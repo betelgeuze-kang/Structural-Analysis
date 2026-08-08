@@ -9,24 +9,52 @@
   },
   "blockers_remaining": [
     "independent_gfx1100_hardware_run_not_available",
-    "device_newton_update_line_search_material_commit_checkpoint_resultir_not_established"
+    "material_commit_rollback_not_established",
+    "checkpoint_resultir_diagnosticir_not_established"
   ],
-  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, and a terminal physical-residual replay in one gfx1030 lifecycle with zero iteration-time D2H. gfx1100 is cross-compiled only; no independent gfx1100 hardware or full nonlinear step lifecycle is claimed.",
+  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. gfx1100 is cross-compiled only; material commit/rollback, checkpoint, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed.",
   "claims": {
     "actual_mgt_full_load_accepted_state": true,
+    "checkpoint_resultir": false,
     "device_givens_and_backsolve": true,
     "equation_scaling": true,
     "g1_closure": false,
     "gfx1100_cross_compile": true,
     "independent_gfx1100_run": false,
+    "material_commit_rollback": false,
     "mid_iteration_d2h_zero": true,
-    "newton_update_line_search_material_checkpoint": false,
+    "newton_update_on_device": true,
+    "nonlinear_convergence_gate_on_device": true,
+    "physical_line_search_on_device": true,
     "production_size_fgmres": true,
     "single_device_lifecycle": true,
     "terminal_physical_residual_replay": true,
     "two_pass_mgs_arnoldi": true
   },
   "comparison": {
+    "accepted_nonlinear_residual_cpu_inf_n": 6.440168363042176e-07,
+    "accepted_nonlinear_residual_cpu_replay_max_abs_error_n": 1.045332449960926e-06,
+    "accepted_nonlinear_residual_parity_tolerance_n": 2e-06,
+    "accepted_state_artifact": {
+      "byte_length": 564480,
+      "data_hash": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
+      "dtype": "<f8",
+      "file_sha256": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_accepted_state.f64le",
+      "shape": [
+        70560
+      ]
+    },
+    "nonlinear_residual_artifact": {
+      "byte_length": 564480,
+      "data_hash": "sha256:65bcf4f7eab176eb7cc184c52338160ca456c7792fbc792902449a1a8a88df4d",
+      "dtype": "<f8",
+      "file_sha256": "sha256:65bcf4f7eab176eb7cc184c52338160ca456c7792fbc792902449a1a8a88df4d",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_nonlinear_residual.f64le",
+      "shape": [
+        70560
+      ]
+    },
     "residual_artifact": {
       "byte_length": 564480,
       "data_hash": "sha256:686c0b7cf4c44343381d27e483db76a435a63447a5742e37c0639f4afbe7f220",
@@ -61,11 +89,14 @@
     "schema_version": "equation-scaling-mgt-translation-free.v1",
     "translation_equation_count": 70560
   },
-  "generated_at": "2026-08-08T13:19:04.501235+00:00",
+  "generated_at": "2026-08-08T13:30:56.343316+00:00",
   "hardware_execution": {
+    "accepted_alpha": 1,
+    "accepted_nonlinear_residual_inf_n": 4.5068662404775016e-07,
+    "accepted_nonlinear_residual_l2_n": 7.653400154524554e-07,
     "cpu_backend": false,
-    "d2h_bytes": 1129040,
-    "device_lifecycle_wall_time_ms": 5222.688778,
+    "d2h_bytes": 2258084,
+    "device_lifecycle_wall_time_ms": 5240.061011,
     "device_name": "AMD Radeon RX 6900 XT",
     "equation_count": 70560,
     "estimated_residual_history": [
@@ -76,10 +107,26 @@
       4.2478510049059246e-17,
       1.0121855174637902e-18
     ],
-    "final_d2h_transfer_count": 4,
+    "final_d2h_transfer_count": 9,
     "gcn_arch_name": "gfx1030",
-    "h2d_bytes": 239823800,
+    "h2d_bytes": 239823840,
     "krylov_iterations": 6,
+    "line_search_candidate_count": 5,
+    "line_search_candidate_inf_n": [
+      4.5068662404775016e-07,
+      0.0002223553510310027,
+      0.00033354754176535015,
+      0.00038915523368205805,
+      0.0004169634926679993
+    ],
+    "line_search_candidate_l2_n": [
+      7.653400154524554e-07,
+      0.00033243166611292236,
+      0.0004986270602349344,
+      0.0005817299376348223,
+      0.0006233179083339585
+    ],
+    "line_search_selected_index": 0,
     "matvec_count": 7,
     "mid_iteration_d2h_transfer_count": 0,
     "physical_residual_inf_n": 2.6308551618277578e-14,
@@ -92,14 +139,14 @@
     "schema_version": "engine-v2-mgt-fgmres-output.v1",
     "sparse_kernel_invocation_count": 51966,
     "status": "ok",
-    "tracked_peak_device_allocation_bytes": 251114024,
-    "vector_kernel_invocation_count": 168
+    "tracked_peak_device_allocation_bytes": 257887916,
+    "vector_kernel_invocation_count": 185
   },
-  "receipt_hash": "sha256:f327db5743749ffab36b603e64bb29959e7fdce8fd2253f4ec58b2eec5234b03",
+  "receipt_hash": "sha256:3e954f5890dc9ed6ba4b28e537271192b573f4ac0fbc5ae8548e2dfcf772e9d0",
   "runtime": {
     "backend": "amd_rocm_hip",
-    "binary_byte_length": 148024,
-    "binary_sha256": "sha256:c504f6e4fa8db15cd7d4d65f328cb60deefa18a7f86822b76100bbb536d20b04",
+    "binary_byte_length": 174672,
+    "binary_sha256": "sha256:a8c950464a712d6bf9738cd74c6c9cf0b53f9758e8489aaabe1d86ef9ae740ef",
     "compiler_version": "HIP version: 6.0.32831-204d35d16",
     "device_name": "AMD Radeon RX 6900 XT",
     "device_nodes": [
@@ -107,7 +154,7 @@
       "/dev/dri/renderD128"
     ],
     "gcn_arch_name": "gfx1030",
-    "gfx1100_cross_compile_binary_sha256": "sha256:ae2f2fd125bec3e167035460c6d0cef56cab8b5bd9c2b2ddc1241cde546fc69e",
+    "gfx1100_cross_compile_binary_sha256": "sha256:df80f6e9a423888b007e1a63d251473bc6eb5a00ad53e9e39f90495a1a98566c",
     "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
   },
   "schema_version": "g1-mgt-device-fgmres-receipt.v1",
@@ -116,17 +163,17 @@
     "input_checksums": {
       "dist/structural_analysis-0.3.0-py3-none-any.whl": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a",
       "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
-      "implementation/phase1/hip_kernels/engine_v2_mgt_fgmres.hip.cpp": "sha256:e4986a289665c7a3b37535dcb94555d328559d15ac69c5a41928cc26c1db2dcd",
+      "implementation/phase1/hip_kernels/engine_v2_mgt_fgmres.hip.cpp": "sha256:b9102f6eecb8c63f06cb7517f0c61be1a9f9a8984053ec1f46d1a6398a9c9530",
       "implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp": "sha256:7d876b3cf5dc5080f9b403b854aa17582934a21692a8fa5d4379c19c2067dcea",
       "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
-      "scripts/run_g1_mgt_device_fgmres.py": "sha256:5deec386fe7e5a3a56681b15a16df86ef5e4b4a9cd5b9c154fe961217a11ae6b",
+      "scripts/run_g1_mgt_device_fgmres.py": "sha256:5914bdf0868f51705b683fabf2ad315ee603c042291fc802e4840ce4cc619b97",
       "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
       "src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.json": "sha256:0d08f646f247ff6d62c731f8cafa3eac4049061e3c6e1389910ced9fab0fc341",
-      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:99a03ce072b6c573b65f1cbdccd2fa3e0ed2d5d603b3b6144d622d50db57e5f8"
+      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:db091da1c885c9e867297ee9057a7edd1e3d7f30979c7c1b7928211aa4dcc589"
     },
-    "repository_commit_sha": "37c853943ce67be6f9b73eaec8cc9e942a7e40c9",
+    "repository_commit_sha": "6c4aab347cbd816b14c3e3df1c44f5ad0b5be009",
     "source_paths_clean_at_execution": true
   },
   "status": "partial"
