@@ -117,8 +117,8 @@ def test_committed_receipt_reaches_diagnostic_semantic_live_target() -> None:
         "matrix_free_operator_recurrence_binding_audit"
     ]
     assert recurrence_binding["status"] == "ready"
-    assert recurrence_binding["solve_receipt_count"] == 20
-    assert recurrence_binding["expected_solve_receipt_count"] == 20
+    assert recurrence_binding["solve_receipt_count"] == 21
+    assert recurrence_binding["expected_solve_receipt_count"] == 21
     assert recurrence_binding["all_solve_receipts_operator_bound"] is True
     assert recurrence_binding["single_operator_binding_hash"] is True
     assert len(recurrence_binding["operator_binding_hashes"]) == 1
@@ -202,6 +202,17 @@ def test_committed_receipt_reaches_diagnostic_semantic_live_target() -> None:
     assert metrics["fallback_count"] == 0
     assert metrics["regularization_count"] == 0
     assert metrics["restart_checkpoint_consumed"] is False
+
+    reproduction = payload["load_scale_0p656_reproduction"]
+    assert reproduction["target_load_factor"] == 0.656
+    assert reproduction["result"]["final_checkpoint"]["load_factor"] == 0.656
+    assert reproduction["final_residual_inf_n"] <= 0.0005
+    assert reproduction["residual_gate_passed"] is True
+    assert reproduction["increment_gate_passed"] is True
+    assert reproduction["fallback_count"] == 0
+    assert reproduction["regularization_count"] == 0
+    assert reproduction["contract_pass"] is True
+    assert payload["claims"]["actual_load_scale_0p656_reproduced"] is True
 
     assert [row["newton_solve_count"] for row in continuation["attempts"]] == [
         1,

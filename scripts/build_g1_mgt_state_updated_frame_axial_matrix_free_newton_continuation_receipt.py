@@ -212,6 +212,20 @@ def _continuation_config() -> LoadControlledMatrixFreeNewtonConfig:
     )
 
 
+def _load_scale_0p656_config() -> LoadControlledMatrixFreeNewtonConfig:
+    return LoadControlledMatrixFreeNewtonConfig(
+        target_load_factors=(0.656,),
+        residual_tolerance_inf_kn=5.0e-7,
+        increment_absolute_tolerance_inf_m=1.0e-10,
+        increment_relative_tolerance=1.0e-4,
+        tangent_solve_residual_tolerance_inf_kn=1.0e-7,
+        maximum_newton_iterations=4,
+        maximum_line_search_backtracks=6,
+        line_search_reduction=0.5,
+        minimum_line_search_alpha=1.0 / 64.0,
+    )
+
+
 def _strict_g1_gate_config() -> LoadControlledMatrixFreeNewtonConfig:
     return LoadControlledMatrixFreeNewtonConfig(
         target_load_factors=(1.0,),
@@ -520,7 +534,7 @@ def build_receipt(
             roundtrip_npz=None,
             checkpoint_npz=resolved_checkpoint,
             apply_state_updated_frame_axial_geometry=True,
-            source_commit_sha=(source_commit_sha if source_exact else "unavailable"),
+            source_commit_sha=source_commit_sha,
         )
     )
     problem = historical_problem.zero_state_problem()
@@ -534,6 +548,12 @@ def build_receipt(
         problem,
         solver,
         config=continuation_config,
+    )
+    load_scale_0p656_config = _load_scale_0p656_config()
+    load_scale_0p656 = load_controlled_matrix_free_newton_continuation(
+        problem,
+        solver,
+        config=load_scale_0p656_config,
     )
     midpoint_rows = [
         row for row in one_shot.checkpoints if row.load_factor == 0.5
@@ -601,6 +621,26 @@ def build_receipt(
         and final_vectors_exact
         and final_state_hash_exact
         and final_data_hash_exact
+    )
+    load_scale_0p656_residual_inf_n = float(
+        load_scale_0p656.metrics["final_residual_inf_kn"] * 1000.0
+    )
+    load_scale_0p656_contract_pass = bool(
+        load_scale_0p656.status == "ready"
+        and load_scale_0p656.terminal_reason == "target_load_factor_reached"
+        and load_scale_0p656.metrics["contract_pass"]
+        and load_scale_0p656.metrics["target_load_factor_reached"]
+        and load_scale_0p656.final_checkpoint.load_factor == 0.656
+        and load_scale_0p656.metrics["accepted_step_count"] == 1
+        and load_scale_0p656.metrics["failed_step_count"] == 0
+        and load_scale_0p656.metrics["checkpoint_count"] == 2
+        and load_scale_0p656.metrics["tangent_solve_count"] > 0
+        and load_scale_0p656.metrics["fallback_count"] == 0
+        and load_scale_0p656.metrics["regularization_count"] == 0
+        and load_scale_0p656.metrics[
+            "residual_and_increment_acceptance_gate"
+        ]
+        and load_scale_0p656_residual_inf_n <= 0.0005
     )
     if len(strict_gate.attempts) != 1:
         raise ValueError("strict-gate probe lacks one full-load attempt")
@@ -757,6 +797,7 @@ def build_receipt(
     solve_receipts = _matrix_free_solve_receipts(
         [
             one_shot_payload,
+            load_scale_0p656.to_dict(),
             restarted_payload,
             strict_gate.to_dict(),
             rollback_probe.to_dict(),
@@ -784,7 +825,7 @@ def build_receipt(
             for receipt in solve_receipts
         }
     )
-    expected_solve_receipt_count = 20
+    expected_solve_receipt_count = 21
     operator_recurrence_binding_contract_pass = bool(
         len(solve_receipts) == expected_solve_receipt_count
         and len(operator_binding_hashes) == 1
@@ -941,6 +982,7 @@ def build_receipt(
         <= continuation_config.increment_relative_tolerance
         and one_shot.metrics["final_residual_inf_kn"]
         <= continuation_config.residual_tolerance_inf_kn
+        and load_scale_0p656_contract_pass
         and restart_contract_pass
         and strict_gate_contract_pass
         and local_quadratic_convergence_audit["contract_pass"]
@@ -1020,6 +1062,41 @@ def build_receipt(
             operator_recurrence_binding_audit
         ),
         "continuation": one_shot_payload,
+        "load_scale_0p656_reproduction": {
+            "schema_version": (
+                "g1-mgt-state-updated-frame-axial-load-scale-0p656-"
+                "reproduction.v1"
+            ),
+            "target_load_factor": 0.656,
+            "configured_residual_tolerance_inf_n": float(
+                load_scale_0p656_config.residual_tolerance_inf_kn * 1000.0
+            ),
+            "result": load_scale_0p656.to_dict(),
+            "final_residual_inf_n": load_scale_0p656_residual_inf_n,
+            "residual_gate_passed": bool(
+                load_scale_0p656_residual_inf_n <= 0.0005
+            ),
+            "increment_gate_passed": bool(
+                load_scale_0p656.metrics[
+                    "residual_and_increment_acceptance_gate"
+                ]
+            ),
+            "fallback_count": int(
+                load_scale_0p656.metrics["fallback_count"]
+            ),
+            "regularization_count": int(
+                load_scale_0p656.metrics["regularization_count"]
+            ),
+            "contract_pass": load_scale_0p656_contract_pass,
+            "claim_boundary": (
+                "This independently reproduces the historical 0.656 load "
+                "scale from the exact zero-state actual-MGT source model "
+                "through the same finite-chord axial residual/current-tangent "
+                "path. It is not a replay of the historical displacement "
+                "vector and does not establish full frame/shell material "
+                "closure or production/HIP readiness."
+            ),
+        },
         "restart_replay": {
             "schema_version": (
                 "g1-mgt-state-updated-frame-axial-newton-restart-replay.v1"
@@ -1155,6 +1232,9 @@ def build_receipt(
             "semantic_live_target_load_1p0_reached": bool(
                 one_shot.metrics["target_load_factor_reached"]
             ),
+            "actual_load_scale_0p656_reproduced": bool(
+                load_scale_0p656_contract_pass
+            ),
             "accepted_displacement_checkpoints": bool(one_shot.checkpoints),
             "residual_and_increment_acceptance_gate": bool(
                 one_shot.metrics["residual_and_increment_acceptance_gate"]
@@ -1218,7 +1298,7 @@ def build_receipt(
             "the target, and restarts byte-exactly from load factor 0.5. "
             "A three-scale perturbation audit around the converged direct "
             "full-load state records local directional Newton order near two. "
-            "All 20 tangent solves bind the same free-equation order, residual "
+            "All 21 tangent solves bind the same free-equation order, residual "
             "formula, reference load, current-tangent action, and reference-"
             "preconditioner hashes while using the ordered Python-fsum host "
             "recurrence. Callback operator and SciPy SuperLU outputs remain "

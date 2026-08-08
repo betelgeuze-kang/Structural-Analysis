@@ -277,7 +277,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         mgt_path=_resolve(repo_root, mgt_path),
         roundtrip_npz=None,
         checkpoint_npz=_resolve(repo_root, operator_checkpoint),
-        source_commit_sha=(source_commit_sha if source_exact else "unavailable"),
+        source_commit_sha=source_commit_sha,
     )
     zero_problem = problem.zero_state_problem()
     config = LinearReferenceNewtonConfig()

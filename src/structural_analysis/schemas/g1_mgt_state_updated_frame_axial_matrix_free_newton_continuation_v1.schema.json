@@ -24,6 +24,7 @@
     "linear_solver_config",
     "matrix_free_operator_recurrence_binding_audit",
     "continuation",
+    "load_scale_0p656_reproduction",
     "restart_replay",
     "strict_g1_gate_full_load_probe",
     "local_quadratic_convergence_audit",
@@ -355,8 +356,8 @@
           "const": "g1-mgt-matrix-free-operator-recurrence-binding-audit.v1"
         },
         "status": {"const": "ready"},
-        "solve_receipt_count": {"const": 20},
-        "expected_solve_receipt_count": {"const": 20},
+        "solve_receipt_count": {"const": 21},
+        "expected_solve_receipt_count": {"const": 21},
         "all_solve_receipts_operator_bound": {"const": true},
         "operator_binding_hashes": {
           "type": "array",
@@ -442,6 +443,112 @@
           }
         }
       ]
+    },
+    "load_scale_0p656_reproduction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "target_load_factor",
+        "configured_residual_tolerance_inf_n",
+        "result",
+        "final_residual_inf_n",
+        "residual_gate_passed",
+        "increment_gate_passed",
+        "fallback_count",
+        "regularization_count",
+        "contract_pass",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-mgt-state-updated-frame-axial-load-scale-0p656-reproduction.v1"
+        },
+        "target_load_factor": {"const": 0.656},
+        "configured_residual_tolerance_inf_n": {"const": 0.0005},
+        "result": {
+          "type": "object",
+          "required": [
+            "status",
+            "terminal_reason",
+            "config",
+            "initial_checkpoint",
+            "final_checkpoint",
+            "checkpoints",
+            "attempts",
+            "metrics",
+            "claims"
+          ],
+          "properties": {
+            "status": {"const": "ready"},
+            "terminal_reason": {"const": "target_load_factor_reached"},
+            "config": {
+              "type": "object",
+              "required": ["target_load_factors", "residual_tolerance_inf_kn"],
+              "properties": {
+                "target_load_factors": {"const": [0.656]},
+                "residual_tolerance_inf_kn": {"const": 5e-7}
+              }
+            },
+            "initial_checkpoint": {
+              "properties": {
+                "step_index": {"const": 0},
+                "load_factor": {"const": 0.0}
+              }
+            },
+            "final_checkpoint": {
+              "properties": {
+                "step_index": {"const": 1},
+                "load_factor": {"const": 0.656}
+              }
+            },
+            "checkpoints": {"minItems": 2, "maxItems": 2},
+            "attempts": {"minItems": 1, "maxItems": 1},
+            "metrics": {
+              "type": "object",
+              "required": [
+                "contract_pass",
+                "target_load_factor_reached",
+                "accepted_step_count",
+                "failed_step_count",
+                "checkpoint_count",
+                "tangent_solve_count",
+                "final_residual_inf_kn",
+                "residual_and_increment_acceptance_gate",
+                "fallback_count",
+                "regularization_count"
+              ],
+              "properties": {
+                "contract_pass": {"const": true},
+                "target_load_factor_reached": {"const": true},
+                "accepted_step_count": {"const": 1},
+                "failed_step_count": {"const": 0},
+                "checkpoint_count": {"const": 2},
+                "tangent_solve_count": {"type": "integer", "minimum": 1},
+                "final_residual_inf_kn": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 5e-7
+                },
+                "residual_and_increment_acceptance_gate": {"const": true},
+                "fallback_count": {"const": 0},
+                "regularization_count": {"const": 0}
+              }
+            }
+          }
+        },
+        "final_residual_inf_n": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.0005
+        },
+        "residual_gate_passed": {"const": true},
+        "increment_gate_passed": {"const": true},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0},
+        "contract_pass": {"const": true},
+        "claim_boundary": {"type": "string", "minLength": 1}
+      }
     },
     "restart_replay": {
       "type": "object",
@@ -1275,6 +1382,7 @@
         "residual_tangent_parent_consistency_audited",
         "residual_formula_hash_verified",
         "semantic_live_target_load_1p0_reached",
+        "actual_load_scale_0p656_reproduced",
         "accepted_displacement_checkpoints",
         "residual_and_increment_acceptance_gate",
         "diagnostic_load_1p0_binary_checkpoint",
@@ -1305,6 +1413,7 @@
         "residual_tangent_parent_consistency_audited": {"const": true},
         "residual_formula_hash_verified": {"const": true},
         "semantic_live_target_load_1p0_reached": {"const": true},
+        "actual_load_scale_0p656_reproduced": {"const": true},
         "accepted_displacement_checkpoints": {"const": true},
         "residual_and_increment_acceptance_gate": {"const": true},
         "diagnostic_load_1p0_binary_checkpoint": {"const": true},
