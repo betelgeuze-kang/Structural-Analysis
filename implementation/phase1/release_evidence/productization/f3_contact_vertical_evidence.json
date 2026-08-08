@@ -1,0 +1,333 @@
+{
+  "claim_boundary": "Closes a bounded two-DOF frictionless nodal upper-gap contact stage with an actual active-set KKT solve, authoritative contact ResultIR, exact hash-bound restart, Workbench multiplier contour, closed-form KKT parity, and inactive/single/both contact breadth. Friction, surface contact, impact, large sliding, nonlinear material, and broad mesh V&V remain outside.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "current_source_replay_executed": true,
+    "persisted_source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_shell_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:c914b1b3d1afda64b676c2432e031e3bd93ac560ef19679c219177f12cb8910c"
+  },
+  "schema_version": "f3-contact-vertical-evidence.v1",
+  "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+  "source_input_checksums": {
+    "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
+    "implementation/phase1/run_f3_contact_vertical_evidence.py": "sha256:f68674954382e583a5c741097dab3fb58d2203162f9fb15a7ab55d1cef6cd21b",
+    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:471b772dc1f6fc5e67368b2e3b096af7215aee16c237b79f820639d651821d49",
+    "src/structural_analysis/engine_v2/contracts/contact_static_result.py": "sha256:37457d7ef9ffac59121bea13a3a07558010773fe4a2547477c369354d5fd651f",
+    "src/structural_analysis/schemas/contact_static_result_ir_v1.schema.json": "sha256:837bc6d479cf8d917ee2e55a270ebd3726003d8ec938277b482db342818261bf",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:f124b070b88502aad6cf4cb70a6acb4fe822ffda5afd84866bce823b59513ca2",
+    "src/structural_analysis/solvers/nonlinear/contact_static.py": "sha256:f1588b63e989ecbe4adb49e2646af9b5b7d0c30b95691df892e402a15d4f155c",
+    "tests/fixtures/model_ir_v2/contact_frictionless_static.json": "sha256:8a8e3922229b2e971ec18a9ce1f97b5934eac31ac77a2345483208860d6141db",
+    "tests/test_contact_model_ir.py": "sha256:92561a175865fb23d5d2a3691f0f558dee717a4922fb1d64cc3ed0e3791d9a2b",
+    "tests/test_contact_static_result_ir.py": "sha256:8cd7043b4ae5569c1a98eb6d22456d47f7a7d8bfbb6dc9f602b221d3ea58e269",
+    "tests/test_contact_static_solver.py": "sha256:224ca664711ee81c4e247ddf90d2d4f606ef5a8339b77e61e08cf29517291ee8",
+    "tests/test_f3_contact_vertical_evidence.py": "sha256:80a609d1a49da74523adbbd28443da727538581ddb36873f03056d2534a7404b"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:c387d26c064fcc4de9b75a12f8412b2f435db9006ae8821defe58b97ae764528",
+      "checkpoint": "sha256:9df26a7575bb76de0fe1260cdd332ed87c3c93f1b2256e354cad1e5ddaf415b5",
+      "external_vv": "sha256:3e97b8536449d7fe0fbf21ad2d6564482da0cb7f521bb1f9eeb125aa96d9ae4c",
+      "model_ir": "sha256:5cc3d0b2c6535531e39d696a362a99c2fd4d893827048dbe1fe4f4b9be89ab87",
+      "platform": "sha256:8c2243b07e84b1bc55d5cea1ad6925a2e1fd586e9b923d2e912ce0a46c52bde0",
+      "recovery": "sha256:7c8e3e832dc0683c171fc38edd413493fc00e27f8e47ecab82e2cd88a078d82d",
+      "result_ir": "sha256:791e6cf747e25b9c600dbd0c45b2182659910a020205be4e6138f55ae4dbbb33",
+      "solver": "sha256:eb6991c5bbf251869980c8f08b1112f0d6c19cc4a03ce53fed7d12011290e54f",
+      "workbench": "sha256:75d05aa28223f453d8e98bc82e66adf9bc11baf9f9099590ccf0d354b31a9d85"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:1de76ca227ab4a302a419c1f08b2a92a760f84c088234d864e07654abb64fff3",
+    "predecessor_stage": "shell",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+    "stage": "contact",
+    "stage_index": 9,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "active_set_breadth_cases": [
+        {
+          "computed_active_contact_ids": [],
+          "expected_active_contact_ids": [],
+          "load_n": [
+            10.0,
+            20.0
+          ],
+          "pass": true
+        },
+        {
+          "computed_active_contact_ids": [
+            "C1"
+          ],
+          "expected_active_contact_ids": [
+            "C1"
+          ],
+          "load_n": [
+            150.0,
+            60.0
+          ],
+          "pass": true
+        },
+        {
+          "computed_active_contact_ids": [
+            "C2"
+          ],
+          "expected_active_contact_ids": [
+            "C2"
+          ],
+          "load_n": [
+            -10.0,
+            200.0
+          ],
+          "pass": true
+        },
+        {
+          "computed_active_contact_ids": [
+            "C1",
+            "C2"
+          ],
+          "expected_active_contact_ids": [
+            "C1",
+            "C2"
+          ],
+          "load_n": [
+            200.0,
+            250.0
+          ],
+          "pass": true
+        }
+      ],
+      "active_set_breadth_pass": true,
+      "benchmark_id": "two-dof-frictionless-gap-closed-form-kkt.v1",
+      "displacement_tolerance_m": 1e-13,
+      "expected_contact_multiplier_n": [
+        89.0,
+        0.0
+      ],
+      "expected_displacement_m": [
+        0.08,
+        0.095
+      ],
+      "maximum_displacement_error_m": 0.0,
+      "maximum_multiplier_error_n": 0.0,
+      "multiplier_tolerance_n": 1e-11
+    },
+    "checkpoint": {
+      "deterministic_repeat": true,
+      "exact_restart": true,
+      "terminal_checkpoint": {
+        "active_contact_ids": [
+          "C1"
+        ],
+        "checkpoint_hash": "sha256:1199dbfff0866a840e0ad35aacdfd50d547f125bbbda9048be7a22c66e312112",
+        "contact_multiplier_n": [
+          89.0,
+          0.0
+        ],
+        "displacement_m": [
+          0.08,
+          0.095
+        ],
+        "load_hash": "sha256:6151f0e91db0ee9e188ebbd66f49490fea3ebd9a6ccb8b4e58574708e8a5fecd",
+        "model_hash": "sha256:6fa866c65d5eec8e8b7e6d8aabe0a169cc4055a5f7639a6b0e1e13da8708a20f",
+        "profile": "frictionless.unilateral-gap.active-set.v1",
+        "schema_version": "contact-static-checkpoint.v1",
+        "stiffness_hash": "sha256:55de6b763182e0ddab4dc6867f82bbe86be230979149482bbaae4167a937f9d2"
+      }
+    },
+    "external_vv": {
+      "maximum_displacement_error_m": 0.0,
+      "maximum_multiplier_error_n": 0.0,
+      "reference_profile": "independent-two-dof-active-set-kkt-closed-form.v1",
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "capability_profile": "contact_frictionless_static_v1",
+      "contact_count": 2,
+      "content_hash": "sha256:3131d71bd00731aeee5a0444b83a807222878a8cc809725e3bd8e0809fcd30cf",
+      "model_id": "f3-contact-frictionless-static"
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222"
+    },
+    "recovery": {
+      "active_contact_ids": [
+        "C1"
+      ],
+      "contact_ids": [
+        "C1",
+        "C2"
+      ],
+      "contact_multiplier_n": [
+        89.0,
+        0.0
+      ],
+      "displacement_m": [
+        0.08,
+        0.095
+      ],
+      "gap_remaining_m": [
+        0.0,
+        0.10500000000000001
+      ]
+    },
+    "result_ir": {
+      "manifest": {
+        "active_contact_ids": [
+          "C1"
+        ],
+        "analysis_type": "contact_frictionless_static",
+        "authority": {
+          "checkpoint": "exact_hash_bound",
+          "contact_response": "authoritative",
+          "engineering_design": "not_authoritative",
+          "kkt_metrics": "authoritative",
+          "profile": "authoritative_frictionless_unilateral_gap_kkt.v1",
+          "release_readiness": "not_authoritative"
+        },
+        "bindings": {
+          "load_hash": "sha256:6151f0e91db0ee9e188ebbd66f49490fea3ebd9a6ccb8b4e58574708e8a5fecd",
+          "model_ir_content_hash": "sha256:3131d71bd00731aeee5a0444b83a807222878a8cc809725e3bd8e0809fcd30cf",
+          "solver_result_hash": "sha256:03cdb8e93ca419a2007616abe1c9a4cc891ab4fc4c6cb7562bf2387db6a76ba5",
+          "stiffness_hash": "sha256:55de6b763182e0ddab4dc6867f82bbe86be230979149482bbaae4167a937f9d2"
+        },
+        "checkpoint": {
+          "exact_restart_required": true,
+          "terminal_checkpoint_hash": "sha256:1199dbfff0866a840e0ad35aacdfd50d547f125bbbda9048be7a22c66e312112"
+        },
+        "claim_boundary": "Authoritative bounded small-displacement frictionless nodal upper-gap contact displacement, multiplier, nonpenetration, equilibrium, complementarity, active set, and exact checkpoint result. Surface discretization, friction, impact, large sliding, nonlinear material, engineering design, and release readiness are outside this contract.",
+        "complementarity_n_m": [
+          0.0,
+          0.0
+        ],
+        "contact_ids": [
+          "C1",
+          "C2"
+        ],
+        "contact_multiplier_n": [
+          89.0,
+          0.0
+        ],
+        "displacement_m": [
+          0.08,
+          0.095
+        ],
+        "dof_ids": [
+          "N1.UX",
+          "N2.UX"
+        ],
+        "equilibrium_residual_n": [
+          0.0,
+          0.0
+        ],
+        "gap_remaining_m": [
+          0.0,
+          0.10500000000000001
+        ],
+        "kkt": {
+          "maximum_complementarity_n_m": 0.0,
+          "maximum_equilibrium_residual_n": 0.0,
+          "maximum_penetration_m": 0.0,
+          "minimum_contact_multiplier_n": 0.0
+        },
+        "result_hash": "sha256:55a74211e783f5d665452d912c2fe7c3044e36245ee47224206ed4a8a26ec9a3",
+        "result_id": "f3.contact",
+        "schema_version": "structural-analysis-contact-result-ir.v1",
+        "solver": {
+          "fallback_used": false,
+          "regularization_used": false,
+          "solver_id": "enumerated-active-set.frictionless-gap.v1"
+        }
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-contact-result-ir.v1"
+    },
+    "solver": {
+      "active_contact_ids": [
+        "C1"
+      ],
+      "active_set_trials": 4,
+      "fallback_used": false,
+      "maximum_complementarity_n_m": 0.0,
+      "maximum_equilibrium_residual_n": 0.0,
+      "maximum_penetration_m": 0.0,
+      "minimum_contact_multiplier_n": 0.0,
+      "profile": "frictionless.unilateral-gap.active-set.v1",
+      "regularization_used": false,
+      "schema_version": "contact-static-solution.v1",
+      "solver_id": "enumerated-active-set.frictionless-gap.v1"
+    },
+    "workbench": {
+      "contact_multiplier_contour": {
+        "locations": [
+          [
+            0.0,
+            0.08
+          ],
+          [
+            1.0,
+            0.2
+          ]
+        ],
+        "max_value": 89.0,
+        "mean_value": 44.5,
+        "min_value": 0.0,
+        "result_type": "contact_multiplier_n",
+        "state_tag": "contour",
+        "values": [
+          89.0,
+          0.0
+        ]
+      },
+      "schema_version": "f3-contact-workbench-payload.v1",
+      "summary": {
+        "contour": {
+          "max_value": 89.0,
+          "mean_value": 44.5,
+          "min_value": 0.0,
+          "result_type": "contact_multiplier_n",
+          "value_count": 2
+        },
+        "result_types": [
+          "contact_multiplier_n"
+        ],
+        "schema_version": "1.0",
+        "state_tags": [
+          "contour"
+        ]
+      }
+    }
+  }
+}
