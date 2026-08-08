@@ -116,9 +116,19 @@ class _Adapter:
     def validate_nonlinear_result_source(self) -> NonlinearNumericalResultSourceSnapshot:
         validate_material_state_bundle(self.bundle)
         validate_nonlinear_terminal_receipt(self.terminal)
-        if self.snapshot.material_state_bundle_hash != self.bundle.bundle_hash:
+        if self.bundle.role != "committed" or self.bundle.epoch != self.snapshot.state_epoch:
+            raise ValueError("result_material_bundle_not_terminal")
+        if (self.bundle.model_ir_content_hash != self.snapshot.model_ir_content_hash
+                or self.bundle.execution_plan_hash != self.snapshot.execution_plan_hash
+                or self.bundle.solver_state_hash != self.snapshot.state_hash
+                or self.snapshot.material_state_bundle_hash != self.bundle.bundle_hash):
             raise ValueError("result_material_bundle_mismatch")
-        if self.snapshot.nonlinear_terminal_hash != self.terminal.terminal_hash:
+        if (self.snapshot.nonlinear_terminal_hash != self.terminal.terminal_hash
+                or self.terminal.state_hash != self.snapshot.state_hash
+                or self.terminal.material_state_bundle_hash != self.bundle.bundle_hash
+                or self.terminal.equation_scaling_hash != self.snapshot.equation_scaling_hash
+                or self.terminal.reduced_csr_identity_hash != self.snapshot.reduced_csr_identity_hash
+                or self.terminal.path_history_hash != self.snapshot.path_history_hash):
             raise ValueError("result_terminal_mismatch")
         if self.observed_residual_inf_n > self.expected_residual_inf_n:
             raise ValueError("result_cpu_residual_replay_failed")
@@ -211,15 +221,17 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
         result = create_adapter_bound_nonlinear_numerical_result_ir(
             result_id=f"g1.mgt.{role}.terminal", source_adapter=adapter)
         results[role] = result.to_manifest()
-    parity_keys = (
+    binding_parity_keys = (
         "model_ir_content_hash", "execution_plan_hash", "equation_scaling_hash",
         "reduced_csr_identity_hash", "operator_hash", "state_hash", "state_epoch",
         "material_state_bundle_hash", "integration_point_order_hash",
-        "path_history_hash", "nonlinear_terminal_hash", "load_factor", "dof_count")
+        "path_history_hash", "nonlinear_terminal_hash")
     parity = all(results["hip"]["bindings"].get(key) == results["cpu_optimized"]["bindings"].get(key)
-                 for key in parity_keys if key in results["hip"]["bindings"])
+                 for key in binding_parity_keys)
     parity = bool(parity and results["hip"]["displacement_artifact"]["data_hash"]
-                  == results["cpu_optimized"]["displacement_artifact"]["data_hash"])
+                  == results["cpu_optimized"]["displacement_artifact"]["data_hash"]
+                  and results["hip"]["load_factor"] == results["cpu_optimized"]["load_factor"]
+                  and results["hip"]["dof_count"] == results["cpu_optimized"]["dof_count"])
     if not parity: raise RuntimeError("terminal_result_ir_parity_failed")
     hip_raw = json.dumps(results["hip"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     cpu_raw = json.dumps(results["cpu_optimized"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
@@ -240,7 +252,7 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
                      "material_state_bundle_hash": bundle.bundle_hash,
                      "material_entry_count": bundle.entry_count},
         "parity": {"terminal_resultir_parity": True,
-                   "shared_binding_keys": list(parity_keys),
+                   "shared_binding_keys": list(binding_parity_keys),
                    "displacement_data_hash": array_data_hash(displacement),
                    "hip_result_hash": results["hip"]["result_hash"],
                    "cpu_result_hash": results["cpu_optimized"]["result_hash"]},
