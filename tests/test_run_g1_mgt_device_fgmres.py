@@ -20,7 +20,9 @@ def test_receipt_keeps_remaining_hardware_and_nonlinear_boundaries_visible() -> 
     assert payload["claims"]["newton_update_on_device"] is True
     assert payload["claims"]["physical_line_search_on_device"] is True
     assert payload["claims"]["nonlinear_convergence_gate_on_device"] is True
+    assert payload["claims"]["checkpoint_emitted"] is True
+    assert payload["claims"]["exact_restart"] is True
     assert payload["claims"]["independent_gfx1100_run"] is False
     assert payload["claims"]["material_commit_rollback"] is False
-    assert payload["claims"]["checkpoint_resultir"] is False
+    assert payload["claims"]["resultir_diagnosticir"] is False
     assert payload["claims"]["g1_closure"] is False
