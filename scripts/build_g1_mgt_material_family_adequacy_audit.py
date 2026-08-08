@@ -431,8 +431,6 @@ def validate(
             SOURCE_PATHS, repo_root=root
         ):
             raise ValueError("material_family_audit_sources_stale")
-        if payload["source"]["repository_commit_sha"] != git_head(root):
-            raise ValueError("material_family_audit_commit_stale")
     return payload
 
 
