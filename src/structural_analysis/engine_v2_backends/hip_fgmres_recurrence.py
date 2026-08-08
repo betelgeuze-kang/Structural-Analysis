@@ -49,6 +49,9 @@ HIP_FGMRES_OPERATOR_BLOCKS_PER_CASE = 4
 HIP_FGMRES_EXECUTION_PROFILE = (
     "same_stream_fixed_kernel_sequence_device_guarded.v1"
 )
+HIP_FGMRES_TELEMETRY_PROFILE = (
+    "bounded_device_lifecycle_exact_counters.v1"
+)
 HIP_FGMRES_CASE_IDS = (
     "converged_full_cycle",
     "restart_max_iterations",
@@ -482,6 +485,56 @@ def compare_hip_fgmres_recurrence_output(
             "Kernel counts must bind the exact device-guarded multi-block "
             "sequence.",
         )
+    expected_preconditioner_apply_count = (
+        reference.cpu_runs[0].iteration_count
+        + reference.cpu_runs[1].iteration_count
+        + reference.cpu_runs[1].iteration_count
+        - reference.checkpoint.iteration_count
+    )
+    expected_executed_matvec_count = (
+        reference.cpu_runs[0].matvec_count
+        + reference.cpu_runs[1].matvec_count
+        + reference.cpu_runs[1].matvec_count
+        - reference.checkpoint.matvec_count
+    )
+    telemetry_available = payload.get("telemetry_profile") is not None
+    byte_metrics: dict[str, int | None] = {
+        "h2d_bytes": None,
+        "d2h_bytes": None,
+        "tracked_peak_device_allocation_bytes": None,
+    }
+    lifecycle_wall_time_ms: float | None = None
+    if telemetry_available:
+        if payload.get("telemetry_profile") != HIP_FGMRES_TELEMETRY_PROFILE:
+            _fail(
+                "hip_fgmres_output_telemetry_profile_invalid",
+                "/telemetry_profile",
+                f"Expected {HIP_FGMRES_TELEMETRY_PROFILE!r}.",
+            )
+        exact_counters = {
+            "preconditioner_apply_count": expected_preconditioner_apply_count,
+            "executed_matvec_count": expected_executed_matvec_count,
+        }
+        for key, expected in exact_counters.items():
+            if payload.get(key) != expected:
+                _fail(
+                    "hip_fgmres_output_telemetry_counter_invalid",
+                    f"/{key}",
+                    f"Expected exact recurrence counter {expected}.",
+                )
+        for key in byte_metrics:
+            value = payload.get(key)
+            if type(value) is not int or value <= 0:
+                _fail(
+                    "hip_fgmres_output_telemetry_bytes_invalid",
+                    f"/{key}",
+                    "A positive exact byte counter is required.",
+                )
+            byte_metrics[key] = value
+        lifecycle_wall_time_ms = _nonnegative_finite(
+            payload.get("device_lifecycle_wall_time_ms"),
+            "/device_lifecycle_wall_time_ms",
+        )
     rows = payload.get("cases")
     if not isinstance(rows, list) or len(rows) != len(fixture.cases):
         _fail("hip_fgmres_output_cases_invalid", "/cases", "Case count is invalid.")
@@ -554,6 +607,23 @@ def compare_hip_fgmres_recurrence_output(
             contract_pass
         ),
         "multi_block_kernel_invocation_count": multi_block_kernel_count,
+        **(
+            {
+                "telemetry": {
+                    "available": True,
+                    "profile": HIP_FGMRES_TELEMETRY_PROFILE,
+                    "executed_matvec_count": expected_executed_matvec_count,
+                    "preconditioner_apply_count": (
+                        expected_preconditioner_apply_count
+                    ),
+                    **byte_metrics,
+                    "device_lifecycle_wall_time_ms": lifecycle_wall_time_ms,
+                    "mid_recurrence_host_transfer_count": 0,
+                }
+            }
+            if telemetry_available
+            else {}
+        ),
         "production_recurrence_claim": False,
         "performance_claim": False,
     }

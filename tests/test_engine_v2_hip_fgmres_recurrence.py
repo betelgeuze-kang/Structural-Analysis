@@ -71,6 +71,23 @@ def _runtime_output() -> tuple[object, dict]:
         ),
         "device_resident_full_recurrence_probe": True,
         "production_recurrence_claim": False,
+        "telemetry_profile": "bounded_device_lifecycle_exact_counters.v1",
+        "executed_matvec_count": (
+            reference.cpu_runs[0].matvec_count
+            + reference.cpu_runs[1].matvec_count
+            + reference.cpu_runs[1].matvec_count
+            - reference.checkpoint.matvec_count
+        ),
+        "preconditioner_apply_count": (
+            reference.cpu_runs[0].iteration_count
+            + reference.cpu_runs[1].iteration_count
+            + reference.cpu_runs[1].iteration_count
+            - reference.checkpoint.iteration_count
+        ),
+        "h2d_bytes": 8192,
+        "d2h_bytes": 4096,
+        "tracked_peak_device_allocation_bytes": 65536,
+        "device_lifecycle_wall_time_ms": 1.25,
         "preconditioner_profile": (
             "operator_derived_left_scaled_jacobi_right.v1"
         ),

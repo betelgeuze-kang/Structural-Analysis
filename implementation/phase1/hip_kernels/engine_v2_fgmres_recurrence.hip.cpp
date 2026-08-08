@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <fstream>
@@ -1259,6 +1260,7 @@ int main(int argc, char** argv) {
     hipDeviceProp_t properties{};
     check_hip(hipGetDeviceProperties(&properties, device_index),
               "hipGetDeviceProperties");
+    const auto device_lifecycle_started = std::chrono::steady_clock::now();
     hipStream_t stream = nullptr;
     check_hip(hipStreamCreate(&stream), "hipStreamCreate");
     auto* d_row_ptr = allocate_and_copy(row_ptr, stream);
@@ -1303,6 +1305,21 @@ int main(int argc, char** argv) {
                              2 * kOperatorBlocksPerCase * sizeof(double),
                              stream),
               "hipMemsetAsync_multi_partials");
+
+    const std::uint64_t h2d_bytes =
+        row_ptr.size() * sizeof(std::int64_t) +
+        columns.size() * sizeof(std::int32_t) +
+        values.size() * sizeof(double) +
+        right_hand_side.size() * sizeof(double) +
+        scale.size() * sizeof(double) +
+        initial_solution.size() * sizeof(double) +
+        inverse_diagonal.size() * sizeof(double) +
+        resume_vectors.size() * sizeof(double);
+    const std::uint64_t tracked_peak_device_allocation_bytes =
+        h2d_bytes + execution_case_count * workspace_stride * sizeof(double) +
+        execution_case_count * sizeof(MultiBlockState) +
+        execution_case_count * n_unsigned * sizeof(double) +
+        2 * kOperatorBlocksPerCase * sizeof(double);
 
     std::uint64_t multi_block_kernel_invocation_count = 0;
 #define LAUNCH_MULTI_BLOCK(kernel, grid, block, ...)                         \
@@ -1470,6 +1487,24 @@ int main(int argc, char** argv) {
                              hipMemcpyDeviceToHost, stream),
               "hipMemcpyAsync_multi_solutions");
     check_hip(hipStreamSynchronize(stream), "hipStreamSynchronize");
+    const auto device_lifecycle_finished = std::chrono::steady_clock::now();
+    const double device_lifecycle_wall_time_ms =
+        std::chrono::duration<double, std::milli>(device_lifecycle_finished -
+                                                  device_lifecycle_started)
+            .count();
+    const std::uint64_t d2h_bytes =
+        multi_states.size() * sizeof(MultiBlockState) +
+        multi_solutions.size() * sizeof(double);
+    const std::uint64_t preconditioner_apply_count =
+        static_cast<std::uint64_t>(multi_states[0].output.iteration_count) +
+        static_cast<std::uint64_t>(multi_states[1].output.iteration_count) +
+        static_cast<std::uint64_t>(multi_states[2].output.iteration_count -
+                                   checkpoint_resume.iteration_count);
+    const std::uint64_t executed_matvec_count =
+        static_cast<std::uint64_t>(multi_states[0].output.matvec_count) +
+        static_cast<std::uint64_t>(multi_states[1].output.matvec_count) +
+        static_cast<std::uint64_t>(multi_states[2].output.matvec_count -
+                                   checkpoint_resume.matvec_count);
 
     check_hip(hipFree(d_row_ptr), "hipFree_row_ptr");
     check_hip(hipFree(d_columns), "hipFree_columns");
@@ -1505,6 +1540,16 @@ int main(int argc, char** argv) {
         << "\"checkpoint_completed_iteration_replay_count\":0,"
         << "\"device_resident_full_recurrence_probe\":true,"
         << "\"production_recurrence_claim\":false,"
+        << "\"telemetry_profile\":\"bounded_device_lifecycle_exact_counters.v1\","
+        << "\"executed_matvec_count\":" << executed_matvec_count << ','
+        << "\"preconditioner_apply_count\":"
+        << preconditioner_apply_count << ','
+        << "\"h2d_bytes\":" << h2d_bytes << ','
+        << "\"d2h_bytes\":" << d2h_bytes << ','
+        << "\"tracked_peak_device_allocation_bytes\":"
+        << tracked_peak_device_allocation_bytes << ','
+        << "\"device_lifecycle_wall_time_ms\":"
+        << device_lifecycle_wall_time_ms << ','
         << "\"preconditioner_profile\":"
            "\"operator_derived_left_scaled_jacobi_right.v1\","
         << "\"threads_per_case\":" << kThreadsPerCase << ','

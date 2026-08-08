@@ -123,6 +123,23 @@ def _runtime_output(*, architecture: str = "gfx1030") -> dict:
         ),
         "device_resident_full_recurrence_probe": True,
         "production_recurrence_claim": False,
+        "telemetry_profile": "bounded_device_lifecycle_exact_counters.v1",
+        "executed_matvec_count": (
+            reference.cpu_runs[0].matvec_count
+            + reference.cpu_runs[1].matvec_count
+            + reference.cpu_runs[1].matvec_count
+            - reference.checkpoint.matvec_count
+        ),
+        "preconditioner_apply_count": (
+            reference.cpu_runs[0].iteration_count
+            + reference.cpu_runs[1].iteration_count
+            + reference.cpu_runs[1].iteration_count
+            - reference.checkpoint.iteration_count
+        ),
+        "h2d_bytes": 8192,
+        "d2h_bytes": 4096,
+        "tracked_peak_device_allocation_bytes": 65536,
+        "device_lifecycle_wall_time_ms": 1.25,
         "preconditioner_profile": ("operator_derived_left_scaled_jacobi_right.v1"),
         "reduction_profile": "fixed_block_binary_tree_fp64_probe.v1",
         "krylov_workspace_profile": "device_global_dynamic_dimension_fp64.v1",
@@ -276,11 +293,12 @@ def test_exact_device_receipt_rejects_unrelated_source_commit(
 
 
 def test_device_receipt_wraps_validated_runtime_without_relabeling_wheel() -> None:
-    upstream = json.loads(
-        (
-            ROOT / "implementation/phase1/release_evidence/productization/"
-            "engine_v2_cpu_hip_fgmres_recurrence_receipt.json"
-        ).read_text(encoding="utf-8")
+    upstream = module.local_runner.build_receipt_from_runtime_output(
+        _runtime_output(),
+        repo_root=ROOT,
+        compiler_path="/opt/rocm/bin/hipcc",
+        compiler_version_output="HIP version: 6.0.32831\nclang 17.0.0\n",
+        binary_sha256="sha256:" + "d" * 64,
     )
 
     receipt = module.build_device_receipt_from_upstream(
