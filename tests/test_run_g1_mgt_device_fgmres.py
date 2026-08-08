@@ -25,9 +25,25 @@ def test_receipt_keeps_remaining_hardware_and_nonlinear_boundaries_visible() -> 
     assert payload["claims"]["independent_gfx1100_run"] is False
     assert payload["claims"]["material_commit_rollback"] is True
     assert payload["claims"]["actual_mgt_elastic_material_state_bundle"] is True
+    assert payload["claims"][
+        "actual_mgt_material_family_fixture_device_bound"
+    ] is True
     assert payload["claims"]["nonlinear_material_family_breadth"] is False
     lifecycle = payload["material_lifecycle"]
     assert lifecycle["integration_point_count"] == 5_572
+    assert lifecycle["family_fixture"]["geometry_order_exact"] is True
+    assert lifecycle["family_fixture"]["family_counts"] == {
+        "CONC": 2_182,
+        "SRC": 1_692,
+        "STEEL": 1_692,
+        "USER": 6,
+    }
+    assert lifecycle["field_names"][-4:] == [
+        "material_family_code",
+        "source_primary_elastic_modulus_mpa",
+        "source_secondary_elastic_modulus_mpa",
+        "source_elastic_stress_mpa",
+    ]
     assert lifecycle["trial_count"] == 2
     assert lifecycle["commit_count"] == 1
     assert lifecycle["rollback_count"] == 1

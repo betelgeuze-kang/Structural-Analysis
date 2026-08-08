@@ -12,6 +12,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -26,7 +27,9 @@ namespace {
 constexpr int kBlockSize = 256;
 constexpr int kRestart = 6;
 constexpr int kLineSearchCandidates = 5;
-constexpr int kMaterialStateFieldCount = 6;
+constexpr int kMaterialStateFieldCount = 10;
+constexpr std::uint64_t kMaterialFamilyFixtureMagic = 0x314D414654474D47ULL;
+constexpr std::uint64_t kMaterialFamilyFixtureVersion = 1ULL;
 constexpr const char* kOutputVersion = "engine-v2-mgt-fgmres-output.v1";
 
 void check_hip(hipError_t status, const char* where) {
@@ -320,6 +323,8 @@ __global__ void accept_candidate_kernel(
 __global__ void finite_chord_elastic_material_state_kernel(
     composition::tangent_component::DeviceFixture fixture,
     std::int64_t element_count, const double* free_state,
+    const std::int32_t* family_codes, const double* primary_e_mpa,
+    const double* secondary_e_mpa,
     double* material_state) {
   const std::int64_t element =
       static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
@@ -360,6 +365,10 @@ __global__ void finite_chord_elastic_material_state_kernel(
   state[3] = extension / reference_length;
   state[4] = axial_stiffness * extension;
   state[5] = axial_stiffness;
+  state[6] = static_cast<double>(family_codes[element]);
+  state[7] = primary_e_mpa[element];
+  state[8] = secondary_e_mpa[element];
+  state[9] = primary_e_mpa[element] * state[3];
 }
 
 __global__ void material_state_copy_kernel(std::int64_t value_count,
@@ -385,20 +394,91 @@ void write_vector(const char* path, const std::vector<double>& values) {
   if (!output) throw std::runtime_error("output_write_failed");
 }
 
+template <typename T>
+void read_exact(std::ifstream& input, T* values, std::size_t count,
+                const char* label) {
+  input.read(reinterpret_cast<char*>(values),
+             static_cast<std::streamsize>(count * sizeof(T)));
+  if (!input) {
+    throw std::runtime_error(std::string("material_fixture_read_") + label);
+  }
+}
+
+struct MaterialFamilyFixture {
+  std::int64_t count = 0;
+  std::vector<std::int64_t> element_ids;
+  std::vector<std::int32_t> family_codes;
+  std::vector<double> primary_e_mpa;
+  std::vector<double> secondary_e_mpa;
+  std::array<std::int64_t, 5> family_counts{};
+};
+
+MaterialFamilyFixture read_material_family_fixture(const char* path) {
+  std::ifstream input(path, std::ios::binary);
+  if (!input) throw std::runtime_error("material_fixture_open_failed");
+  std::uint64_t magic = 0;
+  std::uint64_t version = 0;
+  std::int64_t count = 0;
+  read_exact(input, &magic, 1, "magic");
+  read_exact(input, &version, 1, "version");
+  read_exact(input, &count, 1, "count");
+  if (magic != kMaterialFamilyFixtureMagic ||
+      version != kMaterialFamilyFixtureVersion || count <= 0) {
+    throw std::runtime_error("material_fixture_header_invalid");
+  }
+  MaterialFamilyFixture fixture;
+  fixture.count = count;
+  fixture.element_ids.resize(static_cast<std::size_t>(count));
+  fixture.family_codes.resize(static_cast<std::size_t>(count));
+  fixture.primary_e_mpa.resize(static_cast<std::size_t>(count));
+  fixture.secondary_e_mpa.resize(static_cast<std::size_t>(count));
+  read_exact(input, fixture.element_ids.data(), fixture.element_ids.size(),
+             "element_ids");
+  read_exact(input, fixture.family_codes.data(), fixture.family_codes.size(),
+             "family_codes");
+  read_exact(input, fixture.primary_e_mpa.data(), fixture.primary_e_mpa.size(),
+             "primary_e");
+  read_exact(input, fixture.secondary_e_mpa.data(),
+             fixture.secondary_e_mpa.size(), "secondary_e");
+  char extra = 0;
+  if (input.read(&extra, 1)) {
+    throw std::runtime_error("material_fixture_trailing_bytes");
+  }
+  std::unordered_set<std::int64_t> ids;
+  for (std::int64_t index = 0; index < count; ++index) {
+    const auto element_id = fixture.element_ids[static_cast<std::size_t>(index)];
+    const auto family = fixture.family_codes[static_cast<std::size_t>(index)];
+    const auto primary = fixture.primary_e_mpa[static_cast<std::size_t>(index)];
+    const auto secondary = fixture.secondary_e_mpa[static_cast<std::size_t>(index)];
+    if (element_id <= 0 || !ids.insert(element_id).second ||
+        family < 1 || family > 4 || !(primary > 0.0) ||
+        !std::isfinite(primary) || !std::isfinite(secondary) ||
+        (family == 3 && !(secondary > 0.0)) ||
+        (family != 3 && secondary != 0.0)) {
+      throw std::runtime_error("material_fixture_entry_invalid");
+    }
+    ++fixture.family_counts[static_cast<std::size_t>(family)];
+  }
+  return fixture;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
   try {
-    if (argc != 12) throw std::runtime_error(
-        "usage:fgmres sparse.bin tangent.bin reference_force_n solution.bin "
+    if (argc != 13) throw std::runtime_error(
+        "usage:fgmres sparse.bin tangent.bin material-family.bin reference_force_n solution.bin "
         "linear_residual.bin accepted_state.bin nonlinear_residual.bin "
         "initial_material.bin committed_material.bin rejected_material.bin "
         "rollback_material.bin");
     const composition::SparseFixture sparse = composition::read_sparse_fixture(argv[1]);
     const composition::tangent_component::Fixture tangent = composition::tangent_component::read_fixture(argv[2]);
-    const double reference_force_n = std::stod(argv[3]);
+    const MaterialFamilyFixture material_family = read_material_family_fixture(argv[3]);
+    const double reference_force_n = std::stod(argv[4]);
     if (sparse.dimension != static_cast<std::int64_t>(tangent.equation_count) ||
-        tangent.load_factor != 1.0 || !(reference_force_n >= 1.0) || !std::isfinite(reference_force_n)) {
+        tangent.load_factor != 1.0 ||
+        material_family.count != static_cast<std::int64_t>(tangent.geometry_element_count) ||
+        !(reference_force_n >= 1.0) || !std::isfinite(reference_force_n)) {
       throw std::runtime_error("fgmres_fixture_binding_invalid");
     }
     int device_index = 0;
@@ -449,6 +529,10 @@ int main(int argc, char** argv) {
         1.0, 0.5, 0.25, 0.125, 0.0625};
     double* d_alphas = composition::allocate_and_copy(
         line_search_alphas, stream, &h2d_bytes, &allocated_bytes);
+    auto* d_material_element_ids = copy(material_family.element_ids);
+    auto* d_material_family_codes = copy(material_family.family_codes);
+    auto* d_material_primary_e_mpa = copy(material_family.primary_e_mpa);
+    auto* d_material_secondary_e_mpa = copy(material_family.secondary_e_mpa);
 
     composition::tangent_component::DeviceFixture dt{
       static_cast<std::int64_t>(tangent.equation_count), tangent.load_factor,
@@ -481,7 +565,9 @@ int main(int argc, char** argv) {
     hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
                        dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
                        static_cast<std::int64_t>(tangent.geometry_element_count),
-                       dt.free_displacements, d_initial_material);
+                       dt.free_displacements, d_material_family_codes,
+                       d_material_primary_e_mpa, d_material_secondary_e_mpa,
+                       d_initial_material);
     check_hip(hipMemsetAsync(d_h, 0, (kRestart + 1) * kRestart * sizeof(double), stream), "memset_h");
     check_hip(hipMemsetAsync(d_g, 0, (kRestart + 1) * sizeof(double), stream), "memset_g");
     hipLaunchKernelGGL(initialize_basis_kernel, dim3(1), dim3(1), 0, stream, sparse.dimension,
@@ -574,7 +660,9 @@ int main(int argc, char** argv) {
     hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
                        dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
                        static_cast<std::int64_t>(tangent.geometry_element_count),
-                       d_accepted_state, d_trial_material);
+                       d_accepted_state, d_material_family_codes,
+                       d_material_primary_e_mpa, d_material_secondary_e_mpa,
+                       d_trial_material);
     hipLaunchKernelGGL(material_state_copy_kernel, dim3(material_value_grid),
                        dim3(kBlockSize), 0, stream, material_value_count,
                        d_trial_material, d_committed_material);
@@ -584,7 +672,9 @@ int main(int argc, char** argv) {
     hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
                        dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
                        static_cast<std::int64_t>(tangent.geometry_element_count),
-                       d_followup_trial_state, d_rejected_material);
+                       d_followup_trial_state, d_material_family_codes,
+                       d_material_primary_e_mpa, d_material_secondary_e_mpa,
+                       d_rejected_material);
     hipLaunchKernelGGL(material_state_copy_kernel, dim3(material_value_grid),
                        dim3(kBlockSize), 0, stream, material_value_count,
                        d_committed_material, d_rollback_material);
@@ -629,12 +719,12 @@ int main(int argc, char** argv) {
     check_hip(hipStreamSynchronize(stream), "hipStreamSynchronize");
     const double wall_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     if (selected < 0) throw std::runtime_error("line_search_no_acceptable_candidate");
-    write_vector(argv[4], solution); write_vector(argv[5], residual);
-    write_vector(argv[6], accepted_state); write_vector(argv[7], accepted_residual);
-    write_vector(argv[8], initial_material);
-    write_vector(argv[9], committed_material);
-    write_vector(argv[10], rejected_material);
-    write_vector(argv[11], rollback_material);
+    write_vector(argv[5], solution); write_vector(argv[6], residual);
+    write_vector(argv[7], accepted_state); write_vector(argv[8], accepted_residual);
+    write_vector(argv[9], initial_material);
+    write_vector(argv[10], committed_material);
+    write_vector(argv[11], rejected_material);
+    write_vector(argv[12], rollback_material);
     std::cout << std::setprecision(17) << "{\"schema_version\":\"" << kOutputVersion
       << "\",\"status\":\"ok\",\"cpu_backend\":false,\"device_name\":\""
       << composition::tangent_component::json_escape(properties.name) << "\",\"gcn_arch_name\":\""
@@ -646,6 +736,11 @@ int main(int argc, char** argv) {
       << ",\"material_kernel_invocation_count\":" << material_kernel_invocations
       << ",\"material_integration_point_count\":" << tangent.geometry_element_count
       << ",\"material_state_field_count\":" << kMaterialStateFieldCount
+      << ",\"material_family_fixture_bound\":true"
+      << ",\"material_conc_count\":" << material_family.family_counts[1]
+      << ",\"material_steel_count\":" << material_family.family_counts[2]
+      << ",\"material_src_count\":" << material_family.family_counts[3]
+      << ",\"material_user_count\":" << material_family.family_counts[4]
       << ",\"material_trial_count\":2,\"material_commit_count\":1"
       << ",\"material_rollback_count\":1"
       << ",\"mid_iteration_d2h_transfer_count\":0,\"final_d2h_transfer_count\":13"
@@ -675,6 +770,7 @@ int main(int argc, char** argv) {
     std::cout << "],\"estimated_residual_history\":[";
     for (int i = 0; i < kRestart; ++i) { if (i) std::cout << ','; std::cout << history[i]; }
     std::cout << "]}\n";
+    (void)d_material_element_ids;
     return 0;
   } catch (const std::exception& error) {
     std::cerr << "engine_v2_mgt_fgmres_error:" << error.what() << '\n';

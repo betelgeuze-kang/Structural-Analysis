@@ -9,6 +9,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 import subprocess
+import struct
 import sys
 import tempfile
 import time
@@ -24,6 +25,12 @@ for candidate in (ROOT / "scripts", ROOT / "src", ROOT / "implementation/phase1"
     sys.path.insert(0, str(candidate))
 
 from release_evidence_metadata import engine_version, file_sha256, git_head, input_checksums  # noqa: E402
+from build_g1_mgt_material_family_adequacy_audit import (  # noqa: E402
+    DEFAULT_OUT as MATERIAL_FAMILY_AUDIT,
+    FAMILY_CODES,
+    _frame_fixture,
+    validate as validate_material_family_audit,
+)
 from build_g1_mgt_full_load_checkpoint_bridge import deterministic_npz_bytes  # noqa: E402
 from run_engine_v2_hip_sparse_lu_apply import _detect_architecture, _resolve_device_lib_path, _resolve_hipcc, _run  # noqa: E402
 from run_g1_mgt_accepted_state_hip_sparse_lu_parity import DEFAULT_CHECKPOINT, DEFAULT_MGT, WHEEL  # noqa: E402
@@ -56,7 +63,11 @@ N = 70_560
 MATERIAL_STATE_FIELD_NAMES = (
     "reference_length_m", "current_length_m", "extension_m",
     "engineering_strain", "axial_force_n", "axial_stiffness_n_per_m",
+    "material_family_code", "source_primary_elastic_modulus_mpa",
+    "source_secondary_elastic_modulus_mpa", "source_elastic_stress_mpa",
 )
+MATERIAL_FAMILY_FIXTURE_MAGIC = 0x314D414654474D47
+MATERIAL_FAMILY_FIXTURE_VERSION = 1
 SOURCE_PATHS = (
     DEFAULT_MGT, DEFAULT_CHECKPOINT, WHEEL, SOURCE,
     Path("implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp"),
@@ -64,10 +75,101 @@ SOURCE_PATHS = (
     Path("implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp"),
     Path("scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py"),
     Path("scripts/build_g1_mgt_full_load_checkpoint_bridge.py"),
+    Path("scripts/build_g1_mgt_material_family_adequacy_audit.py"),
+    MATERIAL_FAMILY_AUDIT,
     Path("scripts/run_g1_mgt_device_fgmres.py"), SCHEMA,
     Path("src/structural_analysis/engine_v2/contracts/material_state_bundle.py"),
     Path("tests/test_run_g1_mgt_device_fgmres.py"),
 )
+
+
+def _material_family_fixture(
+    *, root: Path, context: dict[str, Any]
+) -> tuple[dict[str, np.ndarray], bytes, dict[str, Any]]:
+    audit = validate_material_family_audit(
+        _read(root / MATERIAL_FAMILY_AUDIT), root=root, current=True
+    )
+    frames, geometry, material_props, _select_audit = _frame_fixture(root)
+    operator = context["problem"].current_tangent_operator
+    comparisons = (
+        np.array_equal(operator.array("geometry_dofs"), geometry.dofs),
+        np.array_equal(
+            operator.array("geometry_relative_translation_operators"),
+            geometry.relative_translation_operators,
+        ),
+        np.array_equal(
+            operator.array("geometry_reference_chords_m"),
+            geometry.reference_chords_m,
+        ),
+        np.array_equal(
+            operator.array("geometry_reference_lengths_m"),
+            geometry.reference_lengths_m,
+        ),
+        np.array_equal(
+            operator.array("geometry_axial_stiffness_n_per_m"),
+            geometry.axial_stiffness_n_per_m,
+        ),
+    )
+    if not all(comparisons):
+        raise RuntimeError("material_family_fixture_geometry_order_mismatch")
+    element_ids = np.asarray([row.elem_id for row in frames], dtype="<i8")
+    family_names = tuple(
+        str(material_props[int(row.material_id)]["type"]).upper()
+        for row in frames
+    )
+    family_codes = np.asarray(
+        [FAMILY_CODES[name] for name in family_names], dtype="<i4"
+    )
+    primary_e_mpa = np.asarray(
+        [
+            float(material_props[int(row.material_id)]["E_kN_per_m2"]) * 1.0e-3
+            for row in frames
+        ],
+        dtype="<f8",
+    )
+    secondary_e_mpa = np.asarray(
+        [
+            float(
+                material_props[int(row.material_id)].get(
+                    "E_secondary_kN_per_m2", 0.0
+                )
+                or 0.0
+            )
+            * 1.0e-3
+            for row in frames
+        ],
+        dtype="<f8",
+    )
+    arrays = {
+        "element_ids": np.ascontiguousarray(element_ids),
+        "family_codes": np.ascontiguousarray(family_codes),
+        "primary_e_mpa": np.ascontiguousarray(primary_e_mpa),
+        "secondary_e_mpa": np.ascontiguousarray(secondary_e_mpa),
+    }
+    header = struct.pack(
+        "<QQq",
+        MATERIAL_FAMILY_FIXTURE_MAGIC,
+        MATERIAL_FAMILY_FIXTURE_VERSION,
+        int(element_ids.size),
+    )
+    raw = header + b"".join(value.tobytes() for value in arrays.values())
+    expected_bytes = 24 + int(element_ids.size) * (8 + 4 + 8 + 8)
+    if len(raw) != expected_bytes:
+        raise RuntimeError("material_family_fixture_byte_length_invalid")
+    return arrays, raw, {
+        "profile": "actual_mgt_geometry_ordered_material_family_fixture.v1",
+        "byte_length": len(raw),
+        "file_sha256": sha256_prefixed(raw),
+        "adequacy_audit_receipt_hash": audit["receipt_hash"],
+        "element_id_order_data_hash": array_data_hash(element_ids),
+        "family_code_data_hash": array_data_hash(family_codes),
+        "primary_elastic_modulus_mpa_data_hash": array_data_hash(primary_e_mpa),
+        "secondary_elastic_modulus_mpa_data_hash": array_data_hash(
+            secondary_e_mpa
+        ),
+        "family_counts": audit["material_fixture"]["family_counts"],
+        "geometry_order_exact": True,
+    }
 
 
 def _resolve(root: Path, path: Path) -> Path:
@@ -178,7 +280,12 @@ def _checkpoint(root: Path, path: Path, *, context: dict[str, Any],
              "equilibrium_operator_binding_hash": binding["equilibrium_operator_binding_hash"]}, raw)
 
 
-def _material_reference(*, context: dict[str, Any], free_state: np.ndarray) -> np.ndarray:
+def _material_reference(
+    *,
+    context: dict[str, Any],
+    free_state: np.ndarray,
+    family_fixture: dict[str, np.ndarray],
+) -> np.ndarray:
     operator = context["problem"].current_tangent_operator
     free = np.asarray(operator.array("free_global_dofs"), dtype=np.int64)
     global_state = np.array(
@@ -203,16 +310,31 @@ def _material_reference(*, context: dict[str, Any], free_state: np.ndarray) -> n
     extension = (
         2.0 * reference_lengths * linear_extension + relative_squared
     ) / (current_lengths + reference_lengths)
-    return np.ascontiguousarray(np.column_stack((
-        reference_lengths, current_lengths, extension,
-        extension / reference_lengths, axial * extension, axial,
-    )), dtype="<f8")
+    strain = extension / reference_lengths
+    return np.ascontiguousarray(
+        np.column_stack(
+            (
+                reference_lengths,
+                current_lengths,
+                extension,
+                strain,
+                axial * extension,
+                axial,
+                family_fixture["family_codes"],
+                family_fixture["primary_e_mpa"],
+                family_fixture["secondary_e_mpa"],
+                family_fixture["primary_e_mpa"] * strain,
+            )
+        ),
+        dtype="<f8",
+    )
 
 
 def _material_bundles(*, context: dict[str, Any], initial: np.ndarray,
                       committed: np.ndarray, rejected: np.ndarray,
                       accepted_state: np.ndarray,
-                      correction: np.ndarray) -> dict[str, Any]:
+                      correction: np.ndarray,
+                      family_fixture: dict[str, np.ndarray]) -> dict[str, Any]:
     problem = context["problem"]
     model_hash = problem.model_source_sha256
     plan_hash = problem.equilibrium_operator_binding_hash
@@ -228,11 +350,15 @@ def _material_bundles(*, context: dict[str, Any], initial: np.ndarray,
     def inputs(values: np.ndarray, parents: tuple[str, ...] | None) -> tuple[MaterialStateInput, ...]:
         rows: list[MaterialStateInput] = []
         for index, value in enumerate(values):
+            family_code = int(family_fixture["family_codes"][index])
+            family_name = next(
+                name for name, code in FAMILY_CODES.items() if code == family_code
+            )
             rows.append(MaterialStateInput(
-                entity_id=f"mgt.frame_geometry.{index:04d}",
+                entity_id=f"mgt.frame.{int(family_fixture['element_ids'][index])}",
                 integration_point_id="finite_chord_axial.ip0",
-                material_type_id="elastic_finite_chord_axial",
-                material_schema_version="elastic-finite-chord-axial-state.v1",
+                material_type_id=f"mgt_source_elastic_{family_name.lower()}",
+                material_schema_version="mgt-source-elastic-family-state.v1",
                 state_bytes=np.ascontiguousarray(value, dtype="<f8").tobytes(),
                 parent_state_data_hash=None if parents is None else parents[index],
             ))
@@ -270,13 +396,15 @@ def _material_bundles(*, context: dict[str, Any], initial: np.ndarray,
     }
 
 
-def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float,
+def _compile_run(root: Path, sparse: Any, tangent: Any, material_fixture_raw: bytes,
+                 reference_force_n: float,
                  hipcc: str, rocm_path: str, device_lib_path: str, timeout: float) -> dict[str, Any]:
     compiler = _resolve_hipcc(hipcc); libs = _resolve_device_lib_path(root, device_lib_path)
     architecture = _detect_architecture(root, "rocminfo")
     if architecture != "gfx1030": raise RuntimeError("device_fgmres_requires_local_gfx1030")
     with tempfile.TemporaryDirectory(prefix="g1-mgt-device-fgmres-") as raw:
         temp = Path(raw); sp = temp / "sparse.bin"; tp = temp / "tangent.bin"
+        mp = temp / "material-family.bin"
         binary = temp / "fgmres"; cross = temp / "fgmres-gfx1100"
         solution = temp / "solution.bin"; residual = temp / "residual.bin"
         accepted_state = temp / "accepted-state.bin"; nonlinear_residual = temp / "nonlinear-residual.bin"
@@ -285,12 +413,13 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
         rejected_material = temp / "rejected-material.bin"
         rollback_material = temp / "rollback-material.bin"
         sp.write_bytes(sparse.to_bytes()); tp.write_bytes(tangent.to_bytes())
+        mp.write_bytes(material_fixture_raw)
         base = [str(compiler), f"--rocm-path={rocm_path}", f"--rocm-device-lib-path={libs}"]
         tail = [str(root / SOURCE), "-O2", "-Werror", "-ffp-contract=off", "-std=c++17"]
         for arch, output in (("gfx1030", binary), ("gfx1100", cross)):
             built = _run([*base, f"--offload-arch={arch}", *tail, "-o", str(output)], cwd=root, timeout=180)
             if built.returncode: raise RuntimeError(f"device_fgmres_{arch}_compile_failed:" + built.stderr[-1000:])
-        executed = _run([str(binary), str(sp), str(tp), repr(reference_force_n),
+        executed = _run([str(binary), str(sp), str(tp), str(mp), repr(reference_force_n),
                          str(solution), str(residual), str(accepted_state), str(nonlinear_residual),
                          str(initial_material), str(committed_material),
                          str(rejected_material), str(rollback_material)],
@@ -390,9 +519,13 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     root = root.resolve()
     if not _clean(root): raise RuntimeError("device_fgmres_requires_clean_source_paths")
     sparse, _, tangent, context = build_references(root=root)
+    family_fixture, family_fixture_raw, family_fixture_manifest = (
+        _material_family_fixture(root=root, context=context)
+    )
     reference_load_kn = np.asarray(context["problem"].reference_load_kn(), dtype=np.float64)
     reference_force_n = max(1.0, float(np.max(np.abs(reference_load_kn))) * 1000.0)
-    execution = _compile_run(root, sparse, tangent.fixture, reference_force_n,
+    execution = _compile_run(root, sparse, tangent.fixture, family_fixture_raw,
+                             reference_force_n,
                              hipcc, rocm_path, device_lib_path, timeout)
     cpu_baseline = _cpu_baseline(
         sparse=sparse, context=context, reference_force_n=reference_force_n)
@@ -418,10 +551,21 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     rejected_material = execution["rejected_material"].reshape(material_shape)
     rollback_material = execution["rollback_material"].reshape(material_shape)
     expected_material = (
-        _material_reference(context=context, free_state=context["state"]),
-        _material_reference(context=context, free_state=accepted_state),
         _material_reference(
-            context=context, free_state=accepted_state + 0.5 * solution),
+            context=context,
+            free_state=context["state"],
+            family_fixture=family_fixture,
+        ),
+        _material_reference(
+            context=context,
+            free_state=accepted_state,
+            family_fixture=family_fixture,
+        ),
+        _material_reference(
+            context=context,
+            free_state=accepted_state + 0.5 * solution,
+            family_fixture=family_fixture,
+        ),
     )
     observed_material = (initial_material, committed_material, rejected_material)
     material_field_max_abs_errors = [
@@ -437,13 +581,18 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     material_bundles = _material_bundles(
         context=context, initial=initial_material, committed=committed_material,
         rejected=rejected_material, accepted_state=accepted_state,
-        correction=solution)
+        correction=solution, family_fixture=family_fixture)
     material_contract = bool(
         material_count == context["problem"].current_tangent_operator.geometry_element_count
         and runtime["material_state_field_count"] == len(MATERIAL_STATE_FIELD_NAMES)
         and runtime["material_trial_count"] == 2
         and runtime["material_commit_count"] == 1
         and runtime["material_rollback_count"] == 1
+        and runtime["material_family_fixture_bound"] is True
+        and runtime["material_conc_count"] == 2_182
+        and runtime["material_steel_count"] == 1_692
+        and runtime["material_src_count"] == 1_692
+        and runtime["material_user_count"] == 6
         and material_max_scaled_error <= material_tolerance
         and rollback_material_exact
         and material_bundles["rollback_returns_exact_accepted_object"] is True
@@ -496,9 +645,10 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                            "load_factor": 1.0, "equation_count": N, "state_data_hash": array_data_hash(context["state"]),
                            "right_hand_side_data_hash": array_data_hash(context["rhs_kn"])},
         "material_lifecycle": {
-            "profile": "actual_mgt_finite_chord_elastic_frame_material_state.v1",
+            "profile": "actual_mgt_source_family_finite_chord_elastic_state.v1",
             "integration_point_count": material_count,
             "field_names": list(MATERIAL_STATE_FIELD_NAMES),
+            "family_fixture": family_fixture_manifest,
             "trial_count": runtime["material_trial_count"],
             "commit_count": runtime["material_commit_count"],
             "rollback_count": runtime["material_rollback_count"],
@@ -543,13 +693,15 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                    "gfx1100_cross_compile": True, "independent_gfx1100_run": False,
                    "material_commit_rollback": True,
                    "actual_mgt_elastic_material_state_bundle": True,
+                   "actual_mgt_material_family_fixture_device_bound": True,
                    "nonlinear_material_family_breadth": False,
                    "resultir_diagnosticir": False,
                    "g1_closure": False},
         "blockers_remaining": ["independent_gfx1100_hardware_run_not_available",
-                               "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
+                               "source_authoritative_nonlinear_material_parameters_unavailable",
+                               "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp",
                                "resultir_diagnosticir_not_established"],
-        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture executes finite-chord elastic material trial/commit and a post-acceptance rejected trial with exact rollback for all 5,572 actual MGT frame elements, and binds the committed bytes to MaterialStateBundle lineage. The accepted state is emitted through the deterministic full-load checkpoint schema and exact-reloaded. Nonlinear material-family breadth, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed."
+        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture uploads and consumes the exact 5,572-element MGT family order, source primary/secondary elastic moduli, and finite-chord material state during initial, accepted, and rejected trials, followed by exact rollback and MaterialStateBundle binding. This is source-authoritative family-buffer connectivity, not nonlinear constitutive breadth: source-authoritative hardening, damage/softening, and SRC fraction parameters are unavailable and nonlinear laws are not connected to residual/JVP. ResultIR, DiagnosticIR, independent gfx1100 hardware, and G1 closure remain unclaimed."
     }
     payload["receipt_hash"] = _hash(payload); validate(payload, root=root, current=True)
     return (payload, solution_raw, residual_raw, accepted_state_raw,
