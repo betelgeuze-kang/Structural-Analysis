@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "aggregate_source", "sources", "evaluations", "metrics", "claims", "blockers_remaining", "non_n1_boundaries", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "n1-cpu-mathematical-closure-gate.v1"},
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string"},
+    "status": {"enum": ["partial", "ready"]},
+    "contract_pass": {"const": true},
+    "aggregate_source": {
+      "type": "object",
+      "required": ["source_commit_sha", "source_commit_is_ancestor_of_head", "generator_script_sha256", "generator_matches_source_commit", "generator_source_control_state", "input_checksums", "source_input_provenance"],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "source_commit_is_ancestor_of_head": {"type": "boolean"},
+        "generator_script_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "generator_matches_source_commit": {"type": "boolean"},
+        "generator_source_control_state": {"enum": ["working_tree", "commit_bound"]},
+        "input_checksums": {
+          "type": "object",
+          "additionalProperties": {"type": "string"}
+        },
+        "source_input_provenance": {
+          "type": "object",
+          "required": ["schema_version", "contract_pass", "reason_code", "source_commit_resolved", "input_count", "workspace_match_count", "blocker_count", "blockers", "inputs", "claim_boundary"],
+          "properties": {
+            "schema_version": {"const": "source-input-provenance.v1"},
+            "contract_pass": {"type": "boolean"},
+            "reason_code": {"type": "string"},
+            "source_commit_resolved": {"type": "boolean"},
+            "input_count": {"const": 7},
+            "workspace_match_count": {"type": "integer", "minimum": 0},
+            "blocker_count": {"type": "integer", "minimum": 0},
+            "blockers": {"type": "array", "items": {"type": "string"}},
+            "inputs": {"type": "array", "items": {"type": "object"}},
+            "claim_boundary": {"type": "string"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {"type": "object"},
+    "evaluations": {
+      "type": "object",
+      "required": ["physical_residual_definition_fixed", "residual_jacobian_directional_consistency", "accepted_state_tangent_refresh", "material_trial_commit_rollback", "line_search_physical_merit", "increment_gate", "fallback_zero", "load_scale_0p656_reproduced", "adaptive_continuation", "full_load_1p0", "residual_pass", "increment_pass", "actual_mgt_full_equation_space", "material_family_breadth", "regularization_zero", "exact_restart"],
+      "properties": {
+        "physical_residual_definition_fixed": {"type": "boolean"},
+        "residual_jacobian_directional_consistency": {"type": "boolean"},
+        "accepted_state_tangent_refresh": {"type": "boolean"},
+        "material_trial_commit_rollback": {"type": "boolean"},
+        "line_search_physical_merit": {"type": "boolean"},
+        "increment_gate": {"type": "boolean"},
+        "fallback_zero": {"type": "boolean"},
+        "load_scale_0p656_reproduced": {"type": "boolean"},
+        "adaptive_continuation": {"type": "boolean"},
+        "full_load_1p0": {"type": "boolean"},
+        "residual_pass": {"type": "boolean"},
+        "increment_pass": {"type": "boolean"},
+        "actual_mgt_full_equation_space": {"type": "boolean"},
+        "material_family_breadth": {"type": "boolean"},
+        "regularization_zero": {"type": "boolean"},
+        "exact_restart": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "metrics": {"type": "object"},
+    "claims": {
+      "type": "object",
+      "required": ["n1_cpu_mathematical_closure", "actual_mgt_full_mesh_stateful_material_coupling", "g1_production_rocm_hip_closure", "aggregate_generator_committed"],
+      "properties": {
+        "n1_cpu_mathematical_closure": {"type": "boolean"},
+        "actual_mgt_full_mesh_stateful_material_coupling": {"const": false},
+        "g1_production_rocm_hip_closure": {"const": false},
+        "aggregate_generator_committed": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "items": {"type": "string"}},
+    "non_n1_boundaries": {"type": "array", "minItems": 3, "maxItems": 4, "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 300}
+  },
+  "additionalProperties": false
+}
