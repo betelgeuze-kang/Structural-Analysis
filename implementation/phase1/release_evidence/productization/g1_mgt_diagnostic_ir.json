@@ -32,7 +32,7 @@
     "solver_convergence_authority": false,
     "stable_code_path_only": true
   },
-  "diagnostic_hash": "sha256:f4f6c75e357eebfe4c3b23cb61892bda5f2cc4114d2ca2bfb789f0c435171014",
+  "diagnostic_hash": "sha256:cd013ec5583698f814d82ff8d30978fcaedf48018367c7871532f632eedd1bc6",
   "diagnostic_id": "diagnostic.g1.mgt.hip.terminal",
   "entries": [
     {
@@ -79,6 +79,7 @@
       "code": "nonlinear_material_family_breadth_unavailable",
       "disposition": "unsupported",
       "evidence_hashes": [
+        "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
         "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8"
       ],
       "occurrence_count": 1,
