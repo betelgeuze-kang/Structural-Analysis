@@ -1,0 +1,174 @@
+{
+  "artifacts": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint_receipt.json"
+  },
+  "blockers_remaining": [
+    "production_hip_worker_not_executed_from_checkpoint",
+    "device_resident_fgmres_preconditioner_not_integrated",
+    "independent_gfx1100_receipt_not_attached",
+    "signed_hardware_receipts_not_attached"
+  ],
+  "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+  "checkpoint": {
+    "accepted_state_hash": "sha256:db4d84655c3357c7193a0728169ce6c97f82d86249ee0d74164a54d845ee5870",
+    "byte_length": 1142584,
+    "exact_restart_binding": {
+      "complete": true,
+      "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "source_commit_sha": "adea01ea2d0166284f2883094c02b6c99353a38a"
+    },
+    "free_displacement_data_hash": "sha256:c8683e1b58b3a81be967835cb0d549b14ac410cf848288f4bcb2233a1a91fb4d",
+    "free_equation_count": 70560,
+    "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+    "global_dof_count": 78282,
+    "load_scale": 1.0,
+    "node_count": 13047,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz",
+    "schema_version": "g1-mgt-state-updated-frame-axial-full-load-checkpoint.v1",
+    "sha256": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d"
+  },
+  "claim_boundary": "This bridge materializes the exact accepted λ=1.0 CPU free vector into the legacy 78,282-DOF NPZ consumed by the G1 HIP lane while retaining source, model, operator, state, free-order, and free-vector identities. It does not claim that the downstream HIP Newton worker has executed or that full frame/shell material coupling is closed.",
+  "claims": {
+    "actual_mgt_full_load_checkpoint": true,
+    "exact_source_model_operator_binding": true,
+    "g1_closure": false,
+    "legacy_g1_lane_npz_compatible": true,
+    "load_scale_at_least_one": true,
+    "physical_residual_and_increment_gate": true,
+    "production_hip_worker_execution": false
+  },
+  "contract_pass": true,
+  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-08-08T10:15:24.143607+00:00",
+  "input_checksums": {
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+    "implementation/phase1/mgt_state_updated_frame_axial_geometry.py": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+    "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+    "scripts/build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
+    "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py": "sha256:52da8e68873c2496a0c6e0e3537b689c8e6088c8008cc32136f89cb67939f4cc",
+    "scripts/release_evidence_metadata.py": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+    "src/structural_analysis/solvers/nonlinear/load_controlled_matrix_free_newton.py": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+    "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+    "tests/test_build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:6f865dcf4436e48139df34fb5c839da4a823ea060ae29993c3fa5dfc5ca3dfa9"
+  },
+  "schema_version": "g1-mgt-full-load-checkpoint-bridge-receipt.v1",
+  "solver": {
+    "accepted_step_count": 4,
+    "contract_pass": true,
+    "fallback_count": 0,
+    "final_residual_inf_n": 0.0004447424730642524,
+    "regularization_count": 0,
+    "residual_and_increment_acceptance_gate": true,
+    "status": "ready",
+    "tangent_solve_count": 4,
+    "terminal_reason": "target_load_factor_reached"
+  },
+  "source_commit_exact_replay_claim": true,
+  "source_commit_sha": "adea01ea2d0166284f2883094c02b6c99353a38a",
+  "source_input_provenance": {
+    "blocker_count": 0,
+    "blockers": [],
+    "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
+    "contract_pass": true,
+    "input_count": 11,
+    "inputs": [
+      {
+        "blocker": "",
+        "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+        "source_checksum": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+        "source_checksum": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py",
+        "source_checksum": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/mgt_physical_residual_assembly.py",
+        "source_checksum": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/mgt_state_updated_frame_axial_geometry.py",
+        "source_checksum": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:6dce2941bcb45d7ad921bbb1deddca38bef1d9e77573b4ff183570c5ae634cd6",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/load_controlled_matrix_free_newton.py",
+        "source_checksum": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py",
+        "source_checksum": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/build_g1_mgt_full_load_checkpoint_bridge.py",
+        "source_checksum": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
+        "source_checksum": "sha256:52da8e68873c2496a0c6e0e3537b689c8e6088c8008cc32136f89cb67939f4cc",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:52da8e68873c2496a0c6e0e3537b689c8e6088c8008cc32136f89cb67939f4cc",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/release_evidence_metadata.py",
+        "source_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "tests/test_build_g1_mgt_full_load_checkpoint_bridge.py",
+        "source_checksum": "sha256:6f865dcf4436e48139df34fb5c839da4a823ea060ae29993c3fa5dfc5ca3dfa9",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:6f865dcf4436e48139df34fb5c839da4a823ea060ae29993c3fa5dfc5ca3dfa9",
+        "workspace_matches_source": true
+      }
+    ],
+    "reason_code": "PASS",
+    "schema_version": "source-input-provenance.v1",
+    "source_commit_resolved": true,
+    "workspace_match_count": 11
+  },
+  "status": "ready"
+}
