@@ -61,6 +61,11 @@
       "required": ["state", "algorithm", "signer_id", "public_key_spki_base64", "public_key_sha256", "signature_base64", "signed_payload_hash"],
       "properties": {
         "state": {"enum": ["unsigned", "verified"]},
+        "algorithm": {"type": ["string", "null"]},
+        "signer_id": {"type": ["string", "null"]},
+        "public_key_spki_base64": {"type": ["string", "null"]},
+        "public_key_sha256": {"type": ["string", "null"]},
+        "signature_base64": {"type": ["string", "null"]},
         "signed_payload_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
       },
       "additionalProperties": false

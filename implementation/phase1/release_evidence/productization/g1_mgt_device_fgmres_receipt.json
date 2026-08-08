@@ -13,17 +13,19 @@
     "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp",
     "resultir_diagnosticir_not_established"
   ],
-  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture uploads and consumes the exact 5,572-element MGT family order, source primary/secondary elastic moduli, and finite-chord material state during initial, accepted, and rejected trials, followed by exact rollback and MaterialStateBundle binding. This is source-authoritative family-buffer connectivity, not nonlinear constitutive breadth: source-authoritative hardening, damage/softening, and SRC fraction parameters are unavailable and nonlinear laws are not connected to residual/JVP. ResultIR, DiagnosticIR, independent gfx1100 hardware, and G1 closure remain unclaimed.",
+  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture uploads and consumes the exact 5,572-element MGT family order, source primary/secondary elastic moduli, and finite-chord material state during initial, accepted, and rejected trials, followed by exact rollback and MaterialStateBundle binding. This is source-authoritative family-buffer connectivity, not nonlinear constitutive breadth: source-authoritative hardening, damage/softening, and SRC fraction parameters are unavailable and nonlinear laws are not connected to residual/JVP. A single receipt does not establish runner independence or a signed cross-device pair. ResultIR, DiagnosticIR, independent gfx1100 hardware, and G1 closure remain unclaimed.",
   "claims": {
+    "actual_gfx1030_hardware": true,
+    "actual_gfx1100_hardware": false,
     "actual_mgt_elastic_material_state_bundle": true,
     "actual_mgt_full_load_accepted_state": true,
     "actual_mgt_material_family_fixture_device_bound": true,
     "checkpoint_emitted": true,
     "device_givens_and_backsolve": true,
+    "dual_target_cross_compile": true,
     "equation_scaling": true,
     "exact_restart": true,
     "g1_closure": false,
-    "gfx1100_cross_compile": true,
     "independent_gfx1100_run": false,
     "material_commit_rollback": true,
     "mid_iteration_d2h_zero": true,
@@ -53,17 +55,17 @@
     },
     "checkpoint_artifact": {
       "accepted_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
-      "byte_length": 1142627,
+      "byte_length": 1142621,
       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
       "exact_reload": true,
       "exact_restart_terminal_state": true,
-      "file_sha256": "sha256:736c6113f83a0e2bc38fef31f1a9e8eec787eecbc5866baef28a2e41e152aa29",
+      "file_sha256": "sha256:884a82e75e1891b8a0f04c7f8e47e01c394dc6f772415e60a5c2bc12b918a832",
       "free_displacement_data_hash": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_checkpoint.npz",
       "schema": "g1-mgt-state-updated-frame-axial-full-load-checkpoint.v1",
-      "serialization_overhead_seconds": 0.059266666998155415,
-      "source_commit_sha": "189283aed3aa164033da39108b64a4ec79452e57"
+      "serialization_overhead_seconds": 0.05933471300158999,
+      "source_commit_sha": "98b7617072261bf87fd64cb3837be83f6eeed86c"
     },
     "nonlinear_residual_artifact": {
       "byte_length": 564480,
@@ -99,7 +101,7 @@
     "terminal_physical_residual_tolerance_n": 1e-09
   },
   "contract_pass": true,
-  "contract_scope": "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_local_gfx1030",
+  "contract_scope": "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_gfx1030",
   "equation_scaling": {
     "free_equation_scope": true,
     "minimum_reference_force_n": 1.0,
@@ -109,14 +111,14 @@
     "schema_version": "equation-scaling-mgt-translation-free.v1",
     "translation_equation_count": 70560
   },
-  "generated_at": "2026-08-08T14:50:53.517380+00:00",
+  "generated_at": "2026-08-08T15:05:13.536568+00:00",
   "hardware_execution": {
     "accepted_alpha": 1,
     "accepted_nonlinear_residual_inf_n": 4.5068662404775016e-07,
     "accepted_nonlinear_residual_l2_n": 7.653400154524554e-07,
     "cpu_backend": false,
     "d2h_bytes": 4041124,
-    "device_lifecycle_wall_time_ms": 5254.13347,
+    "device_lifecycle_wall_time_ms": 5276.243707,
     "device_name": "AMD Radeon RX 6900 XT",
     "equation_count": 70560,
     "estimated_residual_history": [
@@ -372,14 +374,14 @@
       "preconditioner_apply_count": 6,
       "selected_index": 0,
       "terminal_linear_residual_inf_n": 2.6308529198374256e-14,
-      "wall_seconds": 5.369098746999953
+      "wall_seconds": 5.3835348510001495
     },
-    "gpu_device_lifecycle_wall_seconds": 5.25413347,
-    "speedup_vs_cpu": 1.0218809205469142,
+    "gpu_device_lifecycle_wall_seconds": 5.276243707,
+    "speedup_vs_cpu": 1.0203347589607747,
     "terminal_resultir_parity": false,
     "terminal_resultir_parity_reason": "authoritative_resultir_adapter_and_manifest_not_yet_emitted_despite_bound_elastic_material_bundle"
   },
-  "receipt_hash": "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821",
+  "receipt_hash": "sha256:44c1fdcb0788981a427357c0e687ff0cc7cefc67455fa0f9e5f23ee257add4af",
   "runtime": {
     "backend": "amd_rocm_hip",
     "binary_byte_length": 195240,
@@ -390,8 +392,12 @@
       "/dev/kfd",
       "/dev/dri/renderD128"
     ],
+    "dual_target_binary_sha256": {
+      "gfx1030": "sha256:217488ab7e87ff28eb91d503662f8048761ba0df5e4d4a04aedf7beeb1053aa4",
+      "gfx1100": "sha256:ef069ed6035d92b483d34591f57d75ec662be1140b411694f441bc1b94f9c6b8"
+    },
+    "executed_architecture": "gfx1030",
     "gcn_arch_name": "gfx1030",
-    "gfx1100_cross_compile_binary_sha256": "sha256:ef069ed6035d92b483d34591f57d75ec662be1140b411694f441bc1b94f9c6b8",
     "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
   },
   "schema_version": "g1-mgt-device-fgmres-receipt.v1",
@@ -408,13 +414,13 @@
       "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
       "scripts/build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
       "scripts/build_g1_mgt_material_family_adequacy_audit.py": "sha256:1fb1bb62f33a6da0d0b1ef31839d1a4183b140b54c3529d69757c337c921f2ce",
-      "scripts/run_g1_mgt_device_fgmres.py": "sha256:01dd0f096e37d86d5f5e9be6e56477213a7b162ddfd8ca01773182eba1db714b",
+      "scripts/run_g1_mgt_device_fgmres.py": "sha256:77aa4c2ec11e6e5269fbce846c126342514a6019ac407b2f716ad1993aaae65e",
       "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
       "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
       "src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.json": "sha256:e6a02ace4c1f1bd1c32d3fc769f9d0c0263dfd71a56dacd4c2d3733a8eea14ce",
-      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:f571877a4f8debdee30f934e93db4c956f6b4b4b43f44b0d420a1718d42809e9"
+      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:82bcfb0196a38a7d4e434a51ffa6c5a6a35d1b41ddbb38eb6a56eaeed14b7329"
     },
-    "repository_commit_sha": "189283aed3aa164033da39108b64a4ec79452e57",
+    "repository_commit_sha": "98b7617072261bf87fd64cb3837be83f6eeed86c",
     "source_paths_clean_at_execution": true
   },
   "status": "partial"

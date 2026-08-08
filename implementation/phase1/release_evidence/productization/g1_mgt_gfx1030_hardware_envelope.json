@@ -1,0 +1,150 @@
+{
+  "blockers_remaining": [
+    "ed25519_signature_not_attached",
+    "signed_independent_gfx1030_gfx1100_pair_not_verified",
+    "source_authoritative_nonlinear_material_parameters_unavailable",
+    "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp"
+  ],
+  "claim_boundary": "This envelope authenticates one actual production-size MGT HIP execution, its exact source/wheel/binary identities, terminal numerical gates, KPI counters, checkpoint, and source-family material lifecycle. A verified Ed25519 signature authenticates only the canonical evidence payload and runner attestation. One envelope cannot establish the required independent gfx1030/gfx1100 pair, source-authoritative nonlinear material breadth, or G1 closure.",
+  "claims": {
+    "actual_gfx1030_hardware": true,
+    "actual_gfx1100_hardware": false,
+    "actual_production_mgt_hardware": true,
+    "checkpoint_exact_restart": true,
+    "cross_device_pair": false,
+    "exact_source_commit": true,
+    "g1_closure": false,
+    "independent_gfx1100_hardware": false,
+    "independent_runner_attested": false,
+    "nonlinear_material_family_breadth": false,
+    "signed_receipt": false,
+    "source_family_material_lifecycle": true,
+    "terminal_numerical_contract": true,
+    "wheel_and_binary_bound_at_execution": true
+  },
+  "contract_pass": true,
+  "evidence_payload": {
+    "hardware": {
+      "backend": "amd_rocm_hip",
+      "compiler_version": "HIP version: 6.0.32831-204d35d16",
+      "device_name": "AMD Radeon RX 6900 XT",
+      "device_nodes": [
+        "/dev/kfd",
+        "/dev/dri/renderD128"
+      ],
+      "dual_target_binary_sha256": {
+        "gfx1030": "sha256:217488ab7e87ff28eb91d503662f8048761ba0df5e4d4a04aedf7beeb1053aa4",
+        "gfx1100": "sha256:ef069ed6035d92b483d34591f57d75ec662be1140b411694f441bc1b94f9c6b8"
+      },
+      "executed_binary_byte_length": 195240,
+      "executed_binary_sha256": "sha256:217488ab7e87ff28eb91d503662f8048761ba0df5e4d4a04aedf7beeb1053aa4",
+      "gcn_arch_name": "gfx1030",
+      "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
+    },
+    "material": {
+      "committed_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
+      "cpu_hip_max_scaled_error": 1.768406147705789e-13,
+      "family_fixture": {
+        "adequacy_audit_receipt_hash": "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
+        "byte_length": 156040,
+        "element_id_order_data_hash": "sha256:936abc1baba1dd63334b6c1d0f4fcaf763e422f48eb982b9c8949eaf123f62a9",
+        "family_code_data_hash": "sha256:d9c5cb5acd6bba325ea31801dbf2e68b805855d22d567ce2c4082c84e4c90548",
+        "family_counts": {
+          "CONC": 2182,
+          "SRC": 1692,
+          "STEEL": 1692,
+          "USER": 6
+        },
+        "file_sha256": "sha256:daef4b5d36d2a522feee6d7cfa883d79ba26eed63b3921620b4a638a7218b37a",
+        "geometry_order_exact": true,
+        "primary_elastic_modulus_mpa_data_hash": "sha256:644125fa9eef3b8457c6ac5207dc6e91c38c272c1cd14c3a2ced009907e1963f",
+        "profile": "actual_mgt_geometry_ordered_material_family_fixture.v1",
+        "secondary_elastic_modulus_mpa_data_hash": "sha256:47a41bc55ef0d2004023636f05b3b3859b93a9f9cb8ae57c0e72cd65039545e2"
+      },
+      "field_names": [
+        "reference_length_m",
+        "current_length_m",
+        "extension_m",
+        "engineering_strain",
+        "axial_force_n",
+        "axial_stiffness_n_per_m",
+        "material_family_code",
+        "source_primary_elastic_modulus_mpa",
+        "source_secondary_elastic_modulus_mpa",
+        "source_elastic_stress_mpa"
+      ],
+      "integration_point_count": 5572,
+      "profile": "actual_mgt_source_family_finite_chord_elastic_state.v1",
+      "rollback_state_bitwise_exact": true
+    },
+    "performance": {
+      "checkpoint_serialization_overhead_seconds": 0.05933471300158999,
+      "d2h_bytes": 4041124,
+      "device_lifecycle_wall_time_ms": 5276.243707,
+      "h2d_bytes": 239979856,
+      "mid_iteration_d2h_transfer_count": 0,
+      "peak_device_allocation_bytes": 260837212,
+      "speedup_vs_cpu": 1.0203347589607747
+    },
+    "runner_attestation": {
+      "execution_location": "local-workstation",
+      "independent_from_local_gfx1030": false,
+      "organization_id": "local-development",
+      "runner_id": "rx6900xt-local"
+    },
+    "source": {
+      "input_checksums": {
+        "dist/structural_analysis-0.3.0-py3-none-any.whl": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a",
+        "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
+        "implementation/phase1/hip_kernels/engine_v2_mgt_fgmres.hip.cpp": "sha256:045ace5981d8814cc3f2b3cc9e3b2da3f923b77586199006f69b66e7a28dbbd4",
+        "implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp": "sha256:7d876b3cf5dc5080f9b403b854aa17582934a21692a8fa5d4379c19c2067dcea",
+        "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
+        "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "implementation/phase1/release_evidence/productization/g1_mgt_material_family_adequacy_audit.json": "sha256:c54cc244b7e43b39d313203b8272847e19364f4bd615e07a303a8d0df538ba37",
+        "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+        "scripts/build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
+        "scripts/build_g1_mgt_material_family_adequacy_audit.py": "sha256:1fb1bb62f33a6da0d0b1ef31839d1a4183b140b54c3529d69757c337c921f2ce",
+        "scripts/run_g1_mgt_device_fgmres.py": "sha256:77aa4c2ec11e6e5269fbce846c126342514a6019ac407b2f716ad1993aaae65e",
+        "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
+        "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
+        "src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.json": "sha256:e6a02ace4c1f1bd1c32d3fc769f9d0c0263dfd71a56dacd4c2d3733a8eea14ce",
+        "tests/test_run_g1_mgt_device_fgmres.py": "sha256:82bcfb0196a38a7d4e434a51ffa6c5a6a35d1b41ddbb38eb6a56eaeed14b7329"
+      },
+      "repository_commit_sha": "98b7617072261bf87fd64cb3837be83f6eeed86c",
+      "source_paths_clean_at_execution": true,
+      "source_set_hash": "sha256:5687508e9bdcd9295b64884c3edf580231dad3e20d9fc40939e7370aba2b940f"
+    },
+    "terminal": {
+      "accepted_alpha": 1,
+      "accepted_nonlinear_residual_inf_n": 4.5068662404775016e-07,
+      "checkpoint_accepted_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
+      "checkpoint_sha256": "sha256:884a82e75e1891b8a0f04c7f8e47e01c394dc6f772415e60a5c2bc12b918a832",
+      "equation_count": 70560,
+      "krylov_iterations": 6,
+      "load_factor": 1.0,
+      "matvec_count": 7,
+      "physical_residual_inf_n": 2.6308551618277578e-14,
+      "preconditioner_apply_count": 6,
+      "terminal_cpu_replay_error_n": 1.045332449960926e-06
+    },
+    "upstream": {
+      "contract_scope": "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_gfx1030",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_receipt.json",
+      "receipt_hash": "sha256:44c1fdcb0788981a427357c0e687ff0cc7cefc67455fa0f9e5f23ee257add4af",
+      "schema_version": "g1-mgt-device-fgmres-receipt.v1"
+    }
+  },
+  "generated_at": "2026-08-08T15:05:34.485485+00:00",
+  "receipt_hash": "sha256:4dcc4cd7d2f8c3215d0d045c02d49dfd635c5a240796c0a816711af99897aafe",
+  "schema_version": "g1-mgt-production-hip-hardware-envelope.v1",
+  "signature": {
+    "algorithm": null,
+    "public_key_sha256": null,
+    "public_key_spki_base64": null,
+    "signature_base64": null,
+    "signed_payload_hash": "sha256:f8d077dc44000745414fd957f75e6015821f08827539117a6bfb1139b42d5b73",
+    "signer_id": null,
+    "state": "unsigned"
+  },
+  "status": "partial"
+}
