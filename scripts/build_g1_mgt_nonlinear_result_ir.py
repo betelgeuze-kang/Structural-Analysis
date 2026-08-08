@@ -24,6 +24,10 @@ from build_g1_mgt_material_family_adequacy_audit import (  # noqa: E402
     DEFAULT_OUT as MATERIAL_FAMILY_AUDIT,
     validate as validate_material_family_audit,
 )
+from build_g1_mgt_hardware_envelope import (  # noqa: E402
+    DEFAULT_OUT as GFX1030_HARDWARE_ENVELOPE,
+    validate as validate_hardware_envelope,
+)
 from run_g1_mgt_device_fgmres import (  # noqa: E402
     DEFAULT_ACCEPTED_STATE, DEFAULT_COMMITTED_MATERIAL, DEFAULT_INITIAL_MATERIAL,
     DEFAULT_OUT as FGMRES_RECEIPT, DEFAULT_REJECTED_MATERIAL, DEFAULT_SOLUTION,
@@ -62,6 +66,7 @@ SOURCE_PATHS = (
     FGMRES_RECEIPT, DEFAULT_ACCEPTED_STATE, DEFAULT_SOLUTION, DEFAULT_INITIAL_MATERIAL,
     DEFAULT_COMMITTED_MATERIAL, DEFAULT_REJECTED_MATERIAL,
     MATERIAL_FAMILY_AUDIT,
+    GFX1030_HARDWARE_ENVELOPE,
     Path("scripts/build_g1_mgt_nonlinear_result_ir.py"), SCHEMA,
     Path("scripts/run_g1_mgt_device_fgmres.py"),
     Path("src/structural_analysis/engine_v2/contracts/nonlinear_result.py"),
@@ -163,6 +168,7 @@ class _DiagnosticAdapter:
     snapshot: DiagnosticIRSourceSnapshot
     source: dict[str, Any]
     material_family_audit: dict[str, Any]
+    hardware_envelope: dict[str, Any]
     terminal: NonlinearTerminalReceipt
 
     def validate_diagnostic_ir_source(self) -> DiagnosticIRSourceSnapshot:
@@ -175,6 +181,15 @@ class _DiagnosticAdapter:
             raise ValueError("diagnostic_fallback_or_regularization_observed")
         if self.snapshot.source_receipt_hash != self.source["receipt_hash"]:
             raise ValueError("diagnostic_receipt_hash_mismatch")
+        envelope_claims = self.hardware_envelope["claims"]
+        envelope_upstream = self.hardware_envelope["evidence_payload"]["upstream"]
+        if not (
+            envelope_claims["actual_production_mgt_hardware"]
+            and envelope_claims["actual_gfx1030_hardware"]
+            and envelope_claims["terminal_numerical_contract"]
+            and envelope_upstream["receipt_hash"] == self.source["receipt_hash"]
+        ):
+            raise ValueError("diagnostic_hardware_envelope_invalid")
         audit_claims = self.material_family_audit["claims"]
         if not (
             audit_claims["actual_mgt_full_mesh_material_family_order_bound"]
@@ -210,6 +225,11 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
     source = _read(root / FGMRES_RECEIPT)
     material_family_audit = validate_material_family_audit(
         _read(root / MATERIAL_FAMILY_AUDIT), root=root, current=True
+    )
+    hardware_envelope = validate_hardware_envelope(
+        _read(root / GFX1030_HARDWARE_ENVELOPE),
+        root=root,
+        require_current_sources=True,
     )
     _, _, _, context = build_references(root=root)
     family_fixture, _fixture_raw, family_fixture_manifest = (
@@ -305,7 +325,9 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         create_diagnostic_entry(
             code="actual_gfx1030_execution_observed", path="/runtime/gfx1030",
             severity="info", disposition="observed",
-            evidence_hashes=(source["receipt_hash"],)),
+            evidence_hashes=(
+                source["receipt_hash"], hardware_envelope["receipt_hash"]
+            )),
         create_diagnostic_entry(
             code="fallback_and_regularization_zero", path="/terminal/fallback",
             severity="info", disposition="observed",
@@ -341,7 +363,8 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
     diagnostic = create_adapter_bound_diagnostic_ir(
         diagnostic_id="diagnostic.g1.mgt.hip.terminal",
         source_adapter=_DiagnosticAdapter(
-            diagnostic_snapshot, source, material_family_audit, terminal
+            diagnostic_snapshot, source, material_family_audit,
+            hardware_envelope, terminal
         ))
     diagnostic_manifest = diagnostic.to_manifest()
     binding_parity_keys = (
@@ -371,6 +394,9 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
                    "fgmres_receipt_hash": source["receipt_hash"],
                    "material_family_adequacy_audit_hash": (
                        material_family_audit["receipt_hash"]
+                   ),
+                   "gfx1030_hardware_envelope_hash": (
+                       hardware_envelope["receipt_hash"]
                    )},
         "terminal": {"load_factor": 1.0, "dof_count": int(displacement.size),
                      "free_equation_count": int(accepted_state.size),
@@ -395,11 +421,13 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         "claims": {"authoritative_nonlinear_resultir_emitted": True,
                    "terminal_resultir_parity": True, "diagnosticir_emitted": True,
                    "actual_mgt_material_family_order_bound": True,
+                   "production_mgt_hardware_envelope_emitted": True,
+                   "production_mgt_hardware_envelope_signed": False,
                    "source_authoritative_nonlinear_material_parameters_complete": False,
                    "independent_gfx1100_run": False, "g1_closure": False},
         "blockers_remaining": ["nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
                                "independent_gfx1100_hardware_run_not_available"],
-        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. The DiagnosticIR also binds the exact 5,572-element material-family order/source-adequacy audit: elastic properties are complete, but authoritative hardening, damage/softening, and SRC constituent-fraction parameters are not. Nonlinear material-family breadth, independent gfx1100 hardware, and G1 closure remain unclaimed."}
+        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed source-family elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. DiagnosticIR binds the exact 5,572-element material-family source-adequacy audit and architecture-neutral gfx1030 production hardware envelope. The local envelope is exact-source/wheel/binary bound and self-verifiable but unsigned; authoritative hardening, damage/softening, SRC constituent-fraction parameters, a signed independent gfx1100 envelope, nonlinear material breadth, and G1 closure remain unclaimed."}
     payload["artifacts"]["diagnostic"] = {
         "path": DEFAULT_DIAGNOSTIC.as_posix(), "byte_length": len(diagnostic_raw),
         "file_sha256": sha256_prefixed(diagnostic_raw)}

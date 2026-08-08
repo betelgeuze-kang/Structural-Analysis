@@ -22,6 +22,8 @@ def test_result_ir_parity_does_not_promote_open_g1_boundaries() -> None:
     assert payload["diagnostic"]["entry_count"] == 5
     assert payload["diagnostic"]["unsupported_count"] == 2
     assert payload["claims"]["actual_mgt_material_family_order_bound"] is True
+    assert payload["claims"]["production_mgt_hardware_envelope_emitted"] is True
+    assert payload["claims"]["production_mgt_hardware_envelope_signed"] is False
     assert payload["claims"][
         "source_authoritative_nonlinear_material_parameters_complete"
     ] is False
