@@ -22,6 +22,9 @@ def test_receipt_keeps_remaining_hardware_and_nonlinear_boundaries_visible() -> 
     assert payload["claims"]["nonlinear_convergence_gate_on_device"] is True
     assert payload["claims"]["checkpoint_emitted"] is True
     assert payload["claims"]["exact_restart"] is True
+    assert payload["claims"]["dual_target_cross_compile"] is True
+    assert payload["claims"]["actual_gfx1030_hardware"] is True
+    assert payload["claims"]["actual_gfx1100_hardware"] is False
     assert payload["claims"]["independent_gfx1100_run"] is False
     assert payload["claims"]["material_commit_rollback"] is True
     assert payload["claims"]["actual_mgt_elastic_material_state_bundle"] is True
@@ -30,6 +33,11 @@ def test_receipt_keeps_remaining_hardware_and_nonlinear_boundaries_visible() -> 
     ] is True
     assert payload["claims"]["nonlinear_material_family_breadth"] is False
     lifecycle = payload["material_lifecycle"]
+    assert payload["runtime"]["executed_architecture"] == "gfx1030"
+    assert set(payload["runtime"]["dual_target_binary_sha256"]) == {
+        "gfx1030",
+        "gfx1100",
+    }
     assert lifecycle["integration_point_count"] == 5_572
     assert lifecycle["family_fixture"]["geometry_order_exact"] is True
     assert lifecycle["family_fixture"]["family_counts"] == {

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "evidence_payload", "signature", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-production-hip-hardware-envelope.v1"},
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "evidence_payload": {
+      "type": "object",
+      "required": ["upstream", "source", "runner_attestation", "hardware", "terminal", "material", "performance"],
+      "properties": {
+        "runner_attestation": {
+          "type": "object",
+          "required": ["organization_id", "runner_id", "execution_location", "independent_from_local_gfx1030"],
+          "properties": {
+            "organization_id": {"type": "string", "minLength": 1},
+            "runner_id": {"type": "string", "minLength": 1},
+            "execution_location": {"type": "string", "minLength": 1},
+            "independent_from_local_gfx1030": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "hardware": {
+          "type": "object",
+          "required": ["backend", "device_name", "gcn_arch_name", "executed_binary_sha256", "dual_target_binary_sha256", "wheel_sha256"],
+          "properties": {
+            "gcn_arch_name": {"enum": ["gfx1030", "gfx1100"]}
+          },
+          "additionalProperties": true
+        },
+        "terminal": {
+          "type": "object",
+          "required": ["equation_count", "load_factor", "krylov_iterations", "matvec_count", "preconditioner_apply_count", "accepted_alpha", "physical_residual_inf_n", "accepted_nonlinear_residual_inf_n", "checkpoint_sha256"],
+          "properties": {
+            "equation_count": {"const": 70560},
+            "load_factor": {"const": 1.0},
+            "krylov_iterations": {"const": 6},
+            "matvec_count": {"const": 7},
+            "preconditioner_apply_count": {"const": 6},
+            "accepted_alpha": {"const": 1.0}
+          },
+          "additionalProperties": true
+        },
+        "material": {
+          "type": "object",
+          "required": ["integration_point_count", "field_names", "family_fixture", "rollback_state_bitwise_exact", "committed_bundle_hash"],
+          "properties": {
+            "integration_point_count": {"const": 5572},
+            "rollback_state_bitwise_exact": {"const": true}
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "signature": {
+      "type": "object",
+      "required": ["state", "algorithm", "signer_id", "public_key_spki_base64", "public_key_sha256", "signature_base64", "signed_payload_hash"],
+      "properties": {
+        "state": {"enum": ["unsigned", "verified"]},
+        "signed_payload_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    },
+    "claims": {"type": "object"},
+    "blockers_remaining": {"type": "array", "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "additionalProperties": false
+}

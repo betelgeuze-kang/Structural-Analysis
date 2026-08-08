@@ -398,14 +398,24 @@ def _material_bundles(*, context: dict[str, Any], initial: np.ndarray,
 
 def _compile_run(root: Path, sparse: Any, tangent: Any, material_fixture_raw: bytes,
                  reference_force_n: float,
-                 hipcc: str, rocm_path: str, device_lib_path: str, timeout: float) -> dict[str, Any]:
+                 hipcc: str, rocm_path: str, device_lib_path: str, timeout: float,
+                 expected_architecture: str) -> dict[str, Any]:
     compiler = _resolve_hipcc(hipcc); libs = _resolve_device_lib_path(root, device_lib_path)
     architecture = _detect_architecture(root, "rocminfo")
-    if architecture != "gfx1030": raise RuntimeError("device_fgmres_requires_local_gfx1030")
+    if expected_architecture not in {"gfx1030", "gfx1100"}:
+        raise ValueError("device_fgmres_expected_architecture_invalid")
+    if architecture != expected_architecture:
+        raise RuntimeError(
+            "device_fgmres_architecture_mismatch:"
+            f"expected={expected_architecture}:observed={architecture}"
+        )
     with tempfile.TemporaryDirectory(prefix="g1-mgt-device-fgmres-") as raw:
         temp = Path(raw); sp = temp / "sparse.bin"; tp = temp / "tangent.bin"
         mp = temp / "material-family.bin"
-        binary = temp / "fgmres"; cross = temp / "fgmres-gfx1100"
+        binaries = {
+            "gfx1030": temp / "fgmres-gfx1030",
+            "gfx1100": temp / "fgmres-gfx1100",
+        }
         solution = temp / "solution.bin"; residual = temp / "residual.bin"
         accepted_state = temp / "accepted-state.bin"; nonlinear_residual = temp / "nonlinear-residual.bin"
         initial_material = temp / "initial-material.bin"
@@ -416,9 +426,10 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, material_fixture_raw: by
         mp.write_bytes(material_fixture_raw)
         base = [str(compiler), f"--rocm-path={rocm_path}", f"--rocm-device-lib-path={libs}"]
         tail = [str(root / SOURCE), "-O2", "-Werror", "-ffp-contract=off", "-std=c++17"]
-        for arch, output in (("gfx1030", binary), ("gfx1100", cross)):
+        for arch, output in binaries.items():
             built = _run([*base, f"--offload-arch={arch}", *tail, "-o", str(output)], cwd=root, timeout=180)
             if built.returncode: raise RuntimeError(f"device_fgmres_{arch}_compile_failed:" + built.stderr[-1000:])
+        binary = binaries[expected_architecture]
         executed = _run([str(binary), str(sp), str(tp), str(mp), repr(reference_force_n),
                          str(solution), str(residual), str(accepted_state), str(nonlinear_residual),
                          str(initial_material), str(committed_material),
@@ -435,7 +446,9 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, material_fixture_raw: by
                 "rejected_material": np.fromfile(rejected_material, dtype="<f8"),
                 "rollback_material": np.fromfile(rollback_material, dtype="<f8"),
                 "binary_sha256": file_sha256(binary), "binary_byte_length": binary.stat().st_size,
-                "gfx1100_cross_binary_sha256": file_sha256(cross),
+                "dual_target_binary_sha256": {
+                    arch: file_sha256(path) for arch, path in binaries.items()
+                },
                 "compiler_version": _run([str(compiler), "--version"], cwd=root, timeout=30).stdout.splitlines()[0]}
 
 
@@ -514,7 +527,8 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
         rejected_material_out: Path = DEFAULT_REJECTED_MATERIAL,
         rollback_material_out: Path = DEFAULT_ROLLBACK_MATERIAL,
         hipcc: str = "/opt/rocm-6.0.2/bin/hipcc",
-        rocm_path: str = "/opt/rocm-6.0.2", device_lib_path: str = "", timeout: float = 600
+        rocm_path: str = "/opt/rocm-6.0.2", device_lib_path: str = "", timeout: float = 600,
+        expected_architecture: str = "gfx1030",
         ) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes, bytes, bytes, bytes, bytes, bytes]:
     root = root.resolve()
     if not _clean(root): raise RuntimeError("device_fgmres_requires_clean_source_paths")
@@ -526,7 +540,8 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     reference_force_n = max(1.0, float(np.max(np.abs(reference_load_kn))) * 1000.0)
     execution = _compile_run(root, sparse, tangent.fixture, family_fixture_raw,
                              reference_force_n,
-                             hipcc, rocm_path, device_lib_path, timeout)
+                             hipcc, rocm_path, device_lib_path, timeout,
+                             expected_architecture)
     cpu_baseline = _cpu_baseline(
         sparse=sparse, context=context, reference_force_n=reference_force_n)
     runtime = execution["runtime"]; solution = execution["solution"]; residual = execution["residual"]
@@ -599,7 +614,7 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
         and material_bundles["committed_solver_state_hash"]
         == _mgt_state_hash(context=context, state=accepted_state)
     )
-    contract = bool(runtime["status"] == "ok" and runtime["gcn_arch_name"] == "gfx1030"
+    contract = bool(runtime["status"] == "ok" and runtime["gcn_arch_name"] == expected_architecture
                     and runtime["krylov_iterations"] == 6 and runtime["preconditioner_apply_count"] == 6
                     and runtime["matvec_count"] == 7 and runtime["mid_iteration_d2h_transfer_count"] == 0
                     and runtime["physical_residual_inf_n"] <= 1.0e-9 and replay_error <= 1.0e-18
@@ -632,14 +647,18 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     payload = {
         "schema_version": VERSION, "receipt_hash": "sha256:" + "0" * 64,
         "generated_at": datetime.now(timezone.utc).isoformat(), "status": "partial", "contract_pass": True,
-        "contract_scope": "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_local_gfx1030",
+        "contract_scope": (
+            "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_"
+            + expected_architecture
+        ),
         "source": {"repository_commit_sha": git_head(root), "source_paths_clean_at_execution": True,
                    "input_checksums": input_checksums(SOURCE_PATHS, repo_root=root), "engine_version": engine_version(root)},
         "runtime": {"backend": "amd_rocm_hip", "device_name": runtime["device_name"],
                     "gcn_arch_name": runtime["gcn_arch_name"], "device_nodes": ["/dev/kfd", "/dev/dri/renderD128"],
                     "compiler_version": execution["compiler_version"], "binary_sha256": execution["binary_sha256"],
                     "binary_byte_length": execution["binary_byte_length"],
-                    "gfx1100_cross_compile_binary_sha256": execution["gfx1100_cross_binary_sha256"],
+                    "executed_architecture": expected_architecture,
+                    "dual_target_binary_sha256": execution["dual_target_binary_sha256"],
                     "wheel_sha256": file_sha256(root / WHEEL)},
         "accepted_state": {"checkpoint": DEFAULT_CHECKPOINT.as_posix(), "checkpoint_sha256": file_sha256(root / DEFAULT_CHECKPOINT),
                            "load_factor": 1.0, "equation_count": N, "state_data_hash": array_data_hash(context["state"]),
@@ -690,7 +709,10 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                    "newton_update_on_device": True, "physical_line_search_on_device": True,
                    "nonlinear_convergence_gate_on_device": True,
                    "checkpoint_emitted": True, "exact_restart": True,
-                   "gfx1100_cross_compile": True, "independent_gfx1100_run": False,
+                   "dual_target_cross_compile": True,
+                   "actual_gfx1030_hardware": expected_architecture == "gfx1030",
+                   "actual_gfx1100_hardware": expected_architecture == "gfx1100",
+                   "independent_gfx1100_run": False,
                    "material_commit_rollback": True,
                    "actual_mgt_elastic_material_state_bundle": True,
                    "actual_mgt_material_family_fixture_device_bound": True,
@@ -701,7 +723,23 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                                "source_authoritative_nonlinear_material_parameters_unavailable",
                                "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp",
                                "resultir_diagnosticir_not_established"],
-        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture uploads and consumes the exact 5,572-element MGT family order, source primary/secondary elastic moduli, and finite-chord material state during initial, accepted, and rejected trials, followed by exact rollback and MaterialStateBundle binding. This is source-authoritative family-buffer connectivity, not nonlinear constitutive breadth: source-authoritative hardening, damage/softening, and SRC fraction parameters are unavailable and nonlinear laws are not connected to residual/JVP. ResultIR, DiagnosticIR, independent gfx1100 hardware, and G1 closure remain unclaimed."
+        "claim_boundary": (
+            "Actual 70,560-equation accepted-state right-preconditioned FGMRES "
+            "executes six two-pass-MGS Arnoldi iterations, device Givens rotations "
+            "and backsolve, finite-chord physical-residual line-search candidates, "
+            "accepted-state update, and a nonlinear convergence gate in one "
+            f"{expected_architecture} lifecycle with zero iteration-time D2H. The "
+            "same resident fixture uploads and consumes the exact 5,572-element MGT "
+            "family order, source primary/secondary elastic moduli, and finite-chord "
+            "material state during initial, accepted, and rejected trials, followed "
+            "by exact rollback and MaterialStateBundle binding. This is "
+            "source-authoritative family-buffer connectivity, not nonlinear "
+            "constitutive breadth: source-authoritative hardening, damage/softening, "
+            "and SRC fraction parameters are unavailable and nonlinear laws are not "
+            "connected to residual/JVP. A single receipt does not establish runner "
+            "independence or a signed cross-device pair. ResultIR, DiagnosticIR, "
+            "independent gfx1100 hardware, and G1 closure remain unclaimed."
+        )
     }
     payload["receipt_hash"] = _hash(payload); validate(payload, root=root, current=True)
     return (payload, solution_raw, residual_raw, accepted_state_raw,
@@ -755,11 +793,32 @@ def check(*, root: Path = ROOT, out: Path = DEFAULT_OUT) -> tuple[bool, str]:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("--check", action="store_true")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--expected-architecture",
+        choices=("gfx1030", "gfx1100"),
+        default="gfx1030",
+    )
+    parser.add_argument("--hipcc", default="/opt/rocm-6.0.2/bin/hipcc")
+    parser.add_argument("--rocm-path", default="/opt/rocm-6.0.2")
+    parser.add_argument("--device-lib-path", default="")
+    parser.add_argument("--timeout", type=float, default=600.0)
     args = parser.parse_args(argv)
     if args.check:
-        passed, reason = check(); print(reason); return 0 if passed else 1
-    payload = write(); runmeta = payload["hardware_execution"]
+        passed, reason = check(out=args.out)
+        print(reason)
+        return 0 if passed else 1
+    payload = write(
+        out=args.out,
+        expected_architecture=args.expected_architecture,
+        hipcc=args.hipcc,
+        rocm_path=args.rocm_path,
+        device_lib_path=args.device_lib_path,
+        timeout=args.timeout,
+    )
+    runmeta = payload["hardware_execution"]
     print(f"partial | fgmres={runmeta['krylov_iterations']} | residual_inf_n={runmeta['physical_residual_inf_n']:.3e} | mid_d2h=0")
     return 0
 
