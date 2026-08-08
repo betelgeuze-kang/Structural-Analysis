@@ -87,7 +87,7 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-07-28T06:44:59.236628+00:00",
+  "generated_at": "2026-08-08T10:04:02.044540+00:00",
   "hardware_execution": {
     "action_artifact": {
       "byte_length": 564480,
@@ -166,10 +166,10 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:59be72636cb4e6ca43f96b28d14eab811ce3e093fd021c4c219e4d6021c49990",
+  "receipt_hash": "sha256:86047bf430b44770b4f84514f93e5c25585e27e12bc124cdc29305e5992858e7",
   "schema_version": "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "937a2596c53bd995575fcf9a76c15ab2eb192e96",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }
