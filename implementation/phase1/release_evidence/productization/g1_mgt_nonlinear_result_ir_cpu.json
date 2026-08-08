@@ -1,0 +1,77 @@
+{
+  "authority": {
+    "code_compliance": "not_authoritative",
+    "commercial_use": "not_authoritative",
+    "convergence": "authoritative",
+    "displacement": "authoritative",
+    "engineering_design": "not_authoritative",
+    "integration_point_engineering_output": "not_evaluated",
+    "material_state": "authoritative",
+    "member_force": "not_evaluated",
+    "numerical_state": "authoritative",
+    "reaction": "not_evaluated",
+    "release_readiness": "not_authoritative"
+  },
+  "authority_profile": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1",
+  "backend": {
+    "receipt_hash": "sha256:d5edffa88b83b72054b6df74a4bd644c4452250041ce24e48bd9c36fbc569fa6",
+    "role": "cpu_optimized"
+  },
+  "bindings": {
+    "boundary_condition_receipt_hash": "sha256:d899ce9fa22be0c761c8d0907d0e5aea2e5cecdee48a784d0e3c7ce6e3b63e40",
+    "equation_scaling_hash": "sha256:d222e083ab131565daf15f739a02eec7381ce39992838d91e48ed9b01a4b188c",
+    "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+    "full_residual_receipt_hash": "sha256:4b1645650ff7464be0644547ea7f1bc222def0737900bb3ee688f3886c2e9e85",
+    "integration_point_order_hash": "sha256:3c10370a2b59f0600bdb3e952c0d4670499c3b309b97fe979abec22c3f53b8f2",
+    "material_state_bundle_hash": "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8",
+    "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "nonlinear_terminal_hash": "sha256:4643153f6bf8b181cdc44482f0294719e1d8fa5c3b326011d7e2f10aa95a306e",
+    "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "path_history_hash": "sha256:c47518bd045dc7f4885f7dfee5efd6abd68ad2dea88c8004ca564be673cf9c30",
+    "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
+    "state_epoch": 1,
+    "state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f"
+  },
+  "claim_boundary": {
+    "commercial_claim": false,
+    "committed_nonlinear_state": true,
+    "constitutive_law_verified": false,
+    "design_or_code_authority": false,
+    "equation_scaling_replay_bound": true,
+    "fallback_or_regularization_promoted": false,
+    "fiber_frame_kinematic_adapter_authority": true,
+    "integration_point_engineering_output_authority": false,
+    "material_state_history_replayed": false,
+    "member_force_authority": false,
+    "ordered_material_state_bundle": true,
+    "reaction_authority": false,
+    "reduced_csr_identity_bound": true,
+    "release_readiness": false,
+    "residual_and_increment_terminal_gate": true,
+    "source_free_solution_bytes_bound": true,
+    "viewer_projection": false
+  },
+  "displacement_artifact": {
+    "artifact_uri": "artifact://nonlinear-result/g1.mgt.cpu_optimized.terminal/c9a29f329a6a7935/74420cae8e68544c/displacement_global.f64le",
+    "byte_length": 626256,
+    "byte_order": "little",
+    "content_hash": "sha256:546a9e738904d6ba7148ca69c06b6b8303c6ebc23e0b5d4e8aaadf66561fc1e8",
+    "data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+    "dtype": "<f8",
+    "layout": "C",
+    "name": "displacement_global_si",
+    "shape": [
+      78282
+    ],
+    "storage_profile": "canonical_little_endian_fp64_binary.v1",
+    "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+  },
+  "dof_count": 78282,
+  "extensions": {},
+  "load_factor": 1.0,
+  "result_hash": "sha256:18a2f3b2e65f1056c73577416a1fe9b55cafe73afa3ac10c5fc8fd09a82d1804",
+  "result_id": "g1.mgt.cpu_optimized.terminal",
+  "result_kind": "nonlinear_static_numerical_state",
+  "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",
+  "time_s": 0.0
+}

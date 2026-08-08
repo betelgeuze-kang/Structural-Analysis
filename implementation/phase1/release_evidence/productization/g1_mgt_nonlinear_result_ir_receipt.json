@@ -1,0 +1,85 @@
+{
+  "artifacts": {
+    "cpu_result": {
+      "byte_length": 3773,
+      "file_sha256": "sha256:91014453b3e002baa47bb2b2c3600a7036f10f368d000a20d7b73112b5e91a56",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_nonlinear_result_ir_cpu.json"
+    },
+    "displacement": {
+      "byte_length": 626256,
+      "data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+      "file_sha256": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_nonlinear_result_ir_displacement.f64le"
+    },
+    "hip_result": {
+      "byte_length": 3743,
+      "file_sha256": "sha256:eb2a1c20317d4f0aba094976a50732b46fcc7588a6e068350daa8341c79833b2",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_nonlinear_result_ir_hip.json"
+    }
+  },
+  "blockers_remaining": [
+    "diagnosticir_requires_actual_execution_plan_adapter",
+    "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
+    "independent_gfx1100_hardware_run_not_available"
+  ],
+  "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. It does not fabricate a generic ExecutionPlan-backed DiagnosticIR, connect nonlinear material-family breadth, prove independent gfx1100 hardware, or close G1.",
+  "claims": {
+    "authoritative_nonlinear_resultir_emitted": true,
+    "diagnosticir_emitted": false,
+    "g1_closure": false,
+    "independent_gfx1100_run": false,
+    "terminal_resultir_parity": true
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-08T14:15:38.304011+00:00",
+  "parity": {
+    "cpu_result_hash": "sha256:18a2f3b2e65f1056c73577416a1fe9b55cafe73afa3ac10c5fc8fd09a82d1804",
+    "displacement_data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+    "hip_result_hash": "sha256:9e8efc2fc39afbadfe20572eacc0a937798b447315d9296729caea448d60fefc",
+    "shared_binding_keys": [
+      "model_ir_content_hash",
+      "execution_plan_hash",
+      "equation_scaling_hash",
+      "reduced_csr_identity_hash",
+      "operator_hash",
+      "state_hash",
+      "state_epoch",
+      "material_state_bundle_hash",
+      "integration_point_order_hash",
+      "path_history_hash",
+      "nonlinear_terminal_hash"
+    ],
+    "terminal_resultir_parity": true
+  },
+  "receipt_hash": "sha256:0713df4ec9db107c2b17fa9036bd41b082dae68c8fa521b7566ba40fc159be6a",
+  "schema_version": "g1-mgt-nonlinear-result-ir-receipt.v1",
+  "source": {
+    "fgmres_receipt_hash": "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952",
+    "input_checksums": {
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_accepted_state.f64le": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_committed_material.f64le": "sha256:5b530763a765d6c4b517aa43ea7efb78ee1fa6bdac34ee7c98f9fe6f89972436",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_initial_material.f64le": "sha256:228dbef620197e46421ada173437b2900b61b1cb55c77a16b58ad322514900e4",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_receipt.json": "sha256:90a45eb652eacf9e38ce1c32431e546f10a9827004531dbda10877e9a2728b38",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_rejected_material.f64le": "sha256:d8d77299c458bd14b24b4979290b75b739833b3d2eb7f3eadee986be8f2593c2",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_solution.f64le": "sha256:36027f03d1493f771db20c0855e891a36d4ebf4dc2cb92b7dfd163ada392b1f5",
+      "scripts/build_g1_mgt_nonlinear_result_ir.py": "sha256:3bd8945b601956b6290f33c5f3fbef39ccc2ee594552a28552d13077bc843f84",
+      "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
+      "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
+      "src/structural_analysis/schemas/g1_mgt_nonlinear_result_ir_v1.schema.json": "sha256:382157e7e999688017065a357d971890c289f8a223473dcc9de2540f03ec694b",
+      "tests/test_build_g1_mgt_nonlinear_result_ir.py": "sha256:5acc50cf4495002b58e5ef8592744f0fe39c7ea9dbee31fc83c70faa474d9542"
+    },
+    "repository_commit_sha": "c4dece39bedcf7bfd776a2bcbd2ed157e14ce9e1",
+    "source_paths_clean_at_execution": true
+  },
+  "status": "partial",
+  "terminal": {
+    "cpu_residual_replay_inf_n": 6.440168363042176e-07,
+    "dof_count": 78282,
+    "free_equation_count": 70560,
+    "load_factor": 1.0,
+    "material_entry_count": 5572,
+    "material_state_bundle_hash": "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8",
+    "nonlinear_terminal_hash": "sha256:4643153f6bf8b181cdc44482f0294719e1d8fa5c3b326011d7e2f10aa95a306e",
+    "residual_tolerance_n": 1e-06
+  }
+}
