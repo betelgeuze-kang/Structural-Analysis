@@ -1,0 +1,108 @@
+{
+  "authority": {
+    "code_compliance": "not_authoritative",
+    "commercial_use": "not_authoritative",
+    "convergence": "not_authoritative",
+    "displacement": "not_authoritative",
+    "engineering_design": "not_authoritative",
+    "member_force": "not_authoritative",
+    "numerical_state": "not_authoritative",
+    "reaction": "not_authoritative",
+    "release_readiness": "not_authoritative"
+  },
+  "authority_profile": "non_authoritative_stable_observation.v1",
+  "bindings": {
+    "equation_scaling_hash": "sha256:d222e083ab131565daf15f739a02eec7381ce39992838d91e48ed9b01a4b188c",
+    "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+    "load_pattern_id": "MGT.LIVE",
+    "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
+    "state_epoch": 1,
+    "state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f"
+  },
+  "claim_boundary": {
+    "commercial_claim": false,
+    "description": "Stable sanitized observations only; diagnostics cannot become solver, engineering-result, readiness, or commercial authority.",
+    "engineering_result_authority": false,
+    "fallback_promoted": false,
+    "numerical_result_authority": false,
+    "raw_exception_or_payload_included": false,
+    "release_readiness": false,
+    "solver_convergence_authority": false,
+    "stable_code_path_only": true
+  },
+  "diagnostic_hash": "sha256:f4f6c75e357eebfe4c3b23cb61892bda5f2cc4114d2ca2bfb789f0c435171014",
+  "diagnostic_id": "diagnostic.g1.mgt.hip.terminal",
+  "entries": [
+    {
+      "code": "actual_gfx1030_execution_observed",
+      "disposition": "observed",
+      "evidence_hashes": [
+        "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952"
+      ],
+      "occurrence_count": 1,
+      "path": "/runtime/gfx1030",
+      "severity": "info"
+    },
+    {
+      "code": "fallback_and_regularization_zero",
+      "disposition": "observed",
+      "evidence_hashes": [
+        "sha256:4643153f6bf8b181cdc44482f0294719e1d8fa5c3b326011d7e2f10aa95a306e"
+      ],
+      "occurrence_count": 1,
+      "path": "/terminal/fallback",
+      "severity": "info"
+    },
+    {
+      "code": "independent_gfx1100_execution_unavailable",
+      "disposition": "unsupported",
+      "evidence_hashes": [
+        "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952"
+      ],
+      "occurrence_count": 1,
+      "path": "/runtime/gfx1100",
+      "severity": "warning"
+    },
+    {
+      "code": "mid_step_d2h_zero",
+      "disposition": "observed",
+      "evidence_hashes": [
+        "sha256:03930edea06f54f7b3caf60f0d1c19249726a7cf7532bfe72721476e3742c75a"
+      ],
+      "occurrence_count": 1,
+      "path": "/runtime/transfers/mid_step_d2h",
+      "severity": "info"
+    },
+    {
+      "code": "nonlinear_material_family_breadth_unavailable",
+      "disposition": "unsupported",
+      "evidence_hashes": [
+        "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8"
+      ],
+      "occurrence_count": 1,
+      "path": "/material/nonlinear_family_breadth",
+      "severity": "warning"
+    }
+  ],
+  "extensions": {},
+  "schema_version": "structural-analysis-diagnostic-ir.v1",
+  "source": {
+    "authority_profile": "backend_probe",
+    "backend_receipt_hash": "sha256:03930edea06f54f7b3caf60f0d1c19249726a7cf7532bfe72721476e3742c75a",
+    "receipt_hash": "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952",
+    "receipt_schema_version": "g1-mgt-device-fgmres-receipt.v1"
+  },
+  "status": "partial",
+  "summary": {
+    "entry_count": 5,
+    "error_count": 0,
+    "failed_count": 0,
+    "fallback_count": 0,
+    "info_count": 3,
+    "partial_count": 0,
+    "unsupported_count": 2,
+    "warning_count": 2
+  }
+}
