@@ -23,6 +23,18 @@ def test_receipt_keeps_remaining_hardware_and_nonlinear_boundaries_visible() -> 
     assert payload["claims"]["checkpoint_emitted"] is True
     assert payload["claims"]["exact_restart"] is True
     assert payload["claims"]["independent_gfx1100_run"] is False
-    assert payload["claims"]["material_commit_rollback"] is False
+    assert payload["claims"]["material_commit_rollback"] is True
+    assert payload["claims"]["actual_mgt_elastic_material_state_bundle"] is True
+    assert payload["claims"]["nonlinear_material_family_breadth"] is False
+    lifecycle = payload["material_lifecycle"]
+    assert lifecycle["integration_point_count"] == 5_572
+    assert lifecycle["trial_count"] == 2
+    assert lifecycle["commit_count"] == 1
+    assert lifecycle["rollback_count"] == 1
+    assert lifecycle["mid_lifecycle_d2h_transfer_count"] == 0
+    assert lifecycle["rollback_state_bitwise_exact"] is True
+    assert lifecycle["material_state_bundle"]["entry_count"] == 5_572
+    assert lifecycle["material_state_bundle"]["committed_epoch"] == 1
+    assert lifecycle["material_state_bundle"]["rollback_returns_exact_accepted_object"] is True
     assert payload["claims"]["resultir_diagnosticir"] is False
     assert payload["claims"]["g1_closure"] is False

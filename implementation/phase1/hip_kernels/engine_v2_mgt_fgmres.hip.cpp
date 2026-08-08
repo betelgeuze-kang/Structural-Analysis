@@ -26,6 +26,7 @@ namespace {
 constexpr int kBlockSize = 256;
 constexpr int kRestart = 6;
 constexpr int kLineSearchCandidates = 5;
+constexpr int kMaterialStateFieldCount = 6;
 constexpr const char* kOutputVersion = "engine-v2-mgt-fgmres-output.v1";
 
 void check_hip(hipError_t status, const char* where) {
@@ -316,6 +317,59 @@ __global__ void accept_candidate_kernel(
   }
 }
 
+__global__ void finite_chord_elastic_material_state_kernel(
+    composition::tangent_component::DeviceFixture fixture,
+    std::int64_t element_count, const double* free_state,
+    double* material_state) {
+  const std::int64_t element =
+      static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (element >= element_count) return;
+  double relative[3] = {0.0, 0.0, 0.0};
+  for (std::int64_t axis = 0; axis < 3; ++axis) {
+    for (std::int64_t local = 0; local < 12; ++local) {
+      const std::size_t index =
+          (static_cast<std::size_t>(element) * 3U + axis) * 12U + local;
+      const std::int64_t global_dof = fixture.geometry_dofs[
+          static_cast<std::size_t>(element) * 12U + local];
+      relative[axis] += fixture.geometry_relative[index] *
+                        state_value_from(fixture, free_state, global_dof);
+    }
+  }
+  const double reference_length = fixture.geometry_reference_lengths[element];
+  double current_length_squared = 0.0;
+  double linear_extension = 0.0;
+  double relative_squared = 0.0;
+  for (std::int64_t axis = 0; axis < 3; ++axis) {
+    const double reference_chord = fixture.geometry_reference_chords[
+        static_cast<std::size_t>(element) * 3U + axis];
+    const double current_chord = reference_chord + relative[axis];
+    current_length_squared += current_chord * current_chord;
+    linear_extension += reference_chord / reference_length * relative[axis];
+    relative_squared += relative[axis] * relative[axis];
+  }
+  const double current_length = sqrt(current_length_squared);
+  const double extension =
+      (2.0 * reference_length * linear_extension + relative_squared) /
+      (current_length + reference_length);
+  const double axial_stiffness = fixture.geometry_axial_stiffness[element];
+  double* state = material_state +
+      static_cast<std::size_t>(element) * kMaterialStateFieldCount;
+  state[0] = reference_length;
+  state[1] = current_length;
+  state[2] = extension;
+  state[3] = extension / reference_length;
+  state[4] = axial_stiffness * extension;
+  state[5] = axial_stiffness;
+}
+
+__global__ void material_state_copy_kernel(std::int64_t value_count,
+                                           const double* source,
+                                           double* target) {
+  const std::int64_t index =
+      static_cast<std::int64_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (index < value_count) target[index] = source[index];
+}
+
 template <typename T>
 T* allocate(std::size_t count, std::uint64_t* bytes) {
   T* result = nullptr;
@@ -335,9 +389,11 @@ void write_vector(const char* path, const std::vector<double>& values) {
 
 int main(int argc, char** argv) {
   try {
-    if (argc != 8) throw std::runtime_error(
+    if (argc != 12) throw std::runtime_error(
         "usage:fgmres sparse.bin tangent.bin reference_force_n solution.bin "
-        "linear_residual.bin accepted_state.bin nonlinear_residual.bin");
+        "linear_residual.bin accepted_state.bin nonlinear_residual.bin "
+        "initial_material.bin committed_material.bin rejected_material.bin "
+        "rollback_material.bin");
     const composition::SparseFixture sparse = composition::read_sparse_fixture(argv[1]);
     const composition::tangent_component::Fixture tangent = composition::tangent_component::read_fixture(argv[2]);
     const double reference_force_n = std::stod(argv[3]);
@@ -387,6 +443,7 @@ int main(int argc, char** argv) {
     double* d_candidate_inf = allocate<double>(kLineSearchCandidates, &allocated_bytes);
     double* d_accepted_state = allocate<double>(sparse.dimension, &allocated_bytes);
     double* d_accepted_residual = allocate<double>(sparse.dimension, &allocated_bytes);
+    double* d_followup_trial_state = allocate<double>(sparse.dimension, &allocated_bytes);
     int* d_selected = allocate<int>(1, &allocated_bytes);
     const std::vector<double> line_search_alphas = {
         1.0, 0.5, 0.25, 0.125, 0.0625};
@@ -403,9 +460,28 @@ int main(int argc, char** argv) {
       copy(tangent.geometry_incidence_pointer), copy(tangent.geometry_incidence_element), copy(tangent.geometry_incidence_local_dof),
       copy(tangent.free_displacements), nullptr};
 
+    const std::int64_t material_value_count =
+        static_cast<std::int64_t>(tangent.geometry_element_count) *
+        kMaterialStateFieldCount;
+    double* d_initial_material = allocate<double>(material_value_count, &allocated_bytes);
+    double* d_trial_material = allocate<double>(material_value_count, &allocated_bytes);
+    double* d_committed_material = allocate<double>(material_value_count, &allocated_bytes);
+    double* d_rejected_material = allocate<double>(material_value_count, &allocated_bytes);
+    double* d_rollback_material = allocate<double>(material_value_count, &allocated_bytes);
+
     const int grid = static_cast<int>((sparse.dimension + kBlockSize - 1) / kBlockSize);
     const int sparse_grid = static_cast<int>((sparse.dimension + 127) / 128);
+    const int material_grid = static_cast<int>(
+        (tangent.geometry_element_count + kBlockSize - 1) / kBlockSize);
+    const int material_value_grid = static_cast<int>(
+        (material_value_count + kBlockSize - 1) / kBlockSize);
     const std::size_t vector_bytes = static_cast<std::size_t>(sparse.dimension) * sizeof(double);
+    const std::size_t material_bytes =
+        static_cast<std::size_t>(material_value_count) * sizeof(double);
+    hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
+                       dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
+                       static_cast<std::int64_t>(tangent.geometry_element_count),
+                       dt.free_displacements, d_initial_material);
     check_hip(hipMemsetAsync(d_h, 0, (kRestart + 1) * kRestart * sizeof(double), stream), "memset_h");
     check_hip(hipMemsetAsync(d_g, 0, (kRestart + 1) * sizeof(double), stream), "memset_g");
     hipLaunchKernelGGL(initialize_basis_kernel, dim3(1), dim3(1), 0, stream, sparse.dimension,
@@ -495,9 +571,32 @@ int main(int argc, char** argv) {
                        d_selected, d_accepted_residual, d_accepted_state);
     vector_kernels += 2;
 
+    hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
+                       dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
+                       static_cast<std::int64_t>(tangent.geometry_element_count),
+                       d_accepted_state, d_trial_material);
+    hipLaunchKernelGGL(material_state_copy_kernel, dim3(material_value_grid),
+                       dim3(kBlockSize), 0, stream, material_value_count,
+                       d_trial_material, d_committed_material);
+    hipLaunchKernelGGL(trial_state_kernel, dim3(grid), dim3(kBlockSize), 0,
+                       stream, sparse.dimension, d_accepted_state, d_solution,
+                       0.5, d_followup_trial_state);
+    hipLaunchKernelGGL(finite_chord_elastic_material_state_kernel,
+                       dim3(material_grid), dim3(kBlockSize), 0, stream, dt,
+                       static_cast<std::int64_t>(tangent.geometry_element_count),
+                       d_followup_trial_state, d_rejected_material);
+    hipLaunchKernelGGL(material_state_copy_kernel, dim3(material_value_grid),
+                       dim3(kBlockSize), 0, stream, material_value_count,
+                       d_committed_material, d_rollback_material);
+    const std::int64_t material_kernel_invocations = 6;
+
     std::vector<double> solution(sparse.dimension), residual(sparse.dimension), history(kRestart), metrics(4);
     std::vector<double> accepted_state(sparse.dimension), accepted_residual(sparse.dimension);
     std::vector<double> candidate_l2(kLineSearchCandidates), candidate_inf(kLineSearchCandidates);
+    std::vector<double> initial_material(material_value_count);
+    std::vector<double> committed_material(material_value_count);
+    std::vector<double> rejected_material(material_value_count);
+    std::vector<double> rollback_material(material_value_count);
     int selected = -1;
     check_hip(hipMemcpyAsync(solution.data(), d_solution, vector_bytes, hipMemcpyDeviceToHost, stream), "solution_d2h");
     check_hip(hipMemcpyAsync(residual.data(), d_residual, vector_bytes, hipMemcpyDeviceToHost, stream), "residual_d2h");
@@ -515,11 +614,27 @@ int main(int argc, char** argv) {
                              hipMemcpyDeviceToHost, stream), "candidate_inf_d2h");
     check_hip(hipMemcpyAsync(&selected, d_selected, sizeof(int),
                              hipMemcpyDeviceToHost, stream), "selected_d2h");
+    check_hip(hipMemcpyAsync(initial_material.data(), d_initial_material,
+                             material_bytes, hipMemcpyDeviceToHost, stream),
+              "initial_material_d2h");
+    check_hip(hipMemcpyAsync(committed_material.data(), d_committed_material,
+                             material_bytes, hipMemcpyDeviceToHost, stream),
+              "committed_material_d2h");
+    check_hip(hipMemcpyAsync(rejected_material.data(), d_rejected_material,
+                             material_bytes, hipMemcpyDeviceToHost, stream),
+              "rejected_material_d2h");
+    check_hip(hipMemcpyAsync(rollback_material.data(), d_rollback_material,
+                             material_bytes, hipMemcpyDeviceToHost, stream),
+              "rollback_material_d2h");
     check_hip(hipStreamSynchronize(stream), "hipStreamSynchronize");
     const double wall_ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
     if (selected < 0) throw std::runtime_error("line_search_no_acceptable_candidate");
     write_vector(argv[4], solution); write_vector(argv[5], residual);
     write_vector(argv[6], accepted_state); write_vector(argv[7], accepted_residual);
+    write_vector(argv[8], initial_material);
+    write_vector(argv[9], committed_material);
+    write_vector(argv[10], rejected_material);
+    write_vector(argv[11], rollback_material);
     std::cout << std::setprecision(17) << "{\"schema_version\":\"" << kOutputVersion
       << "\",\"status\":\"ok\",\"cpu_backend\":false,\"device_name\":\""
       << composition::tangent_component::json_escape(properties.name) << "\",\"gcn_arch_name\":\""
@@ -528,9 +643,15 @@ int main(int argc, char** argv) {
       << ",\"preconditioner_apply_count\":" << kRestart << ",\"matvec_count\":" << kRestart + 1
       << ",\"sparse_kernel_invocation_count\":" << sparse_kernels
       << ",\"vector_kernel_invocation_count\":" << vector_kernels
-      << ",\"mid_iteration_d2h_transfer_count\":0,\"final_d2h_transfer_count\":9"
+      << ",\"material_kernel_invocation_count\":" << material_kernel_invocations
+      << ",\"material_integration_point_count\":" << tangent.geometry_element_count
+      << ",\"material_state_field_count\":" << kMaterialStateFieldCount
+      << ",\"material_trial_count\":2,\"material_commit_count\":1"
+      << ",\"material_rollback_count\":1"
+      << ",\"mid_iteration_d2h_transfer_count\":0,\"final_d2h_transfer_count\":13"
       << ",\"h2d_bytes\":" << h2d_bytes << ",\"d2h_bytes\":"
-      << 4 * vector_bytes + (kRestart + 4 + 2 * kLineSearchCandidates) * sizeof(double) + sizeof(int)
+      << 4 * vector_bytes + 4 * material_bytes +
+             (kRestart + 4 + 2 * kLineSearchCandidates) * sizeof(double) + sizeof(int)
       << ",\"tracked_peak_device_allocation_bytes\":" << allocated_bytes
       << ",\"reference_force_n\":" << reference_force_n
       << ",\"physical_residual_l2_n\":" << metrics[0] << ",\"physical_residual_inf_n\":" << metrics[1]

@@ -29,6 +29,13 @@ from run_engine_v2_hip_sparse_lu_apply import _detect_architecture, _resolve_dev
 from run_g1_mgt_accepted_state_hip_sparse_lu_parity import DEFAULT_CHECKPOINT, DEFAULT_MGT, WHEEL  # noqa: E402
 from run_g1_mgt_single_lifecycle_preconditioned_jvp import build_references  # noqa: E402
 from structural_analysis.engine_v2.contracts._canonical import array_data_hash, canonical_hash, sha256_prefixed  # noqa: E402
+from structural_analysis.engine_v2.contracts.material_state_bundle import (  # noqa: E402
+    MaterialStateInput,
+    commit_trial_material_state_bundle,
+    create_initial_material_state_bundle,
+    open_trial_material_state_bundle,
+    rollback_trial_material_state_bundle,
+)
 from structural_analysis.engine_v2_backends.hip_current_tangent_operator import create_hip_current_tangent_operator_fixture, create_hip_current_tangent_operator_reference  # noqa: E402
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -40,8 +47,16 @@ DEFAULT_RESIDUAL = PRODUCTIZATION / "g1_mgt_device_fgmres_residual.f64le"
 DEFAULT_ACCEPTED_STATE = PRODUCTIZATION / "g1_mgt_device_fgmres_accepted_state.f64le"
 DEFAULT_NONLINEAR_RESIDUAL = PRODUCTIZATION / "g1_mgt_device_fgmres_nonlinear_residual.f64le"
 DEFAULT_CHECKPOINT_OUT = PRODUCTIZATION / "g1_mgt_device_fgmres_checkpoint.npz"
+DEFAULT_INITIAL_MATERIAL = PRODUCTIZATION / "g1_mgt_device_fgmres_initial_material.f64le"
+DEFAULT_COMMITTED_MATERIAL = PRODUCTIZATION / "g1_mgt_device_fgmres_committed_material.f64le"
+DEFAULT_REJECTED_MATERIAL = PRODUCTIZATION / "g1_mgt_device_fgmres_rejected_material.f64le"
+DEFAULT_ROLLBACK_MATERIAL = PRODUCTIZATION / "g1_mgt_device_fgmres_rollback_material.f64le"
 VERSION = "g1-mgt-device-fgmres-receipt.v1"
 N = 70_560
+MATERIAL_STATE_FIELD_NAMES = (
+    "reference_length_m", "current_length_m", "extension_m",
+    "engineering_strain", "axial_force_n", "axial_stiffness_n_per_m",
+)
 SOURCE_PATHS = (
     DEFAULT_MGT, DEFAULT_CHECKPOINT, WHEEL, SOURCE,
     Path("implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp"),
@@ -50,6 +65,7 @@ SOURCE_PATHS = (
     Path("scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py"),
     Path("scripts/build_g1_mgt_full_load_checkpoint_bridge.py"),
     Path("scripts/run_g1_mgt_device_fgmres.py"), SCHEMA,
+    Path("src/structural_analysis/engine_v2/contracts/material_state_bundle.py"),
     Path("tests/test_run_g1_mgt_device_fgmres.py"),
 )
 
@@ -86,6 +102,28 @@ def _artifact(root: Path, path: Path, vector: np.ndarray) -> tuple[dict[str, Any
              "data_hash": array_data_hash(value)}, raw)
 
 
+def _material_artifact(root: Path, path: Path, values: np.ndarray) -> tuple[dict[str, Any], bytes]:
+    value = np.ascontiguousarray(values, dtype="<f8"); raw = value.tobytes()
+    return ({"path": _relative(root, path), "dtype": "<f8",
+             "shape": [int(value.shape[0]), int(value.shape[1])],
+             "field_names": list(MATERIAL_STATE_FIELD_NAMES),
+             "byte_length": len(raw), "file_sha256": sha256_prefixed(raw),
+             "data_hash": array_data_hash(value)}, raw)
+
+
+def _mgt_state_hash(*, context: dict[str, Any], state: np.ndarray) -> str:
+    operator = context["problem"].current_tangent_operator
+    free = np.asarray(operator.array("free_global_dofs"), dtype="<i8")
+    binding = context["problem"].exact_restart_binding()
+    return canonical_hash({
+        "schema_version": "g1-mgt-state-updated-frame-axial-full-load-checkpoint.v1",
+        "load_factor": 1.0,
+        "free_displacement_data_hash": array_data_hash(state),
+        "free_equation_order_data_hash": array_data_hash(free),
+        "equilibrium_operator_binding_hash": binding["equilibrium_operator_binding_hash"],
+    })
+
+
 def _checkpoint(root: Path, path: Path, *, context: dict[str, Any],
                 accepted_state: np.ndarray, nonlinear_residual_n: np.ndarray,
                 correction: np.ndarray) -> tuple[dict[str, Any], bytes]:
@@ -95,13 +133,7 @@ def _checkpoint(root: Path, path: Path, *, context: dict[str, Any],
         operator.array("background_global_displacements_m"), dtype="<f8", copy=True)
     global_state[free] = accepted_state
     binding = context["problem"].exact_restart_binding()
-    state_hash = canonical_hash({
-        "schema_version": "g1-mgt-state-updated-frame-axial-full-load-checkpoint.v1",
-        "load_factor": 1.0,
-        "free_displacement_data_hash": array_data_hash(accepted_state),
-        "free_equation_order_data_hash": array_data_hash(free),
-        "equilibrium_operator_binding_hash": binding["equilibrium_operator_binding_hash"],
-    })
+    state_hash = _mgt_state_hash(context=context, state=accepted_state)
     with np.load(root / DEFAULT_CHECKPOINT, allow_pickle=False) as seed:
         node_id = np.asarray(seed["node_id"], dtype="<i8")
     arrays = {
@@ -146,6 +178,98 @@ def _checkpoint(root: Path, path: Path, *, context: dict[str, Any],
              "equilibrium_operator_binding_hash": binding["equilibrium_operator_binding_hash"]}, raw)
 
 
+def _material_reference(*, context: dict[str, Any], free_state: np.ndarray) -> np.ndarray:
+    operator = context["problem"].current_tangent_operator
+    free = np.asarray(operator.array("free_global_dofs"), dtype=np.int64)
+    global_state = np.array(
+        operator.array("background_global_displacements_m"), dtype=np.float64, copy=True)
+    global_state[free] = np.asarray(free_state, dtype=np.float64)
+    dofs = np.asarray(operator.array("geometry_dofs"), dtype=np.int64)
+    relative_operator = np.asarray(
+        operator.array("geometry_relative_translation_operators"), dtype=np.float64)
+    reference_chords = np.asarray(
+        operator.array("geometry_reference_chords_m"), dtype=np.float64)
+    reference_lengths = np.asarray(
+        operator.array("geometry_reference_lengths_m"), dtype=np.float64)
+    axial = np.asarray(
+        operator.array("geometry_axial_stiffness_n_per_m"), dtype=np.float64)
+    gathered = global_state[dofs]
+    relative = np.einsum("eij,ej->ei", relative_operator, gathered, optimize=False)
+    current_chords = reference_chords + relative
+    current_lengths = np.sqrt(np.sum(current_chords * current_chords, axis=1))
+    reference_direction = reference_chords / reference_lengths[:, None]
+    linear_extension = np.sum(reference_direction * relative, axis=1)
+    relative_squared = np.sum(relative * relative, axis=1)
+    extension = (
+        2.0 * reference_lengths * linear_extension + relative_squared
+    ) / (current_lengths + reference_lengths)
+    return np.ascontiguousarray(np.column_stack((
+        reference_lengths, current_lengths, extension,
+        extension / reference_lengths, axial * extension, axial,
+    )), dtype="<f8")
+
+
+def _material_bundles(*, context: dict[str, Any], initial: np.ndarray,
+                      committed: np.ndarray, rejected: np.ndarray,
+                      accepted_state: np.ndarray,
+                      correction: np.ndarray) -> dict[str, Any]:
+    problem = context["problem"]
+    model_hash = problem.model_source_sha256
+    plan_hash = problem.equilibrium_operator_binding_hash
+    initial_state_hash = _mgt_state_hash(context=context, state=context["state"])
+    committed_state_hash = _mgt_state_hash(context=context, state=accepted_state)
+    rejected_state_hash = canonical_hash({
+        "profile": "g1-mgt-post-acceptance-material-trial-state.v1",
+        "accepted_state_hash": committed_state_hash,
+        "free_displacement_data_hash": array_data_hash(
+            np.ascontiguousarray(accepted_state + 0.5 * correction, dtype="<f8")),
+    })
+
+    def inputs(values: np.ndarray, parents: tuple[str, ...] | None) -> tuple[MaterialStateInput, ...]:
+        rows: list[MaterialStateInput] = []
+        for index, value in enumerate(values):
+            rows.append(MaterialStateInput(
+                entity_id=f"mgt.frame_geometry.{index:04d}",
+                integration_point_id="finite_chord_axial.ip0",
+                material_type_id="elastic_finite_chord_axial",
+                material_schema_version="elastic-finite-chord-axial-state.v1",
+                state_bytes=np.ascontiguousarray(value, dtype="<f8").tobytes(),
+                parent_state_data_hash=None if parents is None else parents[index],
+            ))
+        return tuple(rows)
+
+    parent = create_initial_material_state_bundle(
+        bundle_id="g1.mgt.elastic.initial", model_ir_content_hash=model_hash,
+        execution_plan_hash=plan_hash, solver_state_hash=initial_state_hash,
+        entries=inputs(initial, None))
+    trial = open_trial_material_state_bundle(
+        parent, solver_state_hash=committed_state_hash,
+        entries=inputs(committed, tuple(row.data_hash for row in parent.entries)),
+        bundle_id="g1.mgt.elastic.accepted_trial")
+    accepted = commit_trial_material_state_bundle(
+        parent, trial, solver_state_hash=committed_state_hash,
+        bundle_id="g1.mgt.elastic.committed")
+    rejected_trial = open_trial_material_state_bundle(
+        accepted, solver_state_hash=rejected_state_hash,
+        entries=inputs(rejected, tuple(row.data_hash for row in accepted.entries)),
+        bundle_id="g1.mgt.elastic.rejected_trial")
+    rolled_back = rollback_trial_material_state_bundle(accepted, rejected_trial)
+    return {
+        "model_ir_content_hash": model_hash,
+        "execution_plan_hash": plan_hash,
+        "initial_bundle_hash": parent.bundle_hash,
+        "accepted_trial_bundle_hash": trial.bundle_hash,
+        "committed_bundle_hash": accepted.bundle_hash,
+        "rejected_trial_bundle_hash": rejected_trial.bundle_hash,
+        "integration_point_order_hash": accepted.integration_point_order_hash,
+        "entry_count": accepted.entry_count,
+        "committed_epoch": accepted.epoch,
+        "rejected_trial_epoch": rejected_trial.epoch,
+        "committed_solver_state_hash": accepted.solver_state_hash,
+        "rollback_returns_exact_accepted_object": rolled_back is accepted,
+    }
+
+
 def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float,
                  hipcc: str, rocm_path: str, device_lib_path: str, timeout: float) -> dict[str, Any]:
     compiler = _resolve_hipcc(hipcc); libs = _resolve_device_lib_path(root, device_lib_path)
@@ -156,6 +280,10 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
         binary = temp / "fgmres"; cross = temp / "fgmres-gfx1100"
         solution = temp / "solution.bin"; residual = temp / "residual.bin"
         accepted_state = temp / "accepted-state.bin"; nonlinear_residual = temp / "nonlinear-residual.bin"
+        initial_material = temp / "initial-material.bin"
+        committed_material = temp / "committed-material.bin"
+        rejected_material = temp / "rejected-material.bin"
+        rollback_material = temp / "rollback-material.bin"
         sp.write_bytes(sparse.to_bytes()); tp.write_bytes(tangent.to_bytes())
         base = [str(compiler), f"--rocm-path={rocm_path}", f"--rocm-device-lib-path={libs}"]
         tail = [str(root / SOURCE), "-O2", "-Werror", "-ffp-contract=off", "-std=c++17"]
@@ -163,7 +291,9 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
             built = _run([*base, f"--offload-arch={arch}", *tail, "-o", str(output)], cwd=root, timeout=180)
             if built.returncode: raise RuntimeError(f"device_fgmres_{arch}_compile_failed:" + built.stderr[-1000:])
         executed = _run([str(binary), str(sp), str(tp), repr(reference_force_n),
-                         str(solution), str(residual), str(accepted_state), str(nonlinear_residual)],
+                         str(solution), str(residual), str(accepted_state), str(nonlinear_residual),
+                         str(initial_material), str(committed_material),
+                         str(rejected_material), str(rollback_material)],
                         cwd=root, timeout=timeout)
         if executed.returncode: raise RuntimeError("device_fgmres_execution_failed:" + executed.stderr[-1000:])
         runtime = json.loads(executed.stdout.strip().splitlines()[-1])
@@ -171,6 +301,10 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
                 "residual": np.fromfile(residual, dtype="<f8"),
                 "accepted_state": np.fromfile(accepted_state, dtype="<f8"),
                 "nonlinear_residual": np.fromfile(nonlinear_residual, dtype="<f8"),
+                "initial_material": np.fromfile(initial_material, dtype="<f8"),
+                "committed_material": np.fromfile(committed_material, dtype="<f8"),
+                "rejected_material": np.fromfile(rejected_material, dtype="<f8"),
+                "rollback_material": np.fromfile(rollback_material, dtype="<f8"),
                 "binary_sha256": file_sha256(binary), "binary_byte_length": binary.stat().st_size,
                 "gfx1100_cross_binary_sha256": file_sha256(cross),
                 "compiler_version": _run([str(compiler), "--version"], cwd=root, timeout=30).stdout.splitlines()[0]}
@@ -246,9 +380,13 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
         residual_out: Path = DEFAULT_RESIDUAL, accepted_state_out: Path = DEFAULT_ACCEPTED_STATE,
         nonlinear_residual_out: Path = DEFAULT_NONLINEAR_RESIDUAL,
         checkpoint_out: Path = DEFAULT_CHECKPOINT_OUT,
+        initial_material_out: Path = DEFAULT_INITIAL_MATERIAL,
+        committed_material_out: Path = DEFAULT_COMMITTED_MATERIAL,
+        rejected_material_out: Path = DEFAULT_REJECTED_MATERIAL,
+        rollback_material_out: Path = DEFAULT_ROLLBACK_MATERIAL,
         hipcc: str = "/opt/rocm-6.0.2/bin/hipcc",
         rocm_path: str = "/opt/rocm-6.0.2", device_lib_path: str = "", timeout: float = 600
-        ) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes, bytes]:
+        ) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes, bytes, bytes, bytes, bytes, bytes]:
     root = root.resolve()
     if not _clean(root): raise RuntimeError("device_fgmres_requires_clean_source_paths")
     sparse, _, tangent, context = build_references(root=root)
@@ -273,13 +411,53 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     nonlinear_replay_error = float(np.max(np.abs(
         nonlinear_residual - expected_nonlinear_residual)))
     nonlinear_parity_tolerance_n = 2.0e-6
+    material_count = int(runtime["material_integration_point_count"])
+    material_shape = (material_count, len(MATERIAL_STATE_FIELD_NAMES))
+    initial_material = execution["initial_material"].reshape(material_shape)
+    committed_material = execution["committed_material"].reshape(material_shape)
+    rejected_material = execution["rejected_material"].reshape(material_shape)
+    rollback_material = execution["rollback_material"].reshape(material_shape)
+    expected_material = (
+        _material_reference(context=context, free_state=context["state"]),
+        _material_reference(context=context, free_state=accepted_state),
+        _material_reference(
+            context=context, free_state=accepted_state + 0.5 * solution),
+    )
+    observed_material = (initial_material, committed_material, rejected_material)
+    material_field_max_abs_errors = [
+        float(max(np.max(np.abs(actual[:, field] - expected[:, field]))
+                  for actual, expected in zip(observed_material, expected_material, strict=True)))
+        for field in range(len(MATERIAL_STATE_FIELD_NAMES))
+    ]
+    material_max_scaled_error = float(max(
+        np.max(np.abs(actual - expected) / np.maximum(np.abs(expected), 1.0))
+        for actual, expected in zip(observed_material, expected_material, strict=True)))
+    material_tolerance = 2.0e-12
+    rollback_material_exact = bool(np.array_equal(rollback_material, committed_material))
+    material_bundles = _material_bundles(
+        context=context, initial=initial_material, committed=committed_material,
+        rejected=rejected_material, accepted_state=accepted_state,
+        correction=solution)
+    material_contract = bool(
+        material_count == context["problem"].current_tangent_operator.geometry_element_count
+        and runtime["material_state_field_count"] == len(MATERIAL_STATE_FIELD_NAMES)
+        and runtime["material_trial_count"] == 2
+        and runtime["material_commit_count"] == 1
+        and runtime["material_rollback_count"] == 1
+        and material_max_scaled_error <= material_tolerance
+        and rollback_material_exact
+        and material_bundles["rollback_returns_exact_accepted_object"] is True
+        and material_bundles["committed_solver_state_hash"]
+        == _mgt_state_hash(context=context, state=accepted_state)
+    )
     contract = bool(runtime["status"] == "ok" and runtime["gcn_arch_name"] == "gfx1030"
                     and runtime["krylov_iterations"] == 6 and runtime["preconditioner_apply_count"] == 6
                     and runtime["matvec_count"] == 7 and runtime["mid_iteration_d2h_transfer_count"] == 0
                     and runtime["physical_residual_inf_n"] <= 1.0e-9 and replay_error <= 1.0e-18
                     and runtime["accepted_alpha"] == 1.0
                     and runtime["accepted_nonlinear_residual_inf_n"] <= 5.0e-4
-                    and nonlinear_replay_error <= nonlinear_parity_tolerance_n)
+                    and nonlinear_replay_error <= nonlinear_parity_tolerance_n
+                    and material_contract)
     if not contract: raise RuntimeError("device_fgmres_contract_failed")
     solution_item, solution_raw = _artifact(root, solution_out, solution)
     residual_item, residual_raw = _artifact(root, residual_out, residual)
@@ -289,6 +467,14 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     checkpoint_item, checkpoint_raw = _checkpoint(
         root, checkpoint_out, context=context, accepted_state=accepted_state,
         nonlinear_residual_n=nonlinear_residual, correction=solution)
+    initial_material_item, initial_material_raw = _material_artifact(
+        root, initial_material_out, initial_material)
+    committed_material_item, committed_material_raw = _material_artifact(
+        root, committed_material_out, committed_material)
+    rejected_material_item, rejected_material_raw = _material_artifact(
+        root, rejected_material_out, rejected_material)
+    rollback_material_item, rollback_material_raw = _material_artifact(
+        root, rollback_material_out, rollback_material)
     scaling = {"schema_version": "equation-scaling-mgt-translation-free.v1",
                "reference_force_policy": "max_translation_or_equivalent_moment_with_floor.v1",
                "minimum_reference_force_n": 1.0, "reference_force_n": reference_force_n,
@@ -309,6 +495,28 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
         "accepted_state": {"checkpoint": DEFAULT_CHECKPOINT.as_posix(), "checkpoint_sha256": file_sha256(root / DEFAULT_CHECKPOINT),
                            "load_factor": 1.0, "equation_count": N, "state_data_hash": array_data_hash(context["state"]),
                            "right_hand_side_data_hash": array_data_hash(context["rhs_kn"])},
+        "material_lifecycle": {
+            "profile": "actual_mgt_finite_chord_elastic_frame_material_state.v1",
+            "integration_point_count": material_count,
+            "field_names": list(MATERIAL_STATE_FIELD_NAMES),
+            "trial_count": runtime["material_trial_count"],
+            "commit_count": runtime["material_commit_count"],
+            "rollback_count": runtime["material_rollback_count"],
+            "kernel_invocation_count": runtime["material_kernel_invocation_count"],
+            "mid_lifecycle_d2h_transfer_count": 0,
+            "cpu_hip_max_scaled_error": material_max_scaled_error,
+            "cpu_hip_scaled_error_tolerance": material_tolerance,
+            "field_max_abs_errors": dict(zip(
+                MATERIAL_STATE_FIELD_NAMES, material_field_max_abs_errors, strict=True)),
+            "rollback_state_bitwise_exact": rollback_material_exact,
+            "material_state_bundle": material_bundles,
+            "artifacts": {
+                "initial": initial_material_item,
+                "committed": committed_material_item,
+                "rejected_trial": rejected_material_item,
+                "rollback": rollback_material_item,
+            },
+        },
         "equation_scaling": scaling, "hardware_execution": runtime,
         "performance": {"cpu_baseline": cpu_baseline,
                         "gpu_device_lifecycle_wall_seconds": runtime["device_lifecycle_wall_time_ms"] / 1000.0,
@@ -333,16 +541,20 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                    "nonlinear_convergence_gate_on_device": True,
                    "checkpoint_emitted": True, "exact_restart": True,
                    "gfx1100_cross_compile": True, "independent_gfx1100_run": False,
-                   "material_commit_rollback": False, "resultir_diagnosticir": False,
+                   "material_commit_rollback": True,
+                   "actual_mgt_elastic_material_state_bundle": True,
+                   "nonlinear_material_family_breadth": False,
+                   "resultir_diagnosticir": False,
                    "g1_closure": False},
         "blockers_remaining": ["independent_gfx1100_hardware_run_not_available",
-                               "material_commit_rollback_not_established",
+                               "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
                                "resultir_diagnosticir_not_established"],
-        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The accepted state is emitted through the deterministic full-load checkpoint schema and exact-reloaded. gfx1100 is cross-compiled only; material commit/rollback, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed."
+        "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture executes finite-chord elastic material trial/commit and a post-acceptance rejected trial with exact rollback for all 5,572 actual MGT frame elements, and binds the committed bytes to MaterialStateBundle lineage. The accepted state is emitted through the deterministic full-load checkpoint schema and exact-reloaded. Nonlinear material-family breadth, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed."
     }
     payload["receipt_hash"] = _hash(payload); validate(payload, root=root, current=True)
     return (payload, solution_raw, residual_raw, accepted_state_raw,
-            nonlinear_residual_raw, checkpoint_raw)
+            nonlinear_residual_raw, checkpoint_raw, initial_material_raw,
+            committed_material_raw, rejected_material_raw, rollback_material_raw)
 
 
 def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = False, artifacts: bool = False) -> dict[str, Any]:
@@ -355,6 +567,10 @@ def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = Fals
             item = payload["comparison"][key]; path = _resolve(root, Path(item["path"]))
             if file_sha256(path) != item["file_sha256"] or path.stat().st_size != item["byte_length"]:
                 raise ValueError("device_fgmres_artifact_invalid")
+        for item in payload["material_lifecycle"]["artifacts"].values():
+            path = _resolve(root, Path(item["path"]))
+            if file_sha256(path) != item["file_sha256"] or path.stat().st_size != item["byte_length"]:
+                raise ValueError("device_fgmres_material_artifact_invalid")
     return payload
 
 
@@ -364,10 +580,18 @@ def write(**kwargs: Any) -> dict[str, Any]:
     accepted = Path(kwargs.get("accepted_state_out", DEFAULT_ACCEPTED_STATE))
     nonlinear = Path(kwargs.get("nonlinear_residual_out", DEFAULT_NONLINEAR_RESIDUAL))
     checkpoint = Path(kwargs.get("checkpoint_out", DEFAULT_CHECKPOINT_OUT))
-    payload, sr, rr, ar, nr, cr = run(**kwargs)
+    initial_material = Path(kwargs.get("initial_material_out", DEFAULT_INITIAL_MATERIAL))
+    committed_material = Path(kwargs.get("committed_material_out", DEFAULT_COMMITTED_MATERIAL))
+    rejected_material = Path(kwargs.get("rejected_material_out", DEFAULT_REJECTED_MATERIAL))
+    rollback_material = Path(kwargs.get("rollback_material_out", DEFAULT_ROLLBACK_MATERIAL))
+    payload, sr, rr, ar, nr, cr, imr, cmr, rmr, bmr = run(**kwargs)
     _resolve(root, solution).write_bytes(sr); _resolve(root, residual).write_bytes(rr)
     _resolve(root, accepted).write_bytes(ar); _resolve(root, nonlinear).write_bytes(nr)
     _resolve(root, checkpoint).write_bytes(cr)
+    _resolve(root, initial_material).write_bytes(imr)
+    _resolve(root, committed_material).write_bytes(cmr)
+    _resolve(root, rejected_material).write_bytes(rmr)
+    _resolve(root, rollback_material).write_bytes(bmr)
     _resolve(root, out).write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     return validate(payload, root=root, current=True, artifacts=True)
 
