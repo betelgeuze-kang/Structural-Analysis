@@ -40,12 +40,17 @@ from structural_analysis.engine_v2.contracts.nonlinear_result import (  # noqa: 
     create_nonlinear_terminal_receipt, validate_nonlinear_result_manifest,
     validate_nonlinear_terminal_receipt,
 )
+from structural_analysis.engine_v2.contracts.result_ir import (  # noqa: E402
+    DiagnosticIRSourceSnapshot, create_adapter_bound_diagnostic_ir,
+    create_diagnostic_entry, validate_diagnostic_ir_manifest,
+)
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "g1_mgt_nonlinear_result_ir_receipt.json"
 DEFAULT_HIP_RESULT = PRODUCTIZATION / "g1_mgt_nonlinear_result_ir_hip.json"
 DEFAULT_CPU_RESULT = PRODUCTIZATION / "g1_mgt_nonlinear_result_ir_cpu.json"
 DEFAULT_DISPLACEMENT = PRODUCTIZATION / "g1_mgt_nonlinear_result_ir_displacement.f64le"
+DEFAULT_DIAGNOSTIC = PRODUCTIZATION / "g1_mgt_diagnostic_ir.json"
 SCHEMA = Path("src/structural_analysis/schemas/g1_mgt_nonlinear_result_ir_v1.schema.json")
 VERSION = "g1-mgt-nonlinear-result-ir-receipt.v1"
 SOURCE_PATHS = (
@@ -53,6 +58,7 @@ SOURCE_PATHS = (
     DEFAULT_COMMITTED_MATERIAL, DEFAULT_REJECTED_MATERIAL,
     Path("scripts/build_g1_mgt_nonlinear_result_ir.py"), SCHEMA,
     Path("src/structural_analysis/engine_v2/contracts/nonlinear_result.py"),
+    Path("src/structural_analysis/engine_v2/contracts/result_ir.py"),
     Path("src/structural_analysis/engine_v2/contracts/material_state_bundle.py"),
     Path("tests/test_build_g1_mgt_nonlinear_result_ir.py"),
 )
@@ -135,7 +141,26 @@ class _Adapter:
         return self.snapshot
 
 
-def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
+@dataclass(frozen=True)
+class _DiagnosticAdapter:
+    snapshot: DiagnosticIRSourceSnapshot
+    source: dict[str, Any]
+    terminal: NonlinearTerminalReceipt
+
+    def validate_diagnostic_ir_source(self) -> DiagnosticIRSourceSnapshot:
+        validate_nonlinear_terminal_receipt(self.terminal)
+        claims = self.source["claims"]
+        if not (claims["production_size_fgmres"] and claims["mid_iteration_d2h_zero"]
+                and claims["material_commit_rollback"]):
+            raise ValueError("diagnostic_source_claims_invalid")
+        if self.terminal.fallback_count != 0 or self.terminal.regularization_count != 0:
+            raise ValueError("diagnostic_fallback_or_regularization_observed")
+        if self.snapshot.source_receipt_hash != self.source["receipt_hash"]:
+            raise ValueError("diagnostic_receipt_hash_mismatch")
+        return self.snapshot
+
+
+def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes]:
     root = root.resolve()
     if not _clean(root): raise RuntimeError("result_ir_requires_clean_sources")
     source = _read(root / FGMRES_RECEIPT)
@@ -221,6 +246,44 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
         result = create_adapter_bound_nonlinear_numerical_result_ir(
             result_id=f"g1.mgt.{role}.terminal", source_adapter=adapter)
         results[role] = result.to_manifest()
+    diagnostic_entries = tuple(sorted((
+        create_diagnostic_entry(
+            code="actual_gfx1030_execution_observed", path="/runtime/gfx1030",
+            severity="info", disposition="observed",
+            evidence_hashes=(source["receipt_hash"],)),
+        create_diagnostic_entry(
+            code="fallback_and_regularization_zero", path="/terminal/fallback",
+            severity="info", disposition="observed",
+            evidence_hashes=(terminal.terminal_hash,)),
+        create_diagnostic_entry(
+            code="mid_step_d2h_zero", path="/runtime/transfers/mid_step_d2h",
+            severity="info", disposition="observed",
+            evidence_hashes=(canonical_hash(source["hardware_execution"]),)),
+        create_diagnostic_entry(
+            code="nonlinear_material_family_breadth_unavailable",
+            path="/material/nonlinear_family_breadth", severity="warning",
+            disposition="unsupported", evidence_hashes=(bundle.bundle_hash,)),
+        create_diagnostic_entry(
+            code="independent_gfx1100_execution_unavailable",
+            path="/runtime/gfx1100", severity="warning", disposition="unsupported",
+            evidence_hashes=(source["receipt_hash"],)),
+    ), key=lambda row: (row.code, row.path, row.severity, row.disposition,
+                        row.occurrence_count, row.evidence_hashes)))
+    diagnostic_snapshot = DiagnosticIRSourceSnapshot(
+        model_ir_content_hash=common["model_ir_content_hash"],
+        execution_plan_hash=common["execution_plan_hash"],
+        operator_hash=common["operator_hash"], load_pattern_id="MGT.LIVE",
+        state_hash=common["state_hash"], state_epoch=common["state_epoch"],
+        equation_scaling_hash=common["equation_scaling_hash"],
+        reduced_csr_identity_hash=common["reduced_csr_identity_hash"],
+        source_authority_profile="backend_probe",
+        source_receipt_schema_version=source["schema_version"],
+        source_receipt_hash=source["receipt_hash"],
+        backend_receipt_hash=backend_hashes["hip"], entries=diagnostic_entries)
+    diagnostic = create_adapter_bound_diagnostic_ir(
+        diagnostic_id="diagnostic.g1.mgt.hip.terminal",
+        source_adapter=_DiagnosticAdapter(diagnostic_snapshot, source, terminal))
+    diagnostic_manifest = diagnostic.to_manifest()
     binding_parity_keys = (
         "model_ir_content_hash", "execution_plan_hash", "equation_scaling_hash",
         "reduced_csr_identity_hash", "operator_hash", "state_hash", "state_epoch",
@@ -236,6 +299,8 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
     hip_raw = json.dumps(results["hip"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     cpu_raw = json.dumps(results["cpu_optimized"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     displacement_raw = displacement.tobytes()
+    diagnostic_raw = json.dumps(
+        diagnostic_manifest, indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     payload = {
         "schema_version": VERSION, "receipt_hash": "sha256:" + "0" * 64,
         "generated_at": datetime.now(timezone.utc).isoformat(), "status": "partial",
@@ -260,15 +325,21 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes]:
             "hip_result": {"path": DEFAULT_HIP_RESULT.as_posix(), "byte_length": len(hip_raw), "file_sha256": sha256_prefixed(hip_raw)},
             "cpu_result": {"path": DEFAULT_CPU_RESULT.as_posix(), "byte_length": len(cpu_raw), "file_sha256": sha256_prefixed(cpu_raw)},
             "displacement": {"path": DEFAULT_DISPLACEMENT.as_posix(), "byte_length": len(displacement_raw), "file_sha256": sha256_prefixed(displacement_raw), "data_hash": array_data_hash(displacement)}},
+        "diagnostic": {"diagnostic_hash": diagnostic.diagnostic_hash,
+                       "status": diagnostic.status,
+                       "entry_count": len(diagnostic.entries),
+                       "unsupported_count": sum(row.disposition == "unsupported" for row in diagnostic.entries)},
         "claims": {"authoritative_nonlinear_resultir_emitted": True,
-                   "terminal_resultir_parity": True, "diagnosticir_emitted": False,
+                   "terminal_resultir_parity": True, "diagnosticir_emitted": True,
                    "independent_gfx1100_run": False, "g1_closure": False},
-        "blockers_remaining": ["diagnosticir_requires_actual_execution_plan_adapter",
-                               "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
+        "blockers_remaining": ["nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
                                "independent_gfx1100_hardware_run_not_available"],
-        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. It does not fabricate a generic ExecutionPlan-backed DiagnosticIR, connect nonlinear material-family breadth, prove independent gfx1100 hardware, or close G1."}
+        "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. Nonlinear material-family breadth, independent gfx1100 hardware, and G1 closure remain unclaimed."}
+    payload["artifacts"]["diagnostic"] = {
+        "path": DEFAULT_DIAGNOSTIC.as_posix(), "byte_length": len(diagnostic_raw),
+        "file_sha256": sha256_prefixed(diagnostic_raw)}
     payload["receipt_hash"] = _hash(payload)
-    return payload, hip_raw, cpu_raw, displacement_raw
+    return payload, hip_raw, cpu_raw, displacement_raw, diagnostic_raw
 
 
 def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = False,
@@ -285,13 +356,15 @@ def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = Fals
                 raise ValueError(f"result_artifact_invalid:{name}")
         validate_nonlinear_result_manifest(_read(root / DEFAULT_HIP_RESULT))
         validate_nonlinear_result_manifest(_read(root / DEFAULT_CPU_RESULT))
+        validate_diagnostic_ir_manifest(_read(root / DEFAULT_DIAGNOSTIC))
     return payload
 
 
 def write(*, root: Path = ROOT) -> dict[str, Any]:
-    payload, hip, cpu, displacement = run(root=root)
+    payload, hip, cpu, displacement, diagnostic = run(root=root)
     (root / DEFAULT_HIP_RESULT).write_bytes(hip); (root / DEFAULT_CPU_RESULT).write_bytes(cpu)
     (root / DEFAULT_DISPLACEMENT).write_bytes(displacement)
+    (root / DEFAULT_DIAGNOSTIC).write_bytes(diagnostic)
     (root / DEFAULT_OUT).write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
     return validate(payload, root=root, current=True, artifacts=True)
 
@@ -307,7 +380,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.check:
         passed, reason = check(); print(reason); return 0 if passed else 1
-    payload = write(); print(f"partial | resultir_parity={payload['parity']['terminal_resultir_parity']} | diagnosticir=false")
+    payload = write(); print(f"partial | resultir_parity={payload['parity']['terminal_resultir_parity']} | diagnosticir=true")
     return 0
 
 

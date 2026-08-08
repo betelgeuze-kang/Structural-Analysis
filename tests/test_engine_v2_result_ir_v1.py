@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from dataclasses import replace
 import json
 from pathlib import Path
 
@@ -14,12 +15,14 @@ from structural_analysis.engine_v2.contracts import (
     NUMERICAL_RESULT_AUTHORITY_PROFILE,
     NUMERICAL_RESULT_IR_SCHEMA_VERSION,
     DiagnosticIR,
+    DiagnosticIRSourceSnapshot,
     NumericalResultIR,
     ResultIRError,
     bind_equation_scaling_to_execution_plan,
     commit_trial_state,
     create_diagnostic_entry,
     create_diagnostic_ir,
+    create_adapter_bound_diagnostic_ir,
     create_equation_scaling,
     create_execution_plan,
     create_execution_plan_reduced_csr,
@@ -27,6 +30,7 @@ from structural_analysis.engine_v2.contracts import (
     create_numerical_result_ir,
     open_trial_state,
     validate_diagnostic_ir_manifest,
+    validate_diagnostic_ir,
     validate_numerical_result_displacement_bytes,
     validate_numerical_result_ir_manifest,
     write_numerical_result_displacement_artifact,
@@ -339,6 +343,49 @@ def test_diagnostic_ir_is_sanitized_non_authoritative_and_canonical() -> None:
     assert set(manifest["authority"].values()) == {"not_authoritative"}
     assert manifest["claim_boundary"]["raw_exception_or_payload_included"] is False
     assert "message" not in json.dumps(manifest)
+
+
+def test_adapter_bound_diagnostic_replays_source_without_fabricating_plan() -> None:
+    plan, scaling, reduced, state, _solution_hash = _fixture()
+    entry = create_diagnostic_entry(
+        code="actual_backend_observed",
+        path="/backend/execution",
+        severity="info",
+        disposition="observed",
+        evidence_hashes=(_hash("d"),),
+    )
+    snapshot = DiagnosticIRSourceSnapshot(
+        model_ir_content_hash=plan.model_ir_content_hash,
+        execution_plan_hash=plan.plan_hash,
+        operator_hash=plan.operator_hash,
+        load_pattern_id=plan.load_pattern_id,
+        state_hash=state.state_hash,
+        state_epoch=state.epoch,
+        equation_scaling_hash=scaling.scaling_hash,
+        reduced_csr_identity_hash=reduced.identity_hash,
+        source_authority_profile="backend_probe",
+        source_receipt_schema_version="actual-backend-receipt.v1",
+        source_receipt_hash=_hash("e"),
+        backend_receipt_hash=_hash("f"),
+        entries=(entry,),
+    )
+
+    class Adapter:
+        def validate_diagnostic_ir_source(self):
+            return snapshot
+
+    diagnostic = create_adapter_bound_diagnostic_ir(
+        diagnostic_id="diagnostic.adapter.actual",
+        source_adapter=Adapter(),
+    )
+    manifest = diagnostic.to_manifest()
+    assert diagnostic._execution_plan is None
+    assert manifest["status"] == "observed"
+    assert manifest["bindings"]["state_hash"] == state.state_hash
+    assert validate_diagnostic_ir_manifest(manifest) == manifest
+
+    with pytest.raises(ResultIRError, match="diagnostic_binding_mismatch"):
+        validate_diagnostic_ir(replace(diagnostic, operator_hash=_hash("0")))
 
 
 def test_diagnostic_manifest_rejects_authority_status_and_raw_shape_tampering() -> None:

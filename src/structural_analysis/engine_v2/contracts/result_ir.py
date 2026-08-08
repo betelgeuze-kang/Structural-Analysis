@@ -21,7 +21,7 @@ import json
 from pathlib import Path
 import re
 from types import MappingProxyType
-from typing import Any, Literal
+from typing import Any, Literal, Protocol
 
 from jsonschema import Draft202012Validator, validators
 import numpy as np
@@ -274,16 +274,42 @@ class DiagnosticIR:
     backend_receipt_hash: str | None
     entries: tuple[DiagnosticEntry, ...]
     extensions: Mapping[str, Any]
-    _execution_plan: ExecutionPlan = field(repr=False, compare=False)
+    _execution_plan: ExecutionPlan | None = field(repr=False, compare=False)
     _state: StateIR | None = field(repr=False, compare=False)
     _equation_scaling: EquationScaling | None = field(repr=False, compare=False)
     _reduced_csr: ExecutionPlanReducedCSR | None = field(
         repr=False, compare=False
     )
+    _source_adapter: DiagnosticIRSourceAdapter | None = field(
+        default=None, repr=False, compare=False
+    )
 
     def to_manifest(self) -> dict[str, Any]:
         validate_diagnostic_ir(self)
         return _diagnostic_payload(self, include_diagnostic_hash=True)
+
+
+@dataclass(frozen=True)
+class DiagnosticIRSourceSnapshot:
+    """Validated source-neutral bindings for adapter-backed DiagnosticIR."""
+
+    model_ir_content_hash: str
+    execution_plan_hash: str
+    operator_hash: str
+    load_pattern_id: str
+    state_hash: str | None
+    state_epoch: int | None
+    equation_scaling_hash: str | None
+    reduced_csr_identity_hash: str | None
+    source_authority_profile: str
+    source_receipt_schema_version: str
+    source_receipt_hash: str
+    backend_receipt_hash: str | None
+    entries: tuple[DiagnosticEntry, ...]
+
+
+class DiagnosticIRSourceAdapter(Protocol):
+    def validate_diagnostic_ir_source(self) -> DiagnosticIRSourceSnapshot: ...
 
 
 def create_numerical_result_ir(
@@ -562,6 +588,55 @@ def create_diagnostic_ir(
     return validate_diagnostic_ir(diagnostic)
 
 
+def create_adapter_bound_diagnostic_ir(
+    *,
+    diagnostic_id: str,
+    source_adapter: DiagnosticIRSourceAdapter,
+) -> DiagnosticIR:
+    """Create DiagnosticIR v1 from a retained deterministic source adapter.
+
+    This preserves the existing manifest and authority boundary while allowing
+    source solvers whose mixed topology cannot be represented by the linear
+    two-node ``ExecutionPlan v1`` shape to replay their own exact bindings.
+    """
+
+    snapshot = _adapter_diagnostic_snapshot(source_adapter)
+    entries = snapshot.entries
+    provisional = DiagnosticIR(
+        schema_version=DIAGNOSTIC_IR_SCHEMA_VERSION,
+        diagnostic_id=_require_stable_id(diagnostic_id, "/diagnostic_id"),
+        diagnostic_hash="sha256:" + "0" * 64,
+        authority_profile=DIAGNOSTIC_AUTHORITY_PROFILE,
+        status=_diagnostic_status(entries),
+        model_ir_content_hash=snapshot.model_ir_content_hash,
+        execution_plan_hash=snapshot.execution_plan_hash,
+        operator_hash=snapshot.operator_hash,
+        load_pattern_id=snapshot.load_pattern_id,
+        state_hash=snapshot.state_hash,
+        state_epoch=snapshot.state_epoch,
+        equation_scaling_hash=snapshot.equation_scaling_hash,
+        reduced_csr_identity_hash=snapshot.reduced_csr_identity_hash,
+        source_authority_profile=snapshot.source_authority_profile,
+        source_receipt_schema_version=snapshot.source_receipt_schema_version,
+        source_receipt_hash=snapshot.source_receipt_hash,
+        backend_receipt_hash=snapshot.backend_receipt_hash,
+        entries=entries,
+        extensions=_freeze_diagnostic_extensions({}),
+        _execution_plan=None,
+        _state=None,
+        _equation_scaling=None,
+        _reduced_csr=None,
+        _source_adapter=source_adapter,
+    )
+    diagnostic = replace(
+        provisional,
+        diagnostic_hash=canonical_hash(
+            _diagnostic_payload(provisional, include_diagnostic_hash=False)
+        ),
+    )
+    return validate_diagnostic_ir(diagnostic)
+
+
 def validate_numerical_result_ir(result: NumericalResultIR) -> NumericalResultIR:
     if type(result) is not NumericalResultIR:
         _fail("numerical_result_type_invalid", "/", "Expected NumericalResultIR.")
@@ -715,41 +790,56 @@ def validate_numerical_result_ir(result: NumericalResultIR) -> NumericalResultIR
 def validate_diagnostic_ir(diagnostic: DiagnosticIR) -> DiagnosticIR:
     if type(diagnostic) is not DiagnosticIR:
         _fail("diagnostic_ir_type_invalid", "/", "Expected DiagnosticIR.")
-    plan = validate_execution_plan(diagnostic._execution_plan)
-    state = diagnostic._state
-    if state is not None:
-        validate_state_ir(state, expected_plan=plan)
-    if (diagnostic._equation_scaling is None) != (diagnostic._reduced_csr is None):
-        _fail(
-            "diagnostic_solver_binding_incomplete",
-            "/bindings",
-            "Equation scaling and reduced CSR must be supplied together.",
-        )
-    if diagnostic._equation_scaling is not None:
-        validate_equation_scaling_binding(
-            plan, scaling=diagnostic._equation_scaling
-        )
-        validate_execution_plan_reduced_csr(
-            diagnostic._reduced_csr, execution_plan=plan
-        )
-    expected_bindings = {
-        "model_ir_content_hash": plan.model_ir_content_hash,
-        "execution_plan_hash": plan.plan_hash,
-        "operator_hash": plan.operator_hash,
-        "load_pattern_id": plan.load_pattern_id,
-        "state_hash": None if state is None else state.state_hash,
-        "state_epoch": None if state is None else state.epoch,
-        "equation_scaling_hash": (
-            None
-            if diagnostic._equation_scaling is None
-            else diagnostic._equation_scaling.scaling_hash
-        ),
-        "reduced_csr_identity_hash": (
-            None
-            if diagnostic._reduced_csr is None
-            else diagnostic._reduced_csr.identity_hash
-        ),
-    }
+    if diagnostic._source_adapter is not None:
+        if any(value is not None for value in (
+            diagnostic._execution_plan, diagnostic._state,
+            diagnostic._equation_scaling, diagnostic._reduced_csr,
+        )):
+            _fail("diagnostic_source_mode_ambiguous", "/", "Use one retained source mode.")
+        snapshot = _adapter_diagnostic_snapshot(diagnostic._source_adapter)
+        expected_bindings = {
+            "model_ir_content_hash": snapshot.model_ir_content_hash,
+            "execution_plan_hash": snapshot.execution_plan_hash,
+            "operator_hash": snapshot.operator_hash,
+            "load_pattern_id": snapshot.load_pattern_id,
+            "state_hash": snapshot.state_hash,
+            "state_epoch": snapshot.state_epoch,
+            "equation_scaling_hash": snapshot.equation_scaling_hash,
+            "reduced_csr_identity_hash": snapshot.reduced_csr_identity_hash,
+        }
+        expected_source = {
+            "source_authority_profile": snapshot.source_authority_profile,
+            "source_receipt_schema_version": snapshot.source_receipt_schema_version,
+            "source_receipt_hash": snapshot.source_receipt_hash,
+            "backend_receipt_hash": snapshot.backend_receipt_hash,
+            "entries": snapshot.entries,
+        }
+        if any(getattr(diagnostic, key) != value for key, value in expected_source.items()):
+            _fail("diagnostic_source_adapter_mismatch", "/source", "Diagnostic does not match adapter replay.")
+    else:
+        if diagnostic._execution_plan is None:
+            _fail("diagnostic_execution_plan_missing", "/bindings", "ExecutionPlan is required.")
+        plan = validate_execution_plan(diagnostic._execution_plan)
+        state = diagnostic._state
+        if state is not None:
+            validate_state_ir(state, expected_plan=plan)
+        if (diagnostic._equation_scaling is None) != (diagnostic._reduced_csr is None):
+            _fail(
+                "diagnostic_solver_binding_incomplete", "/bindings",
+                "Equation scaling and reduced CSR must be supplied together.")
+        if diagnostic._equation_scaling is not None:
+            validate_equation_scaling_binding(plan, scaling=diagnostic._equation_scaling)
+            validate_execution_plan_reduced_csr(diagnostic._reduced_csr, execution_plan=plan)
+        expected_bindings = {
+            "model_ir_content_hash": plan.model_ir_content_hash,
+            "execution_plan_hash": plan.plan_hash,
+            "operator_hash": plan.operator_hash,
+            "load_pattern_id": plan.load_pattern_id,
+            "state_hash": None if state is None else state.state_hash,
+            "state_epoch": None if state is None else state.epoch,
+            "equation_scaling_hash": None if diagnostic._equation_scaling is None else diagnostic._equation_scaling.scaling_hash,
+            "reduced_csr_identity_hash": None if diagnostic._reduced_csr is None else diagnostic._reduced_csr.identity_hash,
+        }
     if {key: getattr(diagnostic, key) for key in expected_bindings} != expected_bindings:
         _fail(
             "diagnostic_binding_mismatch",
@@ -823,6 +913,56 @@ def validate_diagnostic_ir(diagnostic: DiagnosticIR) -> DiagnosticIR:
         _diagnostic_payload(diagnostic, include_diagnostic_hash=True)
     )
     return diagnostic
+
+
+def _adapter_diagnostic_snapshot(
+    source_adapter: DiagnosticIRSourceAdapter,
+) -> DiagnosticIRSourceSnapshot:
+    validator = getattr(source_adapter, "validate_diagnostic_ir_source", None)
+    if not callable(validator):
+        _fail("diagnostic_source_adapter_invalid", "/", "Source adapter must expose deterministic replay validation.")
+    return _validate_diagnostic_source_snapshot(validator())
+
+
+def _validate_diagnostic_source_snapshot(
+    snapshot: DiagnosticIRSourceSnapshot,
+) -> DiagnosticIRSourceSnapshot:
+    if type(snapshot) is not DiagnosticIRSourceSnapshot:
+        _fail("diagnostic_source_snapshot_invalid", "/", "Expected DiagnosticIRSourceSnapshot.")
+    _require_stable_id(snapshot.load_pattern_id, "/bindings/load_pattern_id")
+    _require_stable_id(snapshot.source_receipt_schema_version, "/source/receipt_schema_version")
+    for path, value in (
+        ("/bindings/model_ir_content_hash", snapshot.model_ir_content_hash),
+        ("/bindings/execution_plan_hash", snapshot.execution_plan_hash),
+        ("/bindings/operator_hash", snapshot.operator_hash),
+        ("/source/receipt_hash", snapshot.source_receipt_hash),
+    ):
+        _require_hash(value, path)
+    for path, value in (
+        ("/bindings/state_hash", snapshot.state_hash),
+        ("/bindings/equation_scaling_hash", snapshot.equation_scaling_hash),
+        ("/bindings/reduced_csr_identity_hash", snapshot.reduced_csr_identity_hash),
+        ("/source/backend_receipt_hash", snapshot.backend_receipt_hash),
+    ):
+        if value is not None:
+            _require_hash(value, path)
+    if (snapshot.state_hash is None) != (snapshot.state_epoch is None):
+        _fail("diagnostic_state_binding_incomplete", "/bindings/state_hash", "State hash and epoch must be supplied together.")
+    if snapshot.state_epoch is not None:
+        _require_exact_int(snapshot.state_epoch, "/bindings/state_epoch", minimum=0)
+    if (snapshot.equation_scaling_hash is None) != (snapshot.reduced_csr_identity_hash is None):
+        _fail("diagnostic_solver_binding_incomplete", "/bindings", "Scaling and reduced CSR identities must be supplied together.")
+    if snapshot.source_authority_profile not in _SOURCE_AUTHORITY_PROFILES:
+        _fail("diagnostic_source_authority_profile_invalid", "/source/authority_profile", "Unsupported source authority profile.")
+    if type(snapshot.entries) is not tuple or not snapshot.entries:
+        _fail("diagnostic_entries_empty", "/entries", "At least one entry is required.")
+    if snapshot.entries != tuple(sorted(snapshot.entries, key=_diagnostic_entry_sort_key)):
+        _fail("diagnostic_entries_not_canonical", "/entries", "Entries must use canonical sort order.")
+    if len(set(_diagnostic_entry_sort_key(row) for row in snapshot.entries)) != len(snapshot.entries):
+        _fail("diagnostic_entries_duplicate", "/entries", "Entries must be unique.")
+    for index, entry in enumerate(snapshot.entries):
+        _validate_diagnostic_entry(entry, f"/entries/{index}")
+    return snapshot
 
 
 def validate_numerical_result_ir_manifest(payload: Any) -> Mapping[str, Any]:
@@ -1506,11 +1646,14 @@ __all__ = [
     "NUMERICAL_RESULT_STORAGE_PROFILE",
     "DiagnosticEntry",
     "DiagnosticIR",
+    "DiagnosticIRSourceAdapter",
+    "DiagnosticIRSourceSnapshot",
     "NumericalResultIR",
     "NumericalResultVectorDescriptor",
     "ResultIRError",
     "create_diagnostic_entry",
     "create_diagnostic_ir",
+    "create_adapter_bound_diagnostic_ir",
     "create_numerical_result_ir",
     "validate_diagnostic_ir",
     "validate_diagnostic_ir_manifest",

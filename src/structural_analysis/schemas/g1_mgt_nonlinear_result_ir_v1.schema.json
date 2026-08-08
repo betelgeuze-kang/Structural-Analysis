@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "source", "terminal", "parity", "artifacts", "claims", "blockers_remaining", "claim_boundary"],
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "source", "terminal", "parity", "artifacts", "diagnostic", "claims", "blockers_remaining", "claim_boundary"],
   "properties": {
     "schema_version": {"const": "g1-mgt-nonlinear-result-ir-receipt.v1"},
     "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
@@ -12,6 +12,7 @@
     "terminal": {"type": "object"},
     "parity": {"type": "object"},
     "artifacts": {"type": "object"},
+    "diagnostic": {"type": "object"},
     "claims": {"type": "object"},
     "blockers_remaining": {"type": "array", "items": {"type": "string"}},
     "claim_boundary": {"type": "string"}
