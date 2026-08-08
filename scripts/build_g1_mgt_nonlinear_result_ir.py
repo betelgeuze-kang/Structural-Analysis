@@ -27,7 +27,8 @@ from build_g1_mgt_material_family_adequacy_audit import (  # noqa: E402
 from run_g1_mgt_device_fgmres import (  # noqa: E402
     DEFAULT_ACCEPTED_STATE, DEFAULT_COMMITTED_MATERIAL, DEFAULT_INITIAL_MATERIAL,
     DEFAULT_OUT as FGMRES_RECEIPT, DEFAULT_REJECTED_MATERIAL, DEFAULT_SOLUTION,
-    MATERIAL_STATE_FIELD_NAMES, _mgt_state_hash,
+    FAMILY_CODES, MATERIAL_STATE_FIELD_NAMES, _material_family_fixture,
+    _mgt_state_hash,
 )
 from run_g1_mgt_single_lifecycle_preconditioned_jvp import build_references  # noqa: E402
 from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
@@ -62,6 +63,7 @@ SOURCE_PATHS = (
     DEFAULT_COMMITTED_MATERIAL, DEFAULT_REJECTED_MATERIAL,
     MATERIAL_FAMILY_AUDIT,
     Path("scripts/build_g1_mgt_nonlinear_result_ir.py"), SCHEMA,
+    Path("scripts/run_g1_mgt_device_fgmres.py"),
     Path("src/structural_analysis/engine_v2/contracts/nonlinear_result.py"),
     Path("src/structural_analysis/engine_v2/contracts/result_ir.py"),
     Path("src/structural_analysis/engine_v2/contracts/material_state_bundle.py"),
@@ -89,20 +91,30 @@ def _clean(root: Path) -> bool:
 
 def _bundle(*, receipt: dict[str, Any], context: dict[str, Any],
             initial: np.ndarray, committed: np.ndarray,
-            accepted_state: np.ndarray) -> MaterialStateBundle:
+            accepted_state: np.ndarray,
+            family_fixture: dict[str, np.ndarray]) -> MaterialStateBundle:
     model_hash = context["problem"].model_source_sha256
     plan_hash = context["problem"].equilibrium_operator_binding_hash
     state_hash = receipt["comparison"]["checkpoint_artifact"]["accepted_state_hash"]
     initial_state_hash = _mgt_state_hash(context=context, state=context["state"])
     def rows(values: np.ndarray, parents: tuple[str, ...] | None) -> tuple[MaterialStateInput, ...]:
-        return tuple(MaterialStateInput(
-            entity_id=f"mgt.frame_geometry.{index:04d}",
-            integration_point_id="finite_chord_axial.ip0",
-            material_type_id="elastic_finite_chord_axial",
-            material_schema_version="elastic-finite-chord-axial-state.v1",
-            state_bytes=np.ascontiguousarray(value, dtype="<f8").tobytes(),
-            parent_state_data_hash=None if parents is None else parents[index],
-        ) for index, value in enumerate(values))
+        result = []
+        for index, value in enumerate(values):
+            family_code = int(family_fixture["family_codes"][index])
+            family_name = next(
+                name for name, code in FAMILY_CODES.items() if code == family_code
+            )
+            result.append(MaterialStateInput(
+                entity_id=f"mgt.frame.{int(family_fixture['element_ids'][index])}",
+                integration_point_id="finite_chord_axial.ip0",
+                material_type_id=f"mgt_source_elastic_{family_name.lower()}",
+                material_schema_version="mgt-source-elastic-family-state.v1",
+                state_bytes=np.ascontiguousarray(value, dtype="<f8").tobytes(),
+                parent_state_data_hash=(
+                    None if parents is None else parents[index]
+                ),
+            ))
+        return tuple(result)
     parent = create_initial_material_state_bundle(
         bundle_id="g1.mgt.elastic.initial", model_ir_content_hash=model_hash,
         execution_plan_hash=plan_hash, solver_state_hash=initial_state_hash,
@@ -200,6 +212,13 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
         _read(root / MATERIAL_FAMILY_AUDIT), root=root, current=True
     )
     _, _, _, context = build_references(root=root)
+    family_fixture, _fixture_raw, family_fixture_manifest = (
+        _material_family_fixture(root=root, context=context)
+    )
+    if family_fixture_manifest["file_sha256"] != source["material_lifecycle"][
+        "family_fixture"
+    ]["file_sha256"]:
+        raise ValueError("material_family_fixture_hash_mismatch")
     count = int(source["material_lifecycle"]["integration_point_count"])
     material_shape = (count, len(MATERIAL_STATE_FIELD_NAMES))
     artifacts = source["material_lifecycle"]["artifacts"]
@@ -217,7 +236,8 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
     correction = np.fromfile(root / solution_item["path"], dtype="<f8")
     if array_data_hash(correction) != solution_item["data_hash"]: raise ValueError("solution_mismatch")
     bundle = _bundle(receipt=source, context=context, initial=initial_material,
-                     committed=committed_material, accepted_state=accepted_state)
+                     committed=committed_material, accepted_state=accepted_state,
+                     family_fixture=family_fixture)
     expected_bundle_hash = source["material_lifecycle"]["material_state_bundle"]["committed_bundle_hash"]
     if bundle.bundle_hash != expected_bundle_hash:
         raise ValueError("committed_material_bundle_hash_mismatch")
