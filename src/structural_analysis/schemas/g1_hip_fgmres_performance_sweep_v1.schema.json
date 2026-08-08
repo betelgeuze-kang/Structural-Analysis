@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema", "$id": "https://structural-analysis.local/schemas/g1_hip_fgmres_performance_sweep_v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "receipt_hash", "source", "runtime", "sweep", "claims", "blockers_remaining", "contract_pass", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-hip-fgmres-performance-sweep.v1"}, "receipt_hash": {"$ref": "#/$defs/hash"},
+    "source": {"type": "object", "required": ["repository_commit_sha", "worktree_clean_at_execution", "input_checksums"], "properties": {"repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "worktree_clean_at_execution": {"const": true}, "input_checksums": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}}}},
+    "runtime": {"type": "object", "required": ["backend", "device_name", "gcn_arch_name", "device_nodes", "compiler", "wheel"], "properties": {"backend": {"const": "amd_rocm_hip"}, "device_name": {"type": "string"}, "gcn_arch_name": {"const": "gfx1030"}, "device_nodes": {"type": "array", "minItems": 2, "items": {"type": "string"}}, "compiler": {"type": "object"}, "wheel": {"type": "object"}}},
+    "sweep": {"type": "object", "required": ["dimensions", "cases"], "properties": {"dimensions": {"const": [66, 264, 1056, 4092]}, "cases": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/case"}}}},
+    "claims": {"type": "object"}, "blockers_remaining": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "contract_pass": {"const": true}, "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}, "positive": {"type": "number", "exclusiveMinimum": 0},
+    "case": {"type": "object", "required": ["dimension", "nnz", "repetitions", "gpu", "cpu", "speedup"], "properties": {"dimension": {"type": "integer", "minimum": 1}, "nnz": {"type": "integer", "minimum": 1}, "repetitions": {"type": "integer", "minimum": 2}, "gpu": {"type": "object", "required": ["krylov_iteration_count", "matvec_count", "preconditioner_apply_count", "h2d_bytes", "d2h_bytes", "mid_recurrence_host_transfer_count", "tracked_peak_device_allocation_bytes", "device_lifecycle_wall_time_samples_ms", "device_lifecycle_wall_time_median_ms", "process_wall_time_samples_ms", "process_wall_time_median_ms", "terminal_scaled_l2"]}, "cpu": {"type": "object"}, "speedup": {"type": "object"}}}
+  }
+}
