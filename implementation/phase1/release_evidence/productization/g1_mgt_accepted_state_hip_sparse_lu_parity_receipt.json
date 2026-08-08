@@ -1,0 +1,397 @@
+{
+  "accepted_state": {
+    "accepted_state_hash": "sha256:db4d84655c3357c7193a0728169ce6c97f82d86249ee0d74164a54d845ee5870",
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz",
+    "checkpoint_residual_inf_n": 0.0004447424730642524,
+    "checkpoint_sha256": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+    "equation_count": 70560,
+    "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+    "load_factor": 1.0,
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "mgt_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "physical_residual_data_hash": "sha256:b6ac1f4d6b948c1dfb0bc66f3eeba292308691ebf64a6fc4e06710b0ad5fdbca",
+    "physical_residual_inf_kn": 4.447424730642524e-07,
+    "right_hand_side_data_hash": "sha256:be565786f9f0da28b61133a7094a0569bd7a9d33453cd56705476080939dd535",
+    "right_hand_side_policy": "negative_physical_residual_at_accepted_state",
+    "state_data_hash": "sha256:c8683e1b58b3a81be967835cb0d549b14ac410cf848288f4bcb2233a1a91fb4d",
+    "state_policy": "full_load_checkpoint_accepted_free_displacements"
+  },
+  "artifacts": {
+    "hip_source": "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_parity_receipt.json",
+    "runner": "scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py",
+    "schema": "src/structural_analysis/schemas/g1_mgt_accepted_state_hip_sparse_lu_parity_v1.schema.json",
+    "solution_vector": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le"
+  },
+  "blockers_remaining": [
+    "current_tangent_operator_and_preconditioner_not_integrated_in_one_device_fgmres",
+    "factor_not_persisted_across_krylov_iterations",
+    "factorization_is_host_scipy_superlu_specific",
+    "independent_gfx1100_run_not_available",
+    "same_clean_source_cross_device_receipt_not_available",
+    "g1_full_building_device_newton_closure_not_established"
+  ],
+  "claim_boundary": "This receipt proves one actual 70,560-equation canonical sparse-LU preconditioner apply on the local AMD Radeon RX 6900 XT gfx1030. Its RHS is the negative physical residual evaluated at the accepted load-scale 1.0 MGT checkpoint, and the full production-size dependency schedule executes without an intermediate device-to-host transfer. It does not claim that the factor is retained across Krylov iterations, that current-tangent JVP and preconditioning execute inside one device FGMRES lifecycle, that host SciPy/SuperLU factor construction is a production factorization backend, that gfx1100 was executed, or that G1 is closed.",
+  "claims": {
+    "actual_gfx1030_hardware": true,
+    "actual_mgt_70560_factor_apply": true,
+    "actual_mgt_full_load_accepted_state": true,
+    "cpu_hip_numerical_parity": true,
+    "g1_closure": false,
+    "independent_gfx1100": false,
+    "mid_apply_d2h_zero": true,
+    "persistent_factor_across_krylov_iterations": false,
+    "production_current_tangent_fgmres": false,
+    "production_scale_level_schedule": true
+  },
+  "comparison": {
+    "actual_hardware_execution_required_for_claim": true,
+    "canonical_cpu_max_abs_error_m": 7.450910146928091e-22,
+    "canonical_solution_data_hash": "sha256:fee3f68a4a1f6fa418ccbd9ff418982bf59b8b920ad69b7a68583debce55de76",
+    "comparison_tolerance_m": 1e-11,
+    "contract_pass": true,
+    "device_order_cpu_max_abs_error_m": 0.0,
+    "device_order_solution_data_hash": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
+    "production_performance_claim": false,
+    "profile": "engine-v2-cpu-hip-canonical-sparse-lu-apply-parity.v1",
+    "solution_data_hash": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a"
+  },
+  "contract_pass": true,
+  "contract_scope": "actual_mgt_full_load_accepted_state_local_gfx1030_sparse_lu_apply",
+  "generated_at": "2026-08-08T12:47:36.008914+00:00",
+  "hardware_execution": {
+    "actual_hardware": true,
+    "fixture_file_byte_length": 204899096,
+    "fixture_file_sha256": "sha256:9475a6c8edf10329fe1965c843ffda22e00d834eb96a58cdaba502a89c4b26f6",
+    "process_wall_time_ms": 1246.7531399997824,
+    "runtime_metadata": {
+      "accumulation_profile": "ascending_column_sequential_fp64.v1",
+      "blocking_d2h_synchronization_count": 1,
+      "cpu_backend": false,
+      "device_name": "AMD Radeon RX 6900 XT",
+      "dimension": 70560,
+      "execution_profile": "same_stream_level_scheduled_csr_forward_backward.v1",
+      "gcn_arch_name": "gfx1030",
+      "kernel_invocation_count": 8661,
+      "lower_level_count": 4405,
+      "mid_apply_d2h_transfer_count": 0,
+      "schema_version": "engine-v2-hip-sparse-lu-apply-output.v1",
+      "status": "ok",
+      "upper_level_count": 4254
+    },
+    "runtime_output_hash": "sha256:f15762560da2b54451bc4ba096503ebcd24582a5e01af757734e3aebf4e246e1",
+    "solution_artifact": {
+      "byte_length": 564480,
+      "data_hash": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
+      "dtype": "<f8",
+      "file_sha256": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
+      "format": "canonical_little_endian_float64_vector.v1",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le",
+      "persisted": true,
+      "shape": [
+        70560
+      ]
+    },
+    "telemetry": {
+      "d2h_bytes": 564480,
+      "h2d_bytes": 204829760,
+      "mid_apply_d2h_bytes": 0,
+      "tracked_peak_device_allocation_bytes": 207087680
+    }
+  },
+  "host_timings": {
+    "canonical_cpu_apply_seconds": 3.2941039130000718,
+    "device_order_cpu_apply_seconds": 3.2093703739992634,
+    "fixture_schedule_seconds": 21.01373859799969,
+    "host_factorization_seconds": 0.9442018680001638,
+    "problem_build_seconds": 29.90015063300052
+  },
+  "preconditioner": {
+    "column_permutation": "COLAMD",
+    "drop_tolerance": 1e-06,
+    "factor_manifest": {
+      "apply_contract": {
+        "column_permutation_application": "forward_gather_solution",
+        "factor_force_unit": "N",
+        "input_conversion_to_n": 1000.0,
+        "input_force_unit": "kN",
+        "lower_diagonal": "explicit_unit",
+        "output_displacement_unit": "m",
+        "profile": "inverse_row_permutation_csr_forward_backward_column_permutation_python_fsum_fp64.v1",
+        "row_order": "lower_ascending_upper_descending",
+        "row_permutation_application": "inverse_gather_rhs",
+        "upper_diagonal": "explicit_nonzero",
+        "within_row_accumulation": "ascending_column_python_fsum_fp64"
+      },
+      "array_count": 8,
+      "arrays": {
+        "column_permutation": {
+          "byte_length": 564480,
+          "content_hash": "sha256:6b9b989fc759f8d52267bda1f6cca7d6c56f8091c229cf034c175eca7a9a26cc",
+          "data_hash": "sha256:999ca68946e6d1bcee47475ffbe68fc62ae1e4d5e98abbd435a592ea76ebad7b",
+          "dtype": "<i8",
+          "name": "column_permutation",
+          "shape": [
+            70560
+          ]
+        },
+        "lower_column_indices": {
+          "byte_length": 47801640,
+          "content_hash": "sha256:25ecce6d724a91b2b80185f15e65bd5d009aca34680d48033b1522b1efb07b18",
+          "data_hash": "sha256:cced169127399f83f23600cce381bdaa5a5184efa15a5413a6d6a2cb4c46ead7",
+          "dtype": "<i8",
+          "name": "lower_column_indices",
+          "shape": [
+            5975205
+          ]
+        },
+        "lower_numeric_values": {
+          "byte_length": 47801640,
+          "content_hash": "sha256:92eb92a9f1800e1bc8cd42111d7ec3c380bee6044e87508572c6c0f3f4ad0ea2",
+          "data_hash": "sha256:1a75be479b709c1b100b5f7620937d4e48d73392575269647872f6f1120b30fa",
+          "dtype": "<f8",
+          "name": "lower_numeric_values",
+          "shape": [
+            5975205
+          ]
+        },
+        "lower_row_pointer": {
+          "byte_length": 564488,
+          "content_hash": "sha256:969ea84ce67bc86f2d7cd14fbf809c24743822a718ac57384eaaf38e4626eeaa",
+          "data_hash": "sha256:38c454e1a407b40c300f3ffb47ec1a318978495da9c2615d8f0401b59ea39575",
+          "dtype": "<i8",
+          "name": "lower_row_pointer",
+          "shape": [
+            70561
+          ]
+        },
+        "row_permutation": {
+          "byte_length": 564480,
+          "content_hash": "sha256:09dec21c6845ec707ec0ed0983bc68fe8f58b47fc69c40f568be4ed698cb06ce",
+          "data_hash": "sha256:b98f253062002e421ee77d77ee0b46dedeb7fbd31a4f85bfd573d1251f5d802b",
+          "dtype": "<i8",
+          "name": "row_permutation",
+          "shape": [
+            70560
+          ]
+        },
+        "upper_column_indices": {
+          "byte_length": 52637552,
+          "content_hash": "sha256:14b147c58e015de3bd89b9f7e098b71f95412ab9bc3e7cfac6c40746ce6ede7d",
+          "data_hash": "sha256:516a1b8468233a2fa569400440dc4a8a9288491c5e11b6b4917097ee7816c762",
+          "dtype": "<i8",
+          "name": "upper_column_indices",
+          "shape": [
+            6579694
+          ]
+        },
+        "upper_numeric_values": {
+          "byte_length": 52637552,
+          "content_hash": "sha256:10ebf21a79e2adf962169e23c857488ad4713ef60831c2e7f2d79ba02fbb75de",
+          "data_hash": "sha256:57c52b7e4c8409687636f92d913ef651e6187ca7860901a7db6475ce74dd8faf",
+          "dtype": "<f8",
+          "name": "upper_numeric_values",
+          "shape": [
+            6579694
+          ]
+        },
+        "upper_row_pointer": {
+          "byte_length": 564488,
+          "content_hash": "sha256:82a558f140c46febda531438f6b481e7297a7395cfd934049a971850664cc4ce",
+          "data_hash": "sha256:ad3a8cf4664f1c4b98636c5a4b47c0e0c172088f62930936d1a3111bfc1573ba",
+          "dtype": "<i8",
+          "name": "upper_row_pointer",
+          "shape": [
+            70561
+          ]
+        }
+      },
+      "claim_boundary": "Canonical little-endian factor arrays, permutation semantics, and ordered CPU triangular apply are in contract. Factor construction, artifact persistence, cross-platform replay, HIP apply parity, and performance are not established by this contract.",
+      "contract_hash": "sha256:d3c3f1bc4fd49a5b909dc34890b3916c3ca658dbbf5eafbe9cf55f16f9ccc0c8",
+      "dimension": 70560,
+      "factor_nnz": 12554899,
+      "lower_nnz": 5975205,
+      "profile": "canonical_csr_sparse_lu_factor.v1",
+      "schema_version": "canonical-sparse-lu-factor.v1",
+      "source_operator_numeric_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1",
+      "source_operator_pattern_hash": "sha256:77d3ceb64bdb40dfedbd253f0ca6e928825c1d0c1a8e801e4b4ad8ab55b76c5e",
+      "total_byte_length": 203136320,
+      "upper_nnz": 6579694
+    },
+    "factor_persisted": false,
+    "factorization_backend": "scipy.sparse.linalg.spilu_superlu",
+    "fill_factor": 20.0,
+    "fixture_manifest": {
+      "accumulation_profile": "ascending_column_sequential_fp64.v1",
+      "arrays": {
+        "column_permutation": {
+          "byte_length": 564480,
+          "data_hash": "sha256:999ca68946e6d1bcee47475ffbe68fc62ae1e4d5e98abbd435a592ea76ebad7b",
+          "dtype": "<i8",
+          "shape": [
+            70560
+          ]
+        },
+        "lower_column_indices": {
+          "byte_length": 47801640,
+          "data_hash": "sha256:cced169127399f83f23600cce381bdaa5a5184efa15a5413a6d6a2cb4c46ead7",
+          "dtype": "<i8",
+          "shape": [
+            5975205
+          ]
+        },
+        "lower_level_pointer": {
+          "byte_length": 35248,
+          "data_hash": "sha256:b225bd871d391fff34abaad8fc01809814709763ccf2b9533d4b09e3d74edb82",
+          "dtype": "<i8",
+          "shape": [
+            4406
+          ]
+        },
+        "lower_level_rows": {
+          "byte_length": 564480,
+          "data_hash": "sha256:6801a6f163f866af69e6d1f6f261738627a115d6c67e6e29423f49b052fcf331",
+          "dtype": "<i8",
+          "shape": [
+            70560
+          ]
+        },
+        "lower_numeric_values": {
+          "byte_length": 47801640,
+          "data_hash": "sha256:1a75be479b709c1b100b5f7620937d4e48d73392575269647872f6f1120b30fa",
+          "dtype": "<f8",
+          "shape": [
+            5975205
+          ]
+        },
+        "lower_row_pointer": {
+          "byte_length": 564488,
+          "data_hash": "sha256:38c454e1a407b40c300f3ffb47ec1a318978495da9c2615d8f0401b59ea39575",
+          "dtype": "<i8",
+          "shape": [
+            70561
+          ]
+        },
+        "right_hand_side_kn": {
+          "byte_length": 564480,
+          "data_hash": "sha256:003e6fc865fa010adf102bc9363b9cd797ab7847478480a2975ca2b39f73f87f",
+          "dtype": "<f8",
+          "shape": [
+            70560
+          ]
+        },
+        "row_permutation": {
+          "byte_length": 564480,
+          "data_hash": "sha256:b98f253062002e421ee77d77ee0b46dedeb7fbd31a4f85bfd573d1251f5d802b",
+          "dtype": "<i8",
+          "shape": [
+            70560
+          ]
+        },
+        "upper_column_indices": {
+          "byte_length": 52637552,
+          "data_hash": "sha256:516a1b8468233a2fa569400440dc4a8a9288491c5e11b6b4917097ee7816c762",
+          "dtype": "<i8",
+          "shape": [
+            6579694
+          ]
+        },
+        "upper_level_pointer": {
+          "byte_length": 34040,
+          "data_hash": "sha256:9bbbc1073585efded4e4773c37f85e0980a7e73cbad961fab746f644bf7ca01a",
+          "dtype": "<i8",
+          "shape": [
+            4255
+          ]
+        },
+        "upper_level_rows": {
+          "byte_length": 564480,
+          "data_hash": "sha256:97ede0291711ff575aef3a70c957ac1d6617d1a9707c1d855a8417d9e44a8c5b",
+          "dtype": "<i8",
+          "shape": [
+            70560
+          ]
+        },
+        "upper_numeric_values": {
+          "byte_length": 52637552,
+          "data_hash": "sha256:57c52b7e4c8409687636f92d913ef651e6187ca7860901a7db6475ce74dd8faf",
+          "dtype": "<f8",
+          "shape": [
+            6579694
+          ]
+        },
+        "upper_row_pointer": {
+          "byte_length": 564488,
+          "data_hash": "sha256:ad3a8cf4664f1c4b98636c5a4b47c0e0c172088f62930936d1a3111bfc1573ba",
+          "dtype": "<i8",
+          "shape": [
+            70561
+          ]
+        }
+      },
+      "binary_profile": "canonical_little_endian_mixed_numeric.v1",
+      "claim_boundary": "This fixture fixes sparse-LU factor bytes, row/column permutations, triangular dependency levels, and one RHS. Actual HIP execution, production-size scalability, performance, and CPU/HIP parity require a device receipt.",
+      "dimension": 70560,
+      "execution_profile": "same_stream_level_scheduled_csr_forward_backward.v1",
+      "expected_kernel_invocation_count": 8661,
+      "factor_contract_hash": "sha256:d3c3f1bc4fd49a5b909dc34890b3916c3ca658dbbf5eafbe9cf55f16f9ccc0c8",
+      "fixture_hash": "sha256:9475a6c8edf10329fe1965c843ffda22e00d834eb96a58cdaba502a89c4b26f6",
+      "lower_level_count": 4405,
+      "lower_nnz": 5975205,
+      "parity_profile": "engine-v2-cpu-hip-canonical-sparse-lu-apply-parity.v1",
+      "preconditioner_contract_hash": "sha256:7c008af1e56c48a3f40277cbcbf77710152b4274861b13cea65423a46c660592",
+      "schedule_contract_hash": "sha256:e55c4b39e55ec55f0b1561eea957206d21a24fa5031056c64031324f6f42009c",
+      "schedule_profile": "csr_triangular_dependency_level_schedule.v1",
+      "schema_version": "engine-v2-hip-sparse-lu-apply-fixture.v1",
+      "upper_level_count": 4254,
+      "upper_nnz": 6579694
+    },
+    "fixture_persisted": false,
+    "profile": "fixed_reference_host_spilu_canonical_sparse_lu.v1",
+    "reference_operator_numeric_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1",
+    "reference_operator_pattern_hash": "sha256:77d3ceb64bdb40dfedbd253f0ca6e928825c1d0c1a8e801e4b4ad8ab55b76c5e",
+    "scipy_version": "1.12.0"
+  },
+  "receipt_hash": "sha256:0b9fcfcd0a17e909a0aa895e55f2243ef01a64f9f73a35c7d80545e8346ddc34",
+  "runtime": {
+    "backend": "amd_rocm_hip",
+    "binary_byte_length": 57936,
+    "binary_sha256": "sha256:be3b38976dcecec4d4be06fb5a21e60158fbea7b486dc8f3d378dafe71605751",
+    "compiler": {
+      "path": "/opt/rocm-6.0.2/bin/hipcc",
+      "version_first_line": "HIP version: 6.0.32831-204d35d16",
+      "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+    },
+    "device_name": "AMD Radeon RX 6900 XT",
+    "device_nodes": [
+      "/dev/kfd",
+      "/dev/dri/renderD128"
+    ],
+    "gcn_arch_name": "gfx1030",
+    "wheel": {
+      "bound_at_execution": true,
+      "path": "dist/structural_analysis-0.3.0-py3-none-any.whl",
+      "sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
+    }
+  },
+  "schema_version": "g1-mgt-accepted-state-hip-sparse-lu-parity-receipt.v1",
+  "source": {
+    "engine_version": "structural-analysis@0.3.0",
+    "input_checksums": {
+      "dist/structural_analysis-0.3.0-py3-none-any.whl": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a",
+      "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+      "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+      "scripts/run_engine_v2_hip_sparse_lu_apply.py": "sha256:0b87e59982247a2f4393c65cf6bd7ef1d37d50db2ea8a02086dfc0d4a422a7e5",
+      "scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py": "sha256:83be5ccf2e0aab3f1588e55b942de27a9382bba9d6e3f135d9061a0aa2f8ea36",
+      "src/structural_analysis/engine_v2_backends/hip_sparse_lu_apply.py": "sha256:b9da2c5044c215fd3d391fb0ac6e794fa22c1ab718b5cd150ac6b87aa7341a9e",
+      "src/structural_analysis/schemas/g1_mgt_accepted_state_hip_sparse_lu_parity_v1.schema.json": "sha256:305eda01625d9eb51ac46f468e28d124582518b7255354aeb128061f43402215",
+      "src/structural_analysis/solvers/nonlinear/canonical_sparse_lu.py": "sha256:49f74473bf9fadea781bcdaf270af556ac8c80108d36d04f265e68fabe26abf1",
+      "tests/test_run_g1_mgt_accepted_state_hip_sparse_lu_parity.py": "sha256:b9391cef6ee10df2ab210068c062ff219a9928b2fbb91c567c056f574d352db7"
+    },
+    "repository_commit_sha": "903d1d0c224d61c4f83a62fa5b26fe7f7f7a1894",
+    "source_paths_clean_at_execution": true
+  },
+  "status": "partial"
+}
