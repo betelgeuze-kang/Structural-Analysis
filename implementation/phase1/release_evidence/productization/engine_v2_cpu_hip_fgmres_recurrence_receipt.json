@@ -350,11 +350,11 @@
     "scaling_hash": "sha256:cbd16a908cdbe062a38781dfb98d50f12ff44a803fc79f8b26c920454dea95ee",
     "schema_version": "engine-v2-hip-fgmres-recurrence-fixture.v1"
   },
-  "generated_at": "2026-07-18T13:31:43.184011+00:00",
+  "generated_at": "2026-08-08T12:29:54.395521+00:00",
   "hardware_execution": {
     "actual_hardware": true,
     "backend": "amd_rocm_hip",
-    "binary_sha256": "sha256:de3133fd1877977a65e362fa577835893857ed755c89ac9a1bbab4eba1aa2441",
+    "binary_sha256": "sha256:cb7b2c43ccaf3dcb0802a21c1326ede4c23a4daaf3a8b10bc2603a206a3a022a",
     "compiler": {
       "path": "/opt/rocm-6.0.2/bin/hipcc",
       "version_first_line": "HIP version: 6.0.32831-204d35d16",
@@ -709,16 +709,21 @@
       },
       "cooperative_launch_supported": false,
       "cpu_backend": false,
+      "d2h_bytes": 41232,
       "device_index": 0,
+      "device_lifecycle_wall_time_ms": 164.570526,
       "device_name": "AMD Radeon RX 6900 XT",
       "device_resident_full_recurrence_probe": true,
       "device_status_to_terminal_state": true,
+      "executed_matvec_count": 50,
       "gcn_arch_name": "gfx1030",
+      "h2d_bytes": 58088,
       "kernel_invocation_count": 3710,
       "krylov_workspace_profile": "device_global_dynamic_dimension_fp64.v1",
       "mid_recurrence_host_transfer_count": 0,
       "multi_block_kernel_invocation_count": 3710,
       "operator_blocks_per_case": 4,
+      "preconditioner_apply_count": 24,
       "preconditioner_profile": "operator_derived_left_scaled_jacobi_right.v1",
       "production_recurrence_claim": false,
       "recurrence_execution_profile": "same_stream_fixed_kernel_sequence_device_guarded.v1",
@@ -727,12 +732,14 @@
       "runtime_status_code": 0,
       "same_stream_ordering": true,
       "schema_version": "engine-v2-hip-fgmres-recurrence-output.v1",
+      "telemetry_profile": "bounded_device_lifecycle_exact_counters.v1",
       "threads_per_case": 64,
+      "tracked_peak_device_allocation_bytes": 211848,
       "workspace_dimension": 66,
       "workspace_doubles_per_case": 4686
     }
   },
-  "receipt_hash": "sha256:fa874249481a4fb469f932f039db8ecc35c3955d7984f1b53d1e47402a500768",
+  "receipt_hash": "sha256:39194d3451e5dda53d133e0266d55e1707f4db06eae9038315782e2589124b37",
   "recurrence_comparison": {
     "absolute_tolerance": 1e-11,
     "case_rows": [
@@ -792,17 +799,28 @@
     "relative_tolerance": 1e-11,
     "restart_checkpoint_semantics_exact": true,
     "schema_version": "engine-v2-cpu-hip-fgmres-recurrence-parity.v1",
+    "telemetry": {
+      "available": true,
+      "d2h_bytes": 41232,
+      "device_lifecycle_wall_time_ms": 164.570526,
+      "executed_matvec_count": 50,
+      "h2d_bytes": 58088,
+      "mid_recurrence_host_transfer_count": 0,
+      "preconditioner_apply_count": 24,
+      "profile": "bounded_device_lifecycle_exact_counters.v1",
+      "tracked_peak_device_allocation_bytes": 211848
+    },
     "terminal_semantics_exact": true
   },
   "schema_version": "engine-v2-cpu-hip-fgmres-recurrence-parity-receipt.v1",
   "source": {
     "exact_source_commit_claim": false,
     "input_checksums": {
-      "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:e50d6da179b691ebe348926400acdfcc9d50f96959bca16cd936528687f9b539",
+      "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:0745831161140e1b4f4af9572652f67f7026b8775ccee00124d8f2497dce7c67",
       "scripts/run_engine_v2_hip_fgmres_recurrence.py": "sha256:8004e2e7c269e9a7ca693385af962518442b722938f1037ee80a357062002333",
       "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
       "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py": "sha256:7864d9c7fa92c8034e1ff618d5ee99642b5c9e129a6404c5d89547a49c996508",
-      "src/structural_analysis/engine_v2_backends/hip_fgmres_recurrence.py": "sha256:ff48948675367a43e97bdd6ddb17b6525d976d634f15a0316f28fc4c69bbf1a2",
+      "src/structural_analysis/engine_v2_backends/hip_fgmres_recurrence.py": "sha256:243f90f5d47ae002027e692b3ee045e8196fffead51ddab16860a6905067c216",
       "src/structural_analysis/engine_v2_backends/hip_primitive_parity.py": "sha256:c0a6b1bec36392da8db16ad48c1a64f9c119ff49ae527f21d12abc9c3fc81942",
       "src/structural_analysis/schemas/cpu_fgmres_checkpoint_v1.schema.json": "sha256:daadbcb312ae5d7ed5861dc7d92e642ea62b2db8b91644e73d414909ed69168c",
       "src/structural_analysis/schemas/cpu_fgmres_run_v1.schema.json": "sha256:e111ffd7141c5db5e01ecaecc47c10ae65d765836594f9a5723ecbcc0b80332f",
@@ -810,11 +828,11 @@
       "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json": "sha256:5e0dc59821983998f422c6c3d6b3a61c20be8a05f8a7c7079efea39d5f3a86d3",
       "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py": "sha256:9c66db78f22d09fd52437e9a1204ae16d27fde8a4b345a2bd21182d52359fc5a",
       "tests/test_engine_v2_cpu_fgmres_v1.py": "sha256:7d4cf202c3d89e5154af4e87dd0ce3062ae60606dd38a7481e8fd7988e9f62df",
-      "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:dccebab38d3b8985ad98b0320cf369fe97c551b0f462d9e1a2d61e4a4cbbde0a",
+      "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:29ce6a491efd3549d648e6eda30355b2c5445c5bc9946f00ce4b73898f33df1e",
       "tests/test_engine_v2_hip_fgmres_recurrence_runner.py": "sha256:e9a5b2d61ba4d68eb0b51bebac4a140ec253473c00c552fa5305444b6b405f2c"
     },
-    "repository_base_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
-    "worktree_clean": false
+    "repository_base_commit_sha": "cbd6ab29785a2256d4420e7e11fc9ab9bcff05f2",
+    "worktree_clean": true
   },
   "status": "partial"
 }
