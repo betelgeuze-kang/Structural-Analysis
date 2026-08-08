@@ -523,7 +523,7 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                         "speedup_vs_cpu": cpu_baseline["wall_seconds"] /
                         (runtime["device_lifecycle_wall_time_ms"] / 1000.0),
                         "terminal_resultir_parity": False,
-                        "terminal_resultir_parity_reason": "authoritative_resultir_not_emitted_without_material_state_bundle"},
+                        "terminal_resultir_parity_reason": "authoritative_resultir_adapter_and_manifest_not_yet_emitted_despite_bound_elastic_material_bundle"},
         "comparison": {"terminal_physical_residual_cpu_replay_max_abs_error_n": replay_error,
                        "terminal_physical_residual_tolerance_n": 1.0e-9,
                        "accepted_nonlinear_residual_cpu_replay_max_abs_error_n": nonlinear_replay_error,
