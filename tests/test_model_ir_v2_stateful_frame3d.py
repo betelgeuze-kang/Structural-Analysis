@@ -43,3 +43,15 @@ def test_linear_material_profile_remains_valid() -> None:
 
     assert document.capability_profile == "engine_v2_phase0_linear_3d"
     assert document.analysis_ready is True
+
+
+def test_modal_buckling_frame3d_profile_is_analysis_ready() -> None:
+    fixture = ROOT / "tests/fixtures/model_ir_v2/frame_cantilever_modal_buckling.json"
+    document = load_model_ir_v2(fixture)
+    payload = document.to_dict()
+
+    assert document.capability_profile == "frame3d_modal_buckling_3d_v1"
+    assert document.analysis_ready is True
+    assert payload["materials"][0]["parameters"]["density_kg_m3"] == 7850.0
+    assert payload["load_patterns"][0]["analysis_type"] == "linear_buckling"
+    assert payload["load_patterns"][0]["nodal_loads"][0]["components_si"]["FX"] < 0.0
