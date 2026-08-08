@@ -33,6 +33,7 @@ HIPExecutionKind = _contract.HIPExecutionKind
 ResidualFunction = _contract.ResidualFunction
 JacobianVectorProduct = _contract.JacobianVectorProduct
 HIPResidualJVPWorkerError = _contract.HIPResidualJVPWorkerError
+HIPProductionLifecycleEvidence = _contract.HIPProductionLifecycleEvidence
 HIPResidualJVPWorkerConfig = _contract.HIPResidualJVPWorkerConfig
 HIPResidualJVPWorkerReceipt = _contract.HIPResidualJVPWorkerReceipt
 
@@ -164,6 +165,7 @@ __all__ = [
     "ResidualFunction",
     "JacobianVectorProduct",
     "HIPResidualJVPWorkerError",
+    "HIPProductionLifecycleEvidence",
     "HIPRuntimeEvidence",
     "HIPResidualJVPWorkerConfig",
     "HIPResidualJVPWorkerReceipt",

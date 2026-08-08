@@ -7,6 +7,7 @@ import pytest
 
 import structural_analysis.engine_v2_backends.hip_residual_jvp_worker as worker
 from structural_analysis.engine_v2_backends.hip_residual_jvp_worker import (
+    HIPProductionLifecycleEvidence,
     HIPResidualJVPWorkerConfig,
     HIPResidualJVPWorkerError,
     HIPRuntimeEvidence,
@@ -54,6 +55,46 @@ def _runtime(**overrides):
     }
     values.update(overrides)
     return HIPRuntimeEvidence(**values)
+
+
+def _lifecycle(**overrides) -> HIPProductionLifecycleEvidence:
+    result_hash = "sha256:" + "7" * 64
+    values = {
+        "wheel_sha256": "sha256:" + "6" * 64,
+        "dedicated_amd_runner": True,
+        "runner_id": "amd-gfx-runner-01",
+        "runner_labels": ("self-hosted", "linux", "amd-gpu", "rocm"),
+        "state_rhs_csr_uploaded": True,
+        "persistent_device_buffers_used": True,
+        "residual_jvp_on_device": True,
+        "accepted_state_tangent_refresh_on_device": True,
+        "equation_scaling_on_device": True,
+        "production_preconditioner_used": True,
+        "production_fgmres_used": True,
+        "newton_update_on_device": True,
+        "line_search_on_device": True,
+        "material_commit_rollback_on_device": True,
+        "convergence_gate_on_device": True,
+        "checkpoint_emitted": True,
+        "result_ir_emitted": True,
+        "diagnostic_ir_emitted": True,
+        "krylov_iteration_count": 8,
+        "matvec_count": 10,
+        "preconditioner_apply_count": 8,
+        "h2d_bytes": 4096,
+        "d2h_bytes": 1024,
+        "mid_step_d2h_bytes": 0,
+        "peak_vram_bytes": 64 * 1024 * 1024,
+        "checkpoint_overhead_seconds": 0.02,
+        "end_to_end_wall_seconds": 1.0,
+        "cpu_baseline_wall_seconds": 2.0,
+        "speedup_vs_cpu": 2.0,
+        "terminal_result_ir_hash": result_hash,
+        "cpu_terminal_result_ir_hash": result_hash,
+        "terminal_result_ir_parity": True,
+    }
+    values.update(overrides)
+    return HIPProductionLifecycleEvidence(**values)
 
 
 def _execute(runtime: HIPRuntimeEvidence, *, jvp=_jvp):
@@ -128,6 +169,7 @@ def test_complete_local_hardware_claim_remains_blocked_until_external_attestatio
             cpu_fallback_used=False,
             regularization_used=False,
             mid_step_d2h_count=0,
+            production_lifecycle=_lifecycle(),
         )
     )
 
@@ -143,6 +185,81 @@ def test_complete_local_hardware_claim_remains_blocked_until_external_attestatio
     assert receipt.numerical_authority == "diagnostic_only"
     assert receipt.engineering_authority == "none"
     assert receipt.release_authority == "none"
+
+
+def test_hardware_claim_without_end_to_end_lifecycle_is_blocked(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _allow_local_hip_probe(monkeypatch)
+    receipt = _execute(
+        _runtime(
+            execution_kind="hardware",
+            backend_id="hip_residual_jvp_worker_gfx1030",
+            device_architecture="gfx1030",
+            available_device_nodes=("/dev/kfd", "/dev/dri"),
+            hardware_receipt_hash="sha256:" + "8" * 64,
+            hip_kernel_invocation_count=3,
+            residual_kernel_invocation_count=1,
+            jvp_kernel_invocation_count=2,
+            hip_krylov_solver_used=True,
+            accepted_state_tangent_refresh_hip_used=True,
+            jvp_rows_retained=True,
+        )
+    )
+
+    assert "production_device_lifecycle_evidence_missing" in receipt.blockers
+
+
+def test_lifecycle_requires_dedicated_amd_runner_labels() -> None:
+    with pytest.raises(
+        HIPResidualJVPWorkerError,
+        match="dedicated_amd_runner_labels_missing",
+    ):
+        _lifecycle(runner_labels=("self-hosted", "linux")).validate()
+
+
+@pytest.mark.parametrize(
+    ("overrides", "blocker"),
+    [
+        (
+            {"persistent_device_buffers_used": False},
+            "lifecycle::persistent_device_buffers_used_not_proven",
+        ),
+        ({"mid_step_d2h_bytes": 8}, "mid_step_d2h_bytes_limit_exceeded"),
+        (
+            {"preconditioner_apply_count": 7},
+            "kpi::preconditioner_apply_count_inconsistent",
+        ),
+        (
+            {"terminal_result_ir_parity": False},
+            "terminal_result_ir_parity_failed",
+        ),
+    ],
+)
+def test_incomplete_device_lifecycle_or_kpi_blocks_worker(
+    monkeypatch: pytest.MonkeyPatch,
+    overrides: dict,
+    blocker: str,
+) -> None:
+    _allow_local_hip_probe(monkeypatch)
+    receipt = _execute(
+        _runtime(
+            execution_kind="hardware",
+            backend_id="hip_residual_jvp_worker_gfx1100",
+            device_architecture="gfx1100",
+            available_device_nodes=("/dev/kfd", "/dev/dri"),
+            hardware_receipt_hash="sha256:" + "9" * 64,
+            hip_kernel_invocation_count=3,
+            residual_kernel_invocation_count=1,
+            jvp_kernel_invocation_count=2,
+            hip_krylov_solver_used=True,
+            accepted_state_tangent_refresh_hip_used=True,
+            jvp_rows_retained=True,
+            production_lifecycle=_lifecycle(**overrides),
+        )
+    )
+
+    assert blocker in receipt.blockers
 
 
 def test_cpu_fallback_and_cpu_tangent_refresh_block_production(

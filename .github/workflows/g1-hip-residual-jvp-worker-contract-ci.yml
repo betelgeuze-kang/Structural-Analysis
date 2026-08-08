@@ -63,6 +63,7 @@ jobs:
           python -m pytest -q
           tests/test_residual_jacobian_consistency.py
           tests/test_hip_residual_jvp_worker.py
+          tests/test_hip_residual_jvp_worker_public_boundary.py
 
       - name: Build fail-closed contract-test receipt
         run: >-

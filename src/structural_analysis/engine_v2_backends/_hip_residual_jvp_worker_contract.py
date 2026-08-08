@@ -40,6 +40,100 @@ class HIPResidualJVPWorkerError(ValueError):
 
 
 @dataclass(frozen=True)
+class HIPProductionLifecycleEvidence:
+    """End-to-end device lifecycle and KPI evidence for one worker run."""
+
+    wheel_sha256: str
+    dedicated_amd_runner: bool
+    runner_id: str
+    runner_labels: tuple[str, ...]
+    state_rhs_csr_uploaded: bool
+    persistent_device_buffers_used: bool
+    residual_jvp_on_device: bool
+    accepted_state_tangent_refresh_on_device: bool
+    equation_scaling_on_device: bool
+    production_preconditioner_used: bool
+    production_fgmres_used: bool
+    newton_update_on_device: bool
+    line_search_on_device: bool
+    material_commit_rollback_on_device: bool
+    convergence_gate_on_device: bool
+    checkpoint_emitted: bool
+    result_ir_emitted: bool
+    diagnostic_ir_emitted: bool
+    krylov_iteration_count: int
+    matvec_count: int
+    preconditioner_apply_count: int
+    h2d_bytes: int
+    d2h_bytes: int
+    mid_step_d2h_bytes: int
+    peak_vram_bytes: int
+    checkpoint_overhead_seconds: float
+    end_to_end_wall_seconds: float
+    cpu_baseline_wall_seconds: float
+    speedup_vs_cpu: float
+    terminal_result_ir_hash: str
+    cpu_terminal_result_ir_hash: str
+    terminal_result_ir_parity: bool
+
+    def validate(self) -> None:
+        if not _is_hash(self.wheel_sha256):
+            raise HIPResidualJVPWorkerError("wheel_sha256_invalid")
+        if not self.runner_id.strip():
+            raise HIPResidualJVPWorkerError("runner_id_missing")
+        if not self.runner_labels or any(
+            not isinstance(label, str) or not label.strip()
+            for label in self.runner_labels
+        ):
+            raise HIPResidualJVPWorkerError("runner_labels_invalid")
+        required_runner_labels = {"self-hosted", "linux", "amd-gpu", "rocm"}
+        if not required_runner_labels.issubset(set(self.runner_labels)):
+            raise HIPResidualJVPWorkerError(
+                "dedicated_amd_runner_labels_missing"
+            )
+        for label, value in (
+            ("krylov_iteration_count", self.krylov_iteration_count),
+            ("matvec_count", self.matvec_count),
+            ("preconditioner_apply_count", self.preconditioner_apply_count),
+            ("h2d_bytes", self.h2d_bytes),
+            ("d2h_bytes", self.d2h_bytes),
+            ("mid_step_d2h_bytes", self.mid_step_d2h_bytes),
+            ("peak_vram_bytes", self.peak_vram_bytes),
+        ):
+            if type(value) is bool or not isinstance(value, int) or value < 0:
+                raise HIPResidualJVPWorkerError(f"{label}_invalid")
+        for label, value in (
+            ("checkpoint_overhead_seconds", self.checkpoint_overhead_seconds),
+            ("end_to_end_wall_seconds", self.end_to_end_wall_seconds),
+            ("cpu_baseline_wall_seconds", self.cpu_baseline_wall_seconds),
+            ("speedup_vs_cpu", self.speedup_vs_cpu),
+        ):
+            if (
+                isinstance(value, bool)
+                or not isinstance(value, (int, float))
+                or not np.isfinite(float(value))
+                or float(value) < 0.0
+            ):
+                raise HIPResidualJVPWorkerError(f"{label}_invalid")
+        if self.checkpoint_overhead_seconds > self.end_to_end_wall_seconds:
+            raise HIPResidualJVPWorkerError(
+                "checkpoint_overhead_exceeds_wall_time"
+            )
+        for label, value in (
+            ("terminal_result_ir_hash", self.terminal_result_ir_hash),
+            ("cpu_terminal_result_ir_hash", self.cpu_terminal_result_ir_hash),
+        ):
+            if not _is_hash(value):
+                raise HIPResidualJVPWorkerError(f"{label}_invalid")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            field_name: getattr(self, field_name)
+            for field_name in self.__dataclass_fields__
+        }
+
+
+@dataclass(frozen=True)
 class HIPRuntimeEvidence:
     execution_kind: HIPExecutionKind
     source_commit_sha: str
@@ -58,6 +152,7 @@ class HIPRuntimeEvidence:
     cpu_fallback_used: bool
     regularization_used: bool
     mid_step_d2h_count: int
+    production_lifecycle: HIPProductionLifecycleEvidence | None = None
     runtime_metadata: Mapping[str, Any] = field(
         default_factory=lambda: MappingProxyType({})
     )
@@ -93,6 +188,12 @@ class HIPRuntimeEvidence:
             raise HIPResidualJVPWorkerError(
                 "contract_test_must_not_attach_hardware_receipt"
             )
+        if self.production_lifecycle is not None:
+            if type(self.production_lifecycle) is not HIPProductionLifecycleEvidence:
+                raise HIPResidualJVPWorkerError(
+                    "production_lifecycle_evidence_type_invalid"
+                )
+            self.production_lifecycle.validate()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -117,6 +218,11 @@ class HIPRuntimeEvidence:
             "cpu_fallback_used": self.cpu_fallback_used,
             "regularization_used": self.regularization_used,
             "mid_step_d2h_count": self.mid_step_d2h_count,
+            "production_lifecycle": (
+                self.production_lifecycle.to_dict()
+                if self.production_lifecycle is not None
+                else None
+            ),
             "runtime_metadata": _deep_thaw(self.runtime_metadata),
         }
 
@@ -127,6 +233,7 @@ class HIPResidualJVPWorkerConfig:
     require_retained_jvp_rows: bool = True
     require_accepted_state_hip_refresh: bool = True
     maximum_mid_step_d2h_count: int = 0
+    maximum_mid_step_d2h_bytes: int = 0
     fallback_allowed: bool = False
     regularization_allowed: bool = False
     directional_config: DirectionalConsistencyConfig = field(
@@ -145,6 +252,14 @@ class HIPResidualJVPWorkerConfig:
         ):
             raise HIPResidualJVPWorkerError(
                 "maximum_mid_step_d2h_count_invalid"
+            )
+        if (
+            type(self.maximum_mid_step_d2h_bytes) is bool
+            or not isinstance(self.maximum_mid_step_d2h_bytes, int)
+            or self.maximum_mid_step_d2h_bytes < 0
+        ):
+            raise HIPResidualJVPWorkerError(
+                "maximum_mid_step_d2h_bytes_invalid"
             )
         self.directional_config.validate()
 
@@ -252,6 +367,58 @@ def execute_hip_residual_jvp_worker_probe(
         blockers.append("regularization_used")
     if runtime.mid_step_d2h_count > cfg.maximum_mid_step_d2h_count:
         blockers.append("mid_step_d2h_limit_exceeded")
+    lifecycle = runtime.production_lifecycle
+    if runtime.execution_kind == "hardware" and lifecycle is None:
+        blockers.append("production_device_lifecycle_evidence_missing")
+    if lifecycle is not None:
+        required_lifecycle_flags = (
+            "dedicated_amd_runner",
+            "state_rhs_csr_uploaded",
+            "persistent_device_buffers_used",
+            "residual_jvp_on_device",
+            "accepted_state_tangent_refresh_on_device",
+            "equation_scaling_on_device",
+            "production_preconditioner_used",
+            "production_fgmres_used",
+            "newton_update_on_device",
+            "line_search_on_device",
+            "material_commit_rollback_on_device",
+            "convergence_gate_on_device",
+            "checkpoint_emitted",
+            "result_ir_emitted",
+            "diagnostic_ir_emitted",
+        )
+        blockers.extend(
+            f"lifecycle::{name}_not_proven"
+            for name in required_lifecycle_flags
+            if getattr(lifecycle, name) is not True
+        )
+        if lifecycle.krylov_iteration_count <= 0:
+            blockers.append("kpi::krylov_iterations_missing")
+        if lifecycle.matvec_count < lifecycle.krylov_iteration_count:
+            blockers.append("kpi::matvec_count_inconsistent")
+        if lifecycle.preconditioner_apply_count < lifecycle.krylov_iteration_count:
+            blockers.append("kpi::preconditioner_apply_count_inconsistent")
+        if lifecycle.h2d_bytes <= 0:
+            blockers.append("kpi::h2d_bytes_missing")
+        if lifecycle.d2h_bytes <= 0:
+            blockers.append("kpi::d2h_bytes_missing")
+        if lifecycle.mid_step_d2h_bytes > cfg.maximum_mid_step_d2h_bytes:
+            blockers.append("mid_step_d2h_bytes_limit_exceeded")
+        if lifecycle.peak_vram_bytes <= 0:
+            blockers.append("kpi::peak_vram_bytes_missing")
+        if lifecycle.end_to_end_wall_seconds <= 0.0:
+            blockers.append("kpi::end_to_end_wall_time_missing")
+        if lifecycle.cpu_baseline_wall_seconds <= 0.0:
+            blockers.append("kpi::cpu_baseline_wall_time_missing")
+        if lifecycle.speedup_vs_cpu <= 0.0:
+            blockers.append("kpi::cpu_speedup_missing")
+        if (
+            lifecycle.terminal_result_ir_parity is not True
+            or lifecycle.terminal_result_ir_hash
+            != lifecycle.cpu_terminal_result_ir_hash
+        ):
+            blockers.append("terminal_result_ir_parity_failed")
     if not directional.consistent_residual_jacobian_newton_gate_passed:
         blockers.append("physical_residual_jacobian_directional_gate_failed")
     blockers = list(dict.fromkeys(blockers))
