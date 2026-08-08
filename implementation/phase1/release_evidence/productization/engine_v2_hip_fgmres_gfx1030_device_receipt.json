@@ -489,7 +489,7 @@
       "exact_source_commit_claim": true,
       "input_checksums": {
         "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:e50d6da179b691ebe348926400acdfcc9d50f96959bca16cd936528687f9b539",
-        "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
+        "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:e4a2980b28192c29eb3918d118fdb99fecf53a519008e93b6017edbbac275272",
         "scripts/run_engine_v2_hip_fgmres_recurrence.py": "sha256:8004e2e7c269e9a7ca693385af962518442b722938f1037ee80a357062002333",
         "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
         "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py": "sha256:7864d9c7fa92c8034e1ff618d5ee99642b5c9e129a6404c5d89547a49c996508",
@@ -502,12 +502,12 @@
         "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json": "sha256:5e0dc59821983998f422c6c3d6b3a61c20be8a05f8a7c7079efea39d5f3a86d3",
         "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py": "sha256:9c66db78f22d09fd52437e9a1204ae16d27fde8a4b345a2bd21182d52359fc5a",
         "tests/test_engine_v2_cpu_fgmres_v1.py": "sha256:7d4cf202c3d89e5154af4e87dd0ce3062ae60606dd38a7481e8fd7988e9f62df",
-        "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
+        "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:d36630c2ee984e3b0a7d60fd79777d5de17d42ba479b9cdcd17acbe41edfe6d8",
         "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:dccebab38d3b8985ad98b0320cf369fe97c551b0f462d9e1a2d61e4a4cbbde0a",
         "tests/test_engine_v2_hip_fgmres_recurrence_runner.py": "sha256:e9a5b2d61ba4d68eb0b51bebac4a140ec253473c00c552fa5305444b6b405f2c"
       },
-      "repository_commit_sha": "e08c3ae547a52a77cfe8b3332d662b82ebc1bb40",
-      "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
+      "repository_commit_sha": "ba759fe19466eb1a9864ccf4d651b1b6b0807f22",
+      "source_set_hash": "sha256:a25cdf4549695bf087c7063ad075c4cc93e71c716f14789056f8513155931a0f",
       "worktree_clean": true
     },
     "wheel": {
@@ -515,18 +515,18 @@
       "filename": "structural_analysis-0.3.0-py3-none-any.whl",
       "project_name": "structural-analysis",
       "project_version": "0.3.0",
-      "sha256": "sha256:f36ea1878378625286d3414d294a45f522f7efcce0b927db5a20f8585080b148"
+      "sha256": "sha256:9c695f339dd8a38222dc0900ae79b41de5cd784cd6c7188694fb93a1b4fc8982"
     }
   },
-  "generated_at": "2026-08-08T10:00:17.830051+00:00",
-  "receipt_hash": "sha256:4261fd84995207ab5635b778aa6225b57cfced5fe34e30f03bc95fce48412f38",
+  "generated_at": "2026-08-08T10:02:56.217670+00:00",
+  "receipt_hash": "sha256:058145528d7b03a7c64ecc9c1c1fdd59e582438eb484bc229ea0ba8fbeda948f",
   "schema_version": "engine-v2-hip-fgmres-device-receipt.v1",
   "signature": {
     "algorithm": null,
     "public_key_sha256": null,
     "public_key_spki_base64": null,
     "signature_base64": null,
-    "signed_payload_hash": "sha256:61e58c5dd7899827bbdbc394c95aba8cb1685c7bb20f081382273a27a74697b2",
+    "signed_payload_hash": "sha256:5c2a01c75d26c294c3c53b162d832fd820f661b8ae358373d928694ad42c9fe7",
     "signer_id": null,
     "state": "unsigned"
   },
