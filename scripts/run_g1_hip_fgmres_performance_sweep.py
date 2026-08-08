@@ -149,8 +149,12 @@ def _case(dimension: int, binary: Path, temporary: Path, repetitions: int) -> di
 def build_receipt(*, repetitions: int = 3) -> dict[str, Any]:
     if repetitions < 2:
         raise ValueError("sweep_repetitions_too_small")
-    if _git("status", "--porcelain", "--untracked-files=normal"):
-        raise RuntimeError("hip_sweep_requires_clean_source_worktree")
+    source_status = subprocess.run(
+        ["git", "status", "--porcelain", "--untracked-files=all", "--", *(path.as_posix() for path in SOURCE_PATHS)],
+        cwd=ROOT, check=True, capture_output=True, text=True,
+    ).stdout.strip()
+    if source_status:
+        raise RuntimeError("hip_sweep_requires_clean_source_paths")
     hipcc = Path("/opt/rocm-6.0.2/bin/hipcc"); wheel = ROOT / WHEEL
     if not hipcc.is_file() or not wheel.is_file() or not Path("/dev/kfd").exists() or not Path("/dev/dri/renderD128").exists():
         raise RuntimeError("hip_sweep_runtime_prerequisite_missing")
@@ -159,7 +163,7 @@ def build_receipt(*, repetitions: int = 3) -> dict[str, Any]:
         cases = [_case(dimension, binary, temporary, repetitions) for dimension in DIMENSIONS]
     payload = {
         "schema_version": "g1-hip-fgmres-performance-sweep.v1", "receipt_hash": "sha256:" + "0" * 64,
-        "source": {"repository_commit_sha": _git("rev-parse", "HEAD"), "worktree_clean_at_execution": True, "input_checksums": {path.as_posix(): _sha_file(path) for path in SOURCE_PATHS}},
+        "source": {"repository_commit_sha": _git("rev-parse", "HEAD"), "source_paths_clean_at_execution": True, "input_checksums": {path.as_posix(): _sha_file(path) for path in SOURCE_PATHS}},
         "runtime": {"backend": "amd_rocm_hip", "device_name": "AMD Radeon RX 6900 XT", "gcn_arch_name": "gfx1030", "device_nodes": ["/dev/kfd", "/dev/dri/renderD128"], "compiler": compiler, "wheel": {"path": WHEEL.as_posix(), "sha256": _sha_file(WHEEL), "bound_at_execution": True}},
         "sweep": {"dimensions": list(DIMENSIONS), "cases": cases},
         "claims": {"actual_gfx1030_hardware": True, "bounded_model_size_performance_sweep": True, "mid_recurrence_d2h_zero": all(row["gpu"]["mid_recurrence_host_transfer_count"] == 0 for row in cases), "synthetic_70560_equation_lifecycle": any(row["dimension"] == 70560 for row in cases), "production_mgt_70560_operator": False, "independent_gfx1100": False, "cross_device_performance": False},
