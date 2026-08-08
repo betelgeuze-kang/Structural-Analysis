@@ -9,13 +9,15 @@
   },
   "blockers_remaining": [
     "independent_gfx1100_hardware_run_not_available",
-    "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
+    "source_authoritative_nonlinear_material_parameters_unavailable",
+    "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp",
     "resultir_diagnosticir_not_established"
   ],
-  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture executes finite-chord elastic material trial/commit and a post-acceptance rejected trial with exact rollback for all 5,572 actual MGT frame elements, and binds the committed bytes to MaterialStateBundle lineage. The accepted state is emitted through the deterministic full-load checkpoint schema and exact-reloaded. Nonlinear material-family breadth, ResultIR, DiagnosticIR, and independent gfx1100 hardware remain unclaimed.",
+  "claim_boundary": "Actual 70,560-equation accepted-state right-preconditioned FGMRES executes six two-pass-MGS Arnoldi iterations, device Givens rotations and backsolve, finite-chord physical-residual line-search candidates, accepted-state update, and a nonlinear convergence gate in one gfx1030 lifecycle with zero iteration-time D2H. The same resident fixture uploads and consumes the exact 5,572-element MGT family order, source primary/secondary elastic moduli, and finite-chord material state during initial, accepted, and rejected trials, followed by exact rollback and MaterialStateBundle binding. This is source-authoritative family-buffer connectivity, not nonlinear constitutive breadth: source-authoritative hardening, damage/softening, and SRC fraction parameters are unavailable and nonlinear laws are not connected to residual/JVP. ResultIR, DiagnosticIR, independent gfx1100 hardware, and G1 closure remain unclaimed.",
   "claims": {
     "actual_mgt_elastic_material_state_bundle": true,
     "actual_mgt_full_load_accepted_state": true,
+    "actual_mgt_material_family_fixture_device_bound": true,
     "checkpoint_emitted": true,
     "device_givens_and_backsolve": true,
     "equation_scaling": true,
@@ -51,17 +53,17 @@
     },
     "checkpoint_artifact": {
       "accepted_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
-      "byte_length": 1142624,
+      "byte_length": 1142627,
       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
       "exact_reload": true,
       "exact_restart_terminal_state": true,
-      "file_sha256": "sha256:8ce5877f54e3f127172a60dc37e1b1d5f3ffb65f3dc25b3aa80ea6c31638b85e",
+      "file_sha256": "sha256:736c6113f83a0e2bc38fef31f1a9e8eec787eecbc5866baef28a2e41e152aa29",
       "free_displacement_data_hash": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_checkpoint.npz",
       "schema": "g1-mgt-state-updated-frame-axial-full-load-checkpoint.v1",
-      "serialization_overhead_seconds": 0.059697220000089146,
-      "source_commit_sha": "4c2e64225b89d05ab05d44cb61acd0c1124a89db"
+      "serialization_overhead_seconds": 0.059266666998155415,
+      "source_commit_sha": "189283aed3aa164033da39108b64a4ec79452e57"
     },
     "nonlinear_residual_artifact": {
       "byte_length": 564480,
@@ -107,14 +109,14 @@
     "schema_version": "equation-scaling-mgt-translation-free.v1",
     "translation_equation_count": 70560
   },
-  "generated_at": "2026-08-08T14:06:25.696793+00:00",
+  "generated_at": "2026-08-08T14:50:53.517380+00:00",
   "hardware_execution": {
     "accepted_alpha": 1,
     "accepted_nonlinear_residual_inf_n": 4.5068662404775016e-07,
     "accepted_nonlinear_residual_l2_n": 7.653400154524554e-07,
     "cpu_backend": false,
-    "d2h_bytes": 3327908,
-    "device_lifecycle_wall_time_ms": 5335.368793,
+    "d2h_bytes": 4041124,
+    "device_lifecycle_wall_time_ms": 5254.13347,
     "device_name": "AMD Radeon RX 6900 XT",
     "equation_count": 70560,
     "estimated_residual_history": [
@@ -127,7 +129,7 @@
     ],
     "final_d2h_transfer_count": 13,
     "gcn_arch_name": "gfx1030",
-    "h2d_bytes": 239823840,
+    "h2d_bytes": 239979856,
     "krylov_iterations": 6,
     "line_search_candidate_count": 5,
     "line_search_candidate_inf_n": [
@@ -146,11 +148,16 @@
     ],
     "line_search_selected_index": 0,
     "material_commit_count": 1,
+    "material_conc_count": 2182,
+    "material_family_fixture_bound": true,
     "material_integration_point_count": 5572,
     "material_kernel_invocation_count": 6,
     "material_rollback_count": 1,
-    "material_state_field_count": 6,
+    "material_src_count": 1692,
+    "material_state_field_count": 10,
+    "material_steel_count": 1692,
     "material_trial_count": 2,
+    "material_user_count": 6,
     "matvec_count": 7,
     "mid_iteration_d2h_transfer_count": 0,
     "physical_residual_inf_n": 2.6308551618277578e-14,
@@ -163,14 +170,14 @@
     "schema_version": "engine-v2-mgt-fgmres-output.v1",
     "sparse_kernel_invocation_count": 51966,
     "status": "ok",
-    "tracked_peak_device_allocation_bytes": 259789676,
+    "tracked_peak_device_allocation_bytes": 260837212,
     "vector_kernel_invocation_count": 185
   },
   "material_lifecycle": {
     "artifacts": {
       "committed": {
-        "byte_length": 267456,
-        "data_hash": "sha256:5b530763a765d6c4b517aa43ea7efb78ee1fa6bdac34ee7c98f9fe6f89972436",
+        "byte_length": 445760,
+        "data_hash": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
         "dtype": "<f8",
         "field_names": [
           "reference_length_m",
@@ -178,18 +185,22 @@
           "extension_m",
           "engineering_strain",
           "axial_force_n",
-          "axial_stiffness_n_per_m"
+          "axial_stiffness_n_per_m",
+          "material_family_code",
+          "source_primary_elastic_modulus_mpa",
+          "source_secondary_elastic_modulus_mpa",
+          "source_elastic_stress_mpa"
         ],
-        "file_sha256": "sha256:5b530763a765d6c4b517aa43ea7efb78ee1fa6bdac34ee7c98f9fe6f89972436",
+        "file_sha256": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
         "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_committed_material.f64le",
         "shape": [
           5572,
-          6
+          10
         ]
       },
       "initial": {
-        "byte_length": 267456,
-        "data_hash": "sha256:228dbef620197e46421ada173437b2900b61b1cb55c77a16b58ad322514900e4",
+        "byte_length": 445760,
+        "data_hash": "sha256:7101008e38a39b9abe995686c9bfea801e2af0636c6f8fda57b93a1f4d0eaa28",
         "dtype": "<f8",
         "field_names": [
           "reference_length_m",
@@ -197,18 +208,22 @@
           "extension_m",
           "engineering_strain",
           "axial_force_n",
-          "axial_stiffness_n_per_m"
+          "axial_stiffness_n_per_m",
+          "material_family_code",
+          "source_primary_elastic_modulus_mpa",
+          "source_secondary_elastic_modulus_mpa",
+          "source_elastic_stress_mpa"
         ],
-        "file_sha256": "sha256:228dbef620197e46421ada173437b2900b61b1cb55c77a16b58ad322514900e4",
+        "file_sha256": "sha256:7101008e38a39b9abe995686c9bfea801e2af0636c6f8fda57b93a1f4d0eaa28",
         "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_initial_material.f64le",
         "shape": [
           5572,
-          6
+          10
         ]
       },
       "rejected_trial": {
-        "byte_length": 267456,
-        "data_hash": "sha256:d8d77299c458bd14b24b4979290b75b739833b3d2eb7f3eadee986be8f2593c2",
+        "byte_length": 445760,
+        "data_hash": "sha256:93b9045475a2e3de340962ba9e4e84f61676b8e78fed39da511e31436f3d63bc",
         "dtype": "<f8",
         "field_names": [
           "reference_length_m",
@@ -216,18 +231,22 @@
           "extension_m",
           "engineering_strain",
           "axial_force_n",
-          "axial_stiffness_n_per_m"
+          "axial_stiffness_n_per_m",
+          "material_family_code",
+          "source_primary_elastic_modulus_mpa",
+          "source_secondary_elastic_modulus_mpa",
+          "source_elastic_stress_mpa"
         ],
-        "file_sha256": "sha256:d8d77299c458bd14b24b4979290b75b739833b3d2eb7f3eadee986be8f2593c2",
+        "file_sha256": "sha256:93b9045475a2e3de340962ba9e4e84f61676b8e78fed39da511e31436f3d63bc",
         "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_rejected_material.f64le",
         "shape": [
           5572,
-          6
+          10
         ]
       },
       "rollback": {
-        "byte_length": 267456,
-        "data_hash": "sha256:5b530763a765d6c4b517aa43ea7efb78ee1fa6bdac34ee7c98f9fe6f89972436",
+        "byte_length": 445760,
+        "data_hash": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
         "dtype": "<f8",
         "field_names": [
           "reference_length_m",
@@ -235,26 +254,51 @@
           "extension_m",
           "engineering_strain",
           "axial_force_n",
-          "axial_stiffness_n_per_m"
+          "axial_stiffness_n_per_m",
+          "material_family_code",
+          "source_primary_elastic_modulus_mpa",
+          "source_secondary_elastic_modulus_mpa",
+          "source_elastic_stress_mpa"
         ],
-        "file_sha256": "sha256:5b530763a765d6c4b517aa43ea7efb78ee1fa6bdac34ee7c98f9fe6f89972436",
+        "file_sha256": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
         "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_rollback_material.f64le",
         "shape": [
           5572,
-          6
+          10
         ]
       }
     },
     "commit_count": 1,
     "cpu_hip_max_scaled_error": 1.768406147705789e-13,
     "cpu_hip_scaled_error_tolerance": 2e-12,
+    "family_fixture": {
+      "adequacy_audit_receipt_hash": "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
+      "byte_length": 156040,
+      "element_id_order_data_hash": "sha256:936abc1baba1dd63334b6c1d0f4fcaf763e422f48eb982b9c8949eaf123f62a9",
+      "family_code_data_hash": "sha256:d9c5cb5acd6bba325ea31801dbf2e68b805855d22d567ce2c4082c84e4c90548",
+      "family_counts": {
+        "CONC": 2182,
+        "SRC": 1692,
+        "STEEL": 1692,
+        "USER": 6
+      },
+      "file_sha256": "sha256:daef4b5d36d2a522feee6d7cfa883d79ba26eed63b3921620b4a638a7218b37a",
+      "geometry_order_exact": true,
+      "primary_elastic_modulus_mpa_data_hash": "sha256:644125fa9eef3b8457c6ac5207dc6e91c38c272c1cd14c3a2ced009907e1963f",
+      "profile": "actual_mgt_geometry_ordered_material_family_fixture.v1",
+      "secondary_elastic_modulus_mpa_data_hash": "sha256:47a41bc55ef0d2004023636f05b3b3859b93a9f9cb8ae57c0e72cd65039545e2"
+    },
     "field_max_abs_errors": {
       "axial_force_n": 2.3283064365386963e-10,
       "axial_stiffness_n_per_m": 0.0,
       "current_length_m": 0.0,
       "engineering_strain": 4.235164736271502e-21,
       "extension_m": 1.3552527156068805e-20,
-      "reference_length_m": 0.0
+      "material_family_code": 0.0,
+      "reference_length_m": 0.0,
+      "source_elastic_stress_mpa": 1.3877787807814457e-16,
+      "source_primary_elastic_modulus_mpa": 0.0,
+      "source_secondary_elastic_modulus_mpa": 0.0
     },
     "field_names": [
       "reference_length_m",
@@ -262,26 +306,30 @@
       "extension_m",
       "engineering_strain",
       "axial_force_n",
-      "axial_stiffness_n_per_m"
+      "axial_stiffness_n_per_m",
+      "material_family_code",
+      "source_primary_elastic_modulus_mpa",
+      "source_secondary_elastic_modulus_mpa",
+      "source_elastic_stress_mpa"
     ],
     "integration_point_count": 5572,
     "kernel_invocation_count": 6,
     "material_state_bundle": {
-      "accepted_trial_bundle_hash": "sha256:59915732cc90f13e8f700cd475ce548ad6618cb9da01e63e8fada331de01acd0",
-      "committed_bundle_hash": "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8",
+      "accepted_trial_bundle_hash": "sha256:d909d94d8a9f5bf35b47e0ac536e487d78cb90202b64c9d04245659a0bdbce68",
+      "committed_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
       "committed_epoch": 1,
       "committed_solver_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
       "entry_count": 5572,
       "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
-      "initial_bundle_hash": "sha256:38c38760bde066ffc5c1fc1065f2818308aaf66b9d5b4336be4c55907a133ce3",
-      "integration_point_order_hash": "sha256:3c10370a2b59f0600bdb3e952c0d4670499c3b309b97fe979abec22c3f53b8f2",
+      "initial_bundle_hash": "sha256:3a5518bc6e9baecbbf8d3c0e522afb45504ac8bb878243e3a5874a4392cfea2b",
+      "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c",
       "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "rejected_trial_bundle_hash": "sha256:4aa2e62061f08752526145a40fee176114a43cb14170d6f15d51e4de5edea20b",
+      "rejected_trial_bundle_hash": "sha256:097b933fc4b4dbb66bdd76fc014b60d16081f048218ea5ea2ee54d31b8e3f439",
       "rejected_trial_epoch": 2,
       "rollback_returns_exact_accepted_object": true
     },
     "mid_lifecycle_d2h_transfer_count": 0,
-    "profile": "actual_mgt_finite_chord_elastic_frame_material_state.v1",
+    "profile": "actual_mgt_source_family_finite_chord_elastic_state.v1",
     "rollback_count": 1,
     "rollback_state_bitwise_exact": true,
     "trial_count": 2
@@ -324,18 +372,18 @@
       "preconditioner_apply_count": 6,
       "selected_index": 0,
       "terminal_linear_residual_inf_n": 2.6308529198374256e-14,
-      "wall_seconds": 5.354765568998118
+      "wall_seconds": 5.369098746999953
     },
-    "gpu_device_lifecycle_wall_seconds": 5.335368793,
-    "speedup_vs_cpu": 1.0036355080127857,
+    "gpu_device_lifecycle_wall_seconds": 5.25413347,
+    "speedup_vs_cpu": 1.0218809205469142,
     "terminal_resultir_parity": false,
     "terminal_resultir_parity_reason": "authoritative_resultir_adapter_and_manifest_not_yet_emitted_despite_bound_elastic_material_bundle"
   },
-  "receipt_hash": "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952",
+  "receipt_hash": "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821",
   "runtime": {
     "backend": "amd_rocm_hip",
-    "binary_byte_length": 186848,
-    "binary_sha256": "sha256:0fc7c6172ab8766be6c4287a46df0dade0b34098453fe698a85c2cba1070b92b",
+    "binary_byte_length": 195240,
+    "binary_sha256": "sha256:217488ab7e87ff28eb91d503662f8048761ba0df5e4d4a04aedf7beeb1053aa4",
     "compiler_version": "HIP version: 6.0.32831-204d35d16",
     "device_name": "AMD Radeon RX 6900 XT",
     "device_nodes": [
@@ -343,7 +391,7 @@
       "/dev/dri/renderD128"
     ],
     "gcn_arch_name": "gfx1030",
-    "gfx1100_cross_compile_binary_sha256": "sha256:a4b824d403ba911d5a1c5f3e311ca02f2ef641dd2201ab457ae0a2a67a7f3c9d",
+    "gfx1100_cross_compile_binary_sha256": "sha256:ef069ed6035d92b483d34591f57d75ec662be1140b411694f441bc1b94f9c6b8",
     "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
   },
   "schema_version": "g1-mgt-device-fgmres-receipt.v1",
@@ -352,19 +400,21 @@
     "input_checksums": {
       "dist/structural_analysis-0.3.0-py3-none-any.whl": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a",
       "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
-      "implementation/phase1/hip_kernels/engine_v2_mgt_fgmres.hip.cpp": "sha256:b429349ac19a34d46c0f05d9e09a8234051c43bd0a600760f597142368fe3834",
+      "implementation/phase1/hip_kernels/engine_v2_mgt_fgmres.hip.cpp": "sha256:045ace5981d8814cc3f2b3cc9e3b2da3f923b77586199006f69b66e7a28dbbd4",
       "implementation/phase1/hip_kernels/engine_v2_mgt_preconditioned_jvp.hip.cpp": "sha256:7d876b3cf5dc5080f9b403b854aa17582934a21692a8fa5d4379c19c2067dcea",
       "implementation/phase1/hip_kernels/engine_v2_sparse_lu_apply.hip.cpp": "sha256:452d5964ec9ca38c0653a27d7d0879fdbf8e110ebdc38c1d2bc6600d3d7706e2",
       "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "implementation/phase1/release_evidence/productization/g1_mgt_material_family_adequacy_audit.json": "sha256:c54cc244b7e43b39d313203b8272847e19364f4bd615e07a303a8d0df538ba37",
       "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
       "scripts/build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
-      "scripts/run_g1_mgt_device_fgmres.py": "sha256:aa17b78d29ab4fd3caf62ac845097350a6a2dea9a228a6ecb433fb178e43e559",
+      "scripts/build_g1_mgt_material_family_adequacy_audit.py": "sha256:1fb1bb62f33a6da0d0b1ef31839d1a4183b140b54c3529d69757c337c921f2ce",
+      "scripts/run_g1_mgt_device_fgmres.py": "sha256:01dd0f096e37d86d5f5e9be6e56477213a7b162ddfd8ca01773182eba1db714b",
       "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
       "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
       "src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.json": "sha256:e6a02ace4c1f1bd1c32d3fc769f9d0c0263dfd71a56dacd4c2d3733a8eea14ce",
-      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:0d0421eaf77328fb56ba0faafa3342190a3c5c96533d8589107511067616ae94"
+      "tests/test_run_g1_mgt_device_fgmres.py": "sha256:f571877a4f8debdee30f934e93db4c956f6b4b4b43f44b0d420a1718d42809e9"
     },
-    "repository_commit_sha": "4c2e64225b89d05ab05d44cb61acd0c1124a89db",
+    "repository_commit_sha": "189283aed3aa164033da39108b64a4ec79452e57",
     "source_paths_clean_at_execution": true
   },
   "status": "partial"
