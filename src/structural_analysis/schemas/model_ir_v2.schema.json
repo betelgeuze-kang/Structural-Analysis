@@ -30,7 +30,10 @@
     "schema_version": {"const": "structural-analysis-model-ir.v2"},
     "model_id": {"$ref": "#/$defs/stableId"},
     "capability_profile": {
-      "enum": ["engine_v2_phase0_linear_3d"]
+      "enum": [
+        "engine_v2_phase0_linear_3d",
+        "frame3d_stateful_nonlinear_3d_v1"
+      ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
     "units": {"$ref": "#/$defs/canonicalUnits"},
@@ -100,6 +103,7 @@
       "pattern": "^sha256:[0-9a-f]{64}$"
     },
     "nonNegativeIndex": {"type": "integer", "minimum": 0},
+    "nonNegativeNumber": {"type": "number", "minimum": 0},
     "positiveNumber": {"type": "number", "exclusiveMinimum": 0},
     "vector3": {
       "type": "array",
@@ -203,6 +207,12 @@
       }
     },
     "material": {
+      "oneOf": [
+        {"$ref": "#/$defs/linearElasticMaterial"},
+        {"$ref": "#/$defs/bilinearCombinedHardeningSteelMaterial"}
+      ]
+    },
+    "linearElasticMaterial": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
@@ -228,6 +238,49 @@
           "properties": {
             "stateful": {"const": false},
             "state_update_epoch": {"const": "none"},
+            "supports_trial_commit_rollback": {"const": true}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "bilinearCombinedHardeningSteelMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "bilinear_combined_hardening_steel"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "elastic_modulus_pa",
+            "poisson_ratio",
+            "density_kg_m3",
+            "yield_stress_pa",
+            "isotropic_hardening_modulus_pa",
+            "kinematic_hardening_modulus_pa"
+          ],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "poisson_ratio": {"type": "number", "exclusiveMinimum": -1, "exclusiveMaximum": 0.5},
+            "density_kg_m3": {"$ref": "#/$defs/nonNegativeNumber"},
+            "yield_stress_pa": {"$ref": "#/$defs/positiveNumber"},
+            "isotropic_hardening_modulus_pa": {"$ref": "#/$defs/nonNegativeNumber"},
+            "kinematic_hardening_modulus_pa": {"$ref": "#/$defs/nonNegativeNumber"}
+          }
+        },
+        "state_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stateful", "state_update_epoch", "supports_trial_commit_rollback"],
+          "properties": {
+            "stateful": {"const": true},
+            "state_update_epoch": {"const": "accepted_state"},
             "supports_trial_commit_rollback": {"const": true}
           }
         },
@@ -399,7 +452,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/stableId"},
         "index": {"$ref": "#/$defs/nonNegativeIndex"},
-        "analysis_type": {"const": "linear_static"},
+        "analysis_type": {"enum": ["linear_static", "nonlinear_static"]},
         "self_weight": {"$ref": "#/$defs/vector3"},
         "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
         "source_id": {"type": ["string", "null"]},
