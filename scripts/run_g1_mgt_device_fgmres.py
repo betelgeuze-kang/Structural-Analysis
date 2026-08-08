@@ -16,6 +16,8 @@ from typing import Any, Sequence
 
 from jsonschema import Draft202012Validator
 import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.linalg import spsolve_triangular
 
 ROOT = Path(__file__).resolve().parents[1]
 for candidate in (ROOT / "scripts", ROOT / "src", ROOT / "implementation/phase1"):
@@ -174,6 +176,72 @@ def _compile_run(root: Path, sparse: Any, tangent: Any, reference_force_n: float
                 "compiler_version": _run([str(compiler), "--version"], cwd=root, timeout=30).stdout.splitlines()[0]}
 
 
+def _cpu_baseline(*, sparse: Any, context: dict[str, Any],
+                  reference_force_n: float) -> dict[str, Any]:
+    factor = sparse.factor; n = factor.dimension; restart = 6
+    lower = csr_matrix((factor.lower_numeric_values, factor.lower_column_indices,
+                        factor.lower_row_pointer), shape=(n, n))
+    upper = csr_matrix((factor.upper_numeric_values, factor.upper_column_indices,
+                        factor.upper_row_pointer), shape=(n, n))
+
+    def precondition(vector: np.ndarray) -> np.ndarray:
+        rhs_n = vector * reference_force_n
+        permuted = rhs_n[factor.inverse_row_permutation]
+        low = spsolve_triangular(lower, permuted, lower=True)
+        high = spsolve_triangular(upper, low, lower=False)
+        return np.asarray(high[factor.column_permutation], dtype=np.float64)
+
+    operator = context["problem"].current_tangent_operator
+    state = context["state"]
+    rhs_n = context["rhs_kn"] * 1000.0
+    started = time.perf_counter()
+    scaled_rhs = rhs_n / reference_force_n
+    beta = float(np.linalg.norm(scaled_rhs))
+    basis = np.zeros((restart + 1, n), dtype=np.float64)
+    directions = np.zeros((restart, n), dtype=np.float64)
+    hessenberg = np.zeros((restart + 1, restart), dtype=np.float64)
+    basis[0] = scaled_rhs / beta
+    for column in range(restart):
+        directions[column] = precondition(basis[column])
+        work = np.asarray(operator.apply_n_per_m(
+            state, 1.0, directions[column]), dtype=np.float64) / reference_force_n
+        for _pass in range(2):
+            for row in range(column + 1):
+                coefficient = float(np.dot(basis[row], work))
+                hessenberg[row, column] += coefficient
+                work -= coefficient * basis[row]
+        hessenberg[column + 1, column] = float(np.linalg.norm(work))
+        basis[column + 1] = work / hessenberg[column + 1, column]
+    target = np.zeros(restart + 1, dtype=np.float64); target[0] = beta
+    coefficients = np.linalg.lstsq(hessenberg, target, rcond=None)[0]
+    correction = coefficients @ directions
+    linear_action_n = np.asarray(
+        operator.apply_n_per_m(state, 1.0, correction), dtype=np.float64)
+    linear_residual_inf_n = float(np.linalg.norm(rhs_n - linear_action_n, ord=np.inf))
+    alphas = (1.0, 0.5, 0.25, 0.125, 0.0625)
+    base_l2 = float(np.linalg.norm(-rhs_n))
+    candidates = []
+    selected = None
+    for alpha in alphas:
+        residual_n = np.asarray(
+            context["problem"].residual_kn(state + alpha * correction, 1.0),
+            dtype=np.float64) * 1000.0
+        l2 = float(np.linalg.norm(residual_n)); inf = float(np.linalg.norm(residual_n, ord=np.inf))
+        candidates.append({"alpha": alpha, "residual_l2_n": l2, "residual_inf_n": inf})
+        if selected is None and l2 <= (1.0 - 1.0e-4 * alpha) * base_l2:
+            selected = len(candidates) - 1
+    wall = time.perf_counter() - started
+    if selected is None: raise RuntimeError("cpu_baseline_line_search_failed")
+    return {"wall_seconds": wall, "krylov_iterations": restart,
+            "preconditioner_apply_count": restart, "matvec_count": restart + 1,
+            "physical_residual_evaluation_count": len(alphas),
+            "terminal_linear_residual_inf_n": linear_residual_inf_n,
+            "selected_index": selected, "accepted_alpha": alphas[selected],
+            "accepted_residual_inf_n": candidates[selected]["residual_inf_n"],
+            "candidate_rows": candidates,
+            "correction_data_hash": array_data_hash(np.ascontiguousarray(correction, dtype="<f8"))}
+
+
 def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFAULT_SOLUTION,
         residual_out: Path = DEFAULT_RESIDUAL, accepted_state_out: Path = DEFAULT_ACCEPTED_STATE,
         nonlinear_residual_out: Path = DEFAULT_NONLINEAR_RESIDUAL,
@@ -188,6 +256,8 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
     reference_force_n = max(1.0, float(np.max(np.abs(reference_load_kn))) * 1000.0)
     execution = _compile_run(root, sparse, tangent.fixture, reference_force_n,
                              hipcc, rocm_path, device_lib_path, timeout)
+    cpu_baseline = _cpu_baseline(
+        sparse=sparse, context=context, reference_force_n=reference_force_n)
     runtime = execution["runtime"]; solution = execution["solution"]; residual = execution["residual"]
     accepted_state = execution["accepted_state"]; nonlinear_residual = execution["nonlinear_residual"]
     if any(value.shape != (N,) for value in (solution, residual, accepted_state, nonlinear_residual)):
@@ -240,6 +310,12 @@ def run(*, root: Path = ROOT, out: Path = DEFAULT_OUT, solution_out: Path = DEFA
                            "load_factor": 1.0, "equation_count": N, "state_data_hash": array_data_hash(context["state"]),
                            "right_hand_side_data_hash": array_data_hash(context["rhs_kn"])},
         "equation_scaling": scaling, "hardware_execution": runtime,
+        "performance": {"cpu_baseline": cpu_baseline,
+                        "gpu_device_lifecycle_wall_seconds": runtime["device_lifecycle_wall_time_ms"] / 1000.0,
+                        "speedup_vs_cpu": cpu_baseline["wall_seconds"] /
+                        (runtime["device_lifecycle_wall_time_ms"] / 1000.0),
+                        "terminal_resultir_parity": False,
+                        "terminal_resultir_parity_reason": "authoritative_resultir_not_emitted_without_material_state_bundle"},
         "comparison": {"terminal_physical_residual_cpu_replay_max_abs_error_n": replay_error,
                        "terminal_physical_residual_tolerance_n": 1.0e-9,
                        "accepted_nonlinear_residual_cpu_replay_max_abs_error_n": nonlinear_replay_error,
