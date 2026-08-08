@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1-mgt-accepted-state-preconditioned-jvp-parity-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "contract_scope", "source", "accepted_state", "preconditioned_direction", "hardware_execution", "comparison", "claims", "blockers_remaining", "artifacts", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-accepted-state-preconditioned-jvp-parity-receipt.v1"},
+    "receipt_hash": {"$ref": "#/$defs/sha256"},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "contract_scope": {"const": "actual_mgt_full_load_accepted_state_preconditioned_jvp_local_gfx1030"},
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository_commit_sha", "source_paths_clean_at_execution", "input_checksums", "engine_version"],
+      "properties": {
+        "repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "source_paths_clean_at_execution": {"const": true},
+        "input_checksums": {"type": "object", "minProperties": 13, "additionalProperties": {"$ref": "#/$defs/sha256"}},
+        "engine_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "accepted_state": {
+      "type": "object", "additionalProperties": false,
+      "required": ["checkpoint", "checkpoint_sha256", "load_factor", "equation_count", "state_data_hash", "operator_contract_hash", "fixture_hash"],
+      "properties": {
+        "checkpoint": {"const": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz"},
+        "checkpoint_sha256": {"$ref": "#/$defs/sha256"},
+        "load_factor": {"const": 1.0},
+        "equation_count": {"const": 70560},
+        "state_data_hash": {"$ref": "#/$defs/sha256"},
+        "operator_contract_hash": {"$ref": "#/$defs/sha256"},
+        "fixture_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "preconditioned_direction": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_receipt", "source_receipt_hash", "source_solution_artifact", "direction_data_hash", "direction_inf_m", "bridge_policy"],
+      "properties": {
+        "source_receipt": {"const": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_parity_receipt.json"},
+        "source_receipt_hash": {"$ref": "#/$defs/sha256"},
+        "source_solution_artifact": {"const": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le"},
+        "direction_data_hash": {"$ref": "#/$defs/sha256"},
+        "direction_inf_m": {"type": "number", "exclusiveMinimum": 0},
+        "bridge_policy": {"const": "persisted_final_d2h_artifact_then_next_process_h2d"}
+      }
+    },
+    "hardware_execution": {
+      "type": "object", "additionalProperties": false,
+      "required": ["actual_hardware", "backend", "device_name", "gcn_arch_name", "compiler", "binary_sha256", "binary_byte_length", "runtime_metadata", "runtime_output_hash", "action_artifact"],
+      "properties": {
+        "actual_hardware": {"const": true}, "backend": {"const": "amd_rocm_hip"},
+        "device_name": {"const": "AMD Radeon RX 6900 XT"}, "gcn_arch_name": {"const": "gfx1030"},
+        "compiler": {"type": "object", "required": ["path", "version_first_line", "version_output_sha256"], "properties": {"version_output_sha256": {"$ref": "#/$defs/sha256"}}},
+        "binary_sha256": {"$ref": "#/$defs/sha256"}, "binary_byte_length": {"type": "integer", "minimum": 1},
+        "runtime_metadata": {
+          "type": "object", "additionalProperties": false,
+          "required": ["schema_version", "status", "cpu_backend", "device_name", "gcn_arch_name", "execution_profile", "accumulation_profile", "equation_count", "kernel_invocation_count", "mid_action_d2h_transfer_count", "blocking_d2h_synchronization_count"],
+          "properties": {
+            "schema_version": {"const": "engine-v2-hip-current-tangent-operator-output.v1"}, "status": {"const": "ok"}, "cpu_backend": {"const": false},
+            "device_name": {"const": "AMD Radeon RX 6900 XT"}, "gcn_arch_name": {"const": "gfx1030"},
+            "execution_profile": {"const": "one_thread_per_free_row_reference_frame_geometry.v1"},
+            "accumulation_profile": {"const": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1"},
+            "equation_count": {"const": 70560}, "kernel_invocation_count": {"const": 1},
+            "mid_action_d2h_transfer_count": {"const": 0}, "blocking_d2h_synchronization_count": {"const": 1}
+          }
+        },
+        "runtime_output_hash": {"$ref": "#/$defs/sha256"}, "action_artifact": {"$ref": "#/$defs/artifact"}
+      }
+    },
+    "comparison": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "contract_pass", "canonical_cpu_max_abs_error_n_per_m", "device_order_cpu_max_abs_error_n_per_m", "comparison_tolerance_n_per_m", "action_data_hash", "canonical_action_data_hash", "device_order_action_data_hash", "actual_hardware_execution_required_for_claim", "actual_mgt_scale_claim", "production_performance_claim"],
+      "properties": {
+        "profile": {"const": "engine-v2-cpu-hip-current-tangent-operator-parity.v1"}, "contract_pass": {"const": true},
+        "canonical_cpu_max_abs_error_n_per_m": {"type": "number", "minimum": 0}, "device_order_cpu_max_abs_error_n_per_m": {"type": "number", "minimum": 0},
+        "comparison_tolerance_n_per_m": {"type": "number", "exclusiveMinimum": 0},
+        "action_data_hash": {"$ref": "#/$defs/sha256"}, "canonical_action_data_hash": {"$ref": "#/$defs/sha256"}, "device_order_action_data_hash": {"$ref": "#/$defs/sha256"},
+        "actual_hardware_execution_required_for_claim": {"const": true}, "actual_mgt_scale_claim": {"const": false}, "production_performance_claim": {"const": false}
+      }
+    },
+    "claims": {
+      "type": "object", "additionalProperties": false,
+      "required": ["actual_mgt_full_load_accepted_state", "actual_preconditioner_output_consumed", "actual_accepted_state_current_tangent_jvp", "mathematical_right_preconditioned_jvp_composition", "cpu_hip_numerical_parity", "single_device_lifecycle", "mid_composition_d2h_zero", "production_fgmres", "independent_gfx1100", "g1_closure"],
+      "properties": {
+        "actual_mgt_full_load_accepted_state": {"const": true}, "actual_preconditioner_output_consumed": {"const": true},
+        "actual_accepted_state_current_tangent_jvp": {"const": true}, "mathematical_right_preconditioned_jvp_composition": {"const": true},
+        "cpu_hip_numerical_parity": {"const": true}, "single_device_lifecycle": {"const": false}, "mid_composition_d2h_zero": {"const": false},
+        "production_fgmres": {"const": false}, "independent_gfx1100": {"const": false}, "g1_closure": {"const": false}
+      }
+    },
+    "blockers_remaining": {"const": ["preconditioner_and_current_tangent_execute_in_separate_processes", "persisted_d2h_h2d_bridge_between_preconditioner_and_jvp", "arnoldi_recurrence_not_connected_to_actual_mgt_operator_and_factor", "independent_gfx1100_run_not_available", "full_device_newton_line_search_material_checkpoint_lifecycle_not_established"]},
+    "artifacts": {
+      "type": "object", "additionalProperties": false, "required": ["receipt", "action_vector", "schema", "runner"],
+      "properties": {"receipt": {"type": "string"}, "action_vector": {"type": "string"}, "schema": {"const": "src/structural_analysis/schemas/g1_mgt_accepted_state_preconditioned_jvp_parity_v1.schema.json"}, "runner": {"const": "scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py"}}
+    },
+    "claim_boundary": {"type": "string", "minLength": 350}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "artifact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "format", "dtype", "shape", "byte_length", "file_sha256", "data_hash", "persisted"],
+      "properties": {
+        "path": {"type": "string"}, "format": {"const": "canonical_little_endian_float64_vector.v1"}, "dtype": {"const": "<f8"},
+        "shape": {"const": [70560]}, "byte_length": {"const": 564480}, "file_sha256": {"$ref": "#/$defs/sha256"}, "data_hash": {"$ref": "#/$defs/sha256"}, "persisted": {"const": true}
+      }
+    }
+  }
+}
