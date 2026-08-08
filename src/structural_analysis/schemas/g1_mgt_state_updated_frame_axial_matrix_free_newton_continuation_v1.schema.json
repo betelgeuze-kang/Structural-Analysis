@@ -807,6 +807,7 @@
                 "line_search_reduction",
                 "minimum_line_search_alpha",
                 "accepted_trial_policy",
+                "line_search_merit",
                 "line_search_acceptance",
                 "step_acceptance"
               ],
@@ -823,8 +824,11 @@
                 "accepted_trial_policy": {
                   "const": "immutable_accepted_copy_trial_then_commit"
                 },
+                "line_search_merit": {
+                  "const": "half_squared_physical_residual_l2.v1"
+                },
                 "line_search_acceptance": {
-                  "const": "strict_residual_inf_decrease"
+                  "const": "strict_physical_merit_and_residual_inf_decrease"
                 },
                 "step_acceptance": {
                   "const": "residual_and_absolute_or_relative_increment"
@@ -1419,6 +1423,7 @@
             "line_search_reduction",
             "minimum_line_search_alpha",
             "accepted_trial_policy",
+            "line_search_merit",
             "line_search_acceptance",
             "step_acceptance"
           ],
@@ -1435,8 +1440,11 @@
             "accepted_trial_policy": {
               "const": "immutable_accepted_copy_trial_then_commit"
             },
+            "line_search_merit": {
+              "const": "half_squared_physical_residual_l2.v1"
+            },
             "line_search_acceptance": {
-              "const": "strict_residual_inf_decrease"
+              "const": "strict_physical_merit_and_residual_inf_decrease"
             },
             "step_acceptance": {
               "const": "residual_and_absolute_or_relative_increment"
