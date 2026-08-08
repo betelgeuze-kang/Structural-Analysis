@@ -1,0 +1,123 @@
+{
+  "accepted_state": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz",
+    "checkpoint_sha256": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+    "equation_count": 70560,
+    "fixture_hash": "sha256:d02d706a197d2a9c06d870251c21a26e58462b79ac72359020f8c45a9d86b6de",
+    "load_factor": 1.0,
+    "operator_contract_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "state_data_hash": "sha256:c8683e1b58b3a81be967835cb0d549b14ac410cf848288f4bcb2233a1a91fb4d"
+  },
+  "artifacts": {
+    "action_vector": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_preconditioned_jvp_action.f64le",
+    "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_preconditioned_jvp_parity_receipt.json",
+    "runner": "scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py",
+    "schema": "src/structural_analysis/schemas/g1_mgt_accepted_state_preconditioned_jvp_parity_v1.schema.json"
+  },
+  "blockers_remaining": [
+    "preconditioner_and_current_tangent_execute_in_separate_processes",
+    "persisted_d2h_h2d_bridge_between_preconditioner_and_jvp",
+    "arnoldi_recurrence_not_connected_to_actual_mgt_operator_and_factor",
+    "independent_gfx1100_run_not_available",
+    "full_device_newton_line_search_material_checkpoint_lifecycle_not_established"
+  ],
+  "claim_boundary": "This receipt composes two actual-MGT mathematical operations at the same accepted load-scale 1.0 state: the persisted local gfx1030 sparse-LU preconditioner output is consumed as the direction of an actual 70,560-equation current-tangent HIP JVP, and that JVP passes CPU/HIP parity. The composition deliberately uses a final D2H artifact from the preconditioner process followed by H2D in the JVP process. It therefore does not establish one persistent device lifecycle, zero transfer between preconditioner and JVP, a production Arnoldi/FGMRES recurrence, independent gfx1100 execution, or G1 closure.",
+  "claims": {
+    "actual_accepted_state_current_tangent_jvp": true,
+    "actual_mgt_full_load_accepted_state": true,
+    "actual_preconditioner_output_consumed": true,
+    "cpu_hip_numerical_parity": true,
+    "g1_closure": false,
+    "independent_gfx1100": false,
+    "mathematical_right_preconditioned_jvp_composition": true,
+    "mid_composition_d2h_zero": false,
+    "production_fgmres": false,
+    "single_device_lifecycle": false
+  },
+  "comparison": {
+    "action_data_hash": "sha256:c854a0548a61f2a775fef970db79fa3728c110dd25cd1ec9b6fc58d634f5a1af",
+    "actual_hardware_execution_required_for_claim": true,
+    "actual_mgt_scale_claim": false,
+    "canonical_action_data_hash": "sha256:2ae660d022c85f9b0e8c116d037911bfd237acd4a4f87efc4457d1600b8624e9",
+    "canonical_cpu_max_abs_error_n_per_m": 8.639736061993863e-18,
+    "comparison_tolerance_n_per_m": 1e-06,
+    "contract_pass": true,
+    "device_order_action_data_hash": "sha256:c854a0548a61f2a775fef970db79fa3728c110dd25cd1ec9b6fc58d634f5a1af",
+    "device_order_cpu_max_abs_error_n_per_m": 0.0,
+    "production_performance_claim": false,
+    "profile": "engine-v2-cpu-hip-current-tangent-operator-parity.v1"
+  },
+  "contract_pass": true,
+  "contract_scope": "actual_mgt_full_load_accepted_state_preconditioned_jvp_local_gfx1030",
+  "generated_at": "2026-08-08T12:54:55.549370+00:00",
+  "hardware_execution": {
+    "action_artifact": {
+      "byte_length": 564480,
+      "data_hash": "sha256:c854a0548a61f2a775fef970db79fa3728c110dd25cd1ec9b6fc58d634f5a1af",
+      "dtype": "<f8",
+      "file_sha256": "sha256:c854a0548a61f2a775fef970db79fa3728c110dd25cd1ec9b6fc58d634f5a1af",
+      "format": "canonical_little_endian_float64_vector.v1",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_preconditioned_jvp_action.f64le",
+      "persisted": true,
+      "shape": [
+        70560
+      ]
+    },
+    "actual_hardware": true,
+    "backend": "amd_rocm_hip",
+    "binary_byte_length": 56912,
+    "binary_sha256": "sha256:2b579ec5b651a5c7503318a9fe59efcf688d1690726f8bb3e51662de942e39d4",
+    "compiler": {
+      "path": "/opt/rocm-6.0.2/bin/hipcc",
+      "version_first_line": "HIP version: 6.0.32831-204d35d16",
+      "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
+    },
+    "device_name": "AMD Radeon RX 6900 XT",
+    "gcn_arch_name": "gfx1030",
+    "runtime_metadata": {
+      "accumulation_profile": "reference_then_sorted_frame_then_sorted_geometry_sequential_fp64.v1",
+      "blocking_d2h_synchronization_count": 1,
+      "cpu_backend": false,
+      "device_name": "AMD Radeon RX 6900 XT",
+      "equation_count": 70560,
+      "execution_profile": "one_thread_per_free_row_reference_frame_geometry.v1",
+      "gcn_arch_name": "gfx1030",
+      "kernel_invocation_count": 1,
+      "mid_action_d2h_transfer_count": 0,
+      "schema_version": "engine-v2-hip-current-tangent-operator-output.v1",
+      "status": "ok"
+    },
+    "runtime_output_hash": "sha256:d07f4cc624e9e192a1d2fd50c025df9b9058a41f333ea4f41e80baedea5c1269"
+  },
+  "preconditioned_direction": {
+    "bridge_policy": "persisted_final_d2h_artifact_then_next_process_h2d",
+    "direction_data_hash": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
+    "direction_inf_m": 3.0172676946723156e-11,
+    "source_receipt": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_parity_receipt.json",
+    "source_receipt_hash": "sha256:0b9fcfcd0a17e909a0aa895e55f2243ef01a64f9f73a35c7d80545e8346ddc34",
+    "source_solution_artifact": "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le"
+  },
+  "receipt_hash": "sha256:7379a065df06394a9b3e40e23ba9ff0616cab70233dd5393bd84e66e0033d3dd",
+  "schema_version": "g1-mgt-accepted-state-preconditioned-jvp-parity-receipt.v1",
+  "source": {
+    "engine_version": "structural-analysis@0.3.0",
+    "input_checksums": {
+      "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+      "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
+      "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_parity_receipt.json": "sha256:ea16b96ea40544a36ec963a1dc99fdb7770934d97eaed66a7f2ba9ed11bd093a",
+      "implementation/phase1/release_evidence/productization/g1_mgt_accepted_state_hip_sparse_lu_solution.f64le": "sha256:50059bc7b4e10c41e0a596e5903ccde9453603aa913751ab2e19237598bb117a",
+      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
+      "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
+      "scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py": "sha256:83be5ccf2e0aab3f1588e55b942de27a9382bba9d6e3f135d9061a0aa2f8ea36",
+      "scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py": "sha256:ed26d13129b23b346ae1cfb3b3440f36783a67ced3d887f7c9289656909dd8d6",
+      "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
+      "src/structural_analysis/engine_v2_backends/hip_current_tangent_operator.py": "sha256:11b2364da86bf40a8e20737f85ec30e21e4f4a141d605f5efbf0eb58d7683f7a",
+      "src/structural_analysis/schemas/g1_mgt_accepted_state_preconditioned_jvp_parity_v1.schema.json": "sha256:0f210b9075129fbba582b3f02745ac0b6de5a272985e9e2ad62ca71c74038d59",
+      "tests/test_run_g1_mgt_accepted_state_preconditioned_jvp_parity.py": "sha256:dd4477a6d3c64f7859f1dda42ccf0cafc242176ac0a23945fbb68541f420adaa"
+    },
+    "repository_commit_sha": "562b810fae9cb59b4d0b7fb9bb2df296492b43e4",
+    "source_paths_clean_at_execution": true
+  },
+  "status": "partial"
+}
