@@ -268,6 +268,10 @@ def solve_sparse_modal_modes(
                     generalized_mass=float(vector @ (m_matrix @ vector)),
                     generalized_stiffness=float(vector @ (k_matrix @ vector)),
                     residual_relative_inf=residual_relative,
+                    raw_residual_relative_inf=residual_relative,
+                    raw_translational_residual_norm=None,
+                    raw_rotational_residual_norm=None,
+                    scaled_residual_relative_inf=None,
                 )
             )
         mass_gram = canonical.T @ (m_matrix @ canonical)
@@ -517,6 +521,10 @@ def solve_sparse_linear_buckling(
                     generalized_elastic_stiffness=elastic,
                     generalized_geometric_stiffness=geometric,
                     residual_relative_inf=residual_relative,
+                    raw_residual_relative_inf=residual_relative,
+                    raw_translational_residual_norm=None,
+                    raw_rotational_residual_norm=None,
+                    scaled_residual_relative_inf=None,
                 )
             )
         value_array = np.asarray(values, dtype=np.float64)
