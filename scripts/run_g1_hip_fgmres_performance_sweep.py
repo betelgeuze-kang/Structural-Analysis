@@ -105,7 +105,8 @@ def _cpu_solve(dimension: int, repetitions: int) -> dict[str, Any]:
 
 def _compile(binary: Path, hipcc: Path, architecture: str) -> dict[str, Any]:
     version = subprocess.run([str(hipcc), "--version"], cwd=ROOT, check=True, capture_output=True, text=True).stdout
-    command = [str(hipcc), "--rocm-path=/opt/rocm-6.0.2", f"--offload-arch={architecture}", str(ROOT / SOURCE), "-O2", "-std=c++17", "-o", str(binary)]
+    device_libs = ROOT / "implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
+    command = [str(hipcc), "--rocm-path=/opt/rocm-6.0.2", f"--rocm-device-lib-path={device_libs}", f"--offload-arch={architecture}", str(ROOT / SOURCE), "-O2", "-std=c++17", "-o", str(binary)]
     compiled = subprocess.run(command, cwd=ROOT, check=False, capture_output=True, text=True, timeout=180)
     if compiled.returncode != 0:
         raise RuntimeError("hip_sweep_compile_failed:" + compiled.stderr[-1000:].replace("\n", " "))
