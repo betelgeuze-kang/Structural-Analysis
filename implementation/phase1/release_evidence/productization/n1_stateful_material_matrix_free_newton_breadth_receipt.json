@@ -1,0 +1,594 @@
+{
+  "all_family_checkpoint_restarts_byte_exact": true,
+  "all_family_deterministic_replays_byte_exact": true,
+  "all_family_failed_step_rollbacks_byte_exact": true,
+  "all_family_increment_gates_passed": true,
+  "all_family_material_commits_observed": true,
+  "all_family_residual_gates_passed": true,
+  "all_family_tangent_checks_passed": true,
+  "analysis_type": "stateful_axial_material_matrix_free_newton_breadth",
+  "artifacts": {
+    "receipt": "implementation/phase1/release_evidence/productization/n1_stateful_material_matrix_free_newton_breadth_receipt.json"
+  },
+  "blockers_remaining": [
+    "actual_mgt_full_mesh_stateful_material_coupling_not_connected",
+    "full_frame_shell_material_consistent_operator_not_connected",
+    "production_preconditioner_effectiveness_not_established",
+    "production_rocm_hip_nonlinear_parity_not_executed"
+  ],
+  "claim_boundary": "This receipt proves a four-family stateful axial constitutive breadth gate through the reusable CPU matrix-free Newton path. It verifies physical residual/current-tangent consistency, physical-merit line search, residual and increment acceptance, immutable-parent trial evaluation, atomic material commit, byte-exact failed-step rollback, byte-exact midpoint restart, and zero fallback/regularization through load factor 1.0. It does not prove that stateful materials are connected to the actual MGT full-building frame/shell operator, production Krylov/preconditioning, ROCm/HIP parity, or N1/G1 closure.",
+  "claims": {
+    "actual_mgt_full_mesh_material_coupling": false,
+    "exact_restart": true,
+    "fallback_zero": true,
+    "full_frame_shell_material_newton": false,
+    "g1_closure": false,
+    "load_scale_at_least_one": true,
+    "n1_closure": false,
+    "production_krylov": false,
+    "regularization_zero": true,
+    "rocm_hip_parity": false,
+    "stateful_material_matrix_free_newton_family_breadth": true,
+    "trial_commit_rollback": true
+  },
+  "contract_pass": true,
+  "current_tangent_action_contract": "assemble_stateful_axial_chain(accepted_material_parent,u_accepted+delta_u,lambda_accepted+eta*delta_lambda).jacobian_kn_per_m*direction_m",
+  "engine_version": "structural-analysis@0.3.0",
+  "fallback_count": 0,
+  "family_contract_pass": true,
+  "family_rows": [
+    {
+      "case_id": "phase2_state_updated_steel_two_element_chain",
+      "checkpoint_restart": {
+        "byte_exact": true,
+        "checkpoint_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+        "one_shot_final_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+        "resumed_final_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+        "split_after_load_factor": 0.5
+      },
+      "contract_pass": true,
+      "deterministic_replay_byte_exact": true,
+      "element_count": 2,
+      "failed_step_probe": {
+        "accepted_state_hash_after": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "accepted_state_hash_before": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+        "material_state_commit_performed": false,
+        "rollback_exact": true,
+        "status": "blocked",
+        "terminal_reason": "maximum_newton_iterations_exhausted"
+      },
+      "fallback_count": 0,
+      "family": "steel_combined_hardening",
+      "final_load_factor": 1.0,
+      "final_material_state_hashes": [
+        "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36",
+        "sha256:f41888081c055a78d25f2a25617c01ebd7a978bd4a931656e641312374e00b36"
+      ],
+      "final_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+      "finite_difference_current_tangent": {
+        "absolute_error_inf_kn_per_m": 5.170128133613616e-05,
+        "accepted_material_parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+        "analytic_action_data_hash": "sha256:05dbbe65b319c27483b88fbf157763c43821c2be389c1856b7ba3071d3a3420c",
+        "contract_pass": true,
+        "current_tangent_action_contract": "assemble_stateful_axial_chain(accepted_material_parent,u_accepted+delta_u,lambda_accepted+eta*delta_lambda).jacobian_kn_per_m*direction_m",
+        "epsilon": 1e-08,
+        "finite_difference_action_data_hash": "sha256:9327ff103a512f644f3e641b6a7bdc0a8f616e08bce5116327e1f40ddb8463f9",
+        "relative_error": 4.4807777178062043e-10,
+        "relative_tolerance": 1e-07,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "same_accepted_material_parent_state": true
+      },
+      "free_equation_count": 2,
+      "initial_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+      "load_factors": [
+        0.5,
+        1.0
+      ],
+      "material_state_changed": true,
+      "maximum_committed_residual_inf_kn": 0.0,
+      "node_count": 3,
+      "regularization_count": 0,
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 0.5,
+          "material_state_changed": false,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:ca77b3dd92a17066badd69b9e188130c32a78502121872040c0d3fbc5832bbf7",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 1,
+          "tangent_solve_count": 0
+        },
+        {
+          "accepted_state_hash": "sha256:7c08d15389d1c25cf6807bc8b43b775d7c4ecc55c2169fdf89b11ce3faae3f2c",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 1.0,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:444c9f9596101625288ac17a39f783355b72ec60c8f3e132bc44f462820e6397",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 2,
+          "tangent_solve_count": 2
+        }
+      ],
+      "tangent_solve_count": 2
+    },
+    {
+      "case_id": "phase2_state_updated_concrete_damage_two_element_chain",
+      "checkpoint_restart": {
+        "byte_exact": true,
+        "checkpoint_state_hash": "sha256:b093fb43fb766d477022da078a3b1e2c7978ea49256e8e30c3ebece940115d83",
+        "one_shot_final_state_hash": "sha256:7f0fa6d22d59120095a7c29e3b6ea093529e755c46c7cfe581f3f2c0144877d2",
+        "resumed_final_state_hash": "sha256:7f0fa6d22d59120095a7c29e3b6ea093529e755c46c7cfe581f3f2c0144877d2",
+        "split_after_load_factor": 0.5
+      },
+      "contract_pass": true,
+      "deterministic_replay_byte_exact": true,
+      "element_count": 2,
+      "failed_step_probe": {
+        "accepted_state_hash_after": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "accepted_state_hash_before": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+        "material_state_commit_performed": false,
+        "rollback_exact": true,
+        "status": "blocked",
+        "terminal_reason": "maximum_newton_iterations_exhausted"
+      },
+      "fallback_count": 0,
+      "family": "asymmetric_concrete_damage",
+      "final_load_factor": 1.0,
+      "final_material_state_hashes": [
+        "sha256:39450650194855a4ddd4122b3b1ffaae9c9b604426439c36b72c4b3e9ee73d39",
+        "sha256:5adf03edecca9841df554b27ce579dce65879715f6d60d36e27f7d0617d6a0b3"
+      ],
+      "final_state_hash": "sha256:7f0fa6d22d59120095a7c29e3b6ea093529e755c46c7cfe581f3f2c0144877d2",
+      "finite_difference_current_tangent": {
+        "absolute_error_inf_kn_per_m": 1.7589482013136148e-06,
+        "accepted_material_parent_state_hash": "sha256:22f5b4a60fd4728668d9b901db64ce6beda9766b217f62582d88fe1590567d42",
+        "analytic_action_data_hash": "sha256:c60cf24d9fa6fd22226435af9fa9bd46df06572a2198659953e9eb6bd76d8b48",
+        "contract_pass": true,
+        "current_tangent_action_contract": "assemble_stateful_axial_chain(accepted_material_parent,u_accepted+delta_u,lambda_accepted+eta*delta_lambda).jacobian_kn_per_m*direction_m",
+        "epsilon": 1e-08,
+        "finite_difference_action_data_hash": "sha256:19e5db250b52ce1e939cc58dd5b736f50f6baace42f08cbd5103c46abab07391",
+        "relative_error": 1.701152175991366e-11,
+        "relative_tolerance": 1e-07,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "same_accepted_material_parent_state": true
+      },
+      "free_equation_count": 1,
+      "initial_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+      "load_factors": [
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "material_state_changed": true,
+      "maximum_committed_residual_inf_kn": 2.4101609596982598e-11,
+      "node_count": 3,
+      "regularization_count": 0,
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state_hash": "sha256:9f953b4f9fbcbefca861dfdb670005953d2c27cda5ef13d3859ee7909d58a8e2",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 0.25,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:c24fc8885388016f7682a934b894222a167bce984be51e4bbb613ad46d570980",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 1,
+          "tangent_solve_count": 0
+        },
+        {
+          "accepted_state_hash": "sha256:b093fb43fb766d477022da078a3b1e2c7978ea49256e8e30c3ebece940115d83",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 5.684341886080802e-14,
+          "load_factor": 0.5,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:9f953b4f9fbcbefca861dfdb670005953d2c27cda5ef13d3859ee7909d58a8e2",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 2,
+          "tangent_solve_count": 4
+        },
+        {
+          "accepted_state_hash": "sha256:22f5b4a60fd4728668d9b901db64ce6beda9766b217f62582d88fe1590567d42",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 2.4101609596982598e-11,
+          "load_factor": 0.75,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:b093fb43fb766d477022da078a3b1e2c7978ea49256e8e30c3ebece940115d83",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 3,
+          "tangent_solve_count": 4
+        },
+        {
+          "accepted_state_hash": "sha256:7f0fa6d22d59120095a7c29e3b6ea093529e755c46c7cfe581f3f2c0144877d2",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 1.0,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:22f5b4a60fd4728668d9b901db64ce6beda9766b217f62582d88fe1590567d42",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 4,
+          "tangent_solve_count": 3
+        }
+      ],
+      "tangent_solve_count": 11
+    },
+    {
+      "case_id": "phase2_state_updated_composite_section_two_element_chain",
+      "checkpoint_restart": {
+        "byte_exact": true,
+        "checkpoint_state_hash": "sha256:49529478d873c7407b096f0fcad923d0833bf913092b28d7ccf84957717ba31a",
+        "one_shot_final_state_hash": "sha256:0db9211a208f12f279ca0d473cec03ed3af0e568424276a05003ade040ad6fa1",
+        "resumed_final_state_hash": "sha256:0db9211a208f12f279ca0d473cec03ed3af0e568424276a05003ade040ad6fa1",
+        "split_after_load_factor": 0.5
+      },
+      "contract_pass": true,
+      "deterministic_replay_byte_exact": true,
+      "element_count": 2,
+      "failed_step_probe": {
+        "accepted_state_hash_after": "sha256:0c31e7b6a2e3c1e849bb55c432873af4934e016f7ae97e7cdef6b879c79d8dea",
+        "accepted_state_hash_before": "sha256:0c31e7b6a2e3c1e849bb55c432873af4934e016f7ae97e7cdef6b879c79d8dea",
+        "material_state_commit_performed": false,
+        "rollback_exact": true,
+        "status": "blocked",
+        "terminal_reason": "maximum_newton_iterations_exhausted"
+      },
+      "fallback_count": 0,
+      "family": "parallel_steel_concrete_section",
+      "final_load_factor": 1.0,
+      "final_material_state_hashes": [
+        "sha256:ccc89364cc850c7e67b34011121f28d2e501b6f26cd02c74160ae80cc4ef0561",
+        "sha256:89ac87d5c8325e7e5f5543c7b2bbd4e7601860b8ed4c67e0c59c2ffa9fbdc567"
+      ],
+      "final_state_hash": "sha256:0db9211a208f12f279ca0d473cec03ed3af0e568424276a05003ade040ad6fa1",
+      "finite_difference_current_tangent": {
+        "absolute_error_inf_kn_per_m": 1.0376919817645103e-05,
+        "accepted_material_parent_state_hash": "sha256:8a37ad9a0ed51c8739327040f079dd1d48df0a1d5f85b757a47602dea735180b",
+        "analytic_action_data_hash": "sha256:abd0cbe12f790b000b1cd8de93866adbe550fb458699a5d3033ec52d89ebfc75",
+        "contract_pass": true,
+        "current_tangent_action_contract": "assemble_stateful_axial_chain(accepted_material_parent,u_accepted+delta_u,lambda_accepted+eta*delta_lambda).jacobian_kn_per_m*direction_m",
+        "epsilon": 1e-08,
+        "finite_difference_action_data_hash": "sha256:695c995af1c1aab176e46e3bcb179301a199eb4ce5478bae2928a498ef45467e",
+        "relative_error": 4.652773679881757e-10,
+        "relative_tolerance": 1e-07,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "same_accepted_material_parent_state": true
+      },
+      "free_equation_count": 1,
+      "initial_state_hash": "sha256:0c31e7b6a2e3c1e849bb55c432873af4934e016f7ae97e7cdef6b879c79d8dea",
+      "load_factors": [
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "material_state_changed": true,
+      "maximum_committed_residual_inf_kn": 1.596163201611489e-10,
+      "node_count": 3,
+      "regularization_count": 0,
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state_hash": "sha256:d2485b11e4e13c1345fde5ddf98c72a8e7a2fba54a7e5c85c87b8ae39e5bb14a",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 0.25,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:0c31e7b6a2e3c1e849bb55c432873af4934e016f7ae97e7cdef6b879c79d8dea",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 1,
+          "tangent_solve_count": 5
+        },
+        {
+          "accepted_state_hash": "sha256:49529478d873c7407b096f0fcad923d0833bf913092b28d7ccf84957717ba31a",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 0.5,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:d2485b11e4e13c1345fde5ddf98c72a8e7a2fba54a7e5c85c87b8ae39e5bb14a",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 2,
+          "tangent_solve_count": 4
+        },
+        {
+          "accepted_state_hash": "sha256:8a37ad9a0ed51c8739327040f079dd1d48df0a1d5f85b757a47602dea735180b",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 1.596163201611489e-10,
+          "load_factor": 0.75,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:49529478d873c7407b096f0fcad923d0833bf913092b28d7ccf84957717ba31a",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 3,
+          "tangent_solve_count": 5
+        },
+        {
+          "accepted_state_hash": "sha256:0db9211a208f12f279ca0d473cec03ed3af0e568424276a05003ade040ad6fa1",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 1.3642420526593924e-12,
+          "load_factor": 1.0,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:8a37ad9a0ed51c8739327040f079dd1d48df0a1d5f85b757a47602dea735180b",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 4,
+          "tangent_solve_count": 4
+        }
+      ],
+      "tangent_solve_count": 18
+    },
+    {
+      "case_id": "phase2_state_updated_bilinear_link_two_element_chain",
+      "checkpoint_restart": {
+        "byte_exact": true,
+        "checkpoint_state_hash": "sha256:d42a0773c3a13bc5ffb0b7c3bdb6bd49735aabf22118ccab69345db17c41ee4e",
+        "one_shot_final_state_hash": "sha256:468e9ad7a8e04973655c3c94c5d8fc2ad17012ca39aabfa9caf21c96a175313b",
+        "resumed_final_state_hash": "sha256:468e9ad7a8e04973655c3c94c5d8fc2ad17012ca39aabfa9caf21c96a175313b",
+        "split_after_load_factor": 0.5
+      },
+      "contract_pass": true,
+      "deterministic_replay_byte_exact": true,
+      "element_count": 2,
+      "failed_step_probe": {
+        "accepted_state_hash_after": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "accepted_state_hash_before": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+        "material_state_commit_performed": false,
+        "rollback_exact": true,
+        "status": "blocked",
+        "terminal_reason": "maximum_newton_iterations_exhausted"
+      },
+      "fallback_count": 0,
+      "family": "bilinear_combined_hardening_link",
+      "final_load_factor": 1.0,
+      "final_material_state_hashes": [
+        "sha256:9114b6e04988b743becfc167e4be4c2b59d0ed4db68136ef84b5154fdeaf5617",
+        "sha256:1549d75f62797e5f87c88106400871945ca35dafe0301d7577ad6eefa054761e"
+      ],
+      "final_state_hash": "sha256:468e9ad7a8e04973655c3c94c5d8fc2ad17012ca39aabfa9caf21c96a175313b",
+      "finite_difference_current_tangent": {
+        "absolute_error_inf_kn_per_m": 5.55787892153603e-07,
+        "accepted_material_parent_state_hash": "sha256:d42a0773c3a13bc5ffb0b7c3bdb6bd49735aabf22118ccab69345db17c41ee4e",
+        "analytic_action_data_hash": "sha256:e2c20a1128d54d6fae9bb680d37fa5e7ef63d23815d3f7e7a5e2000015356c0f",
+        "contract_pass": true,
+        "current_tangent_action_contract": "assemble_stateful_axial_chain(accepted_material_parent,u_accepted+delta_u,lambda_accepted+eta*delta_lambda).jacobian_kn_per_m*direction_m",
+        "epsilon": 1e-08,
+        "finite_difference_action_data_hash": "sha256:6743b60272ca91b9d50d9ece71171eef4d784f73c67b42ce01668525e6087db7",
+        "relative_error": 1.4589432190317233e-09,
+        "relative_tolerance": 1e-07,
+        "residual_formula": "F_internal_minus_F_external",
+        "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+        "same_accepted_material_parent_state": true
+      },
+      "free_equation_count": 1,
+      "initial_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+      "load_factors": [
+        0.5,
+        1.0
+      ],
+      "material_state_changed": true,
+      "maximum_committed_residual_inf_kn": 0.0,
+      "node_count": 3,
+      "regularization_count": 0,
+      "status": "ready",
+      "steps": [
+        {
+          "accepted_state_hash": "sha256:d42a0773c3a13bc5ffb0b7c3bdb6bd49735aabf22118ccab69345db17c41ee4e",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 0.5,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:2e3f6de6eca90fd215f6f3435346af78cbb81e143e5a92be26f62390307dc015",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 1,
+          "tangent_solve_count": 3
+        },
+        {
+          "accepted_state_hash": "sha256:468e9ad7a8e04973655c3c94c5d8fc2ad17012ca39aabfa9caf21c96a175313b",
+          "committed": true,
+          "fallback_count": 0,
+          "final_residual_inf_kn": 0.0,
+          "load_factor": 1.0,
+          "material_state_changed": true,
+          "maximum_line_search_backtrack_count": 0,
+          "parent_state_hash": "sha256:d42a0773c3a13bc5ffb0b7c3bdb6bd49735aabf22118ccab69345db17c41ee4e",
+          "parent_state_unchanged_during_trial": true,
+          "regularization_count": 0,
+          "residual_and_increment_acceptance_gate": true,
+          "step_index": 2,
+          "tangent_solve_count": 2
+        }
+      ],
+      "tangent_solve_count": 5
+    }
+  ],
+  "generated_at": "2026-08-08T09:47:18.516131+00:00",
+  "input_checksums": {
+    "scripts/build_n1_stateful_material_matrix_free_newton_breadth_receipt.py": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+    "scripts/release_evidence_metadata.py": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+    "src/structural_analysis/assembly/stateful_axial.py": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
+    "src/structural_analysis/materials/bilinear_link.py": "sha256:7643fa4a300997af059fad859461bf9df2db091105cd6a2d655d192b7fa3d5ab",
+    "src/structural_analysis/materials/composite_section.py": "sha256:f0e09310052a51c94f7593693d3e95ec40dc3da2385e3c5d552e66178006e6dd",
+    "src/structural_analysis/materials/concrete_damage.py": "sha256:dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
+    "src/structural_analysis/solvers/nonlinear/load_controlled_matrix_free_newton.py": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+    "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
+    "src/structural_analysis/solvers/nonlinear/stateful_axial_matrix_free_newton.py": "sha256:3fde1c31b16451bb0370271278cdb594fc3e429c35ed05499132d689721bd280",
+    "tests/test_build_n1_stateful_material_matrix_free_newton_breadth_receipt.py": "sha256:d00e4dc532c91543cdbf388e918ad91e965e579cf24b6890bbe658e3635450aa"
+  },
+  "line_search_merit": "half_squared_physical_residual_l2.v1",
+  "material_families": [
+    "steel_combined_hardening",
+    "asymmetric_concrete_damage",
+    "parallel_steel_concrete_section",
+    "bilinear_combined_hardening_link"
+  ],
+  "material_family_count": 4,
+  "profile": "accepted_material_parent_increment_space_matrix_free_newton.v1",
+  "regularization_count": 0,
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_formula_hash": "sha256:1014c4e47215197791bbd5dd1820fc44c1c9dfc0a257f8ff29b79ea6124c5a82",
+  "schema_version": "n1-stateful-material-matrix-free-newton-breadth-receipt.v1",
+  "source_commit_exact_replay_claim": true,
+  "source_commit_sha": "2dd16a6cd5419e0edf58cde5975675e365c7822b",
+  "source_input_provenance": {
+    "blocker_count": 0,
+    "blockers": [],
+    "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
+    "contract_pass": true,
+    "input_count": 12,
+    "inputs": [
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/assembly/stateful_axial.py",
+        "source_checksum": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/materials/bilinear_link.py",
+        "source_checksum": "sha256:7643fa4a300997af059fad859461bf9df2db091105cd6a2d655d192b7fa3d5ab",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7643fa4a300997af059fad859461bf9df2db091105cd6a2d655d192b7fa3d5ab",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/materials/composite_section.py",
+        "source_checksum": "sha256:f0e09310052a51c94f7593693d3e95ec40dc3da2385e3c5d552e66178006e6dd",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:f0e09310052a51c94f7593693d3e95ec40dc3da2385e3c5d552e66178006e6dd",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/materials/concrete_damage.py",
+        "source_checksum": "sha256:dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/materials/uniaxial_plasticity.py",
+        "source_checksum": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/load_controlled_matrix_free_newton.py",
+        "source_checksum": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:abd1457bc95931df4ec033fd9110a4524a3123a2ec8d317b6f71bfe48a1de3a9",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py",
+        "source_checksum": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/newton.py",
+        "source_checksum": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "src/structural_analysis/solvers/nonlinear/stateful_axial_matrix_free_newton.py",
+        "source_checksum": "sha256:3fde1c31b16451bb0370271278cdb594fc3e429c35ed05499132d689721bd280",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:3fde1c31b16451bb0370271278cdb594fc3e429c35ed05499132d689721bd280",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/build_n1_stateful_material_matrix_free_newton_breadth_receipt.py",
+        "source_checksum": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/release_evidence_metadata.py",
+        "source_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "tests/test_build_n1_stateful_material_matrix_free_newton_breadth_receipt.py",
+        "source_checksum": "sha256:d00e4dc532c91543cdbf388e918ad91e965e579cf24b6890bbe658e3635450aa",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:d00e4dc532c91543cdbf388e918ad91e965e579cf24b6890bbe658e3635450aa",
+        "workspace_matches_source": true
+      }
+    ],
+    "reason_code": "PASS",
+    "schema_version": "source-input-provenance.v1",
+    "source_commit_resolved": true,
+    "workspace_match_count": 12
+  },
+  "status": "ready",
+  "target_load_factor": 1.0
+}
