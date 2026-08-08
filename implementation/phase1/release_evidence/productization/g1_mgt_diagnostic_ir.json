@@ -32,14 +32,15 @@
     "solver_convergence_authority": false,
     "stable_code_path_only": true
   },
-  "diagnostic_hash": "sha256:1bc2b5f0035437fe8d2ca83da94a4ca8b769b65dc400e46d500dd137e405c899",
+  "diagnostic_hash": "sha256:b7f7973a1094cf0a6cd8f5bd9618a4b43a3af9d22992d6b84a77a283d72e7191",
   "diagnostic_id": "diagnostic.g1.mgt.hip.terminal",
   "entries": [
     {
       "code": "actual_gfx1030_execution_observed",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821"
+        "sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a",
+        "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352"
       ],
       "occurrence_count": 1,
       "path": "/runtime/gfx1030",
@@ -49,7 +50,7 @@
       "code": "fallback_and_regularization_zero",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:cd82e943e1b6976300302efd879d2f42a0d1f565f51abe9065b5e273b9d9a52b"
+        "sha256:820ade46d0af8701dac6894c626b34a2a561088d4b005bbe37642bc0404841ab"
       ],
       "occurrence_count": 1,
       "path": "/terminal/fallback",
@@ -59,7 +60,7 @@
       "code": "independent_gfx1100_execution_unavailable",
       "disposition": "unsupported",
       "evidence_hashes": [
-        "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821"
+        "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352"
       ],
       "occurrence_count": 1,
       "path": "/runtime/gfx1100",
@@ -69,7 +70,7 @@
       "code": "mid_step_d2h_zero",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:97ced76b3f9456271569621d309399cb894c12720cefae0e06fe0a6baa7be50b"
+        "sha256:b65128207661f35deb4ccda6e906587ff00872cfd206645735baca49205c5ac9"
       ],
       "occurrence_count": 1,
       "path": "/runtime/transfers/mid_step_d2h",
@@ -91,8 +92,8 @@
   "schema_version": "structural-analysis-diagnostic-ir.v1",
   "source": {
     "authority_profile": "backend_probe",
-    "backend_receipt_hash": "sha256:97ced76b3f9456271569621d309399cb894c12720cefae0e06fe0a6baa7be50b",
-    "receipt_hash": "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821",
+    "backend_receipt_hash": "sha256:b65128207661f35deb4ccda6e906587ff00872cfd206645735baca49205c5ac9",
+    "receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
     "receipt_schema_version": "g1-mgt-device-fgmres-receipt.v1"
   },
   "status": "partial",

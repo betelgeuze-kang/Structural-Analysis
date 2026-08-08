@@ -2,12 +2,12 @@
   "artifacts": {
     "cpu_result": {
       "byte_length": 3773,
-      "file_sha256": "sha256:efcf1d6a6159c748ceb8b76a3a344732feea53e5214f0335a3fc84edbd0014f9",
+      "file_sha256": "sha256:613aed63df047b4515a1311553029a567945de31c21b8f3c297119150767d1e6",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_nonlinear_result_ir_cpu.json"
     },
     "diagnostic": {
-      "byte_length": 4086,
-      "file_sha256": "sha256:3a72f502bcb9294a2e0e4589b0d38de1c43ef5098b6d17f8f4fbb47f0b170f1c",
+      "byte_length": 4169,
+      "file_sha256": "sha256:d11d08556d4bebe1bb1a91263e01c0c4f826bf3778b2cff57e5c114772d0717e",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_diagnostic_ir.json"
     },
     "displacement": {
@@ -18,7 +18,7 @@
     },
     "hip_result": {
       "byte_length": 3743,
-      "file_sha256": "sha256:a32ebbed43d55819a4de9b6ab1198b7bb64f6138317bc0207f5783c20a847cc0",
+      "file_sha256": "sha256:33e3dbcddf4f8a0e5a7c30ebe7586c9b80398d32a3634de1a6235152e441f55e",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_nonlinear_result_ir_hip.json"
     }
   },
@@ -26,28 +26,30 @@
     "nonlinear_material_family_breadth_not_connected_to_actual_mgt_worker",
     "independent_gfx1100_hardware_run_not_available"
   ],
-  "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. The DiagnosticIR also binds the exact 5,572-element material-family order/source-adequacy audit: elastic properties are complete, but authoritative hardening, damage/softening, and SRC constituent-fraction parameters are not. Nonlinear material-family breadth, independent gfx1100 hardware, and G1 closure remain unclaimed.",
+  "claim_boundary": "This receipt emits adapter-bound authoritative nonlinear ResultIR manifests and a non-authoritative stable DiagnosticIR for the exact actual-MGT terminal displacement and committed source-family elastic MaterialStateBundle, with CPU/HIP terminal binding parity. The retained adapters replay source-specific mixed-topology identities without fabricating an ExecutionPlan v1 shell topology. DiagnosticIR binds the exact 5,572-element material-family source-adequacy audit and architecture-neutral gfx1030 production hardware envelope. The local envelope is exact-source/wheel/binary bound and self-verifiable but unsigned; authoritative hardening, damage/softening, SRC constituent-fraction parameters, a signed independent gfx1100 envelope, nonlinear material breadth, and G1 closure remain unclaimed.",
   "claims": {
     "actual_mgt_material_family_order_bound": true,
     "authoritative_nonlinear_resultir_emitted": true,
     "diagnosticir_emitted": true,
     "g1_closure": false,
     "independent_gfx1100_run": false,
+    "production_mgt_hardware_envelope_emitted": true,
+    "production_mgt_hardware_envelope_signed": false,
     "source_authoritative_nonlinear_material_parameters_complete": false,
     "terminal_resultir_parity": true
   },
   "contract_pass": true,
   "diagnostic": {
-    "diagnostic_hash": "sha256:1bc2b5f0035437fe8d2ca83da94a4ca8b769b65dc400e46d500dd137e405c899",
+    "diagnostic_hash": "sha256:b7f7973a1094cf0a6cd8f5bd9618a4b43a3af9d22992d6b84a77a283d72e7191",
     "entry_count": 5,
     "status": "partial",
     "unsupported_count": 2
   },
-  "generated_at": "2026-08-08T14:54:25.546217+00:00",
+  "generated_at": "2026-08-08T15:20:11.492319+00:00",
   "parity": {
-    "cpu_result_hash": "sha256:a54f2bb971a3099ff9f36aa9398e12a17fb02d6be6a6f15059f2593442ff3fcb",
+    "cpu_result_hash": "sha256:34596bf01834e0464416278d2ba9d7204e6a39a23f138d3344c68be0d3c8aa3d",
     "displacement_data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
-    "hip_result_hash": "sha256:0e0a7e3367834272c3035ff430b5cb059dadf60b2e612cecb6e36140e1040844",
+    "hip_result_hash": "sha256:f753bfb7be499907d9c1e5cceaf90dfde403e1991ffa37b813ab2603f1061e0c",
     "shared_binding_keys": [
       "model_ir_content_hash",
       "execution_plan_hash",
@@ -63,28 +65,30 @@
     ],
     "terminal_resultir_parity": true
   },
-  "receipt_hash": "sha256:a052835c74d320db0a0e066b5380dedfd405d9650a1bc96197fb5f1364d42a5c",
+  "receipt_hash": "sha256:39d090757f99691116e585f2f6ffa39ee4fbe6418ff0c2dea6e7a6c0ef7d66ef",
   "schema_version": "g1-mgt-nonlinear-result-ir-receipt.v1",
   "source": {
-    "fgmres_receipt_hash": "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821",
+    "fgmres_receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
+    "gfx1030_hardware_envelope_hash": "sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a",
     "input_checksums": {
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_accepted_state.f64le": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_committed_material.f64le": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_initial_material.f64le": "sha256:7101008e38a39b9abe995686c9bfea801e2af0636c6f8fda57b93a1f4d0eaa28",
-      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_receipt.json": "sha256:c76dfb5b3f7b6ae83f8b4d60b7741ff702a395edbd38a109b3d2e82ee919ea0f",
+      "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_receipt.json": "sha256:e78db005c658125274fc6c133638c7f350fbbdcd601f07d8b0449a0af587840b",
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_rejected_material.f64le": "sha256:93b9045475a2e3de340962ba9e4e84f61676b8e78fed39da511e31436f3d63bc",
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_solution.f64le": "sha256:36027f03d1493f771db20c0855e891a36d4ebf4dc2cb92b7dfd163ada392b1f5",
+      "implementation/phase1/release_evidence/productization/g1_mgt_gfx1030_hardware_envelope.json": "sha256:d5aeca0801131dfc6237ec3ebf164cfddb80359a678e8217e38169b9afadfac7",
       "implementation/phase1/release_evidence/productization/g1_mgt_material_family_adequacy_audit.json": "sha256:c54cc244b7e43b39d313203b8272847e19364f4bd615e07a303a8d0df538ba37",
-      "scripts/build_g1_mgt_nonlinear_result_ir.py": "sha256:406064bd1c2322bda1b4d4530ca0c1ed7f409a4b37d07f4d3f93ab7da43d6ccf",
-      "scripts/run_g1_mgt_device_fgmres.py": "sha256:01dd0f096e37d86d5f5e9be6e56477213a7b162ddfd8ca01773182eba1db714b",
+      "scripts/build_g1_mgt_nonlinear_result_ir.py": "sha256:1cae7fa57bf7a4ec63025bef28ba3427c526d1b3636e655eccfbd28f4f49d870",
+      "scripts/run_g1_mgt_device_fgmres.py": "sha256:f4c78712ef1892674971a90d1b83af852c1f1509cb6d978c4f417c7a825e216d",
       "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
       "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
       "src/structural_analysis/engine_v2/contracts/result_ir.py": "sha256:86002a263eb10e7f5b4fe1157c190ab89d6c6f08ff5a4c1f1bb77fe60b94f817",
       "src/structural_analysis/schemas/g1_mgt_nonlinear_result_ir_v1.schema.json": "sha256:a8314e8fe1eff01fd8614f3bfe8a7cf27695f5b951308642299a540bf3db07df",
-      "tests/test_build_g1_mgt_nonlinear_result_ir.py": "sha256:09888d0e5568b726008c2a14e0598d8a72a1ddfcdee70f814c6872696a4dcc1c"
+      "tests/test_build_g1_mgt_nonlinear_result_ir.py": "sha256:a9714832886f23ad4e64284cea453f82d2862b4cd0ca8e35880f59a6e9064ff3"
     },
     "material_family_adequacy_audit_hash": "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
-    "repository_commit_sha": "86120a1736fb11ed8e5e39c585be748c1661e447",
+    "repository_commit_sha": "2bd2c482db10b74d55dc330725b830a03f96a18c",
     "source_paths_clean_at_execution": true
   },
   "status": "partial",
@@ -95,7 +99,7 @@
     "load_factor": 1.0,
     "material_entry_count": 5572,
     "material_state_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
-    "nonlinear_terminal_hash": "sha256:cd82e943e1b6976300302efd879d2f42a0d1f565f51abe9065b5e273b9d9a52b",
+    "nonlinear_terminal_hash": "sha256:820ade46d0af8701dac6894c626b34a2a561088d4b005bbe37642bc0404841ab",
     "residual_tolerance_n": 1e-06
   }
 }

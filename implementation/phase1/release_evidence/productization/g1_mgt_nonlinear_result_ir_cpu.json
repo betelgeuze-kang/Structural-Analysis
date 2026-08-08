@@ -14,7 +14,7 @@
   },
   "authority_profile": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1",
   "backend": {
-    "receipt_hash": "sha256:4591d1027a016b21e89e1f5371b2b0bdbced6be02e57c749370d0ef426119b3d",
+    "receipt_hash": "sha256:12ab32566bedda46fffd88f0a765c2e6175327d3c52c70f238b23da37edc80de",
     "role": "cpu_optimized"
   },
   "bindings": {
@@ -25,7 +25,7 @@
     "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c",
     "material_state_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
     "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-    "nonlinear_terminal_hash": "sha256:cd82e943e1b6976300302efd879d2f42a0d1f565f51abe9065b5e273b9d9a52b",
+    "nonlinear_terminal_hash": "sha256:820ade46d0af8701dac6894c626b34a2a561088d4b005bbe37642bc0404841ab",
     "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
     "path_history_hash": "sha256:c47518bd045dc7f4885f7dfee5efd6abd68ad2dea88c8004ca564be673cf9c30",
     "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
@@ -69,7 +69,7 @@
   "dof_count": 78282,
   "extensions": {},
   "load_factor": 1.0,
-  "result_hash": "sha256:a54f2bb971a3099ff9f36aa9398e12a17fb02d6be6a6f15059f2593442ff3fcb",
+  "result_hash": "sha256:34596bf01834e0464416278d2ba9d7204e6a39a23f138d3344c68be0d3c8aa3d",
   "result_id": "g1.mgt.cpu_optimized.terminal",
   "result_kind": "nonlinear_static_numerical_state",
   "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",
