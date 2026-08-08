@@ -1,0 +1,1214 @@
+{
+  "claim_boundary": "Closes the bounded two-node, one-member Frame3D linear cantilever stage for four independent axial, weak-axis, strong-axis, and torsional load modes through ModelIR, authoritative numerical ResultIR, recovery, exact restart, bound viewer payload, analytic benchmark, and local platform evidence. The external signature verifier is explicitly waived, not reported as verified. Multi-member topology, nonlinear control, stateful materials, dynamics, shell, and contact are outside this stage receipt.",
+  "contract_pass": true,
+  "schema_version": "f3-frame3d-linear-vertical-evidence.v1",
+  "source_commit_sha": "a81e19dba4f537d216b8f2c83fd3e8aa4044c6e0",
+  "source_input_checksums": {
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:040ec60787319904c2ad75dcb747b41dfb1b3bda3305a73cc2ead39a4acb2b46",
+    "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
+    "src/structural_analysis/engine_v2/contracts/result_ir.py": "sha256:c624183012677f7333732492831afd950742af90b0acea605ea135753a3c79fa",
+    "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
+    "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
+    "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
+    "tests/test_f3_frame3d_linear_vertical_evidence.py": "sha256:9abb58397e58f5e659082a8d216d8222002e9aa23ab4213c9296bc281099d0d6"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:60fd820be668bf5eed6879a091939af6300f82f5357663992f87ca3bb694495a",
+      "checkpoint": "sha256:7b4b8063823ecda9030480d33b65254a904144bb5967ca68caace00efc82f7ec",
+      "external_vv": "sha256:763bfb5a560ab42dde0ddc91ba25231625c0c22d3673303d3891930d39e43927",
+      "model_ir": "sha256:1a7c73240c387195b9087f55ccd8e69cad1c60bf6ae7abbfe09042d2b891cbd4",
+      "platform": "sha256:8e6cf36aa6cde42227af80ce491bc828ead08cedb691f8fadfa111c5d5f693c9",
+      "recovery": "sha256:10296f65f3f9b17981834e5e34f8f2fd142eb74277a35e0d30fc099db7229842",
+      "result_ir": "sha256:0074f6a6c987225ca528a20196b37fe3962b45c2196166e413902e790ae78e0b",
+      "solver": "sha256:8751ea53ba9e1ca0f3083a5812e9d67e1270aef0cb4a6792ece69fa6c26bfc4f",
+      "workbench": "sha256:5f236ab064d7d837af281d1b205a526ffaca1aa025d7b7c0d34c78d7ee9756a6"
+    },
+    "external_vv_signature_status": "waived",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "schema": "f3-vertical-evidence-gate.v1",
+    "source_commit_sha": "a81e19dba4f537d216b8f2c83fd3e8aa4044c6e0",
+    "stage": "frame3d_linear",
+    "stage_index": 0,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "all_cases_pass": true,
+      "benchmark_id": "frame3d-cantilever-four-independent-modes.v1",
+      "cases": [
+        {
+          "active_tip_dof": "UX",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": 5e-05,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 0.0,
+          "load_pattern_id": "LC_AXIAL",
+          "local_end_force_values_si": [
+            -100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "observed_tip_value_si": 5e-05,
+          "reaction_values_si": [
+            -100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "result_ir_hash": "sha256:2c165032376f0b8e6bfa918013b31c25886049b02e04a0ffe2004136fd53f14e"
+        },
+        {
+          "active_tip_dof": "UY",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": -0.0026666666666666666,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 8.326672684688674e-13,
+          "load_pattern_id": "LC_WEAK",
+          "local_end_force_values_si": [
+            0.0,
+            10000.0,
+            0.0,
+            0.0,
+            0.0,
+            20000.0,
+            0.0,
+            -10000.0,
+            0.0,
+            0.0,
+            0.0,
+            -8.326672684688674e-13
+          ],
+          "observed_tip_value_si": -0.0026666666666666666,
+          "reaction_values_si": [
+            0.0,
+            10000.0,
+            0.0,
+            0.0,
+            0.0,
+            20000.0
+          ],
+          "result_ir_hash": "sha256:1c7c540e722ae4dbfb8d61201e91177f6ecdf96d2fe416ccb3087890d8a681dd"
+        },
+        {
+          "active_tip_dof": "UZ",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": -0.0016666666666666663,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 7.275957614183426e-12,
+          "load_pattern_id": "LC_STRONG",
+          "local_end_force_values_si": [
+            0.0,
+            0.0,
+            9999.999999999996,
+            0.0,
+            -19999.999999999996,
+            0.0,
+            0.0,
+            0.0,
+            -9999.999999999996,
+            0.0,
+            7.275957614183426e-12,
+            0.0
+          ],
+          "observed_tip_value_si": -0.0016666666666666663,
+          "reaction_values_si": [
+            0.0,
+            0.0,
+            9999.999999999996,
+            0.0,
+            -19999.999999999996,
+            0.0
+          ],
+          "result_ir_hash": "sha256:b09b25ea0c44db0b7293cebcd4017433c94583218c86cd89f677799a0fdb9be1"
+        },
+        {
+          "active_tip_dof": "RX",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": 0.013,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 0.0,
+          "load_pattern_id": "LC_TORSION",
+          "local_end_force_values_si": [
+            0.0,
+            0.0,
+            0.0,
+            -5000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            5000.0,
+            0.0,
+            0.0
+          ],
+          "observed_tip_value_si": 0.013,
+          "reaction_values_si": [
+            0.0,
+            0.0,
+            0.0,
+            -5000.0,
+            0.0,
+            0.0
+          ],
+          "result_ir_hash": "sha256:1a3ca25f6bfd5a697555f8e76d15a9610cd2774fd6f021cc84b7543b29ff8708"
+        }
+      ],
+      "reference_profile": "closed_form_euler_bernoulli_tip_response",
+      "relative_error_tolerance": 1e-12
+    },
+    "checkpoint": {
+      "checkpoints": [
+        {
+          "displacement_data_sha256": "sha256:ace09fb299624e413d60169188d4c0d77365607254379508cc9238734076dd43",
+          "displacement_f64le_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002d431cebe2360a3f00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "load_factor": 1.0,
+          "load_pattern_id": "LC_AXIAL",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "result_ir_hash": "sha256:2c165032376f0b8e6bfa918013b31c25886049b02e04a0ffe2004136fd53f14e",
+          "schema_version": "f3-frame3d-linear-checkpoint.v1"
+        },
+        {
+          "displacement_data_sha256": "sha256:b962abf6c3635b36b7740f64a2202dcf471efeff5959e30e64e36f8c37820ec4",
+          "displacement_f64le_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a5e2ecc367d865bf000000000000000000000000000000000000000000000000fca9f1d24d6260bf",
+          "load_factor": 1.0,
+          "load_pattern_id": "LC_WEAK",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "result_ir_hash": "sha256:1c7c540e722ae4dbfb8d61201e91177f6ecdf96d2fe416ccb3087890d8a681dd",
+          "schema_version": "f3-frame3d-linear-checkpoint.v1"
+        },
+        {
+          "displacement_data_sha256": "sha256:0335a8ee14dba02459cf1d2cee8f392674bcd6a9d3d0ea7d8c54298305c54ad8",
+          "displacement_f64le_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004d1be8b4814e5bbf00000000000000007b14ae47e17a543f0000000000000000",
+          "load_factor": 1.0,
+          "load_pattern_id": "LC_STRONG",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "result_ir_hash": "sha256:b09b25ea0c44db0b7293cebcd4017433c94583218c86cd89f677799a0fdb9be1",
+          "schema_version": "f3-frame3d-linear-checkpoint.v1"
+        },
+        {
+          "displacement_data_sha256": "sha256:983bad1b83257fa1918be73be173c3ccf19f1d4aa969bfae549e45fb98a803db",
+          "displacement_f64le_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000039b4c876be9f8a3f00000000000000000000000000000000",
+          "load_factor": 1.0,
+          "load_pattern_id": "LC_TORSION",
+          "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+          "result_ir_hash": "sha256:1a3ca25f6bfd5a697555f8e76d15a9610cd2774fd6f021cc84b7543b29ff8708",
+          "schema_version": "f3-frame3d-linear-checkpoint.v1"
+        }
+      ],
+      "exact_restart_all_cases": true,
+      "schema_version": "f3-frame3d-linear-checkpoint-set.v1"
+    },
+    "external_vv": {
+      "all_cases_pass": true,
+      "case_count": 4,
+      "maximum_relative_error": 0.0,
+      "reference_profile": "independent_closed_form_cantilever_equations.v1",
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+      "model_id": "engine-v2-frame-cantilever",
+      "schema_version": "structural-analysis-model-ir.v2",
+      "semantic_hash": "sha256:5a19491d252b3936135cc1da91338f23e6ca1db59e42b0cf2b4cbd0346e25cb2"
+    },
+    "platform": {
+      "implementation": "CPython",
+      "machine": "x86_64",
+      "numeric_dtype": "float64_little_endian",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "system": "Linux"
+    },
+    "recovery": {
+      "cases": [
+        {
+          "active_tip_dof": "UX",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": 5e-05,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 0.0,
+          "load_pattern_id": "LC_AXIAL",
+          "local_end_force_values_si": [
+            -100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "observed_tip_value_si": 5e-05,
+          "reaction_values_si": [
+            -100000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "result_ir_hash": "sha256:2c165032376f0b8e6bfa918013b31c25886049b02e04a0ffe2004136fd53f14e"
+        },
+        {
+          "active_tip_dof": "UY",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": -0.0026666666666666666,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 8.326672684688674e-13,
+          "load_pattern_id": "LC_WEAK",
+          "local_end_force_values_si": [
+            0.0,
+            10000.0,
+            0.0,
+            0.0,
+            0.0,
+            20000.0,
+            0.0,
+            -10000.0,
+            0.0,
+            0.0,
+            0.0,
+            -8.326672684688674e-13
+          ],
+          "observed_tip_value_si": -0.0026666666666666666,
+          "reaction_values_si": [
+            0.0,
+            10000.0,
+            0.0,
+            0.0,
+            0.0,
+            20000.0
+          ],
+          "result_ir_hash": "sha256:1c7c540e722ae4dbfb8d61201e91177f6ecdf96d2fe416ccb3087890d8a681dd"
+        },
+        {
+          "active_tip_dof": "UZ",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": -0.0016666666666666663,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 7.275957614183426e-12,
+          "load_pattern_id": "LC_STRONG",
+          "local_end_force_values_si": [
+            0.0,
+            0.0,
+            9999.999999999996,
+            0.0,
+            -19999.999999999996,
+            0.0,
+            0.0,
+            0.0,
+            -9999.999999999996,
+            0.0,
+            7.275957614183426e-12,
+            0.0
+          ],
+          "observed_tip_value_si": -0.0016666666666666663,
+          "reaction_values_si": [
+            0.0,
+            0.0,
+            9999.999999999996,
+            0.0,
+            -19999.999999999996,
+            0.0
+          ],
+          "result_ir_hash": "sha256:b09b25ea0c44db0b7293cebcd4017433c94583218c86cd89f677799a0fdb9be1"
+        },
+        {
+          "active_tip_dof": "RX",
+          "analytic_relative_error": 0.0,
+          "analytic_tip_value_si": 0.013,
+          "checkpoint_exact_restart": true,
+          "free_residual_inf_n": 0.0,
+          "load_pattern_id": "LC_TORSION",
+          "local_end_force_values_si": [
+            0.0,
+            0.0,
+            0.0,
+            -5000.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            5000.0,
+            0.0,
+            0.0
+          ],
+          "observed_tip_value_si": 0.013,
+          "reaction_values_si": [
+            0.0,
+            0.0,
+            0.0,
+            -5000.0,
+            0.0,
+            0.0
+          ],
+          "result_ir_hash": "sha256:1a3ca25f6bfd5a697555f8e76d15a9610cd2774fd6f021cc84b7543b29ff8708"
+        }
+      ],
+      "equilibrium_pass": true,
+      "member_end_force_basis": "local_frame_stiffness_times_displacement",
+      "reaction_definition": "constrained_dof_internal_minus_external_force"
+    },
+    "result_ir": {
+      "all_manifests_valid": true,
+      "manifests": [
+        {
+          "authority": {
+            "code_compliance": "not_authoritative",
+            "commercial_use": "not_authoritative",
+            "convergence": "authoritative",
+            "displacement": "authoritative",
+            "engineering_design": "not_authoritative",
+            "member_force": "not_evaluated",
+            "numerical_state": "authoritative",
+            "reaction": "not_evaluated",
+            "release_readiness": "not_authoritative"
+          },
+          "authority_profile": "authoritative_converged_linear_static_displacement.v1",
+          "bindings": {
+            "equation_scaling_hash": "sha256:63857ef4341d636347aa42f54240ea1caf89c4e8761ee36874f0edc0b07d6835",
+            "execution_plan_hash": "sha256:aa0b04f5a2306958d4a18cbdea378ab283b473ef2e3ca2ac679228a77d4c8483",
+            "load_pattern_id": "LC_AXIAL",
+            "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "operator_hash": "sha256:95ff9c17d8d82c6d82c35e7d8eecb099a54dffcde00287872d2478e1c117639d",
+            "reduced_csr_identity_hash": "sha256:a2240cb17b52e9a1e225d9e8a731f486a822d3dc4f264f6ba90627593805562e",
+            "state_epoch": 1,
+            "state_hash": "sha256:cbdc287f55a602a2d3b40bbd0b7c83d8e7508fdc027b15d4d0fe6eebad926898"
+          },
+          "claim_boundary": {
+            "commercial_claim": false,
+            "committed_numerical_state": true,
+            "description": "Authoritative committed numerical displacement state only; reaction, member-force, engineering-design, output-adapter, readiness, and commercial authority are outside this contract.",
+            "engineering_result_recovery": false,
+            "global_displacement_state_projection": true,
+            "legacy_output_adapter": false,
+            "member_force_authority": false,
+            "reaction_authority": false,
+            "release_readiness": false,
+            "viewer_projection": false
+          },
+          "diagnostic_ir_hashes": [],
+          "extensions": {
+            "f3:stage": "frame3d_linear"
+          },
+          "numerical_state": {
+            "displacement_artifact": {
+              "artifact_uri": "artifact://engine-v2/results/f3.frame3d.linear.lc_axial/displacement_global.f64le",
+              "byte_length": 96,
+              "byte_order": "little",
+              "content_hash": "sha256:bffb1a293f10d4565228ddcc03f137e8514df62dfc850ab91199b1e21b9a988a",
+              "data_hash": "sha256:ace09fb299624e413d60169188d4c0d77365607254379508cc9238734076dd43",
+              "dtype": "<f8",
+              "layout": "C",
+              "name": "displacement_global_si",
+              "shape": [
+                12
+              ],
+              "storage_profile": "canonical_little_endian_fp64_binary.v1",
+              "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+            },
+            "dof_components": [
+              "UX",
+              "UY",
+              "UZ",
+              "RX",
+              "RY",
+              "RZ"
+            ],
+            "dof_count": 12,
+            "epoch": 1,
+            "load_factor": 1.0,
+            "role": "committed",
+            "time_s": 0.0
+          },
+          "promotion_basis": "converged_recurrence_plus_independent_full_residual_bc_and_committed_state.v1",
+          "result_hash": "sha256:2c165032376f0b8e6bfa918013b31c25886049b02e04a0ffe2004136fd53f14e",
+          "result_id": "f3.frame3d.linear.lc_axial",
+          "result_kind": "linear_static_numerical_state",
+          "schema_version": "structural-analysis-numerical-result-ir.v1",
+          "source_terminal": {
+            "backend_receipt_hash": "sha256:3fbf76227325afbb286c6e1b20223d8b196c9aed36689ce0370bb1daf60f7b78",
+            "backend_role": "cpu_reference",
+            "boundary_condition_gate_passed": true,
+            "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+            "committed_state_gate_passed": true,
+            "convergence_gate_passed": true,
+            "convergence_receipt_hash": "sha256:c55c2b5c63ebf8db54371ccc1f754ce8de2f91da2b44f728118dc16747922fcf",
+            "fallback_count": 0,
+            "free_solution_value_count": 6,
+            "full_residual_receipt_hash": "sha256:c4cbe6125469c3fd27e734b9bee4e9069fa01ebcc80107a803fc610c569f7fd7",
+            "independent_full_residual_gate_passed": true,
+            "regularization_count": 0,
+            "residual_sign": "internal_minus_external",
+            "run_hash": "sha256:231324667371345451f64c3f0ea21b1ba6944adbbc11453cf272398f10e89cac",
+            "run_schema_version": "f3-frame3d-linear-run.v1",
+            "solution_data_hash": "sha256:3a9c580b53c8e18ee17ac0cf976f69ee318b86219391569443502de7c1945381",
+            "source_authority": "non_authoritative_solver_recurrence",
+            "terminal_reason": "converged_scaled_residual"
+          }
+        },
+        {
+          "authority": {
+            "code_compliance": "not_authoritative",
+            "commercial_use": "not_authoritative",
+            "convergence": "authoritative",
+            "displacement": "authoritative",
+            "engineering_design": "not_authoritative",
+            "member_force": "not_evaluated",
+            "numerical_state": "authoritative",
+            "reaction": "not_evaluated",
+            "release_readiness": "not_authoritative"
+          },
+          "authority_profile": "authoritative_converged_linear_static_displacement.v1",
+          "bindings": {
+            "equation_scaling_hash": "sha256:b2dce97b1d435c3db59cee311fe90a78d78ce672a38edf1bdbb28f89dcf6c16c",
+            "execution_plan_hash": "sha256:766e6dafaffbc6bf2e0b1346ebb00732f92551a4585dbe58cab178134a9d6d47",
+            "load_pattern_id": "LC_WEAK",
+            "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "operator_hash": "sha256:95ff9c17d8d82c6d82c35e7d8eecb099a54dffcde00287872d2478e1c117639d",
+            "reduced_csr_identity_hash": "sha256:9b9f001a2be41ce0cf517f02df64c15f825c7d76f377c8ddf73590ba98f70c6e",
+            "state_epoch": 1,
+            "state_hash": "sha256:49b3128d89d2b0c41059944926594668c7100ecd2a757d91279bba9e736dbaa3"
+          },
+          "claim_boundary": {
+            "commercial_claim": false,
+            "committed_numerical_state": true,
+            "description": "Authoritative committed numerical displacement state only; reaction, member-force, engineering-design, output-adapter, readiness, and commercial authority are outside this contract.",
+            "engineering_result_recovery": false,
+            "global_displacement_state_projection": true,
+            "legacy_output_adapter": false,
+            "member_force_authority": false,
+            "reaction_authority": false,
+            "release_readiness": false,
+            "viewer_projection": false
+          },
+          "diagnostic_ir_hashes": [],
+          "extensions": {
+            "f3:stage": "frame3d_linear"
+          },
+          "numerical_state": {
+            "displacement_artifact": {
+              "artifact_uri": "artifact://engine-v2/results/f3.frame3d.linear.lc_weak/displacement_global.f64le",
+              "byte_length": 96,
+              "byte_order": "little",
+              "content_hash": "sha256:b2517f84ec5d75c9216da3c7510cf825ee4634ed22f4cf65bd401872bb475cd6",
+              "data_hash": "sha256:b962abf6c3635b36b7740f64a2202dcf471efeff5959e30e64e36f8c37820ec4",
+              "dtype": "<f8",
+              "layout": "C",
+              "name": "displacement_global_si",
+              "shape": [
+                12
+              ],
+              "storage_profile": "canonical_little_endian_fp64_binary.v1",
+              "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+            },
+            "dof_components": [
+              "UX",
+              "UY",
+              "UZ",
+              "RX",
+              "RY",
+              "RZ"
+            ],
+            "dof_count": 12,
+            "epoch": 1,
+            "load_factor": 1.0,
+            "role": "committed",
+            "time_s": 0.0
+          },
+          "promotion_basis": "converged_recurrence_plus_independent_full_residual_bc_and_committed_state.v1",
+          "result_hash": "sha256:1c7c540e722ae4dbfb8d61201e91177f6ecdf96d2fe416ccb3087890d8a681dd",
+          "result_id": "f3.frame3d.linear.lc_weak",
+          "result_kind": "linear_static_numerical_state",
+          "schema_version": "structural-analysis-numerical-result-ir.v1",
+          "source_terminal": {
+            "backend_receipt_hash": "sha256:3fbf76227325afbb286c6e1b20223d8b196c9aed36689ce0370bb1daf60f7b78",
+            "backend_role": "cpu_reference",
+            "boundary_condition_gate_passed": true,
+            "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+            "committed_state_gate_passed": true,
+            "convergence_gate_passed": true,
+            "convergence_receipt_hash": "sha256:0bf7d9b5391dcf3e81c8841e8bd09988d7481de7569d807e15c3fb6544b96de5",
+            "fallback_count": 0,
+            "free_solution_value_count": 6,
+            "full_residual_receipt_hash": "sha256:ce17e86f8afb313114552fa902f01bc83d399410bdc911da2203ddde5b0d791d",
+            "independent_full_residual_gate_passed": true,
+            "regularization_count": 0,
+            "residual_sign": "internal_minus_external",
+            "run_hash": "sha256:12c6aed2482074a5b8cf1e1429dcf08bf43faf7c29b5c0c902c79cc618fa0b9d",
+            "run_schema_version": "f3-frame3d-linear-run.v1",
+            "solution_data_hash": "sha256:01670ad7558a89b07407413a6dd39b7b597c48bee8e3f0272b81c99072ab5afe",
+            "source_authority": "non_authoritative_solver_recurrence",
+            "terminal_reason": "converged_scaled_residual"
+          }
+        },
+        {
+          "authority": {
+            "code_compliance": "not_authoritative",
+            "commercial_use": "not_authoritative",
+            "convergence": "authoritative",
+            "displacement": "authoritative",
+            "engineering_design": "not_authoritative",
+            "member_force": "not_evaluated",
+            "numerical_state": "authoritative",
+            "reaction": "not_evaluated",
+            "release_readiness": "not_authoritative"
+          },
+          "authority_profile": "authoritative_converged_linear_static_displacement.v1",
+          "bindings": {
+            "equation_scaling_hash": "sha256:60af40115cc65905f0af700f34400348cde07d9147eb9c401c74a3a963bf33a6",
+            "execution_plan_hash": "sha256:e9cd2bb18dda221ec1d6a40a5e5004be04c6f4369533ed4373668ce927be6501",
+            "load_pattern_id": "LC_STRONG",
+            "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "operator_hash": "sha256:95ff9c17d8d82c6d82c35e7d8eecb099a54dffcde00287872d2478e1c117639d",
+            "reduced_csr_identity_hash": "sha256:ecc9aed2faf25897c5ac26d899d2d6200277b5f593656c8b2cb5cacf991db929",
+            "state_epoch": 1,
+            "state_hash": "sha256:2f915888c48e7223d00c68bce0f8074d60aa44cfa7570e696c2529ba856a2fce"
+          },
+          "claim_boundary": {
+            "commercial_claim": false,
+            "committed_numerical_state": true,
+            "description": "Authoritative committed numerical displacement state only; reaction, member-force, engineering-design, output-adapter, readiness, and commercial authority are outside this contract.",
+            "engineering_result_recovery": false,
+            "global_displacement_state_projection": true,
+            "legacy_output_adapter": false,
+            "member_force_authority": false,
+            "reaction_authority": false,
+            "release_readiness": false,
+            "viewer_projection": false
+          },
+          "diagnostic_ir_hashes": [],
+          "extensions": {
+            "f3:stage": "frame3d_linear"
+          },
+          "numerical_state": {
+            "displacement_artifact": {
+              "artifact_uri": "artifact://engine-v2/results/f3.frame3d.linear.lc_strong/displacement_global.f64le",
+              "byte_length": 96,
+              "byte_order": "little",
+              "content_hash": "sha256:7ebfcac5e2a8af3fb69151684237c9f935269fa411a1f569aa82a57320744365",
+              "data_hash": "sha256:0335a8ee14dba02459cf1d2cee8f392674bcd6a9d3d0ea7d8c54298305c54ad8",
+              "dtype": "<f8",
+              "layout": "C",
+              "name": "displacement_global_si",
+              "shape": [
+                12
+              ],
+              "storage_profile": "canonical_little_endian_fp64_binary.v1",
+              "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+            },
+            "dof_components": [
+              "UX",
+              "UY",
+              "UZ",
+              "RX",
+              "RY",
+              "RZ"
+            ],
+            "dof_count": 12,
+            "epoch": 1,
+            "load_factor": 1.0,
+            "role": "committed",
+            "time_s": 0.0
+          },
+          "promotion_basis": "converged_recurrence_plus_independent_full_residual_bc_and_committed_state.v1",
+          "result_hash": "sha256:b09b25ea0c44db0b7293cebcd4017433c94583218c86cd89f677799a0fdb9be1",
+          "result_id": "f3.frame3d.linear.lc_strong",
+          "result_kind": "linear_static_numerical_state",
+          "schema_version": "structural-analysis-numerical-result-ir.v1",
+          "source_terminal": {
+            "backend_receipt_hash": "sha256:3fbf76227325afbb286c6e1b20223d8b196c9aed36689ce0370bb1daf60f7b78",
+            "backend_role": "cpu_reference",
+            "boundary_condition_gate_passed": true,
+            "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+            "committed_state_gate_passed": true,
+            "convergence_gate_passed": true,
+            "convergence_receipt_hash": "sha256:0d80091a2ab02e9e8394c1168c6f8538000b465c4b26d24749f6d8d1bbe5dd59",
+            "fallback_count": 0,
+            "free_solution_value_count": 6,
+            "full_residual_receipt_hash": "sha256:c30bd0cf63f93f1806a98be998f6b8bdac42888ffa3b55aa3fd7eaf5d26b5daf",
+            "independent_full_residual_gate_passed": true,
+            "regularization_count": 0,
+            "residual_sign": "internal_minus_external",
+            "run_hash": "sha256:01ecc28556fdda68926e7b13260f2c058583ce285efd0c70be8c875f35640e95",
+            "run_schema_version": "f3-frame3d-linear-run.v1",
+            "solution_data_hash": "sha256:46364a285426d911e54f35c9323886cb214f3eab0388be4ba99c407550b2bd98",
+            "source_authority": "non_authoritative_solver_recurrence",
+            "terminal_reason": "converged_scaled_residual"
+          }
+        },
+        {
+          "authority": {
+            "code_compliance": "not_authoritative",
+            "commercial_use": "not_authoritative",
+            "convergence": "authoritative",
+            "displacement": "authoritative",
+            "engineering_design": "not_authoritative",
+            "member_force": "not_evaluated",
+            "numerical_state": "authoritative",
+            "reaction": "not_evaluated",
+            "release_readiness": "not_authoritative"
+          },
+          "authority_profile": "authoritative_converged_linear_static_displacement.v1",
+          "bindings": {
+            "equation_scaling_hash": "sha256:fc31c038dce26049e4909243abe1dc057122150a1f5f29752e6eed9ff21fea5d",
+            "execution_plan_hash": "sha256:9e6f87755aed609a9d9c99666e18ae96b6efbc2d4946583ba178eb936da80160",
+            "load_pattern_id": "LC_TORSION",
+            "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "operator_hash": "sha256:95ff9c17d8d82c6d82c35e7d8eecb099a54dffcde00287872d2478e1c117639d",
+            "reduced_csr_identity_hash": "sha256:236239e97f7d0d8d44d52fd80582d0e9339e3ea6fc7eda1e9c57a1bf45dbc266",
+            "state_epoch": 1,
+            "state_hash": "sha256:b8f821bd6c08c6cc9a49016ded329bd6b835b812a812b8e4abd1a01ca17e5cb9"
+          },
+          "claim_boundary": {
+            "commercial_claim": false,
+            "committed_numerical_state": true,
+            "description": "Authoritative committed numerical displacement state only; reaction, member-force, engineering-design, output-adapter, readiness, and commercial authority are outside this contract.",
+            "engineering_result_recovery": false,
+            "global_displacement_state_projection": true,
+            "legacy_output_adapter": false,
+            "member_force_authority": false,
+            "reaction_authority": false,
+            "release_readiness": false,
+            "viewer_projection": false
+          },
+          "diagnostic_ir_hashes": [],
+          "extensions": {
+            "f3:stage": "frame3d_linear"
+          },
+          "numerical_state": {
+            "displacement_artifact": {
+              "artifact_uri": "artifact://engine-v2/results/f3.frame3d.linear.lc_torsion/displacement_global.f64le",
+              "byte_length": 96,
+              "byte_order": "little",
+              "content_hash": "sha256:3e005ba0f5864a3fefd227de1592c4a281d4de20d7004188f2a58ff0d917365c",
+              "data_hash": "sha256:983bad1b83257fa1918be73be173c3ccf19f1d4aa969bfae549e45fb98a803db",
+              "dtype": "<f8",
+              "layout": "C",
+              "name": "displacement_global_si",
+              "shape": [
+                12
+              ],
+              "storage_profile": "canonical_little_endian_fp64_binary.v1",
+              "unit_profile": "node_major_ux_uy_uz_m_rx_ry_rz_rad.v1"
+            },
+            "dof_components": [
+              "UX",
+              "UY",
+              "UZ",
+              "RX",
+              "RY",
+              "RZ"
+            ],
+            "dof_count": 12,
+            "epoch": 1,
+            "load_factor": 1.0,
+            "role": "committed",
+            "time_s": 0.0
+          },
+          "promotion_basis": "converged_recurrence_plus_independent_full_residual_bc_and_committed_state.v1",
+          "result_hash": "sha256:1a3ca25f6bfd5a697555f8e76d15a9610cd2774fd6f021cc84b7543b29ff8708",
+          "result_id": "f3.frame3d.linear.lc_torsion",
+          "result_kind": "linear_static_numerical_state",
+          "schema_version": "structural-analysis-numerical-result-ir.v1",
+          "source_terminal": {
+            "backend_receipt_hash": "sha256:3fbf76227325afbb286c6e1b20223d8b196c9aed36689ce0370bb1daf60f7b78",
+            "backend_role": "cpu_reference",
+            "boundary_condition_gate_passed": true,
+            "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
+            "committed_state_gate_passed": true,
+            "convergence_gate_passed": true,
+            "convergence_receipt_hash": "sha256:c55c2b5c63ebf8db54371ccc1f754ce8de2f91da2b44f728118dc16747922fcf",
+            "fallback_count": 0,
+            "free_solution_value_count": 6,
+            "full_residual_receipt_hash": "sha256:f02dc0d9ebbda3587ecfa0dacad979ea64303f00e38dec4a54e5dd407221cd75",
+            "independent_full_residual_gate_passed": true,
+            "regularization_count": 0,
+            "residual_sign": "internal_minus_external",
+            "run_hash": "sha256:ba9cf899313768dfe6beee6ddf835922a3e0852aba0607d8754782e5b3d206af",
+            "run_schema_version": "f3-frame3d-linear-run.v1",
+            "solution_data_hash": "sha256:ddb645fdd65145bbe8df170e9b72502d96656e11d91c0b69292f7b3c223bb28c",
+            "source_authority": "non_authoritative_solver_recurrence",
+            "terminal_reason": "converged_scaled_residual"
+          }
+        }
+      ],
+      "schema_version": "structural-analysis-numerical-result-ir.v1"
+    },
+    "solver": {
+      "all_cases_pass": true,
+      "case_count": 4,
+      "fallback_count": 0,
+      "operator_hash": "sha256:95ff9c17d8d82c6d82c35e7d8eecb099a54dffcde00287872d2478e1c117639d",
+      "regularization_count": 0,
+      "residual_formula": "R(u) = K u - F",
+      "solver_path_id": "authoritative_cpu_linear_fea_3d_v1"
+    },
+    "workbench": {
+      "bound_model_identity_all_cases": true,
+      "payloads": [
+        {
+          "analysis_fidelity": "cpu_reference_linear_fea",
+          "elements": [
+            {
+              "id": "E1",
+              "local_end_forces": {
+                "FX_I": -100000.0,
+                "FX_J": 100000.0,
+                "FY_I": 0.0,
+                "FY_J": 0.0,
+                "FZ_I": 0.0,
+                "FZ_J": 0.0,
+                "MX_I": 0.0,
+                "MX_J": 0.0,
+                "MY_I": 0.0,
+                "MY_J": 0.0,
+                "MZ_I": 0.0,
+                "MZ_J": 0.0
+              },
+              "nodes": [
+                "N1",
+                "N2"
+              ],
+              "type": "frame"
+            }
+          ],
+          "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+          "model_identity": {
+            "analysis_input_snapshot": "detached_canonical_model_v1",
+            "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+            "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+          },
+          "nodes": [
+            {
+              "coordinates": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N1",
+              "reaction": {
+                "FX": -100000.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            },
+            {
+              "coordinates": [
+                2.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 5e-05,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N2",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            }
+          ],
+          "reaction_definition": "constrained_dof_internal_minus_external_force",
+          "schema_version": "structural-analysis-viewer-payload.v2",
+          "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+          "source": "authoritative_solver_result"
+        },
+        {
+          "analysis_fidelity": "cpu_reference_linear_fea",
+          "elements": [
+            {
+              "id": "E1",
+              "local_end_forces": {
+                "FX_I": 0.0,
+                "FX_J": 0.0,
+                "FY_I": 10000.0,
+                "FY_J": -10000.0,
+                "FZ_I": 0.0,
+                "FZ_J": 0.0,
+                "MX_I": 0.0,
+                "MX_J": 0.0,
+                "MY_I": 0.0,
+                "MY_J": 0.0,
+                "MZ_I": 20000.0,
+                "MZ_J": -8.326672684688674e-13
+              },
+              "nodes": [
+                "N1",
+                "N2"
+              ],
+              "type": "frame"
+            }
+          ],
+          "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+          "model_identity": {
+            "analysis_input_snapshot": "detached_canonical_model_v1",
+            "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+            "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+          },
+          "nodes": [
+            {
+              "coordinates": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N1",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 10000.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 20000.0
+              }
+            },
+            {
+              "coordinates": [
+                2.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": -0.002,
+                "UX": 0.0,
+                "UY": -0.0026666666666666666,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": -8.326672684688674e-13
+              },
+              "id": "N2",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            }
+          ],
+          "reaction_definition": "constrained_dof_internal_minus_external_force",
+          "schema_version": "structural-analysis-viewer-payload.v2",
+          "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+          "source": "authoritative_solver_result"
+        },
+        {
+          "analysis_fidelity": "cpu_reference_linear_fea",
+          "elements": [
+            {
+              "id": "E1",
+              "local_end_forces": {
+                "FX_I": 0.0,
+                "FX_J": 0.0,
+                "FY_I": 0.0,
+                "FY_J": 0.0,
+                "FZ_I": 9999.999999999996,
+                "FZ_J": -9999.999999999996,
+                "MX_I": 0.0,
+                "MX_J": 0.0,
+                "MY_I": -19999.999999999996,
+                "MY_J": 7.275957614183426e-12,
+                "MZ_I": 0.0,
+                "MZ_J": 0.0
+              },
+              "nodes": [
+                "N1",
+                "N2"
+              ],
+              "type": "frame"
+            }
+          ],
+          "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+          "model_identity": {
+            "analysis_input_snapshot": "detached_canonical_model_v1",
+            "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+            "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+          },
+          "nodes": [
+            {
+              "coordinates": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N1",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 9999.999999999996,
+                "MX": 0.0,
+                "MY": -19999.999999999996,
+                "MZ": 0.0
+              }
+            },
+            {
+              "coordinates": [
+                2.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.00125,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": -0.0016666666666666663
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 3.637978807091713e-12,
+                "MX": 0.0,
+                "MY": 7.275957614183426e-12,
+                "MZ": 0.0
+              },
+              "id": "N2",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            }
+          ],
+          "reaction_definition": "constrained_dof_internal_minus_external_force",
+          "schema_version": "structural-analysis-viewer-payload.v2",
+          "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+          "source": "authoritative_solver_result"
+        },
+        {
+          "analysis_fidelity": "cpu_reference_linear_fea",
+          "elements": [
+            {
+              "id": "E1",
+              "local_end_forces": {
+                "FX_I": 0.0,
+                "FX_J": 0.0,
+                "FY_I": 0.0,
+                "FY_J": 0.0,
+                "FZ_I": 0.0,
+                "FZ_J": 0.0,
+                "MX_I": -5000.0,
+                "MX_J": 5000.0,
+                "MY_I": 0.0,
+                "MY_J": 0.0,
+                "MZ_I": 0.0,
+                "MZ_J": 0.0
+              },
+              "nodes": [
+                "N1",
+                "N2"
+              ],
+              "type": "frame"
+            }
+          ],
+          "equilibrium_residual_definition": "free_dof_internal_minus_external_force; constrained entries are zero",
+          "model_identity": {
+            "analysis_input_snapshot": "detached_canonical_model_v1",
+            "canonical_model_checksum": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+            "identity_policy": "source_bytes_and_detached_canonical_model_v1",
+            "source_input_checksum": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9"
+          },
+          "nodes": [
+            {
+              "coordinates": [
+                0.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.0,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N1",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": -5000.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            },
+            {
+              "coordinates": [
+                2.0,
+                0.0,
+                0.0
+              ],
+              "displacement": {
+                "RX": 0.013,
+                "RY": 0.0,
+                "RZ": 0.0,
+                "UX": 0.0,
+                "UY": 0.0,
+                "UZ": 0.0
+              },
+              "equilibrium_residual": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              },
+              "id": "N2",
+              "reaction": {
+                "FX": 0.0,
+                "FY": 0.0,
+                "FZ": 0.0,
+                "MX": 0.0,
+                "MY": 0.0,
+                "MZ": 0.0
+              }
+            }
+          ],
+          "reaction_definition": "constrained_dof_internal_minus_external_force",
+          "schema_version": "structural-analysis-viewer-payload.v2",
+          "solver_path_id": "authoritative_cpu_linear_fea_3d_v1",
+          "source": "authoritative_solver_result"
+        }
+      ],
+      "schema_version": "structural-analysis-viewer-payload.v2"
+    }
+  }
+}
