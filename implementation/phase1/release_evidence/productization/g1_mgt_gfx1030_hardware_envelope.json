@@ -78,19 +78,19 @@
       "rollback_state_bitwise_exact": true
     },
     "performance": {
-      "checkpoint_serialization_overhead_seconds": 0.05933471300158999,
+      "checkpoint_serialization_overhead_seconds": 0.05986510599905159,
       "d2h_bytes": 4041124,
-      "device_lifecycle_wall_time_ms": 5276.243707,
+      "device_lifecycle_wall_time_ms": 5240.332247,
       "h2d_bytes": 239979856,
       "mid_iteration_d2h_transfer_count": 0,
       "peak_device_allocation_bytes": 260837212,
-      "speedup_vs_cpu": 1.0203347589607747
+      "speedup_vs_cpu": 1.038649503782195
     },
     "runner_attestation": {
       "execution_location": "local-workstation",
       "independent_from_local_gfx1030": false,
       "organization_id": "local-development",
-      "runner_id": "rx6900xt-local"
+      "runner_id": "local-gfx1030"
     },
     "source": {
       "input_checksums": {
@@ -104,21 +104,21 @@
         "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_full_load_checkpoint.npz": "sha256:f5486baa42295cd3545a59d90ebec4310c3d55e544ea75b3f5de797c77303a3d",
         "scripts/build_g1_mgt_full_load_checkpoint_bridge.py": "sha256:9560af5fdc08bb762e9d27e14201066a7acd68425299abcb8b90a338bd067cca",
         "scripts/build_g1_mgt_material_family_adequacy_audit.py": "sha256:1fb1bb62f33a6da0d0b1ef31839d1a4183b140b54c3529d69757c337c921f2ce",
-        "scripts/run_g1_mgt_device_fgmres.py": "sha256:77aa4c2ec11e6e5269fbce846c126342514a6019ac407b2f716ad1993aaae65e",
+        "scripts/run_g1_mgt_device_fgmres.py": "sha256:f4c78712ef1892674971a90d1b83af852c1f1509cb6d978c4f417c7a825e216d",
         "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": "sha256:d3e5647af39e64ef6b9906a7901697c5399c2284be62d471142fab49ab0d86f3",
         "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
         "src/structural_analysis/schemas/g1_mgt_device_fgmres_v1.schema.json": "sha256:e6a02ace4c1f1bd1c32d3fc769f9d0c0263dfd71a56dacd4c2d3733a8eea14ce",
-        "tests/test_run_g1_mgt_device_fgmres.py": "sha256:82bcfb0196a38a7d4e434a51ffa6c5a6a35d1b41ddbb38eb6a56eaeed14b7329"
+        "tests/test_run_g1_mgt_device_fgmres.py": "sha256:ae8490a77f335c0191d2be035bb912df3f9c50fb8013c7197e38a84c1b7027be"
       },
-      "repository_commit_sha": "98b7617072261bf87fd64cb3837be83f6eeed86c",
+      "repository_commit_sha": "24a4d4ab85af5babc42415b518a2a80de8a291c5",
       "source_paths_clean_at_execution": true,
-      "source_set_hash": "sha256:5687508e9bdcd9295b64884c3edf580231dad3e20d9fc40939e7370aba2b940f"
+      "source_set_hash": "sha256:f2534497a5ca7190c8b9a80db176e6d4de770066bcccc42b1dc80f561fdc5a99"
     },
     "terminal": {
       "accepted_alpha": 1,
       "accepted_nonlinear_residual_inf_n": 4.5068662404775016e-07,
       "checkpoint_accepted_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
-      "checkpoint_sha256": "sha256:884a82e75e1891b8a0f04c7f8e47e01c394dc6f772415e60a5c2bc12b918a832",
+      "checkpoint_sha256": "sha256:9ff967c15fe2a7b815095d9cdb9f110033e585bace05b47eea0ea7d063a9e88d",
       "equation_count": 70560,
       "krylov_iterations": 6,
       "load_factor": 1.0,
@@ -130,19 +130,19 @@
     "upstream": {
       "contract_scope": "actual_mgt_full_load_scaled_fgmres_single_device_lifecycle_gfx1030",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_receipt.json",
-      "receipt_hash": "sha256:44c1fdcb0788981a427357c0e687ff0cc7cefc67455fa0f9e5f23ee257add4af",
+      "receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
       "schema_version": "g1-mgt-device-fgmres-receipt.v1"
     }
   },
-  "generated_at": "2026-08-08T15:05:34.485485+00:00",
-  "receipt_hash": "sha256:4dcc4cd7d2f8c3215d0d045c02d49dfd635c5a240796c0a816711af99897aafe",
+  "generated_at": "2026-08-08T15:17:52.079448+00:00",
+  "receipt_hash": "sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a",
   "schema_version": "g1-mgt-production-hip-hardware-envelope.v1",
   "signature": {
     "algorithm": null,
     "public_key_sha256": null,
     "public_key_spki_base64": null,
     "signature_base64": null,
-    "signed_payload_hash": "sha256:f8d077dc44000745414fd957f75e6015821f08827539117a6bfb1139b42d5b73",
+    "signed_payload_hash": "sha256:9ad7c2c2378af94cf553d1d08ff41e7c04c077487ae6ecf70d7c5730918a983a",
     "signer_id": null,
     "state": "unsigned"
   },
