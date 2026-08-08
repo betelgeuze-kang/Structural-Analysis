@@ -122,8 +122,19 @@ def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray
                 "path": str(path),
                 "load_scale": load_scale,
                 "dof_count": int(u.size),
-                "checkpoint_schema": str(np.asarray(archive["checkpoint_schema"]).item())
-                if "checkpoint_schema" in archive.files
+                "checkpoint_schema": str(
+                    np.asarray(
+                        archive[
+                            "checkpoint_schema"
+                            if "checkpoint_schema" in archive.files
+                            else "schema_version"
+                        ]
+                    ).item()
+                )
+                if (
+                    "checkpoint_schema" in archive.files
+                    or "schema_version" in archive.files
+                )
                 else None,
                 "accepted_state_history_count": int(state_history.shape[0])
                 if state_history is not None and state_history.ndim == 2
@@ -141,6 +152,28 @@ def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray
                 else None,
                 "max_translation_m": float(np.asarray(archive["max_translation_m"]).item())
                 if "max_translation_m" in archive.files
+                else None,
+                "source_commit_sha": str(
+                    np.asarray(archive["source_commit_sha"]).item()
+                )
+                if "source_commit_sha" in archive.files
+                else None,
+                "model_source_sha256": str(
+                    np.asarray(archive["model_source_sha256"]).item()
+                )
+                if "model_source_sha256" in archive.files
+                else None,
+                "equilibrium_operator_binding_hash": str(
+                    np.asarray(
+                        archive["equilibrium_operator_binding_hash"]
+                    ).item()
+                )
+                if "equilibrium_operator_binding_hash" in archive.files
+                else None,
+                "committed_material_state_hash": str(
+                    np.asarray(archive["committed_material_state_hash"]).item()
+                )
+                if "committed_material_state_hash" in archive.files
                 else None,
             },
             u,

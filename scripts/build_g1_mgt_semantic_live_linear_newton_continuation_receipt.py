@@ -198,6 +198,11 @@ def _reload_checkpoint(
         load_factor=checkpoint.load_factor,
         free_displacements_m=values,
         state_hash=checkpoint.state_hash,
+        source_commit_sha=checkpoint.source_commit_sha,
+        model_source_sha256=checkpoint.model_source_sha256,
+        equilibrium_operator_binding_hash=(
+            checkpoint.equilibrium_operator_binding_hash
+        ),
     )
 
 

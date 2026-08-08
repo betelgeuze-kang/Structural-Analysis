@@ -62,6 +62,57 @@ def test_evaluate_residual_jacobian_direction_matches_linear_residual() -> None:
     assert row["action_cosine"] > 0.999999
 
 
+def test_legacy_fixed_point_checkpoint_is_not_exact_restart_evidence() -> None:
+    audit = probe_module._checkpoint_exact_restart_audit(
+        checkpoint={
+            "checkpoint_schema": (
+                "mgt-uncoarsened-boundary-pdelta-checkpoint.v1"
+            ),
+            "load_scale": 0.656,
+            "residual_inf_n": 1.1023672608700963e-4,
+            "fixed_point_relative_increment": 5.180648577593716e-6,
+        },
+        current_source_commit_sha="a" * 40,
+        current_model_source_sha256="sha256:" + "b" * 64,
+        current_operator_binding_hash="sha256:" + "c" * 64,
+    )
+
+    assert audit["passed"] is False
+    assert audit["fixed_point_acceptance_is_exact_restart"] is False
+    assert audit["blockers"] == [
+        "checkpoint_source_commit_sha_missing",
+        "checkpoint_model_source_sha256_missing",
+        "checkpoint_equilibrium_operator_binding_hash_missing",
+        "checkpoint_committed_material_state_hash_missing",
+    ]
+
+
+def test_exact_restart_audit_accepts_only_current_bound_checkpoint() -> None:
+    source = "a" * 40
+    model = "sha256:" + "b" * 64
+    operator = "sha256:" + "c" * 64
+    material = "sha256:" + "d" * 64
+    audit = probe_module._checkpoint_exact_restart_audit(
+        checkpoint={
+            "checkpoint_schema": "bound-checkpoint.v2",
+            "source_commit_sha": source,
+            "model_source_sha256": model,
+            "equilibrium_operator_binding_hash": operator,
+            "committed_material_state_hash": material,
+        },
+        current_source_commit_sha=source,
+        current_model_source_sha256=model,
+        current_operator_binding_hash=operator,
+    )
+
+    assert audit["passed"] is True
+    assert audit["blockers"] == []
+    assert all(
+        row["matches_current"] is True
+        for row in audit["identity_comparisons"].values()
+    )
+
+
 def test_evaluate_residual_jacobian_direction_reports_free_set_change() -> None:
     stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
 
@@ -83,6 +134,227 @@ def test_evaluate_residual_jacobian_direction_reports_free_set_change() -> None:
 
     assert row["evaluated"] is False
     assert row["reason"] == "free_dof_set_changed"
+    assert row["difference_scheme"] == "central"
+    assert row["unstable_probe_sides"] == ["plus"]
+
+
+def test_directional_probe_uses_central_physical_residual_difference() -> None:
+    stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        value = float(u[0])
+        residual = np.asarray([value + value * value], dtype=np.float64)
+        tangent = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+        return tangent, np.zeros(1), free, residual, np.zeros(1), {}
+
+    row = evaluate_residual_jacobian_direction(
+        u=np.asarray([0.0]),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([0.0]),
+        direction=np.asarray([1.0]),
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-3,
+        direction_meta={"direction": "fixture"},
+    )
+
+    assert row["evaluated"] is True
+    assert row["difference_scheme"] == "central"
+    assert row["evaluated_sides"] == ["plus", "minus"]
+    assert row["fd_action_inf_n"] == pytest.approx(1.0)
+    assert row["relative_l2_error"] <= 1.0e-12
+
+
+def test_directional_probe_snapshots_accepted_state_tangent() -> None:
+    stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        stiffness.data[:] = 2.0
+        return (
+            stiffness,
+            np.zeros(1),
+            free,
+            np.asarray([2.0 * float(u[0])]),
+            np.zeros(1),
+            {},
+        )
+
+    row = evaluate_residual_jacobian_direction(
+        u=np.asarray([0.0]),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([0.0]),
+        direction=np.asarray([1.0]),
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-6,
+        direction_meta={"direction": "fixture"},
+    )
+
+    assert row["accepted_state_tangent_snapshotted"] is True
+    assert row["jacobian_epoch"] == "accepted_state"
+    assert row["tangent_action_inf_n"] == pytest.approx(1.0)
+    assert row["fd_action_inf_n"] == pytest.approx(2.0)
+    assert row["relative_l2_error"] == pytest.approx(0.5)
+
+
+def test_directional_probe_proves_material_trial_rollback_identity() -> None:
+    stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+    committed_hash = "sha256:" + "a" * 64
+
+    def assemble_residual(u: np.ndarray):
+        return (
+            stiffness,
+            np.zeros(1),
+            free,
+            np.asarray(u, dtype=np.float64),
+            np.zeros(1),
+            {"committed_material_state_hash": committed_hash},
+        )
+
+    row = evaluate_residual_jacobian_direction(
+        u=np.asarray([0.0]),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([0.0]),
+        direction=np.asarray([1.0]),
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-6,
+        direction_meta={"direction": "fixture"},
+        base_meta={"committed_material_state_hash": committed_hash},
+    )
+
+    audit = row["material_state_identity_audit"]
+    assert row["material_state_identity_consistency_eligible"] is True
+    assert audit["passed"] is True
+    assert audit["sides"]["plus"]["trial_matches_base"] is True
+    assert audit["sides"]["minus"]["post_trial_base_matches_base"] is True
+    assert all(
+        metadata["post_trial_base_residual_exact"] is True
+        for metadata in audit["sides"].values()
+    )
+
+
+def test_directional_probe_rejects_material_trial_state_leak() -> None:
+    stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+    base_hash = "sha256:" + "a" * 64
+    trial_hash = "sha256:" + "b" * 64
+
+    def assemble_residual(u: np.ndarray):
+        state_hash = base_hash if float(u[0]) == 0.0 else trial_hash
+        return (
+            stiffness,
+            np.zeros(1),
+            free,
+            np.asarray(u, dtype=np.float64),
+            np.zeros(1),
+            {"committed_material_state_hash": state_hash},
+        )
+
+    row = evaluate_residual_jacobian_direction(
+        u=np.asarray([0.0]),
+        stiffness=stiffness,
+        free=free,
+        residual=np.asarray([0.0]),
+        direction=np.asarray([1.0]),
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-6,
+        direction_meta={"direction": "fixture"},
+        base_meta={"committed_material_state_hash": base_hash},
+    )
+
+    assert row["evaluated"] is True
+    assert row["material_state_identity_consistency_eligible"] is False
+    assert row["material_state_identity_audit"]["passed"] is False
+    assert row["material_state_identity_audit"]["sides"]["plus"][
+        "trial_matches_base"
+    ] is False
+
+
+def test_directional_probe_rejects_one_sided_residual_shape_change() -> None:
+    stiffness = coo_matrix(
+        ([1.0, 1.0], ([0, 1], [0, 1])),
+        shape=(2, 2),
+    ).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray):
+        residual = np.asarray(u if float(u[0]) >= 0.0 else u[:1])
+        return stiffness, np.zeros(2), free, residual, np.zeros(2), {}
+
+    row = evaluate_residual_jacobian_direction(
+        u=np.zeros(2),
+        stiffness=stiffness,
+        free=free,
+        residual=np.zeros(2),
+        direction=np.ones(2),
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-6,
+        direction_meta={"direction": "fixture"},
+    )
+
+    assert row["evaluated"] is False
+    assert row["reason"] == "residual_vector_contract_changed"
+    assert row["invalid_residual_probe_sides"] == ["minus"]
+
+
+def test_probe_requires_every_declared_direction_to_be_evaluated(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([1.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+
+    def assemble_residual(
+        u: np.ndarray,
+        *,
+        include_component_forces: bool = False,
+    ):
+        meta = {"physical_internal_force_model": "fixture"}
+        if include_component_forces:
+            meta["component_forces"] = {"frame": np.asarray([1.0])}
+        return stiffness, np.zeros(1), free, np.asarray([1.0]), np.ones(1), meta
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        lambda **_kwargs: (
+            assemble_residual,
+            {"u0": np.zeros(1), "checkpoint": {}, "load_scale": 1.0},
+        ),
+    )
+
+    def evaluate_direction(**kwargs):
+        meta = kwargs["direction_meta"]
+        if meta["direction"] == "top_residual_sign":
+            return {**meta, "evaluated": False, "reason": "fixture_skip"}
+        return {
+            **meta,
+            "evaluated": True,
+            "relative_l2_error": 0.0,
+            "relative_inf_error": 0.0,
+            "action_cosine": 1.0,
+        }
+
+    monkeypatch.setattr(
+        probe_module,
+        "evaluate_residual_jacobian_direction",
+        evaluate_direction,
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        state_scale_values=(),
+    )
+
+    assert payload["residual_jacobian_consistency_ready"] is False
+    assert payload["direction_evaluation_gate"]["passed"] is False
+    assert payload["direction_evaluation_gate"]["evaluated_direction_count"] == 1
+    assert payload["blockers"] == [
+        "residual_jacobian_direction_evaluation_incomplete"
+    ]
 
 
 def test_component_breakdown_identifies_dominant_top_residual_component() -> None:

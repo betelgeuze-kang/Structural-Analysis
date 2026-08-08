@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import time
 from datetime import datetime, timezone
@@ -67,6 +68,166 @@ def _write_json_payload(output_json: Path | None, payload: dict[str, Any]) -> No
 def _max_abs(values: np.ndarray) -> float:
     arr = np.asarray(values, dtype=np.float64)
     return float(np.max(np.abs(arr))) if arr.size else 0.0
+
+
+def _canonical_sha256(value: Any) -> bool:
+    return bool(
+        isinstance(value, str)
+        and len(value) == 71
+        and value.startswith("sha256:")
+        and all(character in "0123456789abcdef" for character in value[7:])
+    )
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as stream:
+        while chunk := stream.read(1024 * 1024):
+            digest.update(chunk)
+    return "sha256:" + digest.hexdigest()
+
+
+def _array_sha256(values: Any, *, dtype: str) -> str:
+    canonical = np.ascontiguousarray(np.asarray(values, dtype=dtype))
+    return "sha256:" + hashlib.sha256(
+        canonical.tobytes(order="C")
+    ).hexdigest()
+
+
+def _current_equilibrium_operator_binding_hash(
+    *,
+    stiffness: Any,
+    free: np.ndarray,
+    source_commit_sha: str,
+    model_source_sha256: str,
+    load_scale: float,
+    shell_pressure_load_path_policy: str,
+    base_meta: dict[str, Any],
+) -> str:
+    csr = stiffness.tocsr(copy=True)
+    csr.sort_indices()
+    payload = {
+        "schema_version": "mgt-physical-residual-operator-binding.v1",
+        "source_commit_sha": str(source_commit_sha),
+        "model_source_sha256": str(model_source_sha256),
+        "load_scale": float(load_scale),
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+        "free_equation_order_data_hash": _array_sha256(free, dtype="<i8"),
+        "csr_row_pointer_hash": _array_sha256(csr.indptr, dtype="<i8"),
+        "csr_column_index_hash": _array_sha256(csr.indices, dtype="<i8"),
+        "csr_numeric_values_hash": _array_sha256(csr.data, dtype="<f8"),
+        "physical_internal_force_model": base_meta.get(
+            "physical_internal_force_model"
+        ),
+        "newton_tangent_model": base_meta.get("newton_tangent_model"),
+        "equilibrium_geometry_contract": base_meta.get(
+            "equilibrium_geometry_contract"
+        ),
+    }
+    encoded = json.dumps(
+        payload,
+        allow_nan=False,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+def _checkpoint_exact_restart_audit(
+    *,
+    checkpoint: dict[str, Any] | None,
+    current_source_commit_sha: str,
+    current_model_source_sha256: str,
+    current_operator_binding_hash: str,
+) -> dict[str, Any]:
+    checkpoint = checkpoint if isinstance(checkpoint, dict) else {}
+    expected = {
+        "source_commit_sha": str(current_source_commit_sha),
+        "model_source_sha256": str(current_model_source_sha256),
+        "equilibrium_operator_binding_hash": str(current_operator_binding_hash),
+    }
+    blockers: list[str] = []
+    comparisons: dict[str, Any] = {}
+    for field, expected_value in expected.items():
+        stored = checkpoint.get(field)
+        present = bool(stored)
+        canonical = (
+            isinstance(stored, str)
+            and (
+                _canonical_sha256(stored)
+                if field != "source_commit_sha"
+                else len(stored) in {40, 64}
+                and all(character in "0123456789abcdef" for character in stored)
+            )
+        )
+        matches = bool(canonical and stored == expected_value)
+        comparisons[field] = {
+            "stored": stored,
+            "expected": expected_value,
+            "present": present,
+            "canonical": canonical,
+            "matches_current": matches,
+        }
+        if not present:
+            blockers.append(f"checkpoint_{field}_missing")
+        elif not canonical:
+            blockers.append(f"checkpoint_{field}_noncanonical")
+        elif not matches:
+            blockers.append(f"checkpoint_{field}_mismatch")
+    material_hash = checkpoint.get("committed_material_state_hash")
+    material_present = bool(material_hash)
+    material_canonical = _canonical_sha256(material_hash)
+    if not material_present:
+        blockers.append("checkpoint_committed_material_state_hash_missing")
+    elif not material_canonical:
+        blockers.append("checkpoint_committed_material_state_hash_noncanonical")
+    blockers = list(dict.fromkeys(blockers))
+    return {
+        "schema_version": "mgt-checkpoint-exact-restart-audit.v1",
+        "passed": not blockers,
+        "checkpoint_schema": checkpoint.get("checkpoint_schema"),
+        "identity_comparisons": comparisons,
+        "committed_material_state": {
+            "stored_hash": material_hash,
+            "present": material_present,
+            "canonical": material_canonical,
+        },
+        "fixed_point_acceptance_is_exact_restart": False,
+        "blockers": blockers,
+        "claim_boundary": (
+            "A stored fixed-point residual or increment is not exact-restart "
+            "evidence. Exact restart requires canonical and current-matching "
+            "source, model, equilibrium-operator, and committed material-state "
+            "identities."
+        ),
+    }
+
+
+def _committed_material_state_hash(metadata: dict[str, Any] | None) -> str | None:
+    """Return only an explicitly scoped canonical committed-state SHA-256."""
+    if not isinstance(metadata, dict):
+        return None
+    candidates = (
+        metadata.get("committed_material_state_hash"),
+        metadata.get("committed_state_hash"),
+    )
+    lifecycle = metadata.get("state_lifecycle")
+    if isinstance(lifecycle, dict):
+        candidates = (
+            *candidates,
+            lifecycle.get("committed_material_state_hash"),
+            lifecycle.get("committed_state_hash"),
+        )
+    for value in candidates:
+        if (
+            isinstance(value, str)
+            and value.startswith("sha256:")
+            and len(value) == 71
+            and all(character in "0123456789abcdef" for character in value[7:])
+        ):
+            return value
+    return None
 
 
 def _direction_top_residual_sign(
@@ -2130,35 +2291,219 @@ def evaluate_residual_jacobian_direction(
     assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
     fd_step: float,
     direction_meta: dict[str, Any],
+    base_meta: dict[str, Any] | None = None,
+    require_material_state_identity: bool = True,
 ) -> dict[str, Any]:
-    """Compare tangent action K*d with finite-difference residual action."""
-    free_idx = np.asarray(free, dtype=np.int64)
-    base_residual = np.asarray(residual, dtype=np.float64)
-    raw_direction = np.asarray(direction, dtype=np.float64)
+    """Compare the accepted-state tangent with a central physical-residual JVP."""
+    base_u = np.array(u, dtype=np.float64, copy=True)
+    free_idx = np.array(free, dtype=np.int64, copy=True)
+    base_residual = np.array(residual, dtype=np.float64, copy=True)
+    raw_direction = np.array(direction, dtype=np.float64, copy=True)
+    accepted_stiffness = (
+        stiffness.copy()
+        if hasattr(stiffness, "copy")
+        else np.array(stiffness, dtype=np.float64, copy=True)
+    )
+    base_material_state_hash = _committed_material_state_hash(base_meta)
     direction_inf = _max_abs(raw_direction)
     if direction_inf <= 0.0:
         return {
             **direction_meta,
             "evaluated": False,
             "reason": "zero_direction",
+            "difference_scheme": "central",
+            "jacobian_epoch": "accepted_state",
+            "evaluated_sides": [],
+        }
+    if base_residual.ndim != 1 or base_residual.shape != (free_idx.size,):
+        return {
+            **direction_meta,
+            "evaluated": False,
+            "reason": "base_residual_shape_invalid",
+            "difference_scheme": "central",
+            "jacobian_epoch": "accepted_state",
+            "expected_residual_shape": [int(free_idx.size)],
+            "actual_residual_shape": list(base_residual.shape),
+            "evaluated_sides": [],
         }
     normalized_direction = raw_direction / direction_inf
     step = float(fd_step)
-    trial_u = np.asarray(u, dtype=np.float64) + step * normalized_direction
-    _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(trial_u)
-    free_stable = bool(
-        np.asarray(trial_free, dtype=np.int64).shape == free_idx.shape
-        and np.array_equal(np.asarray(trial_free, dtype=np.int64), free_idx)
-    )
-    if not free_stable:
+    if not np.isfinite(step) or step <= 0.0:
+        return {
+            **direction_meta,
+            "evaluated": False,
+            "reason": "invalid_fd_step",
+            "fd_step": step,
+            "difference_scheme": "central",
+            "jacobian_epoch": "accepted_state",
+            "evaluated_sides": [],
+        }
+
+    side_residuals: dict[str, np.ndarray] = {}
+    side_metadata: dict[str, dict[str, Any]] = {}
+    for side, sign in (("plus", 1.0), ("minus", -1.0)):
+        trial_u = base_u + sign * step * normalized_direction
+        (
+            _trial_k,
+            _trial_f,
+            trial_free,
+            trial_residual,
+            _trial_rhs,
+            trial_meta,
+        ) = assemble_residual(trial_u)
+        trial_free_idx = np.array(trial_free, dtype=np.int64, copy=True)
+        trial_residual_array = np.array(
+            trial_residual,
+            dtype=np.float64,
+            copy=True,
+        )
+        trial_meta = trial_meta if isinstance(trial_meta, dict) else {}
+        side_residuals[side] = trial_residual_array
+        side_metadata[side] = {
+            "state_offset_sign": int(sign),
+            "free_dof_set_stable": bool(
+                trial_free_idx.shape == free_idx.shape
+                and np.array_equal(trial_free_idx, free_idx)
+            ),
+            "residual_shape": list(trial_residual_array.shape),
+            "residual_shape_stable": bool(
+                trial_residual_array.ndim == 1
+                and trial_residual_array.shape == base_residual.shape
+            ),
+            "physical_internal_force_model": trial_meta.get(
+                "physical_internal_force_model"
+            ),
+            "committed_material_state_hash": (
+                _committed_material_state_hash(trial_meta)
+            ),
+        }
+        if require_material_state_identity:
+            (
+                _replay_k,
+                _replay_f,
+                replay_free,
+                replay_residual,
+                _replay_rhs,
+                replay_meta,
+            ) = assemble_residual(base_u.copy())
+            replay_free_idx = np.array(replay_free, dtype=np.int64, copy=True)
+            replay_residual_array = np.array(
+                replay_residual,
+                dtype=np.float64,
+                copy=True,
+            )
+            replay_meta = replay_meta if isinstance(replay_meta, dict) else {}
+            side_metadata[side].update(
+                {
+                    "post_trial_base_replay_executed": True,
+                    "post_trial_base_free_dof_set_stable": bool(
+                        replay_free_idx.shape == free_idx.shape
+                        and np.array_equal(replay_free_idx, free_idx)
+                    ),
+                    "post_trial_base_residual_exact": bool(
+                        replay_residual_array.shape == base_residual.shape
+                        and np.array_equal(replay_residual_array, base_residual)
+                    ),
+                    "post_trial_base_committed_material_state_hash": (
+                        _committed_material_state_hash(replay_meta)
+                    ),
+                }
+            )
+
+    unstable_sides = [
+        side
+        for side, metadata in side_metadata.items()
+        if not metadata["free_dof_set_stable"]
+    ]
+    common_metadata = {
+        "fd_step": step,
+        "difference_scheme": "central",
+        "jacobian_epoch": "accepted_state",
+        "accepted_state_tangent_snapshotted": True,
+        "evaluated_sides": ["plus", "minus"],
+        "probe_sides": side_metadata,
+    }
+    if unstable_sides:
         return {
             **direction_meta,
             "evaluated": False,
             "reason": "free_dof_set_changed",
-            "fd_step": step,
+            **common_metadata,
+            "free_dof_set_stable": False,
+            "unstable_probe_sides": unstable_sides,
         }
-    tangent_action = np.asarray(stiffness[free_idx, :][:, free_idx] @ normalized_direction[free_idx], dtype=np.float64)
-    fd_action = (np.asarray(trial_residual, dtype=np.float64) - base_residual) / step
+    invalid_residual_sides = [
+        side
+        for side, metadata in side_metadata.items()
+        if not metadata["residual_shape_stable"]
+    ]
+    if invalid_residual_sides:
+        return {
+            **direction_meta,
+            "evaluated": False,
+            "reason": "residual_vector_contract_changed",
+            **common_metadata,
+            "free_dof_set_stable": True,
+            "invalid_residual_probe_sides": invalid_residual_sides,
+        }
+
+    material_state_identity_audit = {
+        "required": bool(require_material_state_identity),
+        "base_committed_material_state_hash": base_material_state_hash,
+        "base_identity_available": base_material_state_hash is not None,
+        "sides": {
+            side: {
+                "trial_hash": metadata.get("committed_material_state_hash"),
+                "post_trial_base_hash": metadata.get(
+                    "post_trial_base_committed_material_state_hash"
+                ),
+                "trial_matches_base": bool(
+                    base_material_state_hash is not None
+                    and metadata.get("committed_material_state_hash")
+                    == base_material_state_hash
+                ),
+                "post_trial_base_matches_base": bool(
+                    base_material_state_hash is not None
+                    and metadata.get(
+                        "post_trial_base_committed_material_state_hash"
+                    )
+                    == base_material_state_hash
+                ),
+                "post_trial_base_residual_exact": metadata.get(
+                    "post_trial_base_residual_exact"
+                ),
+            }
+            for side, metadata in side_metadata.items()
+        },
+    }
+    material_state_identity_audit["passed"] = bool(
+        not require_material_state_identity
+        or (
+            base_material_state_hash is not None
+            and all(
+                row["trial_matches_base"]
+                and row["post_trial_base_matches_base"]
+                and row["post_trial_base_residual_exact"] is True
+                for row in material_state_identity_audit["sides"].values()
+            )
+        )
+    )
+    if require_material_state_identity and not material_state_identity_audit["passed"]:
+        material_state_identity_audit["limitation"] = (
+            "material_state_identity_or_rollback_not_proven"
+        )
+    else:
+        material_state_identity_audit["limitation"] = None
+    common_metadata["material_state_identity_audit"] = material_state_identity_audit
+
+    tangent_action = np.asarray(
+        accepted_stiffness[free_idx, :][:, free_idx]
+        @ normalized_direction[free_idx],
+        dtype=np.float64,
+    )
+    fd_action = (side_residuals["plus"] - side_residuals["minus"]) / (
+        2.0 * step
+    )
     diff = tangent_action - fd_action
     tangent_l2 = float(np.linalg.norm(tangent_action)) if tangent_action.size else 0.0
     fd_l2 = float(np.linalg.norm(fd_action)) if fd_action.size else 0.0
@@ -2171,7 +2516,7 @@ def evaluate_residual_jacobian_direction(
     return {
         **direction_meta,
         "evaluated": True,
-        "fd_step": step,
+        **common_metadata,
         "free_dof_set_stable": True,
         "tangent_action_inf_n": tangent_inf,
         "fd_action_inf_n": fd_inf,
@@ -2182,7 +2527,12 @@ def evaluate_residual_jacobian_direction(
         "diff_l2_n": diff_l2,
         "relative_l2_error": diff_l2 / max(fd_l2, 1.0),
         "action_cosine": cosine,
-        "trial_physical_internal_force_model": trial_meta.get("physical_internal_force_model"),
+        "material_state_identity_consistency_eligible": bool(
+            material_state_identity_audit["passed"]
+        ),
+        "trial_physical_internal_force_model": side_metadata["plus"].get(
+            "physical_internal_force_model"
+        ),
     }
 
 
@@ -2196,6 +2546,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     sample_count: int = 96,
     sample_seed: int = 1701,
     state_scale_values: tuple[float, ...] = (0.0, 0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0),
+    require_material_state_identity: bool = True,
     relative_error_threshold: float = 0.25,
     cosine_threshold: float = 0.80,
     component_only: bool = False,
@@ -2628,6 +2979,10 @@ def run_mgt_residual_jacobian_consistency_probe(
                 assemble_residual=assemble_residual,
                 fd_step=float(fd_step),
                 direction_meta=meta,
+                base_meta=base_meta,
+                require_material_state_identity=bool(
+                    require_material_state_identity
+                ),
             )
             for direction, meta in directions
         ]
@@ -2637,9 +2992,72 @@ def run_mgt_residual_jacobian_consistency_probe(
             scale_values=state_scale_values,
         )
     evaluated = [row for row in direction_rows if bool(row.get("evaluated"))]
+    direction_evaluation_gate = {
+        "required_direction_count": int(len(direction_rows)),
+        "evaluated_direction_count": int(len(evaluated)),
+        "all_directions_evaluated": bool(
+            direction_rows and len(evaluated) == len(direction_rows)
+        ),
+        "unevaluated_directions": [
+            {
+                "direction": row.get("direction"),
+                "reason": row.get("reason"),
+            }
+            for row in direction_rows
+            if not bool(row.get("evaluated"))
+        ],
+    }
+    direction_evaluation_gate["passed"] = bool(
+        direction_evaluation_gate["all_directions_evaluated"]
+    )
+    material_state_identity_gate = {
+        "required": bool(require_material_state_identity),
+        "evaluated_direction_count": int(
+            sum(
+                isinstance(row.get("material_state_identity_audit"), dict)
+                for row in evaluated
+            )
+        ),
+        "eligible_direction_count": int(
+            sum(
+                row.get("material_state_identity_consistency_eligible") is True
+                for row in evaluated
+            )
+        ),
+    }
+    material_state_identity_gate["passed"] = bool(
+        not require_material_state_identity
+        or (
+            direction_evaluation_gate["passed"]
+            and material_state_identity_gate["eligible_direction_count"]
+            == len(direction_rows)
+        )
+    )
+    material_state_identity_gate["limitation"] = (
+        None
+        if material_state_identity_gate["passed"]
+        else "committed_material_state_trial_rollback_identity_not_proven"
+    )
+    current_model_source_sha256 = _file_sha256(mgt_path)
+    current_operator_binding_hash = _current_equilibrium_operator_binding_hash(
+        stiffness=stiffness,
+        free=np.asarray(free, dtype=np.int64),
+        source_commit_sha=source_commit_sha,
+        model_source_sha256=current_model_source_sha256,
+        load_scale=float(setup_meta.get("load_scale") or 0.0),
+        shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
+        base_meta=base_meta,
+    )
+    exact_restart_gate = _checkpoint_exact_restart_audit(
+        checkpoint=setup_meta.get("checkpoint"),
+        current_source_commit_sha=source_commit_sha,
+        current_model_source_sha256=current_model_source_sha256,
+        current_operator_binding_hash=current_operator_binding_hash,
+    )
     consistency_ready = bool(
         not component_only
-        and evaluated
+        and direction_evaluation_gate["passed"]
+        and material_state_identity_gate["passed"]
         and all(
             float(row.get("relative_l2_error") or float("inf")) <= float(relative_error_threshold)
             and float(row.get("relative_inf_error") or float("inf")) <= float(relative_error_threshold)
@@ -2655,6 +3073,10 @@ def run_mgt_residual_jacobian_consistency_probe(
         blockers = []
     elif component_only:
         blockers = ["component_only_diagnostic_not_consistency_closure"]
+    elif not direction_evaluation_gate["passed"]:
+        blockers = ["residual_jacobian_direction_evaluation_incomplete"]
+    elif not material_state_identity_gate["passed"]:
+        blockers = ["material_state_trial_rollback_identity_not_proven"]
     else:
         blockers = ["residual_jacobian_consistency_not_closed"]
     payload = {
@@ -2670,6 +3092,11 @@ def run_mgt_residual_jacobian_consistency_probe(
         "rocm_hip_required": bool(require_hip_residual_engine),
         "rocm_hip_runtime_preflight": hip_preflight,
         "checkpoint": setup_meta.get("checkpoint"),
+        "checkpoint_exact_restart_gate": exact_restart_gate,
+        "current_model_source_sha256": current_model_source_sha256,
+        "current_equilibrium_operator_binding_hash": (
+            current_operator_binding_hash
+        ),
         "load_scale": setup_meta.get("load_scale"),
         "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "base_residual_inf_n": base_residual_inf,
@@ -2691,8 +3118,14 @@ def run_mgt_residual_jacobian_consistency_probe(
         ),
         "residual_hotspot_diagonal_newton_sweep": hotspot_diagonal_sweep,
         "fd_step": float(fd_step),
+        "difference_scheme": "central",
+        "jacobian_epoch": "accepted_state",
+        "accepted_state_tangent_snapshotted": True,
+        "require_material_state_identity": bool(require_material_state_identity),
         "relative_error_threshold": float(relative_error_threshold),
         "cosine_threshold": float(cosine_threshold),
+        "direction_evaluation_gate": direction_evaluation_gate,
+        "material_state_identity_gate": material_state_identity_gate,
         "direction_rows": direction_rows,
         "state_scale_sweep": state_scale_sweep,
         "component_only": bool(component_only),

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+from dataclasses import replace
 from pathlib import Path
 import sys
 
@@ -69,6 +70,9 @@ def _linear_problem():
         state_invariant_tangent_contract=(
             adapter.MGT_STATE_INVARIANT_TANGENT_CONTRACT
         ),
+        source_commit_sha="a" * 40,
+        model_source_sha256="sha256:" + "b" * 64,
+        equilibrium_operator_binding_hash="sha256:" + "c" * 64,
     )
     return historical.zero_state_problem(), tangent_n_per_m, reference_load_n
 
@@ -128,6 +132,7 @@ def test_linear_reference_newton_reaches_full_load_without_promotion() -> None:
     assert payload["claims"]["actual_mgt_semantic_live_load"] is False
     assert payload["claims"]["failed_step_rollback_exact"] is False
     assert payload["claims"]["restart_checkpoint_consumed"] is False
+    assert payload["claims"]["source_model_operator_bound_restart"] is True
     assert payload["claims"]["nonlinear_current_tangent"] is False
     assert payload["claims"]["quadratic_convergence"] is False
     assert payload["claims"]["material_state_commit_rollback"] is False
@@ -162,6 +167,47 @@ def test_restart_checkpoint_replays_to_identical_full_load_state() -> None:
         restarted.final_checkpoint.free_displacements_m,
         direct.final_checkpoint.free_displacements_m,
     )
+    descriptor = restarted.initial_checkpoint.descriptor()
+    assert descriptor["source_commit_sha"] == "a" * 40
+    assert descriptor["model_source_sha256"] == "sha256:" + "b" * 64
+    assert descriptor["equilibrium_operator_binding_hash"] == (
+        "sha256:" + "c" * 64
+    )
+    assert descriptor["exact_restart_binding_complete"] is True
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        ("source_commit_sha", "d" * 40),
+        ("model_source_sha256", "sha256:" + "e" * 64),
+        ("equilibrium_operator_binding_hash", "sha256:" + "f" * 64),
+    ],
+)
+def test_restart_rejects_source_model_or_operator_drift(
+    field: str,
+    replacement: str,
+) -> None:
+    problem, _, _ = _linear_problem()
+    first = module.run_linear_reference_newton_continuation(
+        problem=problem,
+        config=_config(target=0.75),
+    )
+    drifted_problem = replace(problem, **{field: replacement})
+
+    assert module._path_contract_hash(
+        drifted_problem,
+        _config(target=1.0),
+    ) != first.path_contract_hash
+    with pytest.raises(
+        module.LinearReferenceNewtonContractError,
+        match="path contract",
+    ):
+        module.run_linear_reference_newton_continuation(
+            problem=drifted_problem,
+            config=_config(target=1.0),
+            checkpoint=first.final_checkpoint,
+        )
 
 
 def test_failed_step_rolls_back_exactly_and_reduces_increment() -> None:

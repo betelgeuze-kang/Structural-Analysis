@@ -483,6 +483,12 @@ def test_load_checkpoint_reads_optional_history(tmp_path: Path) -> None:
         residual_inf_n=np.asarray(1.0, dtype=np.float64),
         accepted_state_history_u=state_history,
         accepted_residual_history=residual_history,
+        source_commit_sha=np.asarray("a" * 40),
+        model_source_sha256=np.asarray("sha256:" + "b" * 64),
+        equilibrium_operator_binding_hash=np.asarray(
+            "sha256:" + "c" * 64
+        ),
+        committed_material_state_hash=np.asarray("sha256:" + "d" * 64),
     )
 
     meta, u, loaded_state_history, loaded_residual_history = _load_checkpoint(checkpoint)
@@ -490,9 +496,37 @@ def test_load_checkpoint_reads_optional_history(tmp_path: Path) -> None:
     assert meta["checkpoint_schema"] == "mgt-direct-residual-newton-state.v1"
     assert meta["accepted_state_history_count"] == 2
     assert meta["accepted_residual_history_count"] == 2
+    assert meta["source_commit_sha"] == "a" * 40
+    assert meta["model_source_sha256"] == "sha256:" + "b" * 64
+    assert meta["equilibrium_operator_binding_hash"] == (
+        "sha256:" + "c" * 64
+    )
+    assert meta["committed_material_state_hash"] == (
+        "sha256:" + "d" * 64
+    )
     np.testing.assert_array_equal(u, state_history[-1])
     np.testing.assert_array_equal(loaded_state_history, state_history)
     np.testing.assert_array_equal(loaded_residual_history, residual_history)
+
+
+def test_load_checkpoint_accepts_legacy_schema_version_key(
+    tmp_path: Path,
+) -> None:
+    checkpoint = tmp_path / "legacy.npz"
+    np.savez_compressed(
+        checkpoint,
+        schema_version=np.asarray(
+            "mgt-uncoarsened-boundary-pdelta-checkpoint.v1"
+        ),
+        load_scale=np.asarray(0.656, dtype=np.float64),
+        displacement_u=np.zeros(2, dtype=np.float64),
+    )
+
+    meta, _, _, _ = _load_checkpoint(checkpoint)
+
+    assert meta["checkpoint_schema"] == (
+        "mgt-uncoarsened-boundary-pdelta-checkpoint.v1"
+    )
 
 
 def test_skipped_output_final_checkpoint_meta_marks_no_descent(tmp_path: Path) -> None:
