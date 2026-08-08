@@ -14,7 +14,7 @@
   },
   "authority_profile": "authoritative_converged_nonlinear_numerical_and_terminal_material_state.v1",
   "backend": {
-    "receipt_hash": "sha256:03930edea06f54f7b3caf60f0d1c19249726a7cf7532bfe72721476e3742c75a",
+    "receipt_hash": "sha256:97ced76b3f9456271569621d309399cb894c12720cefae0e06fe0a6baa7be50b",
     "role": "hip"
   },
   "bindings": {
@@ -22,10 +22,10 @@
     "equation_scaling_hash": "sha256:d222e083ab131565daf15f739a02eec7381ce39992838d91e48ed9b01a4b188c",
     "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
     "full_residual_receipt_hash": "sha256:4b1645650ff7464be0644547ea7f1bc222def0737900bb3ee688f3886c2e9e85",
-    "integration_point_order_hash": "sha256:3c10370a2b59f0600bdb3e952c0d4670499c3b309b97fe979abec22c3f53b8f2",
-    "material_state_bundle_hash": "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8",
+    "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c",
+    "material_state_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
     "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-    "nonlinear_terminal_hash": "sha256:4643153f6bf8b181cdc44482f0294719e1d8fa5c3b326011d7e2f10aa95a306e",
+    "nonlinear_terminal_hash": "sha256:cd82e943e1b6976300302efd879d2f42a0d1f565f51abe9065b5e273b9d9a52b",
     "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
     "path_history_hash": "sha256:c47518bd045dc7f4885f7dfee5efd6abd68ad2dea88c8004ca564be673cf9c30",
     "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
@@ -52,10 +52,10 @@
     "viewer_projection": false
   },
   "displacement_artifact": {
-    "artifact_uri": "artifact://nonlinear-result/g1.mgt.hip.terminal/c9a29f329a6a7935/74420cae8e68544c/displacement_global.f64le",
+    "artifact_uri": "artifact://nonlinear-result/g1.mgt.hip.terminal/c9a29f329a6a7935/b828455d6294e803/displacement_global.f64le",
     "byte_length": 626256,
     "byte_order": "little",
-    "content_hash": "sha256:102cf24840b5a65c3ac6b47cba5524f5eeef929ee8cbc53d48f81012629f869f",
+    "content_hash": "sha256:9159e5dfe168909c8dcc4e9324efcbc25b67dc22b1799344674c1251a1f26d65",
     "data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
     "dtype": "<f8",
     "layout": "C",
@@ -69,7 +69,7 @@
   "dof_count": 78282,
   "extensions": {},
   "load_factor": 1.0,
-  "result_hash": "sha256:9e8efc2fc39afbadfe20572eacc0a937798b447315d9296729caea448d60fefc",
+  "result_hash": "sha256:0e0a7e3367834272c3035ff430b5cb059dadf60b2e612cecb6e36140e1040844",
   "result_id": "g1.mgt.hip.terminal",
   "result_kind": "nonlinear_static_numerical_state",
   "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",

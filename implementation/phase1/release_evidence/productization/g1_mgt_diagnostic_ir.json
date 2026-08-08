@@ -32,14 +32,14 @@
     "solver_convergence_authority": false,
     "stable_code_path_only": true
   },
-  "diagnostic_hash": "sha256:cd013ec5583698f814d82ff8d30978fcaedf48018367c7871532f632eedd1bc6",
+  "diagnostic_hash": "sha256:1bc2b5f0035437fe8d2ca83da94a4ca8b769b65dc400e46d500dd137e405c899",
   "diagnostic_id": "diagnostic.g1.mgt.hip.terminal",
   "entries": [
     {
       "code": "actual_gfx1030_execution_observed",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952"
+        "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821"
       ],
       "occurrence_count": 1,
       "path": "/runtime/gfx1030",
@@ -49,7 +49,7 @@
       "code": "fallback_and_regularization_zero",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:4643153f6bf8b181cdc44482f0294719e1d8fa5c3b326011d7e2f10aa95a306e"
+        "sha256:cd82e943e1b6976300302efd879d2f42a0d1f565f51abe9065b5e273b9d9a52b"
       ],
       "occurrence_count": 1,
       "path": "/terminal/fallback",
@@ -59,7 +59,7 @@
       "code": "independent_gfx1100_execution_unavailable",
       "disposition": "unsupported",
       "evidence_hashes": [
-        "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952"
+        "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821"
       ],
       "occurrence_count": 1,
       "path": "/runtime/gfx1100",
@@ -69,7 +69,7 @@
       "code": "mid_step_d2h_zero",
       "disposition": "observed",
       "evidence_hashes": [
-        "sha256:03930edea06f54f7b3caf60f0d1c19249726a7cf7532bfe72721476e3742c75a"
+        "sha256:97ced76b3f9456271569621d309399cb894c12720cefae0e06fe0a6baa7be50b"
       ],
       "occurrence_count": 1,
       "path": "/runtime/transfers/mid_step_d2h",
@@ -80,7 +80,7 @@
       "disposition": "unsupported",
       "evidence_hashes": [
         "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
-        "sha256:74420cae8e68544ca88ceec21194f4cdc4b5cd6d1adea9ac5aa29aa8756d5ea8"
+        "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7"
       ],
       "occurrence_count": 1,
       "path": "/material/nonlinear_family_breadth",
@@ -91,8 +91,8 @@
   "schema_version": "structural-analysis-diagnostic-ir.v1",
   "source": {
     "authority_profile": "backend_probe",
-    "backend_receipt_hash": "sha256:03930edea06f54f7b3caf60f0d1c19249726a7cf7532bfe72721476e3742c75a",
-    "receipt_hash": "sha256:5d158d18dcf6a3648f14943eb5d21826dcec9273a5b2e3fb623b9744f8020952",
+    "backend_receipt_hash": "sha256:97ced76b3f9456271569621d309399cb894c12720cefae0e06fe0a6baa7be50b",
+    "receipt_hash": "sha256:87814040d548c3c76561b8a1be4b1d76f8769c21b4bfe15a162d0141d178f821",
     "receipt_schema_version": "g1-mgt-device-fgmres-receipt.v1"
   },
   "status": "partial",
