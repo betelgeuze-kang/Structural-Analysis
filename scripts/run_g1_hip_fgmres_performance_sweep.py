@@ -32,7 +32,7 @@ SOURCE = Path("implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip
 SCHEMA = Path("src/structural_analysis/schemas/g1_hip_fgmres_performance_sweep_v1.schema.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/g1_hip_fgmres_gfx1030_performance_sweep.json")
 WHEEL = Path("dist/structural_analysis-0.3.0-py3-none-any.whl")
-DIMENSIONS = (66, 264, 1056, 4092)
+DIMENSIONS = (66, 264, 1056, 4092, 70560)
 SOURCE_PATHS = (SOURCE, SCHEMA, Path("scripts/run_g1_hip_fgmres_performance_sweep.py"), Path("tests/test_g1_hip_fgmres_performance_sweep.py"))
 
 
@@ -50,7 +50,7 @@ def _git(*args: str) -> str:
 
 
 def _problem(dimension: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    if dimension < 2 or dimension > 4092:
+    if dimension < 2 or dimension > 70560:
         raise ValueError("sweep_dimension_out_of_range")
     row_ptr = [0]; columns: list[int] = []; values: list[float] = []
     rhs = np.empty(dimension, dtype=np.float64)
@@ -106,7 +106,7 @@ def _cpu_solve(dimension: int, repetitions: int) -> dict[str, Any]:
 def _compile(binary: Path, hipcc: Path, architecture: str) -> dict[str, Any]:
     version = subprocess.run([str(hipcc), "--version"], cwd=ROOT, check=True, capture_output=True, text=True).stdout
     device_libs = ROOT / "implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
-    command = [str(hipcc), "--rocm-path=/opt/rocm-6.0.2", f"--rocm-device-lib-path={device_libs}", f"--offload-arch={architecture}", str(ROOT / SOURCE), "-O2", "-std=c++17", "-o", str(binary)]
+    command = [str(hipcc), "--rocm-path=/opt/rocm-6.0.2", f"--rocm-device-lib-path={device_libs}", f"--offload-arch={architecture}", "-DENGINE_V2_FGMRES_MAXIMUM_FIXTURE_DIMENSION=70560", str(ROOT / SOURCE), "-O2", "-std=c++17", "-o", str(binary)]
     compiled = subprocess.run(command, cwd=ROOT, check=False, capture_output=True, text=True, timeout=180)
     if compiled.returncode != 0:
         raise RuntimeError("hip_sweep_compile_failed:" + compiled.stderr[-1000:].replace("\n", " "))
@@ -158,10 +158,10 @@ def build_receipt(*, repetitions: int = 3) -> dict[str, Any]:
         "source": {"repository_commit_sha": _git("rev-parse", "HEAD"), "worktree_clean_at_execution": True, "input_checksums": {path.as_posix(): _sha_file(path) for path in SOURCE_PATHS}},
         "runtime": {"backend": "amd_rocm_hip", "device_name": "AMD Radeon RX 6900 XT", "gcn_arch_name": "gfx1030", "device_nodes": ["/dev/kfd", "/dev/dri/renderD128"], "compiler": compiler, "wheel": {"path": WHEEL.as_posix(), "sha256": _sha_file(WHEEL), "bound_at_execution": True}},
         "sweep": {"dimensions": list(DIMENSIONS), "cases": cases},
-        "claims": {"actual_gfx1030_hardware": True, "bounded_model_size_performance_sweep": True, "mid_recurrence_d2h_zero": all(row["gpu"]["mid_recurrence_host_transfer_count"] == 0 for row in cases), "production_scale_70560_equations": False, "independent_gfx1100": False, "cross_device_performance": False},
-        "blockers_remaining": ["production_scale_70560_equation_performance_not_measured", "production_operator_and_preconditioner_breadth_not_measured", "independent_gfx1100_run_not_available", "cross_device_performance_sweep_not_available"],
+        "claims": {"actual_gfx1030_hardware": True, "bounded_model_size_performance_sweep": True, "mid_recurrence_d2h_zero": all(row["gpu"]["mid_recurrence_host_transfer_count"] == 0 for row in cases), "synthetic_70560_equation_lifecycle": any(row["dimension"] == 70560 for row in cases), "production_mgt_70560_operator": False, "independent_gfx1100": False, "cross_device_performance": False},
+        "blockers_remaining": ["production_mgt_70560_operator_performance_not_measured", "production_operator_and_preconditioner_breadth_not_measured", "independent_gfx1100_run_not_available", "cross_device_performance_sweep_not_available"],
         "contract_pass": True,
-        "claim_boundary": "Actual current-source gfx1030 lifecycle sweep for synthetic tridiagonal SPD reduced-CSR fixtures from 66 through 4092 equations. Reports exact runtime counters and CPU comparison without claiming the 70,560-equation production shell operator, production preconditioner breadth, gfx1100, or cross-device performance.",
+        "claim_boundary": "Actual current-source gfx1030 lifecycle sweep for synthetic tridiagonal SPD reduced-CSR fixtures from 66 through 70,560 equations. Reports exact runtime counters and CPU comparison without claiming the 70,560-equation production MGT shell operator, production preconditioner breadth, gfx1100, or cross-device performance.",
     }
     payload["receipt_hash"] = canonical_hash({key: value for key, value in payload.items() if key != "receipt_hash"})
     validate_receipt(payload, require_current_sources=True); return payload

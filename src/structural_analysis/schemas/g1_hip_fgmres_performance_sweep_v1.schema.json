@@ -6,7 +6,7 @@
     "schema_version": {"const": "g1-hip-fgmres-performance-sweep.v1"}, "receipt_hash": {"$ref": "#/$defs/hash"},
     "source": {"type": "object", "required": ["repository_commit_sha", "worktree_clean_at_execution", "input_checksums"], "properties": {"repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "worktree_clean_at_execution": {"const": true}, "input_checksums": {"type": "object", "additionalProperties": {"$ref": "#/$defs/hash"}}}},
     "runtime": {"type": "object", "required": ["backend", "device_name", "gcn_arch_name", "device_nodes", "compiler", "wheel"], "properties": {"backend": {"const": "amd_rocm_hip"}, "device_name": {"type": "string"}, "gcn_arch_name": {"const": "gfx1030"}, "device_nodes": {"type": "array", "minItems": 2, "items": {"type": "string"}}, "compiler": {"type": "object"}, "wheel": {"type": "object"}}},
-    "sweep": {"type": "object", "required": ["dimensions", "cases"], "properties": {"dimensions": {"const": [66, 264, 1056, 4092]}, "cases": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/case"}}}},
+    "sweep": {"type": "object", "required": ["dimensions", "cases"], "properties": {"dimensions": {"const": [66, 264, 1056, 4092, 70560]}, "cases": {"type": "array", "minItems": 5, "maxItems": 5, "items": {"$ref": "#/$defs/case"}}}},
     "claims": {"type": "object"}, "blockers_remaining": {"type": "array", "minItems": 1, "items": {"type": "string"}}, "contract_pass": {"const": true}, "claim_boundary": {"type": "string", "minLength": 1}
   },
   "$defs": {

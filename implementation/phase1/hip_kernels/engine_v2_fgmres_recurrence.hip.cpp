@@ -17,7 +17,11 @@ namespace {
 constexpr std::array<char, 8> kMagic = {'E', 'V', '2', 'F', 'G', 'R', '0', '1'};
 constexpr std::array<char, 8> kCheckpointMagic = {
     'E', 'V', '2', 'F', 'G', 'C', 'P', '1'};
-constexpr int kMaximumFixtureDimension = 4092;
+#ifndef ENGINE_V2_FGMRES_MAXIMUM_FIXTURE_DIMENSION
+#define ENGINE_V2_FGMRES_MAXIMUM_FIXTURE_DIMENSION 4092
+#endif
+constexpr int kMaximumFixtureDimension =
+    ENGINE_V2_FGMRES_MAXIMUM_FIXTURE_DIMENSION;
 constexpr int kMaximumRestart = 32;
 constexpr int kMaximumIterations = 128;
 constexpr int kMaximumRestartRecords = 129;
