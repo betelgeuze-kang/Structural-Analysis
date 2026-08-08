@@ -34,7 +34,8 @@
         "engine_v2_phase0_linear_3d",
         "frame3d_stateful_nonlinear_3d_v1",
         "frame3d_modal_buckling_3d_v1",
-        "sdof_authenticated_transient_v1"
+        "sdof_authenticated_transient_v1",
+        "mdof_linear_transient_v1"
       ]
     },
     "provenance": {"$ref": "#/$defs/provenance"},
@@ -98,6 +99,13 @@
     {
       "if": {
         "properties": {"capability_profile": {"const": "sdof_authenticated_transient_v1"}},
+        "required": ["capability_profile"]
+      },
+      "then": {"required": ["dynamics"]}
+    },
+    {
+      "if": {
+        "properties": {"capability_profile": {"const": "mdof_linear_transient_v1"}},
         "required": ["capability_profile"]
       },
       "then": {"required": ["dynamics"]}
@@ -516,6 +524,12 @@
       }
     },
     "dynamics": {
+      "oneOf": [
+        {"$ref": "#/$defs/sdofDynamics"},
+        {"$ref": "#/$defs/mdofLinearDynamics"}
+      ]
+    },
+    "sdofDynamics": {
       "type": "object",
       "additionalProperties": false,
       "required": [
@@ -543,6 +557,46 @@
         "force_history_source_path": {"type": "string", "minLength": 1},
         "force_history_sha256": {"$ref": "#/$defs/sha256"},
         "checkpoint_authority": {"const": "source_authenticated_checkpoint"}
+      }
+    },
+    "mdofLinearDynamics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "dof_ids",
+        "mass_matrix_kg",
+        "damping_matrix_n_s_per_m",
+        "stiffness_matrix_n_per_m",
+        "time_step_s",
+        "force_history_source_path",
+        "force_history_sha256",
+        "checkpoint_authority"
+      ],
+      "properties": {
+        "profile": {"const": "newmark_average_acceleration_linear_mdof.v1"},
+        "dof_ids": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        },
+        "mass_matrix_kg": {"$ref": "#/$defs/squareNumericMatrix"},
+        "damping_matrix_n_s_per_m": {"$ref": "#/$defs/squareNumericMatrix"},
+        "stiffness_matrix_n_per_m": {"$ref": "#/$defs/squareNumericMatrix"},
+        "time_step_s": {"$ref": "#/$defs/positiveNumber"},
+        "force_history_source_path": {"type": "string", "minLength": 1},
+        "force_history_sha256": {"$ref": "#/$defs/sha256"},
+        "checkpoint_authority": {"const": "source_authenticated_checkpoint"}
+      }
+    },
+    "squareNumericMatrix": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "items": {"type": "number"}
       }
     },
     "constructionStage": {
