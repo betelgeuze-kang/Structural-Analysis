@@ -2,24 +2,25 @@
   "claim_boundary": "Closes the bounded elastic Corotational Frame3D load-control stage for one ModelIR-bound cantilever through 0.25, 0.5, and 1.0 load factors, authoritative nonlinear ResultIR, equilibrium recovery, exact restart, bound viewer payload, and deterministic replay. Direct control, stateful material, broader topology, dynamics, shell, and contact remain outside.",
   "contract_pass": true,
   "predecessor_replay": {
+    "current_source_replay_executed": true,
     "input_checksums_unchanged": true,
     "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+    "replayed_source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_frame3d_linear_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:e94622093c4ee0e2dd790322daf2441eae9c16fd08455666a14f8ef9ee0aa654"
+    "source_receipt_sha256": "sha256:73e24b3ce36a4c4bb7822b4b1c2fdb8626f163d96cf008374bc6e4a2ee28f81a"
   },
   "schema_version": "f3-frame3d-load-control-vertical-evidence.v1",
-  "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+  "source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
   "source_input_checksums": {
-    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:040ec60787319904c2ad75dcb747b41dfb1b3bda3305a73cc2ead39a4acb2b46",
-    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:8df646c3745d26d182db829eabb68f2de5eae42bc07c2345a6aa16ce30a90a65",
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:841529ecc3e2b5b524eb3e527a4e95373aa5eb97124b700fbaf33b92272a4809",
+    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:87917f4cc01f1f4757816c194e4e7726438db7d06ac1c841d92836a5364a2fdd",
     "src/structural_analysis/assembly/corotational_frame3d_global.py": "sha256:a7b62158fd522c493e0b5d3ecd6a9256e7242b1c0d5a4cbcb6e5b600b5202ba8",
     "src/structural_analysis/elements/corotational_frame3d.py": "sha256:0bf888f2ffd60b2872f1ae40cce7fc2f23f764ea90ae6c5f1e6de41a925bf526",
     "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
     "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
     "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
     "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
-    "tests/test_f3_frame3d_load_control_vertical_evidence.py": "sha256:967b67b586ad196bfb32ff0bdf18ff495dc9a89424a31e0631f6e7ac4c32f398"
+    "tests/test_f3_frame3d_load_control_vertical_evidence.py": "sha256:7fa76211402f6d3a0b429c26ff7b56d14f670bd5f081ee03d9deefc944db5569"
   },
   "stage_gate": {
     "blockers": [],
@@ -28,14 +29,14 @@
       "checkpoint": "sha256:55f876c71153722076ac9fc688b1c4a62be99c150812bfc0c1e1b99e6b6aa414",
       "external_vv": "sha256:0df71164b5f9b27c03f31584998d1cbb686b8841a52a33e16bbf0eaa36d272ee",
       "model_ir": "sha256:f09208849f5a913c91717b57d4d8f83eb8bf9ea2a69850fa323d24697aa415fd",
-      "platform": "sha256:9839955bd4c466a3cb1c22cc599c50b24cded43742947451f7646ef5cdc5b5d4",
+      "platform": "sha256:5097ff7bd075fb9ab3d83090d328b67ab05ddea606155f843a949a8b0dfb8233",
       "recovery": "sha256:f698364db8009cc322c4dce170aafd90117812250ff72322f0d20bcf97c5d9b9",
       "result_ir": "sha256:5374130258222ba6f98b9df0f349983ed0ad2a1e2c8dc98b9de19096de879921",
       "solver": "sha256:ba01a83f5b5ee2009ed13b2f4afb78590066cce926d5ce0fcab7d74f23ba71d5",
       "workbench": "sha256:2c0a90deed3208241b8ce23c6f33ed318e605ee2ba07126f4b1cafba7bf57bbf"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:fa4dab8540ba22fae3f6e42e5ab10d706233ad72ad4e63142e052a524ac5cbaf",
+    "predecessor_receipt_sha256": "sha256:79bc8f4c5d8e2c5d3042abff951532a544216d9d5e56980edea36fa4814ac70e",
     "predecessor_stage": "frame3d_linear",
     "public_product_promotion_passed": true,
     "required_surfaces": [
@@ -49,7 +50,7 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7",
+    "source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
     "stage": "frame3d_load_control",
     "stage_index": 1,
     "verified_surfaces": [
@@ -123,7 +124,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "965260fcf863ad40eb011321b29a72f82a634aa7"
+      "source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5"
     },
     "recovery": {
       "equilibrium_pass": true,

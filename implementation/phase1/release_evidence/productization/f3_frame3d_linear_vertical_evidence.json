@@ -2,15 +2,15 @@
   "claim_boundary": "Closes the bounded two-node, one-member Frame3D linear cantilever stage for four independent axial, weak-axis, strong-axis, and torsional load modes through ModelIR, authoritative numerical ResultIR, recovery, exact restart, bound viewer payload, analytic benchmark, and local platform evidence. The external signature verifier is explicitly waived, not reported as verified. Multi-member topology, nonlinear control, stateful materials, dynamics, shell, and contact are outside this stage receipt.",
   "contract_pass": true,
   "schema_version": "f3-frame3d-linear-vertical-evidence.v1",
-  "source_commit_sha": "a81e19dba4f537d216b8f2c83fd3e8aa4044c6e0",
+  "source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
   "source_input_checksums": {
-    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:040ec60787319904c2ad75dcb747b41dfb1b3bda3305a73cc2ead39a4acb2b46",
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:841529ecc3e2b5b524eb3e527a4e95373aa5eb97124b700fbaf33b92272a4809",
     "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
     "src/structural_analysis/engine_v2/contracts/result_ir.py": "sha256:c624183012677f7333732492831afd950742af90b0acea605ea135753a3c79fa",
     "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
     "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
     "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
-    "tests/test_f3_frame3d_linear_vertical_evidence.py": "sha256:9abb58397e58f5e659082a8d216d8222002e9aa23ab4213c9296bc281099d0d6"
+    "tests/test_f3_frame3d_linear_vertical_evidence.py": "sha256:7223b03464fea42df73d5f5afbdc2e5d14e17e2325106dc7460fda67e3f231f3"
   },
   "stage_gate": {
     "blockers": [],
@@ -39,7 +39,7 @@
       "external_vv"
     ],
     "schema": "f3-vertical-evidence-gate.v1",
-    "source_commit_sha": "a81e19dba4f537d216b8f2c83fd3e8aa4044c6e0",
+    "source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
     "stage": "frame3d_linear",
     "stage_index": 0,
     "verified_surfaces": [
