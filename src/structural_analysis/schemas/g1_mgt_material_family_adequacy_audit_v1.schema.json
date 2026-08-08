@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "generated_at",
+    "status",
+    "contract_pass",
+    "contract_scope",
+    "source",
+    "operator_binding",
+    "material_fixture",
+    "accepted_state_audit",
+    "source_adequacy",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-material-family-adequacy-audit.v1"},
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string"},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "contract_scope": {"const": "actual_mgt_full_load_material_family_order_and_source_adequacy"},
+    "source": {"type": "object"},
+    "operator_binding": {
+      "type": "object",
+      "required": ["geometry_element_count", "independent_fixture_array_identity", "all_geometry_arrays_exact", "property_fallback_count"],
+      "properties": {
+        "geometry_element_count": {"const": 5572},
+        "independent_fixture_array_identity": {
+          "type": "object",
+          "required": ["dofs", "relative", "chords", "lengths", "axial"],
+          "additionalProperties": {"const": true}
+        },
+        "all_geometry_arrays_exact": {"const": true},
+        "property_fallback_count": {"const": 0}
+      },
+      "additionalProperties": true
+    },
+    "material_fixture": {
+      "type": "object",
+      "required": ["profile", "element_count", "family_code_mapping", "family_counts", "family_count"],
+      "properties": {
+        "profile": {"const": "actual_mgt_geometry_ordered_material_family_fixture.v1"},
+        "element_count": {"const": 5572},
+        "family_code_mapping": {"const": {"CONC": 1, "STEEL": 2, "SRC": 3, "USER": 4}},
+        "family_counts": {"const": {"CONC": 2182, "SRC": 1692, "STEEL": 1692, "USER": 6}},
+        "family_count": {"const": 4}
+      },
+      "additionalProperties": true
+    },
+    "accepted_state_audit": {
+      "type": "object",
+      "required": ["load_factor", "global_dof_count", "free_equation_count", "family_statistics"],
+      "properties": {
+        "load_factor": {"const": 1.0},
+        "global_dof_count": {"const": 78282},
+        "free_equation_count": {"const": 70560},
+        "family_statistics": {"type": "object", "required": ["CONC", "STEEL", "SRC", "USER"]}
+      },
+      "additionalProperties": true
+    },
+    "source_adequacy": {
+      "type": "object",
+      "required": ["primary_elastic_modulus_complete", "src_secondary_elastic_modulus_complete", "missing_authoritative_nonlinear_fields", "authoritative_nonlinear_parameter_set_complete", "engineer_review_required"],
+      "properties": {
+        "primary_elastic_modulus_complete": {"const": true},
+        "src_secondary_elastic_modulus_complete": {"const": true},
+        "missing_authoritative_nonlinear_fields": {
+          "type": "object",
+          "minProperties": 8,
+          "additionalProperties": {"const": true}
+        },
+        "authoritative_nonlinear_parameter_set_complete": {"const": false},
+        "engineer_review_required": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "claims": {
+      "type": "object",
+      "required": ["actual_mgt_full_mesh_material_family_order_bound", "accepted_state_family_strains_measured", "source_elastic_properties_complete", "source_authoritative_nonlinear_material_parameters_complete", "nonlinear_material_family_breadth_connected_to_equilibrium", "independent_gfx1100_run", "g1_closure"],
+      "properties": {
+        "actual_mgt_full_mesh_material_family_order_bound": {"const": true},
+        "accepted_state_family_strains_measured": {"const": true},
+        "source_elastic_properties_complete": {"const": true},
+        "source_authoritative_nonlinear_material_parameters_complete": {"const": false},
+        "nonlinear_material_family_breadth_connected_to_equilibrium": {"const": false},
+        "independent_gfx1100_run": {"const": false},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "minItems": 4, "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "additionalProperties": false
+}
