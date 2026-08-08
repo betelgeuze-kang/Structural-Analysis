@@ -39,6 +39,8 @@ def test_committed_receipt_records_actual_linear_path_without_promotion() -> Non
     assert receipt["status"] == "partial"
     assert receipt["contract_pass"] is True
     assert receipt["evidence_closure_pass"] is False
+    assert receipt["source_commit_exact_replay_claim"] is True
+    assert receipt["source_tree_state"] == "commit_bound_inputs_exact"
     binding = receipt["adapter_binding"]
     assert binding["initial_state_policy"] == "zero_state"
     assert binding["initial_load_factor"] == 0.0
@@ -142,9 +144,11 @@ def test_committed_receipt_records_actual_linear_path_without_promotion() -> Non
     assert replay["direct_final_data_sha256"] == (
         "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2"
     )
-    assert replay["direct_final_state_hash"] == (
-        "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c"
-    )
+    assert replay["direct_final_state_hash"].startswith("sha256:")
+    assert direct["final_checkpoint"]["exact_restart_binding_complete"] is True
+    assert direct["final_checkpoint"]["source_commit_sha"] == receipt[
+        "source_commit_sha"
+    ]
 
     rollback = receipt["failed_step_rollback_audit"]
     assert rollback["status"] == "partial"

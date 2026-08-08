@@ -41,6 +41,8 @@ def test_committed_receipt_reaches_diagnostic_semantic_live_target() -> None:
     assert payload["readiness_pass"] is False
     assert payload["engineer_review_required"] is True
     assert payload["evidence_closure_pass"] is False
+    assert payload["source_commit_exact_replay_claim"] is True
+    assert payload["source_tree_state"] == "commit_bound_inputs_exact"
 
     inputs = payload["inputs"]
     assert inputs["node_count"] == 13_047
