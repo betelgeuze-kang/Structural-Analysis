@@ -645,7 +645,6 @@
     "summary": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_continuation_summary.json"
   },
   "blockers_remaining": [
-    "source_commit_exact_replay_not_claimed_for_dirty_worktree",
     "raw_material_table_binding_incomplete_source_derived_alias_available",
     "dgn_exact_type_name_material_inheritance_engineer_review_required",
     "state_updated_nonlinear_current_tangent_not_connected",
@@ -690,8 +689,8 @@
     "attempts": [
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
-        "accepted_state_hash_before": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+        "accepted_state_hash_after": "sha256:96422816c468fe8251a02c5b2942555e378b1ee7d4e150c5a9d9158e7995555e",
+        "accepted_state_hash_before": "sha256:4bc61986541ba6cca0e14a86d187d17b370a14972808912705e0fe3175e33a36",
         "attempt_index": 1,
         "final_residual_inf_n": 1.7482288967585191e-06,
         "history": [
@@ -741,8 +740,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
-        "accepted_state_hash_before": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
+        "accepted_state_hash_after": "sha256:6006ec015752375e176921c90ab6e7e0d846977a8321a48e066590453a7baa5d",
+        "accepted_state_hash_before": "sha256:96422816c468fe8251a02c5b2942555e378b1ee7d4e150c5a9d9158e7995555e",
         "attempt_index": 2,
         "final_residual_inf_n": 3.843175363726914e-06,
         "history": [
@@ -792,8 +791,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
-        "accepted_state_hash_before": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+        "accepted_state_hash_after": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
+        "accepted_state_hash_before": "sha256:6006ec015752375e176921c90ab6e7e0d846977a8321a48e066590453a7baa5d",
         "attempt_index": 3,
         "final_residual_inf_n": 1.8550488967150613e-06,
         "history": [
@@ -860,10 +859,14 @@
         "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
+        "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+        "exact_restart_binding_complete": true,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "state_hash": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+        "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+        "state_hash": "sha256:4bc61986541ba6cca0e14a86d187d17b370a14972808912705e0fe3175e33a36",
         "step_index": 0
       },
       {
@@ -871,10 +874,14 @@
         "displacement_data_hash": "sha256:e936806c955612e3438299889484c995b86e50acc87e2fd95b2a73f9e54c5b1e",
         "displacement_inf_m": 0.0008652497392953908,
         "equation_count": 70560,
+        "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+        "exact_restart_binding_complete": true,
         "load_factor": 0.25,
-        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "state_hash": "sha256:5948b02a09ef9538ca55b5d84036125cf499337abb27acef1cb0c2a539eb0ff6",
+        "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+        "state_hash": "sha256:96422816c468fe8251a02c5b2942555e378b1ee7d4e150c5a9d9158e7995555e",
         "step_index": 1
       },
       {
@@ -882,10 +889,14 @@
         "displacement_data_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
         "displacement_inf_m": 0.002595749217886194,
         "equation_count": 70560,
+        "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+        "exact_restart_binding_complete": true,
         "load_factor": 0.75,
-        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+        "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+        "state_hash": "sha256:6006ec015752375e176921c90ab6e7e0d846977a8321a48e066590453a7baa5d",
         "step_index": 2
       },
       {
@@ -893,10 +904,14 @@
         "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
         "displacement_inf_m": 0.003460998957181459,
         "equation_count": 70560,
+        "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+        "exact_restart_binding_complete": true,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+        "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+        "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+        "state_hash": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
         "step_index": 3
       }
     ],
@@ -917,6 +932,7 @@
       "quadratic_convergence": false,
       "restart_checkpoint_consumed": false,
       "restart_checkpoint_contract": true,
+      "source_model_operator_bound_restart": true,
       "state_invariant_linear_reference_tangent": true,
       "zero_state_initial_policy": true
     },
@@ -947,10 +963,14 @@
       "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
       "displacement_inf_m": 0.003460998957181459,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 1.0,
-      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
       "step_index": 3
     },
     "initial_checkpoint": {
@@ -958,10 +978,14 @@
       "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
       "displacement_inf_m": 0.0,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 0.0,
-      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:2df507baeb247c46f6aefebae31c1b75381df3eedd7d7d1402e51170802adc86",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:4bc61986541ba6cca0e14a86d187d17b370a14972808912705e0fe3175e33a36",
       "step_index": 0
     },
     "metrics": {
@@ -991,7 +1015,7 @@
       "target_load_factor_reached": true
     },
     "operator_classification": "state_invariant_linear_reference_geometry",
-    "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+    "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
     "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
     "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
     "status": "ready",
@@ -1033,8 +1057,8 @@
     "attempts": [
       {
         "accepted": false,
-        "accepted_state_hash_after": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
-        "accepted_state_hash_before": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+        "accepted_state_hash_after": "sha256:23d4e313e2d2643de420b6d3406f5bc3ec800d466dd6432d6d00edbcb708e417",
+        "accepted_state_hash_before": "sha256:23d4e313e2d2643de420b6d3406f5bc3ec800d466dd6432d6d00edbcb708e417",
         "attempt_index": 1,
         "final_residual_inf_n": 44864.54812499992,
         "history": [
@@ -1090,10 +1114,14 @@
         "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
+        "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+        "exact_restart_binding_complete": true,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+        "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+        "path_contract_hash": "sha256:748aeb54db2c323f85dc754c3405b295e0c4eb15c74686924763859f058ac866",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+        "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+        "state_hash": "sha256:23d4e313e2d2643de420b6d3406f5bc3ec800d466dd6432d6d00edbcb708e417",
         "step_index": 0
       }
     ],
@@ -1114,6 +1142,7 @@
       "quadratic_convergence": false,
       "restart_checkpoint_consumed": false,
       "restart_checkpoint_contract": true,
+      "source_model_operator_bound_restart": true,
       "state_invariant_linear_reference_tangent": true,
       "zero_state_initial_policy": true
     },
@@ -1144,10 +1173,14 @@
       "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
       "displacement_inf_m": 0.0,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 0.0,
-      "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:748aeb54db2c323f85dc754c3405b295e0c4eb15c74686924763859f058ac866",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:23d4e313e2d2643de420b6d3406f5bc3ec800d466dd6432d6d00edbcb708e417",
       "step_index": 0
     },
     "initial_checkpoint": {
@@ -1155,10 +1188,14 @@
       "displacement_data_hash": "sha256:58b03a17a90824848da9b835bc03a8b62aef04aa960a0317d8f9a7e0120b7d78",
       "displacement_inf_m": 0.0,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 0.0,
-      "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:748aeb54db2c323f85dc754c3405b295e0c4eb15c74686924763859f058ac866",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:373adf5ad2069b667bc3f6b71adbbe1fd0d23075c5fc8da0ebb511581599162f",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:23d4e313e2d2643de420b6d3406f5bc3ec800d466dd6432d6d00edbcb708e417",
       "step_index": 0
     },
     "metrics": {
@@ -1188,7 +1225,7 @@
       "target_load_factor_reached": false
     },
     "operator_classification": "state_invariant_linear_reference_geometry",
-    "path_contract_hash": "sha256:dc752a8ff7e10b59b48a4fb92301b63806674647264497d3e939fbbe5e4609a1",
+    "path_contract_hash": "sha256:748aeb54db2c323f85dc754c3405b295e0c4eb15c74686924763859f058ac866",
     "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
     "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
     "status": "partial",
@@ -1232,10 +1269,14 @@
       "displacement_data_hash": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
       "displacement_inf_m": 0.003460998957181459,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 1.0,
-      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
       "step_index": 3
     },
     "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
@@ -1255,10 +1296,10 @@
     "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-07-22T17:27:17.069585+00:00",
+  "generated_at": "2026-08-08T09:35:27.125018+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
-    "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:ac8d129417de659f5145b69e4b126a223176756f30cf75b5586664e26d050f00",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:4306b6ab4fc0fb83d5ab0ea02e420e803083c3144bbc21ac2bb63ffeeb9d9731",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -1266,13 +1307,13 @@
     "implementation/phase1/parse_mgt_section_material_properties.py": "sha256:3979dee18ad23b014bf51032a619730be3fe106ce96fa257057dc93901f03569",
     "implementation/phase1/parse_midas_mgt_to_json_npz.py": "sha256:5c92fd1c8e2d371f2dd46a20f3604650c6e9a56002d1f0af8bd9a96fe2452a41",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:9185d697e848aeabf86ad59a86e605a69771e9f48b856961967af0f64e63d776",
+    "scripts/build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:f54c3f3e742e0ea903d81dfa85a5a8ed32a37d4146b7d1e9b77c7f006d6e12d6",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
-    "src/structural_analysis/schemas/g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json": "sha256:1d41bac404099a0b8784bfcff98285622f18790fa9d8c791157fb457de7ddfeb",
-    "tests/test_build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:bbc379afae6c915fe0d800e93447b29c2684a8355eb455e6878720d2817f72f9",
+    "src/structural_analysis/schemas/g1_mgt_semantic_live_linear_newton_continuation_v1.schema.json": "sha256:be0bb16d22b9b58c6b8ac80aa0b62bdcc671ceca96bf6e725d0ee435fa979118",
+    "tests/test_build_g1_mgt_semantic_live_linear_newton_continuation_receipt.py": "sha256:74d5f2f309c8d2a6498cac01591cbbdfc57b7edf33b3d97f6a3b98cb7a24450f",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:56433cf9f99c5534deeda47ed6ef51c537bb01c73731e79e8694e0d72a2bd646"
+    "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:bed5ace92fdc75bc8e64902808c26a6eb52608de426436aee54289559900b96e"
   },
   "restart_checkpoint_artifact": {
     "artifact_path": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_restart_0p75_free_displacement.f64le",
@@ -1283,10 +1324,14 @@
       "displacement_data_hash": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
       "displacement_inf_m": 0.002595749217886194,
       "equation_count": 70560,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "exact_restart_binding_complete": true,
       "load_factor": 0.75,
-      "path_contract_hash": "sha256:9c847a2853ad1731743cb1a51086f4739668910550e4a1d65b1468f2f1093150",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "path_contract_hash": "sha256:325f264878588e36557d41d022254c55264cf696c076192929aa370d958e9385",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+      "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+      "state_hash": "sha256:6006ec015752375e176921c90ab6e7e0d846977a8321a48e066590453a7baa5d",
       "step_index": 2
     },
     "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
@@ -1311,22 +1356,22 @@
     "contract_pass": true,
     "direct_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
     "direct_final_residual_inf_n": 1.8550488967150613e-06,
-    "direct_final_state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+    "direct_final_state_hash": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
     "final_displacement_bytes_identical": true,
     "final_state_hash_identical": true,
     "restart_checkpoint_consumed": true,
     "restarted_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
     "restarted_final_residual_inf_n": 1.8550488967150613e-06,
-    "restarted_final_state_hash": "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c",
+    "restarted_final_state_hash": "sha256:5d7768f53351384e5395740e2377e9d7d9170db03db5b62a1e9ed55053a2c913",
     "serialization_roundtrip_byte_exact": true,
     "serialized_checkpoint_data_sha256": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
     "serialized_checkpoint_load_factor": 0.75,
-    "serialized_checkpoint_state_hash": "sha256:681b5f4f9e253c7fda81dc1dd11be75fb5be7fe2274e7360ca4e7441d95270bf",
+    "serialized_checkpoint_state_hash": "sha256:6006ec015752375e176921c90ab6e7e0d846977a8321a48e066590453a7baa5d",
     "status": "ready"
   },
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1",
-  "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
-  "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+  "source_commit_exact_replay_claim": true,
+  "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
+  "source_tree_state": "commit_bound_inputs_exact",
   "status": "partial"
 }

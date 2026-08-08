@@ -8,7 +8,6 @@
     "summary": "implementation/phase1/release_evidence/productization/g1_mgt_semantic_live_linear_newton_continuation_summary.json"
   },
   "blockers_remaining": [
-    "source_commit_exact_replay_not_claimed_for_dirty_worktree",
     "raw_material_table_binding_incomplete_source_derived_alias_available",
     "dgn_exact_type_name_material_inheritance_engineer_review_required",
     "state_updated_nonlinear_current_tangent_not_connected",
@@ -61,14 +60,14 @@
   "evidence_closure_pass": false,
   "final_residual_inf_n": 1.8550488967150613e-06,
   "free_equation_count": 70560,
-  "generated_at": "2026-07-22T17:27:17.069585+00:00",
+  "generated_at": "2026-08-08T09:35:27.125018+00:00",
   "maximum_tangent_consistency_error_inf_kn": 9.06263396416307e-06,
   "maximum_tangent_solve_explicit_residual_inf_n": 4.2724750528577715e-06,
   "operator_classification": "state_invariant_linear_reference_geometry",
   "raw_material_table_property_coverage_complete": false,
   "restart_replay_byte_identical": true,
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-summary.v1",
-  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
+  "source_commit_sha": "2d0415a344b8446573b95f7499dcfa0287f7ecd0",
   "source_property_coverage_complete": false,
   "status": "partial"
 }
