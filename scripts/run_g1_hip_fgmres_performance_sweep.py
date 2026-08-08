@@ -86,7 +86,7 @@ def _checkpoint_bytes(dimension: int) -> bytes:
 
 def _cpu_solve(dimension: int, repetitions: int) -> dict[str, Any]:
     row_ptr, columns, values, rhs = _problem(dimension); matrix = csr_matrix((values, columns, row_ptr), shape=(dimension, dimension))
-    timings: list[float] = []; iteration_counts: list[int] = []; matvec_counts: list[int] = []; residuals: list[float] = []
+    timings: list[float] = []; iteration_counts: list[int] = []; matvec_counts: list[int] = []; residuals: list[float] = []; solution_errors: list[float] = []
     for _ in range(repetitions):
         matvec_count = 0; iteration_count = 0
         def apply(vector: np.ndarray) -> np.ndarray:
@@ -99,8 +99,8 @@ def _cpu_solve(dimension: int, repetitions: int) -> dict[str, Any]:
         start = time.perf_counter(); solution, info = gmres(operator, rhs, M=LinearOperator(matrix.shape, matvec=lambda vector: 0.25 * vector, dtype=np.float64), restart=24, maxiter=24, rtol=1.0e-10, atol=1.0e-12, callback=observe, callback_type="pr_norm"); elapsed = (time.perf_counter() - start) * 1000.0
         if info != 0:
             raise RuntimeError(f"cpu_gmres_failed:{dimension}:{info}")
-        timings.append(elapsed); iteration_counts.append(iteration_count); matvec_counts.append(matvec_count); residuals.append(float(np.linalg.norm(matrix @ solution - rhs, ord=np.inf)))
-    return {"implementation": "scipy.sparse.linalg.gmres", "wall_time_samples_ms": timings, "wall_time_median_ms": statistics.median(timings), "iteration_count": max(iteration_counts), "matvec_count": max(matvec_counts), "maximum_physical_residual_n": max(residuals)}
+        timings.append(elapsed); iteration_counts.append(iteration_count); matvec_counts.append(matvec_count); residuals.append(float(np.linalg.norm(matrix @ solution - rhs, ord=np.inf))); solution_errors.append(float(np.max(np.abs(solution - 1.0))))
+    return {"implementation": "scipy.sparse.linalg.gmres", "wall_time_samples_ms": timings, "wall_time_median_ms": statistics.median(timings), "iteration_count": max(iteration_counts), "matvec_count": max(matvec_counts), "maximum_physical_residual_n": max(residuals), "maximum_exact_solution_error": max(solution_errors)}
 
 
 def _compile(binary: Path, hipcc: Path, architecture: str) -> dict[str, Any]:
@@ -133,10 +133,14 @@ def _case(dimension: int, binary: Path, temporary: Path, repetitions: int) -> di
         raise RuntimeError(f"hip_sweep_telemetry_not_deterministic:{dimension}")
     if not converged["converged"] or converged["terminal_reason"] != "converged_scaled_residual" or first["mid_recurrence_host_transfer_count"] != 0 or first["gcn_arch_name"] != "gfx1030":
         raise RuntimeError(f"hip_sweep_runtime_contract_failed:{dimension}")
+    row_ptr, columns, values, rhs = _problem(dimension); matrix = csr_matrix((values, columns, row_ptr), shape=(dimension, dimension)); gpu_solution = np.asarray(converged["solution"])
+    gpu_physical_residual = float(np.linalg.norm(matrix @ gpu_solution - rhs, ord=np.inf)); gpu_solution_error = float(np.max(np.abs(gpu_solution - 1.0)))
+    if gpu_physical_residual > 5.0e-8 or gpu_solution_error > 2.0e-8:
+        raise RuntimeError(f"hip_sweep_terminal_parity_failed:{dimension}")
     cpu = _cpu_solve(dimension, repetitions); lifecycle = [float(row["device_lifecycle_wall_time_ms"]) for row in outputs]
     return {
         "dimension": dimension, "nnz": int(_problem(dimension)[2].size), "repetitions": repetitions,
-        "gpu": {"krylov_iteration_count": int(converged["iteration_count"]), "matvec_count": int(first["executed_matvec_count"]), "preconditioner_apply_count": int(first["preconditioner_apply_count"]), "h2d_bytes": int(first["h2d_bytes"]), "d2h_bytes": int(first["d2h_bytes"]), "mid_recurrence_host_transfer_count": int(first["mid_recurrence_host_transfer_count"]), "tracked_peak_device_allocation_bytes": int(first["tracked_peak_device_allocation_bytes"]), "device_lifecycle_wall_time_samples_ms": lifecycle, "device_lifecycle_wall_time_median_ms": statistics.median(lifecycle), "process_wall_time_samples_ms": process_ms, "process_wall_time_median_ms": statistics.median(process_ms), "terminal_scaled_l2": float(converged["scaled_l2_history"][-1])},
+        "gpu": {"krylov_iteration_count": int(converged["iteration_count"]), "matvec_count": int(first["executed_matvec_count"]), "preconditioner_apply_count": int(first["preconditioner_apply_count"]), "h2d_bytes": int(first["h2d_bytes"]), "d2h_bytes": int(first["d2h_bytes"]), "mid_recurrence_host_transfer_count": int(first["mid_recurrence_host_transfer_count"]), "tracked_peak_device_allocation_bytes": int(first["tracked_peak_device_allocation_bytes"]), "device_lifecycle_wall_time_samples_ms": lifecycle, "device_lifecycle_wall_time_median_ms": statistics.median(lifecycle), "process_wall_time_samples_ms": process_ms, "process_wall_time_median_ms": statistics.median(process_ms), "terminal_scaled_l2": float(converged["scaled_l2_history"][-1]), "maximum_physical_residual_n": gpu_physical_residual, "maximum_exact_solution_error": gpu_solution_error},
         "cpu": cpu,
         "speedup": {"device_lifecycle_vs_cpu_solver": cpu["wall_time_median_ms"] / statistics.median(lifecycle), "gpu_process_vs_cpu_solver": cpu["wall_time_median_ms"] / statistics.median(process_ms)},
     }

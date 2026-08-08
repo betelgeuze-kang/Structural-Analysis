@@ -35,3 +35,4 @@ def test_cpu_reference_converges_with_physical_residual() -> None:
     result = MODULE._cpu_solve(66, 2)
     assert result["iteration_count"] > 0 and result["matvec_count"] > 0
     assert result["maximum_physical_residual_n"] <= 1.0e-9
+    assert result["maximum_exact_solution_error"] <= 1.0e-9
