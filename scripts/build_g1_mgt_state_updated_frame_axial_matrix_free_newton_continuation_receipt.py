@@ -31,10 +31,9 @@ from g1_mgt_load_coupled_arc_length_adapter import (  # noqa: E402
     build_real_mgt_load_coupled_arc_length_problem,
 )
 from release_evidence_metadata import (  # noqa: E402
+    commit_bound_input_metadata,
     engine_version,
     file_sha256,
-    git_head,
-    input_checksums,
 )
 from structural_analysis.engine_v2.contracts._canonical import (  # noqa: E402
     array_data_hash,
@@ -503,12 +502,23 @@ def build_receipt(
     repo_root = repo_root.resolve()
     resolved_mgt = _resolve(repo_root, mgt_path)
     resolved_checkpoint = _resolve(repo_root, checkpoint_npz)
+    source_metadata = commit_bound_input_metadata(
+        _input_paths(
+            mgt_path=mgt_path,
+            checkpoint_npz=checkpoint_npz,
+        ),
+        repo_root=repo_root,
+    )
+    source_provenance = source_metadata["source_input_provenance"]
+    source_exact = bool(source_provenance["contract_pass"])
+    source_commit_sha = str(source_metadata["source_commit_sha"])
     historical_problem, metadata = (
         build_real_mgt_load_coupled_arc_length_problem(
             mgt_path=resolved_mgt,
             roundtrip_npz=None,
             checkpoint_npz=resolved_checkpoint,
             apply_state_updated_frame_axial_geometry=True,
+            source_commit_sha=(source_commit_sha if source_exact else "unavailable"),
         )
     )
     problem = historical_problem.zero_state_problem()
@@ -950,6 +960,8 @@ def build_receipt(
         "authoritative_g1_checkpoint_contract_not_satisfied",
         "g1_full_building_closure_not_established",
     ]
+    if not source_exact:
+        blockers.insert(0, "source_commit_exact_replay_not_proven")
     if not contract_pass:
         blockers.insert(0, "actual_state_updated_newton_path_contract_failed")
 
@@ -962,17 +974,15 @@ def build_receipt(
         "readiness_pass": False,
         "engineer_review_required": engineer_review_required,
         "evidence_closure_pass": False,
-        "source_commit_sha": git_head(repo_root),
+        "source_commit_sha": source_commit_sha,
         "engine_version": engine_version(repo_root),
-        "source_commit_exact_replay_claim": False,
-        "source_tree_state": "working_tree_with_uncommitted_goal_changes",
-        "input_checksums": input_checksums(
-            _input_paths(
-                mgt_path=mgt_path,
-                checkpoint_npz=checkpoint_npz,
-            ),
-            repo_root=repo_root,
+        "source_commit_exact_replay_claim": source_exact,
+        "source_tree_state": (
+            "commit_bound_inputs_exact"
+            if source_exact
+            else "working_tree_input_divergence"
         ),
+        "input_checksums": source_metadata["input_checksums"],
         "case_id": (
             "g1_real_mgt_state_updated_frame_axial_matrix_free_newton_"
             "continuation"

@@ -35,10 +35,9 @@ from g1_mgt_semantic_live_linear_newton_continuation import (  # noqa: E402
     run_linear_reference_newton_continuation,
 )
 from release_evidence_metadata import (  # noqa: E402
+    commit_bound_input_metadata,
     engine_version,
     file_sha256,
-    git_head,
-    input_checksums,
 )
 
 
@@ -262,10 +261,21 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
     full_load_vector_out: Path = DEFAULT_FULL_LOAD_VECTOR_OUT,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, bytes]]:
     repo_root = repo_root.resolve()
+    source_metadata = commit_bound_input_metadata(
+        _input_paths(
+            mgt_path=mgt_path,
+            operator_checkpoint=operator_checkpoint,
+        ),
+        repo_root=repo_root,
+    )
+    source_provenance = source_metadata["source_input_provenance"]
+    source_exact = bool(source_provenance["contract_pass"])
+    source_commit_sha = str(source_metadata["source_commit_sha"])
     problem, adapter_metadata = build_real_mgt_load_coupled_arc_length_problem(
         mgt_path=_resolve(repo_root, mgt_path),
         roundtrip_npz=None,
         checkpoint_npz=_resolve(repo_root, operator_checkpoint),
+        source_commit_sha=(source_commit_sha if source_exact else "unavailable"),
     )
     zero_problem = problem.zero_state_problem()
     config = LinearReferenceNewtonConfig()
@@ -479,7 +489,6 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "g1_full_building_closure": False,
     }
     blockers = [
-        "source_commit_exact_replay_not_claimed_for_dirty_worktree",
         "raw_material_table_binding_incomplete_source_derived_alias_available",
         "dgn_exact_type_name_material_inheritance_engineer_review_required",
         "state_updated_nonlinear_current_tangent_not_connected",
@@ -491,6 +500,8 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "production_rocm_hip_nonlinear_parity_not_verified",
         "g1_full_load_checkpoint_not_created",
     ]
+    if not source_exact:
+        blockers.insert(0, "source_commit_exact_replay_not_proven")
     if claims["raw_material_table_property_coverage_complete"]:
         blockers.remove(
             "raw_material_table_binding_incomplete_source_derived_alias_available"
@@ -499,13 +510,7 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         blockers.remove(
             "dgn_exact_type_name_material_inheritance_engineer_review_required"
         )
-    checksums = input_checksums(
-        _input_paths(
-            mgt_path=mgt_path,
-            operator_checkpoint=operator_checkpoint,
-        ),
-        repo_root=repo_root,
-    )
+    checksums = source_metadata["input_checksums"]
     generated_at = datetime.now(timezone.utc).isoformat()
     artifacts = {
         "receipt": _label(repo_root, receipt_out),
@@ -526,10 +531,14 @@ def build_g1_mgt_semantic_live_linear_newton_continuation_receipt(
         "status": "partial" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "evidence_closure_pass": False,
-        "source_commit_sha": git_head(repo_root),
+        "source_commit_sha": source_commit_sha,
         "engine_version": engine_version(repo_root),
-        "source_commit_exact_replay_claim": False,
-        "source_tree_state": "working_tree_with_uncommitted_goal_changes",
+        "source_commit_exact_replay_claim": source_exact,
+        "source_tree_state": (
+            "commit_bound_inputs_exact"
+            if source_exact
+            else "working_tree_input_divergence"
+        ),
         "input_checksums": checksums,
         "case_id": zero_problem.case_id,
         "adapter_binding": adapter_binding,
