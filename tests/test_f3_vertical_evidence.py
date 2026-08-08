@@ -88,6 +88,36 @@ def test_external_vv_artifact_without_signature_verification_fails_closed() -> N
     assert receipt.blockers == ("external_vv_signature_verification_missing",)
 
 
+def test_user_authorized_signature_verifier_waiver_is_explicit_and_passes() -> None:
+    receipt = evaluate_f3_stage_gate(
+        stage="frame3d_linear",
+        source_commit_sha=SOURCE_SHA,
+        evidence=_complete_evidence(),
+        external_vv_signature=ExternalVVSignatureVerification(
+            status="waived",
+            authority="user_authorized_signature_verifier_waiver",
+            waiver_reason="User explicitly authorized self-verification without a signer.",
+        ),
+    )
+
+    assert receipt.public_product_promotion_passed is True
+    assert receipt.external_vv_signature_status == "waived"
+    assert receipt.blockers == ()
+
+
+def test_signature_verifier_waiver_requires_authority_reason_and_vv_artifact() -> None:
+    receipt = evaluate_f3_stage_gate(
+        stage="frame3d_linear",
+        source_commit_sha=SOURCE_SHA,
+        evidence=[item for item in _complete_evidence() if item.surface != "external_vv"],
+        external_vv_signature=ExternalVVSignatureVerification(status="waived"),
+    )
+
+    assert "external_vv_signature_waiver_authority_invalid" in receipt.blockers
+    assert "external_vv_signature_waiver_reason_missing" in receipt.blockers
+    assert "external_vv_signature_waiver_artifact_missing" in receipt.blockers
+
+
 @pytest.mark.parametrize(
     ("signature", "expected_blocker"),
     [

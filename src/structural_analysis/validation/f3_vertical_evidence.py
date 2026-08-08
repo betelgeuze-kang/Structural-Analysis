@@ -1,9 +1,10 @@
 """Fail-closed evidence gate for staged Frame3D and dynamics promotion.
 
 The gate deliberately validates evidence identity and ordering only.  It does not
-run, sign, or independently verify a solver result.  In particular, an external
-V&V artifact is insufficient until an independent signature-verifier receipt is
-bound to it.
+run, sign, or independently verify a solver result.  An external V&V artifact is
+normally insufficient until an independent signature-verifier receipt is bound
+to it.  A user-authorized verifier waiver is represented explicitly; it never
+masquerades as a verified signature.
 """
 
 from __future__ import annotations
@@ -70,11 +71,12 @@ class F3Evidence:
 class ExternalVVSignatureVerification:
     """Adapter output expected from an independent signature verifier."""
 
-    status: Literal["verified", "unverified", "absent"]
+    status: Literal["verified", "unverified", "absent", "waived"]
     authority: str | None = None
     signer_id: str | None = None
     signed_artifact_sha256: str | None = None
     verification_receipt_sha256: str | None = None
+    waiver_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -90,7 +92,9 @@ class F3StageGateReceipt:
     evidence_artifact_sha256: tuple[tuple[str, str], ...]
     predecessor_stage: str | None
     predecessor_receipt_sha256: str | None
-    external_vv_signature_status: Literal["verified", "unverified", "absent"]
+    external_vv_signature_status: Literal[
+        "verified", "unverified", "absent", "waived"
+    ]
     blockers: tuple[str, ...]
     public_product_promotion_passed: bool
 
@@ -150,7 +154,16 @@ def evaluate_f3_stage_gate(
 
     signature = external_vv_signature or ExternalVVSignatureVerification(status="absent")
     external_vv_artifact = evidence_by_surface.get("external_vv")
-    if signature.status == "absent":
+    if signature.status == "waived":
+        if signature.authority != "user_authorized_signature_verifier_waiver":
+            blockers.append("external_vv_signature_waiver_authority_invalid")
+        if not signature.waiver_reason:
+            blockers.append("external_vv_signature_waiver_reason_missing")
+        if external_vv_artifact is None or not _is_sha256(
+            external_vv_artifact.artifact_sha256
+        ):
+            blockers.append("external_vv_signature_waiver_artifact_missing")
+    elif signature.status == "absent":
         blockers.append("external_vv_signature_verification_missing")
     elif signature.status != "verified":
         blockers.append("external_vv_signature_verification_unverified")
