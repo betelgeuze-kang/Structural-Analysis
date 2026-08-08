@@ -83,3 +83,23 @@ the public key. Do not return the private key. G1 cross-device closure remains
 false until the imported `gfx1030` and `gfx1100` envelopes pass same-source,
 same-wheel, distinct-runner/organization/signer, signature, numerical,
 checkpoint, material, and KPI gates.
+
+## Promotion-host verification
+
+After importing the isolated artifacts and signed envelope on the branch that
+contains the production pair verifier, run:
+
+```bash
+PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
+  scripts/build_g1_mgt_cross_device_gate.py
+
+PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
+  scripts/build_g1_mgt_cross_device_gate.py --check
+```
+
+The gate remains `partial` unless both envelopes validate their upstream
+artifacts and signatures, execute the exact expected architectures, share the
+same source set, wheel, and dual-target binaries, retain exact terminal and
+material contracts, and identify distinct organizations, runners, locations,
+signers, and public keys. Even a `ready` pair does not close the separate
+source-authoritative nonlinear-material blocker.

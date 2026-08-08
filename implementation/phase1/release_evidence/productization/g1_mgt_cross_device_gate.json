@@ -1,0 +1,60 @@
+{
+  "blockers_remaining": [
+    "architectures_exact",
+    "both_signatures_verified",
+    "same_repository_commit",
+    "same_source_set",
+    "same_wheel",
+    "same_dual_target_binaries",
+    "executed_binary_matches_architecture",
+    "terminal_contract_exact",
+    "material_contract_exact",
+    "distinct_organizations",
+    "distinct_runners",
+    "distinct_execution_locations",
+    "distinct_signers",
+    "gfx1100_independence_attested",
+    "production_contracts_true",
+    "kpis_recorded",
+    "source_authoritative_nonlinear_material_parameters_unavailable",
+    "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp"
+  ],
+  "claim_boundary": "A ready gate proves a verified, same-source and same-wheel production-MGT pair on distinct signed gfx1030 and gfx1100 runners with terminal, material, checkpoint, and KPI contracts. It does not prove source-authoritative nonlinear material breadth and therefore cannot by itself close G1.",
+  "claims": {
+    "actual_gfx1030_hardware": true,
+    "actual_gfx1100_hardware": false,
+    "g1_closure": false,
+    "signed_independent_cross_device_pair": false,
+    "terminal_cross_device_parity": false
+  },
+  "comparisons": {
+    "architectures_exact": false,
+    "both_signatures_verified": false,
+    "distinct_execution_locations": false,
+    "distinct_organizations": false,
+    "distinct_runners": false,
+    "distinct_signers": false,
+    "executed_binary_matches_architecture": false,
+    "gfx1100_independence_attested": false,
+    "kpis_recorded": false,
+    "material_contract_exact": false,
+    "production_contracts_true": false,
+    "same_dual_target_binaries": false,
+    "same_repository_commit": false,
+    "same_source_set": false,
+    "same_wheel": false,
+    "terminal_contract_exact": false
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-08T15:25:19.668373Z",
+  "receipt_hash": "sha256:089fc6e985506ba556b97049a90bed64aa495feaf7207ae9010b09c45559e631",
+  "schema_version": "g1-mgt-production-hip-cross-device-gate.v1",
+  "sources": {
+    "gfx1030": {
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_gfx1030_hardware_envelope.json",
+      "receipt_hash": "sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a"
+    },
+    "gfx1100": null
+  },
+  "status": "partial"
+}

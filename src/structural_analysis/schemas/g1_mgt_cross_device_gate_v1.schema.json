@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "sources", "comparisons", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-production-hip-cross-device-gate.v1"},
+    "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "generated_at": {"type": "string"},
+    "status": {"enum": ["partial", "ready"]},
+    "contract_pass": {"const": true},
+    "sources": {
+      "type": "object",
+      "required": ["gfx1030", "gfx1100"],
+      "properties": {
+        "gfx1030": {"$ref": "#/$defs/source"},
+        "gfx1100": {"oneOf": [{"$ref": "#/$defs/source"}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
+    "comparisons": {
+      "type": "object",
+      "minProperties": 16,
+      "maxProperties": 16,
+      "additionalProperties": {"type": "boolean"}
+    },
+    "claims": {
+      "type": "object",
+      "required": ["actual_gfx1030_hardware", "actual_gfx1100_hardware", "signed_independent_cross_device_pair", "terminal_cross_device_parity", "g1_closure"],
+      "properties": {
+        "actual_gfx1030_hardware": {"const": true},
+        "actual_gfx1100_hardware": {"type": "boolean"},
+        "signed_independent_cross_device_pair": {"type": "boolean"},
+        "terminal_cross_device_parity": {"type": "boolean"},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "required": ["path", "receipt_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
