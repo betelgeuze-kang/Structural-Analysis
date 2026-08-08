@@ -212,6 +212,7 @@ void print_vector(const std::vector<double>& values) {
 
 }  // namespace
 
+#ifndef ENGINE_V2_MGT_PRECONDITIONED_JVP_NO_MAIN
 int main(int argc, char** argv) {
   try {
     if (argc != 3) {
@@ -389,3 +390,4 @@ int main(int argc, char** argv) {
     return 1;
   }
 }
+#endif

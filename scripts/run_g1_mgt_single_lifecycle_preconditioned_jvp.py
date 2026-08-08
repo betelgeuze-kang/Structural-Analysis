@@ -141,6 +141,7 @@ def build_references(*, root: Path) -> tuple[Any, HIPSparseLUApplyReference, Any
     tangent_reference = create_hip_current_tangent_operator_reference(tangent_fixture)
     return sparse_fixture, sparse_reference, tangent_reference, {
         "state": state, "residual_kn": residual_kn, "rhs_kn": rhs_kn,
+        "problem": problem,
         "metadata": metadata, "prior": prior, "pattern_hash": pattern_hash,
         "values_hash": values_hash,
     }
