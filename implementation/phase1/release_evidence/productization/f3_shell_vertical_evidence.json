@@ -1,0 +1,494 @@
+{
+  "claim_boundary": "Closes a bounded four-node, two-triangle, small-displacement linear CST membrane/Mindlin shell stage with physical equilibrium, authoritative recovery ResultIR, exact hash-bound restart, Workbench contour, and closed-form patch/rigid-mode verification. Nonlinear shell, higher-order elements, openings, broad mesh V&V, and contact remain outside.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "current_source_replay_executed": true,
+    "persisted_source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_nonlinear_mdof_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:918159234c14b62606162c384892229057b0d654d3f53249eccaf2aab4775281"
+  },
+  "schema_version": "f3-shell-vertical-evidence.v1",
+  "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+  "source_input_checksums": {
+    "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
+    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:5f421f36d5db4d075c93c1c5ddbd184a8b6b554477177dfe9360caeebb6321b6",
+    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:471b772dc1f6fc5e67368b2e3b096af7215aee16c237b79f820639d651821d49",
+    "src/structural_analysis/elements/shell_triangle.py": "sha256:403b20e1f693a1af316f8262afa7030f373b3b3fb016dd95e8e997232bbed294",
+    "src/structural_analysis/engine_v2/contracts/shell_static_result.py": "sha256:5a33cc2d2a61873435e362a666a67b772b4d843b248f1c79e5731691e7124ac4",
+    "src/structural_analysis/model_ir/validation.py": "sha256:66aaa90b02a16e2e3290f820f9db5dd059897bcd5f368b7944b28c6489872fe3",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:fb9fd8453ec336c2ee61b5dbf17debd5dbb0aabfc5c2b369c265db5362c0dba1",
+    "src/structural_analysis/schemas/shell_static_result_ir_v1.schema.json": "sha256:e819240afcb58dd293cf9c61d7fb3867014e61280c88a7dd5731bbd8716e7092",
+    "src/structural_analysis/solvers/linear/shell_static.py": "sha256:99acacde147a06b14c495c0bc4bc0f9286a8f232bfbd83f8e89760fa0904f200",
+    "tests/fixtures/model_ir_v2/shell_square_linear_static.json": "sha256:6ed86acf898faddc63983d55b01d32b7696b261005fe7c26ede10605e571cb71",
+    "tests/test_f3_shell_vertical_evidence.py": "sha256:c60abccd9eb000833d7e119dc532a8786d6a494a534f4a9b772c6abc1f865d9f",
+    "tests/test_shell_model_ir.py": "sha256:10f4d2b0aec5f86945a54237d3ac10b84871b0755da746747c2e4fe834bd4486",
+    "tests/test_shell_static_result_ir.py": "sha256:9ec28acd78107bcbb6afb7b891d4a9a7f6dedb365bf432b72fbb06c48355bf57",
+    "tests/test_shell_static_solver.py": "sha256:5d56a5f444c9d880d02810966a2af0be1101f06523196740d7432a544d848457",
+    "tests/test_shell_triangle_element.py": "sha256:2653001b7d5469162d990b7c650688eb7483787f679cd7ce9d7182c9368cc2fa"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:9d0debc618f04a50725d185dba2964d35665121938aa4c366ae4b48fcf0c47fc",
+      "checkpoint": "sha256:7c286c1e210721c9db1b0d9fdf72baebe29cce4d128f4aec1e36366aa72641ac",
+      "external_vv": "sha256:cb0cdc9c0d6cac6cb2c6af692550389e236d3f6705884e4f49cfa913bf06a384",
+      "model_ir": "sha256:6d4a7e9459f57bada87b19638f5e324d45d3ec138fc2b967d39c399909f367bb",
+      "platform": "sha256:f382776f018b3ba2a85884123cbd1a7355b1134c86adc146af044db6e521dac1",
+      "recovery": "sha256:050336c160caa1e9523c50e7296999a3fadc59d009bab83cf3b3ab83d3fe4adf",
+      "result_ir": "sha256:df71334ea4b2717a10fedc6fb693e5773a515ea4404c89cac55b6529a56320c5",
+      "solver": "sha256:30e387b397e1b610472e5d401159a62c616afa16d60d3f58b77292059fea0d39",
+      "workbench": "sha256:ea3d10d1c04345d97f871e08b6ddfd4b5d3353c23d6ada1c2718a62f429b47c6"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:210eb6d668e098088ffc06853a9c3c92a255d9259309757abd8cb9145b2b7f04",
+    "predecessor_stage": "nonlinear_mdof",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+    "stage": "shell",
+    "stage_index": 8,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "benchmark_id": "shell3-constant-membrane-strain-and-rigid-translation.v1",
+      "closed_form_energy_j": 0.005769230769230769,
+      "computed_constant_strain_energy_j": 0.005769230769230769,
+      "relative_energy_error": 0.0,
+      "relative_energy_tolerance": 1e-12,
+      "rigid_relative_residual_tolerance": 1e-14,
+      "rigid_translation_energy_j": -7.152557373046876e-08,
+      "rigid_translation_relative_residual": 1.8449056716192337e-17
+    },
+    "checkpoint": {
+      "deterministic_repeat": true,
+      "exact_restart": true,
+      "terminal_checkpoint": {
+        "checkpoint_hash": "sha256:36b430cad1f7f7129290d881608cac32b7be27bbe1276f3e886a90771d81a2a8",
+        "displacement_global": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -2.7668816077211324e-05,
+          -1.8646390964480117e-05,
+          -2.0916136728150304e-05,
+          0.0,
+          0.0,
+          0.0,
+          -2.0974166090039745e-05,
+          -1.021465613716834e-06,
+          -6.161497631537289e-05,
+          0.0
+        ],
+        "load_hash": "sha256:b7846ac5cdd72c5f23f859eece98b073635d1f9e0b0360f9fe489e26f3cd350b",
+        "model_hash": "sha256:e541f7e9fda1b1ab5ac61b61ce0afa01f90151f130bd082c515427fdae1ea72d",
+        "profile": "linear_cst_membrane_mindlin_triangle_shell.v1",
+        "reaction_global_n_nm": [
+          0.0,
+          0.0,
+          1679.1034635886765,
+          -478.31830112479656,
+          915.1868721337623,
+          0.0,
+          0.0,
+          0.0,
+          320.8965364113126,
+          -200.78516246386425,
+          1084.8131278662263,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "schema_version": "shell-static-checkpoint.v1",
+        "stiffness_hash": "sha256:e8890ac2e8ca5c306cf206bfbb82681859b9707a4e01255f039f1dc939761081"
+      }
+    },
+    "external_vv": {
+      "reference_profile": "closed-form-constant-strain-patch-and-rigid-body-invariance.v1",
+      "relative_energy_error": 0.0,
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "capability_profile": "shell_linear_static_v1",
+      "content_hash": "sha256:b936087b0e54a69d7044e3a53b299c930e6dae7bea9c00f994543c4b803d3461",
+      "element_count": 2,
+      "model_id": "f3-shell-square-linear-static",
+      "node_count": 4
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae"
+    },
+    "recovery": {
+      "element_results": [
+        {
+          "bending_resultant_nm_per_m": [
+            -503.9156602572941,
+            -459.6108917155458,
+            -148.42994265307433
+          ],
+          "curvature_per_m": [
+            -2.0916136728150304e-05,
+            -1.7624925350763282e-05,
+            -2.205244862274247e-05
+          ],
+          "element_id": "S1",
+          "membrane_resultant_n_per_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "membrane_strain": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "strain_energy_j": 0.005553068848770714,
+          "transverse_shear_resultant_n_per_m": [
+            -1066.457152812668,
+            933.542847187348
+          ],
+          "transverse_shear_strain": [
+            -1.5844506270359636e-07,
+            1.3869779443926312e-07
+          ]
+        },
+        {
+          "bending_resultant_nm_per_m": [
+            -763.3119546190673,
+            -777.0624532652553,
+            414.71618673808683
+          ],
+          "curvature_per_m": [
+            -3.0296755350828027e-05,
+            -3.131822096454486e-05,
+            6.161497631537289e-05
+          ],
+          "element_id": "S2",
+          "membrane_resultant_n_per_m": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "membrane_strain": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "strain_energy_j": 0.018768422234854653,
+          "transverse_shear_resultant_n_per_m": [
+            -3694.8398463834665,
+            453.81623391144336
+          ],
+          "transverse_shear_strain": [
+            -5.489476343198292e-07,
+            6.742412618112872e-08
+          ]
+        }
+      ],
+      "reaction_vertical_sum_n": 1999.999999999989,
+      "strain_energy_sum_j": 0.024321491083625368
+    },
+    "result_ir": {
+      "manifest": {
+        "analysis_type": "shell_linear_static",
+        "authority": {
+          "checkpoint": "exact_hash_bound",
+          "element_recovery": "authoritative",
+          "engineering_design": "not_authoritative",
+          "nodal_response": "authoritative",
+          "profile": "authoritative_linear_cst_membrane_mindlin_shell.v1",
+          "release_readiness": "not_authoritative"
+        },
+        "bindings": {
+          "load_hash": "sha256:b7846ac5cdd72c5f23f859eece98b073635d1f9e0b0360f9fe489e26f3cd350b",
+          "model_ir_content_hash": "sha256:b936087b0e54a69d7044e3a53b299c930e6dae7bea9c00f994543c4b803d3461",
+          "solver_result_hash": "sha256:1b5cbd764c0df064aaf7728257b3db702ab12478e69029a75e94f6206aee3722",
+          "stiffness_hash": "sha256:e8890ac2e8ca5c306cf206bfbb82681859b9707a4e01255f039f1dc939761081"
+        },
+        "checkpoint": {
+          "exact_restart_required": true,
+          "terminal_checkpoint_hash": "sha256:36b430cad1f7f7129290d881608cac32b7be27bbe1276f3e886a90771d81a2a8"
+        },
+        "claim_boundary": "Authoritative bounded small-displacement linear three-node shell displacement, reaction, physical equilibrium residual, membrane, bending, transverse shear, and exact checkpoint result. Shell nonlinearities, higher-order elements, openings, contact, engineering design, and release readiness are outside this contract.",
+        "displacement_global": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -2.7668816077211324e-05,
+          -1.8646390964480117e-05,
+          -2.0916136728150304e-05,
+          0.0,
+          0.0,
+          0.0,
+          -2.0974166090039745e-05,
+          -1.021465613716834e-06,
+          -6.161497631537289e-05,
+          0.0
+        ],
+        "element_ids": [
+          "S1",
+          "S2"
+        ],
+        "element_results": [
+          {
+            "bending_resultant_nm_per_m": [
+              -503.9156602572941,
+              -459.6108917155458,
+              -148.42994265307433
+            ],
+            "curvature_per_m": [
+              -2.0916136728150304e-05,
+              -1.7624925350763282e-05,
+              -2.205244862274247e-05
+            ],
+            "element_id": "S1",
+            "membrane_resultant_n_per_m": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "membrane_strain": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "strain_energy_j": 0.005553068848770714,
+            "transverse_shear_resultant_n_per_m": [
+              -1066.457152812668,
+              933.542847187348
+            ],
+            "transverse_shear_strain": [
+              -1.5844506270359636e-07,
+              1.3869779443926312e-07
+            ]
+          },
+          {
+            "bending_resultant_nm_per_m": [
+              -763.3119546190673,
+              -777.0624532652553,
+              414.71618673808683
+            ],
+            "curvature_per_m": [
+              -3.0296755350828027e-05,
+              -3.131822096454486e-05,
+              6.161497631537289e-05
+            ],
+            "element_id": "S2",
+            "membrane_resultant_n_per_m": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "membrane_strain": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "strain_energy_j": 0.018768422234854653,
+            "transverse_shear_resultant_n_per_m": [
+              -3694.8398463834665,
+              453.81623391144336
+            ],
+            "transverse_shear_strain": [
+              -5.489476343198292e-07,
+              6.742412618112872e-08
+            ]
+          }
+        ],
+        "energy": {
+          "external_work_j": 0.024321491083625534,
+          "strain_energy_j": 0.024321491083625562
+        },
+        "equilibrium_residual_global_n_nm": [
+          0.0,
+          0.0,
+          1679.1034635886765,
+          -478.31830112479656,
+          915.1868721337623,
+          0.0,
+          0.0,
+          0.0,
+          320.8965364113126,
+          -200.78516246386425,
+          1084.8131278662263,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -1.0913936421275139e-11,
+          1.8758328224066645e-12,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          2.7284841053187847e-12,
+          -1.3358203432289883e-12,
+          0.0
+        ],
+        "node_ids": [
+          "N1",
+          "N2",
+          "N3",
+          "N4"
+        ],
+        "reaction_global_n_nm": [
+          0.0,
+          0.0,
+          1679.1034635886765,
+          -478.31830112479656,
+          915.1868721337623,
+          0.0,
+          0.0,
+          0.0,
+          320.8965364113126,
+          -200.78516246386425,
+          1084.8131278662263,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "result_hash": "sha256:af09fdaa583caf6340956f9e4884aceb15ebccb564a8e623fc5fc1691d02c3d0",
+        "result_id": "f3.shell",
+        "schema_version": "structural-analysis-shell-result-ir.v1",
+        "solver": {
+          "fallback_used": false,
+          "maximum_free_residual": 1.0913936421275139e-11,
+          "regularization_used": false,
+          "solver_id": "dense.direct.cst-mindlin-shell3.v1"
+        }
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-shell-result-ir.v1"
+    },
+    "solver": {
+      "fallback_used": false,
+      "free_dof_count": 12,
+      "maximum_free_residual": 1.0913936421275139e-11,
+      "profile": "linear_cst_membrane_mindlin_triangle_shell.v1",
+      "regularization_used": false,
+      "schema_version": "shell-static-solution.v1",
+      "solver_id": "dense.direct.cst-mindlin-shell3.v1"
+    },
+    "workbench": {
+      "contour": {
+        "locations": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            1.0
+          ]
+        ],
+        "max_value": 0.0,
+        "mean_value": -1.2160745541812766e-05,
+        "min_value": -2.7668816077211324e-05,
+        "result_type": "shell_displacement_uz_m",
+        "state_tag": "contour",
+        "values": [
+          0.0,
+          0.0,
+          -2.7668816077211324e-05,
+          -2.0974166090039745e-05
+        ]
+      },
+      "schema_version": "f3-shell-workbench-payload.v1",
+      "summary": {
+        "contour": {
+          "max_value": 0.0,
+          "mean_value": -1.2160745541812766e-05,
+          "min_value": -2.7668816077211324e-05,
+          "result_type": "shell_displacement_uz_m",
+          "value_count": 4
+        },
+        "result_types": [
+          "shell_displacement_uz_m"
+        ],
+        "schema_version": "1.0",
+        "state_tags": [
+          "contour"
+        ]
+      }
+    }
+  }
+}
