@@ -1,6 +1,5 @@
 {
   "blockers_remaining": [
-    "clean_exact_source_commit_not_verified",
     "device_receipt_signature_not_attached",
     "cross_device_gfx1030_gfx1100_pair_not_verified",
     "production_scale_multi_block_operator_not_verified",
@@ -12,7 +11,7 @@
     "actual_hardware_execution": true,
     "checkpoint_resume_parity": true,
     "cross_device_stage4": false,
-    "exact_source_commit": false,
+    "exact_source_commit": true,
     "numerical_parity": true,
     "performance": false,
     "production_recurrence": false,
@@ -420,10 +419,10 @@
       "upstream_receipt_hash": null
     },
     "operator_context": {
-      "execution_location": "local-rx6900xt",
+      "execution_location": "local-rocm-workstation",
       "independent_from_local_gfx1030": false,
-      "organization_id": "local-development",
-      "runner_id": "codex-desktop-gfx1030"
+      "organization_id": "local-self-verification",
+      "runner_id": "local-gfx1030-rx6900xt"
     },
     "recurrence_comparison": {
       "absolute_tolerance": 1e-11,
@@ -487,7 +486,7 @@
       "terminal_semantics_exact": true
     },
     "source": {
-      "exact_source_commit_claim": false,
+      "exact_source_commit_claim": true,
       "input_checksums": {
         "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:e50d6da179b691ebe348926400acdfcc9d50f96959bca16cd936528687f9b539",
         "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
@@ -507,27 +506,27 @@
         "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:dccebab38d3b8985ad98b0320cf369fe97c551b0f462d9e1a2d61e4a4cbbde0a",
         "tests/test_engine_v2_hip_fgmres_recurrence_runner.py": "sha256:e9a5b2d61ba4d68eb0b51bebac4a140ec253473c00c552fa5305444b6b405f2c"
       },
-      "repository_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+      "repository_commit_sha": "e08c3ae547a52a77cfe8b3332d662b82ebc1bb40",
       "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
-      "worktree_clean": false
+      "worktree_clean": true
     },
     "wheel": {
       "bound_at_execution": true,
-      "filename": "structural_optimization_workbench-1.0.0-py3-none-any.whl",
-      "project_name": "structural-optimization-workbench",
-      "project_version": "1.0.0",
-      "sha256": "sha256:85f64c517f09c95195b6afa0bac6a73f0b231d6cddfdab46ef577ee8a074e98e"
+      "filename": "structural_analysis-0.3.0-py3-none-any.whl",
+      "project_name": "structural-analysis",
+      "project_version": "0.3.0",
+      "sha256": "sha256:f36ea1878378625286d3414d294a45f522f7efcce0b927db5a20f8585080b148"
     }
   },
-  "generated_at": "2026-07-19T07:02:46.180975+00:00",
-  "receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88",
+  "generated_at": "2026-08-08T10:00:17.830051+00:00",
+  "receipt_hash": "sha256:4261fd84995207ab5635b778aa6225b57cfced5fe34e30f03bc95fce48412f38",
   "schema_version": "engine-v2-hip-fgmres-device-receipt.v1",
   "signature": {
     "algorithm": null,
     "public_key_sha256": null,
     "public_key_spki_base64": null,
     "signature_base64": null,
-    "signed_payload_hash": "sha256:19ceef2cfe7d8abbd81eb7e6079a898273b1dbef87d6c904d66ef3d97b7cb2c2",
+    "signed_payload_hash": "sha256:61e58c5dd7899827bbdbc394c95aba8cb1685c7bb20f081382273a27a74697b2",
     "signer_id": null,
     "state": "unsigned"
   },
