@@ -1,0 +1,46 @@
+{
+  "blockers_remaining": [
+    "trusted_hardware_identity_pair",
+    "cpu_fallback_zero",
+    "terminal_resultir_diagnosticir_parity",
+    "cross_device_production_performance_sweep",
+    "nonlinear_material_family_breadth"
+  ],
+  "claim_boundary": "This v2 promotion gate accepts only an externally hash-pinned, unexpired hardware identity policy, two verified non-colliding signer/runner identities, same-source and same-wheel worker receipts, independently bound CPU-fallback-zero evidence, terminal ResultIR and invariant DiagnosticIR parity digests, and a repeated production performance sweep. Missing inputs stay partial; self-declared identity, synthetic performance, and the detached local self-signature are never discovered or promoted. This gate has no bound nonlinear material-family breadth receipt, so production readiness and G1 closure remain false.",
+  "claims": {
+    "g1_closure": false,
+    "gfx1100_workflow_executed_by_this_builder": false,
+    "production_worker_ready": false,
+    "self_declared_identity_promoted": false,
+    "trusted_identity_derived_from_external_policy": false
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-09T12:20:15.805939Z",
+  "promotion_requirements": {
+    "cpu_fallback_zero": false,
+    "cross_device_production_performance_sweep": false,
+    "nonlinear_material_family_breadth": false,
+    "terminal_resultir_diagnosticir_parity": false,
+    "trusted_hardware_identity_pair": false
+  },
+  "provenance": {
+    "input_checksums": {
+      "scripts/build_g1_mgt_production_promotion_gate_v2.py": "sha256:d6df1e1d046f5330b4afac14596b5e2200193a52a07814b6e2732d45efddd228",
+      "scripts/g1_receipt_provenance.py": "sha256:0e1cf0a3bab59ede3dd066ff28959078e986217c504452a2f1013114992e0baf",
+      "src/structural_analysis/schemas/g1_mgt_production_promotion_gate_v2.schema.json": "sha256:11a49ca9e7f8ff9e61a175ef9b19eac15bbb37d314f35a047864100171432dfd",
+      "tests/test_build_g1_mgt_production_promotion_gate_v2.py": "sha256:fb7f65d5b6d82ea964541785a393221c7a54e721d6ffd5df7ee7b6dc7ce480f2"
+    },
+    "source_commit_sha": "079699356dc4b11f8772481e419af210f9fcd868"
+  },
+  "receipt_hash": "sha256:5d541f3961ede79c98ec2934b9cf51a1fd128a1412b1d3f8a2a728edec918080",
+  "schema_version": "g1-mgt-production-promotion-gate.v2",
+  "sources": {
+    "checkpoint_bundle_hash": "sha256:671d0a8eedc1e4ab5ee3bf14d6b1220caea6f487cebab880cf0c278e4f941b8a",
+    "fallback_zero_receipt_hash": null,
+    "gfx1030_worker_receipt_hash": "sha256:c677e819cbb35923f251831c4e0a15cda104c7f49ef34d8fd13ff27032913af8",
+    "gfx1100_worker_receipt_hash": null,
+    "performance_receipt_hash": "sha256:aab469db19ab6555286e4a350f959f7a79e9ccf8c22b21656ae026764ce4f7a4",
+    "trust_policy_hash": null
+  },
+  "status": "partial"
+}

@@ -1,0 +1,46 @@
+{
+  "architecture_summaries": {
+    "gfx1030": null,
+    "gfx1100": null
+  },
+  "blockers_remaining": [
+    "same_source_wheel_workload_checkpoint_parity_not_proven",
+    "three_repetitions_per_architecture_not_available"
+  ],
+  "claim_boundary": "This performance gate accepts only repeated actual production-MGT samples with identical source, wheel, workload, checkpoint, and terminal parity digest. It reports p50/p95 Krylov, matvec, preconditioner, transfer, VRAM, checkpoint, wall-time, and speedup KPIs. Synthetic fixtures are excluded and can never establish the production sweep or G1 closure.",
+  "claims": {
+    "cross_device_production_performance_sweep": false,
+    "g1_closure": false,
+    "production_mgt_workload_only": false,
+    "same_source_wheel_workload_checkpoint": false,
+    "synthetic_fixture_promoted": false,
+    "terminal_parity_digest_bound": false,
+    "three_repetitions_per_architecture": false
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-09T12:20:14.168562Z",
+  "identity": {
+    "checkpoint_sha256": null,
+    "source_commit_sha": null,
+    "terminal_parity_digest": null,
+    "wheel_sha256": null,
+    "workload_hash": null
+  },
+  "production_sample_count": 0,
+  "provenance": {
+    "input_checksums": {
+      "scripts/build_g1_mgt_production_performance_sweep_v2.py": "sha256:4ce75d7bf31d677349e16d679a86c4cb15c0f46de97144f3974634d5707027ca",
+      "scripts/g1_receipt_provenance.py": "sha256:0e1cf0a3bab59ede3dd066ff28959078e986217c504452a2f1013114992e0baf",
+      "src/structural_analysis/schemas/g1_mgt_production_performance_sweep_v2.schema.json": "sha256:d069eeb9754333ef730fe08bed441270b96c28ceedfbe1b89e06db7c9e60d8b4",
+      "tests/test_build_g1_mgt_production_performance_sweep_v2.py": "sha256:34328c37ab2674cf8f2435466666208f0460b3ed2c9950290f40cf6493305c7e"
+    },
+    "source_commit_sha": "079699356dc4b11f8772481e419af210f9fcd868"
+  },
+  "receipt_hash": "sha256:aab469db19ab6555286e4a350f959f7a79e9ccf8c22b21656ae026764ce4f7a4",
+  "sample_count": 0,
+  "sample_receipt_hashes": [],
+  "samples": [],
+  "schema_version": "g1-mgt-production-performance-sweep.v2",
+  "status": "partial",
+  "synthetic_sample_count": 0
+}

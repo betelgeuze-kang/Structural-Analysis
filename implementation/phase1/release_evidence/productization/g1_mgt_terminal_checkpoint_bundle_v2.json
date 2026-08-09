@@ -1,0 +1,77 @@
+{
+  "blockers_remaining": [
+    "mid_krylov_restart_not_captured",
+    "independent_gfx1100_hardware_not_available",
+    "nonlinear_material_family_breadth_not_closed"
+  ],
+  "checkpoint": {
+    "accepted_state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f",
+    "byte_length": 1142614,
+    "exact_npz_reload": true,
+    "file_sha256": "sha256:9ff967c15fe2a7b815095d9cdb9f110033e585bace05b47eea0ea7d063a9e88d",
+    "free_displacement_data_hash": "sha256:25f1f2e205c3aa6a507bfdcbbddecfbee04f6a9481a7a9ff47a4c54fc57b6f4f",
+    "load_factor": 1.0,
+    "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_checkpoint.npz"
+  },
+  "claim_boundary": "This v2 bundle binds one accepted full-load Newton terminal state, its committed material bundle, equation scaling, reduced CSR identity, path history, ResultIR pair, and DiagnosticIR for exact offline replay. It is not a Krylov mid-iteration checkpoint, independent hardware attestation, nonlinear material-breadth proof, or G1 closure receipt.",
+  "claims": {
+    "accepted_newton_terminal_restart_bound": true,
+    "diagnostic_ir_bound": true,
+    "equation_scaling_bound": true,
+    "g1_closure": false,
+    "material_state_restart_bound": true,
+    "mid_krylov_restart": false,
+    "offline_replay_without_local_device_probe": true,
+    "path_history_bound": true,
+    "reduced_csr_identity_bound": true
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-09T12:20:11.106800Z",
+  "material": {
+    "committed_artifact": {
+      "byte_length": 445760,
+      "file_sha256": "sha256:3edb5c45a5c0265f6a89eb811e21a6ab6d7f5112104787ba0383ec22009316ec",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_committed_material.f64le"
+    },
+    "committed_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
+    "committed_epoch": 1,
+    "entry_count": 5572,
+    "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c"
+  },
+  "provenance": {
+    "input_checksums": {
+      "scripts/build_g1_mgt_terminal_checkpoint_bundle_v2.py": "sha256:bca81cf5f14d50d4dd843e95e4bbabc5479f3b9bc34b87a016d461d9ef424f82",
+      "scripts/g1_receipt_provenance.py": "sha256:0e1cf0a3bab59ede3dd066ff28959078e986217c504452a2f1013114992e0baf",
+      "src/structural_analysis/schemas/g1_mgt_terminal_checkpoint_bundle_v2.schema.json": "sha256:48fc3f3ae22c7ee1cdc7eab0547e6b42664c412d5dded4ec35e8241ee075d170",
+      "tests/test_build_g1_mgt_terminal_checkpoint_bundle_v2.py": "sha256:a52af9efea153dc29ba04eb62bb6e175ac8801d1a03d66eb8ec145dbca39eb63"
+    },
+    "source_commit_sha": "079699356dc4b11f8772481e419af210f9fcd868"
+  },
+  "receipt_hash": "sha256:671d0a8eedc1e4ab5ee3bf14d6b1220caea6f487cebab880cf0c278e4f941b8a",
+  "schema_version": "g1-mgt-terminal-checkpoint-bundle.v2",
+  "solver_bindings": {
+    "equation_scaling_hash": "sha256:d222e083ab131565daf15f739a02eec7381ce39992838d91e48ed9b01a4b188c",
+    "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+    "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c",
+    "material_state_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
+    "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "nonlinear_terminal_hash": "sha256:820ade46d0af8701dac6894c626b34a2a561088d4b005bbe37642bc0404841ab",
+    "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+    "path_history_hash": "sha256:c47518bd045dc7f4885f7dfee5efd6abd68ad2dea88c8004ca564be673cf9c30",
+    "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
+    "state_epoch": 1,
+    "state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f"
+  },
+  "source": {
+    "device_receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
+    "repository_commit_sha": "24a4d4ab85af5babc42415b518a2a80de8a291c5",
+    "result_receipt_hash": "sha256:496ce3621413ade7f3c335c0e51120ded180bc7a3cc60e23a71a2b0941933405"
+  },
+  "status": "partial",
+  "terminal_outputs": {
+    "cpu_result_hash": "sha256:34596bf01834e0464416278d2ba9d7204e6a39a23f138d3344c68be0d3c8aa3d",
+    "diagnostic_hash": "sha256:b7f7973a1094cf0a6cd8f5bd9618a4b43a3af9d22992d6b84a77a283d72e7191",
+    "displacement_data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+    "hip_result_hash": "sha256:f753bfb7be499907d9c1e5cceaf90dfde403e1991ffa37b813ab2603f1061e0c"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "blockers_remaining": [
+    "accepted_state_tangent_refresh_hip_not_proven",
+    "trusted_hardware_identity_receipt_not_bound",
+    "independent_gfx1100_worker_receipt_not_bound",
+    "cross_device_performance_sweep_not_bound",
+    "nonlinear_material_family_breadth_not_closed"
+  ],
+  "capture_boundary": {
+    "hardware_identity_trusted": false,
+    "local_device_probe_performed": false,
+    "local_device_probe_required_for_offline_replay": false,
+    "mode": "offline_bound_artifact_replay",
+    "signed_hardware_envelope_verified": false
+  },
+  "claim_boundary": "This additive worker receipt replays an already-bound gfx1030 capture without probing local device nodes. It proves terminal authority parity from shared model, plan, scaling, CSR, state, material, path, terminal, and displacement identities while preserving distinct backend ResultIR hashes. An unsigned envelope, missing trusted identity policy, absent accepted-state HIP tangent-refresh evidence, independent gfx1100 receipt, and open nonlinear material breadth keep the production worker and G1 closure false.",
+  "claims": {
+    "accepted_state_tangent_refresh_on_device_proven": false,
+    "diagnostic_ir_bound": true,
+    "fallback_zero_observed_in_bound_receipt": true,
+    "g1_closure": false,
+    "mid_step_d2h_zero_observed": true,
+    "offline_replay_without_local_device_probe": true,
+    "production_worker_ready": false,
+    "terminal_resultir_authority_parity": true,
+    "terminal_resultir_full_hash_equality_required": false,
+    "trusted_hardware_execution": false
+  },
+  "contract_pass": true,
+  "generated_at": "2026-08-09T12:20:12.656685Z",
+  "kpis": {
+    "checkpoint_overhead_seconds": 0.05986510599905159,
+    "cpu_baseline_wall_seconds": 5.442868488000386,
+    "d2h_bytes": 4041124,
+    "end_to_end_wall_seconds": 5.240332247,
+    "h2d_bytes": 239979856,
+    "krylov_iteration_count": 6,
+    "matvec_count": 7,
+    "mid_step_d2h_bytes": 0,
+    "peak_vram_bytes": 260837212,
+    "preconditioner_apply_count": 6,
+    "speedup_vs_cpu": 1.038649503782195
+  },
+  "lifecycle": {
+    "accepted_state_tangent_refresh_on_device": false,
+    "checkpoint_emitted": true,
+    "convergence_gate_on_device": true,
+    "diagnostic_ir_emitted": true,
+    "equation_scaling_on_device": true,
+    "line_search_on_device": true,
+    "material_commit_rollback_on_device": true,
+    "newton_update_on_device": true,
+    "persistent_device_buffers_used": true,
+    "production_fgmres_used": true,
+    "production_preconditioner_used": true,
+    "residual_jvp_on_device": true,
+    "result_ir_emitted": true,
+    "state_rhs_csr_uploaded": true
+  },
+  "provenance": {
+    "input_checksums": {
+      "scripts/build_g1_mgt_production_worker_receipt_v2.py": "sha256:e23f4f061eb1f71740fd521b0c770fca08161527fc79a779027fb3fa6e5e64a3",
+      "scripts/g1_receipt_provenance.py": "sha256:0e1cf0a3bab59ede3dd066ff28959078e986217c504452a2f1013114992e0baf",
+      "src/structural_analysis/schemas/g1_mgt_production_worker_receipt_v2.schema.json": "sha256:5e28c6f8eecf3acfc710522ce1dfbcd01ba13154a4eec8e4edaea44ef5ea153d",
+      "tests/test_build_g1_mgt_production_worker_receipt_v2.py": "sha256:193b5668a36b3339a20534b971c59c8332496e91ba6e294a124693627a95e777"
+    },
+    "source_commit_sha": "079699356dc4b11f8772481e419af210f9fcd868"
+  },
+  "receipt_hash": "sha256:c677e819cbb35923f251831c4e0a15cda104c7f49ef34d8fd13ff27032913af8",
+  "schema_version": "g1-mgt-production-worker-receipt.v2",
+  "source": {
+    "binary_sha256": "sha256:217488ab7e87ff28eb91d503662f8048761ba0df5e4d4a04aedf7beeb1053aa4",
+    "checkpoint_bundle_hash": "sha256:671d0a8eedc1e4ab5ee3bf14d6b1220caea6f487cebab880cf0c278e4f941b8a",
+    "device_architecture": "gfx1030",
+    "device_receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
+    "hardware_envelope_hash": "sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a",
+    "repository_commit_sha": "24a4d4ab85af5babc42415b518a2a80de8a291c5",
+    "result_receipt_hash": "sha256:496ce3621413ade7f3c335c0e51120ded180bc7a3cc60e23a71a2b0941933405",
+    "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
+  },
+  "status": "partial",
+  "terminal_parity": {
+    "cpu_result_hash": "sha256:34596bf01834e0464416278d2ba9d7204e6a39a23f138d3344c68be0d3c8aa3d",
+    "diagnostic_hash": "sha256:b7f7973a1094cf0a6cd8f5bd9618a4b43a3af9d22992d6b84a77a283d72e7191",
+    "diagnostic_parity_digest": "sha256:acb6ae6f0878a69734f4e899fc0d6fb64487d83a148dbe88fde00f8686d9f002",
+    "displacement_data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
+    "full_result_hashes_equal": false,
+    "hip_result_hash": "sha256:f753bfb7be499907d9c1e5cceaf90dfde403e1991ffa37b813ab2603f1061e0c",
+    "parity_digest": "sha256:5e06512ef55641e51d91e19707e08ddf8f7c0c97bab8a3a94a8fe7f38c0e40f8",
+    "profile": "g1-terminal-resultir-authority-parity.v2",
+    "shared_bindings": {
+      "equation_scaling_hash": "sha256:d222e083ab131565daf15f739a02eec7381ce39992838d91e48ed9b01a4b188c",
+      "execution_plan_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
+      "integration_point_order_hash": "sha256:5c2f40a4e944f2b2d3fd5dfd8b5db14e9dd5b7b01cceb568f3213d73bbc10a0c",
+      "material_state_bundle_hash": "sha256:b828455d6294e8034d18cb76f0721d8a90f69aecfac832b2de2558258e16b6c7",
+      "model_ir_content_hash": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "nonlinear_terminal_hash": "sha256:820ade46d0af8701dac6894c626b34a2a561088d4b005bbe37642bc0404841ab",
+      "operator_hash": "sha256:56fdb87292249c79557198159590710394f0b0482acf5552d55d7888cd730177",
+      "path_history_hash": "sha256:c47518bd045dc7f4885f7dfee5efd6abd68ad2dea88c8004ca564be673cf9c30",
+      "reduced_csr_identity_hash": "sha256:bee343d7395ba5dd44dd99298db6678f91a62651966eafbd3caa3c03d50b9a76",
+      "state_epoch": 1,
+      "state_hash": "sha256:c9a29f329a6a79356a37fcdb7fd23595adedeb75f7211494f40089d1c62ca54f"
+    }
+  }
+}
