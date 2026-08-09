@@ -67,28 +67,62 @@ def _is_ancestor(ancestor: str, descendant: str, *, cwd: Path = ROOT) -> bool:
             f"returncode={probe.returncode} stderr={probe.stderr.strip()!r}"
         )
 
-    # Keep the fallback independent from subprocess.run and merge-base.  A
-    # long CI process can otherwise turn a transient/probe-state false
-    # negative into a provenance failure.  Exact rev-list membership still
-    # rejects siblings, shared-base commits, and unrelated histories.
-    with subprocess.Popen(
-        ["git", "rev-list", descendant],
-        cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    ) as traversal:
-        stdout, stderr = traversal.communicate()
-    if traversal.returncode != 0:
-        raise AssertionError(
-            "git rev-list ancestry fallback failed: "
-            f"returncode={traversal.returncode} stderr={stderr.strip()!r}"
-        )
-    return ancestor in stdout.splitlines()
+    # Walk raw commit objects rather than another revision walker. Both
+    # merge-base and rev-list honor a transient .git/shallow boundary even
+    # when every parent object is still available. Raw parent links retain
+    # the cryptographic ancestry while missing or malformed objects fail
+    # closed.
+    pending = [descendant]
+    visited: set[str] = set()
+    while pending:
+        commit = pending.pop()
+        if commit in visited:
+            continue
+        visited.add(commit)
+
+        with subprocess.Popen(
+            ["git", "cat-file", "-p", commit],
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        ) as reader:
+            stdout, stderr = reader.communicate()
+        if reader.returncode != 0:
+            raise AssertionError(
+                "git cat-file ancestry fallback failed: "
+                f"commit={commit} returncode={reader.returncode} "
+                f"stderr={stderr.strip()!r}"
+            )
+
+        header, separator, _ = stdout.partition("\n\n")
+        if not separator:
+            raise AssertionError(
+                f"git commit object has no header terminator: commit={commit}"
+            )
+        header_lines = header.splitlines()
+        if not header_lines or not re.fullmatch(
+            r"tree [0-9a-f]{40}", header_lines[0]
+        ):
+            raise AssertionError(
+                f"git commit object has invalid tree header: commit={commit}"
+            )
+        if commit == ancestor:
+            return True
+        for line in header_lines[1:]:
+            if not line.startswith("parent "):
+                continue
+            parent = line.removeprefix("parent ")
+            if not re.fullmatch(r"[0-9a-f]{40}", parent):
+                raise AssertionError(
+                    f"git commit object has invalid parent: commit={commit}"
+                )
+            pending.append(parent)
+    return False
 
 
-def test_git_ancestry_false_negative_uses_exact_parent_walk(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary(
+    tmp_path: Path,
 ) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
@@ -106,6 +140,11 @@ def test_git_ancestry_false_negative_uses_exact_parent_walk(
     git("commit", "-q", "-m", "root")
     root = git("rev-parse", "HEAD")
 
+    (repo / "intermediate.txt").write_text("intermediate\n", encoding="utf-8")
+    git("add", "intermediate.txt")
+    git("commit", "-q", "-m", "intermediate")
+    intermediate = git("rev-parse", "HEAD")
+
     (repo / "descendant.txt").write_text("descendant\n", encoding="utf-8")
     git("add", "descendant.txt")
     git("commit", "-q", "-m", "descendant")
@@ -117,14 +156,21 @@ def test_git_ancestry_false_negative_uses_exact_parent_walk(
     git("commit", "-q", "-m", "sibling")
     sibling = git("rev-parse", "HEAD")
 
-    original_run = subprocess.run
+    git_dir = Path(git("rev-parse", "--git-dir"))
+    if not git_dir.is_absolute():
+        git_dir = repo / git_dir
+    (git_dir / "shallow").write_text(f"{intermediate}\n", encoding="ascii")
 
-    def false_negative(command, **kwargs):
-        if command[:3] == ["git", "merge-base", "--is-ancestor"]:
-            return subprocess.CompletedProcess(command, 1, "", "")
-        return original_run(command, **kwargs)
-
-    monkeypatch.setattr(subprocess, "run", false_negative)
+    assert (
+        subprocess.run(
+            ["git", "merge-base", "--is-ancestor", root, descendant],
+            cwd=repo,
+            check=False,
+        ).returncode
+        == 1
+    )
+    assert root not in git("rev-list", descendant).splitlines()
+    assert f"parent {root}" in git("cat-file", "-p", intermediate).splitlines()
 
     assert _is_ancestor(root, descendant, cwd=repo)
     assert not _is_ancestor(sibling, descendant, cwd=repo)
