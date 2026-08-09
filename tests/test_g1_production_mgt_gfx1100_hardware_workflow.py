@@ -4,19 +4,118 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
-
-import yaml
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/g1-production-mgt-gfx1100-hardware.yml"
 LFS_POINTER_VERSION = "version https://git-lfs.github.com/spec/v1"
+SOURCE_BOUND_RUFF_EXCEPTIONS = {
+    "scripts/run_g1_hip_fgmres_performance_sweep.py": ["E701", "E702", "F401"],
+    "scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py": ["F401"],
+    "scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py": [
+        "E701",
+        "E702",
+    ],
+    "scripts/run_g1_mgt_device_fgmres.py": ["E701", "E702"],
+    "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py": ["E701", "E702"],
+    "scripts/run_g1_stateful_steel_hip_lifecycle.py": ["E701", "E702", "F841"],
+    "tests/test_g1_hip_fgmres_performance_sweep.py": ["E702"],
+    "tests/test_run_g1_mgt_accepted_state_preconditioned_jvp_parity.py": [
+        "E702"
+    ],
+    "tests/test_run_g1_mgt_device_fgmres.py": ["E402"],
+    "tests/test_run_g1_mgt_single_lifecycle_preconditioned_jvp.py": ["E702"],
+    "tests/test_run_g1_stateful_steel_hip_lifecycle.py": ["E402"],
+}
+E701_E702_SOURCE_BOUND_PATHS = {
+    "scripts/run_g1_hip_fgmres_performance_sweep.py",
+    "scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py",
+    "scripts/run_g1_mgt_device_fgmres.py",
+    "scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py",
+    "scripts/run_g1_stateful_steel_hip_lifecycle.py",
+}
+
+
+def _scalar(value: str) -> Any:
+    value = value.strip()
+    if value == "{}":
+        return {}
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    if value.startswith("[") and value.endswith("]"):
+        return [_scalar(item) for item in value[1:-1].split(",")]
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    return value
+
+
+def _direct_mapping(lines: list[str], *, indent: int) -> dict[str, Any]:
+    prefix = " " * indent
+    mapping: dict[str, Any] = {}
+    for line in lines:
+        if not line.startswith(prefix) or line.startswith(prefix + " "):
+            continue
+        key, separator, value = line[len(prefix) :].partition(":")
+        if separator and value.strip():
+            mapping[key] = _scalar(value)
+        elif separator:
+            mapping[key] = {}
+    return mapping
+
+
+def _block(lines: list[str], header: str, *, indent: int) -> list[str]:
+    header_line = " " * indent + header + ":"
+    start = lines.index(header_line) + 1
+    result: list[str] = []
+    for line in lines[start:]:
+        if line and len(line) - len(line.lstrip()) <= indent:
+            break
+        result.append(line)
+    return result
+
+
+def _checkout_steps(job_lines: list[str]) -> list[dict[str, Any]]:
+    steps: list[dict[str, Any]] = []
+    for index, line in enumerate(job_lines):
+        if not line.startswith("        uses: actions/checkout@"):
+            continue
+        with_lines: list[str] = []
+        for candidate in job_lines[index + 1 :]:
+            if candidate.startswith("      - name:"):
+                break
+            if candidate.startswith("          "):
+                with_lines.append(candidate)
+        steps.append(
+            {
+                "uses": line.split(":", 1)[1].strip(),
+                "with": _direct_mapping(with_lines, indent=10),
+            }
+        )
+    return steps
+
+
+def _load_workflow_contract() -> dict[str, Any]:
+    lines = WORKFLOW.read_text(encoding="utf-8").splitlines()
+    trigger = _direct_mapping(_block(lines, "on", indent=0), indent=2)
+    env = _direct_mapping(_block(lines, "env", indent=0), indent=2)
+    jobs = _block(lines, "jobs", indent=0)
+    job_lines = _block(jobs, "production-gfx1100", indent=2)
+    job = _direct_mapping(job_lines, indent=4)
+    job["steps"] = _checkout_steps(job_lines)
+    return {
+        "on": trigger,
+        "env": env,
+        "jobs": {"production-gfx1100": job},
+    }
 
 
 def test_gfx1100_workflow_is_manual_and_dedicated() -> None:
     raw = WORKFLOW.read_text(encoding="utf-8")
-    payload = yaml.safe_load(raw)
-    trigger = payload.get("on", payload.get(True))
+    payload = _load_workflow_contract()
+    trigger = payload["on"]
     assert set(trigger) == {"workflow_dispatch"}
     assert trigger["workflow_dispatch"] == {}
     job = payload["jobs"]["production-gfx1100"]
@@ -91,7 +190,7 @@ def test_gfx1100_workflow_fails_closed_and_exports_evidence() -> None:
 
 
 def test_gfx1100_trusted_hash_constants_match_control_evidence() -> None:
-    payload = yaml.safe_load(WORKFLOW.read_text(encoding="utf-8"))
+    payload = _load_workflow_contract()
     env = payload["env"]
     envelope_path = (
         ROOT / "implementation/phase1/release_evidence/productization/"
@@ -145,3 +244,27 @@ def test_gfx1100_trusted_hash_constants_match_control_evidence() -> None:
         .strip()
         .endswith(": lfs")
     )
+
+
+def test_source_bound_g1_ruff_exceptions_are_exact_paths() -> None:
+    pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
+    section = pyproject.split("[tool.ruff.lint.per-file-ignores]", 1)[1].split(
+        "[tool.pytest.ini_options]", 1
+    )[0]
+    configured = {}
+    configured_paths = []
+    for line in section.splitlines():
+        if not line.startswith('"'):
+            continue
+        path = line.split('"', 2)[1]
+        configured_paths.append(path)
+        if path in SOURCE_BOUND_RUFF_EXCEPTIONS:
+            configured[path] = json.loads(line.split("=", 1)[1])
+    assert configured == SOURCE_BOUND_RUFF_EXCEPTIONS
+    assert {
+        path for path, codes in configured.items() if {"E701", "E702"} <= set(codes)
+    } == E701_E702_SOURCE_BOUND_PATHS
+    assert not any(
+        wildcard in path for path in configured_paths for wildcard in ("*", "?", "[")
+    )
+    assert "byte-bound to hardware/source evidence" in section

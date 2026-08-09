@@ -254,16 +254,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert g1_requirements["strict_full_load_hip_newton_checkpoint_available"] == {
         "id": "strict_full_load_hip_newton_checkpoint_available",
         "observed": {
-            "full_load_candidate_count": 0,
-            "highest_observed_load_scale": 0.656,
-            "loadable_count": 42,
-            "candidate_count": 50,
+            "full_load_candidate_count": 1,
+            "highest_observed_load_scale": 1.0,
+            "loadable_count": 1,
+            "candidate_count": 1,
         },
         "target": {
             "full_load_candidate_count": ">=1",
             "required_load_scale": 1.0,
         },
-        "passed": False,
+        "passed": True,
         "blocker": "full_load_gate_not_closed",
     }
     assert g1_requirements["full_line_mesh_nonlinear_equilibrium_closed"][
@@ -311,8 +311,11 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "child_relative_increment_gate_passed": True,
     }
     assert full_load_terminal["observed"]["load_scale_reached"] == 0.5
-    assert full_load_terminal["observed"]["full_load_candidate_count"] == 0
-    assert "full_load_checkpoint_candidate_missing" in full_load_terminal[
+    assert full_load_terminal["observed"]["full_load_candidate_count"] == 1
+    assert "load_scale_below_full_load" in full_load_terminal[
+        "non_closing_reasons"
+    ]
+    assert "child_full_load_closure_not_proven" in full_load_terminal[
         "non_closing_reasons"
     ]
     mesh_terminal = g1_blocker_terminal_requirements[
@@ -334,13 +337,10 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "production_rocm_hip_residency_not_closed"
     ]
     assert hip_terminal["observed"]["production_hip_residual_jacobian_path"] is False
-    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is False
-    assert hip_terminal["observed"]["runtime_blockers"] == [
-        "dev_kfd_missing",
-        "dev_dri_missing",
-    ]
+    assert hip_terminal["observed"]["raw_production_hip_residual_jacobian_path"] is True
+    assert hip_terminal["observed"]["runtime_blockers"] == []
     assert (
-        "hip_residual_jacobian_consistency_preflight_only"
+        "consistent_residual_jacobian::consistent_residual_jacobian_newton_not_proven"
         in hip_terminal["observed"]["receipt_blockers"]
     )
     assert (
@@ -353,17 +353,17 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
             "production_rocm_hip_residual_jvp_worker_blockers"
         ]
     )
-    assert (
-        "production_hip_residual_jacobian_path_not_proven"
-        in hip_terminal["observed"][
-            "production_rocm_hip_residual_jvp_worker_blockers"
-        ]
-    )
+    assert hip_terminal["observed"][
+        "production_rocm_hip_residual_jvp_worker_blockers"
+    ] == ["consistent_residual_jacobian_newton_gate_not_passed"]
+    assert "production_hip_path_not_proven" in hip_terminal[
+        "non_closing_reasons"
+    ]
     assert "consistent_residual_jacobian_newton_not_proven" in hip_terminal[
         "non_closing_reasons"
     ]
     assert "hip_receipt_blockers_present" in hip_terminal["non_closing_reasons"]
-    assert "hip_runtime_blockers_present" in hip_terminal["non_closing_reasons"]
+    assert "hip_runtime_blockers_present" not in hip_terminal["non_closing_reasons"]
     assert "production_rocm_hip_residual_jvp_worker_not_ready" in hip_terminal[
         "non_closing_reasons"
     ]
@@ -389,11 +389,11 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert g1_gap["production_rocm_hip_residency_closed"] is False
     assert g1_gap["full_load_hip_newton_lane_status"] == "blocked"
     strict_checkpoint_gate = g1_gap["full_load_hip_newton_checkpoint_resolution_gate"]
-    assert strict_checkpoint_gate["passed"] is False
-    assert strict_checkpoint_gate["full_load_candidate_count"] == 0
-    assert strict_checkpoint_gate["highest_observed_load_scale"] == 0.656
-    assert strict_checkpoint_gate["highest_observed_gap_to_required_load_scale"] == 0.344
-    assert "checkpoint_resolution_no_full_load_candidate" in strict_checkpoint_gate["blockers"]
+    assert strict_checkpoint_gate["passed"] is True
+    assert strict_checkpoint_gate["full_load_candidate_count"] == 1
+    assert strict_checkpoint_gate["highest_observed_load_scale"] == 1.0
+    assert strict_checkpoint_gate["highest_observed_gap_to_required_load_scale"] == 0.0
+    assert strict_checkpoint_gate["blockers"] == []
     assert "sub-load receipts remain non-closing evidence" in g1_gap["claim_boundary"]
     terminal_gate_scope = rows["G1"]["evidence"]["direct_residual_terminal_gate_scope"]
     assert terminal_gate_scope["receipt"] == (

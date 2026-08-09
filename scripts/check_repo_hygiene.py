@@ -30,10 +30,12 @@ FORBIDDEN_PATH_PARTS = {
     "cache",
     "__pycache__",
 }
-# Narrow tracked exceptions must be deterministic source/evidence inputs, never
-# runtime bundles. The OpenSees breadth report is a checked-in benchmark manifest
-# consumed by acquisition, license, scorecard, and clean-checkout contracts.
+# Narrow tracked exceptions must be deterministic source/evidence inputs. The
+# exact G1 production wheel is an LFS-bound accepted binary input. The OpenSees
+# breadth report is a checked-in benchmark manifest consumed by acquisition,
+# license, scorecard, and clean-checkout contracts.
 ALLOWED_PATHS = {
+    "dist/structural_analysis-0.3.0-py3-none-any.whl",
     "implementation/phase1/release_artifacts_manifest.json",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
 }

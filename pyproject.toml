@@ -59,6 +59,19 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# These exact G1 runner/test sources are byte-bound to hardware/source evidence;
+# preserving their accepted bytes is safer than invalidating device receipts.
+"scripts/run_g1_hip_fgmres_performance_sweep.py" = ["E701", "E702", "F401"]
+"scripts/run_g1_mgt_accepted_state_hip_sparse_lu_parity.py" = ["F401"]
+"scripts/run_g1_mgt_accepted_state_preconditioned_jvp_parity.py" = ["E701", "E702"]
+"scripts/run_g1_mgt_device_fgmres.py" = ["E701", "E702"]
+"scripts/run_g1_mgt_single_lifecycle_preconditioned_jvp.py" = ["E701", "E702"]
+"scripts/run_g1_stateful_steel_hip_lifecycle.py" = ["E701", "E702", "F841"]
+"tests/test_g1_hip_fgmres_performance_sweep.py" = ["E702"]
+"tests/test_run_g1_mgt_accepted_state_preconditioned_jvp_parity.py" = ["E702"]
+"tests/test_run_g1_mgt_device_fgmres.py" = ["E402"]
+"tests/test_run_g1_mgt_single_lifecycle_preconditioned_jvp.py" = ["E702"]
+"tests/test_run_g1_stateful_steel_hip_lifecycle.py" = ["E402"]
 # This hardware receipt source is byte-bound to the signed gfx1030 run.
 "tests/test_engine_v2_hip_fgmres_device_receipt.py" = ["F401"]
 

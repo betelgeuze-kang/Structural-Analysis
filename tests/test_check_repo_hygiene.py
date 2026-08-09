@@ -122,6 +122,18 @@ def test_canonical_opensees_breadth_manifest_is_not_blocked() -> None:
     ) == []
 
 
+def test_exact_g1_production_wheel_is_the_only_allowed_dist_artifact() -> None:
+    assert check_repo_hygiene.check_tracked_files(
+        ["dist/structural_analysis-0.3.0-py3-none-any.whl"]
+    ) == []
+    assert check_repo_hygiene.check_tracked_files(
+        ["dist/structural_analysis-0.3.1-py3-none-any.whl"]
+    ) == [
+        "generated path is tracked: "
+        "dist/structural_analysis-0.3.1-py3-none-any.whl"
+    ]
+
+
 def test_release_directory_remains_blocked() -> None:
     errors = check_repo_hygiene.check_tracked_files(["implementation/phase1/release/bundle.zip"])
 

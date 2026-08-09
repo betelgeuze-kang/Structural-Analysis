@@ -78,7 +78,8 @@ SOURCE_PATHS = (
 
 def _read(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict): raise ValueError("json_object_required")
+    if not isinstance(value, dict):
+        raise ValueError("json_object_required")
     return value
 
 
@@ -221,7 +222,8 @@ class _DiagnosticAdapter:
 
 def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, bytes]:
     root = root.resolve()
-    if not _clean(root): raise RuntimeError("result_ir_requires_clean_sources")
+    if not _clean(root):
+        raise RuntimeError("result_ir_requires_clean_sources")
     source = _read(root / FGMRES_RECEIPT)
     material_family_audit = validate_material_family_audit(
         _read(root / MATERIAL_FAMILY_AUDIT), root=root, current=True
@@ -242,19 +244,27 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
     count = int(source["material_lifecycle"]["integration_point_count"])
     material_shape = (count, len(MATERIAL_STATE_FIELD_NAMES))
     artifacts = source["material_lifecycle"]["artifacts"]
+
     def material(name: str) -> np.ndarray:
-        item = artifacts[name]; path = root / item["path"]
-        if file_sha256(path) != item["file_sha256"]: raise ValueError("material_hash_mismatch")
+        item = artifacts[name]
+        path = root / item["path"]
+        if file_sha256(path) != item["file_sha256"]:
+            raise ValueError("material_hash_mismatch")
         value = np.fromfile(path, dtype="<f8").reshape(material_shape)
-        if array_data_hash(value) != item["data_hash"]: raise ValueError("material_data_hash_mismatch")
+        if array_data_hash(value) != item["data_hash"]:
+            raise ValueError("material_data_hash_mismatch")
         return np.ascontiguousarray(value, dtype="<f8")
-    initial_material = material("initial"); committed_material = material("committed")
+
+    initial_material = material("initial")
+    committed_material = material("committed")
     accepted_item = source["comparison"]["accepted_state_artifact"]
     accepted_state = np.fromfile(root / accepted_item["path"], dtype="<f8")
-    if array_data_hash(accepted_state) != accepted_item["data_hash"]: raise ValueError("accepted_state_mismatch")
+    if array_data_hash(accepted_state) != accepted_item["data_hash"]:
+        raise ValueError("accepted_state_mismatch")
     solution_item = source["comparison"]["solution_artifact"]
     correction = np.fromfile(root / solution_item["path"], dtype="<f8")
-    if array_data_hash(correction) != solution_item["data_hash"]: raise ValueError("solution_mismatch")
+    if array_data_hash(correction) != solution_item["data_hash"]:
+        raise ValueError("solution_mismatch")
     bundle = _bundle(receipt=source, context=context, initial=initial_material,
                      committed=committed_material, accepted_state=accepted_state,
                      family_fixture=family_fixture)
@@ -378,7 +388,8 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
                   == results["cpu_optimized"]["displacement_artifact"]["data_hash"]
                   and results["hip"]["load_factor"] == results["cpu_optimized"]["load_factor"]
                   and results["hip"]["dof_count"] == results["cpu_optimized"]["dof_count"])
-    if not parity: raise RuntimeError("terminal_result_ir_parity_failed")
+    if not parity:
+        raise RuntimeError("terminal_result_ir_parity_failed")
     hip_raw = json.dumps(results["hip"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     cpu_raw = json.dumps(results["cpu_optimized"], indent=2, sort_keys=True, allow_nan=False).encode() + b"\n"
     displacement_raw = displacement.tobytes()
@@ -437,9 +448,11 @@ def run(*, root: Path = ROOT) -> tuple[dict[str, Any], bytes, bytes, bytes, byte
 
 def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = False,
              artifacts: bool = False) -> dict[str, Any]:
-    schema = _read(root / SCHEMA); Draft202012Validator.check_schema(schema)
+    schema = _read(root / SCHEMA)
+    Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
-    if payload["receipt_hash"] != _hash(payload): raise ValueError("result_receipt_hash_mismatch")
+    if payload["receipt_hash"] != _hash(payload):
+        raise ValueError("result_receipt_hash_mismatch")
     if current and payload["source"]["input_checksums"] != input_checksums(SOURCE_PATHS, repo_root=root):
         raise ValueError("result_sources_stale")
     if artifacts:
@@ -455,7 +468,8 @@ def validate(payload: dict[str, Any], *, root: Path = ROOT, current: bool = Fals
 
 def write(*, root: Path = ROOT) -> dict[str, Any]:
     payload, hip, cpu, displacement, diagnostic = run(root=root)
-    (root / DEFAULT_HIP_RESULT).write_bytes(hip); (root / DEFAULT_CPU_RESULT).write_bytes(cpu)
+    (root / DEFAULT_HIP_RESULT).write_bytes(hip)
+    (root / DEFAULT_CPU_RESULT).write_bytes(cpu)
     (root / DEFAULT_DISPLACEMENT).write_bytes(displacement)
     (root / DEFAULT_DIAGNOSTIC).write_bytes(diagnostic)
     (root / DEFAULT_OUT).write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
@@ -463,18 +477,29 @@ def write(*, root: Path = ROOT) -> dict[str, Any]:
 
 
 def check(*, root: Path = ROOT) -> tuple[bool, str]:
-    try: validate(_read(root / DEFAULT_OUT), root=root, current=True, artifacts=True)
-    except Exception as exc: return False, f"g1_mgt_result_ir_invalid:{exc}"
+    try:
+        validate(_read(root / DEFAULT_OUT), root=root, current=True, artifacts=True)
+    except Exception as exc:
+        return False, f"g1_mgt_result_ir_invalid:{exc}"
     return True, "g1_mgt_result_ir_consistent"
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__); parser.add_argument("--check", action="store_true")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
     if args.check:
-        passed, reason = check(); print(reason); return 0 if passed else 1
-    payload = write(); print(f"partial | resultir_parity={payload['parity']['terminal_resultir_parity']} | diagnosticir=true")
+        passed, reason = check()
+        print(reason)
+        return 0 if passed else 1
+    payload = write()
+    print(
+        "partial | "
+        f"resultir_parity={payload['parity']['terminal_resultir_parity']} | "
+        "diagnosticir=true"
+    )
     return 0
 
 
-if __name__ == "__main__": raise SystemExit(main())
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -40,24 +40,24 @@
       "attached": true,
       "checkpoint_resume_parity": true,
       "evidence_origin": "direct_device_runner",
-      "exact_source_commit": false,
-      "execution_location": "local-rx6900xt",
+      "exact_source_commit": true,
+      "execution_location": "local-dedicated-amd-runner",
       "expected_architecture": "gfx1030",
       "fixture_identity_hash": "sha256:ca75a9f23b232a47dc53d6187251c487941b614bc89ab380479473e2fffc86ed",
       "gcn_arch_name": "gfx1030",
       "independent_from_local_gfx1030": false,
       "numerical_parity": true,
-      "organization_id": "local-development",
+      "organization_id": "local-dev",
       "path": "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json",
       "public_key_sha256": null,
-      "receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88",
-      "runner_id": "codex-desktop-gfx1030",
+      "receipt_hash": "sha256:0c1f507f635129c5431103133259a149e6d69644854bef8e0b9e02cb6b6fa72f",
+      "runner_id": "local-gfx1030-rx6900xt",
       "signature_verified": false,
       "signer_id": null,
-      "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
-      "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
+      "source_commit_sha": "ddd78e15394926d82d16806f236e4354b985e17f",
+      "source_set_hash": "sha256:f44f4e01ecd29a27175c1fcdbaf486894b2d302b81960e47a392d1e6dcd78065",
       "wheel_bound_at_execution": true,
-      "wheel_sha256": "sha256:85f64c517f09c95195b6afa0bac6a73f0b231d6cddfdab46ef577ee8a074e98e"
+      "wheel_sha256": "sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a"
     },
     "gfx1100": {
       "actual_hardware": false,
@@ -84,7 +84,7 @@
       "wheel_sha256": null
     }
   },
-  "generated_at": "2026-07-19T07:38:24.225359+00:00",
+  "generated_at": "2026-08-09T03:49:41.904270+00:00",
   "identity_gates": {
     "actual_hardware_pair": false,
     "architecture_pair_exact": false,
@@ -106,34 +106,34 @@
   },
   "local_legacy_gfx1030": {
     "actual_hardware": true,
-    "binary_sha256": "sha256:de3133fd1877977a65e362fa577835893857ed755c89ac9a1bbab4eba1aa2441",
+    "binary_sha256": "sha256:cb7b2c43ccaf3dcb0802a21c1326ede4c23a4daaf3a8b10bc2603a206a3a022a",
     "contract_pass": true,
     "cross_device_eligible": false,
     "fixture_hash": "sha256:dd8f47dc9599bf07239051b2c33cea8968a37e5f3fbc80bd9d66a9d0b4bac497",
     "gcn_arch_name": "gfx1030",
     "path": "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json",
     "preconditioner_contract_hash": "sha256:4307b187a323895a1a772c217e7f6889f497bb06060415b89e6b1d5f35ceb84e",
-    "receipt_hash": "sha256:fa874249481a4fb469f932f039db8ecc35c3955d7984f1b53d1e47402a500768",
+    "receipt_hash": "sha256:39194d3451e5dda53d133e0266d55e1707f4db06eae9038315782e2589124b37",
     "signed_receipt": false,
-    "source_commit_sha": "b243f083e258327a5556483f6cb61d3124b15acc",
+    "source_commit_sha": "cbd6ab29785a2256d4420e7e11fc9ab9bcff05f2",
     "wheel_identity_bound_at_execution": false,
-    "worktree_clean": false
+    "worktree_clean": true
   },
   "schema_version": "engine-v2-hip-fgmres-stage4-status.v1",
   "source": {
     "input_checksums": {
-      "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json": "sha256:9fe3adb29995a274f8818ab963cc39a1ca19ecaec219fe8b4213ecacb99ac4e3",
-      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:1b5826eb44b6a7850ba679ae7ffe879306078680ab2b8bbc8dcc1b58a2639f0a",
+      "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json": "sha256:2650353e80c9f32e882e5abf263ffec6ef2401770b174a6e0ac8db7c29a64e68",
+      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:d43006a1038ad106304507dc76f592a485059932d881d4f8bfea298668e90c22",
       "scripts/build_engine_v2_hip_fgmres_stage4_status.py": "sha256:442c026f147049107b3f2cb8cd79856c4a887ed5628451f400561f3556d74247",
-      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
+      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:e4a2980b28192c29eb3918d118fdb99fecf53a519008e93b6017edbbac275272",
       "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json": "sha256:768e8aec34ba7b791c22b925c4405d1f40f1d1fe144a92b290aa195b861aa0f9",
       "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json": "sha256:7911e585ece66d6ea66c503ce21439d60d4bfaf29c403312497b4579c4e7e8c3",
-      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
+      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:c0a5ea357af768751cadb057983e0bb69a69ecb490212de76a5e1cf215019b6a",
       "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:8849cb458a41b9e50d1b4a3590149cbd23e507892bbc114c3b57dad6ab415977"
     },
-    "repository_commit_sha": "1ae01fa3d9d11dd3f1ba41c975d59d18ca7598d8",
+    "repository_commit_sha": "3c90e306e377e73757af03657d7039ffdffef3fd",
     "worktree_clean": false
   },
   "status": "partial",
-  "status_hash": "sha256:596e28811ae5e84324477dac10f26413961049c1952d040674c14b6b0ac15e36"
+  "status_hash": "sha256:c86dec959b7351cd65e260e6945c328b5c61b43b9e72f88c13a447c675cae2e7"
 }

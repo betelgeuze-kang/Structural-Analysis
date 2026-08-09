@@ -5,7 +5,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-import build_g1_mgt_nonlinear_result_ir as gate
+import build_g1_mgt_nonlinear_result_ir as gate  # noqa: E402
 
 
 def test_committed_result_ir_receipt_is_current() -> None:
