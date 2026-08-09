@@ -4,6 +4,15 @@ import {
   type JobArtifactReference,
   type WorkbenchJobView,
 } from './jobSchema'
+import {
+  FRAME3D_LOAD_CONTROL_ADAPTER_ID,
+  FRAME3D_LOAD_CONTROL_RESULT_CONTRACT,
+  FRAME3D_LOAD_CONTROL_VALIDATOR_ID,
+  validateFrame3DLoadControlEvidenceReport,
+  validatePublishedFrame3DLoadControlResult,
+  type Frame3DValidationContext,
+  type PublishedFrame3DLoadControlResult,
+} from './frame3dLoadControlResult'
 
 export type JobLoadStatus = 'unconfigured' | 'loading' | 'ready' | 'missing' | 'invalid' | 'error'
 
@@ -21,6 +30,7 @@ export type Frame2DDurableProfile =
 
 export type PublishedDurableResult =
   | PublishedFrame2DDurableResult
+  | PublishedFrame3DLoadControlResult
 
 export interface PublishedFrame2DDurableResult {
   kind: 'frame2d'
@@ -77,6 +87,12 @@ const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+const JOB_COMPLETION_EVIDENCE_KEYS = new Set([
+  'schema_version', 'job_id', 'request_hash', 'checkpoint_hash',
+  'result_artifact_hash', 'validator_id', 'contract_pass',
+  'solver_truth_owner', 'validation_report', 'claim_boundary',
+])
+const JOB_SERVICE_CLAIM_BOUNDARY = 'The job service owns durable orchestration state and content integrity only. It does not define solver truth, engineering acceptance, design-code compliance, distributed consensus, or release readiness.'
 const FRAME2D_ADAPTER_ID = 'frame2d-unified-nonlinear-frame.v1'
 const FRAME2D_RESULT_CONTRACT = 'unified-nonlinear-frame-result.v1'
 const FRAME2D_VALIDATOR_ID = 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
@@ -93,7 +109,11 @@ interface PublishedDurableResultAdapter {
     value: Record<string, unknown>,
     errors: string[],
   ): Promise<{ value: PublishedDurableResult | null; integrityUnavailable: boolean }>
-  validateEvidenceReport(report: unknown, result: unknown): boolean
+  validateEvidenceReport(
+    report: unknown,
+    result: unknown,
+    context: Frame3DValidationContext,
+  ): boolean
 }
 
 const FRAME2D_RESULT_ADAPTER: PublishedDurableResultAdapter = Object.freeze({
@@ -104,8 +124,17 @@ const FRAME2D_RESULT_ADAPTER: PublishedDurableResultAdapter = Object.freeze({
   validateEvidenceReport: validFrame2DCoreValidationReport,
 })
 
+const FRAME3D_LOAD_CONTROL_RESULT_ADAPTER: PublishedDurableResultAdapter = Object.freeze({
+  adapterId: FRAME3D_LOAD_CONTROL_ADAPTER_ID,
+  resultContract: FRAME3D_LOAD_CONTROL_RESULT_CONTRACT,
+  validatorId: FRAME3D_LOAD_CONTROL_VALIDATOR_ID,
+  validateResult: validatePublishedFrame3DLoadControlResult,
+  validateEvidenceReport: validateFrame3DLoadControlEvidenceReport,
+})
+
 const PUBLISHED_RESULT_ADAPTERS: ReadonlyMap<string, PublishedDurableResultAdapter> = new Map([
   [FRAME2D_RESULT_ADAPTER.resultContract, FRAME2D_RESULT_ADAPTER],
+  [FRAME3D_LOAD_CONTROL_RESULT_ADAPTER.resultContract, FRAME3D_LOAD_CONTROL_RESULT_ADAPTER],
 ])
 
 export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
@@ -143,6 +172,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     const resultAdapter = resultValidation.adapter
     if (
       !record(evidencePayload)
+      || !exactKeys(evidencePayload, JOB_COMPLETION_EVIDENCE_KEYS)
       || evidencePayload.schema_version !== 'structural-analysis-job-completion-evidence.v1'
       || evidencePayload.job_id !== job.job_id
       || evidencePayload.request_hash !== job.request.content_hash
@@ -150,11 +180,27 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       || evidencePayload.result_artifact_hash !== job.result.content_hash
       || evidencePayload.contract_pass !== true
       || evidencePayload.solver_truth_owner !== 'structural_analysis_core'
+      || evidencePayload.claim_boundary !== JOB_SERVICE_CLAIM_BOUNDARY
       || (
         resultAdapter !== null
         && (
           evidencePayload.validator_id !== resultAdapter.validatorId
-          || !resultAdapter.validateEvidenceReport(evidencePayload.validation_report, resultPayload)
+          || !resultAdapter.validateEvidenceReport(
+            evidencePayload.validation_report,
+            resultPayload,
+            {
+              jobRequestArtifactSha256: job.request.content_hash,
+              resumeCheckpointArtifactSha256: job.checkpoint?.content_hash ?? null,
+              resultArtifactSha256: job.result.content_hash,
+              jobCompletedSteps: job.progress.completed_steps,
+              jobTotalSteps: job.progress.total_steps,
+              jobResumeContractHash: job.resume_contract_hash,
+              evidenceCheckpointHash: typeof evidencePayload.checkpoint_hash === 'string'
+                ? evidencePayload.checkpoint_hash
+                : null,
+              evidenceValidatorId: evidencePayload.validator_id,
+            },
+          )
         )
       )
     ) {
@@ -163,14 +209,17 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     if (artifactErrors.length) {
       return { status: 'invalid', job, errors: artifactErrors, artifactStatus: 'invalid' }
     }
+    const artifactStatus = result.integrityUnavailable || evidence.integrityUnavailable || resultValidation.integrityUnavailable
+      ? 'integrity_unavailable'
+      : 'verified'
     return {
       status: 'ready',
       job,
       errors: [],
-      artifactStatus: result.integrityUnavailable || evidence.integrityUnavailable || resultValidation.integrityUnavailable
-        ? 'integrity_unavailable'
-        : 'verified',
-      publishedResult: resultValidation.value ?? undefined,
+      artifactStatus,
+      ...(artifactStatus === 'verified' && resultValidation.value !== null
+        ? { publishedResult: resultValidation.value }
+        : {}),
     }
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
@@ -223,6 +272,11 @@ function parseJson(bytes: Uint8Array, label: string): unknown {
 
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
+}
+
+function exactKeys(value: Record<string, unknown>, expected: ReadonlySet<string>): boolean {
+  const keys = Object.keys(value)
+  return keys.length === expected.size && keys.every((key) => expected.has(key))
 }
 
 async function validatePublishedDurableResult(

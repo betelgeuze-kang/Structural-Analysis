@@ -3,6 +3,7 @@ import type { JobLoadStatus, PublishedDurableResult } from '../model/jobProvider
 import type { WorkbenchJobView } from '../model/jobSchema'
 import { StateChip, type ChipState } from './StateChip'
 import { BooleanEvidenceValueText } from './EngineeringValueText'
+import { Frame3DLoadControlCandidatePanel } from './Frame3DLoadControlCandidatePanel'
 
 interface JobServicePanelProps {
   loadStatus: JobLoadStatus
@@ -42,48 +43,57 @@ export function JobServicePanel({
     )
   }
 
-  const engineeringResultIr = publishedResult?.kind === 'frame2d'
-    ? publishedResult.engineeringResultIr
-    : undefined
+  const verifiedResult = artifactStatus === 'verified' ? publishedResult : undefined
+  const resultIrHash = verifiedResult?.kind === 'frame2d'
+    ? verifiedResult.engineeringResultIr.engineering_result_hash
+    : verifiedResult?.kind === 'frame3d-load-control'
+      ? verifiedResult.numericalResultIr.resultHash
+      : undefined
+  const resultIrAuthority = verifiedResult?.kind === 'frame2d'
+    ? `convergence=${verifiedResult.engineeringResultIr.authority_axes.convergence}; displacement=${verifiedResult.engineeringResultIr.authority_axes.displacement}; reaction=${verifiedResult.engineeringResultIr.authority_axes.reaction}`
+    : verifiedResult?.kind === 'frame3d-load-control'
+      ? `convergence=authoritative; displacement=authoritative; reaction=${verifiedResult.numericalResultIr.reactionAuthority}; member_force=${verifiedResult.numericalResultIr.memberForceAuthority}`
+      : 'UNAVAILABLE'
 
   return (
-    <section className="wb2-panel" aria-labelledby="wb2-job-title" data-job-service="ready" data-job-status={job.status}>
-      <h2 id="wb2-job-title" className="wb2-panel__title">Durable job service</h2>
-      <div className="wb2-run-head">
-        <StateChip state={chip(job)} srLabel="Job state" />
-        <span className="wb2-run-status-label">{job.status}</span>
-      </div>
-      <div className="wb2-run-progress" role="progressbar" aria-valuemin={0} aria-valuemax={job.progress.total_steps} aria-valuenow={job.progress.completed_steps} aria-label="Durably committed analysis steps">
-        <div className="wb2-run-progress__bar" style={{ width: `${Math.round(100 * job.progress.completed_steps / job.progress.total_steps)}%` }} />
-      </div>
-      <p className="wb2-run-progress__caption">
-        {job.progress.completed_steps} of {job.progress.total_steps} step(s) durably committed · attempt {job.attempt}
-      </p>
-      <dl className="wb2-kv">
-        <dt>Job</dt><dd className="wb2-mono">{job.job_id}</dd>
-        <dt>Request</dt><dd className="wb2-mono">{shortHash(job.request.content_hash)}</dd>
-        <dt>Checkpoint</dt><dd className="wb2-mono">{job.checkpoint ? shortHash(job.checkpoint.content_hash) : 'none'}</dd>
-        <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
-        <dt>Evidence</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
-        <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
-        <dt>Solver converged</dt>
-        <dd data-job-convergence="unavailable">
-          <BooleanEvidenceValueText value={{ status: 'unavailable' }} />
-        </dd>
-        <dt>Engineering ResultIR</dt>
-        <dd className="wb2-mono" data-job-result-ir={engineeringResultIr ? 'verified' : 'unavailable'}>
-          {engineeringResultIr ? shortHash(engineeringResultIr.engineering_result_hash) : 'not verified'}
-        </dd>
-        <dt>ResultIR authority</dt>
-        <dd data-job-result-ir-authority>
-          {engineeringResultIr
-            ? `convergence=${engineeringResultIr.authority_axes.convergence}; displacement=${engineeringResultIr.authority_axes.displacement}; reaction=${engineeringResultIr.authority_axes.reaction}`
-            : 'UNAVAILABLE'}
-        </dd>
-      </dl>
-      <p className="wb2-muted" data-job-authority={job.result_authority}>
-        Job state is orchestration evidence only. This panel consumes only the verified embedded engineering ResultIR identity and authority axes; it never falls back to top-level result arrays.
-      </p>
-    </section>
+    <>
+      <section className="wb2-panel" aria-labelledby="wb2-job-title" data-job-service="ready" data-job-status={job.status}>
+        <h2 id="wb2-job-title" className="wb2-panel__title">Durable job service</h2>
+        <div className="wb2-run-head">
+          <StateChip state={chip(job)} srLabel="Job state" />
+          <span className="wb2-run-status-label">{job.status}</span>
+        </div>
+        <div className="wb2-run-progress" role="progressbar" aria-valuemin={0} aria-valuemax={job.progress.total_steps} aria-valuenow={job.progress.completed_steps} aria-label="Durably committed analysis steps">
+          <div className="wb2-run-progress__bar" style={{ width: `${Math.round(100 * job.progress.completed_steps / job.progress.total_steps)}%` }} />
+        </div>
+        <p className="wb2-run-progress__caption">
+          {job.progress.completed_steps} of {job.progress.total_steps} step(s) durably committed · attempt {job.attempt}
+        </p>
+        <dl className="wb2-kv">
+          <dt>Job</dt><dd className="wb2-mono">{job.job_id}</dd>
+          <dt>Request artifact SHA-256</dt><dd className="wb2-mono">{shortHash(job.request.content_hash)}</dd>
+          <dt>Resume checkpoint artifact SHA-256</dt><dd className="wb2-mono">{job.checkpoint ? shortHash(job.checkpoint.content_hash) : 'none'}</dd>
+          <dt>Result artifact SHA-256</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
+          <dt>Evidence artifact SHA-256</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
+          <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
+          <dt>Solver converged</dt>
+          <dd data-job-convergence="unavailable">
+            <BooleanEvidenceValueText value={{ status: 'unavailable' }} />
+          </dd>
+          <dt>Verified ResultIR</dt>
+          <dd className="wb2-mono" data-job-result-ir={resultIrHash ? 'verified' : 'unavailable'}>
+            {resultIrHash ? shortHash(resultIrHash) : 'not verified'}
+          </dd>
+          <dt>ResultIR authority</dt>
+          <dd data-job-result-ir-authority>{resultIrAuthority}</dd>
+        </dl>
+        <p className="wb2-muted" data-job-authority={job.result_authority}>
+          Job state is orchestration evidence only. This panel consumes only an artifact-verified, core-report-bound embedded ResultIR identity and authority axes; it never falls back to top-level result arrays.
+        </p>
+      </section>
+      {verifiedResult?.kind === 'frame3d-load-control'
+        ? <Frame3DLoadControlCandidatePanel result={verifiedResult} />
+        : null}
+    </>
   )
 }

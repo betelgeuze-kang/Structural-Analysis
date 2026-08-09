@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { createServer as createViteServer } from 'vite'
+import type { PublishedFrame3DLoadControlResult } from '../../src/workbench-v2/model/frame3dLoadControlResult'
+import type { WorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
 // End-to-end smoke for the Workbench v2 product shell. The runner builds and
 // serves dist; the embedded Viewer must resolve to its emitted production entry,
@@ -160,6 +165,144 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel).toBeVisible()
     await expect(panel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
     await expect(panel).toContainText(/solver state is not inferred/i)
+  })
+
+  test('verified Frame3D candidate UI keeps Numerical ResultIR and outer recovery authority separate', async ({ page }) => {
+    const digest = `sha256:${'1'.repeat(64)}`
+    const job: WorkbenchJobView = {
+      schema_version: 'structural-analysis-job-view.v1',
+      service_profile: 'sqlite_wal_content_addressed_single_host.v1',
+      job_id: `job_${'a'.repeat(32)}`,
+      status: 'succeeded',
+      revision: 2,
+      attempt: 1,
+      progress: { completed_steps: 1, total_steps: 1 },
+      created_at: '2026-08-09T00:00:00Z',
+      updated_at: '2026-08-09T00:00:01Z',
+      lease_expires_at: null,
+      error_code: null,
+      can_resume: false,
+      request: { role: 'request', content_hash: digest, byte_length: 1, media_type: 'application/json' },
+      checkpoint: null,
+      result: { role: 'result', content_hash: digest, byte_length: 1, media_type: 'application/json' },
+      evidence: { role: 'evidence', content_hash: digest, byte_length: 1, media_type: 'application/json' },
+      resume_contract_hash: null,
+      solver_truth_owner: 'structural_analysis_core',
+      result_authority: 'referenced_result_and_evidence_contracts_only',
+      claim_boundary: 'orchestration only',
+      terminal_event_hash: digest,
+    }
+    const result: PublishedFrame3DLoadControlResult = {
+      kind: 'frame3d-load-control',
+      adapterId: 'frame3d-bounded-load-control.v1',
+      resultContract: 'bounded-frame3d-load-control-result.v1',
+      profile: 'bounded_multimember_frame3d_load_control_model_ir_api.v1',
+      resultHash: digest,
+      source: {
+        modelIrContentHash: digest,
+        adapterHash: digest,
+        apiRequestHash: digest,
+        loadPatternId: 'LC1',
+        nodeIds: ['N1', 'N2', 'N3'],
+        memberIds: ['M1', 'M2'],
+      },
+      schedule: {
+        loadFactors: [1],
+        acceptedStepCount: 1,
+        resumeCompletedPrefixCount: 0,
+        acceptedSuffixStepCount: 1,
+        completedPrefixCount: 1,
+        remainingLoadFactorCount: 0,
+        finalLoadFactor: 1,
+      },
+      numericalResultIr: {
+        resultHash: digest,
+        backendRole: 'cpu_reference',
+        displacementDataHash: digest,
+        dofCount: 18,
+        reactionAuthority: 'not_evaluated',
+        memberForceAuthority: 'not_evaluated',
+      },
+      recovery: {
+        nodeDisplacementCount: 3,
+        supportReactionCount: 1,
+        memberRecoveryCount: 2,
+        fullNodeEquilibriumCount: 3,
+        reactionAuthority: 'bounded_candidate',
+        memberForceAuthority: 'bounded_candidate',
+      },
+      equilibrium: {
+        maximumScaledBalanceResidual: 1e-10,
+        scaledTolerance: 1e-7,
+        maximumForceBalanceResidualN: 1e-7,
+        forceToleranceN: 1e-4,
+        maximumMomentBalanceResidualNM: 1e-8,
+        momentToleranceNM: 1e-3,
+        authority: 'authoritative_reassembled',
+      },
+      checkpoint: {
+        terminalArtifactLogicalHash: digest,
+        resumeContractHash: digest,
+        terminalCheckpointHash: digest,
+      },
+      authority: {
+        workbenchExecution: false,
+        externalVvLevel: 0,
+        designAuthority: false,
+        publicProductPromotion: false,
+        releaseEligible: false,
+        commercialUse: false,
+      },
+    }
+
+    const vite = await createViteServer({
+      root: process.cwd(),
+      server: { middlewareMode: true },
+      appType: 'custom',
+      logLevel: 'silent',
+    })
+    const loadedModule = await vite.ssrLoadModule('/src/workbench-v2/components/JobServicePanel.tsx') as {
+      JobServicePanel: typeof import('../../src/workbench-v2/components/JobServicePanel')['JobServicePanel']
+    }
+    const { JobServicePanel } = loadedModule
+    try {
+      await page.setContent(renderToStaticMarkup(createElement(JobServicePanel, {
+        loadStatus: 'ready',
+        job,
+        errors: [],
+        artifactStatus: 'verified',
+        publishedResult: result,
+      })))
+      const candidate = page.locator('[data-frame3d-load-control-candidate="verified"]')
+      await expect(candidate).toBeVisible()
+      await expect(candidate).toContainText('Verified bounded CPU candidate')
+      await expect(candidate.locator('[data-frame3d-numerical-reaction-authority]')).toHaveText('not_evaluated')
+      await expect(candidate.locator('[data-frame3d-numerical-member-authority]')).toHaveText('not_evaluated')
+      await expect(candidate.locator('[data-frame3d-recovery-reaction-authority]')).toHaveText('bounded_candidate')
+      await expect(candidate.locator('[data-frame3d-recovery-member-authority]')).toHaveText('bounded_candidate')
+      await expect(candidate.locator('[data-frame3d-workbench-execution="false"]')).toHaveText('false')
+      await expect(candidate.locator('[data-frame3d-external-vv="0"]')).toHaveText('0')
+      await expect(candidate.locator('[data-frame3d-public-promotion="false"]')).toHaveText('false')
+      await expect(candidate.locator('[data-frame3d-release-eligible="false"]')).toHaveText('false')
+      await expect(candidate).not.toContainText(
+        /basic_deformations|basic_forces_solver_units|global_end_forces_solver_units|displacement_global/,
+      )
+      await expect(candidate).toContainText(
+        'Raw solver steps, checkpoint displacements, and member basic/global force arrays are intentionally omitted.',
+      )
+
+      await page.setContent(renderToStaticMarkup(createElement(JobServicePanel, {
+        loadStatus: 'ready',
+        job,
+        errors: [],
+        artifactStatus: 'integrity_unavailable',
+        publishedResult: result,
+      })))
+      await expect(page.locator('[data-frame3d-load-control-candidate]')).toHaveCount(0)
+      await expect(page.locator('[data-job-result-ir="unavailable"]')).toHaveText('not verified')
+    } finally {
+      await vite.close()
+    }
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {

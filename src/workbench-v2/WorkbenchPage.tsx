@@ -233,7 +233,9 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
           job={jobLoad.job}
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
-          publishedResult={jobLoad.publishedResult}
+          publishedResult={jobLoad.artifactStatus === 'verified'
+            ? jobLoad.publishedResult
+            : undefined}
         />
         {caseV2 ? (
           <RunMonitor
