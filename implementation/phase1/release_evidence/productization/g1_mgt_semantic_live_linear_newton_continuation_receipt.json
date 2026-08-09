@@ -689,8 +689,8 @@
     "attempts": [
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:00c88bba1115b5eb2c62e64b92d6ecdc4a5f63bb0ba6ab17d192e6800f9c4b55",
-        "accepted_state_hash_before": "sha256:658824d3701518583fba35b0405da8e4e49da235cb46c1d8b938775370aed798",
+        "accepted_state_hash_after": "sha256:7ac9d8879eb8eb88aa944722fb33092f93a0b677d04cefc22c15b26c2b0a3bb2",
+        "accepted_state_hash_before": "sha256:f711a6c8be55a0eb629dbcc695261f1f4412777d92bfa81992d3c78d9aba3d5a",
         "attempt_index": 1,
         "final_residual_inf_n": 1.7482288967585191e-06,
         "history": [
@@ -740,8 +740,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:892340c8e2cb6a1551f5f5e76501459683476cd2696487882661fe58e667ec5b",
-        "accepted_state_hash_before": "sha256:00c88bba1115b5eb2c62e64b92d6ecdc4a5f63bb0ba6ab17d192e6800f9c4b55",
+        "accepted_state_hash_after": "sha256:e7e6566681d9203c8d739719175c3ffcc68f135fd94bc4bc8cd0c1fb71d6dfc9",
+        "accepted_state_hash_before": "sha256:7ac9d8879eb8eb88aa944722fb33092f93a0b677d04cefc22c15b26c2b0a3bb2",
         "attempt_index": 2,
         "final_residual_inf_n": 3.843175363726914e-06,
         "history": [
@@ -791,8 +791,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
-        "accepted_state_hash_before": "sha256:892340c8e2cb6a1551f5f5e76501459683476cd2696487882661fe58e667ec5b",
+        "accepted_state_hash_after": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
+        "accepted_state_hash_before": "sha256:e7e6566681d9203c8d739719175c3ffcc68f135fd94bc4bc8cd0c1fb71d6dfc9",
         "attempt_index": 3,
         "final_residual_inf_n": 1.8550488967150613e-06,
         "history": [
@@ -863,10 +863,10 @@
         "exact_restart_binding_complete": true,
         "load_factor": 0.0,
         "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-        "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+        "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-        "state_hash": "sha256:658824d3701518583fba35b0405da8e4e49da235cb46c1d8b938775370aed798",
+        "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+        "state_hash": "sha256:f711a6c8be55a0eb629dbcc695261f1f4412777d92bfa81992d3c78d9aba3d5a",
         "step_index": 0
       },
       {
@@ -878,10 +878,10 @@
         "exact_restart_binding_complete": true,
         "load_factor": 0.25,
         "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-        "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+        "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-        "state_hash": "sha256:00c88bba1115b5eb2c62e64b92d6ecdc4a5f63bb0ba6ab17d192e6800f9c4b55",
+        "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+        "state_hash": "sha256:7ac9d8879eb8eb88aa944722fb33092f93a0b677d04cefc22c15b26c2b0a3bb2",
         "step_index": 1
       },
       {
@@ -893,10 +893,10 @@
         "exact_restart_binding_complete": true,
         "load_factor": 0.75,
         "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-        "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+        "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-        "state_hash": "sha256:892340c8e2cb6a1551f5f5e76501459683476cd2696487882661fe58e667ec5b",
+        "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+        "state_hash": "sha256:e7e6566681d9203c8d739719175c3ffcc68f135fd94bc4bc8cd0c1fb71d6dfc9",
         "step_index": 2
       },
       {
@@ -908,10 +908,10 @@
         "exact_restart_binding_complete": true,
         "load_factor": 1.0,
         "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-        "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+        "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-        "state_hash": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
+        "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+        "state_hash": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
         "step_index": 3
       }
     ],
@@ -967,10 +967,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 1.0,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+      "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
       "step_index": 3
     },
     "initial_checkpoint": {
@@ -982,10 +982,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 0.0,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+      "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:658824d3701518583fba35b0405da8e4e49da235cb46c1d8b938775370aed798",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:f711a6c8be55a0eb629dbcc695261f1f4412777d92bfa81992d3c78d9aba3d5a",
       "step_index": 0
     },
     "metrics": {
@@ -1015,7 +1015,7 @@
       "target_load_factor_reached": true
     },
     "operator_classification": "state_invariant_linear_reference_geometry",
-    "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+    "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
     "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
     "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
     "status": "ready",
@@ -1057,8 +1057,8 @@
     "attempts": [
       {
         "accepted": false,
-        "accepted_state_hash_after": "sha256:7f7fd8870fd1968d746045afedc90a74c966b014b4a6d684c20a630ccaed7932",
-        "accepted_state_hash_before": "sha256:7f7fd8870fd1968d746045afedc90a74c966b014b4a6d684c20a630ccaed7932",
+        "accepted_state_hash_after": "sha256:ca8bfd33898f13e62262a19d0f2926f19d927563cef98d6bee44b347604f9de5",
+        "accepted_state_hash_before": "sha256:ca8bfd33898f13e62262a19d0f2926f19d927563cef98d6bee44b347604f9de5",
         "attempt_index": 1,
         "final_residual_inf_n": 44864.54812499992,
         "history": [
@@ -1118,10 +1118,10 @@
         "exact_restart_binding_complete": true,
         "load_factor": 0.0,
         "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-        "path_contract_hash": "sha256:e65ccc32b1e700b92df148efca79f83c1f0c06740a0d4cfed3637cf41ec754ac",
+        "path_contract_hash": "sha256:2e1ce02c731ef715168fd576b019b7bb7d49afc52142adf49733c8c44a06b219",
         "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-        "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-        "state_hash": "sha256:7f7fd8870fd1968d746045afedc90a74c966b014b4a6d684c20a630ccaed7932",
+        "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+        "state_hash": "sha256:ca8bfd33898f13e62262a19d0f2926f19d927563cef98d6bee44b347604f9de5",
         "step_index": 0
       }
     ],
@@ -1177,10 +1177,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 0.0,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:e65ccc32b1e700b92df148efca79f83c1f0c06740a0d4cfed3637cf41ec754ac",
+      "path_contract_hash": "sha256:2e1ce02c731ef715168fd576b019b7bb7d49afc52142adf49733c8c44a06b219",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:7f7fd8870fd1968d746045afedc90a74c966b014b4a6d684c20a630ccaed7932",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:ca8bfd33898f13e62262a19d0f2926f19d927563cef98d6bee44b347604f9de5",
       "step_index": 0
     },
     "initial_checkpoint": {
@@ -1192,10 +1192,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 0.0,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:e65ccc32b1e700b92df148efca79f83c1f0c06740a0d4cfed3637cf41ec754ac",
+      "path_contract_hash": "sha256:2e1ce02c731ef715168fd576b019b7bb7d49afc52142adf49733c8c44a06b219",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:7f7fd8870fd1968d746045afedc90a74c966b014b4a6d684c20a630ccaed7932",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:ca8bfd33898f13e62262a19d0f2926f19d927563cef98d6bee44b347604f9de5",
       "step_index": 0
     },
     "metrics": {
@@ -1225,7 +1225,7 @@
       "target_load_factor_reached": false
     },
     "operator_classification": "state_invariant_linear_reference_geometry",
-    "path_contract_hash": "sha256:e65ccc32b1e700b92df148efca79f83c1f0c06740a0d4cfed3637cf41ec754ac",
+    "path_contract_hash": "sha256:2e1ce02c731ef715168fd576b019b7bb7d49afc52142adf49733c8c44a06b219",
     "schema_version": "g1-mgt-semantic-live-linear-newton-continuation.v1",
     "solver_profile": "scipy-splu-colamd-state-invariant-cpu-diagnostic.v1",
     "status": "partial",
@@ -1273,10 +1273,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 1.0,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+      "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
       "step_index": 3
     },
     "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
@@ -1296,9 +1296,9 @@
     "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-08-08T09:55:58.277944+00:00",
+  "generated_at": "2026-08-09T02:01:31.754222+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:7b83fe9ed3c94bc1bc35879db24ea21ab86ad9ff8836a3b48dcb07d46d6f99bb",
     "implementation/phase1/g1_mgt_semantic_live_linear_newton_continuation.py": "sha256:4306b6ab4fc0fb83d5ab0ea02e420e803083c3144bbc21ac2bb63ffeeb9d9731",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
@@ -1328,10 +1328,10 @@
       "exact_restart_binding_complete": true,
       "load_factor": 0.75,
       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "path_contract_hash": "sha256:93a0759e8f467926b06da3c1b3f9f95c76ff18af9c09b814ff6f1d4d2599d07c",
+      "path_contract_hash": "sha256:eeb08bb34bf96beca7c48684387c8b4f451f55f76ff6528236a1bd9d235466d1",
       "schema_version": "g1-mgt-semantic-live-linear-newton-checkpoint.v1",
-      "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
-      "state_hash": "sha256:892340c8e2cb6a1551f5f5e76501459683476cd2696487882661fe58e667ec5b",
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
+      "state_hash": "sha256:e7e6566681d9203c8d739719175c3ffcc68f135fd94bc4bc8cd0c1fb71d6dfc9",
       "step_index": 2
     },
     "claim_boundary": "A deterministic little-endian free-DOF vector for one accepted state of the linear reference-geometry diagnostic only.",
@@ -1356,22 +1356,22 @@
     "contract_pass": true,
     "direct_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
     "direct_final_residual_inf_n": 1.8550488967150613e-06,
-    "direct_final_state_hash": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
+    "direct_final_state_hash": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
     "final_displacement_bytes_identical": true,
     "final_state_hash_identical": true,
     "restart_checkpoint_consumed": true,
     "restarted_final_data_sha256": "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2",
     "restarted_final_residual_inf_n": 1.8550488967150613e-06,
-    "restarted_final_state_hash": "sha256:3fde8b9243ff8e951f96f2b7c99a18c37b8e1282310220b95b8605e14836e24c",
+    "restarted_final_state_hash": "sha256:7f5aacf6d6301f712386a53a9d33642f39b2873c6c536b597ec628ee3b597965",
     "serialization_roundtrip_byte_exact": true,
     "serialized_checkpoint_data_sha256": "sha256:54ff7e76815eea773df1ecb2e7eb70f4d7045c35449f3a618af6fa0d431ca2f8",
     "serialized_checkpoint_load_factor": 0.75,
-    "serialized_checkpoint_state_hash": "sha256:892340c8e2cb6a1551f5f5e76501459683476cd2696487882661fe58e667ec5b",
+    "serialized_checkpoint_state_hash": "sha256:e7e6566681d9203c8d739719175c3ffcc68f135fd94bc4bc8cd0c1fb71d6dfc9",
     "status": "ready"
   },
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": true,
-  "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_tree_state": "commit_bound_inputs_exact",
   "status": "partial"
 }

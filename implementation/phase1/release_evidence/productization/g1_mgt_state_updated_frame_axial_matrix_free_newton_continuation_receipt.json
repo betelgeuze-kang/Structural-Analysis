@@ -156,9 +156,9 @@
       "displacement_inf_m": 0.0013024351166917312,
       "equation_count": 70560,
       "load_factor": 0.5,
-      "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+      "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
       "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-      "state_hash": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+      "state_hash": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
       "step_index": 1
     },
     "restart_load_factor": 0.5,
@@ -168,8 +168,8 @@
           "accepted": false,
           "accepted_load_factor_after": 0.5,
           "accepted_load_factor_before": 0.5,
-          "accepted_state_hash_after": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
-          "accepted_state_hash_before": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "accepted_state_hash_after": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
+          "accepted_state_hash_before": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "accepted_step_index_after": 1,
           "accepted_step_index_before": 1,
           "attempt_index": 1,
@@ -215,7 +215,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 2.867466486890333,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:316c3fae7edd4f36e17047be8f5ddfa8f86a0705fae1aab7ed1eb72cbd401788",
                 "independent_explicit_residual_gate_passed": true,
@@ -238,7 +238,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 5.0581309778830355e-08,
@@ -279,7 +279,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -291,7 +291,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -363,7 +363,7 @@
                   "solution_data_hash": "sha256:c6e3d2984c940a8a5a4fb6f0e225c450bf00a57b4bd939d1ce023c0a037af3d8",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:1066a791d2759a838773381879ac3444659cad89e3440425c456f2daa0355ef3",
-                  "state_operator_binding_hash": "sha256:596f1e6ccf2571658d78845904471d32f875836414b8cb9c3a282354e443d1d6",
+                  "state_operator_binding_hash": "sha256:36eeb49b673bf3c8ab5f4ed37bd4c0ad7e9c91cc61da655b33244c65e377b128",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -405,8 +405,8 @@
           "accepted": true,
           "accepted_load_factor_after": 0.75,
           "accepted_load_factor_before": 0.5,
-          "accepted_state_hash_after": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
-          "accepted_state_hash_before": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "accepted_state_hash_after": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
+          "accepted_state_hash_before": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "accepted_step_index_after": 2,
           "accepted_step_index_before": 1,
           "attempt_index": 2,
@@ -452,7 +452,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.1947450434018554,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:a79183ac570f4c3cc61574d642031b9ae817e89465427c2b428ff4720c58f829",
                 "independent_explicit_residual_gate_passed": true,
@@ -475,7 +475,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.107521453836202e-08,
@@ -516,7 +516,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -528,7 +528,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -600,7 +600,7 @@
                   "solution_data_hash": "sha256:3237e1c6b48878cebfff740a6f5f80646a90e6c707c85de12139dbf084c56d93",
                   "solve_id": "load-0.75-newton-1",
                   "state_hash": "sha256:9ee8a282a2fc29b5d57c1f4218b9d1faa47c72f4f86b95be609858047dbf061f",
-                  "state_operator_binding_hash": "sha256:945e1a2e4a0757c884a7daa5856236cd785abcc342ff857df82d47ae5db5eecf",
+                  "state_operator_binding_hash": "sha256:96a7fea21785e8f639a5e0d3cd1108ad14f2c539ecb1d1b72f02e347d7319a49",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -641,8 +641,8 @@
           "accepted": true,
           "accepted_load_factor_after": 1.0,
           "accepted_load_factor_before": 0.75,
-          "accepted_state_hash_after": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
-          "accepted_state_hash_before": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
+          "accepted_state_hash_after": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
+          "accepted_state_hash_before": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
           "accepted_step_index_after": 3,
           "accepted_step_index_before": 2,
           "attempt_index": 3,
@@ -688,7 +688,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.6724753634785479,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:660c97a61eaa223346cd67ec161718d4e5db1622af1d575ddb67efd88149ede6",
                 "independent_explicit_residual_gate_passed": true,
@@ -711,7 +711,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.9503610329153382e-08,
@@ -752,7 +752,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -764,7 +764,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -836,7 +836,7 @@
                   "solution_data_hash": "sha256:ec9b9b641c9eb6ed30ffd51fa947244ea405001e134958d8d2c6243a497dd579",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:db73fc72e7567e15d501280f0cfc4f05941742a4d78f3c074f84913396044beb",
-                  "state_operator_binding_hash": "sha256:f5362c5a7b991bb930b87c900294e0e3af2f8ca0f790597e8daf6dc9e0a95477",
+                  "state_operator_binding_hash": "sha256:8e88219fcc29797a1b71185f5601f907bb1be07fb152eef005a4cbec15b34acb",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -882,9 +882,9 @@
           "displacement_inf_m": 0.0013024351166917312,
           "equation_count": 70560,
           "load_factor": 0.5,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "state_hash": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "step_index": 1
         },
         {
@@ -893,9 +893,9 @@
           "displacement_inf_m": 0.001953654881039265,
           "equation_count": 70560,
           "load_factor": 0.75,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
+          "state_hash": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
           "step_index": 2
         },
         {
@@ -904,9 +904,9 @@
           "displacement_inf_m": 0.0026048760859529196,
           "equation_count": 70560,
           "load_factor": 1.0,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
+          "state_hash": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
           "step_index": 3
         }
       ],
@@ -959,9 +959,9 @@
         "displacement_inf_m": 0.0026048760859529196,
         "equation_count": 70560,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+        "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
+        "state_hash": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
         "step_index": 3
       },
       "initial_checkpoint": {
@@ -970,9 +970,9 @@
         "displacement_inf_m": 0.0013024351166917312,
         "equation_count": 70560,
         "load_factor": 0.5,
-        "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+        "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+        "state_hash": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
         "step_index": 1
       },
       "metrics": {
@@ -1007,9 +1007,9 @@
         "target_load_factor": 1.0,
         "target_load_factor_reached": true
       },
-      "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+      "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
       "schema_version": "adaptive-load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "ready",
       "terminal_reason": "target_load_factor_reached"
@@ -1020,8 +1020,8 @@
           "accepted": false,
           "accepted_load_factor_after": 0.0,
           "accepted_load_factor_before": 0.0,
-          "accepted_state_hash_after": "sha256:6a9bb93b8377d56a21677b5efe9acfc6253ae52c13fdcc8ab827bd208e02ed83",
-          "accepted_state_hash_before": "sha256:6a9bb93b8377d56a21677b5efe9acfc6253ae52c13fdcc8ab827bd208e02ed83",
+          "accepted_state_hash_after": "sha256:b37c4f401d999126bf93afa9458b7d76002133fbdcf863e782d8e008c9070e43",
+          "accepted_state_hash_before": "sha256:b37c4f401d999126bf93afa9458b7d76002133fbdcf863e782d8e008c9070e43",
           "accepted_step_index_after": 0,
           "accepted_step_index_before": 0,
           "attempt_index": 1,
@@ -1067,7 +1067,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 3.8238140951064206,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:0fb0103b0d1f840ac867beb9767cd1ca908f401ab0854ffb7257b2f85d4297a3",
                 "independent_explicit_residual_gate_passed": true,
@@ -1090,7 +1090,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 6.744704877118535e-08,
@@ -1131,7 +1131,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -1143,7 +1143,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -1215,7 +1215,7 @@
                   "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:38d7160269dc9258e35d996b75315ef7424e12531d9ef51de80a1eb0018d9d78",
-                  "state_operator_binding_hash": "sha256:e7938303ac013ec8f87d6f69fe10cc57a3dd5fa31c5c31fe576aa02d9f025b72",
+                  "state_operator_binding_hash": "sha256:2c2d4371158411aed9f7bfff958d689c7237def7307ef7518c19203023840c2d",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -1257,8 +1257,8 @@
           "accepted": true,
           "accepted_load_factor_after": 0.5,
           "accepted_load_factor_before": 0.0,
-          "accepted_state_hash_after": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
-          "accepted_state_hash_before": "sha256:6a9bb93b8377d56a21677b5efe9acfc6253ae52c13fdcc8ab827bd208e02ed83",
+          "accepted_state_hash_after": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
+          "accepted_state_hash_before": "sha256:b37c4f401d999126bf93afa9458b7d76002133fbdcf863e782d8e008c9070e43",
           "accepted_step_index_after": 1,
           "accepted_step_index_before": 0,
           "attempt_index": 2,
@@ -1304,7 +1304,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 0.9559536855687516,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:d30abecd07f23555ae0fee38f1da4ebf5b4d2fa69fd42bb0e6e03b88500e3ce6",
                 "independent_explicit_residual_gate_passed": true,
@@ -1327,7 +1327,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 1.686176090491682e-08,
@@ -1368,7 +1368,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -1380,7 +1380,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -1452,7 +1452,7 @@
                   "solution_data_hash": "sha256:273fceb970347e7b41ec51328da5c437b18ee4b0fbcb360c667924d234afcdee",
                   "solve_id": "load-0.5-newton-1",
                   "state_hash": "sha256:cf757de1055af48a85b29086de38c6daaac2413288688e54e4050ff8aa7ca128",
-                  "state_operator_binding_hash": "sha256:b3c7383e44e08a597f0e7ddac35ab9c3967e1f153d2c8b9918d0555842896ae1",
+                  "state_operator_binding_hash": "sha256:050307e0a6e22e3835b89a40a5d478fb5172fd9b5c3f3a6f978fd74c7df7ca75",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -1493,8 +1493,8 @@
           "accepted": false,
           "accepted_load_factor_after": 0.5,
           "accepted_load_factor_before": 0.5,
-          "accepted_state_hash_after": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
-          "accepted_state_hash_before": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "accepted_state_hash_after": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
+          "accepted_state_hash_before": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "accepted_step_index_after": 1,
           "accepted_step_index_before": 1,
           "attempt_index": 3,
@@ -1540,7 +1540,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 2.867466486890333,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:316c3fae7edd4f36e17047be8f5ddfa8f86a0705fae1aab7ed1eb72cbd401788",
                 "independent_explicit_residual_gate_passed": true,
@@ -1563,7 +1563,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 5.0581309778830355e-08,
@@ -1604,7 +1604,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -1616,7 +1616,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -1688,7 +1688,7 @@
                   "solution_data_hash": "sha256:c6e3d2984c940a8a5a4fb6f0e225c450bf00a57b4bd939d1ce023c0a037af3d8",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:1066a791d2759a838773381879ac3444659cad89e3440425c456f2daa0355ef3",
-                  "state_operator_binding_hash": "sha256:596f1e6ccf2571658d78845904471d32f875836414b8cb9c3a282354e443d1d6",
+                  "state_operator_binding_hash": "sha256:36eeb49b673bf3c8ab5f4ed37bd4c0ad7e9c91cc61da655b33244c65e377b128",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -1730,8 +1730,8 @@
           "accepted": true,
           "accepted_load_factor_after": 0.75,
           "accepted_load_factor_before": 0.5,
-          "accepted_state_hash_after": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
-          "accepted_state_hash_before": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "accepted_state_hash_after": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
+          "accepted_state_hash_before": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "accepted_step_index_after": 2,
           "accepted_step_index_before": 1,
           "attempt_index": 4,
@@ -1777,7 +1777,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.1947450434018554,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:a79183ac570f4c3cc61574d642031b9ae817e89465427c2b428ff4720c58f829",
                 "independent_explicit_residual_gate_passed": true,
@@ -1800,7 +1800,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.107521453836202e-08,
@@ -1841,7 +1841,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -1853,7 +1853,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -1925,7 +1925,7 @@
                   "solution_data_hash": "sha256:3237e1c6b48878cebfff740a6f5f80646a90e6c707c85de12139dbf084c56d93",
                   "solve_id": "load-0.75-newton-1",
                   "state_hash": "sha256:9ee8a282a2fc29b5d57c1f4218b9d1faa47c72f4f86b95be609858047dbf061f",
-                  "state_operator_binding_hash": "sha256:945e1a2e4a0757c884a7daa5856236cd785abcc342ff857df82d47ae5db5eecf",
+                  "state_operator_binding_hash": "sha256:96a7fea21785e8f639a5e0d3cd1108ad14f2c539ecb1d1b72f02e347d7319a49",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -1966,8 +1966,8 @@
           "accepted": true,
           "accepted_load_factor_after": 1.0,
           "accepted_load_factor_before": 0.75,
-          "accepted_state_hash_after": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
-          "accepted_state_hash_before": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
+          "accepted_state_hash_after": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
+          "accepted_state_hash_before": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
           "accepted_step_index_after": 3,
           "accepted_step_index_before": 2,
           "attempt_index": 5,
@@ -2013,7 +2013,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.6724753634785479,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:660c97a61eaa223346cd67ec161718d4e5db1622af1d575ddb67efd88149ede6",
                 "independent_explicit_residual_gate_passed": true,
@@ -2036,7 +2036,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.9503610329153382e-08,
@@ -2077,7 +2077,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -2089,7 +2089,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -2161,7 +2161,7 @@
                   "solution_data_hash": "sha256:ec9b9b641c9eb6ed30ffd51fa947244ea405001e134958d8d2c6243a497dd579",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:db73fc72e7567e15d501280f0cfc4f05941742a4d78f3c074f84913396044beb",
-                  "state_operator_binding_hash": "sha256:f5362c5a7b991bb930b87c900294e0e3af2f8ca0f790597e8daf6dc9e0a95477",
+                  "state_operator_binding_hash": "sha256:8e88219fcc29797a1b71185f5601f907bb1be07fb152eef005a4cbec15b34acb",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -2207,9 +2207,9 @@
           "displacement_inf_m": 0.0,
           "equation_count": 70560,
           "load_factor": 0.0,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:6a9bb93b8377d56a21677b5efe9acfc6253ae52c13fdcc8ab827bd208e02ed83",
+          "state_hash": "sha256:b37c4f401d999126bf93afa9458b7d76002133fbdcf863e782d8e008c9070e43",
           "step_index": 0
         },
         {
@@ -2218,9 +2218,9 @@
           "displacement_inf_m": 0.0013024351166917312,
           "equation_count": 70560,
           "load_factor": 0.5,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:c1381d1cfb6b497cd2d7fdda226030e646bbe7f1a4d4b74fe8daf1419c867d9d",
+          "state_hash": "sha256:783af12f145cf742909349d96be87c862e67f5d05725b0ebdaa87fac6716c566",
           "step_index": 1
         },
         {
@@ -2229,9 +2229,9 @@
           "displacement_inf_m": 0.001953654881039265,
           "equation_count": 70560,
           "load_factor": 0.75,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:73df35a9cd91ad192bfe10daef25fa2fb94ea58840b8b8e90c60417e70c2ce8c",
+          "state_hash": "sha256:3dbe30c9bb2425e25471b593b75d5e87c4c74af1a726cddd16ebe12ed1d83d09",
           "step_index": 2
         },
         {
@@ -2240,9 +2240,9 @@
           "displacement_inf_m": 0.0026048760859529196,
           "equation_count": 70560,
           "load_factor": 1.0,
-          "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+          "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
+          "state_hash": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
           "step_index": 3
         }
       ],
@@ -2295,9 +2295,9 @@
         "displacement_inf_m": 0.0026048760859529196,
         "equation_count": 70560,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+        "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:a5e01c69f1e3a9cb13ca24b23e36460242a7d07845a928be779707e892eac3a8",
+        "state_hash": "sha256:066caa04eb8ad03eea217c9c84bd3b42eb500b2b9145044a68d1278cd293d8ea",
         "step_index": 3
       },
       "initial_checkpoint": {
@@ -2306,9 +2306,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+        "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:6a9bb93b8377d56a21677b5efe9acfc6253ae52c13fdcc8ab827bd208e02ed83",
+        "state_hash": "sha256:b37c4f401d999126bf93afa9458b7d76002133fbdcf863e782d8e008c9070e43",
         "step_index": 0
       },
       "metrics": {
@@ -2343,9 +2343,9 @@
         "target_load_factor": 1.0,
         "target_load_factor_reached": true
       },
-      "path_contract_hash": "sha256:8cbc1d5996e9ba5a12d4c86a55570e5a94532be27a793ba4a53a9fa8c125f04c",
+      "path_contract_hash": "sha256:c14da9b8657cd1ed6887f3c93848848d0e5613993ea81993f1299ecd91269799",
       "schema_version": "adaptive-load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "ready",
       "terminal_reason": "target_load_factor_reached"
@@ -2404,8 +2404,8 @@
     "attempts": [
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:02531ee3fa204c1477811cbe01648f8cfaa6ff049b66a9b0b040255ff0b03616",
-        "accepted_state_hash_before": "sha256:fc5339af7835ab984ce8990fa1bdae3360a47caa60c9c8de08aea853d56c91ad",
+        "accepted_state_hash_after": "sha256:f897bf32db173cbbd858e4edca27530a2b40b4dc4e627e8d56ed04f51718f1c7",
+        "accepted_state_hash_before": "sha256:145200f8c57a145fe849217098f31c3d21772f70f32b406f623a8de189485e6e",
         "attempt_index": 1,
         "history": [
           {
@@ -2448,7 +2448,7 @@
             "residual_gate_passed": false,
             "residual_inf_kn": 0.23898843442087023,
             "tangent_solve": {
-              "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+              "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
               "contract_pass": true,
               "independent_explicit_residual_data_hash": "sha256:fa8f2c9a387afae8d3469ebb24a38c4b600070edcde47c6bdd2b164495bf8118",
               "independent_explicit_residual_gate_passed": true,
@@ -2471,7 +2471,7 @@
                   "restart_length": 8,
                   "terminal_gate": "explicit_raw_residual_l2_and_inf"
                 },
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "converged": true,
                 "convergence_threshold_l2_kn": 4.215439957265752e-09,
@@ -2512,7 +2512,7 @@
                 "matrix_free_current_state_operator_action": true,
                 "operator_action_count": 5,
                 "operator_binding": {
-                  "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                  "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                   "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                   "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                   "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -2524,7 +2524,7 @@
                     "complete": true,
                     "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                     "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                    "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                    "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                   },
                   "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                   "load_factor_unit": "dimensionless",
@@ -2596,7 +2596,7 @@
                 "solution_data_hash": "sha256:97bc8d55699d0041c26cf4582a0274099a6e919097fa55bd1cde7c4eef5ac480",
                 "solve_id": "load-0.25-newton-1",
                 "state_hash": "sha256:61cfb3dcdaa33728bdfe3f57c2bb264f1fa8cac48fa83c08ebc4c7b145086eee",
-                "state_operator_binding_hash": "sha256:3300f3afab070109b02a583eed3a5aefa868378f3f263eed81bf6081fa41807c",
+                "state_operator_binding_hash": "sha256:e83c50e25de2591643cbf058ff44a90b5ab6bac6a806b3558d29ce16b0727157",
                 "status": "ready",
                 "terminal_reason": "converged_explicit_residual"
               },
@@ -2631,8 +2631,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
-        "accepted_state_hash_before": "sha256:02531ee3fa204c1477811cbe01648f8cfaa6ff049b66a9b0b040255ff0b03616",
+        "accepted_state_hash_after": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
+        "accepted_state_hash_before": "sha256:f897bf32db173cbbd858e4edca27530a2b40b4dc4e627e8d56ed04f51718f1c7",
         "attempt_index": 2,
         "history": [
           {
@@ -2675,7 +2675,7 @@
             "residual_gate_passed": false,
             "residual_inf_kn": 0.7169160033491644,
             "tangent_solve": {
-              "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+              "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
               "contract_pass": true,
               "independent_explicit_residual_data_hash": "sha256:d05fb4a1c04cbe98a7c8a6f57eae479e5b9d795c8190cb6f2f7731a53db7f6be",
               "independent_explicit_residual_gate_passed": true,
@@ -2698,7 +2698,7 @@
                   "restart_length": 8,
                   "terminal_gate": "explicit_raw_residual_l2_and_inf"
                 },
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "converged": true,
                 "convergence_threshold_l2_kn": 1.2645823607900673e-08,
@@ -2739,7 +2739,7 @@
                 "matrix_free_current_state_operator_action": true,
                 "operator_action_count": 5,
                 "operator_binding": {
-                  "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                  "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                   "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                   "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                   "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -2751,7 +2751,7 @@
                     "complete": true,
                     "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                     "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                    "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                    "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                   },
                   "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                   "load_factor_unit": "dimensionless",
@@ -2823,7 +2823,7 @@
                 "solution_data_hash": "sha256:b2ce556373fe03d07853fb575b3c0eea2e219e9bf3791b8a3ffab4e3d71ad6c7",
                 "solve_id": "load-0.5-newton-1",
                 "state_hash": "sha256:6675e9b67c1766555de9163e2ecf9afd404ef6ecbfe33445ef4606a9b9a1c067",
-                "state_operator_binding_hash": "sha256:c3d23cc720a9df493ed6dc8b6039f1a6773fb1c06855b58a062051be20b51633",
+                "state_operator_binding_hash": "sha256:069986cb8468a923fe7d467ee2ac4df8b2bdcc9c436619482330fbd68983723e",
                 "status": "ready",
                 "terminal_reason": "converged_explicit_residual"
               },
@@ -2858,8 +2858,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
-        "accepted_state_hash_before": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+        "accepted_state_hash_after": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
+        "accepted_state_hash_before": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
         "attempt_index": 3,
         "history": [
           {
@@ -2902,7 +2902,7 @@
             "residual_gate_passed": false,
             "residual_inf_kn": 1.1947449797988008,
             "tangent_solve": {
-              "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+              "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
               "contract_pass": true,
               "independent_explicit_residual_data_hash": "sha256:cfff4a47fe6e6d663a59cac1f518b60d2830803894fbaad2b3c82fe981de2646",
               "independent_explicit_residual_gate_passed": true,
@@ -2925,7 +2925,7 @@
                   "restart_length": 8,
                   "terminal_gate": "explicit_raw_residual_l2_and_inf"
                 },
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "converged": true,
                 "convergence_threshold_l2_kn": 2.1075213768460954e-08,
@@ -2966,7 +2966,7 @@
                 "matrix_free_current_state_operator_action": true,
                 "operator_action_count": 5,
                 "operator_binding": {
-                  "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                  "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                   "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                   "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                   "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -2978,7 +2978,7 @@
                     "complete": true,
                     "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                     "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                    "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                    "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                   },
                   "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                   "load_factor_unit": "dimensionless",
@@ -3050,7 +3050,7 @@
                 "solution_data_hash": "sha256:e73ee731fe99729adf0c4e0967d66c76e30c62b0724571377d6fd2aeeecc9336",
                 "solve_id": "load-0.75-newton-1",
                 "state_hash": "sha256:dfdfbacb491de74f03858020cf6cb9945871e4751476a53c148144753b258cd3",
-                "state_operator_binding_hash": "sha256:3c0748780c28e54c5ce48680776265f1d3021410445e9e261ab495b9cb9d4a68",
+                "state_operator_binding_hash": "sha256:2eac4ad89756e3588d6fdcf4efa41068ed3bf32d2a4f7aeaaf2e2ad07aa13507",
                 "status": "ready",
                 "terminal_reason": "converged_explicit_residual"
               },
@@ -3085,8 +3085,8 @@
       },
       {
         "accepted": true,
-        "accepted_state_hash_after": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
-        "accepted_state_hash_before": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
+        "accepted_state_hash_after": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
+        "accepted_state_hash_before": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
         "attempt_index": 4,
         "history": [
           {
@@ -3129,7 +3129,7 @@
             "residual_gate_passed": false,
             "residual_inf_kn": 1.6724753635574203,
             "tangent_solve": {
-              "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+              "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
               "contract_pass": true,
               "independent_explicit_residual_data_hash": "sha256:fcc61e27824ecf2640803d58df75d83323db7e039685e93402f3715b2b20f267",
               "independent_explicit_residual_gate_passed": true,
@@ -3152,7 +3152,7 @@
                   "restart_length": 8,
                   "terminal_gate": "explicit_raw_residual_l2_and_inf"
                 },
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "converged": true,
                 "convergence_threshold_l2_kn": 2.950361032947862e-08,
@@ -3193,7 +3193,7 @@
                 "matrix_free_current_state_operator_action": true,
                 "operator_action_count": 5,
                 "operator_binding": {
-                  "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                  "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                   "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                   "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                   "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -3205,7 +3205,7 @@
                     "complete": true,
                     "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                     "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                    "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                    "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                   },
                   "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                   "load_factor_unit": "dimensionless",
@@ -3277,7 +3277,7 @@
                 "solution_data_hash": "sha256:124ed6817f5f5d2283c0da0627c8a23dfaadf00ddbcfa587981df5151e10e12d",
                 "solve_id": "load-1-newton-1",
                 "state_hash": "sha256:34ee7fc4b45ccce8ddb6bd3a4338eb9138f642df91fb358e56ddd7bcd01831ff",
-                "state_operator_binding_hash": "sha256:4f65c795ad1a7210cd1915bb6c19db1e1ea0f6bdbce0623c71008be2f246c981",
+                "state_operator_binding_hash": "sha256:8ddd8b5e439785b2472abb8181a4969c73a9f61cd835024c8746b367d10e4bb8",
                 "status": "ready",
                 "terminal_reason": "converged_explicit_residual"
               },
@@ -3319,9 +3319,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:fc5339af7835ab984ce8990fa1bdae3360a47caa60c9c8de08aea853d56c91ad",
+        "state_hash": "sha256:145200f8c57a145fe849217098f31c3d21772f70f32b406f623a8de189485e6e",
         "step_index": 0
       },
       {
@@ -3330,9 +3330,9 @@
         "displacement_inf_m": 0.0006512168154868429,
         "equation_count": 70560,
         "load_factor": 0.25,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:02531ee3fa204c1477811cbe01648f8cfaa6ff049b66a9b0b040255ff0b03616",
+        "state_hash": "sha256:f897bf32db173cbbd858e4edca27530a2b40b4dc4e627e8d56ed04f51718f1c7",
         "step_index": 1
       },
       {
@@ -3341,9 +3341,9 @@
         "displacement_inf_m": 0.0013024351166917927,
         "equation_count": 70560,
         "load_factor": 0.5,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+        "state_hash": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
         "step_index": 2
       },
       {
@@ -3352,9 +3352,9 @@
         "displacement_inf_m": 0.001953654881039215,
         "equation_count": 70560,
         "load_factor": 0.75,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
+        "state_hash": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
         "step_index": 3
       },
       {
@@ -3363,9 +3363,9 @@
         "displacement_inf_m": 0.0026048760859528554,
         "equation_count": 70560,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
+        "state_hash": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
         "step_index": 4
       }
     ],
@@ -3412,9 +3412,9 @@
       "displacement_inf_m": 0.0026048760859528554,
       "equation_count": 70560,
       "load_factor": 1.0,
-      "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+      "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
       "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-      "state_hash": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
+      "state_hash": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
       "step_index": 4
     },
     "initial_checkpoint": {
@@ -3423,9 +3423,9 @@
       "displacement_inf_m": 0.0,
       "equation_count": 70560,
       "load_factor": 0.0,
-      "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+      "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
       "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-      "state_hash": "sha256:fc5339af7835ab984ce8990fa1bdae3360a47caa60c9c8de08aea853d56c91ad",
+      "state_hash": "sha256:145200f8c57a145fe849217098f31c3d21772f70f32b406f623a8de189485e6e",
       "step_index": 0
     },
     "metrics": {
@@ -3458,9 +3458,9 @@
       "target_load_factor": 1.0,
       "target_load_factor_reached": true
     },
-    "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+    "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
     "schema_version": "load-controlled-matrix-free-newton-continuation.v1",
-    "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+    "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
     "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
     "status": "ready",
     "terminal_reason": "target_load_factor_reached"
@@ -3494,9 +3494,9 @@
     "schema_version": "g1-mgt-state-updated-frame-axial-live-load-1p0-diagnostic-vector.v1",
     "status": "ready"
   },
-  "generated_at": "2026-08-08T09:53:41.420407+00:00",
+  "generated_at": "2026-08-09T02:02:59.545242+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:7b83fe9ed3c94bc1bc35879db24ea21ab86ad9ff8836a3b48dcb07d46d6f99bb",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -3537,8 +3537,8 @@
     ]
   },
   "iteration_limited_failure_rollback": {
-    "accepted_state_hash_after": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
-    "accepted_state_hash_before": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
+    "accepted_state_hash_after": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
+    "accepted_state_hash_before": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
     "claim_boundary": "This actual-model control-flow probe uses the same 0.0005 N gate but deliberately allows only one Newton correction. The remaining 0.002323 N trial therefore fails, and the zero accepted checkpoint is restored exactly. It proves bounded displacement rollback, not material-state rollback or a physical convergence limitation.",
     "configured_maximum_newton_iterations": 1,
     "configured_residual_tolerance_inf_n": 0.0005,
@@ -3547,8 +3547,8 @@
       "attempts": [
         {
           "accepted": false,
-          "accepted_state_hash_after": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
-          "accepted_state_hash_before": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
+          "accepted_state_hash_after": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
+          "accepted_state_hash_before": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
           "attempt_index": 1,
           "history": [
             {
@@ -3591,7 +3591,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 3.8238140951064206,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:0fb0103b0d1f840ac867beb9767cd1ca908f401ab0854ffb7257b2f85d4297a3",
                 "independent_explicit_residual_gate_passed": true,
@@ -3614,7 +3614,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 6.744704877118535e-08,
@@ -3655,7 +3655,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -3667,7 +3667,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -3739,7 +3739,7 @@
                   "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:38d7160269dc9258e35d996b75315ef7424e12531d9ef51de80a1eb0018d9d78",
-                  "state_operator_binding_hash": "sha256:e7938303ac013ec8f87d6f69fe10cc57a3dd5fa31c5c31fe576aa02d9f025b72",
+                  "state_operator_binding_hash": "sha256:2c2d4371158411aed9f7bfff958d689c7237def7307ef7518c19203023840c2d",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -3782,9 +3782,9 @@
           "displacement_inf_m": 0.0,
           "equation_count": 70560,
           "load_factor": 0.0,
-          "path_contract_hash": "sha256:ae75f0de7d474e34b86ff1de6a2a4b8439babeb1999d6a3bfd87bb9874ea0fff",
+          "path_contract_hash": "sha256:951a88a1a7fba9e9ef682e060e803b4aa815eb7fd9793405c2853d20de18958a",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
+          "state_hash": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
           "step_index": 0
         }
       ],
@@ -3828,9 +3828,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:ae75f0de7d474e34b86ff1de6a2a4b8439babeb1999d6a3bfd87bb9874ea0fff",
+        "path_contract_hash": "sha256:951a88a1a7fba9e9ef682e060e803b4aa815eb7fd9793405c2853d20de18958a",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
+        "state_hash": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
         "step_index": 0
       },
       "initial_checkpoint": {
@@ -3839,9 +3839,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:ae75f0de7d474e34b86ff1de6a2a4b8439babeb1999d6a3bfd87bb9874ea0fff",
+        "path_contract_hash": "sha256:951a88a1a7fba9e9ef682e060e803b4aa815eb7fd9793405c2853d20de18958a",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:4fea9a4468a96229cfe71d5b16dd834ed2604cd3f7d014ccf97b4321e760bb5e",
+        "state_hash": "sha256:6c01286e96f06ff77c6c19594f0fab2720e3f7770bcbc3314dee624b3be778e1",
         "step_index": 0
       },
       "metrics": {
@@ -3874,9 +3874,9 @@
         "target_load_factor": 1.0,
         "target_load_factor_reached": false
       },
-      "path_contract_hash": "sha256:ae75f0de7d474e34b86ff1de6a2a4b8439babeb1999d6a3bfd87bb9874ea0fff",
+      "path_contract_hash": "sha256:951a88a1a7fba9e9ef682e060e803b4aa815eb7fd9793405c2853d20de18958a",
       "schema_version": "load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "blocked",
       "terminal_reason": "maximum_newton_iterations_exhausted"
@@ -3913,8 +3913,8 @@
       "attempts": [
         {
           "accepted": true,
-          "accepted_state_hash_after": "sha256:ad4df05ca15b557d4658644f5a4821e28f8e5ebf6566bf1d235f0ab5ef52a4ec",
-          "accepted_state_hash_before": "sha256:cf7ebde5abeece0cf58763f652396fd71371199b0700f660a51ed6ed6d419dc1",
+          "accepted_state_hash_after": "sha256:13baedf107b11e61967fbdae98a6cef07082e91d79e7c6062d282e9b15ee2399",
+          "accepted_state_hash_before": "sha256:08314b987485eb3b9d37d8a28cfe4a1fe101d80159cb1411c3a42472c460b346",
           "attempt_index": 1,
           "history": [
             {
@@ -3957,7 +3957,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.6455250594454822,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:8bb68a6adc5fb68f6d9675d667964e25185f5219853a48b8a15b2a79452a63dc",
                 "independent_explicit_residual_gate_passed": true,
@@ -3980,7 +3980,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.9024891743631617e-08,
@@ -4021,7 +4021,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -4033,7 +4033,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -4105,7 +4105,7 @@
                   "solution_data_hash": "sha256:dd2ec897e09eb38a436d19b1ba881c7ff59d53d3c44fb2eed0a7c6292354d094",
                   "solve_id": "load-0.656-newton-1",
                   "state_hash": "sha256:aa1e6b7aff82ca47c93c678e78fde51b8638de6d3650ef192ffe49d8b2cc87a1",
-                  "state_operator_binding_hash": "sha256:e38d363bc119443c6f84bc5a80cad1b51bd7edabb285793dbd5ac32b20dc02b8",
+                  "state_operator_binding_hash": "sha256:4096200aa4a54445244857342925074bbc54f01a59f88f8a5646edccd63108b4",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -4147,9 +4147,9 @@
           "displacement_inf_m": 0.0,
           "equation_count": 70560,
           "load_factor": 0.0,
-          "path_contract_hash": "sha256:33ae6b1118cf3c413be6287d7060ec90b59131d4139cf5519610f7fc9aad7b2c",
+          "path_contract_hash": "sha256:2ca50e161a9d1f2da7cd6ddad2db8d78bc4f1fa406528d8d83fbf525f86c7fae",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:cf7ebde5abeece0cf58763f652396fd71371199b0700f660a51ed6ed6d419dc1",
+          "state_hash": "sha256:08314b987485eb3b9d37d8a28cfe4a1fe101d80159cb1411c3a42472c460b346",
           "step_index": 0
         },
         {
@@ -4158,9 +4158,9 @@
           "displacement_inf_m": 0.0017087960794339202,
           "equation_count": 70560,
           "load_factor": 0.656,
-          "path_contract_hash": "sha256:33ae6b1118cf3c413be6287d7060ec90b59131d4139cf5519610f7fc9aad7b2c",
+          "path_contract_hash": "sha256:2ca50e161a9d1f2da7cd6ddad2db8d78bc4f1fa406528d8d83fbf525f86c7fae",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:ad4df05ca15b557d4658644f5a4821e28f8e5ebf6566bf1d235f0ab5ef52a4ec",
+          "state_hash": "sha256:13baedf107b11e61967fbdae98a6cef07082e91d79e7c6062d282e9b15ee2399",
           "step_index": 1
         }
       ],
@@ -4204,9 +4204,9 @@
         "displacement_inf_m": 0.0017087960794339202,
         "equation_count": 70560,
         "load_factor": 0.656,
-        "path_contract_hash": "sha256:33ae6b1118cf3c413be6287d7060ec90b59131d4139cf5519610f7fc9aad7b2c",
+        "path_contract_hash": "sha256:2ca50e161a9d1f2da7cd6ddad2db8d78bc4f1fa406528d8d83fbf525f86c7fae",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:ad4df05ca15b557d4658644f5a4821e28f8e5ebf6566bf1d235f0ab5ef52a4ec",
+        "state_hash": "sha256:13baedf107b11e61967fbdae98a6cef07082e91d79e7c6062d282e9b15ee2399",
         "step_index": 1
       },
       "initial_checkpoint": {
@@ -4215,9 +4215,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:33ae6b1118cf3c413be6287d7060ec90b59131d4139cf5519610f7fc9aad7b2c",
+        "path_contract_hash": "sha256:2ca50e161a9d1f2da7cd6ddad2db8d78bc4f1fa406528d8d83fbf525f86c7fae",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:cf7ebde5abeece0cf58763f652396fd71371199b0700f660a51ed6ed6d419dc1",
+        "state_hash": "sha256:08314b987485eb3b9d37d8a28cfe4a1fe101d80159cb1411c3a42472c460b346",
         "step_index": 0
       },
       "metrics": {
@@ -4250,9 +4250,9 @@
         "target_load_factor": 0.656,
         "target_load_factor_reached": true
       },
-      "path_contract_hash": "sha256:33ae6b1118cf3c413be6287d7060ec90b59131d4139cf5519610f7fc9aad7b2c",
+      "path_contract_hash": "sha256:2ca50e161a9d1f2da7cd6ddad2db8d78bc4f1fa406528d8d83fbf525f86c7fae",
       "schema_version": "load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "ready",
       "terminal_reason": "target_load_factor_reached"
@@ -4317,7 +4317,7 @@
             "restart_length": 8,
             "terminal_gate": "explicit_raw_residual_l2_and_inf"
           },
-          "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+          "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
           "contract_pass": true,
           "converged": true,
           "convergence_threshold_l2_kn": 2.135229473089873e-08,
@@ -4358,7 +4358,7 @@
           "matrix_free_current_state_operator_action": true,
           "operator_action_count": 5,
           "operator_binding": {
-            "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+            "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
             "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
             "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
             "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -4370,7 +4370,7 @@
               "complete": true,
               "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
               "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-              "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+              "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
             },
             "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
             "load_factor_unit": "dimensionless",
@@ -4442,7 +4442,7 @@
           "solution_data_hash": "sha256:33338510ae52a3f7b408549cdd25ed51baa8274a7a610a3d81511c41520cc27c",
           "solve_id": "actual-local-quadratic-probe-1",
           "state_hash": "sha256:0282c5f16bada769f55da9109524641763eeb8b2a6c566a6407ce47236c83ab4",
-          "state_operator_binding_hash": "sha256:4965f5237507eaeafb3f505548102b134c101957ed3c1e59cfac63479b10df04",
+          "state_operator_binding_hash": "sha256:01a03b63e9107b2458e085e64bcf0948e248eaa2ff93ff55391d9f2c1ecbff53",
           "status": "ready",
           "terminal_reason": "converged_explicit_residual"
         }
@@ -4479,7 +4479,7 @@
             "restart_length": 8,
             "terminal_gate": "explicit_raw_residual_l2_and_inf"
           },
-          "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+          "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
           "contract_pass": true,
           "converged": true,
           "convergence_threshold_l2_kn": 1.0676146974987615e-08,
@@ -4520,7 +4520,7 @@
           "matrix_free_current_state_operator_action": true,
           "operator_action_count": 5,
           "operator_binding": {
-            "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+            "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
             "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
             "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
             "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -4532,7 +4532,7 @@
               "complete": true,
               "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
               "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-              "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+              "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
             },
             "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
             "load_factor_unit": "dimensionless",
@@ -4604,7 +4604,7 @@
           "solution_data_hash": "sha256:a3cd2519d5b38262ca6124107b10bd2f210fa2a3e75582a07ae6d75438811795",
           "solve_id": "actual-local-quadratic-probe-2",
           "state_hash": "sha256:cc0f32531e6aa109b8c32ab8693382058b32cb5dcd67adcf8e549c1e4f857ce0",
-          "state_operator_binding_hash": "sha256:81d29ca4ceb8b82127ef55a300cc26749e98f9f887fc0190984de535155e0d7b",
+          "state_operator_binding_hash": "sha256:d5edfe75db74925d3a76d34cdcb4fe560c5ca69a10bea4c556f6d2c0a4162548",
           "status": "ready",
           "terminal_reason": "converged_explicit_residual"
         }
@@ -4641,7 +4641,7 @@
             "restart_length": 8,
             "terminal_gate": "explicit_raw_residual_l2_and_inf"
           },
-          "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+          "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
           "contract_pass": true,
           "converged": true,
           "convergence_threshold_l2_kn": 5.338073389711029e-09,
@@ -4682,7 +4682,7 @@
           "matrix_free_current_state_operator_action": true,
           "operator_action_count": 5,
           "operator_binding": {
-            "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+            "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
             "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
             "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
             "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -4694,7 +4694,7 @@
               "complete": true,
               "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
               "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-              "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+              "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
             },
             "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
             "load_factor_unit": "dimensionless",
@@ -4766,7 +4766,7 @@
           "solution_data_hash": "sha256:52676005c58421d9dc603b26e84e0f53baffb2fe44cd27bd56bbae92fcecddd8",
           "solve_id": "actual-local-quadratic-probe-3",
           "state_hash": "sha256:838a252496373384f15570424350543a73484689c7053eb723ebbb35a0e88786",
-          "state_operator_binding_hash": "sha256:c18828619e0ee0ed111a6ce8a21fe86ddd13104ddf9fab15bac51fd2e0f7564a",
+          "state_operator_binding_hash": "sha256:fa10f79c38f49d8d57b2c22cd2fb9de5974102210179fdfd768d46bf04834b0e",
           "status": "ready",
           "terminal_reason": "converged_explicit_residual"
         }
@@ -4786,7 +4786,7 @@
     "expected_solve_receipt_count": 21,
     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
     "operator_binding_hashes": [
-      "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279"
+      "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980"
     ],
     "operator_callback_formula_parent_arrays_bound": true,
     "operator_callback_outputs_in_deterministic_contract": false,
@@ -4820,9 +4820,9 @@
       "displacement_inf_m": 0.0013024351166917927,
       "equation_count": 70560,
       "load_factor": 0.5,
-      "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+      "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
       "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-      "state_hash": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+      "state_hash": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
       "step_index": 2
     },
     "restart_checkpoint_consumed": true,
@@ -4831,8 +4831,8 @@
       "attempts": [
         {
           "accepted": true,
-          "accepted_state_hash_after": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
-          "accepted_state_hash_before": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+          "accepted_state_hash_after": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
+          "accepted_state_hash_before": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
           "attempt_index": 1,
           "history": [
             {
@@ -4875,7 +4875,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.1947449797988008,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:cfff4a47fe6e6d663a59cac1f518b60d2830803894fbaad2b3c82fe981de2646",
                 "independent_explicit_residual_gate_passed": true,
@@ -4898,7 +4898,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.1075213768460954e-08,
@@ -4939,7 +4939,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -4951,7 +4951,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -5023,7 +5023,7 @@
                   "solution_data_hash": "sha256:e73ee731fe99729adf0c4e0967d66c76e30c62b0724571377d6fd2aeeecc9336",
                   "solve_id": "load-0.75-newton-1",
                   "state_hash": "sha256:dfdfbacb491de74f03858020cf6cb9945871e4751476a53c148144753b258cd3",
-                  "state_operator_binding_hash": "sha256:3c0748780c28e54c5ce48680776265f1d3021410445e9e261ab495b9cb9d4a68",
+                  "state_operator_binding_hash": "sha256:2eac4ad89756e3588d6fdcf4efa41068ed3bf32d2a4f7aeaaf2e2ad07aa13507",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -5058,8 +5058,8 @@
         },
         {
           "accepted": true,
-          "accepted_state_hash_after": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
-          "accepted_state_hash_before": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
+          "accepted_state_hash_after": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
+          "accepted_state_hash_before": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
           "attempt_index": 2,
           "history": [
             {
@@ -5102,7 +5102,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 1.6724753635574203,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:fcc61e27824ecf2640803d58df75d83323db7e039685e93402f3715b2b20f267",
                 "independent_explicit_residual_gate_passed": true,
@@ -5125,7 +5125,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 2.950361032947862e-08,
@@ -5166,7 +5166,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -5178,7 +5178,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -5250,7 +5250,7 @@
                   "solution_data_hash": "sha256:124ed6817f5f5d2283c0da0627c8a23dfaadf00ddbcfa587981df5151e10e12d",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:34ee7fc4b45ccce8ddb6bd3a4338eb9138f642df91fb358e56ddd7bcd01831ff",
-                  "state_operator_binding_hash": "sha256:4f65c795ad1a7210cd1915bb6c19db1e1ea0f6bdbce0623c71008be2f246c981",
+                  "state_operator_binding_hash": "sha256:8ddd8b5e439785b2472abb8181a4969c73a9f61cd835024c8746b367d10e4bb8",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -5292,9 +5292,9 @@
           "displacement_inf_m": 0.0013024351166917927,
           "equation_count": 70560,
           "load_factor": 0.5,
-          "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+          "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+          "state_hash": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
           "step_index": 2
         },
         {
@@ -5303,9 +5303,9 @@
           "displacement_inf_m": 0.001953654881039215,
           "equation_count": 70560,
           "load_factor": 0.75,
-          "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+          "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:f9c4e5ffe00eda1c5be2ee9597868b80b920dfac6f58c0867eaab606f046b2c6",
+          "state_hash": "sha256:696231f7b79961f4f7a778e2f0d7c48d44554a9a910e56b14255bde8974ea0f1",
           "step_index": 3
         },
         {
@@ -5314,9 +5314,9 @@
           "displacement_inf_m": 0.0026048760859528554,
           "equation_count": 70560,
           "load_factor": 1.0,
-          "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+          "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
+          "state_hash": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
           "step_index": 4
         }
       ],
@@ -5363,9 +5363,9 @@
         "displacement_inf_m": 0.0026048760859528554,
         "equation_count": 70560,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:2f649a292ed73c8b02eaf23c21459c84c6fa4d64e7885cbf3be5697ddbe5ec4a",
+        "state_hash": "sha256:f10a10eaa3911ce4aa38a1caffec8f27ed4d036a320b891c7e6a93fdd4f948d9",
         "step_index": 4
       },
       "initial_checkpoint": {
@@ -5374,9 +5374,9 @@
         "displacement_inf_m": 0.0013024351166917927,
         "equation_count": 70560,
         "load_factor": 0.5,
-        "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+        "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:f79ccf8a947dc57954af9316e423020f7a69d59e2024398d15c47e39b15d764d",
+        "state_hash": "sha256:46664016325141e53ae9f673f9b88bd20a66bf1d1694e99f68fc0c432bf2c33d",
         "step_index": 2
       },
       "metrics": {
@@ -5409,9 +5409,9 @@
         "target_load_factor": 1.0,
         "target_load_factor_reached": true
       },
-      "path_contract_hash": "sha256:f62238e3d45790d7c90ac323b448a5d2386c74028da55efda6b08855c8c7dbac",
+      "path_contract_hash": "sha256:da48278359ead240c912f13ec87ca0ca04894366fb38aba5dd1c4029821b79f7",
       "schema_version": "load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "ready",
       "terminal_reason": "target_load_factor_reached"
@@ -5420,7 +5420,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1",
   "source_commit_exact_replay_claim": true,
-  "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_tree_state": "commit_bound_inputs_exact",
   "status": "partial",
   "strict_g1_gate_full_load_probe": {
@@ -5434,8 +5434,8 @@
       "attempts": [
         {
           "accepted": true,
-          "accepted_state_hash_after": "sha256:598d40e27526da8b47621762eb93c5165a00c7bed0c1f333f1260a3b6a509e39",
-          "accepted_state_hash_before": "sha256:1e90c59671b53b9024cd35d05a550ee9831c91ccdd493dc0bbc5b9af4e90d5e6",
+          "accepted_state_hash_after": "sha256:aa20fed26ce64e5e955b99dd06df5476f17b53cf8ccf4d24bc9d8cb138d25d3a",
+          "accepted_state_hash_before": "sha256:36dd668b27cc86380d20374d858e656f2cb66e649cf7d55ecf35cc633d11d7b4",
           "attempt_index": 1,
           "history": [
             {
@@ -5478,7 +5478,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 3.8238140951064206,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:0fb0103b0d1f840ac867beb9767cd1ca908f401ab0854ffb7257b2f85d4297a3",
                 "independent_explicit_residual_gate_passed": true,
@@ -5501,7 +5501,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 6.744704877118535e-08,
@@ -5542,7 +5542,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 5,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -5554,7 +5554,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -5626,7 +5626,7 @@
                   "solution_data_hash": "sha256:f34beea3dcaeefbb3ad7eb97eeb6c0448124198d69654d09d9189c616dea2b35",
                   "solve_id": "load-1-newton-1",
                   "state_hash": "sha256:38d7160269dc9258e35d996b75315ef7424e12531d9ef51de80a1eb0018d9d78",
-                  "state_operator_binding_hash": "sha256:e7938303ac013ec8f87d6f69fe10cc57a3dd5fa31c5c31fe576aa02d9f025b72",
+                  "state_operator_binding_hash": "sha256:2c2d4371158411aed9f7bfff958d689c7237def7307ef7518c19203023840c2d",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -5675,7 +5675,7 @@
               "residual_gate_passed": false,
               "residual_inf_kn": 2.323337105281098e-06,
               "tangent_solve": {
-                "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                 "contract_pass": true,
                 "independent_explicit_residual_data_hash": "sha256:b543480b8f7e3083617ae782fec59b6ba14dcc4aa3983664873662acff5c43dd",
                 "independent_explicit_residual_gate_passed": true,
@@ -5698,7 +5698,7 @@
                     "restart_length": 8,
                     "terminal_gate": "explicit_raw_residual_l2_and_inf"
                   },
-                  "contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+                  "contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
                   "contract_pass": true,
                   "converged": true,
                   "convergence_threshold_l2_kn": 1e-10,
@@ -5739,7 +5739,7 @@
                   "matrix_free_current_state_operator_action": true,
                   "operator_action_count": 4,
                   "operator_binding": {
-                    "binding_hash": "sha256:9bfa5306c64f41f45c7d014bae085e16a1b8367a55e8aba46d84b5ab3a84b279",
+                    "binding_hash": "sha256:6207f723e1a28cecbb3c1844ba4bcab6256a4f41afff429a711875ad3af91980",
                     "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
                     "current_tangent_action_contract": "analytic_reference_load_frame_delta_finite_chord_axial_action.v1",
                     "current_tangent_operator_array_bundle_hash": "sha256:19b833d0334ed923586aa9797459fec2814f138d1d7cf525d4f62ea9267a9118",
@@ -5751,7 +5751,7 @@
                       "complete": true,
                       "equilibrium_operator_binding_hash": "sha256:d943968e1d383c9c1868e0a9c42ecf7231e1b997e77b1400066a89c9db509869",
                       "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-                      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+                      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
                     },
                     "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
                     "load_factor_unit": "dimensionless",
@@ -5817,7 +5817,7 @@
                   "solution_data_hash": "sha256:181eea267a2c9b9de30221af65d9c1b19f1379fd077466cceb88efe6fb6a1da8",
                   "solve_id": "load-1-newton-2",
                   "state_hash": "sha256:80874e32ce20f1c348479833cad767caf4677281fdec9b0a2757c26c03a9d7dd",
-                  "state_operator_binding_hash": "sha256:acd23c4076eabbf650ab574d3762c12aaf76f0f50b3a8fdd9ff9684d54c982cc",
+                  "state_operator_binding_hash": "sha256:0b003de98229ed14dde08972d88258dc36b6f38316cc9483f52e5bb524a5fd1c",
                   "status": "ready",
                   "terminal_reason": "converged_explicit_residual"
                 },
@@ -5859,9 +5859,9 @@
           "displacement_inf_m": 0.0,
           "equation_count": 70560,
           "load_factor": 0.0,
-          "path_contract_hash": "sha256:e937d4c2aaaa67f17c361c476b6cc480b95a6455cb278ed581e097a4846d28c8",
+          "path_contract_hash": "sha256:ffb732dcbd55ceef2ffffcea7ca0822b391b2ac39efb811b5d99bc8dd37e86e3",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:1e90c59671b53b9024cd35d05a550ee9831c91ccdd493dc0bbc5b9af4e90d5e6",
+          "state_hash": "sha256:36dd668b27cc86380d20374d858e656f2cb66e649cf7d55ecf35cc633d11d7b4",
           "step_index": 0
         },
         {
@@ -5870,9 +5870,9 @@
           "displacement_inf_m": 0.0026048760859532665,
           "equation_count": 70560,
           "load_factor": 1.0,
-          "path_contract_hash": "sha256:e937d4c2aaaa67f17c361c476b6cc480b95a6455cb278ed581e097a4846d28c8",
+          "path_contract_hash": "sha256:ffb732dcbd55ceef2ffffcea7ca0822b391b2ac39efb811b5d99bc8dd37e86e3",
           "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-          "state_hash": "sha256:598d40e27526da8b47621762eb93c5165a00c7bed0c1f333f1260a3b6a509e39",
+          "state_hash": "sha256:aa20fed26ce64e5e955b99dd06df5476f17b53cf8ccf4d24bc9d8cb138d25d3a",
           "step_index": 1
         }
       ],
@@ -5916,9 +5916,9 @@
         "displacement_inf_m": 0.0026048760859532665,
         "equation_count": 70560,
         "load_factor": 1.0,
-        "path_contract_hash": "sha256:e937d4c2aaaa67f17c361c476b6cc480b95a6455cb278ed581e097a4846d28c8",
+        "path_contract_hash": "sha256:ffb732dcbd55ceef2ffffcea7ca0822b391b2ac39efb811b5d99bc8dd37e86e3",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:598d40e27526da8b47621762eb93c5165a00c7bed0c1f333f1260a3b6a509e39",
+        "state_hash": "sha256:aa20fed26ce64e5e955b99dd06df5476f17b53cf8ccf4d24bc9d8cb138d25d3a",
         "step_index": 1
       },
       "initial_checkpoint": {
@@ -5927,9 +5927,9 @@
         "displacement_inf_m": 0.0,
         "equation_count": 70560,
         "load_factor": 0.0,
-        "path_contract_hash": "sha256:e937d4c2aaaa67f17c361c476b6cc480b95a6455cb278ed581e097a4846d28c8",
+        "path_contract_hash": "sha256:ffb732dcbd55ceef2ffffcea7ca0822b391b2ac39efb811b5d99bc8dd37e86e3",
         "schema_version": "load-controlled-matrix-free-newton-checkpoint.v1",
-        "state_hash": "sha256:1e90c59671b53b9024cd35d05a550ee9831c91ccdd493dc0bbc5b9af4e90d5e6",
+        "state_hash": "sha256:36dd668b27cc86380d20374d858e656f2cb66e649cf7d55ecf35cc633d11d7b4",
         "step_index": 0
       },
       "metrics": {
@@ -5962,9 +5962,9 @@
         "target_load_factor": 1.0,
         "target_load_factor_reached": true
       },
-      "path_contract_hash": "sha256:e937d4c2aaaa67f17c361c476b6cc480b95a6455cb278ed581e097a4846d28c8",
+      "path_contract_hash": "sha256:ffb732dcbd55ceef2ffffcea7ca0822b391b2ac39efb811b5d99bc8dd37e86e3",
       "schema_version": "load-controlled-matrix-free-newton-continuation.v1",
-      "solver_contract_hash": "sha256:ad536470da3f659f584634189a7059bdcb61b9bde1b740769ff5b88cc2b8314c",
+      "solver_contract_hash": "sha256:d82cbeac82a203233c7f0d345a3db76e3e2f45fa65d16d0f8b45d2387842cb28",
       "solver_profile": "matrix_free_cpu_fgmres_fixed_reference_splu_diagnostic.v1",
       "status": "ready",
       "terminal_reason": "target_load_factor_reached"

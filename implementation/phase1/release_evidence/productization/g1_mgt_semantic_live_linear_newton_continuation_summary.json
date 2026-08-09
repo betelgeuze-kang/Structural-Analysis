@@ -60,14 +60,14 @@
   "evidence_closure_pass": false,
   "final_residual_inf_n": 1.8550488967150613e-06,
   "free_equation_count": 70560,
-  "generated_at": "2026-08-08T09:55:58.277944+00:00",
+  "generated_at": "2026-08-09T02:01:31.754222+00:00",
   "maximum_tangent_consistency_error_inf_kn": 9.06263396416307e-06,
   "maximum_tangent_solve_explicit_residual_inf_n": 4.2724750528577715e-06,
   "operator_classification": "state_invariant_linear_reference_geometry",
   "raw_material_table_property_coverage_complete": false,
   "restart_replay_byte_identical": true,
   "schema_version": "g1-mgt-semantic-live-linear-newton-continuation-summary.v1",
-  "source_commit_sha": "7cc626b277997a1b5f4e94eb64bf287335d8042b",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_property_coverage_complete": false,
   "status": "partial"
 }

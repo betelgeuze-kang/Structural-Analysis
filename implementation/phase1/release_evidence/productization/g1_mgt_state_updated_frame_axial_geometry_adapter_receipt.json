@@ -526,9 +526,9 @@
     "unresolved_element_head_limit": 32,
     "unresolved_source_property_element_count": 0
   },
-  "generated_at": "2026-07-22T17:27:16.048225+00:00",
+  "generated_at": "2026-08-09T02:03:01.815446+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:7b83fe9ed3c94bc1bc35879db24ea21ab86ad9ff8836a3b48dcb07d46d6f99bb",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -548,7 +548,7 @@
     "src/structural_analysis/schemas/g1_mgt_state_updated_frame_axial_geometry_adapter_v1.schema.json": "sha256:6b54c97408ca8eb257e27780cdc8b20437a8ce1b474325b37baa55bb65bd9315",
     "tests/test_build_g1_mgt_state_updated_frame_axial_geometry_adapter_receipt.py": "sha256:006da2710f67ecd05b04182ebed2590cfe9c2162337ad44b90969490e9e97188",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f92f6d65a24cd59d7c18a29f9624fa04d52e32d400be8f951485519f64e8e210",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f77f6cde778d23c70a04657a93e0c525178f1a9d1fe09fb3ba19ffe8434f7716",
     "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
     "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
     "tests/test_parse_mgt_section_material_properties.py": "sha256:d7859a725762191c56523c0cfed9aabd13ed7ec5b2cdca275ba2a10d7a472cfa"
@@ -647,7 +647,7 @@
   },
   "schema_version": "g1-mgt-state-updated-frame-axial-geometry-adapter-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "state_dependent_tangent_contract": {
     "available": false,

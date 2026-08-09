@@ -224,6 +224,30 @@
       "unresolved_identity_rows": []
     },
     "element_count": 12728,
+    "equilibrium_operator_binding": {
+      "apply_shell_material_tangent": false,
+      "apply_state_updated_frame_axial_geometry": false,
+      "case_id": "g1_real_mgt_load_coupled_arc_length_adapter",
+      "current_tangent_operator_array_bundle_hash": "unavailable",
+      "current_tangent_operator_contract_hash": "unavailable",
+      "free_equation_order_data_hash": "sha256:21e0cef7915f3c68a772ca541123453a35535c3b172110ebd54f16695541c1b1",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "operator_classification": "state_invariant_linear_reference_geometry",
+      "reference_load_free_n_data_hash": "sha256:010766b31f80c5f2de534b006b6b3143d9d59fffd24d709eb16637392fbdc805",
+      "residual_formula_hash": "sha256:2fc498657a1500da4ff969e09251d4c947bf028618f8aaddaf868e79304174d3",
+      "roundtrip_json_sha256": "sha256:7f3ee6659bf4a11531b7ffd984ae931b4c01af45a155c688042b1ec4189d9dc6",
+      "roundtrip_sha256": "sha256:d95097f6d0a40d950f38dda4fe287bca2428ea3e476bebeb3424d458eac409de",
+      "schema_version": "mgt-equilibrium-operator-binding.v1",
+      "semantic_load_case": "LIVE",
+      "state_invariant_tangent_contract_hash": "sha256:b8743abc72f010270c8f456bdaf67cef236eb1a6686a06dcd31639a596a15cae",
+      "zero_reference_background_displacement_data_hash": "sha256:12ba98e8f05cefe565c66d8644823cf70806a4585fc97aeb1021f76b1ce8e112"
+    },
+    "exact_restart_binding": {
+      "complete": false,
+      "equilibrium_operator_binding_hash": "sha256:c24ffc957c4e858e2f3914e639bce28ae4172cfc72fd5a482d5fbf7c429cd393",
+      "model_source_sha256": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "source_commit_sha": "unavailable"
+    },
     "force_conversion_divisor": 1000.0,
     "force_unit_input": "N",
     "force_unit_protocol": "kN",
@@ -2139,7 +2163,7 @@
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-22T17:27:14.315850+00:00",
+  "generated_at": "2026-08-09T02:01:46.053825+00:00",
   "initial_state_audit": {
     "blockers_remaining": [
       "initial_checkpoint_not_required_to_satisfy_arc_length_residual_gate",
@@ -2188,7 +2212,7 @@
     "tangent_step_comparison_relative_error": 3.3783233839930677e-12
   },
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:7b83fe9ed3c94bc1bc35879db24ea21ab86ad9ff8836a3b48dcb07d46d6f99bb",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -2200,7 +2224,7 @@
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
     "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py": "sha256:a6598d5613aefccaa9a6eda7c26adaba2cf4406dd3ea0a4acb57f32fe0870603",
-    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:ce19f76c158c6b119c05c034fae25cad3fc0e7e3f77624738cefe39bd98839aa",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:8414c63eedc3d26e4446d8a829992b6120235d242a8a5132c7339a2e4d44bf55",
     "implementation/phase1/run_mgt_full_frame_6dof_sparse_equilibrium.py": "sha256:def37aafc842b84295aa1c7f77a1f3ea5ec7f02fe53a88fafdde140de9afe196",
     "implementation/phase1/run_mgt_uncoarsened_boundary_global_equilibrium.py": "sha256:1c3c723d49c535743aa618c5d80f10a351d2fe019f908f7118a58171dce12599",
     "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:aa7948c0ea1478bf33b2a7d460808fb7754c9ea905a501fdaec1f566c6459af9",
@@ -2209,7 +2233,7 @@
     "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:a04172f6aabcbd92299fcb93cf091680affece0e4a385bb3d39136e8171be68c",
     "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:42642fa2b9997bac8ba8a1aa76de3211749352aae46ee8e2bb7a545c3032cdda",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f92f6d65a24cd59d7c18a29f9624fa04d52e32d400be8f951485519f64e8e210",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:f77f6cde778d23c70a04657a93e0c525178f1a9d1fe09fb3ba19ffe8434f7716",
     "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
     "tests/test_mgt_semantic_load_assembly.py": "sha256:8349d6213e690ce12d33375a18f278a145c52eb48e63b386208f13ecadf9f968",
     "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
@@ -2217,7 +2241,7 @@
   },
   "schema_version": "g1-mgt-load-coupled-arc-length-adapter-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f55bc4562ad59e4af8e791d6aafb5e97e3cae34f",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "stored_receipt_comparison": {

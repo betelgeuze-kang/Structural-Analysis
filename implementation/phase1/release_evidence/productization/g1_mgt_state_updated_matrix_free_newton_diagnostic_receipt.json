@@ -168,9 +168,9 @@
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "evidence_closure_pass": false,
-  "generated_at": "2026-07-29T03:36:17.407710+00:00",
+  "generated_at": "2026-08-09T02:05:36.089095+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:fc1daaa7860dec56cfb3f6f9d5b34afaeb12c8d58197d20c2ed6e009735189db",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:7b83fe9ed3c94bc1bc35879db24ea21ab86ad9ff8836a3b48dcb07d46d6f99bb",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -184,10 +184,10 @@
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
     "src/structural_analysis/schemas/current_tangent_operator_v1.schema.json": "sha256:8d233fd3893f952daf31c8acb011a362861540e8048589fb8ffcd003218b3b5d",
     "src/structural_analysis/schemas/g1_mgt_state_updated_matrix_free_newton_diagnostic_v1.schema.json": "sha256:927ceb497e967a55002dac240a7d9787b64f5451b4cb0ee30dc7608a9d2ad095",
-    "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:02c9d30c47759562ab66c92422105078c5a987bc8f4bafe6027a8c3b07a01058",
+    "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py": "sha256:740d944c5272851cdb016785b31e7121957138ca78459e32897873de66821b3a",
     "tests/test_build_g1_mgt_state_updated_matrix_free_newton_diagnostic_receipt.py": "sha256:3b4a028881f6e5d843e7b853922d4cd4fb4ec3ff99069f4b37933a8054ab3758",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_matrix_free_cpu_fgmres_state_tangent.py": "sha256:461b4518cc69ed168d505bf04d50d9cc5fa89f338f117fd0aa7d0550df8345ff"
+    "tests/test_matrix_free_cpu_fgmres_state_tangent.py": "sha256:e0efc0576aec72217031360a5dd36d5145011d93f3ea6c17c416f41a3afa4be3"
   },
   "inputs": {
     "free_equation_count": 70560,
@@ -593,7 +593,7 @@
     "reference_preconditioner_values_hash": "sha256:e8acc6e11594cdf375d8972c8c3292e97c5ada72e250a07273fa5fe1a636f4e1"
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial"
 }
