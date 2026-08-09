@@ -142,9 +142,29 @@ def test_committed_receipt_records_actual_linear_path_without_promotion() -> Non
     assert replay["direct_final_data_sha256"] == (
         "sha256:e598d1b996deb2260eac80c7c66b4da7e64202513c011f570f7c7dcc659279b2"
     )
-    assert replay["direct_final_state_hash"] == (
-        "sha256:af0c565b0fd9c796b7f2fd4f39eeae676f0665266ad60ed3f24257899d7e1b4c"
+    full_load_artifact = receipt["full_load_checkpoint_artifact"]
+    full_load_descriptor = full_load_artifact["checkpoint"]
+    full_load_vector = np.fromfile(
+        ROOT / full_load_artifact["artifact_path"],
+        dtype="<f8",
     )
+    validated_full_load_checkpoint = module.LinearReferenceNewtonCheckpoint(
+        schema_version=full_load_descriptor["schema_version"],
+        case_id=full_load_descriptor["case_id"],
+        path_contract_hash=full_load_descriptor["path_contract_hash"],
+        step_index=full_load_descriptor["step_index"],
+        load_factor=full_load_descriptor["load_factor"],
+        free_displacements_m=full_load_vector,
+        state_hash=full_load_descriptor["state_hash"],
+        source_commit_sha=full_load_descriptor["source_commit_sha"],
+        model_source_sha256=full_load_descriptor["model_source_sha256"],
+        equilibrium_operator_binding_hash=full_load_descriptor[
+            "equilibrium_operator_binding_hash"
+        ],
+    )
+    assert validated_full_load_checkpoint.state_hash == replay[
+        "direct_final_state_hash"
+    ]
 
     rollback = receipt["failed_step_rollback_audit"]
     assert rollback["status"] == "partial"
