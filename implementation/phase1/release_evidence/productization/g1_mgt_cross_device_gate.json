@@ -16,16 +16,19 @@
     "gfx1100_independence_attested",
     "production_contracts_true",
     "kpis_recorded",
-    "source_authoritative_nonlinear_material_parameters_unavailable",
-    "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp"
+    "trusted_hardware_identity_receipts_bound",
+    "cpu_fallback_zero_attested",
+    "terminal_resultir_diagnosticir_parity_bound",
+    "end_to_end_performance_sweep_bound"
   ],
-  "claim_boundary": "A ready gate proves a verified, same-source and same-wheel production-MGT pair on distinct signed gfx1030 and gfx1100 runners with terminal, material, checkpoint, and KPI contracts. It does not prove source-authoritative nonlinear material breadth and therefore cannot by itself close G1.",
+  "claim_boundary": "This v1 gate replays cryptographically signed, same-source and same-wheel production-MGT gfx1030/gfx1100 envelopes and compares their terminal, material, checkpoint, and KPI contracts. It cannot close G1 until separate trusted hardware-identity receipts, observed CPU fallback zero, terminal ResultIR/DiagnosticIR parity, and an end-to-end performance sweep are bound. It does not replace the separately gated N1 CPU mathematical closure or promote unsupported actual-MGT nonlinear material parameters.",
   "claims": {
     "actual_gfx1030_hardware": true,
     "actual_gfx1100_hardware": false,
+    "cryptographically_consistent_cross_device_pair": false,
     "g1_closure": false,
     "signed_independent_cross_device_pair": false,
-    "terminal_cross_device_parity": false
+    "terminal_envelope_contract_parity": false
   },
   "comparisons": {
     "architectures_exact": false,
@@ -46,8 +49,14 @@
     "terminal_contract_exact": false
   },
   "contract_pass": true,
-  "generated_at": "2026-08-08T15:25:19.668373Z",
-  "receipt_hash": "sha256:089fc6e985506ba556b97049a90bed64aa495feaf7207ae9010b09c45559e631",
+  "generated_at": "2026-08-09T00:27:07.588991Z",
+  "promotion_requirements": {
+    "cpu_fallback_zero_attested": false,
+    "end_to_end_performance_sweep_bound": false,
+    "terminal_resultir_diagnosticir_parity_bound": false,
+    "trusted_hardware_identity_receipts_bound": false
+  },
+  "receipt_hash": "sha256:5328b0f0e126f5eff07b14ab37eaee0fd8df95f63a77d2aec488da13e802fc4e",
   "schema_version": "g1-mgt-production-hip-cross-device-gate.v1",
   "sources": {
     "gfx1030": {

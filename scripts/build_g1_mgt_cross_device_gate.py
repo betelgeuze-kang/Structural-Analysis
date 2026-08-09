@@ -30,10 +30,19 @@ DEFAULT_OUT = PRODUCTIZATION / "g1_mgt_cross_device_gate.json"
 SCHEMA = Path("src/structural_analysis/schemas/g1_mgt_cross_device_gate_v1.schema.json")
 VERSION = "g1-mgt-production-hip-cross-device-gate.v1"
 CLAIM_BOUNDARY = (
-    "A ready gate proves a verified, same-source and same-wheel production-MGT "
-    "pair on distinct signed gfx1030 and gfx1100 runners with terminal, material, "
-    "checkpoint, and KPI contracts. It does not prove source-authoritative "
-    "nonlinear material breadth and therefore cannot by itself close G1."
+    "This v1 gate replays cryptographically signed, same-source and same-wheel "
+    "production-MGT gfx1030/gfx1100 envelopes and compares their terminal, "
+    "material, checkpoint, and KPI contracts. It cannot close G1 until separate "
+    "trusted hardware-identity receipts, observed CPU fallback zero, terminal "
+    "ResultIR/DiagnosticIR parity, and an end-to-end performance sweep are bound. "
+    "It does not replace the separately gated N1 CPU mathematical closure or "
+    "promote unsupported actual-MGT nonlinear material parameters."
+)
+PROMOTION_REQUIREMENTS = (
+    "trusted_hardware_identity_receipts_bound",
+    "cpu_fallback_zero_attested",
+    "terminal_resultir_diagnosticir_parity_bound",
+    "end_to_end_performance_sweep_bound",
 )
 
 
@@ -91,14 +100,10 @@ def compare_envelopes(
             == right["source"]["repository_commit_sha"]
         ),
         "same_source_set": (
-            left["source"]["source_set_hash"]
-            == right["source"]["source_set_hash"]
-            and left["source"]["input_checksums"]
-            == right["source"]["input_checksums"]
+            left["source"]["source_set_hash"] == right["source"]["source_set_hash"]
+            and left["source"]["input_checksums"] == right["source"]["input_checksums"]
         ),
-        "same_wheel": (
-            left_hardware["wheel_sha256"] == right_hardware["wheel_sha256"]
-        ),
+        "same_wheel": (left_hardware["wheel_sha256"] == right_hardware["wheel_sha256"]),
         "same_dual_target_binaries": (
             left_hardware["dual_target_binary_sha256"]
             == right_hardware["dual_target_binary_sha256"]
@@ -116,8 +121,7 @@ def compare_envelopes(
         ),
         "distinct_runners": left_runner["runner_id"] != right_runner["runner_id"],
         "distinct_execution_locations": (
-            left_runner["execution_location"]
-            != right_runner["execution_location"]
+            left_runner["execution_location"] != right_runner["execution_location"]
         ),
         "distinct_signers": (
             left_signature["signer_id"] != right_signature["signer_id"]
@@ -158,6 +162,11 @@ def compare_envelopes(
     }
 
 
+def pair_ready(comparisons: dict[str, bool]) -> bool:
+    """Return true only when every signed cross-device comparison passes."""
+    return bool(comparisons) and all(comparisons.values())
+
+
 def build(
     *,
     root: Path = ROOT,
@@ -171,6 +180,11 @@ def build(
         root=root,
         require_current_sources=True,
     )
+    if not (
+        local["evidence_payload"]["hardware"]["gcn_arch_name"] == "gfx1030"
+        and local["claims"]["actual_gfx1030_hardware"] is True
+    ):
+        raise ValueError("g1_cross_device_gfx1030_source_required")
     external_target = _resolve(root, gfx1100_path)
     external: dict[str, Any] | None = None
     if external_target.is_file():
@@ -180,41 +194,41 @@ def build(
     comparisons = (
         compare_envelopes(local, external)
         if external is not None
-        else {name: False for name in (
-            "architectures_exact",
-            "both_signatures_verified",
-            "same_repository_commit",
-            "same_source_set",
-            "same_wheel",
-            "same_dual_target_binaries",
-            "executed_binary_matches_architecture",
-            "terminal_contract_exact",
-            "material_contract_exact",
-            "distinct_organizations",
-            "distinct_runners",
-            "distinct_execution_locations",
-            "distinct_signers",
-            "gfx1100_independence_attested",
-            "production_contracts_true",
-            "kpis_recorded",
-        )}
+        else {
+            name: False
+            for name in (
+                "architectures_exact",
+                "both_signatures_verified",
+                "same_repository_commit",
+                "same_source_set",
+                "same_wheel",
+                "same_dual_target_binaries",
+                "executed_binary_matches_architecture",
+                "terminal_contract_exact",
+                "material_contract_exact",
+                "distinct_organizations",
+                "distinct_runners",
+                "distinct_execution_locations",
+                "distinct_signers",
+                "gfx1100_independence_attested",
+                "production_contracts_true",
+                "kpis_recorded",
+            )
+        }
     )
-    pair_ready = external is not None and all(comparisons.values())
-    blockers = [
-        name for name, passed in comparisons.items() if not passed
-    ]
+    pair_is_consistent = external is not None and pair_ready(comparisons)
+    promotion_requirements = {name: False for name in PROMOTION_REQUIREMENTS}
+    g1_ready = bool(pair_is_consistent and all(promotion_requirements.values()))
+    blockers = [name for name, passed in comparisons.items() if not passed]
     blockers.extend(
-        [
-            "source_authoritative_nonlinear_material_parameters_unavailable",
-            "nonlinear_material_laws_not_connected_to_equilibrium_residual_jvp",
-        ]
+        name for name, passed in promotion_requirements.items() if not passed
     )
     payload: dict[str, Any] = {
         "schema_version": VERSION,
         "receipt_hash": "",
         "generated_at": generated_at
         or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "status": "ready" if pair_ready else "partial",
+        "status": "partial",
         "contract_pass": True,
         "sources": {
             "gfx1030": {
@@ -231,17 +245,21 @@ def build(
             ),
         },
         "comparisons": comparisons,
+        "promotion_requirements": promotion_requirements,
         "claims": {
             "actual_gfx1030_hardware": True,
             "actual_gfx1100_hardware": bool(
-                external is not None
-                and external["claims"]["actual_gfx1100_hardware"]
+                external is not None and external["claims"]["actual_gfx1100_hardware"]
             ),
-            "signed_independent_cross_device_pair": pair_ready,
-            "terminal_cross_device_parity": bool(
-                pair_ready and comparisons["terminal_contract_exact"]
+            "cryptographically_consistent_cross_device_pair": pair_is_consistent,
+            "signed_independent_cross_device_pair": bool(
+                pair_is_consistent
+                and promotion_requirements["trusted_hardware_identity_receipts_bound"]
             ),
-            "g1_closure": False,
+            "terminal_envelope_contract_parity": bool(
+                pair_is_consistent and comparisons["terminal_contract_exact"]
+            ),
+            "g1_closure": g1_ready,
         },
         "blockers_remaining": blockers,
         "claim_boundary": CLAIM_BOUNDARY,
@@ -250,9 +268,7 @@ def build(
     return payload
 
 
-def validate(
-    payload: dict[str, Any], *, root: Path = ROOT
-) -> dict[str, Any]:
+def validate(payload: dict[str, Any], *, root: Path = ROOT) -> dict[str, Any]:
     schema = _read(_resolve(root, SCHEMA))
     errors = sorted(Draft202012Validator(schema).iter_errors(payload), key=str)
     if errors:

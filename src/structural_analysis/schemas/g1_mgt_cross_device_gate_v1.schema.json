@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "sources", "comparisons", "claims", "blockers_remaining", "claim_boundary"],
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "sources", "comparisons", "promotion_requirements", "claims", "blockers_remaining", "claim_boundary"],
   "properties": {
     "schema_version": {"const": "g1-mgt-production-hip-cross-device-gate.v1"},
     "receipt_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "generated_at": {"type": "string"},
-    "status": {"enum": ["partial", "ready"]},
+    "status": {"const": "partial"},
     "contract_pass": {"const": true},
     "sources": {
       "type": "object",
@@ -23,14 +23,26 @@
       "maxProperties": 16,
       "additionalProperties": {"type": "boolean"}
     },
+    "promotion_requirements": {
+      "type": "object",
+      "required": ["trusted_hardware_identity_receipts_bound", "cpu_fallback_zero_attested", "terminal_resultir_diagnosticir_parity_bound", "end_to_end_performance_sweep_bound"],
+      "properties": {
+        "trusted_hardware_identity_receipts_bound": {"const": false},
+        "cpu_fallback_zero_attested": {"const": false},
+        "terminal_resultir_diagnosticir_parity_bound": {"const": false},
+        "end_to_end_performance_sweep_bound": {"const": false}
+      },
+      "additionalProperties": false
+    },
     "claims": {
       "type": "object",
-      "required": ["actual_gfx1030_hardware", "actual_gfx1100_hardware", "signed_independent_cross_device_pair", "terminal_cross_device_parity", "g1_closure"],
+      "required": ["actual_gfx1030_hardware", "actual_gfx1100_hardware", "cryptographically_consistent_cross_device_pair", "signed_independent_cross_device_pair", "terminal_envelope_contract_parity", "g1_closure"],
       "properties": {
         "actual_gfx1030_hardware": {"const": true},
         "actual_gfx1100_hardware": {"type": "boolean"},
-        "signed_independent_cross_device_pair": {"type": "boolean"},
-        "terminal_cross_device_parity": {"type": "boolean"},
+        "cryptographically_consistent_cross_device_pair": {"type": "boolean"},
+        "signed_independent_cross_device_pair": {"const": false},
+        "terminal_envelope_contract_parity": {"type": "boolean"},
         "g1_closure": {"const": false}
       },
       "additionalProperties": false

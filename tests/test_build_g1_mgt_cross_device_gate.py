@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts/build_g1_mgt_cross_device_gate.py"
@@ -57,19 +59,41 @@ def test_committed_gate_is_partial_and_replays() -> None:
     assert payload["sources"]["gfx1100"] is None
     assert payload["claims"]["actual_gfx1030_hardware"] is True
     assert payload["claims"]["actual_gfx1100_hardware"] is False
+    assert payload["claims"]["cryptographically_consistent_cross_device_pair"] is False
     assert payload["claims"]["signed_independent_cross_device_pair"] is False
     assert payload["claims"]["g1_closure"] is False
+    assert payload["promotion_requirements"] == {
+        name: False for name in module.PROMOTION_REQUIREMENTS
+    }
+
+
+def test_locked_v1_schema_rejects_promotion_claims() -> None:
+    payload = json.loads((ROOT / module.DEFAULT_OUT).read_text(encoding="utf-8"))
+    schema = module._read(ROOT / module.SCHEMA)
+    for path, value in (
+        (("status",), "ready"),
+        (("claims", "signed_independent_cross_device_pair"), True),
+        (("claims", "g1_closure"), True),
+    ):
+        candidate = deepcopy(payload)
+        target = candidate
+        for key in path[:-1]:
+            target = target[key]
+        target[path[-1]] = value
+        assert list(module.Draft202012Validator(schema).iter_errors(candidate))
 
 
 def test_pair_comparison_accepts_only_complete_independent_pair() -> None:
     left, right = _synthetic_verified_pair()
     comparisons = module.compare_envelopes(left, right)
     assert comparisons and all(comparisons.values())
-    right["evidence_payload"]["runner_attestation"]["organization_id"] = (
-        left["evidence_payload"]["runner_attestation"]["organization_id"]
-    )
+    assert module.pair_ready(comparisons) is True
+    right["evidence_payload"]["runner_attestation"]["organization_id"] = left[
+        "evidence_payload"
+    ]["runner_attestation"]["organization_id"]
     comparisons = module.compare_envelopes(left, right)
     assert comparisons["distinct_organizations"] is False
+    assert module.pair_ready(comparisons) is False
 
 
 def test_pair_comparison_rejects_source_and_terminal_drift() -> None:
@@ -79,3 +103,59 @@ def test_pair_comparison_rejects_source_and_terminal_drift() -> None:
     comparisons = module.compare_envelopes(left, right)
     assert comparisons["same_repository_commit"] is False
     assert comparisons["terminal_contract_exact"] is False
+
+
+def test_build_keeps_crypto_pair_partial_without_promotion_receipts(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    left, right = _synthetic_verified_pair()
+    left_path = tmp_path / "gfx1030.json"
+    right_path = tmp_path / "gfx1100.json"
+    left_path.write_text(json.dumps(left), encoding="utf-8")
+    right_path.write_text(json.dumps(right), encoding="utf-8")
+    monkeypatch.setattr(module, "validate_envelope", lambda payload, **_: payload)
+
+    partial_pair = module.build(
+        root=ROOT,
+        gfx1030_path=left_path,
+        gfx1100_path=right_path,
+        generated_at="2026-08-09T00:00:00Z",
+    )
+    assert partial_pair["status"] == "partial"
+    assert (
+        partial_pair["claims"]["cryptographically_consistent_cross_device_pair"] is True
+    )
+    assert partial_pair["claims"]["signed_independent_cross_device_pair"] is False
+    assert partial_pair["claims"]["terminal_envelope_contract_parity"] is True
+    assert partial_pair["claims"]["g1_closure"] is False
+    assert partial_pair["blockers_remaining"] == list(module.PROMOTION_REQUIREMENTS)
+
+    right["evidence_payload"]["runner_attestation"]["organization_id"] = left[
+        "evidence_payload"
+    ]["runner_attestation"]["organization_id"]
+    right_path.write_text(json.dumps(right), encoding="utf-8")
+    partial = module.build(
+        root=ROOT,
+        gfx1030_path=left_path,
+        gfx1100_path=right_path,
+        generated_at="2026-08-09T00:00:00Z",
+    )
+    assert partial["status"] == "partial"
+    assert partial["claims"]["g1_closure"] is False
+    assert partial["blockers_remaining"] == [
+        "distinct_organizations",
+        *module.PROMOTION_REQUIREMENTS,
+    ]
+
+
+def test_build_rejects_non_gfx1030_local_source(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    left, _ = _synthetic_verified_pair()
+    left["evidence_payload"]["hardware"]["gcn_arch_name"] = "gfx1100"
+    left["claims"]["actual_gfx1030_hardware"] = False
+    left_path = tmp_path / "wrong-local.json"
+    left_path.write_text(json.dumps(left), encoding="utf-8")
+    monkeypatch.setattr(module, "validate_envelope", lambda payload, **_: payload)
+    with pytest.raises(ValueError, match="gfx1030_source_required"):
+        module.build(root=ROOT, gfx1030_path=left_path)
