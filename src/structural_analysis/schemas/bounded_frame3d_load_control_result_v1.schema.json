@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_frame3d_load_control_result_v1.schema.json",
+  "title": "Bounded multi-member Frame3D load-control result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "status",
+    "contract_pass",
+    "result_hash",
+    "source_binding",
+    "load_factors",
+    "solver",
+    "numerical_result_ir",
+    "node_displacements",
+    "support_reactions",
+    "member_recovery",
+    "full_node_equilibrium",
+    "checkpoint_artifact",
+    "metrics",
+    "authority",
+    "warnings",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-frame3d-load-control-result.v1"},
+    "profile": {"const": "bounded_multimember_frame3d_load_control_model_ir_api.v1"},
+    "status": {"const": "ready"},
+    "contract_pass": {"const": true},
+    "result_hash": {"$ref": "#/$defs/hash"},
+    "source_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "adapter_profile",
+        "adapter_hash",
+        "model_ir_content_hash",
+        "model_ir_semantic_hash",
+        "model_ir_provenance_hash",
+        "load_pattern_id",
+        "model_hash",
+        "node_ids",
+        "member_ids",
+        "material_ids",
+        "section_ids",
+        "restrained_global_dofs",
+        "unit_conversion_hash",
+        "entity_mapping_hash",
+        "claim_boundary",
+        "request_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "bounded-frame3d-load-control-model-ir-adapter.v1"},
+        "adapter_profile": {"const": "model_ir_v2_to_multimember_corotational_frame3d_load_control.v1"},
+        "adapter_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_semantic_hash": {"$ref": "#/$defs/hash"},
+        "model_ir_provenance_hash": {"$ref": "#/$defs/hash"},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "model_hash": {"$ref": "#/$defs/hash"},
+        "node_ids": {"type": "array", "minItems": 3, "maxItems": 16, "uniqueItems": true, "items": {"$ref": "#/$defs/stable_id"}},
+        "member_ids": {"type": "array", "minItems": 2, "maxItems": 32, "uniqueItems": true, "items": {"$ref": "#/$defs/stable_id"}},
+        "material_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stable_id"}},
+        "section_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stable_id"}},
+        "restrained_global_dofs": {"type": "array", "minItems": 1, "maxItems": 95, "uniqueItems": true, "items": {"type": "integer", "minimum": 0, "maximum": 95}},
+        "unit_conversion_hash": {"$ref": "#/$defs/hash"},
+        "entity_mapping_hash": {"$ref": "#/$defs/hash"},
+        "claim_boundary": {"type": "string", "minLength": 1},
+        "request_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "load_factors": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0}},
+    "solver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_receipt", "execution", "full_node_equilibrium"],
+      "properties": {
+        "source_receipt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema_version", "profile", "model_hash", "solver_contract_hash",
+            "start_checkpoint_hash", "steps", "maximum_free_residual_inf_norm_kn",
+            "maximum_scaled_residual_inf_norm", "maximum_scaled_increment_inf_norm",
+            "equation_scaling", "result_hash", "exact_checkpoint_resume_supported",
+            "regularization_used", "fallback_used", "contract_pass", "claim_boundary"
+          ],
+          "properties": {
+            "schema_version": {"const": "corotational-frame3d-global-solution.v2"},
+            "profile": {"const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2"},
+            "model_hash": {"$ref": "#/$defs/hash"},
+            "solver_contract_hash": {"$ref": "#/$defs/hash"},
+            "start_checkpoint_hash": {"$ref": "#/$defs/hash"},
+            "steps": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "object"}},
+            "maximum_free_residual_inf_norm_kn": {"type": "number", "minimum": 0.0},
+            "maximum_scaled_residual_inf_norm": {"type": "number", "minimum": 0.0},
+            "maximum_scaled_increment_inf_norm": {"type": "number", "minimum": 0.0},
+            "equation_scaling": {"type": "object"},
+            "result_hash": {"$ref": "#/$defs/hash"},
+            "exact_checkpoint_resume_supported": {"const": true},
+            "regularization_used": {"const": false},
+            "fallback_used": {"const": false},
+            "contract_pass": {"const": true},
+            "claim_boundary": {"type": "string", "minLength": 1}
+          }
+        },
+        "execution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start_checkpoint", "requested_load_factors", "accepted_load_factors", "maximum_new_steps", "completed_prefix_count", "remaining_load_factor_count", "state_epoch_scope"],
+          "properties": {
+            "start_checkpoint": {"type": "object"},
+            "requested_load_factors": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0}},
+            "accepted_load_factors": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0}},
+            "maximum_new_steps": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 1, "maximum": 64}]},
+            "completed_prefix_count": {"type": "integer", "minimum": 1, "maximum": 64},
+            "remaining_load_factor_count": {"type": "integer", "minimum": 0, "maximum": 63},
+            "state_epoch_scope": {"const": "current_request_suffix"}
+          }
+        },
+        "full_node_equilibrium": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["equilibrium_scaling_hash", "scaled_tolerance", "maximum_scaled_balance_residual", "maximum_force_balance_residual_n", "maximum_moment_balance_residual_n_m", "force_tolerance_n", "moment_tolerance_n_m", "contract_pass"],
+          "properties": {
+            "equilibrium_scaling_hash": {"$ref": "#/$defs/hash"},
+            "scaled_tolerance": {"type": "number", "exclusiveMinimum": 0.0},
+            "maximum_scaled_balance_residual": {"type": "number", "minimum": 0.0},
+            "maximum_force_balance_residual_n": {"type": "number", "minimum": 0.0},
+            "maximum_moment_balance_residual_n_m": {"type": "number", "minimum": 0.0},
+            "force_tolerance_n": {"type": "number", "exclusiveMinimum": 0.0},
+            "moment_tolerance_n_m": {"type": "number", "exclusiveMinimum": 0.0},
+            "contract_pass": {"const": true}
+          }
+        }
+      }
+    },
+    "numerical_result_ir": {
+      "type": "object",
+      "required": ["schema_version", "result_hash", "authority", "bindings", "backend", "load_factor", "dof_count", "displacement_artifact"],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-nonlinear-numerical-result-ir.v1"},
+        "result_hash": {"$ref": "#/$defs/hash"},
+        "authority": {"type": "object"},
+        "bindings": {"type": "object"},
+        "backend": {"type": "object"},
+        "load_factor": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "dof_count": {"type": "integer", "minimum": 18, "maximum": 96, "multipleOf": 6},
+        "displacement_artifact": {"type": "object"}
+      }
+    },
+    "node_displacements": {
+      "type": "array", "minItems": 3, "maxItems": 16,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["node_id", "components", "unit_profile"],
+        "properties": {
+          "node_id": {"$ref": "#/$defs/stable_id"},
+          "components": {"$ref": "#/$defs/displacement_components"},
+          "unit_profile": {"const": "ux_uy_uz_m_rx_ry_rz_rad.v1"}
+        }
+      }
+    },
+    "support_reactions": {
+      "type": "array", "minItems": 1, "maxItems": 16,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["node_id", "force_n", "moment_n_m"],
+        "properties": {
+          "node_id": {"$ref": "#/$defs/stable_id"},
+          "force_n": {"$ref": "#/$defs/force_components"},
+          "moment_n_m": {"$ref": "#/$defs/moment_components"}
+        }
+      }
+    },
+    "member_recovery": {
+      "type": "array", "minItems": 2, "maxItems": 32,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["member_id", "node_ids", "initial_length_m", "current_length_m", "strain_energy_kn_m", "basic_deformations", "basic_forces_solver_units", "global_end_forces_solver_units", "force_unit_profile"],
+        "properties": {
+          "member_id": {"$ref": "#/$defs/stable_id"},
+          "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stable_id"}},
+          "initial_length_m": {"type": "number", "exclusiveMinimum": 0.0},
+          "current_length_m": {"type": "number", "exclusiveMinimum": 0.0},
+          "strain_energy_kn_m": {"type": "number", "minimum": 0.0},
+          "basic_deformations": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "number"}},
+          "basic_forces_solver_units": {"type": "array", "minItems": 7, "maxItems": 7, "items": {"type": "number"}},
+          "global_end_forces_solver_units": {"type": "array", "minItems": 12, "maxItems": 12, "items": {"type": "number"}},
+          "force_unit_profile": {"const": "forces_kn_moments_kn_m.v1"}
+        }
+      }
+    },
+    "full_node_equilibrium": {
+      "type": "array", "minItems": 3, "maxItems": 16,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["node_id", "internal_minus_applied_force_n", "internal_minus_applied_moment_n_m", "reaction_force_n", "reaction_moment_n_m", "balance_residual_force_n", "balance_residual_moment_n_m"],
+        "properties": {
+          "node_id": {"$ref": "#/$defs/stable_id"},
+          "internal_minus_applied_force_n": {"$ref": "#/$defs/vector3"},
+          "internal_minus_applied_moment_n_m": {"$ref": "#/$defs/vector3"},
+          "reaction_force_n": {"$ref": "#/$defs/vector3"},
+          "reaction_moment_n_m": {"$ref": "#/$defs/vector3"},
+          "balance_residual_force_n": {"$ref": "#/$defs/vector3"},
+          "balance_residual_moment_n_m": {"$ref": "#/$defs/vector3"}
+        }
+      }
+    },
+    "checkpoint_artifact": {"type": "object"},
+    "metrics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["final_load_factor", "accepted_step_count", "numerical_result_state_epoch", "state_epoch_scope", "completed_prefix_count", "remaining_load_factor_count", "node_count", "member_count", "fallback_count", "regularization_count"],
+      "properties": {
+        "final_load_factor": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0},
+        "accepted_step_count": {"type": "integer", "minimum": 1, "maximum": 64},
+        "numerical_result_state_epoch": {"type": "integer", "minimum": 1, "maximum": 64},
+        "state_epoch_scope": {"const": "current_request_suffix"},
+        "completed_prefix_count": {"type": "integer", "minimum": 1, "maximum": 64},
+        "remaining_load_factor_count": {"type": "integer", "minimum": 0, "maximum": 63},
+        "node_count": {"type": "integer", "minimum": 3, "maximum": 16},
+        "member_count": {"type": "integer", "minimum": 2, "maximum": 32},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0}
+      }
+    },
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_api_exposed", "capability_registry_public", "workbench_execution", "numerical_result_ir", "numerical_result_ir_reaction_authority", "numerical_result_ir_member_force_authority", "solver_derived_reaction_recovery", "solver_derived_member_recovery", "full_node_equilibrium", "external_vv_level", "independent_operator_attached", "design_authority", "public_product_promotion", "release_eligible", "commercial_use"],
+      "properties": {
+        "candidate_api_exposed": {"const": true},
+        "capability_registry_public": {"const": false},
+        "workbench_execution": {"const": false},
+        "numerical_result_ir": {"const": "authoritative_bounded"},
+        "numerical_result_ir_reaction_authority": {"const": false},
+        "numerical_result_ir_member_force_authority": {"const": false},
+        "solver_derived_reaction_recovery": {"const": "bounded_candidate"},
+        "solver_derived_member_recovery": {"const": "bounded_candidate"},
+        "full_node_equilibrium": {"const": "authoritative_reassembled"},
+        "external_vv_level": {"const": 0},
+        "independent_operator_attached": {"const": false},
+        "design_authority": {"const": false},
+        "public_product_promotion": {"const": false},
+        "release_eligible": {"const": false},
+        "commercial_use": {"const": false}
+      }
+    },
+    "warnings": {"type": "array", "minItems": 3, "maxItems": 3, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "vector3": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number"}},
+    "displacement_components": {
+      "type": "object", "additionalProperties": false,
+      "required": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+      "properties": {"UX": {"type": "number"}, "UY": {"type": "number"}, "UZ": {"type": "number"}, "RX": {"type": "number"}, "RY": {"type": "number"}, "RZ": {"type": "number"}}
+    },
+    "force_components": {
+      "type": "object", "additionalProperties": false,
+      "required": ["FX", "FY", "FZ"],
+      "properties": {"FX": {"type": "number"}, "FY": {"type": "number"}, "FZ": {"type": "number"}}
+    },
+    "moment_components": {
+      "type": "object", "additionalProperties": false,
+      "required": ["MX", "MY", "MZ"],
+      "properties": {"MX": {"type": "number"}, "MY": {"type": "number"}, "MZ": {"type": "number"}}
+    }
+  }
+}
