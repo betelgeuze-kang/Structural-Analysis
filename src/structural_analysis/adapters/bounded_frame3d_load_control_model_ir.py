@@ -278,10 +278,10 @@ def _build_adapter(
     reference_load = [0.0] * (6 * len(node_ids))
     components = ("FX", "FY", "FZ", "MX", "MY", "MZ")
     for load_index, row in enumerate(pattern["nodal_loads"]):
-        base = 6 * node_index[str(row["node_id"])]
+        dof_base = 6 * node_index[str(row["node_id"])]
         for component_index, component in enumerate(components):
             value_kn = float(row["components_si"][component]) / 1000.0
-            dof = base + component_index
+            dof = dof_base + component_index
             if value_kn != 0.0 and dof in restrained:
                 _fail(
                     "bounded_frame3d_load_on_restrained_dof_unsupported",
@@ -306,7 +306,11 @@ def _build_adapter(
     try:
         model = CorotationalFrame3DModel(
             node_coordinates_m=tuple(
-                tuple(float(value) for value in row["coordinates_m"])
+                (
+                    float(row["coordinates_m"][0]),
+                    float(row["coordinates_m"][1]),
+                    float(row["coordinates_m"][2]),
+                )
                 for row in node_rows
             ),
             members=tuple(members),
