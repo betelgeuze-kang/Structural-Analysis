@@ -233,7 +233,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
           job={jobLoad.job}
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
-          engineeringResultIr={jobLoad.engineeringResultIr}
+          publishedResult={jobLoad.publishedResult}
         />
         {caseV2 ? (
           <RunMonitor

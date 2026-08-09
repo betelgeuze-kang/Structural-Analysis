@@ -12,7 +12,23 @@ export interface JobLoadResult {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
-  engineeringResultIr?: EngineeringResultIrManifest
+  publishedResult?: PublishedDurableResult
+}
+
+export type Frame2DDurableProfile =
+  | 'corotational_one_bay_portal.v1'
+  | 'corotational_connected_frame2d.v1'
+
+export type PublishedDurableResult =
+  | PublishedFrame2DDurableResult
+
+export interface PublishedFrame2DDurableResult {
+  kind: 'frame2d'
+  adapterId: 'frame2d-unified-nonlinear-frame.v1'
+  resultContract: 'unified-nonlinear-frame-result.v1'
+  profile: Frame2DDurableProfile
+  resultHash: string
+  engineeringResultIr: EngineeringResultIrManifest
 }
 
 export interface EngineeringResultIrManifest {
@@ -61,6 +77,36 @@ const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+const FRAME2D_ADAPTER_ID = 'frame2d-unified-nonlinear-frame.v1'
+const FRAME2D_RESULT_CONTRACT = 'unified-nonlinear-frame-result.v1'
+const FRAME2D_VALIDATOR_ID = 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
+const FRAME2D_PROFILES = new Set<Frame2DDurableProfile>([
+  'corotational_one_bay_portal.v1',
+  'corotational_connected_frame2d.v1',
+])
+
+interface PublishedDurableResultAdapter {
+  readonly adapterId: PublishedDurableResult['adapterId']
+  readonly resultContract: PublishedDurableResult['resultContract']
+  readonly validatorId: string
+  validateResult(
+    value: Record<string, unknown>,
+    errors: string[],
+  ): Promise<{ value: PublishedDurableResult | null; integrityUnavailable: boolean }>
+  validateEvidenceReport(report: unknown, result: unknown): boolean
+}
+
+const FRAME2D_RESULT_ADAPTER: PublishedDurableResultAdapter = Object.freeze({
+  adapterId: FRAME2D_ADAPTER_ID,
+  resultContract: FRAME2D_RESULT_CONTRACT,
+  validatorId: FRAME2D_VALIDATOR_ID,
+  validateResult: validatePublishedFrame2DResult,
+  validateEvidenceReport: validFrame2DCoreValidationReport,
+})
+
+const PUBLISHED_RESULT_ADAPTERS: ReadonlyMap<string, PublishedDurableResultAdapter> = new Map([
+  [FRAME2D_RESULT_ADAPTER.resultContract, FRAME2D_RESULT_ADAPTER],
+])
 
 export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
   if (!url) return { status: 'unconfigured', job: null, errors: [] }
@@ -93,8 +139,8 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     }
     const resultPayload = result.value
     const evidencePayload = evidence.value
-    const resultValidation = await validatePublishedEngineeringResultIr(resultPayload, artifactErrors)
-    const resultIr = resultValidation.value
+    const resultValidation = await validatePublishedDurableResult(resultPayload, artifactErrors)
+    const resultAdapter = resultValidation.adapter
     if (
       !record(evidencePayload)
       || evidencePayload.schema_version !== 'structural-analysis-job-completion-evidence.v1'
@@ -104,8 +150,13 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       || evidencePayload.result_artifact_hash !== job.result.content_hash
       || evidencePayload.contract_pass !== true
       || evidencePayload.solver_truth_owner !== 'structural_analysis_core'
-      || evidencePayload.validator_id !== 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
-      || !validCoreValidationReport(evidencePayload.validation_report, resultPayload)
+      || (
+        resultAdapter !== null
+        && (
+          evidencePayload.validator_id !== resultAdapter.validatorId
+          || !resultAdapter.validateEvidenceReport(evidencePayload.validation_report, resultPayload)
+        )
+      )
     ) {
       artifactErrors.push('published completion evidence binding is invalid')
     }
@@ -119,7 +170,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       artifactStatus: result.integrityUnavailable || evidence.integrityUnavailable || resultValidation.integrityUnavailable
         ? 'integrity_unavailable'
         : 'verified',
-      engineeringResultIr: resultIr ?? undefined,
+      publishedResult: resultValidation.value ?? undefined,
     }
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
@@ -174,19 +225,51 @@ function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
 }
 
-async function validatePublishedEngineeringResultIr(
+async function validatePublishedDurableResult(
   value: unknown,
   errors: string[],
-): Promise<{ value: EngineeringResultIrManifest | null; integrityUnavailable: boolean }> {
+): Promise<{
+  value: PublishedDurableResult | null
+  adapter: PublishedDurableResultAdapter | null
+  integrityUnavailable: boolean
+}> {
+  if (!record(value) || typeof value.schema_version !== 'string') {
+    errors.push('published result contract is unsupported')
+    return { value: null, adapter: null, integrityUnavailable: false }
+  }
+  const adapter = PUBLISHED_RESULT_ADAPTERS.get(value.schema_version) ?? null
+  if (adapter === null) {
+    errors.push('published result contract is unsupported')
+    return { value: null, adapter: null, integrityUnavailable: false }
+  }
+  const priorErrorCount = errors.length
+  const validation = await adapter.validateResult(value, errors)
+  if (validation.value === null && errors.length === priorErrorCount) {
+    errors.push('published result contract is unsupported')
+  }
   if (
-    !record(value)
-    || value.schema_version !== 'unified-nonlinear-frame-result.v1'
+    validation.value !== null
+    && (
+      validation.value.adapterId !== adapter.adapterId
+      || validation.value.resultContract !== adapter.resultContract
+    )
+  ) {
+    errors.push('published result adapter identity is invalid')
+    return { value: null, adapter, integrityUnavailable: validation.integrityUnavailable }
+  }
+  return { ...validation, adapter }
+}
+
+async function validatePublishedFrame2DResult(
+  value: Record<string, unknown>,
+  errors: string[],
+): Promise<{ value: PublishedFrame2DDurableResult | null; integrityUnavailable: boolean }> {
+  if (
+    value.schema_version !== FRAME2D_RESULT_CONTRACT
     || value.status !== 'ready'
     || value.contract_pass !== true
-    || (
-      value.profile !== 'corotational_one_bay_portal.v1'
-      && value.profile !== 'corotational_connected_frame2d.v1'
-    )
+    || typeof value.profile !== 'string'
+    || !FRAME2D_PROFILES.has(value.profile as Frame2DDurableProfile)
   ) {
     errors.push('published result contract is unsupported')
     return { value: null, integrityUnavailable: false }
@@ -241,7 +324,17 @@ async function validatePublishedEngineeringResultIr(
     errors.push('published engineering ResultIR array bundle hash is invalid')
     return { value: null, integrityUnavailable }
   }
-  return { value: manifest, integrityUnavailable }
+  return {
+    value: {
+      kind: 'frame2d',
+      adapterId: FRAME2D_ADAPTER_ID,
+      resultContract: FRAME2D_RESULT_CONTRACT,
+      profile: value.profile as Frame2DDurableProfile,
+      resultHash: value.result_hash as string,
+      engineeringResultIr: manifest,
+    },
+    integrityUnavailable,
+  }
 }
 
 function validEngineeringResultIrShape(value: unknown): value is Record<string, unknown> {
@@ -300,7 +393,7 @@ function validArrayDescriptor(value: unknown): boolean {
     && hash(value.content_hash)
 }
 
-function validCoreValidationReport(report: unknown, result: unknown): boolean {
+function validFrame2DCoreValidationReport(report: unknown, result: unknown): boolean {
   if (!record(report) || !record(result)) return false
   return report.schema_version === 'unified-nonlinear-frame-validation-report.v1'
     && report.status === 'ready'

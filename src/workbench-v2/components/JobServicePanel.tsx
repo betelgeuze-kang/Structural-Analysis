@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { EngineeringResultIrManifest, JobLoadStatus } from '../model/jobProvider'
+import type { JobLoadStatus, PublishedDurableResult } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
 import { StateChip, type ChipState } from './StateChip'
 import { BooleanEvidenceValueText } from './EngineeringValueText'
@@ -9,7 +9,7 @@ interface JobServicePanelProps {
   job: WorkbenchJobView | null
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
-  engineeringResultIr?: EngineeringResultIrManifest
+  publishedResult?: PublishedDurableResult
 }
 
 function chip(job: WorkbenchJobView): ChipState {
@@ -27,7 +27,7 @@ export function JobServicePanel({
   job,
   errors,
   artifactStatus,
-  engineeringResultIr,
+  publishedResult,
 }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
@@ -41,6 +41,10 @@ export function JobServicePanel({
       </section>
     )
   }
+
+  const engineeringResultIr = publishedResult?.kind === 'frame2d'
+    ? publishedResult.engineeringResultIr
+    : undefined
 
   return (
     <section className="wb2-panel" aria-labelledby="wb2-job-title" data-job-service="ready" data-job-status={job.status}>

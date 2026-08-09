@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
+import { createServer } from 'node:http'
 import { loadWorkbenchJob } from '../../src/workbench-v2/model/jobProvider'
 import { validateWorkbenchJobView } from '../../src/workbench-v2/model/jobSchema'
 
@@ -208,37 +209,142 @@ function completionEvidence(
       fallback_count: 0,
       regularization_count: 0,
     },
+    claim_boundary: 'orchestration only',
   }
 }
 
-test('Workbench verifies a succeeded result/evidence pair before display', async () => {
+async function loadPublishedHttpPair(
+  resultBytes: Uint8Array,
+  evidenceBytes: Uint8Array,
+  declaredResultBytes: Uint8Array = resultBytes,
+) {
+  const resultHash = digest(declaredResultBytes)
+  const succeeded = {
+    ...queuedJob(),
+    status: 'succeeded', revision: 2, attempt: 1,
+    progress: { completed_steps: 4, total_steps: 4 },
+    result: {
+      role: 'result',
+      content_hash: resultHash,
+      byte_length: declaredResultBytes.byteLength,
+      media_type: 'application/vnd.structural-analysis.result+json',
+    },
+    evidence: {
+      role: 'evidence',
+      content_hash: digest(evidenceBytes),
+      byte_length: evidenceBytes.byteLength,
+      media_type: 'application/json',
+    },
+  }
+  const statusBytes = new TextEncoder().encode(JSON.stringify(succeeded))
+  const jobPath = `/v1/jobs/${succeeded.job_id}`
+  const server = createServer((request, response) => {
+    const path = new URL(request.url ?? '/', 'http://127.0.0.1').pathname
+    const match = path === jobPath
+      ? { bytes: statusBytes, contentType: 'application/json' }
+      : path === `${jobPath}/result`
+        ? { bytes: resultBytes, contentType: 'application/vnd.structural-analysis.result+json' }
+        : path === `${jobPath}/evidence`
+          ? { bytes: evidenceBytes, contentType: 'application/json' }
+          : null
+    if (match === null) {
+      response.writeHead(404).end()
+      return
+    }
+    response.writeHead(200, {
+      'cache-control': 'no-store',
+      'content-length': String(match.bytes.byteLength),
+      'content-type': match.contentType,
+      'x-content-type-options': 'nosniff',
+    })
+    response.end(match.bytes)
+  })
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+  const address = server.address()
+  if (address === null || typeof address === 'string') {
+    await new Promise<void>((resolve) => server.close(() => resolve()))
+    throw new Error('published job HTTP fixture did not bind a TCP port')
+  }
+  try {
+    return await loadWorkbenchJob(`http://127.0.0.1:${address.port}${jobPath}`)
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => error ? reject(error) : resolve())
+    })
+  }
+}
+
+test('Workbench verifies a succeeded job/result/evidence HTTP path before display', async () => {
   const encoder = new TextEncoder()
   const result = publishedResult()
   const resultBytes = encoder.encode(JSON.stringify(result))
   const resultHash = digest(resultBytes)
   const evidenceBytes = encoder.encode(JSON.stringify(completionEvidence(result, resultHash)))
-  const succeeded = {
-    ...queuedJob(),
-    status: 'succeeded', revision: 2, attempt: 1,
-    progress: { completed_steps: 4, total_steps: 4 },
-    result: { role: 'result', content_hash: resultHash, byte_length: resultBytes.byteLength, media_type: 'application/json' },
-    evidence: { role: 'evidence', content_hash: digest(evidenceBytes), byte_length: evidenceBytes.byteLength, media_type: 'application/json' },
-  }
-  const statusBytes = encoder.encode(JSON.stringify(succeeded))
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
-    const url = String(input)
-    const bytes = url.endsWith('/result') ? resultBytes : url.endsWith('/evidence') ? evidenceBytes : statusBytes
-    return new Response(bytes, { headers: { 'content-type': 'application/json', 'content-length': String(bytes.byteLength) } })
-  }) as typeof fetch
-  try {
-    const loaded = await loadWorkbenchJob('https://example.test/v1/jobs/job_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    expect(loaded).toMatchObject({ status: 'ready', artifactStatus: 'verified', errors: [] })
-    expect(loaded.engineeringResultIr?.engineering_result_hash).toBe(result.source_result_hash)
-    expect('node_displacements' in loaded).toBe(false)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded).toMatchObject({ status: 'ready', artifactStatus: 'verified', errors: [] })
+  expect(loaded.publishedResult).toMatchObject({
+    kind: 'frame2d',
+    adapterId: 'frame2d-unified-nonlinear-frame.v1',
+    resultContract: 'unified-nonlinear-frame-result.v1',
+    profile: 'corotational_one_bay_portal.v1',
+    resultHash: result.result_hash,
+  })
+  if (loaded.publishedResult?.kind !== 'frame2d') throw new Error('expected Frame2D durable result')
+  expect(loaded.publishedResult.engineeringResultIr.engineering_result_hash).toBe(result.source_result_hash)
+  expect('node_displacements' in loaded).toBe(false)
+})
+
+test('durable result registry fails closed for an unregistered Frame3D result contract', async () => {
+  const encoder = new TextEncoder()
+  const result = publishedResult()
+  result.schema_version = 'bounded-frame3d-load-control-result.v1'
+  const resultBody = { ...result }
+  delete resultBody.result_hash
+  result.result_hash = canonicalHash(resultBody)
+  const resultBytes = encoder.encode(JSON.stringify(result))
+  const resultHash = digest(resultBytes)
+  const evidenceBytes = encoder.encode(JSON.stringify(completionEvidence(result, resultHash)))
+
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.artifactStatus).toBe('invalid')
+  expect(loaded.errors).toContain('published result contract is unsupported')
+  expect(loaded.publishedResult).toBeUndefined()
+})
+
+test('Frame2D adapter rejects a profile outside its exact identity', async () => {
+  const encoder = new TextEncoder()
+  const result = publishedResult()
+  result.profile = 'bounded_frame3d_load_control_model_ir_api.v1'
+  const resultBody = { ...result }
+  delete resultBody.result_hash
+  result.result_hash = canonicalHash(resultBody)
+  const resultBytes = encoder.encode(JSON.stringify(result))
+  const resultHash = digest(resultBytes)
+  const evidenceBytes = encoder.encode(JSON.stringify(completionEvidence(result, resultHash)))
+
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.errors).toContain('published result contract is unsupported')
+  expect(loaded.publishedResult).toBeUndefined()
+})
+
+test('Frame2D adapter rejects completion evidence from another validator identity', async () => {
+  const encoder = new TextEncoder()
+  const result = publishedResult()
+  const resultBytes = encoder.encode(JSON.stringify(result))
+  const resultHash = digest(resultBytes)
+  const evidence = completionEvidence(result, resultHash)
+  evidence.validator_id = 'structural_analysis.api.frame3d_load_control.validate_bounded_frame3d_load_control_result'
+  const evidenceBytes = encoder.encode(JSON.stringify(evidence))
+
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.errors).toContain('published completion evidence binding is invalid')
+  expect(loaded.publishedResult).toBeUndefined()
 })
 
 test('Workbench blocks a tampered published result', async () => {
@@ -248,27 +354,10 @@ test('Workbench blocks a tampered published result', async () => {
   const tamperedResult = encoder.encode(JSON.stringify({ ...result, changed: true }))
   const resultHash = digest(declaredResult)
   const evidenceBytes = encoder.encode(JSON.stringify(completionEvidence(result, resultHash)))
-  const succeeded = {
-    ...queuedJob(), status: 'succeeded', revision: 2, attempt: 1,
-    progress: { completed_steps: 4, total_steps: 4 },
-    result: { role: 'result', content_hash: resultHash, byte_length: declaredResult.byteLength, media_type: 'application/json' },
-    evidence: { role: 'evidence', content_hash: digest(evidenceBytes), byte_length: evidenceBytes.byteLength, media_type: 'application/json' },
-  }
-  const statusBytes = encoder.encode(JSON.stringify(succeeded))
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
-    const url = String(input)
-    const bytes = url.endsWith('/result') ? tamperedResult : url.endsWith('/evidence') ? evidenceBytes : statusBytes
-    return new Response(bytes, { headers: { 'content-type': 'application/json' } })
-  }) as typeof fetch
-  try {
-    const loaded = await loadWorkbenchJob('https://example.test/v1/jobs/job_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    expect(loaded.status).toBe('invalid')
-    expect(loaded.artifactStatus).toBe('invalid')
-    expect(loaded.errors.join(' ')).toMatch(/result (byte length|sha256) mismatch/)
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  const loaded = await loadPublishedHttpPair(tamperedResult, evidenceBytes, declaredResult)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.artifactStatus).toBe('invalid')
+  expect(loaded.errors.join(' ')).toMatch(/result (byte length|sha256) mismatch/)
 })
 
 test('Workbench blocks a hash-valid result with a detached ResultIR mismatch', async () => {
@@ -281,26 +370,9 @@ test('Workbench blocks a hash-valid result with a detached ResultIR mismatch', a
   const resultBytes = encoder.encode(JSON.stringify(payload))
   const resultHash = digest(resultBytes)
   const evidenceBytes = encoder.encode(JSON.stringify(completionEvidence(payload, resultHash)))
-  const succeeded = {
-    ...queuedJob(), status: 'succeeded', revision: 2, attempt: 1,
-    progress: { completed_steps: 4, total_steps: 4 },
-    result: { role: 'result', content_hash: resultHash, byte_length: resultBytes.byteLength, media_type: 'application/json' },
-    evidence: { role: 'evidence', content_hash: digest(evidenceBytes), byte_length: evidenceBytes.byteLength, media_type: 'application/json' },
-  }
-  const statusBytes = encoder.encode(JSON.stringify(succeeded))
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
-    const url = String(input)
-    const bytes = url.endsWith('/result') ? resultBytes : url.endsWith('/evidence') ? evidenceBytes : statusBytes
-    return new Response(bytes, { headers: { 'content-type': 'application/json', 'content-length': String(bytes.byteLength) } })
-  }) as typeof fetch
-  try {
-    const loaded = await loadWorkbenchJob('https://example.test/v1/jobs/job_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    expect(loaded.status).toBe('invalid')
-    expect(loaded.errors).toContain('published engineering ResultIR binding is invalid')
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.errors).toContain('published engineering ResultIR binding is invalid')
 })
 
 test('Workbench blocks a hash-valid pair when the core validation report is detached', async () => {
@@ -311,24 +383,7 @@ test('Workbench blocks a hash-valid pair when the core validation report is deta
   const evidence = completionEvidence(result, resultHash)
   ;(evidence.validation_report as Record<string, unknown>).result_hash = `sha256:${'9'.repeat(64)}`
   const evidenceBytes = encoder.encode(JSON.stringify(evidence))
-  const succeeded = {
-    ...queuedJob(), status: 'succeeded', revision: 2, attempt: 1,
-    progress: { completed_steps: 4, total_steps: 4 },
-    result: { role: 'result', content_hash: resultHash, byte_length: resultBytes.byteLength, media_type: 'application/json' },
-    evidence: { role: 'evidence', content_hash: digest(evidenceBytes), byte_length: evidenceBytes.byteLength, media_type: 'application/json' },
-  }
-  const statusBytes = encoder.encode(JSON.stringify(succeeded))
-  const originalFetch = globalThis.fetch
-  globalThis.fetch = (async (input: RequestInfo | URL) => {
-    const url = String(input)
-    const bytes = url.endsWith('/result') ? resultBytes : url.endsWith('/evidence') ? evidenceBytes : statusBytes
-    return new Response(bytes, { headers: { 'content-type': 'application/json', 'content-length': String(bytes.byteLength) } })
-  }) as typeof fetch
-  try {
-    const loaded = await loadWorkbenchJob('https://example.test/v1/jobs/job_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
-    expect(loaded.status).toBe('invalid')
-    expect(loaded.errors).toContain('published completion evidence binding is invalid')
-  } finally {
-    globalThis.fetch = originalFetch
-  }
+  const loaded = await loadPublishedHttpPair(resultBytes, evidenceBytes)
+  expect(loaded.status).toBe('invalid')
+  expect(loaded.errors).toContain('published completion evidence binding is invalid')
 })
