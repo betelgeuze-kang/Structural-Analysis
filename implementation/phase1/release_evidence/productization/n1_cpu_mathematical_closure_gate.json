@@ -1,0 +1,155 @@
+{
+  "aggregate_source": {
+    "generator_matches_source_commit": true,
+    "generator_script_sha256": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
+    "generator_source_control_state": "commit_bound",
+    "input_checksums": {
+      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+      "implementation/phase1/release_evidence/productization/n1_stateful_material_matrix_free_newton_breadth_receipt.json": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
+      "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py": "sha256:bf98beea178d07e850d4e2fc43bef61c78a6795fdcdc041d5f474a78c689843f",
+      "scripts/build_n1_cpu_mathematical_closure_gate.py": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
+      "scripts/build_n1_stateful_material_matrix_free_newton_breadth_receipt.py": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+      "scripts/release_evidence_metadata.py": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+      "src/structural_analysis/schemas/n1_cpu_mathematical_closure_gate_v1.schema.json": "sha256:0cdbfd11b27a909e1441e4eda5528c52c753b1343c157df224d71a341fa9030a"
+    },
+    "source_commit_is_ancestor_of_head": true,
+    "source_commit_sha": "b8ebc925009fc1d8fb073070f455b656e7db33c9",
+    "source_input_provenance": {
+      "blocker_count": 0,
+      "blockers": [],
+      "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
+      "contract_pass": true,
+      "input_count": 7,
+      "inputs": [
+        {
+          "blocker": "",
+          "path": "scripts/build_n1_cpu_mathematical_closure_gate.py",
+          "source_checksum": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "src/structural_analysis/schemas/n1_cpu_mathematical_closure_gate_v1.schema.json",
+          "source_checksum": "sha256:0cdbfd11b27a909e1441e4eda5528c52c753b1343c157df224d71a341fa9030a",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:0cdbfd11b27a909e1441e4eda5528c52c753b1343c157df224d71a341fa9030a",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
+          "source_checksum": "sha256:bf98beea178d07e850d4e2fc43bef61c78a6795fdcdc041d5f474a78c689843f",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:bf98beea178d07e850d4e2fc43bef61c78a6795fdcdc041d5f474a78c689843f",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "scripts/build_n1_stateful_material_matrix_free_newton_breadth_receipt.py",
+          "source_checksum": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:97683542105a159b9fac9da93e50d090e827000ed3f74e534f56942d3dcca151",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "scripts/release_evidence_metadata.py",
+          "source_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:e273ae459f91e6a6e5ae5b2a12d126f4487255306c1562d3e39e414f1f8a818b",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json",
+          "source_checksum": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+          "workspace_matches_source": true
+        },
+        {
+          "blocker": "",
+          "path": "implementation/phase1/release_evidence/productization/n1_stateful_material_matrix_free_newton_breadth_receipt.json",
+          "source_checksum": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
+          "source_state": "tracked",
+          "workspace_checksum": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
+          "workspace_matches_source": true
+        }
+      ],
+      "reason_code": "PASS",
+      "schema_version": "source-input-provenance.v1",
+      "source_commit_resolved": true,
+      "workspace_match_count": 7
+    }
+  },
+  "blockers_remaining": [],
+  "claim_boundary": "This aggregate closes the separately scoped N1 CPU mathematical milestone by combining exact-replayed actual-MGT 70,560-equation finite-chord axial equilibrium evidence with a separate four-family stateful material Newton breadth gate, exactly as required by the N1 exit criteria. It does not claim that the four stateful laws are connected to the actual-MGT full frame/shell operator, does not upgrade reference-geometry bending/torsion, and does not close the production ROCm/HIP G1 milestone. The aggregate generator, schema, and upstream inputs are bound to an ancestor source commit; the receipt may be committed in a later evidence-only descendant without creating a cyclic HEAD dependency.",
+  "claims": {
+    "actual_mgt_full_mesh_stateful_material_coupling": false,
+    "aggregate_generator_committed": true,
+    "g1_production_rocm_hip_closure": false,
+    "n1_cpu_mathematical_closure": true
+  },
+  "contract_pass": true,
+  "evaluations": {
+    "accepted_state_tangent_refresh": true,
+    "actual_mgt_full_equation_space": true,
+    "adaptive_continuation": true,
+    "exact_restart": true,
+    "fallback_zero": true,
+    "full_load_1p0": true,
+    "increment_gate": true,
+    "increment_pass": true,
+    "line_search_physical_merit": true,
+    "load_scale_0p656_reproduced": true,
+    "material_family_breadth": true,
+    "material_trial_commit_rollback": true,
+    "physical_residual_definition_fixed": true,
+    "regularization_zero": true,
+    "residual_jacobian_directional_consistency": true,
+    "residual_pass": true
+  },
+  "generated_at": "2026-08-08T23:58:09.866069Z",
+  "metrics": {
+    "fallback_count": 0,
+    "final_load_factor": 1.0,
+    "final_residual_inf_n": 1.1767242540372536e-06,
+    "free_equation_count": 70560,
+    "full_mesh_frame_element_count": 5572,
+    "material_families": [
+      "steel_combined_hardening",
+      "asymmetric_concrete_damage",
+      "parallel_steel_concrete_section",
+      "bilinear_combined_hardening_link"
+    ],
+    "maximum_accepted_relative_increment": 1.438475564164355e-08,
+    "regularization_count": 0,
+    "residual_tolerance_inf_n": 0.0005
+  },
+  "non_n1_boundaries": [
+    "actual_mgt_full_mesh_stateful_material_coupling",
+    "full_corotational_frame_bending_torsion",
+    "production_rocm_hip_cross_device_execution"
+  ],
+  "receipt_hash": "sha256:22a646f0b4047b2153b782128c79149fa0301210c5bb3f2b94edb5a52740df32",
+  "schema_version": "n1-cpu-mathematical-closure-gate.v1",
+  "sources": {
+    "actual_mgt_full_mesh": {
+      "file_sha256": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+      "path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json",
+      "schema_version": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1",
+      "source_commit_exact_replay": true,
+      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+    },
+    "material_family_breadth": {
+      "file_sha256": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
+      "path": "implementation/phase1/release_evidence/productization/n1_stateful_material_matrix_free_newton_breadth_receipt.json",
+      "schema_version": "n1-stateful-material-matrix-free-newton-breadth-receipt.v1",
+      "source_commit_exact_replay": true,
+      "source_commit_sha": "2dd16a6cd5419e0edf58cde5975675e365c7822b"
+    }
+  },
+  "status": "ready"
+}
