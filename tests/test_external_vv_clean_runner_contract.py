@@ -51,27 +51,95 @@ def _json(path: Path) -> dict:
     return payload
 
 
-def _is_ancestor(ancestor: str, descendant: str) -> bool:
-    return (
-        subprocess.run(
-            ["git", "merge-base", "--is-ancestor", ancestor, descendant],
-            cwd=ROOT,
-            check=False,
-            capture_output=True,
-        ).returncode
-        == 0
+def _is_ancestor(ancestor: str, descendant: str, *, cwd: Path = ROOT) -> bool:
+    probe = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", ancestor, descendant],
+        cwd=cwd,
+        check=False,
+        capture_output=True,
+        text=True,
     )
+    if probe.returncode == 0:
+        return True
+    if probe.returncode != 1:
+        raise AssertionError(
+            "git merge-base ancestry probe failed: "
+            f"returncode={probe.returncode} stderr={probe.stderr.strip()!r}"
+        )
+
+    # Keep the fallback independent from subprocess.run and merge-base.  A
+    # long CI process can otherwise turn a transient/probe-state false
+    # negative into a provenance failure.  Exact rev-list membership still
+    # rejects siblings, shared-base commits, and unrelated histories.
+    with subprocess.Popen(
+        ["git", "rev-list", descendant],
+        cwd=cwd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    ) as traversal:
+        stdout, stderr = traversal.communicate()
+    if traversal.returncode != 0:
+        raise AssertionError(
+            "git rev-list ancestry fallback failed: "
+            f"returncode={traversal.returncode} stderr={stderr.strip()!r}"
+        )
+    return ancestor in stdout.splitlines()
 
 
-def _direct_parents(commit: str) -> set[str]:
-    raw_commit = subprocess.check_output(
-        ["git", "cat-file", "-p", commit], cwd=ROOT, text=True
-    )
-    return {
-        line.removeprefix("parent ")
-        for line in raw_commit.splitlines()
-        if line.startswith("parent ")
-    }
+def test_git_ancestry_false_negative_uses_exact_parent_walk(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+
+    def git(*args: str) -> str:
+        return subprocess.check_output(
+            ["git", *args], cwd=repo, text=True, stderr=subprocess.STDOUT
+        ).strip()
+
+    git("init", "-q", "--initial-branch=main")
+    git("config", "user.email", "ci@example.invalid")
+    git("config", "user.name", "CI")
+    (repo / "root.txt").write_text("root\n", encoding="utf-8")
+    git("add", "root.txt")
+    git("commit", "-q", "-m", "root")
+    root = git("rev-parse", "HEAD")
+
+    (repo / "descendant.txt").write_text("descendant\n", encoding="utf-8")
+    git("add", "descendant.txt")
+    git("commit", "-q", "-m", "descendant")
+    descendant = git("rev-parse", "HEAD")
+
+    git("switch", "-q", "--detach", root)
+    (repo / "sibling.txt").write_text("sibling\n", encoding="utf-8")
+    git("add", "sibling.txt")
+    git("commit", "-q", "-m", "sibling")
+    sibling = git("rev-parse", "HEAD")
+
+    original_run = subprocess.run
+
+    def false_negative(command, **kwargs):
+        if command[:3] == ["git", "merge-base", "--is-ancestor"]:
+            return subprocess.CompletedProcess(command, 1, "", "")
+        return original_run(command, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", false_negative)
+
+    assert _is_ancestor(root, descendant, cwd=repo)
+    assert not _is_ancestor(sibling, descendant, cwd=repo)
+
+
+def test_git_ancestry_probe_preserves_git_errors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def git_error(command, **kwargs):
+        return subprocess.CompletedProcess(command, 128, "", "fatal: corrupt graph")
+
+    monkeypatch.setattr(subprocess, "run", git_error)
+
+    with pytest.raises(AssertionError, match="fatal: corrupt graph"):
+        _is_ancestor("0" * 40, "1" * 40, cwd=tmp_path)
 
 
 def test_external_receipt_documents_do_not_copy_volatile_replay_hashes() -> None:
@@ -243,14 +311,11 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
     ).strip() == "true"
     if recorded_object_available:
         ancestry_verified = _is_ancestor(recorded_commit, head)
-        if not ancestry_verified:
-            parents = _direct_parents(head)
-            assert parents
-            ancestry_verified = any(
-                parent == recorded_commit or _is_ancestor(recorded_commit, parent)
-                for parent in parents
-            )
-        assert ancestry_verified
+        assert ancestry_verified, {
+            "recorded_commit": recorded_commit,
+            "checkout_head": head,
+            "shallow_repository": shallow_repository,
+        }
     else:
         assert shallow_repository
 
