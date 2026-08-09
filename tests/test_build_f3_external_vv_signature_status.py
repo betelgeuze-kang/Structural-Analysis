@@ -60,7 +60,6 @@ def _signed_envelope(
     )
 
 
-@pytest.mark.skip(reason="phase 2 regenerates the status JSON from committed gate code")
 def test_committed_status_replays_all_ten_nine_surface_receipts() -> None:
     module.validate_status(
         json.loads((ROOT / module.DEFAULT_OUT).read_text(encoding="utf-8")),
