@@ -6,7 +6,7 @@
     "schema_version": {"const": "g1-mgt-production-promotion-gate.v2"},
     "receipt_hash": {"$ref": "#/$defs/hash"},
     "generated_at": {"type": "string", "minLength": 1},
-    "status": {"enum": ["partial", "ready"]},
+    "status": {"const": "partial"},
     "contract_pass": {"const": true},
     "provenance": {"$ref": "#/$defs/provenance"},
     "sources": {
@@ -16,14 +16,21 @@
     },
     "promotion_requirements": {
       "type": "object",
-      "required": ["trusted_hardware_identity_pair", "cpu_fallback_zero", "terminal_resultir_diagnosticir_parity", "cross_device_production_performance_sweep"],
-      "additionalProperties": {"type": "boolean"}
+      "required": ["trusted_hardware_identity_pair", "cpu_fallback_zero", "terminal_resultir_diagnosticir_parity", "cross_device_production_performance_sweep", "nonlinear_material_family_breadth"],
+      "properties": {
+        "trusted_hardware_identity_pair": {"type": "boolean"},
+        "cpu_fallback_zero": {"type": "boolean"},
+        "terminal_resultir_diagnosticir_parity": {"type": "boolean"},
+        "cross_device_production_performance_sweep": {"type": "boolean"},
+        "nonlinear_material_family_breadth": {"const": false}
+      },
+      "additionalProperties": false
     },
     "claims": {
       "type": "object",
       "required": ["production_worker_ready", "trusted_identity_derived_from_external_policy", "self_declared_identity_promoted", "gfx1100_workflow_executed_by_this_builder", "g1_closure"],
       "properties": {
-        "production_worker_ready": {"type": "boolean"},
+        "production_worker_ready": {"const": false},
         "trusted_identity_derived_from_external_policy": {"type": "boolean"},
         "self_declared_identity_promoted": {"const": false},
         "gfx1100_workflow_executed_by_this_builder": {"const": false},

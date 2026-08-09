@@ -52,7 +52,27 @@
       },
       "additionalProperties": false
     },
-    "lifecycle": {"type": "object", "minProperties": 13, "additionalProperties": {"const": true}},
+    "lifecycle": {
+      "type": "object",
+      "required": ["state_rhs_csr_uploaded", "persistent_device_buffers_used", "residual_jvp_on_device", "accepted_state_tangent_refresh_on_device", "equation_scaling_on_device", "production_preconditioner_used", "production_fgmres_used", "newton_update_on_device", "line_search_on_device", "material_commit_rollback_on_device", "convergence_gate_on_device", "checkpoint_emitted", "result_ir_emitted", "diagnostic_ir_emitted"],
+      "properties": {
+        "state_rhs_csr_uploaded": {"const": true},
+        "persistent_device_buffers_used": {"const": true},
+        "residual_jvp_on_device": {"const": true},
+        "accepted_state_tangent_refresh_on_device": {"const": false},
+        "equation_scaling_on_device": {"const": true},
+        "production_preconditioner_used": {"const": true},
+        "production_fgmres_used": {"const": true},
+        "newton_update_on_device": {"const": true},
+        "line_search_on_device": {"const": true},
+        "material_commit_rollback_on_device": {"const": true},
+        "convergence_gate_on_device": {"const": true},
+        "checkpoint_emitted": {"const": true},
+        "result_ir_emitted": {"const": true},
+        "diagnostic_ir_emitted": {"const": true}
+      },
+      "additionalProperties": false
+    },
     "kpis": {
       "type": "object",
       "required": ["krylov_iteration_count", "matvec_count", "preconditioner_apply_count", "h2d_bytes", "d2h_bytes", "mid_step_d2h_bytes", "peak_vram_bytes", "checkpoint_overhead_seconds", "end_to_end_wall_seconds", "cpu_baseline_wall_seconds", "speedup_vs_cpu"],
@@ -60,11 +80,12 @@
     },
     "claims": {
       "type": "object",
-      "required": ["terminal_resultir_authority_parity", "terminal_resultir_full_hash_equality_required", "diagnostic_ir_bound", "fallback_zero_observed_in_bound_receipt", "mid_step_d2h_zero_observed", "offline_replay_without_local_device_probe", "trusted_hardware_execution", "production_worker_ready", "g1_closure"],
+      "required": ["terminal_resultir_authority_parity", "terminal_resultir_full_hash_equality_required", "diagnostic_ir_bound", "accepted_state_tangent_refresh_on_device_proven", "fallback_zero_observed_in_bound_receipt", "mid_step_d2h_zero_observed", "offline_replay_without_local_device_probe", "trusted_hardware_execution", "production_worker_ready", "g1_closure"],
       "properties": {
         "terminal_resultir_authority_parity": {"const": true},
         "terminal_resultir_full_hash_equality_required": {"const": false},
         "diagnostic_ir_bound": {"const": true},
+        "accepted_state_tangent_refresh_on_device_proven": {"const": false},
         "fallback_zero_observed_in_bound_receipt": {"const": true},
         "mid_step_d2h_zero_observed": {"const": true},
         "offline_replay_without_local_device_probe": {"const": true},

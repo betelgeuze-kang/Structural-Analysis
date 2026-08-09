@@ -38,6 +38,13 @@ SCHEMA = Path(
 VERSION = "g1-mgt-production-promotion-gate.v2"
 TRUST_POLICY_VERSION = "g1-mgt-hardware-trust-policy.v2"
 FALLBACK_VERSION = "g1-mgt-cpu-fallback-zero-receipt.v2"
+REQUIREMENT_NAMES = (
+    "trusted_hardware_identity_pair",
+    "cpu_fallback_zero",
+    "terminal_resultir_diagnosticir_parity",
+    "cross_device_production_performance_sweep",
+    "nonlinear_material_family_breadth",
+)
 SOURCE_PATHS = (
     Path("scripts/build_g1_mgt_production_promotion_gate_v2.py"),
     Path("scripts/g1_receipt_provenance.py"),
@@ -138,6 +145,7 @@ def _time(value: str) -> datetime:
 def validate_trust_policy(
     policy: dict[str, Any], *, expected_hash: str | None, now: datetime
 ) -> dict[str, Any]:
+    _check_finite(policy)
     required = {
         "schema_version",
         "receipt_hash",
@@ -264,6 +272,7 @@ def validate_trusted_identity_pair(
 def validate_fallback_zero_receipt(
     receipt: dict[str, Any], workers: Sequence[dict[str, Any]]
 ) -> dict[str, Any]:
+    _check_finite(receipt)
     required = {
         "schema_version",
         "receipt_hash",
@@ -341,8 +350,20 @@ def build(
     fallback_zero_receipt: dict[str, Any] | None = None,
     performance_receipt: dict[str, Any] | None = None,
     generated_at: str | None = None,
+    provenance_source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
+    for name, value in (
+        ("gfx1030_worker", gfx1030_worker),
+        ("gfx1100_worker", gfx1100_worker),
+        ("gfx1030_envelope", gfx1030_envelope),
+        ("gfx1100_envelope", gfx1100_envelope),
+        ("trust_policy", trust_policy),
+        ("fallback_zero_receipt", fallback_zero_receipt),
+        ("performance_receipt", performance_receipt),
+    ):
+        if value is not None:
+            _check_finite(value, f"$.{name}")
     local_worker = gfx1030_worker or worker_gate.validate(
         secure_read_json(worker_gate.DEFAULT_OUT, allowed_root=root),
         root=root,
@@ -366,12 +387,7 @@ def build(
     if local_envelope["evidence_payload"]["hardware"]["gcn_arch_name"] != "gfx1030":
         raise ValueError("g1_promotion_local_envelope_must_be_gfx1030")
 
-    requirements = {
-        "trusted_hardware_identity_pair": False,
-        "cpu_fallback_zero": False,
-        "terminal_resultir_diagnosticir_parity": False,
-        "cross_device_production_performance_sweep": False,
-    }
+    requirements = {name: False for name in REQUIREMENT_NAMES}
     sources: dict[str, Any] = {
         "gfx1030_worker_receipt_hash": local_worker["receipt_hash"],
         "gfx1100_worker_receipt_hash": None,
@@ -455,8 +471,7 @@ def build(
         performance["claims"]["cross_device_production_performance_sweep"]
     )
     promotion_ready = all(requirements.values())
-    blockers = [name for name, passed in requirements.items() if not passed]
-    blockers.append("nonlinear_material_family_breadth_not_closed")
+    blockers = [name for name in REQUIREMENT_NAMES if not requirements[name]]
     payload: dict[str, Any] = {
         "schema_version": VERSION,
         "receipt_hash": "sha256:" + "0" * 64,
@@ -464,7 +479,11 @@ def build(
         or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "status": "ready" if promotion_ready else "partial",
         "contract_pass": True,
-        "provenance": build_provenance(root, SOURCE_PATHS),
+        "provenance": build_provenance(
+            root,
+            SOURCE_PATHS,
+            source_commit_sha=provenance_source_commit_sha,
+        ),
         "sources": sources,
         "promotion_requirements": requirements,
         "claims": {
@@ -485,7 +504,8 @@ def build(
             "DiagnosticIR parity digests, and a repeated production performance sweep. "
             "Missing inputs stay partial; self-declared identity, synthetic performance, "
             "and the detached local self-signature are never discovered or promoted. "
-            "Nonlinear material breadth and G1 closure remain separate and false."
+            "This gate has no bound nonlinear material-family breadth receipt, so "
+            "production readiness and G1 closure remain false."
         ),
     }
     payload["receipt_hash"] = _hash(payload)
@@ -497,6 +517,7 @@ def validate(
     *,
     root: Path = ROOT,
     require_commit_bound: bool = False,
+    current: bool = False,
 ) -> dict[str, Any]:
     schema = secure_read_json(SCHEMA, allowed_root=root)
     Draft202012Validator.check_schema(schema)
@@ -519,9 +540,7 @@ def validate(
         != requirements["trusted_hardware_identity_pair"]
     ):
         raise ValueError("g1_promotion_semantic_claim_mismatch")
-    expected_blockers = [
-        name for name, passed in requirements.items() if not passed
-    ] + ["nonlinear_material_family_breadth_not_closed"]
+    expected_blockers = [name for name in REQUIREMENT_NAMES if not requirements[name]]
     if payload["blockers_remaining"] != expected_blockers:
         raise ValueError("g1_promotion_blocker_set_mismatch")
     trusted_sources = (
@@ -529,10 +548,30 @@ def validate(
         payload["sources"]["trust_policy_hash"],
         payload["sources"]["fallback_zero_receipt_hash"],
     )
-    if requirements["trusted_hardware_identity_pair"] != all(
-        value is not None for value in trusted_sources
+    trusted_source_count = sum(value is not None for value in trusted_sources)
+    if trusted_source_count not in (0, len(trusted_sources)):
+        raise ValueError("g1_promotion_trusted_source_set_incomplete")
+    if requirements["trusted_hardware_identity_pair"] != (
+        trusted_source_count == len(trusted_sources)
     ):
         raise ValueError("g1_promotion_trusted_source_set_mismatch")
+    if (
+        requirements["cpu_fallback_zero"]
+        != requirements["trusted_hardware_identity_pair"]
+        or requirements["terminal_resultir_diagnosticir_parity"]
+        != requirements["trusted_hardware_identity_pair"]
+    ):
+        raise ValueError("g1_promotion_trusted_requirement_set_mismatch")
+    if current:
+        if any(value is not None for value in trusted_sources):
+            raise ValueError("g1_promotion_external_current_replay_inputs_required")
+        expected = build(
+            root=root,
+            generated_at=payload["generated_at"],
+            provenance_source_commit_sha=payload["provenance"]["source_commit_sha"],
+        )
+        if payload != expected:
+            raise ValueError("g1_promotion_current_replay_mismatch")
     return payload
 
 
@@ -543,7 +582,7 @@ def write(*, root: Path = ROOT, out: Path = DEFAULT_OUT) -> dict[str, Any]:
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n",
         encoding="utf-8",
     )
-    return validate(payload, root=root)
+    return validate(payload, root=root, current=True)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -557,6 +596,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             secure_read_json(target, allowed_root=ROOT),
             root=ROOT,
             require_commit_bound=True,
+            current=True,
         )
         print("g1_mgt_production_promotion_gate_v2_consistent")
         return 0

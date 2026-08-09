@@ -51,6 +51,11 @@ def test_current_worker_receipt_uses_authority_digest_not_full_hash_equality(
         "hardware_identity_trusted": False,
     }
     assert payload["claims"]["production_worker_ready"] is False
+    assert payload["lifecycle"]["accepted_state_tangent_refresh_on_device"] is False
+    assert payload["claims"]["accepted_state_tangent_refresh_on_device_proven"] is False
+    assert (
+        "accepted_state_tangent_refresh_hip_not_proven" in payload["blockers_remaining"]
+    )
 
 
 def test_backend_specific_hash_drift_does_not_change_authority_digest() -> None:

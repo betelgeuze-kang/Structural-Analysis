@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "sample_count", "production_sample_count", "synthetic_sample_count", "sample_receipt_hashes", "identity", "architecture_summaries", "claims", "blockers_remaining", "claim_boundary"],
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "sample_count", "production_sample_count", "synthetic_sample_count", "samples", "sample_receipt_hashes", "identity", "architecture_summaries", "claims", "blockers_remaining", "claim_boundary"],
   "properties": {
     "schema_version": {"const": "g1-mgt-production-performance-sweep.v2"},
     "receipt_hash": {"$ref": "#/$defs/hash"},
@@ -12,6 +12,10 @@
     "sample_count": {"type": "integer", "minimum": 0},
     "production_sample_count": {"type": "integer", "minimum": 0},
     "synthetic_sample_count": {"type": "integer", "minimum": 0},
+    "samples": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
     "sample_receipt_hashes": {
       "type": "array",
       "uniqueItems": true,

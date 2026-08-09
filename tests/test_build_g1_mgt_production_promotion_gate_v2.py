@@ -73,6 +73,7 @@ def test_missing_optional_inputs_remain_partial() -> None:
     assert payload["claims"]["self_declared_identity_promoted"] is False
     assert payload["claims"]["gfx1100_workflow_executed_by_this_builder"] is False
     assert all(value is False for value in payload["promotion_requirements"].values())
+    assert "nonlinear_material_family_breadth" in payload["blockers_remaining"]
 
 
 def test_detached_self_signature_sidecars_are_not_discovered() -> None:
@@ -80,6 +81,23 @@ def test_detached_self_signature_sidecars_are_not_discovered() -> None:
     assert "detached_self_signature" not in source
     assert ".glob(" not in source
     assert ".rglob(" not in source
+
+
+def test_current_validation_replays_default_upstream_chain(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = module.build(root=ROOT, generated_at="2026-08-09T00:00:00Z")
+    original = module.build
+
+    def drifted_build(**kwargs):
+        candidate = original(**kwargs)
+        candidate["sources"]["performance_receipt_hash"] = "sha256:" + "f" * 64
+        candidate["receipt_hash"] = module._hash(candidate)
+        return candidate
+
+    monkeypatch.setattr(module, "build", drifted_build)
+    with pytest.raises(ValueError, match="current_replay_mismatch"):
+        module.validate(payload, root=ROOT, current=True)
 
 
 def test_secure_json_rejects_symlink_duplicate_keys_and_nonfinite(

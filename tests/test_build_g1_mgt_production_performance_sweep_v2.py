@@ -49,6 +49,7 @@ def test_missing_samples_stays_partial_and_fail_closed() -> None:
     payload = module.build(root=ROOT, generated_at="2026-08-09T00:00:00Z")
     module.validate(payload, root=ROOT)
     assert payload["status"] == "partial"
+    assert payload["claims"]["production_mgt_workload_only"] is False
     assert payload["claims"]["cross_device_production_performance_sweep"] is False
     assert (
         "three_repetitions_per_architecture_not_available"
@@ -111,3 +112,16 @@ def test_synthetic_and_nonfinite_samples_cannot_claim_production() -> None:
     module.validate(payload, root=ROOT)
     assert payload["status"] == "partial"
     assert payload["claims"]["cross_device_production_performance_sweep"] is False
+
+
+def test_ready_looking_aggregate_without_bound_samples_is_rejected() -> None:
+    samples = [
+        _sample(architecture, repetition)
+        for architecture in module.ARCHITECTURES
+        for repetition in range(3)
+    ]
+    payload = module.build(samples=samples, root=ROOT)
+    payload["samples"] = []
+    payload["receipt_hash"] = module._hash(payload)
+    with pytest.raises(ValueError, match="replay_mismatch"):
+        module.validate(payload, root=ROOT)

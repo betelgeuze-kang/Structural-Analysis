@@ -198,9 +198,17 @@ def build(
     samples: Sequence[dict[str, Any]] = (),
     root: Path = ROOT,
     generated_at: str | None = None,
+    provenance_source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     root = root.resolve()
-    rows = [validate_sample(dict(sample)) for sample in samples]
+    rows = sorted(
+        (validate_sample(dict(sample)) for sample in samples),
+        key=lambda row: (
+            row["architecture"],
+            row["repetition_index"],
+            row["receipt_hash"],
+        ),
+    )
     production = [
         row
         for row in rows
@@ -246,10 +254,15 @@ def build(
         or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "status": "ready" if cross_device_ready else "partial",
         "contract_pass": True,
-        "provenance": build_provenance(root, SOURCE_PATHS),
+        "provenance": build_provenance(
+            root,
+            SOURCE_PATHS,
+            source_commit_sha=provenance_source_commit_sha,
+        ),
         "sample_count": len(rows),
         "production_sample_count": len(production),
         "synthetic_sample_count": synthetic_count,
+        "samples": rows,
         "sample_receipt_hashes": sorted(row["receipt_hash"] for row in rows),
         "identity": {
             name: values[0] if len(values) == 1 else None
@@ -260,7 +273,7 @@ def build(
             for architecture, arch_rows in grouped.items()
         },
         "claims": {
-            "production_mgt_workload_only": synthetic_count == 0,
+            "production_mgt_workload_only": bool(production) and synthetic_count == 0,
             "same_source_wheel_workload_checkpoint": identity_consistent,
             "terminal_parity_digest_bound": identity_consistent,
             "three_repetitions_per_architecture": sufficient_repetitions,
@@ -300,48 +313,14 @@ def validate(
     )
     if payload["claims"]["synthetic_fixture_promoted"] is not False:
         raise ValueError("g1_performance_synthetic_promotion_forbidden")
-    if payload["sample_count"] != (
-        payload["production_sample_count"] + payload["synthetic_sample_count"]
-    ):
-        raise ValueError("g1_performance_sample_count_mismatch")
-    sample_hashes = payload["sample_receipt_hashes"]
-    if len(sample_hashes) != payload["sample_count"] or len(sample_hashes) != len(
-        set(sample_hashes)
-    ):
-        raise ValueError("g1_performance_sample_hash_set_mismatch")
-    summaries = payload["architecture_summaries"]
-    summarized_count = sum(
-        summary["sample_count"] for summary in summaries.values() if summary
+    expected = build(
+        samples=payload["samples"],
+        root=root,
+        generated_at=payload["generated_at"],
+        provenance_source_commit_sha=payload["provenance"]["source_commit_sha"],
     )
-    if summarized_count != payload["production_sample_count"]:
-        raise ValueError("g1_performance_summary_count_mismatch")
-    identity_complete = all(
-        isinstance(value, str) for value in payload["identity"].values()
-    )
-    repeated = all(
-        summary is not None and summary["sample_count"] >= 3
-        for summary in summaries.values()
-    )
-    expected_ready = bool(
-        payload["production_sample_count"]
-        and payload["synthetic_sample_count"] == 0
-        and identity_complete
-        and repeated
-    )
-    claims = payload["claims"]
-    if (
-        claims["same_source_wheel_workload_checkpoint"] != identity_complete
-        or claims["terminal_parity_digest_bound"] != identity_complete
-        or claims["three_repetitions_per_architecture"] != repeated
-        or claims["cross_device_production_performance_sweep"] != expected_ready
-        or (payload["status"] == "ready") != expected_ready
-    ):
-        raise ValueError("g1_performance_semantic_claim_mismatch")
-    if payload["synthetic_sample_count"] and (
-        claims["production_mgt_workload_only"]
-        or claims["cross_device_production_performance_sweep"]
-    ):
-        raise ValueError("g1_performance_synthetic_promotion_forbidden")
+    if payload != expected:
+        raise ValueError("g1_performance_sweep_replay_mismatch")
     return payload
 
 

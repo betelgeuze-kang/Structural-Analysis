@@ -218,7 +218,7 @@ def build(
         "state_rhs_csr_uploaded": claims["single_device_lifecycle"],
         "persistent_device_buffers_used": claims["single_device_lifecycle"],
         "residual_jvp_on_device": claims["terminal_physical_residual_replay"],
-        "accepted_state_tangent_refresh_on_device": True,
+        "accepted_state_tangent_refresh_on_device": False,
         "equation_scaling_on_device": claims["equation_scaling"],
         "production_preconditioner_used": claims["production_size_fgmres"],
         "production_fgmres_used": claims["production_size_fgmres"],
@@ -232,7 +232,12 @@ def build(
         ],
         "diagnostic_ir_emitted": result["claims"]["diagnosticir_emitted"],
     }
-    if not all(lifecycle.values()):
+    proven_lifecycle = {
+        name: passed
+        for name, passed in lifecycle.items()
+        if name != "accepted_state_tangent_refresh_on_device"
+    }
+    if not all(proven_lifecycle.values()):
         raise ValueError("g1_worker_v2_lifecycle_incomplete")
     kpis = {
         "krylov_iteration_count": runtime["krylov_iterations"],
@@ -299,6 +304,7 @@ def build(
             "terminal_resultir_authority_parity": True,
             "terminal_resultir_full_hash_equality_required": False,
             "diagnostic_ir_bound": True,
+            "accepted_state_tangent_refresh_on_device_proven": False,
             "fallback_zero_observed_in_bound_receipt": True,
             "mid_step_d2h_zero_observed": runtime["mid_iteration_d2h_transfer_count"]
             == 0,
@@ -308,6 +314,7 @@ def build(
             "g1_closure": False,
         },
         "blockers_remaining": [
+            "accepted_state_tangent_refresh_hip_not_proven",
             "trusted_hardware_identity_receipt_not_bound",
             "independent_gfx1100_worker_receipt_not_bound",
             "cross_device_performance_sweep_not_bound",
@@ -319,8 +326,9 @@ def build(
             "from shared model, plan, scaling, CSR, state, material, path, terminal, "
             "and displacement identities while preserving distinct backend ResultIR "
             "hashes. An unsigned envelope, missing trusted identity policy, absent "
-            "independent gfx1100 receipt, and open nonlinear material breadth keep the "
-            "production worker and G1 closure false."
+            "accepted-state HIP tangent-refresh evidence, independent gfx1100 receipt, "
+            "and open nonlinear material breadth keep the production worker and G1 "
+            "closure false."
         ),
     }
     payload["receipt_hash"] = _hash(payload)
