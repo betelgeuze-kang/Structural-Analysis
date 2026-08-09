@@ -1,0 +1,277 @@
+name: G1 Production MGT gfx1100 Hardware
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  EXPECTED_SOURCE_SHA: 24a4d4ab85af5babc42415b518a2a80de8a291c5
+  EXPECTED_GFX1030_ENVELOPE_FILE_SHA256: sha256:d5aeca0801131dfc6237ec3ebf164cfddb80359a678e8217e38169b9afadfac7
+  EXPECTED_GFX1030_ENVELOPE_RECEIPT_HASH: sha256:26d68ed12c9b97d60438f5f022028a0b0320271b9aac8b5b73ca4d837479eb2a
+  EXPECTED_WHEEL_SHA256: sha256:3dceed70c1783ef88d7a0bed5ae72e64ddd3510b9acdca19b1c90c7220e0505a
+  EXPECTED_WHEEL_SIZE_BYTES: "1429533"
+  RUN_ARTIFACT_PREFIX: g1_mgt_gfx1100_${{ github.run_id }}_${{ github.run_attempt }}
+  PYTHONHASHSEED: "0"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+
+concurrency:
+  group: g1-production-mgt-gfx1100
+  cancel-in-progress: false
+
+jobs:
+  production-gfx1100:
+    if: github.ref == 'refs/heads/main'
+    environment: g1-production-gfx1100
+    env:
+      EVIDENCE_ORGANIZATION_ID: "${{ vars.G1_GFX1100_ORGANIZATION_ID }}"
+      EVIDENCE_EXECUTION_LOCATION: "${{ vars.G1_GFX1100_EXECUTION_LOCATION }}"
+      EXPECTED_RUNNER_ID: "${{ vars.G1_GFX1100_RUNNER_ID }}"
+      EXPECTED_SIGNER_PUBLIC_KEY_SHA256: "${{ vars.G1_GFX1100_SIGNER_PUBLIC_KEY_SHA256 }}"
+      INDEPENDENCE_ATTESTED: "${{ vars.G1_GFX1100_INDEPENDENT_FROM_LOCAL_GFX1030 }}"
+    runs-on: [self-hosted, linux, x64, amd, rocm, gfx1100, g1-production-gfx1100]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout trusted control plane
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: "${{ github.sha }}"
+          path: control
+          fetch-depth: 1
+          lfs: true
+          persist-credentials: false
+
+      - name: Checkout accepted source and LFS artifacts
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 24a4d4ab85af5babc42415b518a2a80de8a291c5
+          path: source
+          fetch-depth: 1
+          lfs: true
+          persist-credentials: false
+
+      - name: Fail closed on source, attestation, device, and runtime
+        shell: bash
+        env:
+          EVIDENCE_RUNNER_ID: "${{ runner.name }}"
+        run: |
+          set -euo pipefail
+          CONTROL_ROOT="$GITHUB_WORKSPACE/control"
+          SOURCE_ROOT="$GITHUB_WORKSPACE/source"
+          CONTROL_WHEEL="$CONTROL_ROOT/dist/structural_analysis-0.3.0-py3-none-any.whl"
+          SOURCE_WHEEL="$SOURCE_ROOT/dist/structural_analysis-0.3.0-py3-none-any.whl"
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$(git -C "$CONTROL_ROOT" rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C "$SOURCE_ROOT" rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          test "$INDEPENDENCE_ATTESTED" = "true"
+          test -n "$EVIDENCE_ORGANIZATION_ID"
+          test -n "$EVIDENCE_EXECUTION_LOCATION"
+          test -n "$EVIDENCE_RUNNER_ID"
+          test "$EVIDENCE_RUNNER_ID" = "$EXPECTED_RUNNER_ID"
+          test "$EVIDENCE_ORGANIZATION_ID" != "local-development"
+          test "$EVIDENCE_EXECUTION_LOCATION" != "local-workstation"
+          test "$EVIDENCE_RUNNER_ID" != "local-gfx1030"
+          test -c /dev/kfd
+          test -r /dev/kfd
+          test -w /dev/kfd
+          test -c /dev/dri/renderD128
+          test -r /dev/dri/renderD128
+          test -w /dev/dri/renderD128
+          command -v rocminfo
+          command -v python3
+          test -x /opt/rocm-6.0.2/bin/hipcc
+          test -f "$CONTROL_WHEEL"
+          python3 -c 'import cryptography, jsonschema, numpy, scipy'
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import re
+
+          workspace = Path(os.environ["GITHUB_WORKSPACE"])
+          control_envelope_path = (
+              workspace
+              / "control/implementation/phase1/release_evidence/productization/"
+              "g1_mgt_gfx1030_hardware_envelope.json"
+          )
+          raw = control_envelope_path.read_bytes()
+          file_hash = "sha256:" + hashlib.sha256(raw).hexdigest()
+          if file_hash != os.environ["EXPECTED_GFX1030_ENVELOPE_FILE_SHA256"]:
+              raise SystemExit("trusted gfx1030 envelope file hash mismatch")
+          envelope = json.loads(raw)
+          if envelope["receipt_hash"] != os.environ[
+              "EXPECTED_GFX1030_ENVELOPE_RECEIPT_HASH"
+          ]:
+              raise SystemExit("trusted gfx1030 envelope receipt hash mismatch")
+          if envelope["evidence_payload"]["source"][
+              "repository_commit_sha"
+          ] != os.environ["EXPECTED_SOURCE_SHA"]:
+              raise SystemExit("trusted envelope source SHA mismatch")
+          wheel_path = (
+              workspace
+              / "control/dist/structural_analysis-0.3.0-py3-none-any.whl"
+          )
+          if wheel_path.stat().st_size != int(
+              os.environ["EXPECTED_WHEEL_SIZE_BYTES"]
+          ):
+              raise SystemExit("accepted wheel size mismatch")
+          wheel_hash = "sha256:" + hashlib.sha256(wheel_path.read_bytes()).hexdigest()
+          if wheel_hash != os.environ["EXPECTED_WHEEL_SHA256"]:
+              raise SystemExit("accepted wheel hash mismatch")
+          if re.fullmatch(
+              r"sha256:[0-9a-f]{64}",
+              os.environ["EXPECTED_SIGNER_PUBLIC_KEY_SHA256"],
+          ) is None:
+              raise SystemExit("trusted gfx1100 signer public-key hash missing")
+          PY
+          test -z "$(git -C "$CONTROL_ROOT" status --porcelain --untracked-files=all)"
+          test -z "$(git -C "$SOURCE_ROOT" status --porcelain --untracked-files=all)"
+          mkdir -p "$SOURCE_ROOT/dist"
+          cp -- "$CONTROL_WHEEL" "$SOURCE_WHEEL"
+          test "sha256:$(sha256sum "$SOURCE_WHEEL" | cut -d ' ' -f 1)" = "$EXPECTED_WHEEL_SHA256"
+          rocminfo > "$SOURCE_ROOT/${RUN_ARTIFACT_PREFIX}_rocminfo.txt"
+          grep -q 'Name:[[:space:]]*gfx1100' "$SOURCE_ROOT/${RUN_ARTIFACT_PREFIX}_rocminfo.txt"
+
+      - name: Run production-size persistent gfx1100 lifecycle
+        shell: bash
+        working-directory: source
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$PWD/src:$PWD/scripts:$PWD/implementation/phase1" \
+            python3 scripts/run_g1_mgt_device_fgmres.py \
+              --expected-architecture gfx1100 \
+              --artifact-prefix "$RUN_ARTIFACT_PREFIX" \
+              --hipcc /opt/rocm-6.0.2/bin/hipcc \
+              --rocm-path /opt/rocm-6.0.2 \
+              --timeout 600
+
+      - name: Build and replay unsigned hardware envelope
+        shell: bash
+        working-directory: source
+        env:
+          EVIDENCE_RUNNER_ID: "${{ runner.name }}"
+        run: |
+          set -euo pipefail
+          PYTHONPATH="$PWD/src:$PWD/scripts:$PWD/implementation/phase1" \
+            python3 scripts/build_g1_mgt_hardware_envelope.py \
+              --upstream "implementation/phase1/release_evidence/productization/${RUN_ARTIFACT_PREFIX}_receipt.json" \
+              --out "implementation/phase1/release_evidence/productization/${RUN_ARTIFACT_PREFIX}_hardware_envelope.json" \
+              --organization-id "$EVIDENCE_ORGANIZATION_ID" \
+              --runner-id "$EVIDENCE_RUNNER_ID" \
+              --execution-location "$EVIDENCE_EXECUTION_LOCATION" \
+              --independent-from-local-gfx1030
+          PYTHONPATH="$PWD/src:$PWD/scripts:$PWD/implementation/phase1" \
+            python3 scripts/build_g1_mgt_hardware_envelope.py \
+              --out "implementation/phase1/release_evidence/productization/${RUN_ARTIFACT_PREFIX}_hardware_envelope.json" \
+              --export-evidence "${RUN_ARTIFACT_PREFIX}_evidence.canonical.json"
+          PYTHONPATH="$PWD/src:$PWD/scripts:$PWD/implementation/phase1" \
+            python3 scripts/build_g1_mgt_hardware_envelope.py \
+              --out "implementation/phase1/release_evidence/productization/${RUN_ARTIFACT_PREFIX}_hardware_envelope.json" \
+              --check
+
+      - name: Build complete non-promotable signing bundle manifest
+        shell: bash
+        working-directory: source
+        env:
+          EVIDENCE_RUNNER_ID: "${{ runner.name }}"
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          prefix = os.environ["RUN_ARTIFACT_PREFIX"]
+          productization = Path(
+              "implementation/phase1/release_evidence/productization"
+          )
+          names = [
+              f"{prefix}_receipt.json",
+              f"{prefix}_solution.f64le",
+              f"{prefix}_residual.f64le",
+              f"{prefix}_accepted_state.f64le",
+              f"{prefix}_nonlinear_residual.f64le",
+              f"{prefix}_checkpoint.npz",
+              f"{prefix}_initial_material.f64le",
+              f"{prefix}_committed_material.f64le",
+              f"{prefix}_rejected_material.f64le",
+              f"{prefix}_rollback_material.f64le",
+              f"{prefix}_hardware_envelope.json",
+          ]
+          paths = [productization / name for name in names]
+          paths.extend(
+              [
+                  Path(f"{prefix}_evidence.canonical.json"),
+                  Path(f"{prefix}_rocminfo.txt"),
+              ]
+          )
+          missing = [path.as_posix() for path in paths if not path.is_file()]
+          if missing:
+              raise SystemExit(f"incomplete evidence bundle: {missing}")
+          receipt = json.loads((productization / names[0]).read_text())
+          envelope = json.loads((productization / names[-1]).read_text())
+          if receipt["source"]["repository_commit_sha"] != os.environ[
+              "EXPECTED_SOURCE_SHA"
+          ]:
+              raise SystemExit("device receipt source SHA mismatch")
+          if receipt["runtime"]["gcn_arch_name"] != "gfx1100":
+              raise SystemExit("device receipt architecture mismatch")
+          if receipt["hardware_execution"][
+              "mid_iteration_d2h_transfer_count"
+          ] != 0:
+              raise SystemExit("mid-iteration D2H is not zero")
+          if envelope["signature"]["state"] != "unsigned":
+              raise SystemExit("workflow must export unsigned external-signing bytes")
+          files = []
+          for path in paths:
+              raw = path.read_bytes()
+              files.append(
+                  {
+                      "path": path.as_posix(),
+                      "byte_length": len(raw),
+                      "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
+                  }
+              )
+          payload = {
+              "schema_version": "g1-gfx1100-signing-bundle-manifest.v1",
+              "source_sha": os.environ["EXPECTED_SOURCE_SHA"],
+              "runner_id": os.environ["EVIDENCE_RUNNER_ID"],
+              "organization_id": os.environ["EVIDENCE_ORGANIZATION_ID"],
+              "execution_location": os.environ["EVIDENCE_EXECUTION_LOCATION"],
+              "expected_signer_public_key_sha256": os.environ[
+                  "EXPECTED_SIGNER_PUBLIC_KEY_SHA256"
+              ],
+              "files": files,
+              "promotion_eligible": False,
+              "blockers_remaining": [
+                  "cpu_fallback_zero_not_attested",
+                  "terminal_resultir_diagnosticir_parity_not_bound",
+                  "end_to_end_performance_sweep_not_bound",
+                  "trusted_hardware_identity_receipt_not_bound",
+              ],
+          }
+          body = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+          payload["manifest_hash"] = "sha256:" + hashlib.sha256(body).hexdigest()
+          Path(f"{prefix}_bundle_manifest.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n"
+          )
+          PY
+
+      - name: Upload isolated evidence for external signing
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            source/implementation/phase1/release_evidence/productization/${{ env.RUN_ARTIFACT_PREFIX }}_*
+            source/${{ env.RUN_ARTIFACT_PREFIX }}_evidence.canonical.json
+            source/${{ env.RUN_ARTIFACT_PREFIX }}_rocminfo.txt
+            source/${{ env.RUN_ARTIFACT_PREFIX }}_bundle_manifest.json
+          if-no-files-found: error
+          retention-days: 90

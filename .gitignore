@@ -24,6 +24,9 @@ env/
 # Node / Frontend
 node_modules/
 dist/
+!dist/
+dist/*
+!dist/structural_analysis-0.3.0-py3-none-any.whl
 build/
 test-results/
 *.tsbuildinfo

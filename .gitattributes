@@ -1,5 +1,6 @@
 implementation/phase1/release_evidence/productization/*.npz filter=lfs diff=lfs merge=lfs -text
 implementation/phase1/release_evidence/productization/**/*.npz filter=lfs diff=lfs merge=lfs -text
+dist/structural_analysis-0.3.0-py3-none-any.whl filter=lfs diff=lfs merge=lfs -text
 # These two checkpoint families predate the LFS policy and are intentionally
 # retained as direct Git blobs. Do not misclassify them as missing pointers.
 implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoints/*.npz -filter -diff -merge

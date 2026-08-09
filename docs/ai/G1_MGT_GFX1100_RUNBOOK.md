@@ -1,17 +1,50 @@
 # G1 production MGT gfx1100 runner
 
-This runbook produces an isolated, self-verifying `gfx1100` execution and an
-optional Ed25519-signed hardware envelope. It does not itself assert runner
-independence; the supplied organization, runner, location, signer, and public
-key identities are retained for the cross-device gate.
+This runbook produces an isolated `gfx1100` execution and unsigned canonical
+evidence for external Ed25519 signing. The current gate treats organization,
+runner, location, and signer strings as untrusted metadata until a separate
+hardware-identity receipt binds them to the protected runner policy.
 
 ## Required runner
 
 - Dedicated AMD `gfx1100` host with `/dev/kfd` and `/dev/dri` available.
+- Repository-level protected environment `g1-production-gfx1100` and the unique
+  dedicated-runner label `g1-production-gfx1100`.
 - The same repository commit and wheel hash named by the accepted local
   `g1_mgt_gfx1030_hardware_envelope.json`.
 - ROCm/HIP compiler and device libraries compatible with the runner.
 - A clean checkout for every path in the FGMRES receipt source set.
+
+The protected environment must define `G1_GFX1100_ORGANIZATION_ID`,
+`G1_GFX1100_EXECUTION_LOCATION`, `G1_GFX1100_RUNNER_ID`,
+`G1_GFX1100_SIGNER_PUBLIC_KEY_SHA256`, and
+`G1_GFX1100_INDEPENDENT_FROM_LOCAL_GFX1030=true`. These values are not
+dispatcher inputs.
+
+The repository includes a manual-only dispatch contract at
+`.github/workflows/g1-production-mgt-gfx1100-hardware.yml`. It is gated to the
+`main` ref, the protected environment, and dedicated runner labels
+`self-hosted`, `linux`, `x64`, `amd`, `rocm`, `gfx1100`, and
+`g1-production-gfx1100`. It first checks out the trusted control plane and then the
+fixed accepted source SHA into separate directories, with checkout credentials
+disabled. The exact 1.3 MB wheel is retained as a Git LFS control artifact at
+`dist/structural_analysis-0.3.0-py3-none-any.whl`; the historical source commit
+does not contain it. The workflow verifies that control artifact and copies it
+into the ignored source `dist/` path before execution. Before any solver work
+it verifies the exact control-envelope, source, and wheel hashes and rejects
+identity-policy drift, a dirty checkout,
+inaccessible `/dev/kfd` or `/dev/dri/renderD128`, a missing pinned ROCm
+compiler, or a device that does not report `gfx1100`.
+
+Every run uses a run-ID-specific artifact prefix. Only a successful complete
+bundle is uploaded, together with a hash manifest. The bundle remains marked
+`promotion_eligible=false`; the workflow does not handle a private signing key
+and does not claim G1 closure.
+
+As of 2026-08-09, the repository has one registered self-hosted runner,
+`betelgeuze-X570S-AORUS-ELITE`, with only `self-hosted/Linux/X64` labels and
+`offline` status. Therefore the production job intentionally remains
+undispatchable until an independently operated labeled gfx1100 runner exists.
 
 Read the required source commit without editing the receipt:
 
@@ -19,8 +52,8 @@ Read the required source commit without editing the receipt:
 python3 -c 'import json; from pathlib import Path; p=json.loads(Path("implementation/phase1/release_evidence/productization/g1_mgt_gfx1030_hardware_envelope.json").read_text()); print(p["evidence_payload"]["source"]["repository_commit_sha"])'
 ```
 
-Checkout that exact commit, verify the wheel SHA-256 against the local
-envelope, and run:
+Checkout that exact commit, copy the versioned control wheel into its `dist/`
+path, verify SHA-256 against the local envelope, and run:
 
 ```bash
 PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
@@ -78,11 +111,10 @@ PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
   --check
 ```
 
-Return the upstream receipt, its isolated artifacts, the signed envelope, and
-the public key. Do not return the private key. G1 cross-device closure remains
-false until the imported `gfx1030` and `gfx1100` envelopes pass same-source,
-same-wheel, distinct-runner/organization/signer, signature, numerical,
-checkpoint, material, and KPI gates.
+Return the upstream receipt, its isolated artifacts, the signed envelope, the
+bundle manifest, and the public key. Do not return the private key. Verify that
+the signing key hash matches the protected environment policy. Even a
+cryptographically consistent envelope pair is not yet G1 closure evidence.
 
 ## Promotion-host verification
 
@@ -97,9 +129,9 @@ PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
   scripts/build_g1_mgt_cross_device_gate.py --check
 ```
 
-The gate remains `partial` unless both envelopes validate their upstream
-artifacts and signatures, execute the exact expected architectures, share the
-same source set, wheel, and dual-target binaries, retain exact terminal and
-material contracts, and identify distinct organizations, runners, locations,
-signers, and public keys. Even a `ready` pair does not close the separate
-source-authoritative nonlinear-material blocker.
+The v1 gate remains `partial`. It can replay and compare both envelopes, but it
+keeps G1 closure false until four separate promotion receipts are bound:
+trusted hardware identity, observed CPU fallback count zero, terminal
+ResultIR/DiagnosticIR parity, and an end-to-end performance sweep. N1 CPU
+mathematical closure remains a separate gate, and unsupported actual-MGT
+nonlinear material parameters are not promoted here.
