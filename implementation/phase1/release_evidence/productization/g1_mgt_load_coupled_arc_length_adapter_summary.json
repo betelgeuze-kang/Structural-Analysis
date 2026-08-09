@@ -584,7 +584,7 @@
     "semantic_load_target": "LIVE",
     "status": "ready"
   },
-  "generated_at": "2026-08-09T04:50:40.650049+00:00",
+  "generated_at": "2026-08-09T04:59:53.664498+00:00",
   "global_dof_count": 78282,
   "initial_component_internal_force_free_inf_n": {
     "frame": 1276959794140.9329,
@@ -605,7 +605,7 @@
   "initial_residual_hotspot_maximum_translation_jump_m": 0.006714415448707063,
   "initial_residual_inf_n": 1277024522787.6619,
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:ee41609c6fb1f928fe3f8fbf8d41c3f104d310ef5769bcb1476006b2ed7ae6b0",
     "implementation/phase1/mgt_frame_force_based_assembly.py": "sha256:4448ea5b73089acca71d0c2f7ca368b4bb672e0c129faf4bd7e65752c1b5afed",
     "implementation/phase1/mgt_physical_residual_assembly.py": "sha256:6546c4d675aca60e0b6bc4f831c276d291aa421954c4db647f1455896b97c1a8",
     "implementation/phase1/mgt_semantic_load_assembly.py": "sha256:7df94d23907924dff69202922be356fc12afe4d93aab45f9aa8ad4759a6ab6ac",
@@ -626,7 +626,7 @@
     "src/structural_analysis/schemas/g1_mgt_load_coupled_arc_length_adapter_v1.schema.json": "sha256:a04172f6aabcbd92299fcb93cf091680affece0e4a385bb3d39136e8171be68c",
     "tests/test_build_g1_mgt_load_coupled_arc_length_adapter_receipt.py": "sha256:42642fa2b9997bac8ba8a1aa76de3211749352aae46ee8e2bb7a545c3032cdda",
     "tests/test_engine_v2_current_tangent_operator_v1.py": "sha256:6014a3faf61407de368537d625b5a2a9097f48d703761563be6fc60bc819a8cc",
-    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:3a03cd03ca782df2d66273860512b55014b436922735d7c16e68b42b84d3088c",
+    "tests/test_g1_mgt_load_coupled_arc_length_adapter.py": "sha256:bc95b331dc9eb38bfa625b9e534483cf98734825469ddc8574d2512e661a1d52",
     "tests/test_mgt_physical_residual_assembly.py": "sha256:07956e81f561e06af794e1808e3398bb8c13e54c1d0938456fd2f560fea16982",
     "tests/test_mgt_semantic_load_assembly.py": "sha256:8349d6213e690ce12d33375a18f278a145c52eb48e63b386208f13ecadf9f968",
     "tests/test_mgt_state_updated_frame_axial_geometry.py": "sha256:fdaa0e30d7f5aac05ec1ab4aa6128d8111c63cd55c297958323758cd3bfa9af4",
@@ -787,7 +787,7 @@
     "unsupported_selected_row_count": 0
   },
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "befaba5f847b8c9584654e9a2e77a85fd0591a9d",
+  "source_commit_sha": "fb8e7c9f98a9d0ff16ce7104f4945b7bf8422127",
   "source_material_properties_consumed": true,
   "status": "partial",
   "stored_base_direct_residual_inf_n": 42754.66805918372,
