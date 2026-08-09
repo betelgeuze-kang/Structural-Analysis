@@ -93,6 +93,26 @@ def test_durable_checkpoint_write_is_no_replace(tmp_path: Path) -> None:
         _write(tmp_path)
 
 
+def test_descriptor_collision_rolls_back_vector_installed_by_this_call(
+    tmp_path: Path,
+) -> None:
+    descriptor = tmp_path / "checkpoint.json"
+    descriptor.write_bytes(b"pre-existing descriptor")
+    assert not (tmp_path / "checkpoint.f64le").exists()
+
+    with pytest.raises(
+        LoadControlledMatrixFreeNewtonCheckpointArtifactError,
+        match="already exists",
+    ):
+        write_load_controlled_matrix_free_newton_checkpoint_artifact(
+            _checkpoint(),
+            descriptor,
+        )
+
+    assert descriptor.read_bytes() == b"pre-existing descriptor"
+    assert not (tmp_path / "checkpoint.f64le").exists()
+
+
 def test_duplicate_key_and_nonfinite_json_fail_closed(tmp_path: Path) -> None:
     _write(tmp_path)
     descriptor_path = tmp_path / "checkpoint.json"
@@ -196,4 +216,39 @@ def test_cross_case_path_equation_and_detached_vector_fail_closed(
             expected_case_id=_Problem.case_id,
             expected_path_contract_hash=PATH_HASH,
             displacement_path=detached,
+        )
+
+
+def test_descriptor_and_vector_symlinks_fail_closed(tmp_path: Path) -> None:
+    real = tmp_path / "real"
+    real.mkdir()
+    artifact = write_load_controlled_matrix_free_newton_checkpoint_artifact(
+        _checkpoint(),
+        real / "checkpoint.json",
+    )
+    descriptor_link = tmp_path / "descriptor-link.json"
+    descriptor_link.symlink_to(artifact.descriptor_path)
+    with pytest.raises(
+        LoadControlledMatrixFreeNewtonCheckpointArtifactError,
+        match="symlink",
+    ):
+        read_load_controlled_matrix_free_newton_checkpoint_artifact(
+            descriptor_link,
+            expected_case_id=_Problem.case_id,
+            expected_path_contract_hash=PATH_HASH,
+        )
+
+    vector_bytes = artifact.displacement_path.read_bytes()
+    artifact.displacement_path.unlink()
+    outside_vector = tmp_path / "outside.f64le"
+    outside_vector.write_bytes(vector_bytes)
+    artifact.displacement_path.symlink_to(outside_vector)
+    with pytest.raises(
+        LoadControlledMatrixFreeNewtonCheckpointArtifactError,
+        match="symlink",
+    ):
+        read_load_controlled_matrix_free_newton_checkpoint_artifact(
+            artifact.descriptor_path,
+            expected_case_id=_Problem.case_id,
+            expected_path_contract_hash=PATH_HASH,
         )

@@ -238,6 +238,7 @@ def _load_descriptor_bytes(raw: bytes) -> dict[str, Any]:
 
 
 def _read_bounded(path: Path, *, maximum_bytes: int, label: str) -> bytes:
+    _reject_symlink_chain(path)
     try:
         size = path.stat().st_size
         if size > maximum_bytes:
@@ -251,6 +252,20 @@ def _read_bounded(path: Path, *, maximum_bytes: int, label: str) -> bytes:
         raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
             f"checkpoint {label} could not be read"
         ) from exc
+
+
+def _reject_symlink_chain(path: Path) -> None:
+    candidate = path.absolute()
+    for component in (candidate, *candidate.parents):
+        try:
+            if component.is_symlink():
+                raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
+                    "checkpoint artifact path must not contain a symlink"
+                )
+        except OSError as exc:
+            raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
+                "checkpoint artifact path could not be inspected"
+            ) from exc
 
 
 def read_load_controlled_matrix_free_newton_checkpoint_artifact(
@@ -415,6 +430,9 @@ def write_load_controlled_matrix_free_newton_checkpoint_artifact(
         raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
             "checkpoint artifact directory does not exist"
         )
+    _reject_symlink_chain(descriptor_target.parent)
+    _reject_symlink_chain(descriptor_target)
+    _reject_symlink_chain(vector_target)
     if descriptor_target == vector_target:
         raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
             "checkpoint descriptor and displacement paths must differ"
@@ -437,7 +455,7 @@ def write_load_controlled_matrix_free_newton_checkpoint_artifact(
         _install_no_replace(descriptor_temporary, descriptor_target)
         descriptor_temporary = None
     except Exception:
-        if vector_installed and not descriptor_target.exists():
+        if vector_installed:
             try:
                 vector_target.unlink()
             except OSError:
