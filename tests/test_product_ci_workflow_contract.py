@@ -22,6 +22,16 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     assert "scripts/run_product_ci_lane.py --lane core" in workflow
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
 
+    hydration = workflow.split(
+        "- name: Hydrate merge-ref ancestry for provenance tests", 1
+    )[1].split("- name: Set up Python", 1)[0]
+    assert "git fetch --no-tags --unshallow origin" in hydration
+    assert "--deepen=" not in hydration
+    assert (
+        'test "$(git rev-parse --is-shallow-repository)" = "false"'
+        in hydration
+    )
+
 
 def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     workflow = _read("ci.yml")
@@ -94,7 +104,7 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
 
     assert "name: Legacy Evidence CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
-    assert "timeout-minutes: 180" in workflow
+    assert "timeout-minutes: 240" in workflow
     assert "fetch-depth: 0" in workflow
     assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
