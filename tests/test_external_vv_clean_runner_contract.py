@@ -243,7 +243,7 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
     ).strip() == "true"
     if recorded_object_available:
         ancestry_verified = _is_ancestor(recorded_commit, head)
-        if not ancestry_verified and shallow_repository:
+        if not ancestry_verified:
             parents = _direct_parents(head)
             assert parents
             ancestry_verified = any(
