@@ -32,28 +32,53 @@ class ContactStaticModel:
     gap_upper_m: tuple[float, ...]
 
     def __init__(
-        self, *, model_id: str, dof_ids: Sequence[str], contact_ids: Sequence[str],
-        stiffness_n_per_m: Sequence[Sequence[float]], load_n: Sequence[float],
+        self,
+        *,
+        model_id: str,
+        dof_ids: Sequence[str],
+        contact_ids: Sequence[str],
+        stiffness_n_per_m: Sequence[Sequence[float]],
+        load_n: Sequence[float],
         gap_upper_m: Sequence[float],
     ) -> None:
-        dofs = tuple(map(str, dof_ids)); contacts = tuple(map(str, contact_ids))
+        dofs = tuple(map(str, dof_ids))
+        contacts = tuple(map(str, contact_ids))
         stiffness = np.asarray(stiffness_n_per_m, dtype=np.float64)
-        load = np.asarray(load_n, dtype=np.float64); gap = np.asarray(gap_upper_m, dtype=np.float64)
+        load = np.asarray(load_n, dtype=np.float64)
+        gap = np.asarray(gap_upper_m, dtype=np.float64)
         size = len(dofs)
-        if size < 1 or len(set(dofs)) != size or len(contacts) != size or len(set(contacts)) != size:
+        if (
+            size < 1
+            or len(set(dofs)) != size
+            or len(contacts) != size
+            or len(set(contacts)) != size
+        ):
             raise ValueError("contact DOF/contact identity is invalid")
-        if stiffness.shape != (size, size) or not np.all(np.isfinite(stiffness)) or not np.allclose(stiffness, stiffness.T, rtol=0.0, atol=1.0e-12):
+        if (
+            stiffness.shape != (size, size)
+            or not np.all(np.isfinite(stiffness))
+            or not np.allclose(stiffness, stiffness.T, rtol=0.0, atol=1.0e-12)
+        ):
             raise ValueError("contact stiffness must be finite and symmetric")
-        if load.shape != (size,) or gap.shape != (size,) or not np.all(np.isfinite(load)) or not np.all(np.isfinite(gap)):
+        if (
+            load.shape != (size,)
+            or gap.shape != (size,)
+            or not np.all(np.isfinite(load))
+            or not np.all(np.isfinite(gap))
+        ):
             raise ValueError("contact load/gap vectors are invalid")
         try:
             np.linalg.cholesky(stiffness)
         except np.linalg.LinAlgError as exc:
             raise ValueError("contact stiffness must be positive definite") from exc
-        object.__setattr__(self, "model_id", str(model_id)); object.__setattr__(self, "dof_ids", dofs)
+        object.__setattr__(self, "model_id", str(model_id))
+        object.__setattr__(self, "dof_ids", dofs)
         object.__setattr__(self, "contact_ids", contacts)
-        object.__setattr__(self, "stiffness_n_per_m", tuple(map(tuple, stiffness.tolist())))
-        object.__setattr__(self, "load_n", tuple(map(float, load))); object.__setattr__(self, "gap_upper_m", tuple(map(float, gap)))
+        object.__setattr__(
+            self, "stiffness_n_per_m", tuple(map(tuple, stiffness.tolist()))
+        )
+        object.__setattr__(self, "load_n", tuple(map(float, load)))
+        object.__setattr__(self, "gap_upper_m", tuple(map(float, gap)))
 
     @property
     def model_hash(self) -> str:
@@ -103,67 +128,130 @@ class ContactStaticSolution:
     contract_pass: bool
 
 
-def solve_contact_static(model: ContactStaticModel, *, tolerance: float = 1.0e-10) -> ContactStaticSolution:
+def solve_contact_static(
+    model: ContactStaticModel, *, tolerance: float = 1.0e-10
+) -> ContactStaticSolution:
     if not math.isfinite(tolerance) or tolerance <= 0.0:
         raise ValueError("contact tolerance must be positive")
-    stiffness = np.asarray(model.stiffness_n_per_m); load = np.asarray(model.load_n); gap = np.asarray(model.gap_upper_m)
-    size = load.size; feasible: list[tuple[tuple[bool, ...], np.ndarray, np.ndarray]] = []; trials = 0
+    stiffness = np.asarray(model.stiffness_n_per_m)
+    load = np.asarray(model.load_n)
+    gap = np.asarray(model.gap_upper_m)
+    size = load.size
+    feasible: list[tuple[tuple[bool, ...], np.ndarray, np.ndarray]] = []
+    trials = 0
     for mask in itertools.product((False, True), repeat=size):
-        trials += 1; active = np.flatnonzero(mask); free = np.flatnonzero(np.logical_not(mask))
-        displacement = np.zeros(size); multiplier = np.zeros(size)
+        trials += 1
+        active = np.flatnonzero(mask)
+        free = np.flatnonzero(np.logical_not(mask))
+        displacement = np.zeros(size)
+        multiplier = np.zeros(size)
         if active.size:
             displacement[active] = gap[active]
         if free.size:
-            rhs = load[free] - (stiffness[np.ix_(free, active)] @ displacement[active] if active.size else 0.0)
+            rhs = load[free] - (
+                stiffness[np.ix_(free, active)] @ displacement[active]
+                if active.size
+                else 0.0
+            )
             displacement[free] = np.linalg.solve(stiffness[np.ix_(free, free)], rhs)
-        multiplier[active] = load[active] - stiffness[np.ix_(active, np.arange(size))] @ displacement
+        multiplier[active] = (
+            load[active] - stiffness[np.ix_(active, np.arange(size))] @ displacement
+        )
         remaining = gap - displacement
-        scale_gap = max(float(np.max(np.abs(gap))), float(np.max(np.abs(displacement))), 1.0)
+        scale_gap = max(
+            float(np.max(np.abs(gap))), float(np.max(np.abs(displacement))), 1.0
+        )
         scale_force = max(float(np.max(np.abs(load))), 1.0)
-        if float(np.min(remaining)) >= -tolerance * scale_gap and float(np.min(multiplier)) >= -tolerance * scale_force:
+        if (
+            float(np.min(remaining)) >= -tolerance * scale_gap
+            and float(np.min(multiplier)) >= -tolerance * scale_force
+        ):
             feasible.append((mask, displacement, multiplier))
     if not feasible:
         raise ContactStaticError("no feasible unilateral contact active set")
     mask, displacement, multiplier = min(feasible, key=lambda row: row[0])
-    multiplier[np.abs(multiplier) <= tolerance * max(float(np.max(np.abs(load))), 1.0)] = 0.0
-    remaining = gap - displacement; residual = stiffness @ displacement + multiplier - load
+    multiplier[
+        np.abs(multiplier) <= tolerance * max(float(np.max(np.abs(load))), 1.0)
+    ] = 0.0
+    remaining = gap - displacement
+    residual = stiffness @ displacement + multiplier - load
     complementarity = multiplier * remaining
     maximum_residual = float(np.max(np.abs(residual)))
     maximum_penetration = max(0.0, -float(np.min(remaining)))
     minimum_multiplier = float(np.min(multiplier))
     maximum_complementarity = float(np.max(np.abs(complementarity)))
-    force_scale = max(float(np.max(np.abs(load))), 1.0); length_scale = max(float(np.max(np.abs(gap))), float(np.max(np.abs(displacement))), 1.0)
+    force_scale = max(float(np.max(np.abs(load))), 1.0)
+    length_scale = max(
+        float(np.max(np.abs(gap))), float(np.max(np.abs(displacement))), 1.0
+    )
     contract_pass = bool(
-        maximum_residual <= tolerance * force_scale and maximum_penetration <= tolerance * length_scale
-        and minimum_multiplier >= -tolerance * force_scale and maximum_complementarity <= tolerance * force_scale * length_scale
+        maximum_residual <= tolerance * force_scale
+        and maximum_penetration <= tolerance * length_scale
+        and minimum_multiplier >= -tolerance * force_scale
+        and maximum_complementarity <= tolerance * force_scale * length_scale
     )
     if not contract_pass:
         raise ContactStaticError("contact KKT physical gate failed")
-    stiffness_hash = canonical_hash(stiffness.tolist()); load_hash = canonical_hash(load.tolist())
-    active_ids = tuple(model.contact_ids[index] for index, value in enumerate(mask) if value)
-    checkpoint0 = ContactStaticCheckpoint(
-        CONTACT_CHECKPOINT_SCHEMA_VERSION, CONTACT_STATIC_PROFILE, model.model_hash,
-        stiffness_hash, load_hash, tuple(map(float, displacement)), tuple(map(float, multiplier)),
-        active_ids, _ZERO_HASH,
+    stiffness_hash = canonical_hash(stiffness.tolist())
+    load_hash = canonical_hash(load.tolist())
+    active_ids = tuple(
+        model.contact_ids[index] for index, value in enumerate(mask) if value
     )
-    payload = checkpoint0.to_dict(); payload.pop("checkpoint_hash")
+    checkpoint0 = ContactStaticCheckpoint(
+        CONTACT_CHECKPOINT_SCHEMA_VERSION,
+        CONTACT_STATIC_PROFILE,
+        model.model_hash,
+        stiffness_hash,
+        load_hash,
+        tuple(map(float, displacement)),
+        tuple(map(float, multiplier)),
+        active_ids,
+        _ZERO_HASH,
+    )
+    payload = checkpoint0.to_dict()
+    payload.pop("checkpoint_hash")
     checkpoint = replace(checkpoint0, checkpoint_hash=canonical_hash(payload))
     provisional = ContactStaticSolution(
-        CONTACT_STATIC_SCHEMA_VERSION, CONTACT_STATIC_PROFILE, model.model_hash,
-        stiffness_hash, load_hash, tuple(map(float, displacement)), tuple(map(float, multiplier)),
-        tuple(map(float, remaining)), tuple(map(float, residual)), tuple(map(float, complementarity)),
-        active_ids, trials, maximum_residual, maximum_penetration, minimum_multiplier,
-        maximum_complementarity, 0.5 * float(displacement @ stiffness @ displacement),
-        float(displacement @ load), checkpoint, _ZERO_HASH, False, False, contract_pass,
+        CONTACT_STATIC_SCHEMA_VERSION,
+        CONTACT_STATIC_PROFILE,
+        model.model_hash,
+        stiffness_hash,
+        load_hash,
+        tuple(map(float, displacement)),
+        tuple(map(float, multiplier)),
+        tuple(map(float, remaining)),
+        tuple(map(float, residual)),
+        tuple(map(float, complementarity)),
+        active_ids,
+        trials,
+        maximum_residual,
+        maximum_penetration,
+        minimum_multiplier,
+        maximum_complementarity,
+        0.5 * float(displacement @ stiffness @ displacement),
+        float(displacement @ load),
+        checkpoint,
+        _ZERO_HASH,
+        False,
+        False,
+        contract_pass,
     )
-    result_payload = asdict(provisional); result_payload.pop("result_hash")
+    result_payload = asdict(provisional)
+    result_payload.pop("result_hash")
     return replace(provisional, result_hash=canonical_hash(result_payload))
 
 
-def resume_contact_static(model: ContactStaticModel, checkpoint: ContactStaticCheckpoint) -> ContactStaticSolution:
-    if checkpoint.schema_version != CONTACT_CHECKPOINT_SCHEMA_VERSION or checkpoint.profile != CONTACT_STATIC_PROFILE or checkpoint.model_hash != model.model_hash:
+def resume_contact_static(
+    model: ContactStaticModel, checkpoint: ContactStaticCheckpoint
+) -> ContactStaticSolution:
+    if (
+        checkpoint.schema_version != CONTACT_CHECKPOINT_SCHEMA_VERSION
+        or checkpoint.profile != CONTACT_STATIC_PROFILE
+        or checkpoint.model_hash != model.model_hash
+    ):
         raise ContactStaticError("contact checkpoint binding mismatch")
-    payload = checkpoint.to_dict(); claimed = payload.pop("checkpoint_hash")
+    payload = checkpoint.to_dict()
+    claimed = payload.pop("checkpoint_hash")
     if canonical_hash(payload) != claimed:
         raise ContactStaticError("contact checkpoint hash mismatch")
     replay = solve_contact_static(model)
@@ -173,7 +261,13 @@ def resume_contact_static(model: ContactStaticModel, checkpoint: ContactStaticCh
 
 
 __all__ = [
-    "CONTACT_CHECKPOINT_SCHEMA_VERSION", "CONTACT_STATIC_PROFILE", "CONTACT_STATIC_SCHEMA_VERSION",
-    "ContactStaticCheckpoint", "ContactStaticError", "ContactStaticModel", "ContactStaticSolution",
-    "resume_contact_static", "solve_contact_static",
+    "CONTACT_CHECKPOINT_SCHEMA_VERSION",
+    "CONTACT_STATIC_PROFILE",
+    "CONTACT_STATIC_SCHEMA_VERSION",
+    "ContactStaticCheckpoint",
+    "ContactStaticError",
+    "ContactStaticModel",
+    "ContactStaticSolution",
+    "resume_contact_static",
+    "solve_contact_static",
 ]

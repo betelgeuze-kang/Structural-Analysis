@@ -42,7 +42,10 @@ def _positive(value: float, name: str) -> float:
 
 def shell_triangle_matrices(
     points_m: Sequence[Sequence[float]] | np.ndarray,
-    *, elastic_modulus_pa: float, poisson_ratio: float, thickness_m: float,
+    *,
+    elastic_modulus_pa: float,
+    poisson_ratio: float,
+    thickness_m: float,
 ) -> ShellTriangleMatrices:
     points = np.asarray(points_m, dtype=np.float64)
     if points.shape != (3, 3) or not np.all(np.isfinite(points)):
@@ -52,14 +55,25 @@ def shell_triangle_matrices(
     poisson = float(poisson_ratio)
     if not math.isfinite(poisson) or not (-1.0 < poisson < 0.5):
         raise ValueError("poisson_ratio must be in (-1, 0.5)")
-    v1 = points[1] - points[0]; v2 = points[2] - points[0]
-    normal = np.cross(v1, v2); area2 = float(np.linalg.norm(normal))
+    v1 = points[1] - points[0]
+    v2 = points[2] - points[0]
+    normal = np.cross(v1, v2)
+    area2 = float(np.linalg.norm(normal))
     if area2 <= 1.0e-12:
         raise ValueError("shell triangle is degenerate")
-    e1 = v1 / np.linalg.norm(v1); e3 = normal / area2; e2 = np.cross(e3, e1)
+    e1 = v1 / np.linalg.norm(v1)
+    e3 = normal / area2
+    e2 = np.cross(e3, e1)
     basis = np.vstack((e1, e2, e3))
-    xy = np.asarray([[np.dot(point - points[0], e1), np.dot(point - points[0], e2)] for point in points])
-    x1, y1 = xy[0]; x2, y2 = xy[1]; x3, y3 = xy[2]
+    xy = np.asarray(
+        [
+            [np.dot(point - points[0], e1), np.dot(point - points[0], e2)]
+            for point in points
+        ]
+    )
+    x1, y1 = xy[0]
+    x2, y2 = xy[1]
+    x3, y3 = xy[2]
     signed_area = 0.5 * ((x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1))
     if abs(signed_area) <= 1.0e-12:
         raise ValueError("shell triangle local area is degenerate")
@@ -73,8 +87,17 @@ def shell_triangle_matrices(
         membrane_b[1, 2 * node + 1] = c[node]
         membrane_b[2, 2 * node] = c[node]
         membrane_b[2, 2 * node + 1] = b[node]
-    membrane_d = elastic * thickness / (1.0 - poisson**2) * np.asarray(
-        [[1.0, poisson, 0.0], [poisson, 1.0, 0.0], [0.0, 0.0, (1.0 - poisson) / 2.0]]
+    membrane_d = (
+        elastic
+        * thickness
+        / (1.0 - poisson**2)
+        * np.asarray(
+            [
+                [1.0, poisson, 0.0],
+                [poisson, 1.0, 0.0],
+                [0.0, 0.0, (1.0 - poisson) / 2.0],
+            ]
+        )
     )
     membrane_local = area * membrane_b.T @ membrane_d @ membrane_b
     membrane_transform = np.zeros((6, 18), dtype=np.float64)
@@ -90,14 +113,27 @@ def shell_triangle_matrices(
         bending_b[1, theta_x] = -c[node]
         bending_b[2, theta_x] = -b[node]
         bending_b[2, theta_y] = c[node]
-        shear_b[0, w] = b[node]; shear_b[0, theta_y] = -1.0 / 3.0
-        shear_b[1, w] = c[node]; shear_b[1, theta_x] = 1.0 / 3.0
-    bending_d = elastic * thickness**3 / (12.0 * (1.0 - poisson**2)) * np.asarray(
-        [[1.0, poisson, 0.0], [poisson, 1.0, 0.0], [0.0, 0.0, (1.0 - poisson) / 2.0]]
+        shear_b[0, w] = b[node]
+        shear_b[0, theta_y] = -1.0 / 3.0
+        shear_b[1, w] = c[node]
+        shear_b[1, theta_x] = 1.0 / 3.0
+    bending_d = (
+        elastic
+        * thickness**3
+        / (12.0 * (1.0 - poisson**2))
+        * np.asarray(
+            [
+                [1.0, poisson, 0.0],
+                [poisson, 1.0, 0.0],
+                [0.0, 0.0, (1.0 - poisson) / 2.0],
+            ]
+        )
     )
     shear_modulus = elastic / (2.0 * (1.0 + poisson))
     shear_d = (5.0 / 6.0) * shear_modulus * thickness * np.eye(2)
-    bending_local = area * (bending_b.T @ bending_d @ bending_b + shear_b.T @ shear_d @ shear_b)
+    bending_local = area * (
+        bending_b.T @ bending_d @ bending_b + shear_b.T @ shear_d @ shear_b
+    )
     bending_transform = np.zeros((9, 18), dtype=np.float64)
     for node in range(3):
         bending_transform[3 * node, 6 * node : 6 * node + 3] = e3
@@ -105,14 +141,36 @@ def shell_triangle_matrices(
         bending_transform[3 * node + 2, 6 * node + 3 : 6 * node + 6] = e2
     stiffness = membrane_transform.T @ membrane_local @ membrane_transform
     stiffness += bending_transform.T @ bending_local @ bending_transform
-    drill = max(float(np.trace(bending_local)) / 9.0 * 1.0e-6, elastic * thickness**3 * area * 1.0e-12)
+    drill = max(
+        float(np.trace(bending_local)) / 9.0 * 1.0e-6,
+        elastic * thickness**3 * area * 1.0e-12,
+    )
     for node in range(3):
         rotation = slice(6 * node + 3, 6 * node + 6)
         stiffness[rotation, rotation] += drill * np.outer(e3, e3)
     stiffness = 0.5 * (stiffness + stiffness.T)
-    for array in (stiffness, basis, membrane_b, bending_b, shear_b, membrane_d, bending_d, shear_d):
+    for array in (
+        stiffness,
+        basis,
+        membrane_b,
+        bending_b,
+        shear_b,
+        membrane_d,
+        bending_d,
+        shear_d,
+    ):
         array.setflags(write=False)
-    return ShellTriangleMatrices(stiffness, area, basis, membrane_b, bending_b, shear_b, membrane_d, bending_d, shear_d)
+    return ShellTriangleMatrices(
+        stiffness,
+        area,
+        basis,
+        membrane_b,
+        bending_b,
+        shear_b,
+        membrane_d,
+        bending_d,
+        shear_d,
+    )
 
 
 def recover_shell_triangle(
@@ -129,7 +187,9 @@ def recover_shell_triangle(
         translation = displacement[6 * node : 6 * node + 3]
         rotation = displacement[6 * node + 3 : 6 * node + 6]
         membrane_values.extend((float(e1 @ translation), float(e2 @ translation)))
-        bending_values.extend((float(e3 @ translation), float(e1 @ rotation), float(e2 @ rotation)))
+        bending_values.extend(
+            (float(e3 @ translation), float(e1 @ rotation), float(e2 @ rotation))
+        )
     membrane_strain = matrices.membrane_b @ np.asarray(membrane_values)
     curvature = matrices.bending_b @ np.asarray(bending_values)
     shear_strain = matrices.shear_b @ np.asarray(bending_values)
@@ -138,10 +198,19 @@ def recover_shell_triangle(
     shear_force = matrices.shear_d_n_per_m @ shear_strain
     energy = 0.5 * float(displacement @ matrices.stiffness_n_per_m @ displacement)
     return ShellTriangleRecovery(
-        tuple(map(float, membrane_strain)), tuple(map(float, membrane_force)),
-        tuple(map(float, curvature)), tuple(map(float, bending_moment)),
-        tuple(map(float, shear_strain)), tuple(map(float, shear_force)), energy,
+        tuple(map(float, membrane_strain)),
+        tuple(map(float, membrane_force)),
+        tuple(map(float, curvature)),
+        tuple(map(float, bending_moment)),
+        tuple(map(float, shear_strain)),
+        tuple(map(float, shear_force)),
+        energy,
     )
 
 
-__all__ = ["ShellTriangleMatrices", "ShellTriangleRecovery", "recover_shell_triangle", "shell_triangle_matrices"]
+__all__ = [
+    "ShellTriangleMatrices",
+    "ShellTriangleRecovery",
+    "recover_shell_triangle",
+    "shell_triangle_matrices",
+]
