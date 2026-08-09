@@ -113,6 +113,42 @@ def test_descriptor_collision_rolls_back_vector_installed_by_this_call(
     assert not (tmp_path / "checkpoint.f64le").exists()
 
 
+def test_temporary_unlink_failure_after_link_rolls_back_named_artifact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_unlink = Path.unlink
+    failure_injected = False
+
+    def _fail_first_vector_temporary_unlink(
+        path: Path,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
+        nonlocal failure_injected
+        if (
+            not failure_injected
+            and path.name.startswith(".checkpoint.f64le.")
+            and path.name.endswith(".tmp")
+        ):
+            failure_injected = True
+            raise OSError("injected temporary unlink failure")
+        original_unlink(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "unlink", _fail_first_vector_temporary_unlink)
+
+    with pytest.raises(
+        LoadControlledMatrixFreeNewtonCheckpointArtifactError,
+        match="installation transaction failed",
+    ):
+        _write(tmp_path)
+
+    assert failure_injected is True
+    assert not (tmp_path / "checkpoint.json").exists()
+    assert not (tmp_path / "checkpoint.f64le").exists()
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_duplicate_key_and_nonfinite_json_fail_closed(tmp_path: Path) -> None:
     _write(tmp_path)
     descriptor_path = tmp_path / "checkpoint.json"

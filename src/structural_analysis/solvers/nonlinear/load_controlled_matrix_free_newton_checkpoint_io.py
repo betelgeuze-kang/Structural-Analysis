@@ -397,7 +397,6 @@ def _write_temporary(path: Path, raw: bytes) -> Path:
 def _install_no_replace(temporary: Path, target: Path) -> None:
     try:
         os.link(temporary, target)
-        temporary.unlink()
     except FileExistsError as exc:
         raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
             "checkpoint artifact target already exists"
@@ -446,21 +445,34 @@ def write_load_controlled_matrix_free_newton_checkpoint_artifact(
     vector_temporary: Path | None = None
     descriptor_temporary: Path | None = None
     vector_installed = False
+    descriptor_installed = False
     try:
         vector_temporary = _write_temporary(vector_target, vector_raw)
         descriptor_temporary = _write_temporary(descriptor_target, descriptor_raw)
         _install_no_replace(vector_temporary, vector_target)
-        vector_temporary = None
         vector_installed = True
+        vector_temporary.unlink()
+        vector_temporary = None
         _install_no_replace(descriptor_temporary, descriptor_target)
+        descriptor_installed = True
+        descriptor_temporary.unlink()
         descriptor_temporary = None
-    except Exception:
+    except Exception as exc:
+        if descriptor_installed:
+            try:
+                descriptor_target.unlink()
+            except OSError:
+                pass
         if vector_installed:
             try:
                 vector_target.unlink()
             except OSError:
                 pass
-        raise
+        if isinstance(exc, LoadControlledMatrixFreeNewtonCheckpointArtifactError):
+            raise
+        raise LoadControlledMatrixFreeNewtonCheckpointArtifactError(
+            "checkpoint artifact installation transaction failed"
+        ) from exc
     finally:
         for temporary in (vector_temporary, descriptor_temporary):
             if temporary is not None:
