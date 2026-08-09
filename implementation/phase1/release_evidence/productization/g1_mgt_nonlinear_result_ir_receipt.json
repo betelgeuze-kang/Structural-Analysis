@@ -45,7 +45,7 @@
     "status": "partial",
     "unsupported_count": 2
   },
-  "generated_at": "2026-08-08T15:20:11.492319+00:00",
+  "generated_at": "2026-08-09T04:06:14.837129+00:00",
   "parity": {
     "cpu_result_hash": "sha256:34596bf01834e0464416278d2ba9d7204e6a39a23f138d3344c68be0d3c8aa3d",
     "displacement_data_hash": "sha256:53d3f4bf038b4bbe756fef946bc2724ccdfc2612262bec5eeb8b32c33483f09b",
@@ -65,7 +65,7 @@
     ],
     "terminal_resultir_parity": true
   },
-  "receipt_hash": "sha256:39d090757f99691116e585f2f6ffa39ee4fbe6418ff0c2dea6e7a6c0ef7d66ef",
+  "receipt_hash": "sha256:496ce3621413ade7f3c335c0e51120ded180bc7a3cc60e23a71a2b0941933405",
   "schema_version": "g1-mgt-nonlinear-result-ir-receipt.v1",
   "source": {
     "fgmres_receipt_hash": "sha256:3abdc8a90eac199f442cad37e0ee4841edb1e3bf3a78e9a696b2fa8c2db92352",
@@ -79,16 +79,16 @@
       "implementation/phase1/release_evidence/productization/g1_mgt_device_fgmres_solution.f64le": "sha256:36027f03d1493f771db20c0855e891a36d4ebf4dc2cb92b7dfd163ada392b1f5",
       "implementation/phase1/release_evidence/productization/g1_mgt_gfx1030_hardware_envelope.json": "sha256:d5aeca0801131dfc6237ec3ebf164cfddb80359a678e8217e38169b9afadfac7",
       "implementation/phase1/release_evidence/productization/g1_mgt_material_family_adequacy_audit.json": "sha256:c54cc244b7e43b39d313203b8272847e19364f4bd615e07a303a8d0df538ba37",
-      "scripts/build_g1_mgt_nonlinear_result_ir.py": "sha256:1cae7fa57bf7a4ec63025bef28ba3427c526d1b3636e655eccfbd28f4f49d870",
+      "scripts/build_g1_mgt_nonlinear_result_ir.py": "sha256:ef908751aabdbfc6b82cd702214bfab59430563b0f2ed10d63455fc23424af78",
       "scripts/run_g1_mgt_device_fgmres.py": "sha256:f4c78712ef1892674971a90d1b83af852c1f1509cb6d978c4f417c7a825e216d",
       "src/structural_analysis/engine_v2/contracts/material_state_bundle.py": "sha256:71707b4296a5dd66f4966c8b7b7f3b6be9ad0f5ccaed2c59a0014d55b95bf12c",
       "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
       "src/structural_analysis/engine_v2/contracts/result_ir.py": "sha256:86002a263eb10e7f5b4fe1157c190ab89d6c6f08ff5a4c1f1bb77fe60b94f817",
       "src/structural_analysis/schemas/g1_mgt_nonlinear_result_ir_v1.schema.json": "sha256:a8314e8fe1eff01fd8614f3bfe8a7cf27695f5b951308642299a540bf3db07df",
-      "tests/test_build_g1_mgt_nonlinear_result_ir.py": "sha256:a9714832886f23ad4e64284cea453f82d2862b4cd0ca8e35880f59a6e9064ff3"
+      "tests/test_build_g1_mgt_nonlinear_result_ir.py": "sha256:f5e0ac104a50f9c59ce889ee2708e076c1300d57a978008754c2b3163af157e4"
     },
     "material_family_adequacy_audit_hash": "sha256:606a98d9666e6adaf653d9b793941de5cf111b05483aedca64b1f5809509f012",
-    "repository_commit_sha": "2bd2c482db10b74d55dc330725b830a03f96a18c",
+    "repository_commit_sha": "635c85f71c43438c9b28d8ef10c574d37741caf7",
     "source_paths_clean_at_execution": true
   },
   "status": "partial",
