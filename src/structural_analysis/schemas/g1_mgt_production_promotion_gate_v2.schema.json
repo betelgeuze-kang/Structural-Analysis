@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "sources", "promotion_requirements", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-production-promotion-gate.v2"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "status": {"enum": ["partial", "ready"]},
+    "contract_pass": {"const": true},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "sources": {
+      "type": "object",
+      "required": ["gfx1030_worker_receipt_hash", "gfx1100_worker_receipt_hash", "checkpoint_bundle_hash", "performance_receipt_hash", "trust_policy_hash", "fallback_zero_receipt_hash"],
+      "additionalProperties": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]}
+    },
+    "promotion_requirements": {
+      "type": "object",
+      "required": ["trusted_hardware_identity_pair", "cpu_fallback_zero", "terminal_resultir_diagnosticir_parity", "cross_device_production_performance_sweep"],
+      "additionalProperties": {"type": "boolean"}
+    },
+    "claims": {
+      "type": "object",
+      "required": ["production_worker_ready", "trusted_identity_derived_from_external_policy", "self_declared_identity_promoted", "gfx1100_workflow_executed_by_this_builder", "g1_closure"],
+      "properties": {
+        "production_worker_ready": {"type": "boolean"},
+        "trusted_identity_derived_from_external_policy": {"type": "boolean"},
+        "self_declared_identity_promoted": {"const": false},
+        "gfx1100_workflow_executed_by_this_builder": {"const": false},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 200}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["source_commit_sha", "input_checksums"],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "input_checksums": {"type": "object", "minProperties": 4, "additionalProperties": {"$ref": "#/$defs/hash"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

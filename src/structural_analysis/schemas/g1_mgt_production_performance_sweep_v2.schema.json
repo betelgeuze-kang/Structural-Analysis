@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "sample_count", "production_sample_count", "synthetic_sample_count", "sample_receipt_hashes", "identity", "architecture_summaries", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-production-performance-sweep.v2"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "status": {"enum": ["partial", "ready"]},
+    "contract_pass": {"const": true},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "sample_count": {"type": "integer", "minimum": 0},
+    "production_sample_count": {"type": "integer", "minimum": 0},
+    "synthetic_sample_count": {"type": "integer", "minimum": 0},
+    "sample_receipt_hashes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/hash"}
+    },
+    "identity": {
+      "type": "object",
+      "required": ["source_commit_sha", "wheel_sha256", "workload_hash", "checkpoint_sha256", "terminal_parity_digest"],
+      "properties": {
+        "source_commit_sha": {"oneOf": [{"type": "string", "pattern": "^[0-9a-f]{40}$"}, {"type": "null"}]},
+        "wheel_sha256": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "workload_hash": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "checkpoint_sha256": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]},
+        "terminal_parity_digest": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
+    "architecture_summaries": {
+      "type": "object",
+      "required": ["gfx1030", "gfx1100"],
+      "properties": {
+        "gfx1030": {"oneOf": [{"$ref": "#/$defs/summary"}, {"type": "null"}]},
+        "gfx1100": {"oneOf": [{"$ref": "#/$defs/summary"}, {"type": "null"}]}
+      },
+      "additionalProperties": false
+    },
+    "claims": {
+      "type": "object",
+      "required": ["production_mgt_workload_only", "same_source_wheel_workload_checkpoint", "terminal_parity_digest_bound", "three_repetitions_per_architecture", "cross_device_production_performance_sweep", "synthetic_fixture_promoted", "g1_closure"],
+      "properties": {
+        "production_mgt_workload_only": {"type": "boolean"},
+        "same_source_wheel_workload_checkpoint": {"type": "boolean"},
+        "terminal_parity_digest_bound": {"type": "boolean"},
+        "three_repetitions_per_architecture": {"type": "boolean"},
+        "cross_device_production_performance_sweep": {"type": "boolean"},
+        "synthetic_fixture_promoted": {"const": false},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 150}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["source_commit_sha", "input_checksums"],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "input_checksums": {"type": "object", "minProperties": 4, "additionalProperties": {"$ref": "#/$defs/hash"}}
+      },
+      "additionalProperties": false
+    },
+    "summary": {
+      "type": "object",
+      "required": ["sample_count", "kpis", "mid_step_d2h_bytes_max"],
+      "properties": {
+        "sample_count": {"type": "integer", "minimum": 1},
+        "kpis": {
+          "type": "object",
+          "required": ["krylov_iteration_count", "matvec_count", "preconditioner_apply_count", "h2d_bytes", "d2h_bytes", "mid_step_d2h_bytes", "peak_vram_bytes", "checkpoint_overhead_seconds", "end_to_end_wall_seconds", "cpu_baseline_wall_seconds", "speedup_vs_cpu"],
+          "additionalProperties": {"$ref": "#/$defs/percentiles"}
+        },
+        "mid_step_d2h_bytes_max": {"const": 0}
+      },
+      "additionalProperties": false
+    },
+    "percentiles": {
+      "type": "object",
+      "required": ["p50", "p95"],
+      "properties": {
+        "p50": {"type": "number", "minimum": 0},
+        "p95": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "source", "checkpoint", "material", "solver_bindings", "terminal_outputs", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-terminal-checkpoint-bundle.v2"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "source": {
+      "type": "object",
+      "required": ["device_receipt_hash", "result_receipt_hash", "repository_commit_sha"],
+      "properties": {
+        "device_receipt_hash": {"$ref": "#/$defs/hash"},
+        "result_receipt_hash": {"$ref": "#/$defs/hash"},
+        "repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      },
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "required": ["path", "byte_length", "file_sha256", "accepted_state_hash", "free_displacement_data_hash", "load_factor", "exact_npz_reload"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "file_sha256": {"$ref": "#/$defs/hash"},
+        "accepted_state_hash": {"$ref": "#/$defs/hash"},
+        "free_displacement_data_hash": {"$ref": "#/$defs/hash"},
+        "load_factor": {"const": 1.0},
+        "exact_npz_reload": {"const": true}
+      },
+      "additionalProperties": false
+    },
+    "material": {
+      "type": "object",
+      "required": ["committed_artifact", "committed_bundle_hash", "integration_point_order_hash", "entry_count", "committed_epoch"],
+      "properties": {
+        "committed_artifact": {"$ref": "#/$defs/artifact"},
+        "committed_bundle_hash": {"$ref": "#/$defs/hash"},
+        "integration_point_order_hash": {"$ref": "#/$defs/hash"},
+        "entry_count": {"const": 5572},
+        "committed_epoch": {"const": 1}
+      },
+      "additionalProperties": false
+    },
+    "solver_bindings": {
+      "type": "object",
+      "required": ["model_ir_content_hash", "execution_plan_hash", "equation_scaling_hash", "reduced_csr_identity_hash", "operator_hash", "state_hash", "state_epoch", "material_state_bundle_hash", "integration_point_order_hash", "path_history_hash", "nonlinear_terminal_hash"],
+      "additionalProperties": {"oneOf": [{"$ref": "#/$defs/hash"}, {"type": "integer", "minimum": 0}]}
+    },
+    "terminal_outputs": {
+      "type": "object",
+      "required": ["hip_result_hash", "cpu_result_hash", "displacement_data_hash", "diagnostic_hash"],
+      "additionalProperties": {"$ref": "#/$defs/hash"}
+    },
+    "claims": {
+      "type": "object",
+      "required": ["accepted_newton_terminal_restart_bound", "material_state_restart_bound", "equation_scaling_bound", "reduced_csr_identity_bound", "path_history_bound", "diagnostic_ir_bound", "offline_replay_without_local_device_probe", "mid_krylov_restart", "g1_closure"],
+      "properties": {
+        "accepted_newton_terminal_restart_bound": {"const": true},
+        "material_state_restart_bound": {"const": true},
+        "equation_scaling_bound": {"const": true},
+        "reduced_csr_identity_bound": {"const": true},
+        "path_history_bound": {"const": true},
+        "diagnostic_ir_bound": {"const": true},
+        "offline_replay_without_local_device_probe": {"const": true},
+        "mid_krylov_restart": {"const": false},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 120}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["source_commit_sha", "input_checksums"],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "input_checksums": {"type": "object", "minProperties": 4, "additionalProperties": {"$ref": "#/$defs/hash"}}
+      },
+      "additionalProperties": false
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["path", "byte_length", "file_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "file_sha256": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schema_version", "receipt_hash", "generated_at", "status", "contract_pass", "provenance", "capture_boundary", "source", "terminal_parity", "lifecycle", "kpis", "claims", "blockers_remaining", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-production-worker-receipt.v2"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "generated_at": {"type": "string", "minLength": 1},
+    "status": {"const": "partial"},
+    "contract_pass": {"const": true},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "capture_boundary": {
+      "type": "object",
+      "required": ["mode", "local_device_probe_performed", "local_device_probe_required_for_offline_replay", "signed_hardware_envelope_verified", "hardware_identity_trusted"],
+      "properties": {
+        "mode": {"const": "offline_bound_artifact_replay"},
+        "local_device_probe_performed": {"const": false},
+        "local_device_probe_required_for_offline_replay": {"const": false},
+        "signed_hardware_envelope_verified": {"type": "boolean"},
+        "hardware_identity_trusted": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": ["repository_commit_sha", "device_architecture", "wheel_sha256", "binary_sha256", "device_receipt_hash", "hardware_envelope_hash", "result_receipt_hash", "checkpoint_bundle_hash"],
+      "properties": {
+        "repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "device_architecture": {"enum": ["gfx1030", "gfx1100"]},
+        "wheel_sha256": {"$ref": "#/$defs/hash"},
+        "binary_sha256": {"$ref": "#/$defs/hash"},
+        "device_receipt_hash": {"$ref": "#/$defs/hash"},
+        "hardware_envelope_hash": {"$ref": "#/$defs/hash"},
+        "result_receipt_hash": {"$ref": "#/$defs/hash"},
+        "checkpoint_bundle_hash": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "terminal_parity": {
+      "type": "object",
+      "required": ["profile", "parity_digest", "hip_result_hash", "cpu_result_hash", "full_result_hashes_equal", "shared_bindings", "displacement_data_hash", "diagnostic_hash", "diagnostic_parity_digest"],
+      "properties": {
+        "profile": {"const": "g1-terminal-resultir-authority-parity.v2"},
+        "parity_digest": {"$ref": "#/$defs/hash"},
+        "hip_result_hash": {"$ref": "#/$defs/hash"},
+        "cpu_result_hash": {"$ref": "#/$defs/hash"},
+        "full_result_hashes_equal": {"type": "boolean"},
+        "shared_bindings": {"type": "object", "minProperties": 11},
+        "displacement_data_hash": {"$ref": "#/$defs/hash"},
+        "diagnostic_hash": {"$ref": "#/$defs/hash"},
+        "diagnostic_parity_digest": {"$ref": "#/$defs/hash"}
+      },
+      "additionalProperties": false
+    },
+    "lifecycle": {"type": "object", "minProperties": 13, "additionalProperties": {"const": true}},
+    "kpis": {
+      "type": "object",
+      "required": ["krylov_iteration_count", "matvec_count", "preconditioner_apply_count", "h2d_bytes", "d2h_bytes", "mid_step_d2h_bytes", "peak_vram_bytes", "checkpoint_overhead_seconds", "end_to_end_wall_seconds", "cpu_baseline_wall_seconds", "speedup_vs_cpu"],
+      "additionalProperties": {"type": "number", "minimum": 0}
+    },
+    "claims": {
+      "type": "object",
+      "required": ["terminal_resultir_authority_parity", "terminal_resultir_full_hash_equality_required", "diagnostic_ir_bound", "fallback_zero_observed_in_bound_receipt", "mid_step_d2h_zero_observed", "offline_replay_without_local_device_probe", "trusted_hardware_execution", "production_worker_ready", "g1_closure"],
+      "properties": {
+        "terminal_resultir_authority_parity": {"const": true},
+        "terminal_resultir_full_hash_equality_required": {"const": false},
+        "diagnostic_ir_bound": {"const": true},
+        "fallback_zero_observed_in_bound_receipt": {"const": true},
+        "mid_step_d2h_zero_observed": {"const": true},
+        "offline_replay_without_local_device_probe": {"const": true},
+        "trusted_hardware_execution": {"const": false},
+        "production_worker_ready": {"const": false},
+        "g1_closure": {"const": false}
+      },
+      "additionalProperties": false
+    },
+    "blockers_remaining": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "claim_boundary": {"type": "string", "minLength": 160}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "required": ["source_commit_sha", "input_checksums"],
+      "properties": {
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "input_checksums": {"type": "object", "minProperties": 4, "additionalProperties": {"$ref": "#/$defs/hash"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
