@@ -159,3 +159,23 @@ def test_guard_rejects_recorded_source_checksum_drift(
     codes = {row.code for row in report.issues}
     assert "source_checksum_drift" in codes
     assert "workspace_checksum_drift" in codes
+
+
+def test_guard_pins_aggregate_root_before_traversing_reduced_graph(
+    evidence_repo: tuple[Path, str],
+) -> None:
+    repo, baseline = evidence_repo
+    aggregate_path = repo / "evidence" / "aggregate.json"
+    aggregate = json.loads(aggregate_path.read_text(encoding="utf-8"))
+    del aggregate["sources"]["material"]
+    del aggregate["aggregate_source"]["input_checksums"]["evidence/material.json"]
+    _write_json(aggregate_path, aggregate)
+
+    report = _inspect(repo, baseline)
+
+    assert report.contract_pass is False
+    assert any(
+        row.code == "aggregate_root_changed_from_baseline"
+        and row.path == "evidence/aggregate.json"
+        for row in report.issues
+    )

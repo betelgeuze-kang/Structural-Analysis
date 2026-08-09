@@ -291,11 +291,29 @@ def inspect_n1_evidence_boundary(
     if type(baseline_ref) is not str or not baseline_ref.strip():
         raise N1EvidenceBoundaryError("baseline_ref_required")
     _git(repo_root, ["rev-parse", "--verify", f"{baseline_ref}^{{commit}}"])
+    aggregate_relative = _repo_path(aggregate_path.as_posix(), field="aggregate_path")
     bindings = collect_transitive_bound_inputs(
         repo_root=repo_root,
         aggregate_path=aggregate_path,
     )
     issues: list[BoundaryIssue] = []
+    baseline_aggregate_checksum = _sha256(
+        _source_bytes(repo_root, baseline_ref, aggregate_relative)
+    )
+    workspace_aggregate_checksum = _sha256(
+        (repo_root / aggregate_relative).read_bytes()
+    )
+    if workspace_aggregate_checksum != baseline_aggregate_checksum:
+        issues.append(
+            BoundaryIssue(
+                "aggregate_root_changed_from_baseline",
+                aggregate_relative,
+                (
+                    f"expected={baseline_aggregate_checksum} "
+                    f"actual={workspace_aggregate_checksum}"
+                ),
+            )
+        )
     checksums_by_path: dict[str, set[str]] = {}
     for row in bindings:
         checksums_by_path.setdefault(row.path, set()).add(row.checksum)
@@ -348,11 +366,11 @@ def inspect_n1_evidence_boundary(
                 )
             )
 
-    bound_paths = set(checksums_by_path)
+    protected_paths = set(checksums_by_path) | {aggregate_relative}
     for record in _diff_records(repo_root, baseline_ref):
         status, *paths = record
         for path in paths:
-            if path in bound_paths:
+            if path in protected_paths:
                 issues.append(
                     BoundaryIssue(
                         "bound_path_changed_in_followup_diff",
