@@ -23,6 +23,20 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
 
 
+def test_pr_quality_gate_fully_hydrates_merge_ref_ancestry() -> None:
+    workflow = _read("ci.yml")
+
+    hydration = workflow.split(
+        "- name: Hydrate merge-ref ancestry for provenance tests", 1
+    )[1].split("- name: Set up Python", 1)[0]
+    assert "git fetch --no-tags --unshallow origin" in hydration
+    assert "--deepen=" not in hydration
+    assert (
+        'test "$(git rev-parse --is-shallow-repository)" = "false"'
+        in hydration
+    )
+
+
 def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     workflow = _read("ci.yml")
 
