@@ -230,7 +230,11 @@ def test_source_binding_replays_git_ancestry_tree_blobs_and_inputs() -> None:
     assert stateful["source_input_binding"]["recorded_source_inputs_match"] is True
     assert stateful["source_input_binding"]["aggregate_source_inputs_match"] is False
     assert stateful["source_input_binding"]["aggregate_source_mismatch_paths"] == [
-        "src/structural_analysis/schemas/model_ir_v2.schema.json"
+        "implementation/phase1/run_f3_frame3d_direct_control_vertical_evidence.py",
+        "implementation/phase1/run_f3_frame3d_stateful_material_vertical_evidence.py",
+        "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py",
+        "src/structural_analysis/materials/uniaxial_plasticity.py",
+        "src/structural_analysis/schemas/model_ir_v2.schema.json",
     ]
     assert stateful["current_source_binding_pass"] is False
 
@@ -376,7 +380,7 @@ def test_ephemeral_status_validates_and_v1_schema_rejects_promotion() -> None:
     assert status["status"] == "partial"
     assert status["trusted_signer_policy_anchor_count"] == 0
     assert status["independently_signed_stage_count"] == 0
-    assert status["aggregate_source"]["exact_source_binding"] is False
+    assert status["aggregate_source"]["exact_source_binding"] is True
 
     promoted = deepcopy(status)
     promoted["status"] = "ready"
