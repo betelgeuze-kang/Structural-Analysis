@@ -1,0 +1,1268 @@
+{
+  "claim_boundary": "Closes a bounded force-driven two-DOF linear matrix Newmark stage with ModelIR matrix/source hash binding, authoritative vector SI ResultIR, complete source-authenticated checkpoint replay, Workbench histories, and an independent generalized-eigen first-mode closed-form check. Nonlinear MDOF, support excitation, shell, and contact remain outside.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "current_source_replay_executed": true,
+    "persisted_source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8",
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_sdof_authenticated_transient_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:0f382d24585b12bc7a11d27014733d1efe4ac9b0597204b8d6ba28b50518e1f7"
+  },
+  "schema_version": "f3-mdof-linear-transient-vertical-evidence.v1",
+  "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+  "source_input_checksums": {
+    "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
+    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:81b5691d8e532b8228f6ab154fb2b5257659b68e6fdfbd61b78abc0f113cbf58",
+    "implementation/phase1/run_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:0ea2be6d4c0692b7ffa681c7c38fca8b161809afb0b1a720d75fb29386395363",
+    "src/structural_analysis/engine_v2/contracts/mdof_transient_result.py": "sha256:6392f8c1b2ba6fdd3917c5f668b5dcc7c220bdbdbf2a93bd65ef7cbd32c9ce24",
+    "src/structural_analysis/schemas/mdof_transient_result_ir_v1.schema.json": "sha256:239f694bc5ae0d883e9a926481f8ec8dfb48687d1d09fc93050fe64f25819b20",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:d17d72ebccea51c4a09a6f56d133153eb1b406d6a354ca45d61b80d33596ec66",
+    "src/structural_analysis/solvers/linear/transient.py": "sha256:80da4f3c6e84b01b9fc7d79b7cb46d791a474f3d571cee846634e87a8965d792",
+    "tests/fixtures/dynamics/mdof_linear_force_history.csv": "sha256:897902833c7bf39792452207d4c046f6dccfcae73b21f96724f2c2a4aa3f8dc5",
+    "tests/fixtures/model_ir_v2/mdof_linear_transient.json": "sha256:ffdb1ae3676eed9395a47fdccc1909c502e2130413e187b685e6edfe2cce2b29",
+    "tests/test_f3_mdof_linear_transient_vertical_evidence.py": "sha256:947da218f01e2abc92c1df3031579c00a5aa627c02f55ba286e9677ec6ef63fc",
+    "tests/test_linear_mdof_transient.py": "sha256:13aeceb9193ab262ea93a26584a2ba168d6af07c3e9b5ca0037ebb60ea1d9388",
+    "tests/test_mdof_transient_result_ir.py": "sha256:0df81ae690de4077daaa7da413eaa69f37ad1f81a060a3c89a81dcf721206b5c"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:2690767a402b1855f2d25e37fdcef012a4a25a5f0eb8bd3ed8f2de5a3508860b",
+      "checkpoint": "sha256:d16d4dd3e72e505039f420503c7bdeadf20d27a34125b568db4029c8dafd9877",
+      "external_vv": "sha256:372557c25e628ae2520b96a615712084a7cae40bf0cf5b9b558a9b91b4242eb6",
+      "model_ir": "sha256:75a8f18ba3e421e905b56af5658df4c3cfbf89e819973bbd3dc4d195a49d18cf",
+      "platform": "sha256:f178b143c6fcb27314fff6dc929bd9ae33af6797198d282c4937e1c2ed83cdc9",
+      "recovery": "sha256:22817760473a072375cf2276fe2e0673c7bc6865737f91758c42ab4a252c1539",
+      "result_ir": "sha256:4b6f7300ea4cd8ad37bdb765c6d45fc6610dba78305f8dfdebf3ccbbc9391855",
+      "solver": "sha256:e6f8505ba38592640c43ef4beed27fee9144710e93e09a61e28131b51103285f",
+      "workbench": "sha256:615163ac2cb324cb9db885eef260cfd0e365f7a4a9b3cdb2af23b5269002d752"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:832275a7b06b62b7a9bffcd0836a6f7139238d9b5ac374d69e91111966a0b9ba",
+    "predecessor_stage": "sdof_authenticated_transient",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+    "stage": "mdof_linear_transient",
+    "stage_index": 6,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "benchmark_id": "two-dof-first-mode-undamped-closed-form.v1",
+      "deterministic_repeat": true,
+      "exact_terminal_displacement_m": [
+        0.0014183109273161313,
+        0.0028366218546322626
+      ],
+      "first_mode_omega_rad_per_s": 10.0,
+      "maximum_absolute_energy_balance_error_j": 2.2305074454109786e-14,
+      "maximum_absolute_error_m": 9.988772305168439e-08,
+      "observed_terminal_displacement_m": [
+        0.0014182609834564193,
+        0.002836521966909211
+      ],
+      "terminal_time_s": 0.5,
+      "tolerance_m": 2e-07
+    },
+    "checkpoint": {
+      "exact_restart": true,
+      "prefix_terminal_checkpoint_hash": "sha256:c9dc868381f516b7e32162c4cd95df9d4652558413ab33b138fa6a1026a997ad",
+      "resumed_terminal_checkpoint_hash": "sha256:eee70026ec96b7d5cbda665f570c8db80ca864bed60ee31104684e4f467bc9d0",
+      "source_authority_receipt": {
+        "checkpoint_hash": "sha256:eee70026ec96b7d5cbda665f570c8db80ca864bed60ee31104684e4f467bc9d0",
+        "deterministic_checkpoint_replay_pass": true,
+        "dynamic_equilibrium_replay_pass": true,
+        "energy_replay_pass": true,
+        "force_history_hash": "sha256:a6d3e4c29a101d163fcca8a0221061c3f75a55a432b83073d760a2d76288e8cb",
+        "force_history_sample_count": 21,
+        "newmark_kinematic_replay_pass": true,
+        "parent_chain_complete": true,
+        "receipt_hash": "sha256:df757c1b6f81127e30bfc406d3a4ad20830a06f8d914335cc189df0078389626",
+        "schema_version": "linear-mdof-checkpoint-authority.v1",
+        "source_authenticated_checkpoint": true
+      },
+      "terminal_checkpoint": {
+        "acceleration_m_per_s2": [
+          0.329037897910089,
+          -7.740066034050173
+        ],
+        "applied_force_n": [
+          0.0,
+          0.0
+        ],
+        "checkpoint_hash": "sha256:eee70026ec96b7d5cbda665f570c8db80ca864bed60ee31104684e4f467bc9d0",
+        "damping_dissipation_j": 0.015522222009167301,
+        "displacement_m": [
+          0.01803679444629132,
+          0.05742647242084788
+        ],
+        "external_work_j": 0.4732198870822553,
+        "initial_mechanical_energy_j": 0.0,
+        "integration_contract_hash": "sha256:4eed32401d88c18dd8add9c8831908abd09b6287f00be6379b1a09c0a8cd4f0b",
+        "model_hash": "sha256:fc0976b4bb679c3d1263b315f8cb30a7ec9133be5930091684cf3d55082b18a7",
+        "parent_checkpoint_hash": "sha256:16007be6dd0f8d1f778998b9ee9634312b0245da6f764ed50ef54141d5cc4015",
+        "profile": "newmark_average_acceleration_linear_mdof.v1",
+        "schema_version": "linear-mdof-transient-checkpoint.v1",
+        "step_index": 20,
+        "time_s": 0.2,
+        "velocity_m_per_s": [
+          0.012855051436165894,
+          -0.6893478043034618
+        ]
+      }
+    },
+    "external_vv": {
+      "maximum_absolute_error_m": 9.988772305168439e-08,
+      "reference_profile": "independent_generalized_eigen_first_mode_cosine.v1",
+      "signature_verifier_waived": true,
+      "source_authenticated_checkpoint_pass": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "capability_profile": "mdof_linear_transient_v1",
+      "content_hash": "sha256:ac6ad67c22b945440937e1632caaf97d9c488aebf8d1ac6b1d7bb3049cc2f0f0",
+      "force_history_source_sha256": "sha256:897902833c7bf39792452207d4c046f6dccfcae73b21f96724f2c2a4aa3f8dc5",
+      "matrix_dimension": 2,
+      "model_id": "f3-mdof-linear-transient"
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a"
+    },
+    "recovery": {
+      "maximum_absolute_acceleration_by_dof_m_per_s2": {
+        "Floor1_UX": 11.289322207345265,
+        "Floor2_UX": 31.040838360265425
+      },
+      "maximum_absolute_displacement_by_dof_m": {
+        "Floor1_UX": 0.02370167277355041,
+        "Floor2_UX": 0.07563464680749393
+      },
+      "maximum_absolute_equilibrium_residual_n": 7.194245199571014e-13,
+      "maximum_absolute_velocity_by_dof_m_per_s": {
+        "Floor1_UX": 0.34270326597232187,
+        "Floor2_UX": 0.9167432704671497
+      }
+    },
+    "result_ir": {
+      "manifest": {
+        "analysis_type": "mdof_linear_transient",
+        "authority": {
+          "checkpoint": "source_authenticated",
+          "engineering_design": "not_authoritative",
+          "profile": "authoritative_source_authenticated_linear_mdof_history.v1",
+          "release_readiness": "not_authoritative",
+          "response_history": "authoritative"
+        },
+        "bindings": {
+          "force_history_hash": "sha256:a6d3e4c29a101d163fcca8a0221061c3f75a55a432b83073d760a2d76288e8cb",
+          "integration_contract_hash": "sha256:4eed32401d88c18dd8add9c8831908abd09b6287f00be6379b1a09c0a8cd4f0b",
+          "model_ir_content_hash": "sha256:ac6ad67c22b945440937e1632caaf97d9c488aebf8d1ac6b1d7bb3049cc2f0f0",
+          "solver_result_hash": "sha256:d09e017ef0190c06777530ab6f02fe1e683e711b7b66b137715a0322d4d25bee"
+        },
+        "checkpoint": {
+          "authority": "source_authenticated_checkpoint",
+          "authority_receipt_hash": "sha256:df757c1b6f81127e30bfc406d3a4ad20830a06f8d914335cc189df0078389626",
+          "terminal_checkpoint_hash": "sha256:eee70026ec96b7d5cbda665f570c8db80ca864bed60ee31104684e4f467bc9d0"
+        },
+        "claim_boundary": "Authoritative bounded force-driven linear MDOF displacement, velocity, acceleration, force-balance, and energy history with source-authenticated checkpoint replay. Nonlinear response, support excitation, shell, contact, engineering design, and release readiness are outside this contract.",
+        "dof_ids": [
+          "Floor1_UX",
+          "Floor2_UX"
+        ],
+        "history": [
+          {
+            "acceleration_m_per_s2": [
+              0.0,
+              0.0
+            ],
+            "applied_force_n": [
+              0.0,
+              0.0
+            ],
+            "damping_dissipation_j": 0.0,
+            "damping_force_n": [
+              0.0,
+              0.0
+            ],
+            "displacement_m": [
+              0.0,
+              0.0
+            ],
+            "energy_balance_error_j": 0.0,
+            "equilibrium_residual_n": [
+              0.0,
+              0.0
+            ],
+            "external_work_j": 0.0,
+            "inertia_force_n": [
+              0.0,
+              0.0
+            ],
+            "kinetic_energy_j": 0.0,
+            "linear_solve_count": 0,
+            "relative_residual": 0.0,
+            "restoring_force_n": [
+              0.0,
+              0.0
+            ],
+            "step_index": 0,
+            "strain_energy_j": 0.0,
+            "time_s": 0.0,
+            "velocity_m_per_s": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              2.48388799439351,
+              2.000416938341916
+            ],
+            "applied_force_n": [
+              5.0,
+              2.0
+            ],
+            "damping_dissipation_j": 4.085266766147419e-07,
+            "damping_force_n": [
+              0.004967775988787021,
+              0.0020004169383419164
+            ],
+            "displacement_m": [
+              6.209719985983774e-05,
+              5.00104234585479e-05
+            ],
+            "energy_balance_error_j": -2.0426333830740482e-07,
+            "equilibrium_residual_n": [
+              4.163336342344337e-17,
+              -8.716985466783456e-17
+            ],
+            "external_work_j": 0.00020525342310814227,
+            "inertia_force_n": [
+              4.96777598878702,
+              2.000416938341916
+            ],
+            "kinetic_energy_j": 0.00020426333830737093,
+            "linear_solve_count": 1,
+            "relative_residual": 1.7928633279850557e-17,
+            "restoring_force_n": [
+              0.027256235224193067,
+              -0.002417355280257969
+            ],
+            "step_index": 1,
+            "strain_energy_j": 7.858214624640041e-07,
+            "time_s": 0.01,
+            "velocity_m_per_s": [
+              0.01241943997196755,
+              0.010002084691709582
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              4.908810304934032,
+              4.006175585257472
+            ],
+            "applied_force_n": [
+              10.0,
+              4.0
+            ],
+            "damping_dissipation_j": 7.297206207185852e-06,
+            "damping_force_n": [
+              0.019753172587442108,
+              0.008007009461941305
+            ],
+            "displacement_m": [
+              0.0003711090570627018,
+              0.0003001960834656284
+            ],
+            "energy_balance_error_j": -2.0215524637368224e-06,
+            "equilibrium_residual_n": [
+              -8.881784197001252e-16,
+              1.7329887525008303e-15
+            ],
+            "external_work_j": 0.003273399332150864,
+            "inertia_force_n": [
+              9.817620609868063,
+              4.006175585257472
+            ],
+            "kinetic_energy_j": 0.0032400764269781834,
+            "linear_solve_count": 1,
+            "relative_residual": 1.8050761741942822e-16,
+            "restoring_force_n": [
+              0.16262621754449538,
+              -0.014182594719414677
+            ],
+            "step_index": 2,
+            "strain_energy_j": 2.8047251429231453e-05,
+            "time_s": 0.02,
+            "velocity_m_per_s": [
+              0.049382931468605264,
+              0.04003504730970652
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              7.227586215548599,
+              8.013435668654205
+            ],
+            "applied_force_n": [
+              15.0,
+              8.0
+            ],
+            "damping_dissipation_j": 4.803256811247936e-05,
+            "damping_force_n": [
+              0.044025965628407375,
+              0.020026620715852983
+            ],
+            "displacement_m": [
+              0.0011683482847608202,
+              0.0010010368379104856
+            ],
+            "energy_balance_error_j": -7.5097436599858036e-06,
+            "equilibrium_residual_n": [
+              -4.440892098500626e-16,
+              8.743006318923108e-15
+            ],
+            "external_work_j": 0.017443934205046488,
+            "inertia_force_n": [
+              14.455172431097198,
+              8.013435668654205
+            ],
+            "kinetic_energy_j": 0.01712760452566857,
+            "linear_solve_count": 1,
+            "relative_residual": 5.126039090627074e-16,
+            "restoring_force_n": [
+              0.500801603274395,
+              -0.03346228937006693
+            ],
+            "step_index": 3,
+            "strain_energy_j": 0.0002758068549254254,
+            "time_s": 0.03,
+            "velocity_m_per_s": [
+              0.11006491407101843,
+              0.10013310357926491
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              9.406162325895536,
+              11.996408964545735
+            ],
+            "applied_force_n": [
+              20.0,
+              12.0
+            ],
+            "damping_dissipation_j": 0.00019703923332874503,
+            "damping_force_n": [
+              0.07729346271129565,
+              0.040036465349052926
+            ],
+            "displacement_m": [
+              0.002684841139007108,
+              0.0025026139895331333
+            ],
+            "energy_balance_error_j": -1.9431706951549964e-05,
+            "equilibrium_residual_n": [
+              -6.439293542825908e-15,
+              7.376044219853384e-15
+            ],
+            "external_work_j": 0.058998330670582994,
+            "inertia_force_n": [
+              18.812324651791073,
+              11.996408964545735
+            ],
+            "kinetic_energy_j": 0.05737572808246426,
+            "linear_solve_count": 1,
+            "relative_residual": 4.164786380903263e-16,
+            "restoring_force_n": [
+              1.110381885497638,
+              -0.03644542989479488
+            ],
+            "step_index": 4,
+            "strain_energy_j": 0.0014449950617415378,
+            "time_s": 0.04,
+            "velocity_m_per_s": [
+              0.19323365677823912,
+              0.20018232674526462
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              6.461495871130737,
+              15.894504435198387
+            ],
+            "applied_force_n": [
+              15.0,
+              16.0
+            ],
+            "damping_dissipation_j": 0.0005757348425007717,
+            "damping_force_n": [
+              0.1090287791053482,
+              0.06792737874879705
+            ],
+            "displacement_m": [
+              0.005013869161715156,
+              0.0052017100919793825
+            ],
+            "energy_balance_error_j": -3.545005949644165e-05,
+            "equilibrium_residual_n": [
+              -3.8413716652030416e-14,
+              -2.943478794037446e-14
+            ],
+            "external_work_j": 0.13754366650222133,
+            "inertia_force_n": [
+              12.922991742261473,
+              15.894504435198387
+            ],
+            "kinetic_energy_j": 0.13197207650354909,
+            "linear_solve_count": 1,
+            "relative_residual": 2.143063757511725e-15,
+            "restoring_force_n": [
+              1.967979478633217,
+              0.037568186052845315
+            ],
+            "step_index": 5,
+            "strain_energy_j": 0.005031305215667901,
+            "time_s": 0.05,
+            "velocity_m_per_s": [
+              0.27257194776337046,
+              0.3396368937439852
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              3.487578971191894,
+              19.597169871607903
+            ],
+            "applied_force_n": [
+              10.0,
+              20.0
+            ],
+            "damping_dissipation_j": 0.001314843420971063,
+            "damping_force_n": [
+              0.12892692878999346,
+              0.10341905305560334
+            ],
+            "displacement_m": [
+              0.007988315510406926,
+              0.009485370887089391
+            ],
+            "energy_balance_error_j": -5.367039856586978e-05,
+            "equilibrium_residual_n": [
+              -5.861977570020827e-14,
+              3.3306690738754696e-16
+            ],
+            "external_work_j": 0.2518301401728486,
+            "inertia_force_n": [
+              6.975157942383788,
+              19.597169871607903
+            ],
+            "kinetic_energy_j": 0.23758221273159646,
+            "linear_solve_count": 1,
+            "relative_residual": 2.45499732209105e-15,
+            "restoring_force_n": [
+              2.895915128826277,
+              0.2994110753364931
+            ],
+            "step_index": 6,
+            "strain_energy_j": 0.012986754418846962,
+            "time_s": 0.06,
+            "velocity_m_per_s": [
+              0.32231732197498364,
+              0.5170952652780166
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              0.5896098282757549,
+              15.020295138935879
+            ],
+            "applied_force_n": [
+              5.0,
+              16.0
+            ],
+            "damping_dissipation_j": 0.0025012509114460918,
+            "damping_force_n": [
+              0.13708130638892876,
+              0.1380365180661471
+            ],
+            "displacement_m": [
+              0.011313418450143454,
+              0.015521760165133153
+            ],
+            "energy_balance_error_j": -6.906559632535334e-05,
+            "equilibrium_residual_n": [
+              1.199040866595169e-13,
+              3.419486915845482e-14
+            ],
+            "external_work_j": 0.38542341922566026,
+            "inertia_force_n": [
+              1.1792196565515098,
+              15.020295138935879
+            ],
+            "kinetic_energy_j": 0.355621532505918,
+            "linear_solve_count": 1,
+            "relative_residual": 6.548676478316081e-15,
+            "restoring_force_n": [
+              3.6836990370594416,
+              0.8416683429979399
+            ],
+            "step_index": 7,
+            "strain_energy_j": 0.02736970140462151,
+            "time_s": 0.07,
+            "velocity_m_per_s": [
+              0.34270326597232187,
+              0.6901825903307356
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -2.1719013995350025,
+              10.166305428955624
+            ],
+            "applied_force_n": [
+              0.0,
+              12.0
+            ],
+            "damping_dissipation_j": 0.004102709747436659,
+            "damping_force_n": [
+              0.13391672324641027,
+              0.16322311863403863
+            ],
+            "displacement_m": [
+              0.014700893820585191,
+              0.023053251082637796
+            ],
+            "energy_balance_error_j": -7.705774809314316e-05,
+            "equilibrium_residual_n": [
+              3.907985046680551e-14,
+              -1.8385293287792592e-13
+            ],
+            "external_work_j": 0.4993329804968296,
+            "inertia_force_n": [
+              -4.343802799070005,
+              10.166305428955624
+            ],
+            "kinetic_energy_j": 0.44510788548936586,
+            "linear_solve_count": 1,
+            "relative_residual": 1.1899433784687039e-14,
+            "restoring_force_n": [
+              4.2098860758235555,
+              1.6704714524105209
+            ],
+            "step_index": 8,
+            "strain_energy_j": 0.05019944300812026,
+            "time_s": 0.08,
+            "velocity_m_per_s": [
+              0.33479180811602566,
+              0.8161155931701931
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -4.763104120521675,
+              5.077519879396746
+            ],
+            "applied_force_n": [
+              -5.0,
+              8.0
+            ],
+            "damping_dissipation_j": 0.005969326934313073,
+            "damping_force_n": [
+              0.12004671220629691,
+              0.17846694394239102
+            ],
+            "displacement_m": [
+              0.01787543676374403,
+              0.03159550264704854
+            ],
+            "energy_balance_error_j": -8.116478325792976e-05,
+            "equilibrium_residual_n": [
+              3.410605131648481e-13,
+              -3.907985046680551e-14
+            ],
+            "external_work_j": 0.5768191387830399,
+            "inertia_force_n": [
+              -9.52620824104335,
+              5.077519879396746
+            ],
+            "kinetic_energy_j": 0.48820070794884085,
+            "linear_solve_count": 1,
+            "relative_residual": 2.1189915589577994e-14,
+            "restoring_force_n": [
+              4.406161528836711,
+              2.7440131766609017
+            ],
+            "step_index": 9,
+            "strain_energy_j": 0.08273026868314395,
+            "time_s": 0.09,
+            "velocity_m_per_s": [
+              0.30011678051574225,
+              0.892334719711955
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -7.157589570604671,
+              -0.19580972835781552
+            ],
+            "applied_force_n": [
+              -10.0,
+              4.0
+            ],
+            "damping_dissipation_j": 0.007901839880713808,
+            "damping_force_n": [
+              0.09620532482404422,
+              0.18334865409342993
+            ],
+            "displacement_m": [
+              0.020578587226623295,
+              0.04064089259794406
+            ],
+            "energy_balance_error_j": -8.501524538340882e-05,
+            "equilibrium_residual_n": [
+              1.3145040611561853e-13,
+              2.3359092438113294e-13
+            ],
+            "external_work_j": 0.6108178500168185,
+            "inertia_force_n": [
+              -14.315179141209342,
+              -0.19580972835781552
+            ],
+            "kinetic_energy_j": 0.4780557652515269,
+            "linear_solve_count": 1,
+            "relative_residual": 1.3174008402324732e-14,
+            "restoring_force_n": [
+              4.218973816385166,
+              4.012461074264152
+            ],
+            "step_index": 10,
+            "strain_energy_j": 0.12494526012996128,
+            "time_s": 0.1,
+            "velocity_m_per_s": [
+              0.24051331206011053,
+              0.9167432704671497
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -9.336664575687337,
+              -5.595990116831942
+            ],
+            "applied_force_n": [
+              -15.0,
+              0.0
+            ],
+            "damping_dissipation_j": 0.009696066897134786,
+            "damping_force_n": [
+              0.0632168165314602,
+              0.1775568542482402
+            ],
+            "displacement_m": [
+              0.0225713639935671,
+              0.04966353030648581
+            ],
+            "energy_balance_error_j": -9.223606769639958e-05,
+            "equilibrium_residual_n": [
+              1.1501910535116622e-13,
+              -4.085620730620576e-14
+            ],
+            "external_work_j": 0.6039534158471045,
+            "inertia_force_n": [
+              -18.673329151374674,
+              -5.595990116831942
+            ],
+            "kinetic_energy_j": 0.4190577429589619,
+            "linear_solve_count": 1,
+            "relative_residual": 4.659982135051303e-15,
+            "restoring_force_n": [
+              3.610112334843098,
+              5.418433262583743
+            ],
+            "step_index": 11,
+            "strain_energy_j": 0.17529184205870424,
+            "time_s": 0.11,
+            "velocity_m_per_s": [
+              0.1580420413286505,
+              0.8877842712412009
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -11.289322207345265,
+              -11.058676510807132
+            ],
+            "applied_force_n": [
+              -20.0,
+              -4.0
+            ],
+            "damping_dissipation_j": 0.011187450911661269,
+            "damping_force_n": [
+              0.021964842965394995,
+              0.1609021876206011
+            ],
+            "displacement_m": [
+              0.02363613473727779,
+              0.058125006353206846
+            ],
+            "energy_balance_error_j": -0.00010633907496890999,
+            "equilibrium_residual_n": [
+              -1.6964207816272392e-13,
+              7.194245199571014e-13
+            ],
+            "external_work_j": 0.5683969757387254,
+            "inertia_force_n": [
+              -22.57864441469053,
+              -11.058676510807132
+            ],
+            "kinetic_energy_j": 0.32663426430427933,
+            "linear_solve_count": 1,
+            "relative_residual": 2.2631717610445992e-14,
+            "restoring_force_n": [
+              2.5566795717253044,
+              6.8977743231858115
+            ],
+            "step_index": 12,
+            "strain_energy_j": 0.23068159959775364,
+            "time_s": 0.12,
+            "velocity_m_per_s": [
+              0.05491210741348748,
+              0.8045109381030054
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -8.053999307144899,
+              -16.489302903274037
+            ],
+            "applied_force_n": [
+              -15.0,
+              -8.0
+            ],
+            "damping_dissipation_j": 0.012288798293896605,
+            "damping_force_n": [
+              -0.016721800063585337,
+              0.13335420820651991
+            ],
+            "displacement_m": [
+              0.02370167277355041,
+              0.06548141624888487
+            ],
+            "energy_balance_error_j": -0.00012517931676668537,
+            "equilibrium_residual_n": [
+              1.1035616864774056e-13,
+              6.270539643082884e-13
+            ],
+            "external_work_j": 0.5231116007298864,
+            "inertia_force_n": [
+              -16.107998614289798,
+              -16.489302903274037
+            ],
+            "kinetic_energy_j": 0.22403942681338904,
+            "linear_solve_count": 1,
+            "relative_residual": 2.013757621846476e-14,
+            "restoring_force_n": [
+              1.124720414353273,
+              8.35594869506689
+            ],
+            "step_index": 13,
+            "strain_energy_j": 0.2869085549393674,
+            "time_s": 0.13,
+            "velocity_m_per_s": [
+              -0.04180450015896334,
+              0.6667710410325995
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -4.748568904351526,
+              -21.741084502280714
+            ],
+            "applied_force_n": [
+              -10.0,
+              -12.0
+            ],
+            "damping_dissipation_j": 0.012985485299021972,
+            "damping_force_n": [
+              -0.04232693648657819,
+              0.09512382080096515
+            ],
+            "displacement_m": [
+              0.022963563566673367,
+              0.071193366974072
+            ],
+            "energy_balance_error_j": -0.00014754649209989396,
+            "equilibrium_residual_n": [
+              9.603429163007604e-15,
+              2.1316282072803006e-14
+            ],
+            "external_work_j": 0.47521845856397815,
+            "inertia_force_n": [
+              -9.497137808703052,
+              -21.741084502280714
+            ],
+            "kinetic_energy_j": 0.12430407574929428,
+            "linear_solve_count": 1,
+            "relative_residual": 6.981938333092193e-16,
+            "restoring_force_n": [
+              -0.4605352548103798,
+              9.645960681479727
+            ],
+            "step_index": 14,
+            "strain_energy_j": 0.33807644400776177,
+            "time_s": 0.14,
+            "velocity_m_per_s": [
+              -0.10581734121644547,
+              0.47561910400482577
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              -1.5231533475617987,
+              -26.644999499968904
+            ],
+            "applied_force_n": [
+              -5.0,
+              -16.0
+            ],
+            "damping_dissipation_j": 0.013326338335422613,
+            "damping_force_n": [
+              -0.05487038099040484,
+              0.04673773679871554
+            ],
+            "displacement_m": [
+              0.02174859709821108,
+              0.07473990591406401
+            ],
+            "energy_balance_error_j": -0.00017779501866420355,
+            "equilibrium_residual_n": [
+              1.5787371410169726e-13,
+              -3.979039320256561e-13
+            ],
+            "external_work_j": 0.43467916191755707,
+            "inertia_force_n": [
+              -3.0463066951235973,
+              -26.644999499968904
+            ],
+            "kinetic_energy_j": 0.04612244245102623,
+            "linear_solve_count": 1,
+            "relative_residual": 1.1367644604190921e-14,
+            "restoring_force_n": [
+              -1.8988229238861558,
+              10.598261763170587
+            ],
+            "step_index": 15,
+            "strain_energy_j": 0.3754081761497724,
+            "time_s": 0.15,
+            "velocity_m_per_s": [
+              -0.13717595247601208,
+              0.23368868399357767
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              1.4782304438905136,
+              -31.040838360265425
+            ],
+            "applied_force_n": [
+              0.0,
+              -20.0
+            ],
+            "damping_dissipation_j": 0.013459337574866745,
+            "damping_force_n": [
+              -0.054960226797747404,
+              -0.0109481010615188
+            ],
+            "displacement_m": [
+              0.020375714500859177,
+              0.07563464680749393
+            ],
+            "energy_balance_error_j": -0.00021939076773660159,
+            "equilibrium_residual_n": [
+              1.3322676295501878e-15,
+              -7.105427357601002e-15
+            ],
+            "external_work_j": 0.4220060323291983,
+            "inertia_force_n": [
+              2.9564608877810272,
+              -31.040838360265425
+            ],
+            "kinetic_energy_j": 0.020377177271039312,
+            "linear_solve_count": 1,
+            "relative_residual": 1.6944741785554683e-16,
+            "restoring_force_n": [
+              -2.901500660983281,
+              11.051786461326952
+            ],
+            "step_index": 16,
+            "strain_energy_j": 0.38838890825102884,
+            "time_s": 0.16,
+            "velocity_m_per_s": [
+              -0.1374005669943685,
+              -0.054740505307594
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              4.153086774576369,
+              -22.854629092828233
+            ],
+            "applied_force_n": [
+              5.0,
+              -12.0
+            ],
+            "damping_dissipation_j": 0.013629077633578202,
+            "damping_force_n": [
+              -0.043697592360813636,
+              -0.06484356851461247
+            ],
+            "displacement_m": [
+              0.019142491761377164,
+              0.07373985506809065
+            ],
+            "energy_balance_error_j": -0.00025649257872691934,
+            "equilibrium_residual_n": [
+              -9.281464485866309e-14,
+              1.4921397450962104e-13
+            ],
+            "external_work_j": 0.4492396433109458,
+            "inertia_force_n": [
+              8.306173549152739,
+              -22.854629092828233
+            ],
+            "kinetic_energy_j": 0.0644928520846895,
+            "linear_solve_count": 1,
+            "relative_residual": 4.909647165450326e-15,
+            "restoring_force_n": [
+              -3.262475956791832,
+              10.919472661342697
+            ],
+            "step_index": 17,
+            "strain_energy_j": 0.371374206171405,
+            "time_s": 0.17,
+            "velocity_m_per_s": [
+              -0.10924398090203409,
+              -0.3242178425730623
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              6.473762279477054,
+              -14.149522216360467
+            ],
+            "applied_force_n": [
+              10.0,
+              -4.0
+            ],
+            "damping_dissipation_j": 0.014023683893445603,
+            "damping_force_n": [
+              -0.022443894252706792,
+              -0.10184771982380117
+            ],
+            "displacement_m": [
+              0.01831572317870816,
+              0.06957257285963031
+            ],
+            "energy_balance_error_j": -0.00027643216692363297,
+            "equilibrium_residual_n": [
+              -2.3314683517128287e-13,
+              -1.6342482922482304e-13
+            ],
+            "external_work_j": 0.476377136608611,
+            "inertia_force_n": [
+              12.947524558954107,
+              -14.149522216360467
+            ],
+            "kinetic_energy_j": 0.13281027784901053,
+            "linear_solve_count": 1,
+            "relative_residual": 9.508344397208264e-15,
+            "restoring_force_n": [
+              -2.9250806647011673,
+              10.251369936184432
+            ],
+            "step_index": 18,
+            "strain_energy_j": 0.32981960703307844,
+            "time_s": 0.18,
+            "velocity_m_per_s": [
+              -0.05610973563176697,
+              -0.5092385991190058
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              3.495078618099715,
+              -7.066126393240282
+            ],
+            "applied_force_n": [
+              5.0,
+              2.0
+            ],
+            "damping_dissipation_j": 0.014667997779159034,
+            "damping_force_n": [
+              -0.0025062124575532503,
+              -0.12306336843340192
+            ],
+            "displacement_m": [
+              0.018003846844829908,
+              0.06394979565320023
+            ],
+            "energy_balance_error_j": -0.0002845429084671093,
+            "equilibrium_residual_n": [
+              2.2470914018413168e-13,
+              -3.8191672047105385e-13
+            ],
+            "external_work_j": 0.47966084131095416,
+            "inertia_force_n": [
+              6.99015723619943,
+              -7.066126393240282
+            ],
+            "kinetic_energy_j": 0.18934666500770525,
+            "linear_solve_count": 1,
+            "relative_residual": 2.276582230548897e-14,
+            "restoring_force_n": [
+              -1.9876510237421012,
+              9.189189761674065
+            ],
+            "step_index": 19,
+            "strain_energy_j": 0.275930721432557,
+            "time_s": 0.19,
+            "velocity_m_per_s": [
+              -0.006265531143883125,
+              -0.6153168421670095
+            ]
+          },
+          {
+            "acceleration_m_per_s2": [
+              0.329037897910089,
+              -7.740066034050173
+            ],
+            "applied_force_n": [
+              0.0,
+              0.0
+            ],
+            "damping_dissipation_j": 0.015522222009167301,
+            "damping_force_n": [
+              0.005142020574466358,
+              -0.13786956086069235
+            ],
+            "displacement_m": [
+              0.01803679444629132,
+              0.05742647242084788
+            ],
+            "energy_balance_error_j": -0.00028764879682002115,
+            "equilibrium_residual_n": [
+              1.3788969965844444e-13,
+              -4.4586556668946287e-13
+            ],
+            "external_work_j": 0.4732198870822553,
+            "inertia_force_n": [
+              0.658075795820178,
+              -7.740066034050173
+            ],
+            "kinetic_energy_j": 0.2377654499964284,
+            "linear_solve_count": 1,
+            "relative_residual": 2.9516059011943114e-14,
+            "restoring_force_n": [
+              -0.6632178163947822,
+              7.877935594911311
+            ],
+            "step_index": 20,
+            "strain_energy_j": 0.22021986387347967,
+            "time_s": 0.2,
+            "velocity_m_per_s": [
+              0.012855051436165894,
+              -0.6893478043034618
+            ]
+          }
+        ],
+        "result_hash": "sha256:72aa102371049d38d277206c54eb3fa1778f104208333a93462a6b041a2eef47",
+        "result_id": "f3.mdof.linear-transient",
+        "schema_version": "structural-analysis-mdof-transient-result-ir.v1",
+        "solver": {
+          "fallback_used": false,
+          "regularization_used": false,
+          "residual_relative_tolerance": 1e-10,
+          "solver_id": "newmark.average-acceleration.linear-mdof.v1",
+          "time_step_s": 0.01
+        },
+        "storage_profile": "inline_time_major_vector_fp64_si.v1"
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-mdof-transient-result-ir.v1"
+    },
+    "solver": {
+      "fallback_used": false,
+      "linear_solve_count": 20,
+      "maximum_absolute_energy_balance_error_j": 0.00028764879682002115,
+      "maximum_relative_residual": 2.9516059011943114e-14,
+      "profile": "newmark_average_acceleration_linear_mdof.v1",
+      "regularization_used": false,
+      "schema_version": "linear-mdof-transient-solution.v1",
+      "solver_id": "newmark.average-acceleration.linear-mdof.v1",
+      "step_count": 21
+    },
+    "workbench": {
+      "dof_ids": [
+        "Floor1_UX",
+        "Floor2_UX"
+      ],
+      "model_ir_content_hash": "sha256:ac6ad67c22b945440937e1632caaf97d9c488aebf8d1ac6b1d7bb3049cc2f0f0",
+      "schema_version": "f3-mdof-linear-transient-workbench-payload.v1",
+      "summary": {
+        "result_types": [
+          "time_history"
+        ],
+        "schema_version": "1.0",
+        "state_tags": [
+          "time_history"
+        ],
+        "time_history": {
+          "history_count": 2,
+          "peak_values": [
+            0.02370167277355041,
+            0.07563464680749393
+          ],
+          "rms_values": [
+            0.01630300954493038,
+            0.04766947496649899
+          ]
+        }
+      },
+      "time_history_cards": [
+        {
+          "peak_time": 0.13,
+          "peak_value": 0.02370167277355041,
+          "result_type": "mdof_displacement_m:Floor1_UX",
+          "rms_value": 0.01630300954493038,
+          "state_tag": "time_history",
+          "time_steps": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2
+          ],
+          "values": [
+            0.0,
+            6.209719985983774e-05,
+            0.0003711090570627018,
+            0.0011683482847608202,
+            0.002684841139007108,
+            0.005013869161715156,
+            0.007988315510406926,
+            0.011313418450143454,
+            0.014700893820585191,
+            0.01787543676374403,
+            0.020578587226623295,
+            0.0225713639935671,
+            0.02363613473727779,
+            0.02370167277355041,
+            0.022963563566673367,
+            0.02174859709821108,
+            0.020375714500859177,
+            0.019142491761377164,
+            0.01831572317870816,
+            0.018003846844829908,
+            0.01803679444629132
+          ]
+        },
+        {
+          "peak_time": 0.16,
+          "peak_value": 0.07563464680749393,
+          "result_type": "mdof_displacement_m:Floor2_UX",
+          "rms_value": 0.04766947496649899,
+          "state_tag": "time_history",
+          "time_steps": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09,
+            0.1,
+            0.11,
+            0.12,
+            0.13,
+            0.14,
+            0.15,
+            0.16,
+            0.17,
+            0.18,
+            0.19,
+            0.2
+          ],
+          "values": [
+            0.0,
+            5.00104234585479e-05,
+            0.0003001960834656284,
+            0.0010010368379104856,
+            0.0025026139895331333,
+            0.0052017100919793825,
+            0.009485370887089391,
+            0.015521760165133153,
+            0.023053251082637796,
+            0.03159550264704854,
+            0.04064089259794406,
+            0.04966353030648581,
+            0.058125006353206846,
+            0.06548141624888487,
+            0.071193366974072,
+            0.07473990591406401,
+            0.07563464680749393,
+            0.07373985506809065,
+            0.06957257285963031,
+            0.06394979565320023,
+            0.05742647242084788
+          ]
+        }
+      ]
+    }
+  }
+}

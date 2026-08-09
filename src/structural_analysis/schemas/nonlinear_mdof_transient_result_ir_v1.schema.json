@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/nonlinear_mdof_transient_result_ir_v1.schema.json",
+  "title": "Structural Analysis nonlinear MDOF transient ResultIR v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "result_id", "analysis_type", "authority", "bindings", "solver", "dof_ids", "story_ids", "storage_profile", "history", "terminal_story_material_states", "checkpoint", "claim_boundary", "result_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-nonlinear-mdof-result-ir.v1"},
+    "result_id": {"$ref": "#/$defs/id"}, "analysis_type": {"const": "nonlinear_mdof_transient"},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile", "response_history", "material_state", "checkpoint", "engineering_design", "release_readiness"],
+      "properties": {
+        "profile": {"const": "authoritative_source_authenticated_nonlinear_mdof_history.v1"},
+        "response_history": {"const": "authoritative"}, "material_state": {"const": "authoritative"},
+        "checkpoint": {"const": "source_authenticated"}, "engineering_design": {"const": "not_authoritative"},
+        "release_readiness": {"const": "not_authoritative"}
+      }
+    },
+    "bindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_ir_content_hash", "force_history_hash", "solver_result_hash", "integration_contract_hash"],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"}, "force_history_hash": {"$ref": "#/$defs/hash"},
+        "solver_result_hash": {"$ref": "#/$defs/hash"}, "integration_contract_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "solver": {
+      "type": "object", "additionalProperties": false,
+      "required": ["solver_id", "time_step_s", "residual_relative_tolerance", "fallback_used", "regularization_used"],
+      "properties": {
+        "solver_id": {"$ref": "#/$defs/id"}, "time_step_s": {"type": "number", "exclusiveMinimum": 0},
+        "residual_relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "fallback_used": {"const": false}, "regularization_used": {"const": false}
+      }
+    },
+    "dof_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "story_ids": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "storage_profile": {"const": "inline_time_major_vector_material_fp64_si.v1"},
+    "history": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/sample"}},
+    "terminal_story_material_states": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/materialState"}},
+    "checkpoint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authority", "terminal_checkpoint_hash", "authority_receipt_hash"],
+      "properties": {
+        "authority": {"const": "source_authenticated_checkpoint"},
+        "terminal_checkpoint_hash": {"$ref": "#/$defs/hash"}, "authority_receipt_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 140}, "result_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "vector": {"type": "array", "minItems": 2, "items": {"type": "number"}},
+    "sample": {
+      "type": "object", "additionalProperties": false,
+      "required": ["step_index", "time_s", "applied_force_n", "displacement_m", "velocity_m_per_s", "acceleration_m_per_s2", "story_drift_m", "story_force_n", "equilibrium_residual_n", "relative_residual", "newton_iterations", "yielded_story_count", "kinetic_energy_j", "stored_energy_j", "external_work_j", "damping_dissipation_j", "plastic_dissipation_j", "energy_balance_error_j"],
+      "properties": {
+        "step_index": {"type": "integer", "minimum": 0}, "time_s": {"type": "number", "minimum": 0},
+        "applied_force_n": {"$ref": "#/$defs/vector"}, "displacement_m": {"$ref": "#/$defs/vector"},
+        "velocity_m_per_s": {"$ref": "#/$defs/vector"}, "acceleration_m_per_s2": {"$ref": "#/$defs/vector"},
+        "story_drift_m": {"$ref": "#/$defs/vector"}, "story_force_n": {"$ref": "#/$defs/vector"},
+        "equilibrium_residual_n": {"$ref": "#/$defs/vector"}, "relative_residual": {"type": "number", "minimum": 0},
+        "newton_iterations": {"type": "integer", "minimum": 0}, "yielded_story_count": {"type": "integer", "minimum": 0},
+        "kinetic_energy_j": {"type": "number", "minimum": 0}, "stored_energy_j": {"type": "number", "minimum": 0},
+        "external_work_j": {"type": "number"}, "damping_dissipation_j": {"type": "number", "minimum": 0},
+        "plastic_dissipation_j": {"type": "number", "minimum": 0}, "energy_balance_error_j": {"type": "number"}
+      }
+    },
+    "materialState": {
+      "type": "object", "additionalProperties": false,
+      "required": ["story_id", "plastic_displacement_m", "backstress_n", "cumulative_plastic_displacement_m", "plastic_dissipation_j"],
+      "properties": {
+        "story_id": {"$ref": "#/$defs/id"}, "plastic_displacement_m": {"type": "number"},
+        "backstress_n": {"type": "number"}, "cumulative_plastic_displacement_m": {"type": "number", "minimum": 0},
+        "plastic_dissipation_j": {"type": "number", "minimum": 0}
+      }
+    }
+  }
+}

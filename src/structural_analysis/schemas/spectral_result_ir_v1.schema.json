@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.structural-analysis.local/spectral_result_ir_v1.schema.json",
+  "title": "Structural Analysis Spectral ResultIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "result_id", "analysis_type", "authority", "bindings", "solver", "storage_profile", "modes", "checkpoint", "claim_boundary", "result_hash"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-spectral-result-ir.v1"},
+    "result_id": {"$ref": "#/$defs/stableId"},
+    "analysis_type": {"enum": ["modal", "linear_buckling"]},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "eigenvalues", "mode_shapes", "frequencies", "load_factors", "engineering_design", "release_readiness"],
+      "properties": {
+        "profile": {"const": "authoritative_small_model_generalized_eigen.v1"},
+        "eigenvalues": {"const": "authoritative"},
+        "mode_shapes": {"const": "authoritative"},
+        "frequencies": {"enum": ["authoritative", "not_applicable"]},
+        "load_factors": {"enum": ["authoritative", "not_applicable"]},
+        "engineering_design": {"const": "not_authoritative"},
+        "release_readiness": {"const": "not_authoritative"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_ir_content_hash", "solver_receipt_hash", "stiffness_matrix_hash", "secondary_matrix_hash", "free_dof_map_hash", "node_ids"],
+      "properties": {
+        "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+        "solver_receipt_hash": {"$ref": "#/$defs/hash"},
+        "stiffness_matrix_hash": {"$ref": "#/$defs/hash"},
+        "secondary_matrix_hash": {"$ref": "#/$defs/hash"},
+        "free_dof_map_hash": {"$ref": "#/$defs/hash"},
+        "node_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}}
+      }
+    },
+    "solver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["solver_id", "tolerance", "fallback_used", "regularization_used"],
+      "properties": {
+        "solver_id": {"$ref": "#/$defs/stableId"},
+        "tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "fallback_used": {"const": false},
+        "regularization_used": {"const": false}
+      }
+    },
+    "storage_profile": {"const": "inline_node_major_max_component_normalized_fp64.v1"},
+    "modes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/mode"}},
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "mode_count", "terminal_mode_number", "checkpoint_hash"],
+      "properties": {
+        "schema_version": {"const": "structural-analysis-spectral-checkpoint.v1"},
+        "mode_count": {"type": "integer", "minimum": 1},
+        "terminal_mode_number": {"type": "integer", "minimum": 1},
+        "checkpoint_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1},
+    "result_hash": {"$ref": "#/$defs/hash"}
+  },
+  "$defs": {
+    "stableId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode_number", "eigenvalue", "frequency_hz", "load_factor", "residual_relative_inf", "node_shapes", "mode_shape_hash"],
+      "properties": {
+        "mode_number": {"type": "integer", "minimum": 1},
+        "eigenvalue": {"type": "number", "exclusiveMinimum": 0},
+        "frequency_hz": {"anyOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "null"}]},
+        "load_factor": {"anyOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "null"}]},
+        "residual_relative_inf": {"type": "number", "minimum": 0},
+        "node_shapes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {"type": "number"}
+          }
+        },
+        "mode_shape_hash": {"$ref": "#/$defs/hash"}
+      }
+    }
+  }
+}

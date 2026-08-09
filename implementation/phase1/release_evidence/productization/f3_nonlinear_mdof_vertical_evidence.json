@@ -1,0 +1,758 @@
+{
+  "claim_boundary": "Closes a bounded force-driven two-story nonlinear MDOF Newmark/Newton stage with immutable bilinear trial/commit/rollback, authoritative response and material-state ResultIR, source-authenticated exact restart, Workbench histories, and elastic-limit matrix parity. Shell and contact remain outside.",
+  "contract_pass": true,
+  "predecessor_replay": {
+    "current_source_replay_executed": true,
+    "persisted_source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+    "public_product_promotion_passed": true,
+    "replayed_source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+    "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_mdof_linear_transient_vertical_evidence.json",
+    "source_receipt_sha256": "sha256:bd10ec634ed8212befb627e753b4e59380289fecd13371b4a8092e6b1e6919e5"
+  },
+  "schema_version": "f3-nonlinear-mdof-vertical-evidence.v1",
+  "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+  "source_input_checksums": {
+    "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
+    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:81b5691d8e532b8228f6ab154fb2b5257659b68e6fdfbd61b78abc0f113cbf58",
+    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:5f421f36d5db4d075c93c1c5ddbd184a8b6b554477177dfe9360caeebb6321b6",
+    "src/structural_analysis/engine_v2/contracts/nonlinear_mdof_transient_result.py": "sha256:72bc6f11779c26c2cecfb8e7bec2811065ec46d3953502476712bfaaba1b114e",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:641a77c4620067c31389099a848d59cd31e63b4d9a8dd923bef97c7ec8416695",
+    "src/structural_analysis/schemas/nonlinear_mdof_transient_result_ir_v1.schema.json": "sha256:a5f2f4707325ca98af70c4cb8224aa724f065b7422d91fe1f20d4fb0d56858ed",
+    "src/structural_analysis/solvers/nonlinear/mdof_transient.py": "sha256:39a4b0504eaccf8b2dc0411f712e9b85415d0780c519d57506c56f2519a3547c",
+    "tests/fixtures/dynamics/nonlinear_mdof_force_history.csv": "sha256:ff0ae1a89306f0182e0837ff4460e11ea7fd0a86574c618a790e2b2eb81b7571",
+    "tests/fixtures/model_ir_v2/nonlinear_mdof_transient.json": "sha256:198d6474894e7f0bd87d9603c2d2bbc010b501d21df2e428b879107c0ce35af0",
+    "tests/test_f3_nonlinear_mdof_vertical_evidence.py": "sha256:dbc340eb85e4437961d7683c165c143a1e51a2b075456448af82a162c85c93bf",
+    "tests/test_nonlinear_mdof_transient.py": "sha256:25e34bf8f1133d46d5398057087a388381ed33e4dc95e4daf7d0e851f42d59f7",
+    "tests/test_nonlinear_mdof_transient_result_ir.py": "sha256:19dcb61c1649f112c32ace83759f034b6b088bbbd03a7831574fcc50ce549480"
+  },
+  "stage_gate": {
+    "blockers": [],
+    "evidence_artifact_sha256": {
+      "benchmark": "sha256:fd7c7f8dacaa47ac9b22f29f4c08f4041989904a94a40f9715f6e44e05c40261",
+      "checkpoint": "sha256:9314dced16c9ef7815973b5d631351bf9c657c9e91dd64378e7f7e66b21d8c09",
+      "external_vv": "sha256:88ab698c3a8bf535e6920cad83cd329b2ea048c556c81c9be24221973538740f",
+      "model_ir": "sha256:0b38f75b5955ddbe82117feefe67438a3537f25d233bda7f03545b445cdd7de5",
+      "platform": "sha256:b258bc89347c4953e03f6cfe8007c6c5c465edc5341b2d4ddcff848b3ea1a65b",
+      "recovery": "sha256:631016fdb3cac8626a57217c35c324fa1c179e06744f6de8992f566d9e3f347d",
+      "result_ir": "sha256:d3b48c06143009d8fc50381ba0e587fa7039504af565ffc5e8c6569441eb4c45",
+      "solver": "sha256:b37dc4b352330f75476167f72214cb106c15fb2d0361dde7b42bcb0859348ce3",
+      "workbench": "sha256:a1a7d2558bf5da4db267405cea61b733aa0ff34aa8e1b583dab441c49ce6e24e"
+    },
+    "external_vv_signature_status": "waived",
+    "predecessor_receipt_sha256": "sha256:fb44f0ab689813a88bbbe9b41eba3d7391eb2384d52f781d4765aa477bb0efa9",
+    "predecessor_stage": "mdof_linear_transient",
+    "public_product_promotion_passed": true,
+    "required_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ],
+    "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+    "stage": "nonlinear_mdof",
+    "stage_index": 7,
+    "verified_surfaces": [
+      "model_ir",
+      "solver",
+      "result_ir",
+      "recovery",
+      "checkpoint",
+      "workbench",
+      "benchmark",
+      "platform",
+      "external_vv"
+    ]
+  },
+  "status": "ready",
+  "surface_artifacts": {
+    "benchmark": {
+      "benchmark_id": "nonlinear-mdof-elastic-limit-linear-matrix-parity.v1",
+      "deterministic_repeat": true,
+      "maximum_absolute_displacement_difference_m": 4.2500725161431774e-17,
+      "tolerance_m": 2e-14,
+      "yielded_step_count": 0
+    },
+    "checkpoint": {
+      "exact_restart": true,
+      "forced_failure_rollback_exact": true,
+      "forced_failure_trial_observed": true,
+      "source_authority_receipt": {
+        "checkpoint_hash": "sha256:06bb5d9436ca79fb0fa97caa8df7da3275258f03b27bea6d982038b030c52c74",
+        "deterministic_checkpoint_replay_pass": true,
+        "dynamic_equilibrium_replay_pass": true,
+        "force_history_hash": "sha256:72bd05f28cfeae56e8a3ce12ea92b1b781783993c2b8a4d183e7742ff3336eeb",
+        "force_history_sample_count": 10,
+        "material_state_replay_pass": true,
+        "parent_chain_complete": true,
+        "receipt_hash": "sha256:885f1d0c622886c71e97567732b90a064107e479ae0304f29e31217860eb00be",
+        "schema_version": "nonlinear-mdof-checkpoint-authority.v1",
+        "source_authenticated_checkpoint": true
+      },
+      "terminal_checkpoint": {
+        "acceleration_m_per_s2": [
+          -8.818902762505987,
+          -4.0777491847423875
+        ],
+        "applied_force_kn": [
+          0.0,
+          0.0
+        ],
+        "checkpoint_hash": "sha256:06bb5d9436ca79fb0fa97caa8df7da3275258f03b27bea6d982038b030c52c74",
+        "damping_dissipation_kn_m": 0.007315423751153028,
+        "displacement_m": [
+          0.017120581421677987,
+          0.01946202955750864
+        ],
+        "external_work_kn_m": 0.08703973133146381,
+        "initial_mechanical_energy_kn_m": 0.0,
+        "integration_contract_hash": "sha256:eeccc1113a65bb8ac357dbe0d45d9891d753fd7dd399de1a9d75e04d078f76d0",
+        "material_states": [
+          {
+            "backstress_kn": 0.6060290710838994,
+            "cumulative_plastic_displacement_m": 0.011514552350594088,
+            "plastic_displacement_m": 0.011514552350594088,
+            "plastic_dissipation_kn_m": 0.057572761752970436
+          },
+          {
+            "backstress_kn": 0.034004673345899225,
+            "cumulative_plastic_displacement_m": 0.0008076109919651067,
+            "plastic_displacement_m": 0.0008076109919651067,
+            "plastic_dissipation_kn_m": 0.0032304439678604267
+          }
+        ],
+        "model_hash": "sha256:4d89e9aff3e1736b7e45cf997c2c1e6578ccf0399eb6d2aa282bd8e5c0403734",
+        "parent_checkpoint_hash": "sha256:f25e6a019b189a571c23c78a9bf4d72aaff58e6ddf7816c7f0ad1059bb13ef82",
+        "profile": "newmark_consistent_newton_bilinear_shear_mdof.v1",
+        "schema_version": "nonlinear-mdof-transient-checkpoint.v1",
+        "step_index": 9,
+        "time_s": 0.09,
+        "velocity_m_per_s": [
+          0.060984050523020764,
+          -0.012483198899106138
+        ]
+      }
+    },
+    "external_vv": {
+      "maximum_absolute_displacement_difference_m": 4.2500725161431774e-17,
+      "reference_profile": "independent-linear-matrix-elastic-limit-parity.v1",
+      "signature_verifier_waived": true,
+      "verification_mode": "local_self_verification_user_authorized"
+    },
+    "model_ir": {
+      "analysis_ready": true,
+      "capability_profile": "nonlinear_mdof_transient_v1",
+      "content_hash": "sha256:b0197724336389dd71ce14f1bb62e2e5a2c3d68cc5958dff087d8ac5bdc65ada",
+      "force_history_source_sha256": "sha256:ff0ae1a89306f0182e0837ff4460e11ea7fd0a86574c618a790e2b2eb81b7571",
+      "model_id": "f3-nonlinear-mdof-transient",
+      "story_count": 2
+    },
+    "platform": {
+      "implementation": "CPython",
+      "numpy_version": "1.26.4",
+      "python_version": "3.10.12",
+      "self_verified": true,
+      "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29"
+    },
+    "recovery": {
+      "maximum_absolute_displacement_by_dof_m": {
+        "Floor1_UX": 0.017120581421677987,
+        "Floor2_UX": 0.022203120639992246
+      },
+      "plastic_dissipation_j": 60.80320572083087,
+      "terminal_story_material_states": [
+        {
+          "backstress_n": 606.0290710838993,
+          "cumulative_plastic_displacement_m": 0.011514552350594088,
+          "plastic_displacement_m": 0.011514552350594088,
+          "plastic_dissipation_j": 57.572761752970436,
+          "story_id": "Story1"
+        },
+        {
+          "backstress_n": 34.00467334589923,
+          "cumulative_plastic_displacement_m": 0.0008076109919651067,
+          "plastic_displacement_m": 0.0008076109919651067,
+          "plastic_dissipation_j": 3.2304439678604266,
+          "story_id": "Story2"
+        }
+      ]
+    },
+    "result_ir": {
+      "manifest": {
+        "analysis_type": "nonlinear_mdof_transient",
+        "authority": {
+          "checkpoint": "source_authenticated",
+          "engineering_design": "not_authoritative",
+          "material_state": "authoritative",
+          "profile": "authoritative_source_authenticated_nonlinear_mdof_history.v1",
+          "release_readiness": "not_authoritative",
+          "response_history": "authoritative"
+        },
+        "bindings": {
+          "force_history_hash": "sha256:72bd05f28cfeae56e8a3ce12ea92b1b781783993c2b8a4d183e7742ff3336eeb",
+          "integration_contract_hash": "sha256:eeccc1113a65bb8ac357dbe0d45d9891d753fd7dd399de1a9d75e04d078f76d0",
+          "model_ir_content_hash": "sha256:b0197724336389dd71ce14f1bb62e2e5a2c3d68cc5958dff087d8ac5bdc65ada",
+          "solver_result_hash": "sha256:15c5779d4ffc78364b95436ba3c6a5b50dcf4b504b905f3cd49d75b233c14f0b"
+        },
+        "checkpoint": {
+          "authority": "source_authenticated_checkpoint",
+          "authority_receipt_hash": "sha256:885f1d0c622886c71e97567732b90a064107e479ae0304f29e31217860eb00be",
+          "terminal_checkpoint_hash": "sha256:06bb5d9436ca79fb0fa97caa8df7da3275258f03b27bea6d982038b030c52c74"
+        },
+        "claim_boundary": "Authoritative bounded force-driven nonlinear MDOF displacement, velocity, acceleration, story force, energy, and committed bilinear material history with source-authenticated checkpoint replay. Support excitation, shell, contact, engineering design, and release readiness are outside this contract.",
+        "dof_ids": [
+          "Floor1_UX",
+          "Floor2_UX"
+        ],
+        "history": [
+          {
+            "acceleration_m_per_s2": [
+              0.0,
+              0.0
+            ],
+            "applied_force_n": [
+              0.0,
+              0.0
+            ],
+            "damping_dissipation_j": 0.0,
+            "displacement_m": [
+              0.0,
+              0.0
+            ],
+            "energy_balance_error_j": 0.0,
+            "equilibrium_residual_n": [
+              0.0,
+              0.0
+            ],
+            "external_work_j": 0.0,
+            "kinetic_energy_j": 0.0,
+            "newton_iterations": 0,
+            "plastic_dissipation_j": 0.0,
+            "relative_residual": 0.0,
+            "step_index": 0,
+            "stored_energy_j": 0.0,
+            "story_drift_m": [
+              0.0,
+              0.0
+            ],
+            "story_force_n": [
+              0.0,
+              0.0
+            ],
+            "time_s": 0.0,
+            "velocity_m_per_s": [
+              0.0,
+              0.0
+            ],
+            "yielded_story_count": 0
+          },
+          {
+            "acceleration_m_per_s2": [
+              9.494864659031867,
+              9.921920040997316
+            ],
+            "applied_force_n": [
+              5000.0,
+              3000.0
+            ],
+            "damping_dissipation_j": 0.009326197079581176,
+            "displacement_m": [
+              0.00023737161647579665,
+              0.0002480480010249329
+            ],
+            "energy_balance_error_j": -0.0046630985397906775,
+            "equilibrium_residual_n": [
+              8.881784197001252e-13,
+              0.0
+            ],
+            "external_work_j": 0.965501042726891,
+            "kinetic_energy_j": 0.9326197079581177,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 0.0,
+            "relative_residual": 1.5155569847965303e-16,
+            "step_index": 1,
+            "stored_energy_j": 0.028218236228982764,
+            "story_drift_m": [
+              0.00023737161647579665,
+              1.0676384549136259e-05
+            ],
+            "story_force_n": [
+              237.37161647579666,
+              8.541107639309008
+            ],
+            "time_s": 0.01,
+            "velocity_m_per_s": [
+              0.04747432329515933,
+              0.04960960020498658
+            ],
+            "yielded_story_count": 0
+          },
+          {
+            "acceleration_m_per_s2": [
+              17.44767428134851,
+              25.76990138397121
+            ],
+            "applied_force_n": [
+              10000.0,
+              8000.0
+            ],
+            "damping_dissipation_j": 0.17965567087046508,
+            "displacement_m": [
+              0.0013856783229368994,
+              0.001636439538699012
+            ],
+            "energy_balance_error_j": -0.051233225868943126,
+            "equilibrium_residual_n": [
+              -3.552713678800501e-12,
+              1.7763568394002505e-12
+            ],
+            "external_work_j": 17.2139547983926,
+            "kinetic_energy_j": 16.10032767113027,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 0.0,
+            "relative_residual": 3.0619453310782593e-16,
+            "step_index": 2,
+            "stored_energy_j": 0.9852046822608062,
+            "story_drift_m": [
+              0.0013856783229368994,
+              0.00025076121576211256
+            ],
+            "story_force_n": [
+              1385.6783229368993,
+              200.60897260969006
+            ],
+            "time_s": 0.02,
+            "velocity_m_per_s": [
+              0.18218701799706125,
+              0.2280687073298292
+            ],
+            "yielded_story_count": 0
+          },
+          {
+            "acceleration_m_per_s2": [
+              23.157329212655128,
+              36.14918846237608
+            ],
+            "applied_force_n": [
+              15000.0,
+              12000.0
+            ],
+            "damping_dissipation_j": 1.1452538461300836,
+            "displacement_m": [
+              0.004222673590257603,
+              0.005465103858155986
+            ],
+            "energy_balance_error_j": -0.1746441796560837,
+            "equilibrium_residual_n": [
+              0.0,
+              0.0
+            ],
+            "external_work_j": 90.96303883447112,
+            "kinetic_energy_j": 80.45948985483159,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 0.0,
+            "relative_residual": 0.0,
+            "step_index": 3,
+            "stored_energy_j": 9.532939313165537,
+            "story_drift_m": [
+              0.004222673590257603,
+              0.0012424302678983833
+            ],
+            "story_force_n": [
+              4222.673590257603,
+              993.9442143187066
+            ],
+            "time_s": 0.03,
+            "velocity_m_per_s": [
+              0.38521203546707944,
+              0.5376641565615656
+            ],
+            "yielded_story_count": 0
+          },
+          {
+            "acceleration_m_per_s2": [
+              4.179821606649369,
+              7.448444897051168
+            ],
+            "applied_force_n": [
+              5000.0,
+              5000.0
+            ],
+            "damping_dissipation_j": 3.48730765225294,
+            "displacement_m": [
+              0.00875822271541101,
+              0.011931686257757323
+            ],
+            "energy_balance_error_j": -1.6212857954517323,
+            "equilibrium_residual_n": [
+              -1.4210854715202004e-11,
+              1.1546319456101628e-11
+            ],
+            "external_work_j": 191.28448048261657,
+            "kinetic_energy_j": 153.74589075745405,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 17.851557898202294,
+            "relative_residual": 2.588222271205566e-15,
+            "step_index": 4,
+            "stored_energy_j": 17.82100997015902,
+            "story_drift_m": [
+              0.00875822271541101,
+              0.0031734635423463133
+            ],
+            "story_force_n": [
+              5187.911135770551,
+              2538.7708338770503
+            ],
+            "time_s": 0.04,
+            "velocity_m_per_s": [
+              0.5218977895636019,
+              0.7556523233587019
+            ],
+            "yielded_story_count": 1
+          },
+          {
+            "acceleration_m_per_s2": [
+              -23.263764879328477,
+              -40.61104498424721
+            ],
+            "applied_force_n": [
+              -10000.0,
+              -8000.0
+            ],
+            "damping_dissipation_j": 6.001341067427784,
+            "displacement_m": [
+              0.01350010202923005,
+              0.01865914448916444
+            ],
+            "energy_balance_error_j": -1.7636762151519298,
+            "equilibrium_residual_n": [
+              -8.881784197001252e-12,
+              3.019806626980426e-11
+            ],
+            "external_work_j": 169.3385948509583,
+            "kinetic_energy_j": 97.65745076003036,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 40.97984598659343,
+            "relative_residual": 1.472847343788852e-15,
+            "step_index": 5,
+            "stored_energy_j": 26.463633252058646,
+            "story_drift_m": [
+              0.01350010202923005,
+              0.00515904245993439
+            ],
+            "story_force_n": [
+              5425.005101461501,
+              4006.3616983973757
+            ],
+            "time_s": 0.05,
+            "velocity_m_per_s": [
+              0.42647807320020636,
+              0.5898393229227217
+            ],
+            "yielded_story_count": 2
+          },
+          {
+            "acceleration_m_per_s2": [
+              -33.21139331616544,
+              -53.56563815172921
+            ],
+            "applied_force_n": [
+              -15000.0,
+              -12000.0
+            ],
+            "damping_dissipation_j": 7.051055006184542,
+            "displacement_m": [
+              0.016353003806344767,
+              0.022203120639992246
+            ],
+            "energy_balance_error_j": -2.02964471768638,
+            "equilibrium_residual_n": [
+              -1.0658141036401503e-11,
+              -1.4210854715202004e-11
+            ],
+            "external_work_j": 98.23756112874628,
+            "kinetic_energy_j": 7.313943115645374,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 57.15721204799808,
+            "relative_residual": 6.458492759722097e-16,
+            "step_index": 6,
+            "stored_energy_j": 28.74499567660467,
+            "story_drift_m": [
+              0.016353003806344767,
+              0.00585011683364748
+            ],
+            "story_force_n": [
+              5567.6501903172375,
+              4034.0046733458985
+            ],
+            "time_s": 0.06,
+            "velocity_m_per_s": [
+              0.14410228222273674,
+              0.11895590724283955
+            ],
+            "yielded_story_count": 2
+          },
+          {
+            "acceleration_m_per_s2": [
+              -4.5392660470196375,
+              -10.798981065882067
+            ],
+            "applied_force_n": [
+              0.0,
+              0.0
+            ],
+            "damping_dissipation_j": 7.190911364566439,
+            "displacement_m": [
+              0.016850260144492507,
+              0.02178356423198036
+            ],
+            "energy_balance_error_j": -2.1518570553917677,
+            "equilibrium_residual_n": [
+              1.509903313490213e-11,
+              1.199040866595169e-11
+            ],
+            "external_work_j": 97.02547704070955,
+            "kinetic_energy_j": 6.671692722544416,
+            "newton_iterations": 3,
+            "plastic_dissipation_j": 59.51917965419984,
+            "relative_residual": 2.3984912026210695e-15,
+            "step_index": 7,
+            "stored_energy_j": 25.79555035479061,
+            "story_drift_m": [
+              0.016850260144492507,
+              0.004933304087487853
+            ],
+            "story_force_n": [
+              5592.513007224626,
+              3300.5544764181973
+            ],
+            "time_s": 0.07,
+            "velocity_m_per_s": [
+              -0.044651014593188654,
+              -0.20286718884521682
+            ],
+            "yielded_story_count": 1
+          },
+          {
+            "acceleration_m_per_s2": [
+              17.242590916383755,
+              26.476764119923295
+            ],
+            "applied_force_n": [
+              12000.0,
+              10000.0
+            ],
+            "damping_dissipation_j": 7.281760330758647,
+            "displacement_m": [
+              0.016721333120294724,
+              0.020146836919879223
+            ],
+            "energy_balance_error_j": -2.161508623880197,
+            "equilibrium_residual_n": [
+              2.1316282072803006e-11,
+              -1.7763568394002505e-12
+            ],
+            "external_work_j": 88.06827833501715,
+            "kinetic_energy_j": 2.413203896676363,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 59.51917965419984,
+            "relative_residual": 1.3599874126075824e-15,
+            "step_index": 8,
+            "stored_energy_j": 21.015643077262503,
+            "story_drift_m": [
+              0.016721333120294724,
+              0.003425503799584499
+            ],
+            "story_force_n": [
+              5463.585983026842,
+              2094.314246095514
+            ],
+            "time_s": 0.08,
+            "velocity_m_per_s": [
+              0.018865609753631926,
+              -0.12447827357501068
+            ],
+            "yielded_story_count": 0
+          },
+          {
+            "acceleration_m_per_s2": [
+              -8.818902762505987,
+              -4.0777491847423875
+            ],
+            "applied_force_n": [
+              0.0,
+              0.0
+            ],
+            "damping_dissipation_j": 7.315423751153029,
+            "displacement_m": [
+              0.017120581421677987,
+              0.01946202955750864
+            ],
+            "energy_balance_error_j": -2.1896878162363103,
+            "equilibrium_residual_n": [
+              -2.042810365310288e-11,
+              -1.199040866595169e-11
+            ],
+            "external_work_j": 87.03973133146381,
+            "kinetic_energy_j": 0.953138142761784,
+            "newton_iterations": 2,
+            "plastic_dissipation_j": 60.80320572083087,
+            "relative_residual": 2.5875187212544006e-15,
+            "step_index": 9,
+            "stored_energy_j": 20.157651532954446,
+            "story_drift_m": [
+              0.017120581421677987,
+              0.0023414481358306517
+            ],
+            "story_force_n": [
+              5606.029071083899,
+              1227.0697150924361
+            ],
+            "time_s": 0.09,
+            "velocity_m_per_s": [
+              0.060984050523020764,
+              -0.012483198899106138
+            ],
+            "yielded_story_count": 1
+          }
+        ],
+        "result_hash": "sha256:d2f268e61665bf56cb1ebeb6bd8cf7eb7a11441dae84a115230d6823cda95aee",
+        "result_id": "f3.nonlinear-mdof",
+        "schema_version": "structural-analysis-nonlinear-mdof-result-ir.v1",
+        "solver": {
+          "fallback_used": false,
+          "regularization_used": false,
+          "residual_relative_tolerance": 1e-10,
+          "solver_id": "newmark.consistent-newton.bilinear-shear-mdof.v1",
+          "time_step_s": 0.01
+        },
+        "storage_profile": "inline_time_major_vector_material_fp64_si.v1",
+        "story_ids": [
+          "Story1",
+          "Story2"
+        ],
+        "terminal_story_material_states": [
+          {
+            "backstress_n": 606.0290710838993,
+            "cumulative_plastic_displacement_m": 0.011514552350594088,
+            "plastic_displacement_m": 0.011514552350594088,
+            "plastic_dissipation_j": 57.572761752970436,
+            "story_id": "Story1"
+          },
+          {
+            "backstress_n": 34.00467334589923,
+            "cumulative_plastic_displacement_m": 0.0008076109919651067,
+            "plastic_displacement_m": 0.0008076109919651067,
+            "plastic_dissipation_j": 3.2304439678604266,
+            "story_id": "Story2"
+          }
+        ]
+      },
+      "manifest_valid": true,
+      "schema_version": "structural-analysis-nonlinear-mdof-result-ir.v1"
+    },
+    "solver": {
+      "fallback_used": false,
+      "material_trial_commit_rollback": true,
+      "maximum_relative_residual": 2.588222271205566e-15,
+      "profile": "newmark_consistent_newton_bilinear_shear_mdof.v1",
+      "regularization_used": false,
+      "schema_version": "nonlinear-mdof-transient-solution.v1",
+      "solver_id": "newmark.consistent-newton.bilinear-shear-mdof.v1",
+      "step_count": 10,
+      "total_newton_iterations": 19,
+      "yielded_step_count": 5
+    },
+    "workbench": {
+      "schema_version": "f3-nonlinear-mdof-workbench-payload.v1",
+      "summary": {
+        "result_types": [
+          "time_history"
+        ],
+        "schema_version": "1.0",
+        "state_tags": [
+          "time_history"
+        ],
+        "time_history": {
+          "history_count": 2,
+          "peak_values": [
+            0.017120581421677987,
+            0.022203120639992246
+          ],
+          "rms_values": [
+            0.011844137502768014,
+            0.015084109193295255
+          ]
+        }
+      },
+      "time_history_cards": [
+        {
+          "peak_time": 0.09,
+          "peak_value": 0.017120581421677987,
+          "result_type": "nonlinear_mdof_displacement_m:Floor1_UX",
+          "rms_value": 0.011844137502768014,
+          "state_tag": "time_history",
+          "time_steps": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "values": [
+            0.0,
+            0.00023737161647579665,
+            0.0013856783229368994,
+            0.004222673590257603,
+            0.00875822271541101,
+            0.01350010202923005,
+            0.016353003806344767,
+            0.016850260144492507,
+            0.016721333120294724,
+            0.017120581421677987
+          ]
+        },
+        {
+          "peak_time": 0.06,
+          "peak_value": 0.022203120639992246,
+          "result_type": "nonlinear_mdof_displacement_m:Floor2_UX",
+          "rms_value": 0.015084109193295255,
+          "state_tag": "time_history",
+          "time_steps": [
+            0.0,
+            0.01,
+            0.02,
+            0.03,
+            0.04,
+            0.05,
+            0.06,
+            0.07,
+            0.08,
+            0.09
+          ],
+          "values": [
+            0.0,
+            0.0002480480010249329,
+            0.001636439538699012,
+            0.005465103858155986,
+            0.011931686257757323,
+            0.01865914448916444,
+            0.022203120639992246,
+            0.02178356423198036,
+            0.020146836919879223,
+            0.01946202955750864
+          ]
+        }
+      ]
+    }
+  }
+}
