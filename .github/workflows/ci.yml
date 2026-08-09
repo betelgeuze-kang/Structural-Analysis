@@ -198,6 +198,11 @@ jobs:
           OPENBLAS_NUM_THREADS: "1"
           OMP_NUM_THREADS: "1"
         run: |
+          if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+            git fetch --no-tags --unshallow origin
+          fi
+          test "$(git rev-parse --is-shallow-repository)" = "false"
+          git cat-file -e "${GITHUB_SHA}^{commit}"
           set +e
           python scripts/verify_quality_gate.py --mode pr > ci-quality-gate.log 2>&1
           code=$?
