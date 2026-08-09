@@ -39,6 +39,9 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     )[0]
     assert "fetch-depth: 0" in full_checkout
     pristine_ledger = workflow.index("- name: Validate pristine commercial gap ledger")
+    pristine_n1_gate = workflow.index(
+        "- name: Validate pristine committed N1 closure gate"
+    )
     hosted_hip_source = workflow.index(
         "- name: Validate hosted HIP receipt source binding"
     )
@@ -51,14 +54,27 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
     )
     assert workflow.count(ledger_nodeid) == 2
+    n1_gate_nodeid = (
+        "tests/test_build_n1_cpu_mathematical_closure_gate.py::"
+        "test_committed_n1_closure_gate_replays_every_exit_criterion"
+    )
+    assert workflow.count(n1_gate_nodeid) == 2
     hip_reproduction_nodeid = (
         "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
         "test_committed_receipt_is_reproducible"
     )
     assert workflow.count(hip_reproduction_nodeid) == 1
     assert "--check-source-only" in workflow[hosted_hip_source:pristine_ledger]
-    assert hosted_hip_source < pristine_ledger < materialize < full_suite
+    assert (
+        hosted_hip_source
+        < pristine_ledger
+        < pristine_n1_gate
+        < materialize
+        < full_suite
+    )
     assert "--deselect" in workflow[full_suite:]
+    assert n1_gate_nodeid in workflow[pristine_n1_gate:materialize]
+    assert f"--deselect\n          {n1_gate_nodeid}" in workflow[full_suite:]
     for command in (
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",
