@@ -3,48 +3,60 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_nonlinear_mdof_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:918159234c14b62606162c384892229057b0d654d3f53249eccaf2aab4775281"
+    "source_receipt_sha256": "sha256:7dd9528889465ac775b02fcb73784d4b23efd55d157ecce1b34c7c1d2c472b32",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-shell-vertical-evidence.v1",
-  "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:5f421f36d5db4d075c93c1c5ddbd184a8b6b554477177dfe9360caeebb6321b6",
-    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:471b772dc1f6fc5e67368b2e3b096af7215aee16c237b79f820639d651821d49",
-    "src/structural_analysis/elements/shell_triangle.py": "sha256:403b20e1f693a1af316f8262afa7030f373b3b3fb016dd95e8e997232bbed294",
+    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:aa8f046d7b92ebae97626f35cb7b2495b9f106467d93d10ab95079f8dcab1a85",
+    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:2e0000621ebae2f814c31762a3fe6dcd8de21bec11f6b7ee3ecfb015c119fba0",
+    "src/structural_analysis/elements/shell_triangle.py": "sha256:10564dc39e01baed4b4c1d0fef919851eb7a1e4e4b2232eda919e75fb3a41402",
     "src/structural_analysis/engine_v2/contracts/shell_static_result.py": "sha256:5a33cc2d2a61873435e362a666a67b772b4d843b248f1c79e5731691e7124ac4",
-    "src/structural_analysis/model_ir/validation.py": "sha256:66aaa90b02a16e2e3290f820f9db5dd059897bcd5f368b7944b28c6489872fe3",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:fb9fd8453ec336c2ee61b5dbf17debd5dbb0aabfc5c2b369c265db5362c0dba1",
+    "src/structural_analysis/model_ir/validation.py": "sha256:d5940797b10488281ea9be93951f519487f0c0bdd1acb18b062f69faedb8d5c2",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
     "src/structural_analysis/schemas/shell_static_result_ir_v1.schema.json": "sha256:e819240afcb58dd293cf9c61d7fb3867014e61280c88a7dd5731bbd8716e7092",
-    "src/structural_analysis/solvers/linear/shell_static.py": "sha256:99acacde147a06b14c495c0bc4bc0f9286a8f232bfbd83f8e89760fa0904f200",
+    "src/structural_analysis/solvers/linear/shell_static.py": "sha256:f401df4e5ede5cf473139b76e56b85c0f967f5fd4d63615a24f50f94c49d5d0e",
     "tests/fixtures/model_ir_v2/shell_square_linear_static.json": "sha256:6ed86acf898faddc63983d55b01d32b7696b261005fe7c26ede10605e571cb71",
-    "tests/test_f3_shell_vertical_evidence.py": "sha256:c60abccd9eb000833d7e119dc532a8786d6a494a534f4a9b772c6abc1f865d9f",
+    "tests/test_f3_shell_vertical_evidence.py": "sha256:d114cc9690ae222a86daae101e30b109c99ff7f3bcb3511db97f9e47d36e5af3",
     "tests/test_shell_model_ir.py": "sha256:10f4d2b0aec5f86945a54237d3ac10b84871b0755da746747c2e4fe834bd4486",
-    "tests/test_shell_static_result_ir.py": "sha256:9ec28acd78107bcbb6afb7b891d4a9a7f6dedb365bf432b72fbb06c48355bf57",
+    "tests/test_shell_static_result_ir.py": "sha256:aa447a223cad6e0a6901f2c2ab7f4310bddf605efde162af31c9371c28b31f70",
     "tests/test_shell_static_solver.py": "sha256:5d56a5f444c9d880d02810966a2af0be1101f06523196740d7432a544d848457",
     "tests/test_shell_triangle_element.py": "sha256:2653001b7d5469162d990b7c650688eb7483787f679cd7ce9d7182c9368cc2fa"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
       "benchmark": "sha256:9d0debc618f04a50725d185dba2964d35665121938aa4c366ae4b48fcf0c47fc",
       "checkpoint": "sha256:7c286c1e210721c9db1b0d9fdf72baebe29cce4d128f4aec1e36366aa72641ac",
       "external_vv": "sha256:cb0cdc9c0d6cac6cb2c6af692550389e236d3f6705884e4f49cfa913bf06a384",
       "model_ir": "sha256:6d4a7e9459f57bada87b19638f5e324d45d3ec138fc2b967d39c399909f367bb",
-      "platform": "sha256:f382776f018b3ba2a85884123cbd1a7355b1134c86adc146af044db6e521dac1",
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
       "recovery": "sha256:050336c160caa1e9523c50e7296999a3fadc59d009bab83cf3b3ab83d3fe4adf",
       "result_ir": "sha256:df71334ea4b2717a10fedc6fb693e5773a515ea4404c89cac55b6529a56320c5",
       "solver": "sha256:30e387b397e1b610472e5d401159a62c616afa16d60d3f58b77292059fea0d39",
       "workbench": "sha256:ea3d10d1c04345d97f871e08b6ddfd4b5d3353c23d6ada1c2718a62f429b47c6"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:210eb6d668e098088ffc06853a9c3c92a255d9259309757abd8cb9145b2b7f04",
+    "predecessor_receipt_sha256": "sha256:4d118fa8f1f9aa4823ae14e482e60fd99920ab2db6632be2c1d4ee96121d168a",
     "predecessor_stage": "nonlinear_mdof",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -56,9 +68,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "shell",
     "stage_index": 8,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -69,9 +83,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "shell3-constant-membrane-strain-and-rigid-translation.v1",
@@ -166,7 +181,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "element_results": [

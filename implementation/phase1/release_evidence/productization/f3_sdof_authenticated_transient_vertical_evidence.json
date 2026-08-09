@@ -3,44 +3,56 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "8214d76a4a85f718ea05ed88af3963b59c80e492",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_modal_buckling_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:93468061a77f67277e814586535b70034b143368cec7357ee0f7b7fd1828fe31"
+    "source_receipt_sha256": "sha256:b61b1556498193641ab3e75be7bb5a7ed8a6dc54ef340ec4933264e6dbe2711d",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-sdof-authenticated-transient-vertical-evidence.v1",
-  "source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_modal_buckling_vertical_evidence.py": "sha256:7b5eed71ae4ba31a0f414d7b6d6320f1890186c1ddc662fcc21e456472724a39",
-    "implementation/phase1/run_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:0ea2be6d4c0692b7ffa681c7c38fca8b161809afb0b1a720d75fb29386395363",
+    "implementation/phase1/run_f3_modal_buckling_vertical_evidence.py": "sha256:7e79a7d442ea60a2942b6ee0c57b1971d1534a527a6896076cf878fb682dbb0e",
+    "implementation/phase1/run_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:60384e966a7daa64f090679f4fee15446895df252b561792f6481ff800b77b04",
     "src/structural_analysis/engine_v2/contracts/transient_result.py": "sha256:1939bdb6673c4d1324918a11729510457e8a0467c2e832fc8b906e51475b6234",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:0d84437fabe9af7c830678d5e6619eed8e934577cb72fd1339d21569ae15bc72",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
     "src/structural_analysis/schemas/nonlinear_transient_checkpoint_v1.schema.json": "sha256:c255145d754f3fc43ee24866e0003dcd72274ed33ebec1612873797e5199487e",
     "src/structural_analysis/schemas/transient_result_ir_v1.schema.json": "sha256:f287c71bd18889e7f11d34da9ec4684bb31a006690da719de3436ecbf2028389",
-    "src/structural_analysis/solvers/nonlinear/transient.py": "sha256:b82c45e78ffe7bf8e5f86c059177f066348972a296364b48cb00fa591a3e6427",
+    "src/structural_analysis/solvers/nonlinear/transient.py": "sha256:b7e2ca663d70a9553c8576e445a99c960fd44f4e77ec717b70f5f4599479694d",
     "tests/fixtures/dynamics/sdof_authenticated_force_history.csv": "sha256:eb8d894c6581284953d504099059eec5c691f28b3664133befe95d96be4fd356",
     "tests/fixtures/model_ir_v2/sdof_authenticated_transient.json": "sha256:fbf76edcb913b6b560dd7c19deee27935e48a495afdb655d8e1c163c166749e9",
-    "tests/test_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:5f2247efbd156294e0b8519f293c6494a6bcf8abd710d38f06bf7dd0954acf91"
+    "tests/test_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:726a1ae8d6381f67543a51d7d15e7051429033530648e96c07b922a97f16f5e2"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
       "benchmark": "sha256:20c143b488cf8616968944b2f4e4e1bb8a85f2ceebd783bdfd640ff1c7a1d3a5",
-      "checkpoint": "sha256:d163af721faba75d3018c6d1b5d51c8536c5f8df535bd931fa588e6937679735",
+      "checkpoint": "sha256:a4f2254369d53c1f2a14ea26117fd55a0f3284103a7269a00c740aaf4d9d3fc0",
       "external_vv": "sha256:c9c9e9002fc1f7f4b6ffbbb4ba4864f5ce870c1acbb452b77abd21f6cb84f69f",
       "model_ir": "sha256:361254082f7ee70d51eb3d7b505148a2c671e9fdf3d278da7de866f92993aa07",
-      "platform": "sha256:aac3bae4048c9a8e1f459675ced4441c712806b76111f5e053bb3167c8067ec0",
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
       "recovery": "sha256:a8b9062ea4bf6cca0e0e7a0c70d2eb67065d9388db7ca3c82dd1baf5cee9d4a6",
-      "result_ir": "sha256:cbd5e92f14e4b49ed4435ab3968c0bfb4dd6fcb1fd32ddace0f28745a5f8b24c",
+      "result_ir": "sha256:8927866d327b64d18d9cb1ce906bcc3c1c9aff292e5f4c4abdaee7771bb49712",
       "solver": "sha256:e649ff2904da6c08baf4421053231d297047d4778bd910f52184da2b0568d2ab",
       "workbench": "sha256:9cfd969820dfbf57ba0b1a4485d8cc2595ff28a908ce3f8b27a1109b082e0cb2"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:e06eae7d9b41e0b3609b86dcd2a8cefccdeae1a6dd9d0360747dfef6aeaae584",
+    "predecessor_receipt_sha256": "sha256:748cb02b9fec4163151d52f7b0bd1bd47e290cc1acbaa59e3ca382388f6a22db",
     "predecessor_stage": "modal_buckling",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -52,9 +64,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "sdof_authenticated_transient",
     "stage_index": 5,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -65,9 +79,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "sdof-newmark-linear-closed-form-plus-bilinear-cyclic.v1",
@@ -91,16 +106,11 @@
         "deterministic_checkpoint_replay_pass": true,
         "dynamic_equilibrium_replay_pass": true,
         "external_work_replay_pass": true,
-        "force_history_hash": "sha256:c05397960452b5cc9ab0d11d5ca848adb925dc03b617a2d9222285e9ca9973de",
-        "force_history_sample_count": 21,
-        "initial_condition_hash": "sha256:910b10416fe564b9be2b797ed940874671dfcb11b15a7b77e739a4ff0ff0dbe7",
         "newmark_kinematic_replay_pass": true,
         "parent_chain_complete": true,
-        "parent_chain_hash": "sha256:590c59a1051bb314fd7ccdcf0eb81f00d3a0ca2b823507c87596012417676d44",
         "plastic_dissipation_replay_pass": true,
-        "receipt_hash": "sha256:81b7a85131f30731b53ee14b24adf9137bde808c5e5d259eefdaaed332daaef6",
-        "schema_version": "nonlinear-transient-checkpoint-authority.v2",
-        "self_consistent_checkpoint": true,
+        "receipt_hash": "sha256:338ddb6a61fa0ab660a3fb4273d09e5ed3c52f56e3e4fe50f5c67a062b42dd28",
+        "schema_version": "f3-sdof-checkpoint-authority-adapter.v1",
         "source_authenticated_checkpoint": true
       },
       "terminal_checkpoint": {
@@ -147,7 +157,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "maximum_absolute_acceleration_m_per_s2": 40.72008233441615,
@@ -176,11 +186,11 @@
           "force_history_hash": "sha256:c05397960452b5cc9ab0d11d5ca848adb925dc03b617a2d9222285e9ca9973de",
           "integration_contract_hash": "sha256:7f1e65f095d37ffa92ae3da67517d30636eb7ad53f8478ccefe16da4f2fae24a",
           "model_ir_content_hash": "sha256:e1f0026b598655cafb9b0e856b8fb492a7edbb438cc324e0212d38571a76bb21",
-          "solver_result_hash": "sha256:60e4cb1d647fcd5a4125f383e28e776cd76acedcf58138530efa87d50378e4b0"
+          "solver_result_hash": "sha256:f212dc86e23850fd07cdeb96f763779164625b7504a9940ae235cf668997aeec"
         },
         "checkpoint": {
           "authority": "source_authenticated_checkpoint",
-          "authority_receipt_hash": "sha256:81b7a85131f30731b53ee14b24adf9137bde808c5e5d259eefdaaed332daaef6",
+          "authority_receipt_hash": "sha256:338ddb6a61fa0ab660a3fb4273d09e5ed3c52f56e3e4fe50f5c67a062b42dd28",
           "terminal_checkpoint_hash": "sha256:5fdf7c737fbe323c199e9f12154c54bc3a40a9d26c008cb21b518916e0514422"
         },
         "claim_boundary": "Authoritative bounded force-driven SDOF displacement, velocity, acceleration, restoring-force, energy, and committed material history with a complete source-authenticated checkpoint chain. MDOF, ground-motion support motion, engineering design, and release readiness are outside this contract.",
@@ -564,7 +574,7 @@
             "yielded": false
           }
         ],
-        "result_hash": "sha256:5cb12be1706ad02493e91749725bfd81fba6de0e79b57e7e594f4e734f488519",
+        "result_hash": "sha256:737c6cdc0f45f22ccf0946bd3ad08ba70b239e7a453d34ba846a4d9eb968c069",
         "result_id": "f3.sdof.authenticated-transient",
         "schema_version": "structural-analysis-transient-result-ir.v1",
         "solver": {

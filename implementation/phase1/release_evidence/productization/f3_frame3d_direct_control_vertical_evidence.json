@@ -3,44 +3,56 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "2694914a03dc9f299ad86e8210a77e311487dec5",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_frame3d_load_control_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:132714249eeddc3d424e2a4b8579c2ef78717e3d1dd444899bb135cf121295b2"
+    "source_receipt_sha256": "sha256:e5e7cc95a8d94d4a08a61c7ee26f1daa8c2828cc323dd04e867c522eb157768e",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-frame3d-direct-control-vertical-evidence.v1",
-  "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
-    "implementation/phase1/run_f3_frame3d_direct_control_vertical_evidence.py": "sha256:c4db1f49e15ea0551e0ae9ca4eb50d4af94719da113a9eb276112c9810e88e04",
-    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:841529ecc3e2b5b524eb3e527a4e95373aa5eb97124b700fbaf33b92272a4809",
-    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:87917f4cc01f1f4757816c194e4e7726438db7d06ac1c841d92836a5364a2fdd",
-    "src/structural_analysis/assembly/stateful_corotational_frame3d_displacement_control.py": "sha256:8cc8b149fda49e5718cf453ef5c62716a2a53570d4f51cb0452fb68450cc90c5",
-    "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py": "sha256:36203031c0b7f870b06bde09170de403c3391700062f1e7bffc58368efc3ce3a",
+    "implementation/phase1/run_f3_frame3d_direct_control_vertical_evidence.py": "sha256:3cde36c576b364d4466012a73c408e676443937d7eb7c8b95e8721a7b4782a27",
+    "implementation/phase1/run_f3_frame3d_linear_vertical_evidence.py": "sha256:c4b4f7d1b587ce9c8cd6f05e5ae7022da825d2af734dc0f211d88d21d2fedae5",
+    "implementation/phase1/run_f3_frame3d_load_control_vertical_evidence.py": "sha256:eac797474952e88f3ece19242acc325b1711bdfcb1d63e4c1178a00d0857b772",
+    "src/structural_analysis/assembly/stateful_corotational_frame3d_displacement_control.py": "sha256:cb323caa7e544cf8143a33309c6eded68fa20d8e6503565d9f1b822c6ac5e276",
+    "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py": "sha256:db7a4d4e75883a989073ee0927f1937f16e4239ddb5971d1c093e9cfceb42985",
     "src/structural_analysis/engine_v2/contracts/nonlinear_result.py": "sha256:75c8648440a6faf5f8ed050b8bb7dd1701e1219486934579bd46a84b25430566",
-    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:9bbb52ba8db6dc572f2b5e5cdf78762da3b42464f818e88ae21863ad85c77932",
+    "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
     "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
-    "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:604936ab0933be7f8d346102edd02d426ccb585a43e142266e1a779cd5e0c39e",
+    "src/structural_analysis/validation/f3_vertical_evidence.py": "sha256:2deeb4910a73baf6955aa68af8aaa6fae5e4095a16559bfba69b097fd28ca689",
     "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json": "sha256:86459551b7607aeb0ce252340c6aa9a87c77645e2bc9817530b8cb16233314d9",
-    "tests/test_f3_frame3d_direct_control_vertical_evidence.py": "sha256:0c35f9bde11d673dafaca429beebef87f3d94d7c6a2b0b421891ee65ca4695ce"
+    "tests/test_f3_frame3d_direct_control_vertical_evidence.py": "sha256:2c1fbc3c3403a7d4d282132108a56bd707ff742ebce459aeebc1a96d05f060f5"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
-      "benchmark": "sha256:09f195b20f48b94544926fa4497ffd925594c8364ef7476ea280ad397705fdb9",
-      "checkpoint": "sha256:105780d4c7d0fa8f1ad83dde37a1e40ccc47d5b151bd8ef4bc1082080ac31f8a",
-      "external_vv": "sha256:bd387565b4fa3343e2d0c5c2261b6af421efa954cb0d0027a479f8291c9c1782",
+      "benchmark": "sha256:e69ee969d43278677bd6934621663b2666939c7caa75de281ac9a1ffe36560f9",
+      "checkpoint": "sha256:7a25b9d1c425c179fda0bdcf7bd708d4b27cf0f4f5b79c42812014a7b6472265",
+      "external_vv": "sha256:13be43b07945e77ff0b4ad8dff5601a750b312c1b00fffb50e378d0ce0f7eeff",
       "model_ir": "sha256:913fba45d736d11ec28751a13eea5b095c315fb2d6d7beb52ce16dfeafbae6de",
-      "platform": "sha256:7096ac21cd430706923ee895682d7611169c5c8a0dcc44c1336ef69a07900a47",
-      "recovery": "sha256:c94b40e1ba9fe58f3d5ae9d470cdbea227475ef735c0b4914c237c5cb0c8c0bd",
-      "result_ir": "sha256:4feec56c29d6333c562e92aa697065f2d530a0aa6e6e1027e8883cf9222f6a17",
-      "solver": "sha256:8bbf3400ccc5bdf3f46f4f98a73145865467c2162768516319e2bd2ac42b45f4",
-      "workbench": "sha256:3e49d0ce94dbbd1f827587071fb0fcefd63443bf2665968a5ccafa780f9ef504"
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
+      "recovery": "sha256:805f1ef4749b069e70aa1c166f8c33bca198013e02ed3df4432fd85d52265e80",
+      "result_ir": "sha256:c6ee21f6bb0634600ceb409b7a94539078060920d353b3e3cee4e5f61070c160",
+      "solver": "sha256:3316b02e7e6fef5a93e1c3286474589cb71a98f5fe6632487ef3e20373aa2527",
+      "workbench": "sha256:8a1bf48b4a2e252ab6be2046415fb09842b5e783bd30c42a775b0ecd7c923887"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:ed2bd0183ca265516a22de54b369c34a1bf514a1e2eb072998295ff046776170",
+    "predecessor_receipt_sha256": "sha256:ca6a6149aa72acc740dfd1b06184dc456ccf9ac0102dbac4dcd36bd038ad9bdf",
     "predecessor_stage": "frame3d_load_control",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -52,9 +64,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "frame3d_direct_control",
     "stage_index": 2,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -65,21 +79,22 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "frame3d-axial-direct-control-reversal.v1",
       "deterministic_repeat": true,
       "exact_reversal_path": false,
       "expected_final_load_factor": -0.5,
-      "load_factor_absolute_error": 3.356759314954161e-11,
-      "observed_final_load_factor": -0.5000000000335676
+      "load_factor_absolute_error": 3.356692701572683e-11,
+      "observed_final_load_factor": -0.5000000000335669
     },
     "checkpoint": {
       "checkpoint": {
-        "checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+        "checkpoint_hash": "sha256:8a33626ff31496b1b83540614a7b118052b75c71cf6dfb05abefbb3be1f18c13",
         "converged_iterations": 1,
         "displacement": [
           0.0,
@@ -88,14 +103,14 @@
           0.0,
           0.0,
           0.0,
-          -2.5000000000000005e-05,
-          8.269117442683539e-18,
-          2.1045368860729974e-17,
-          -1.5269180595838205e-16,
-          -1.886766382832631e-17,
-          9.84377376104286e-18
+          -2.4999999999999998e-05,
+          8.269117442683535e-18,
+          2.1045368860729977e-17,
+          -1.5269180595838208e-16,
+          -1.8867663828326314e-17,
+          9.843773761042856e-18
         ],
-        "load_factor": -0.5000000000335676,
+        "load_factor": -0.5000000000335669,
         "material_states": [
           {
             "accumulated_plastic_strain": 0.0,
@@ -106,24 +121,24 @@
             "state_hash": "sha256:8f599ab0c682ca2c4f4bf5dd7d9c557234ea740511f38662bbac4a16cc544cd1"
           }
         ],
-        "model_hash": "sha256:379928b54bb7a126f2c2684ec3f93a82dbc968ebc43cd327e2440a4a083782ec",
-        "parent_checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
+        "model_hash": "sha256:c7d9cc4fef8d175a3ef035dcbacb141e92e212582a0979e3b790cef7490d50f9",
+        "parent_checkpoint_hash": "sha256:6fc38f5da10be1b173f5f73bb97e567513e957abead05e21ef488df2c123def9",
         "profile": "stateful_axial_material_corotational_timoshenko_frame3d_native_coo_csr.v1",
-        "residual_inf_norm_kn": 3.1272335831999953e-09,
+        "residual_inf_norm_kn": 3.1271625289264193e-09,
         "schema_version": "stateful-corotational-frame3d-sparse-checkpoint.v1",
-        "solver_contract_hash": "sha256:b346fc9db482e536f24e54628e3deb76f66157f7422a1c07a8b4af701eca0eb6",
+        "solver_contract_hash": "sha256:4094f2ca96979f0131f948ae9a192759b1a6ad79728bd5ee4762daaec815a91d",
         "step_index": 3
       },
       "exact_restart": true,
       "parent_state_immutability_enforced": true,
-      "prefix_checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
-      "resumed_checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+      "prefix_checkpoint_hash": "sha256:6fc38f5da10be1b173f5f73bb97e567513e957abead05e21ef488df2c123def9",
+      "resumed_checkpoint_hash": "sha256:8a33626ff31496b1b83540614a7b118052b75c71cf6dfb05abefbb3be1f18c13",
       "schema_version": "stateful-corotational-frame3d-sparse-checkpoint.v1"
     },
     "external_vv": {
       "equilibrium_pass": true,
       "exact_restart_pass": true,
-      "load_factor_absolute_error": 3.356759314954161e-11,
+      "load_factor_absolute_error": 3.356692701572683e-11,
       "reference_profile": "independent_axial_bar_force_displacement_control.v1",
       "signature_verifier_waived": true,
       "verification_mode": "local_self_verification_user_authorized"
@@ -139,7 +154,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "2d18c02d2c4a95ebee3a1567e0968a7a9f0fccc6"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "axial_material_response": {
@@ -161,7 +176,7 @@
         "trial_yield_function_mpa": -247.50000000000583,
         "yielded": false
       },
-      "final_residual_inf_n": 3.1272335831999953e-06,
+      "final_residual_inf_n": 3.1271625289264193e-06,
       "local_end_forces_n": [
         49999.9999980831,
         6.776263578034403e-12,
@@ -207,18 +222,18 @@
         },
         "bindings": {
           "boundary_condition_receipt_hash": "sha256:87394cee73a99ece4fccd9afe63c837a547668f5edf0fc9afb6b6e7166ea53d8",
-          "equation_scaling_hash": "sha256:35e020dd6eb7c089289d3c197a27be25149b0c789cfcea75b02d460261258849",
-          "execution_plan_hash": "sha256:1bfe1551423034aa2e4af2fc1d18ceb0f970175d6170fe167b76120792cc3e67",
-          "full_residual_receipt_hash": "sha256:55af188333c2058f1888164ca2a016f7a6bde0c82bc7748ac2c6305ab8ae470d",
+          "equation_scaling_hash": "sha256:56dc14787b95fcbfa13e7db8c9f819222fae69b204bee4f679cbf79821af56aa",
+          "execution_plan_hash": "sha256:b6892bea61968fe33279b3aefd52ec3feeb8b5299de29c5596e3afdbca6c03ae",
+          "full_residual_receipt_hash": "sha256:a8a24036a0b41352301afdff7f11eb3a8b84d3160202e97641ab3d630b1a7532",
           "integration_point_order_hash": "sha256:f8a69faa4535d95aa2c3d6e80de06f7a2f0fd597a0d19421e8cd50fad3391e72",
-          "material_state_bundle_hash": "sha256:c1a82ea8cb8f6de1f90b3f543ce2c02bed304e98aa658d065cc7bd6c6f60dc87",
+          "material_state_bundle_hash": "sha256:b0f43e223ec31027f803b864019f95da84c80b99f7ee57c34f805009ed35ec12",
           "model_ir_content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
-          "nonlinear_terminal_hash": "sha256:7e26a8bcfba6c85e9cbb2925936d37edfa8ec8db52244b836772298967ddeec7",
-          "operator_hash": "sha256:3a341e92da9918574765090b1cf398f0e2989959bd9a51f2c84ccd618f70a862",
-          "path_history_hash": "sha256:0d4291e7ee49f7bf21351f6739f70bb6ccdc1f1caca5f239c98b6af03dae1afa",
-          "reduced_csr_identity_hash": "sha256:e34dc3b7905cf07e355b5ae4c91877f615d4f6bb7cbdf4d1e0162f5542f15f0a",
+          "nonlinear_terminal_hash": "sha256:42144ec3e809910953019ed0a28e3f98aaf247d5eba6f0226384d3f024887e30",
+          "operator_hash": "sha256:595385ef6961eeceb1e4ac23d97a7a274bf4f633200589397256db0ca795931a",
+          "path_history_hash": "sha256:50c1598f4a9f29a26400f029517485791c4ee3227311c7ffb5ee9260d8e0b757",
+          "reduced_csr_identity_hash": "sha256:311d60d77e78f618bcc5a3e5af4efe9d2b26cbfde99ac0743d848965808faf53",
           "state_epoch": 3,
-          "state_hash": "sha256:7d9a88d8673fa2870a34ac2965040f82e7a3a39d3475e2d0159c06e78baf9719"
+          "state_hash": "sha256:49c3b7661e77e0409f5323d721c348c58bf8a85735da7bca091c392cc9c683f4"
         },
         "claim_boundary": {
           "commercial_claim": false,
@@ -240,11 +255,11 @@
           "viewer_projection": false
         },
         "displacement_artifact": {
-          "artifact_uri": "artifact://nonlinear-result/f3.frame3d.direct-control.lc-axial/7d9a88d8673fa287/c1a82ea8cb8f6de1/displacement_global.f64le",
+          "artifact_uri": "artifact://nonlinear-result/f3.frame3d.direct-control.lc-axial/49c3b7661e77e040/b0f43e223ec31027/displacement_global.f64le",
           "byte_length": 96,
           "byte_order": "little",
-          "content_hash": "sha256:5d2cfe4a012fa1d434b177f72f1db33d55510f4c54d8a75a673585fe8ad3dbdf",
-          "data_hash": "sha256:d02dff285612dc3bf656eab388ff5d728035d59264fb89a6c89344dffb63dfac",
+          "content_hash": "sha256:fd83351825fe780e1c9beeca1187bbf0d17b38ea382e916de442e58e9a9206d3",
+          "data_hash": "sha256:214fb018cb25252a3131c1bac68856ab5c21cdc41edc0c3a1c620165622bd5e6",
           "dtype": "<f8",
           "layout": "C",
           "name": "displacement_global_si",
@@ -256,8 +271,8 @@
         },
         "dof_count": 12,
         "extensions": {},
-        "load_factor": -0.5000000000335676,
-        "result_hash": "sha256:6d21bda227833d4709f929068a9ceec1028999e665021feb2b8624d23b782985",
+        "load_factor": -0.5000000000335669,
+        "result_hash": "sha256:03a5c4d7f11fc1f2e523b74f9d833d65d28f3500dde4d84672fa1034a77c530d",
         "result_id": "f3.frame3d.direct-control.lc-axial",
         "result_kind": "nonlinear_static_numerical_state",
         "schema_version": "structural-analysis-nonlinear-numerical-result-ir.v1",
@@ -275,7 +290,7 @@
           "accepted_line_search_alphas": [
             1.0
           ],
-          "checkpoint_hash": "sha256:648ec4342ef3ebd48e865064b549a456148db5a6b0c531bbd563e51a76fcfeb7",
+          "checkpoint_hash": "sha256:debfaf4414a070948abe49785eac48dc2b989d583d9553f5098eefce7b167299",
           "convergence_checks": {
             "augmented_sparse_diagnostic_pass": true,
             "fallback_not_used": true,
@@ -289,15 +304,15 @@
             "scaled_increment_gate": true,
             "scaled_residual_gate": true
           },
-          "scaled_control_error": 0.0,
-          "solved_load_factor": 0.5000000000035906,
+          "scaled_control_error": -1.3552527156068805e-16,
+          "solved_load_factor": 0.5000000000035905,
           "target_control_displacement_m": 2.5e-05
         },
         {
           "accepted_line_search_alphas": [
             1.0
           ],
-          "checkpoint_hash": "sha256:a3338ebc86a0ea58c20c7265fec8eb6bf68f92397b17bed77d00c299a67c034b",
+          "checkpoint_hash": "sha256:6fc38f5da10be1b173f5f73bb97e567513e957abead05e21ef488df2c123def9",
           "convergence_checks": {
             "augmented_sparse_diagnostic_pass": true,
             "fallback_not_used": true,
@@ -311,7 +326,7 @@
             "scaled_increment_gate": true,
             "scaled_residual_gate": true
           },
-          "scaled_control_error": 0.0,
+          "scaled_control_error": -1.3552527156068805e-16,
           "solved_load_factor": 1.000000000016248,
           "target_control_displacement_m": 5e-05
         },
@@ -319,7 +334,7 @@
           "accepted_line_search_alphas": [
             1.0
           ],
-          "checkpoint_hash": "sha256:6d080551d8cb7e589649b8fb6c08f89111e26f903bc57ebc599c0e9f3f1f4587",
+          "checkpoint_hash": "sha256:8a33626ff31496b1b83540614a7b118052b75c71cf6dfb05abefbb3be1f18c13",
           "convergence_checks": {
             "augmented_sparse_diagnostic_pass": true,
             "fallback_not_used": true,
@@ -333,14 +348,14 @@
             "scaled_increment_gate": true,
             "scaled_residual_gate": true
           },
-          "scaled_control_error": -4.517509052022935e-17,
-          "solved_load_factor": -0.5000000000335676,
+          "scaled_control_error": 4.5175090520229353e-17,
+          "solved_load_factor": -0.5000000000335669,
           "target_control_displacement_m": -2.5e-05
         }
       ],
-      "profile": "stateful-corotational-frame3d-direct-displacement-control.v1",
+      "profile": "stateful_corotational_frame3d_sparse_direct_displacement_control.v1",
       "regularization_used": false,
-      "schema_version": "stateful-corotational-frame3d-direct-displacement-control-result.v1",
+      "schema_version": "stateful-corotational-frame3d-displacement-control-result.v1",
       "targets_m": [
         2.5e-05,
         5e-05,
@@ -423,12 +438,12 @@
               0.0
             ],
             "displacement": {
-              "RX": -1.5269180595838205e-16,
-              "RY": -1.886766382832631e-17,
-              "RZ": 9.84377376104286e-18,
-              "UX": -2.5000000000000005e-05,
-              "UY": 8.269117442683539e-18,
-              "UZ": 2.1045368860729974e-17
+              "RX": -1.5269180595838208e-16,
+              "RY": -1.8867663828326314e-17,
+              "RZ": 9.843773761042856e-18,
+              "UX": -2.4999999999999998e-05,
+              "UY": 8.269117442683535e-18,
+              "UZ": 2.1045368860729977e-17
             },
             "equilibrium_residual": {
               "FX": 0.0,

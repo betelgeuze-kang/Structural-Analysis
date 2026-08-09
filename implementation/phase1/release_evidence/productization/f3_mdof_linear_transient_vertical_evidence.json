@@ -3,45 +3,57 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "74116f3380548538afede82457668f550f3a6ec8",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_sdof_authenticated_transient_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:0f382d24585b12bc7a11d27014733d1efe4ac9b0597204b8d6ba28b50518e1f7"
+    "source_receipt_sha256": "sha256:3cb09275f23e04a3191984fd5d044fe4b3a45eaea26a1f2de49b81cd7cbad6ea",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-mdof-linear-transient-vertical-evidence.v1",
-  "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:81b5691d8e532b8228f6ab154fb2b5257659b68e6fdfbd61b78abc0f113cbf58",
-    "implementation/phase1/run_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:0ea2be6d4c0692b7ffa681c7c38fca8b161809afb0b1a720d75fb29386395363",
+    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:f72485918991593f43e9e7132df413f9000d4e8122c7671b4a2d37c3f09bd594",
+    "implementation/phase1/run_f3_sdof_authenticated_transient_vertical_evidence.py": "sha256:60384e966a7daa64f090679f4fee15446895df252b561792f6481ff800b77b04",
     "src/structural_analysis/engine_v2/contracts/mdof_transient_result.py": "sha256:6392f8c1b2ba6fdd3917c5f668b5dcc7c220bdbdbf2a93bd65ef7cbd32c9ce24",
     "src/structural_analysis/schemas/mdof_transient_result_ir_v1.schema.json": "sha256:239f694bc5ae0d883e9a926481f8ec8dfb48687d1d09fc93050fe64f25819b20",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:d17d72ebccea51c4a09a6f56d133153eb1b406d6a354ca45d61b80d33596ec66",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
     "src/structural_analysis/solvers/linear/transient.py": "sha256:80da4f3c6e84b01b9fc7d79b7cb46d791a474f3d571cee846634e87a8965d792",
     "tests/fixtures/dynamics/mdof_linear_force_history.csv": "sha256:897902833c7bf39792452207d4c046f6dccfcae73b21f96724f2c2a4aa3f8dc5",
     "tests/fixtures/model_ir_v2/mdof_linear_transient.json": "sha256:ffdb1ae3676eed9395a47fdccc1909c502e2130413e187b685e6edfe2cce2b29",
-    "tests/test_f3_mdof_linear_transient_vertical_evidence.py": "sha256:947da218f01e2abc92c1df3031579c00a5aa627c02f55ba286e9677ec6ef63fc",
+    "tests/test_f3_mdof_linear_transient_vertical_evidence.py": "sha256:ac76db381fe5666591009707a977d7f4854b3dd4b01aab4cd7343045d427ab1e",
     "tests/test_linear_mdof_transient.py": "sha256:13aeceb9193ab262ea93a26584a2ba168d6af07c3e9b5ca0037ebb60ea1d9388",
     "tests/test_mdof_transient_result_ir.py": "sha256:0df81ae690de4077daaa7da413eaa69f37ad1f81a060a3c89a81dcf721206b5c"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
       "benchmark": "sha256:2690767a402b1855f2d25e37fdcef012a4a25a5f0eb8bd3ed8f2de5a3508860b",
       "checkpoint": "sha256:d16d4dd3e72e505039f420503c7bdeadf20d27a34125b568db4029c8dafd9877",
       "external_vv": "sha256:372557c25e628ae2520b96a615712084a7cae40bf0cf5b9b558a9b91b4242eb6",
       "model_ir": "sha256:75a8f18ba3e421e905b56af5658df4c3cfbf89e819973bbd3dc4d195a49d18cf",
-      "platform": "sha256:f178b143c6fcb27314fff6dc929bd9ae33af6797198d282c4937e1c2ed83cdc9",
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
       "recovery": "sha256:22817760473a072375cf2276fe2e0673c7bc6865737f91758c42ab4a252c1539",
       "result_ir": "sha256:4b6f7300ea4cd8ad37bdb765c6d45fc6610dba78305f8dfdebf3ccbbc9391855",
       "solver": "sha256:e6f8505ba38592640c43ef4beed27fee9144710e93e09a61e28131b51103285f",
       "workbench": "sha256:615163ac2cb324cb9db885eef260cfd0e365f7a4a9b3cdb2af23b5269002d752"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:832275a7b06b62b7a9bffcd0836a6f7139238d9b5ac374d69e91111966a0b9ba",
+    "predecessor_receipt_sha256": "sha256:61895202a52437dff36e2579092331db642df30480fbc5e0acedc71f2270e575",
     "predecessor_stage": "sdof_authenticated_transient",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -53,9 +65,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "mdof_linear_transient",
     "stage_index": 6,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -66,9 +80,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "two-dof-first-mode-undamped-closed-form.v1",
@@ -154,7 +169,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "maximum_absolute_acceleration_by_dof_m_per_s2": {

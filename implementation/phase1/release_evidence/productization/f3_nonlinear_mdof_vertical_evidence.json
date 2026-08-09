@@ -3,45 +3,57 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "18c18ca8d9b33c8a84d86f2357d3438503c6d81a",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_mdof_linear_transient_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:bd10ec634ed8212befb627e753b4e59380289fecd13371b4a8092e6b1e6919e5"
+    "source_receipt_sha256": "sha256:83775f30408b7281b810745e437c4860790008a18d10efa9220a3b039fb7e655",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-nonlinear-mdof-vertical-evidence.v1",
-  "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:81b5691d8e532b8228f6ab154fb2b5257659b68e6fdfbd61b78abc0f113cbf58",
-    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:5f421f36d5db4d075c93c1c5ddbd184a8b6b554477177dfe9360caeebb6321b6",
+    "implementation/phase1/run_f3_mdof_linear_transient_vertical_evidence.py": "sha256:f72485918991593f43e9e7132df413f9000d4e8122c7671b4a2d37c3f09bd594",
+    "implementation/phase1/run_f3_nonlinear_mdof_vertical_evidence.py": "sha256:aa8f046d7b92ebae97626f35cb7b2495b9f106467d93d10ab95079f8dcab1a85",
     "src/structural_analysis/engine_v2/contracts/nonlinear_mdof_transient_result.py": "sha256:72bc6f11779c26c2cecfb8e7bec2811065ec46d3953502476712bfaaba1b114e",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:641a77c4620067c31389099a848d59cd31e63b4d9a8dd923bef97c7ec8416695",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
     "src/structural_analysis/schemas/nonlinear_mdof_transient_result_ir_v1.schema.json": "sha256:a5f2f4707325ca98af70c4cb8224aa724f065b7422d91fe1f20d4fb0d56858ed",
-    "src/structural_analysis/solvers/nonlinear/mdof_transient.py": "sha256:39a4b0504eaccf8b2dc0411f712e9b85415d0780c519d57506c56f2519a3547c",
+    "src/structural_analysis/solvers/nonlinear/mdof_transient.py": "sha256:68f1df41f5ab2ba1696db80e0bd6594b3e7c15f661e11b5da3f4261efd77445a",
     "tests/fixtures/dynamics/nonlinear_mdof_force_history.csv": "sha256:ff0ae1a89306f0182e0837ff4460e11ea7fd0a86574c618a790e2b2eb81b7571",
     "tests/fixtures/model_ir_v2/nonlinear_mdof_transient.json": "sha256:198d6474894e7f0bd87d9603c2d2bbc010b501d21df2e428b879107c0ce35af0",
-    "tests/test_f3_nonlinear_mdof_vertical_evidence.py": "sha256:dbc340eb85e4437961d7683c165c143a1e51a2b075456448af82a162c85c93bf",
+    "tests/test_f3_nonlinear_mdof_vertical_evidence.py": "sha256:071f3b27569cafb17597ced78a037bde994fcf9b3afca23c6e358489eb7b470e",
     "tests/test_nonlinear_mdof_transient.py": "sha256:25e34bf8f1133d46d5398057087a388381ed33e4dc95e4daf7d0e851f42d59f7",
-    "tests/test_nonlinear_mdof_transient_result_ir.py": "sha256:19dcb61c1649f112c32ace83759f034b6b088bbbd03a7831574fcc50ce549480"
+    "tests/test_nonlinear_mdof_transient_result_ir.py": "sha256:a2cc31019e54426dbbfb3a5ce98da5165054efa3e0136d89688b2ab1effafc53"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
       "benchmark": "sha256:fd7c7f8dacaa47ac9b22f29f4c08f4041989904a94a40f9715f6e44e05c40261",
       "checkpoint": "sha256:9314dced16c9ef7815973b5d631351bf9c657c9e91dd64378e7f7e66b21d8c09",
       "external_vv": "sha256:88ab698c3a8bf535e6920cad83cd329b2ea048c556c81c9be24221973538740f",
       "model_ir": "sha256:0b38f75b5955ddbe82117feefe67438a3537f25d233bda7f03545b445cdd7de5",
-      "platform": "sha256:b258bc89347c4953e03f6cfe8007c6c5c465edc5341b2d4ddcff848b3ea1a65b",
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
       "recovery": "sha256:631016fdb3cac8626a57217c35c324fa1c179e06744f6de8992f566d9e3f347d",
       "result_ir": "sha256:d3b48c06143009d8fc50381ba0e587fa7039504af565ffc5e8c6569441eb4c45",
       "solver": "sha256:b37dc4b352330f75476167f72214cb106c15fb2d0361dde7b42bcb0859348ce3",
       "workbench": "sha256:a1a7d2558bf5da4db267405cea61b733aa0ff34aa8e1b583dab441c49ce6e24e"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:fb44f0ab689813a88bbbe9b41eba3d7391eb2384d52f781d4765aa477bb0efa9",
+    "predecessor_receipt_sha256": "sha256:637e57f2db4b2329832938031ba10064e3ed7f352e62b3862574fb949afb11f2",
     "predecessor_stage": "mdof_linear_transient",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -53,9 +65,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "nonlinear_mdof",
     "stage_index": 7,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -66,9 +80,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "nonlinear-mdof-elastic-limit-linear-matrix-parity.v1",
@@ -156,7 +171,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "e06b018a89e95f089d6ceacbad301f1ef5ff6d29"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "maximum_absolute_displacement_by_dof_m": {

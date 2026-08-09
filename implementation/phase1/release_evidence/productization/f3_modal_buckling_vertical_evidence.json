@@ -3,47 +3,59 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "219f6d82c709016e64f924ef1211ce43369ebd3b",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "8214d76a4a85f718ea05ed88af3963b59c80e492",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_frame3d_stateful_material_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:6bc094724015a398d4e3980c464637d6d4c26d7310244a258567d3578bd68905"
+    "source_receipt_sha256": "sha256:793b2a2be476991960ff4ca0ba370c5b6e0c0f88453d6b1cd57f170b9215567d",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-modal-buckling-vertical-evidence.v1",
-  "source_commit_sha": "8214d76a4a85f718ea05ed88af3963b59c80e492",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_frame3d_stateful_material_vertical_evidence.py": "sha256:19e7c31e9dbfdb51ffeccc4bfbbaaa87e7f40f16edc549e69d1b4fa473509e76",
-    "implementation/phase1/run_f3_modal_buckling_vertical_evidence.py": "sha256:7b5eed71ae4ba31a0f414d7b6d6320f1890186c1ddc662fcc21e456472724a39",
-    "src/structural_analysis/analyses/buckling.py": "sha256:5ae4b425931134c28daf1b85d41eb5e8cee54af10533938ee342aa914ae688f4",
-    "src/structural_analysis/analyses/modal.py": "sha256:09cceb61eea08ad42b5233011935fb6ed0673d4fd68530af0e3d29142037dcd2",
+    "implementation/phase1/run_f3_frame3d_stateful_material_vertical_evidence.py": "sha256:7915b329f036a1f531b366d71850286b04de17adbef7116c735a49e74b5f968a",
+    "implementation/phase1/run_f3_modal_buckling_vertical_evidence.py": "sha256:7e79a7d442ea60a2942b6ee0c57b1971d1534a527a6896076cf878fb682dbb0e",
+    "src/structural_analysis/analyses/buckling.py": "sha256:2a6f9208490e7598a8595449e186cc33c3178228e26868899cf8efd62b34cab2",
+    "src/structural_analysis/analyses/modal.py": "sha256:ae7923f121e53b044044789a73d63e3745f3ee5d8cd44e23354cb0df34b5261c",
     "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
     "src/structural_analysis/assembly/modal.py": "sha256:bf0909750f7d471541180c8dec8ac2037730e3b17b7ecbbedce0c5c74df83bd8",
     "src/structural_analysis/engine_v2/contracts/spectral_result.py": "sha256:4a66f36c5c1d0c7fa41925c01b5fcaff96f74d579ef04516e935b467fdb87e8e",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:398f7e7ecd5d93087635d468351ff8e20bb6499d9c361d61971bb420458e01ca",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
     "src/structural_analysis/schemas/spectral_result_ir_v1.schema.json": "sha256:e3ce5b666b296205ad03c8c50a69ac13d40254d41a25e1ed888852d15b27c5d6",
-    "src/structural_analysis/solvers/buckling/solver.py": "sha256:8a4da36f19d48588d3c3cf1eee9fb4b33bc63b815a1459d4695d13d87e4d46d3",
-    "src/structural_analysis/solvers/modal/solver.py": "sha256:d42c0321893cf8fdf96580db1a613b3ece1f1a04d935df19d9f187b2d9a30118",
+    "src/structural_analysis/solvers/buckling/solver.py": "sha256:b3572a2513274c4195735d958758ba67c284ca2c06e4bbda6e3ef9c25fc5f75d",
+    "src/structural_analysis/solvers/modal/solver.py": "sha256:91109241e086ea4f24be4a8d4a3485a6ac185959e5d7b5b09b093dd8a75af523",
     "tests/fixtures/model_ir_v2/frame_cantilever_modal_buckling.json": "sha256:92b8186fe1fd952e56d3417d8ae6c1c9685d2e5c2dc49a73ecb6269c525f5b2e",
-    "tests/test_f3_modal_buckling_vertical_evidence.py": "sha256:c7779046f543d6b9f5e026651c593ae5f2df23fac0ae217a57893fd9c48aa6c9"
+    "tests/test_f3_modal_buckling_vertical_evidence.py": "sha256:9f3cf02e368580a0f308d5eaaba94f16f94809b3a15094b69992f16a3f3f489d"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
-      "benchmark": "sha256:0153925bb3f1451b153ca1285b33924eb1076a2c5337cd944428b6350cd55d71",
-      "checkpoint": "sha256:2be32598af5296656c10e75dc43cf37082f6ca16e1c8679aa428c19c37b2933e",
-      "external_vv": "sha256:fc0a0942c7eeb0071ab0f586ceea764f155030fd354a778f95cdd91fe608e691",
+      "benchmark": "sha256:0b11d48995d5fd56339329d2fb324e25f2fc3cafc0a0d2cf0fe98681c3d3b752",
+      "checkpoint": "sha256:fb09461dfa7372ffff16c04e4c71ef12265a1e4ac88a25a894ac6aeb1c81f4e8",
+      "external_vv": "sha256:d6561a28d0a54933cc237d6046ab8bace853bc0b32f7a2f39c0938f2636105a3",
       "model_ir": "sha256:1b86093b882ce135aa92772dfb756595d4879c9638457b77617b154ddd61ad0e",
-      "platform": "sha256:e5018dbf88f9cc7c9d1b122c3c6537313744081d28ca3fe8e5951d17d9859b20",
-      "recovery": "sha256:f66e7f99d559c598b83312869ddd9e0e81b26f0a91d4182f05b9cb68a6862bf8",
-      "result_ir": "sha256:542dc0a8033b6f4f12d4fb6b8729590774f4a6298b3c05bdb2d39e5221ad6d2d",
-      "solver": "sha256:be9c2686cacf8bb9f8a9013c3e4b32aa0d14461f76f6a792b579121a819a2a39",
-      "workbench": "sha256:147b589cf5d20ec0ff9c610015465ee124f23973bf873fe1ab31ddc62961be0c"
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
+      "recovery": "sha256:db8deda0618a1ecefcfe0f93a8730caf5a7f136c54ec1eef8b6c055ead71544b",
+      "result_ir": "sha256:2f4e0200aa78c1ba8859eabb206d21149945095133532f0af4aa284a0f2fda79",
+      "solver": "sha256:bc59a6b8b67f0313d458d3717b24ab3da4e0c9433526acea51a9257ba4980f16",
+      "workbench": "sha256:4ada9d669d0fbe16be3b5390891a2e880ed32740bfbb15bccdd3eb7e6f7110f7"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:bc96683f3dd507623216addaf09ed0ab52274756994d62385dc96d09b716f274",
+    "predecessor_receipt_sha256": "sha256:4e0b800650d80fde8c93b53fe3a33be9bbc0972e2499b9a734d67e9a7873f1c7",
     "predecessor_stage": "frame3d_stateful_material",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -55,9 +67,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "8214d76a4a85f718ea05ed88af3963b59c80e492",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "modal_buckling",
     "stage_index": 4,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -68,9 +82,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "benchmark_id": "frame3d-cantilever-modal-and-euler-buckling.v1",
@@ -83,29 +98,29 @@
         35.47488123375618,
         44.87256976905345
       ],
-      "maximum_buckling_relative_error": 0.0075223273773986354,
-      "maximum_modal_relative_error": 3.004419089149686e-15,
+      "maximum_buckling_relative_error": 0.007522327377398722,
+      "maximum_modal_relative_error": 2.850242210220445e-15,
       "observed_buckling_load_factors": [
         62.14904247799855,
-        99.43846796479761
+        99.43846796479768
       ],
       "observed_modal_frequencies_hz": [
-        35.474881233756285,
+        35.47488123375627,
         44.87256976905358
       ]
     },
     "checkpoint": {
-      "buckling_checkpoint_hash": "sha256:1c5edd0da6251d14cb1ab10b478b2b96fe91241277a4ca6b4856b3fea40190e8",
+      "buckling_checkpoint_hash": "sha256:d166bc60a678eb22198b15aa465109f2c3d69f50d5ea237dafd8802aeb99f568",
       "exact_restart": true,
-      "modal_checkpoint_hash": "sha256:237ce20dc8d183579f0c982eba9bfb2ca967896a9fdefc687edbaf0ed7643b7a",
-      "replayed_buckling_checkpoint_hash": "sha256:1c5edd0da6251d14cb1ab10b478b2b96fe91241277a4ca6b4856b3fea40190e8",
-      "replayed_modal_checkpoint_hash": "sha256:237ce20dc8d183579f0c982eba9bfb2ca967896a9fdefc687edbaf0ed7643b7a",
+      "modal_checkpoint_hash": "sha256:a1f0c41a3a8ccaaf93a36aab2caef05a4e33e0d7b799e4e3e0e6bfbcf6781367",
+      "replayed_buckling_checkpoint_hash": "sha256:d166bc60a678eb22198b15aa465109f2c3d69f50d5ea237dafd8802aeb99f568",
+      "replayed_modal_checkpoint_hash": "sha256:a1f0c41a3a8ccaaf93a36aab2caef05a4e33e0d7b799e4e3e0e6bfbcf6781367",
       "schema_version": "f3-spectral-checkpoint-pair.v1"
     },
     "external_vv": {
       "buckling_reference": "euler_fixed_free_column.v1",
-      "maximum_buckling_relative_error": 0.0075223273773986354,
-      "maximum_modal_relative_error": 3.004419089149686e-15,
+      "maximum_buckling_relative_error": 0.007522327377398722,
+      "maximum_modal_relative_error": 2.850242210220445e-15,
       "modal_reference": "closed_form_consistent_mass_cantilever_bending.v1",
       "signature_verifier_waived": true,
       "verification_mode": "local_self_verification_user_authorized"
@@ -122,7 +137,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "8214d76a4a85f718ea05ed88af3963b59c80e492"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "buckling_node_shapes": [
@@ -140,12 +155,12 @@
           },
           {
             "components": {
-              "RX": 0.0,
-              "RY": -0.7838821814150111,
-              "RZ": -1.9061029259182146e-16,
-              "UX": 0.0,
-              "UY": -2.1086599411589533e-16,
-              "UZ": 1.0
+              "RX": -0.0,
+              "RY": 0.7838821814150111,
+              "RZ": 2.287323511101856e-16,
+              "UX": -0.0,
+              "UY": 2.547753959268519e-16,
+              "UZ": -1.0
             },
             "node_id": "N2"
           }
@@ -165,11 +180,11 @@
           {
             "components": {
               "RX": 0.0,
-              "RY": -3.2679375308477415e-16,
-              "RZ": 0.7838821814150112,
+              "RY": -4.201633968232703e-16,
+              "RZ": 0.783882181415011,
               "UX": 0.0,
               "UY": 1.0,
-              "UZ": 1.8593115629987648e-16
+              "UZ": 2.7930080003837264e-16
             },
             "node_id": "N2"
           }
@@ -186,17 +201,17 @@
           },
           "UY": {
             "applicable": true,
-            "cumulative_effective_modal_mass_ratio": 3.485335346684243e-29,
-            "effective_modal_mass_kg": 4.06489682433288e-27,
-            "effective_modal_mass_ratio": 3.485335346684243e-29,
-            "participation_factor": -2.01615892834193e-15
+            "cumulative_effective_modal_mass_ratio": 3.8725948296469086e-30,
+            "effective_modal_mass_kg": 4.516552027033909e-28,
+            "effective_modal_mass_ratio": 3.8725948296469086e-30,
+            "participation_factor": -6.720529761137815e-16
           },
           "UZ": {
             "applicable": true,
             "cumulative_effective_modal_mass_ratio": 0.9834638489884361,
             "effective_modal_mass_kg": 114.69998375916559,
             "effective_modal_mass_ratio": 0.9834638489884361,
-            "participation_factor": 0.3386738604604223
+            "participation_factor": -0.33867386046042236
           }
         },
         {
@@ -217,9 +232,9 @@
           "UZ": {
             "applicable": true,
             "cumulative_effective_modal_mass_ratio": 0.9834638489884361,
-            "effective_modal_mass_kg": 4.114650762591434e-27,
-            "effective_modal_mass_ratio": 3.527995509326316e-29,
-            "participation_factor": 2.028460194973378e-15
+            "effective_modal_mass_kg": 4.529206588833828e-28,
+            "effective_modal_mass_ratio": 3.88344513986242e-30,
+            "participation_factor": -6.729938030051859e-16
           }
         }
       ],
@@ -238,12 +253,12 @@
           },
           {
             "components": {
-              "RX": 0.0,
-              "RY": -0.6887505004004003,
-              "RZ": -4.162487883720655e-15,
-              "UX": 0.0,
-              "UY": -5.970667183240493e-15,
-              "UZ": 1.0
+              "RX": -0.0,
+              "RY": 0.6887505004004008,
+              "RZ": -1.7839233787374248e-15,
+              "UX": -0.0,
+              "UY": -2.1020352557583985e-15,
+              "UZ": -1.0
             },
             "node_id": "N2"
           }
@@ -263,11 +278,11 @@
           {
             "components": {
               "RX": 0.0,
-              "RY": -4.14207118660169e-15,
+              "RY": 1.3806903955338146e-15,
               "RZ": 0.6887505004004004,
               "UX": 0.0,
               "UY": 1.0,
-              "UZ": 5.994174500509683e-15
+              "UZ": -1.9905411917399936e-15
             },
             "node_id": "N2"
           }
@@ -305,11 +320,11 @@
             "N2"
           ],
           "secondary_matrix_hash": "sha256:5d9d2a24b119fd1a00a40fc203b03361128e0ad9399f37496a9f318d0bcd3276",
-          "solver_receipt_hash": "sha256:f0764b44597d03a7431b3936b168b5b849688e60f92855ee496be1f3daf5a492",
+          "solver_receipt_hash": "sha256:8ec84775eafd79093f04e389de30d22cc3dea6dc920efbb65d057ad9ea810040",
           "stiffness_matrix_hash": "sha256:b76871ae369ab0f43e0444644646afdca8aec9a9662c990d83a19a3557c9d1df"
         },
         "checkpoint": {
-          "checkpoint_hash": "sha256:1c5edd0da6251d14cb1ab10b478b2b96fe91241277a4ca6b4856b3fea40190e8",
+          "checkpoint_hash": "sha256:d166bc60a678eb22198b15aa465109f2c3d69f50d5ea237dafd8802aeb99f568",
           "mode_count": 2,
           "schema_version": "structural-analysis-spectral-checkpoint.v1",
           "terminal_mode_number": 2
@@ -321,7 +336,7 @@
             "frequency_hz": null,
             "load_factor": 62.14904247799855,
             "mode_number": 1,
-            "mode_shape_hash": "sha256:89adba5598a066b2c458d5967405027a38d256f77e6818d6d2daf9784b345a66",
+            "mode_shape_hash": "sha256:b09344603f8f3e8779af62fd5adc09294d37eda66d176d97e85266827eb18498",
             "node_shapes": [
               [
                 0.0,
@@ -332,22 +347,22 @@
                 0.0
               ],
               [
-                0.0,
-                -2.1086599411589533e-16,
-                1.0,
-                0.0,
-                -0.7838821814150111,
-                -1.9061029259182146e-16
+                -0.0,
+                2.547753959268519e-16,
+                -1.0,
+                -0.0,
+                0.7838821814150111,
+                2.287323511101856e-16
               ]
             ],
-            "residual_relative_inf": 2.0194854640804042e-16
+            "residual_relative_inf": 2.019485464080404e-16
           },
           {
-            "eigenvalue": 99.43846796479761,
+            "eigenvalue": 99.43846796479768,
             "frequency_hz": null,
-            "load_factor": 99.43846796479761,
+            "load_factor": 99.43846796479768,
             "mode_number": 2,
-            "mode_shape_hash": "sha256:0aaa4d497ee4c83d3d401b89e34388439e34b583adac5273c00a22158b5ac775",
+            "mode_shape_hash": "sha256:deaf0d54912d6f20af8e9254cef5f87a2077035f15cc506f1028b681066843cb",
             "node_shapes": [
               [
                 0.0,
@@ -360,16 +375,16 @@
               [
                 0.0,
                 1.0,
-                1.8593115629987648e-16,
+                2.7930080003837264e-16,
                 0.0,
-                -3.2679375308477415e-16,
-                0.7838821814150112
+                -4.201633968232703e-16,
+                0.783882181415011
               ]
             ],
-            "residual_relative_inf": 3.19308688404812e-16
+            "residual_relative_inf": 3.2556935410288544e-16
           }
         ],
-        "result_hash": "sha256:c0b4430dee6616d9ec9a29f975b3904f8fe2db099d78347b07f1169181f5d858",
+        "result_hash": "sha256:7e4f1a9cc6264fcaa95aab2d32976be066b6367cbdf03487334945fd29556b39",
         "result_id": "f3.frame3d.linear_buckling",
         "schema_version": "structural-analysis-spectral-result-ir.v1",
         "solver": {
@@ -400,11 +415,11 @@
             "N2"
           ],
           "secondary_matrix_hash": "sha256:a555a0f0a94347b8a965fc5c0fb158b7e4399ad9d359bd2614b07886ba392b1c",
-          "solver_receipt_hash": "sha256:1ed81b0178e4bedc97ecbaae7c69a18bf182976706823cfc25a1f72cd82b155f",
+          "solver_receipt_hash": "sha256:a3cbb39862f1737f8dca783be422ff63b336a468ad4727efab9dc4e4b6e30d48",
           "stiffness_matrix_hash": "sha256:b76871ae369ab0f43e0444644646afdca8aec9a9662c990d83a19a3557c9d1df"
         },
         "checkpoint": {
-          "checkpoint_hash": "sha256:237ce20dc8d183579f0c982eba9bfb2ca967896a9fdefc687edbaf0ed7643b7a",
+          "checkpoint_hash": "sha256:a1f0c41a3a8ccaaf93a36aab2caef05a4e33e0d7b799e4e3e0e6bfbcf6781367",
           "mode_count": 2,
           "schema_version": "structural-analysis-spectral-checkpoint.v1",
           "terminal_mode_number": 2
@@ -412,11 +427,11 @@
         "claim_boundary": "Authoritative bounded modal frequencies or linear-buckling load factors and node-major mode shapes. Engineering design, nonlinear stability, release readiness, and commercial equivalence are not authoritative.",
         "modes": [
           {
-            "eigenvalue": 49682.2936057077,
-            "frequency_hz": 35.474881233756285,
+            "eigenvalue": 49682.29360570767,
+            "frequency_hz": 35.47488123375627,
             "load_factor": null,
             "mode_number": 1,
-            "mode_shape_hash": "sha256:8bb98f9e980b34aa845b2d6d5c68e757ca27c50228d21119c25d75a14b901cda",
+            "mode_shape_hash": "sha256:e6897ed757e57aa5c20c03848641d5ce3eabffa21bd068d40d1c89939866195b",
             "node_shapes": [
               [
                 0.0,
@@ -427,22 +442,22 @@
                 0.0
               ],
               [
-                0.0,
-                -5.970667183240493e-15,
-                1.0,
-                0.0,
-                -0.6887505004004003,
-                -4.162487883720655e-15
+                -0.0,
+                -2.1020352557583985e-15,
+                -1.0,
+                -0.0,
+                0.6887505004004008,
+                -1.7839233787374248e-15
               ]
             ],
-            "residual_relative_inf": 1.6709872305327137e-15
+            "residual_relative_inf": 9.651318929362403e-16
           },
           {
             "eigenvalue": 79491.6697691323,
             "frequency_hz": 44.87256976905358,
             "load_factor": null,
             "mode_number": 2,
-            "mode_shape_hash": "sha256:b4cb1c467aa6cd26c20e835f1a3892905cd65eaa9cac5eaf7d1335587393fdfb",
+            "mode_shape_hash": "sha256:bf495be2cdc0645867bd138b720a37e444d16a1422969508634093882dc93fac",
             "node_shapes": [
               [
                 0.0,
@@ -455,16 +470,16 @@
               [
                 0.0,
                 1.0,
-                5.994174500509683e-15,
+                -1.9905411917399936e-15,
                 0.0,
-                -4.14207118660169e-15,
+                1.3806903955338146e-15,
                 0.6887505004004004
               ]
             ],
-            "residual_relative_inf": 1.1351658282724542e-15
+            "residual_relative_inf": 3.812711275247302e-16
           }
         ],
-        "result_hash": "sha256:e597fe8405cda7da64c6a180ac4497d90d8b3a85fcd5fd05994b65e5f717181a",
+        "result_hash": "sha256:0bda61c015b91cf4480ff04134db6dea5feab5fc01c6d5c942ff4dbe0e71c4da",
         "result_id": "f3.frame3d.modal",
         "schema_version": "structural-analysis-spectral-result-ir.v1",
         "solver": {
@@ -480,7 +495,7 @@
       "buckling_solver_id": "authoritative_cpu_linear_buckling_fea_3d_v1",
       "buckling_status": "ready",
       "fallback_count": 0,
-      "maximum_residual_relative_inf": 1.6709872305327137e-15,
+      "maximum_residual_relative_inf": 9.651318929362403e-16,
       "modal_solver_id": "authoritative_cpu_modal_fea_3d_v1",
       "modal_status": "ready",
       "mode_count_each": 2,
@@ -489,7 +504,7 @@
     "workbench": {
       "buckling_load_factors": [
         62.14904247799855,
-        99.43846796479761
+        99.43846796479768
       ],
       "buckling_mode_shapes": [
         [
@@ -506,12 +521,12 @@
           },
           {
             "components": {
-              "RX": 0.0,
-              "RY": -0.7838821814150111,
-              "RZ": -1.9061029259182146e-16,
-              "UX": 0.0,
-              "UY": -2.1086599411589533e-16,
-              "UZ": 1.0
+              "RX": -0.0,
+              "RY": 0.7838821814150111,
+              "RZ": 2.287323511101856e-16,
+              "UX": -0.0,
+              "UY": 2.547753959268519e-16,
+              "UZ": -1.0
             },
             "node_id": "N2"
           }
@@ -531,11 +546,11 @@
           {
             "components": {
               "RX": 0.0,
-              "RY": -3.2679375308477415e-16,
-              "RZ": 0.7838821814150112,
+              "RY": -4.201633968232703e-16,
+              "RZ": 0.783882181415011,
               "UX": 0.0,
               "UY": 1.0,
-              "UZ": 1.8593115629987648e-16
+              "UZ": 2.7930080003837264e-16
             },
             "node_id": "N2"
           }
@@ -550,22 +565,22 @@
             0.0,
             0.0,
             0.0,
-            0.0,
-            -5.970667183240493e-15,
-            1.0,
-            0.0,
-            -0.6887505004004003,
-            -4.162487883720655e-15
+            -0.0,
+            -2.1020352557583985e-15,
+            -1.0,
+            -0.0,
+            0.6887505004004008,
+            -1.7839233787374248e-15
           ],
-          "frequency_hz": 35.474881233756285,
+          "frequency_hz": 35.47488123375627,
           "modal_mass_ratio_x": 0.0,
-          "modal_mass_ratio_y": 3.485335346684243e-29,
+          "modal_mass_ratio_y": 3.8725948296469086e-30,
           "modal_mass_ratio_z": 0.9834638489884361,
           "mode_number": 1,
           "participation_factor_x": 0.0,
-          "participation_factor_y": -2.01615892834193e-15,
-          "participation_factor_z": 0.3386738604604223,
-          "period_s": 0.028188959771581854,
+          "participation_factor_y": -6.720529761137815e-16,
+          "participation_factor_z": -0.33867386046042236,
+          "period_s": 0.028188959771581867,
           "state_tag": "mode_shape"
         },
         {
@@ -578,27 +593,27 @@
             0.0,
             0.0,
             1.0,
-            5.994174500509683e-15,
+            -1.9905411917399936e-15,
             0.0,
-            -4.14207118660169e-15,
+            1.3806903955338146e-15,
             0.6887505004004004
           ],
           "frequency_hz": 44.87256976905358,
           "modal_mass_ratio_x": 0.0,
           "modal_mass_ratio_y": 0.9834638489884362,
-          "modal_mass_ratio_z": 3.527995509326316e-29,
+          "modal_mass_ratio_z": 3.88344513986242e-30,
           "mode_number": 2,
           "participation_factor_x": 0.0,
           "participation_factor_y": 0.33867386046042236,
-          "participation_factor_z": 2.028460194973378e-15,
+          "participation_factor_z": -6.729938030051859e-16,
           "period_s": 0.022285329437264616,
           "state_tag": "mode_shape"
         }
       ],
       "modal_summary": {
         "modal": {
-          "fundamental_frequency_hz": 35.474881233756285,
-          "fundamental_period_s": 0.028188959771581854,
+          "fundamental_frequency_hz": 35.47488123375627,
+          "fundamental_period_s": 0.028188959771581867,
           "mode_count": 2
         },
         "result_types": [

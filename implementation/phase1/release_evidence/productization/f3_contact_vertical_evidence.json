@@ -3,45 +3,57 @@
   "contract_pass": true,
   "predecessor_replay": {
     "current_source_replay_executed": true,
-    "persisted_source_commit_sha": "236aa98247a3d56c698fb81255d42604993610ae",
-    "public_product_promotion_passed": true,
-    "replayed_source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+    "persisted_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
+    "public_product_promotion_passed": false,
+    "replayed_source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "source_receipt_path": "implementation/phase1/release_evidence/productization/f3_shell_vertical_evidence.json",
-    "source_receipt_sha256": "sha256:c914b1b3d1afda64b676c2432e031e3bd93ac560ef19679c219177f12cb8910c"
+    "source_receipt_sha256": "sha256:9be2752c1136392e21ec1c10bc0b9ec0e21949f2576bcf35643e529776b8171d",
+    "vertical_stage_contract_passed": true
   },
   "schema_version": "f3-contact-vertical-evidence.v1",
-  "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+  "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
   "source_input_checksums": {
     "implementation/phase1/results_explorer.py": "sha256:055869d24b01c044756bd26f90da7d53b5bc8643e35ac8620b5f82786cdbbb25",
-    "implementation/phase1/run_f3_contact_vertical_evidence.py": "sha256:f68674954382e583a5c741097dab3fb58d2203162f9fb15a7ab55d1cef6cd21b",
-    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:471b772dc1f6fc5e67368b2e3b096af7215aee16c237b79f820639d651821d49",
+    "implementation/phase1/run_f3_contact_vertical_evidence.py": "sha256:ab3d84cf43a0fb9fc0c614de18f5b10ae89697fe1f90f0e2854855a57ab5a768",
+    "implementation/phase1/run_f3_shell_vertical_evidence.py": "sha256:2e0000621ebae2f814c31762a3fe6dcd8de21bec11f6b7ee3ecfb015c119fba0",
     "src/structural_analysis/engine_v2/contracts/contact_static_result.py": "sha256:37457d7ef9ffac59121bea13a3a07558010773fe4a2547477c369354d5fd651f",
     "src/structural_analysis/schemas/contact_static_result_ir_v1.schema.json": "sha256:837bc6d479cf8d917ee2e55a270ebd3726003d8ec938277b482db342818261bf",
-    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:f124b070b88502aad6cf4cb70a6acb4fe822ffda5afd84866bce823b59513ca2",
-    "src/structural_analysis/solvers/nonlinear/contact_static.py": "sha256:f1588b63e989ecbe4adb49e2646af9b5b7d0c30b95691df892e402a15d4f155c",
+    "src/structural_analysis/schemas/model_ir_v2.schema.json": "sha256:285e91888a0ed5496322e713a3a43683ca099fbd8db9df9f4e7c536ccc755f25",
+    "src/structural_analysis/solvers/nonlinear/contact_static.py": "sha256:a8b6a131415de2bcd4279ecdea9538b6c416dbd3df9dfa7f1fe062413549936e",
     "tests/fixtures/model_ir_v2/contact_frictionless_static.json": "sha256:8a8e3922229b2e971ec18a9ce1f97b5934eac31ac77a2345483208860d6141db",
     "tests/test_contact_model_ir.py": "sha256:92561a175865fb23d5d2a3691f0f558dee717a4922fb1d64cc3ed0e3791d9a2b",
     "tests/test_contact_static_result_ir.py": "sha256:8cd7043b4ae5569c1a98eb6d22456d47f7a7d8bfbb6dc9f602b221d3ea58e269",
-    "tests/test_contact_static_solver.py": "sha256:224ca664711ee81c4e247ddf90d2d4f606ef5a8339b77e61e08cf29517291ee8",
-    "tests/test_f3_contact_vertical_evidence.py": "sha256:80a609d1a49da74523adbbd28443da727538581ddb36873f03056d2534a7404b"
+    "tests/test_contact_static_solver.py": "sha256:9232239ccefaf0fe66fc5eb3a64fa8fa6197fa6a6bd7bd7ca7caaba9af6feb24",
+    "tests/test_f3_contact_vertical_evidence.py": "sha256:cdbcfe8c3083d6890c8129244a774786f4eb4f459322314c2c5707a40f42aed4"
   },
   "stage_gate": {
-    "blockers": [],
+    "blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
     "evidence_artifact_sha256": {
       "benchmark": "sha256:c387d26c064fcc4de9b75a12f8412b2f435db9006ae8821defe58b97ae764528",
       "checkpoint": "sha256:9df26a7575bb76de0fe1260cdd332ed87c3c93f1b2256e354cad1e5ddaf415b5",
       "external_vv": "sha256:3e97b8536449d7fe0fbf21ad2d6564482da0cb7f521bb1f9eeb125aa96d9ae4c",
       "model_ir": "sha256:5cc3d0b2c6535531e39d696a362a99c2fd4d893827048dbe1fe4f4b9be89ab87",
-      "platform": "sha256:8c2243b07e84b1bc55d5cea1ad6925a2e1fd586e9b923d2e912ce0a46c52bde0",
+      "platform": "sha256:b4591e0bdf7f8d9d12536c570c202e24ddeb32435590b3eca2f496206932cc07",
       "recovery": "sha256:7c8e3e832dc0683c171fc38edd413493fc00e27f8e47ecab82e2cd88a078d82d",
       "result_ir": "sha256:791e6cf747e25b9c600dbd0c45b2182659910a020205be4e6138f55ae4dbbb33",
       "solver": "sha256:eb6991c5bbf251869980c8f08b1112f0d6c19cc4a03ce53fed7d12011290e54f",
       "workbench": "sha256:75d05aa28223f453d8e98bc82e66adf9bc11baf9f9099590ccf0d354b31a9d85"
     },
     "external_vv_signature_status": "waived",
-    "predecessor_receipt_sha256": "sha256:1de76ca227ab4a302a419c1f08b2a92a760f84c088234d864e07654abb64fff3",
+    "predecessor_receipt_sha256": "sha256:956384931279fad3420fc3e822e060997b7a49e5e0edab913ea8f7b1aa3557c9",
     "predecessor_stage": "shell",
-    "public_product_promotion_passed": true,
+    "promotion_blockers": [
+      "external_vv_signature_verification_waived",
+      "planar_product_replay_prerequisite_not_bound",
+      "planar_external_vv_prerequisite_not_bound",
+      "predecessor_stage_not_promoted"
+    ],
+    "public_product_promotion_passed": false,
     "required_surfaces": [
       "model_ir",
       "solver",
@@ -53,9 +65,11 @@
       "platform",
       "external_vv"
     ],
-    "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222",
+    "schema": "f3-vertical-evidence-gate.v2",
+    "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea",
     "stage": "contact",
     "stage_index": 9,
+    "technical_blockers": [],
     "verified_surfaces": [
       "model_ir",
       "solver",
@@ -66,9 +80,10 @@
       "benchmark",
       "platform",
       "external_vv"
-    ]
+    ],
+    "vertical_stage_contract_passed": true
   },
-  "status": "ready",
+  "status": "partial",
   "surface_artifacts": {
     "benchmark": {
       "active_set_breadth_cases": [
@@ -180,7 +195,7 @@
       "numpy_version": "1.26.4",
       "python_version": "3.10.12",
       "self_verified": true,
-      "source_commit_sha": "583b17dad0d8038724f12fe1da1075b52884f222"
+      "source_commit_sha": "cdbbcfd34409c1a4e92215cce5af296a49b1c3ea"
     },
     "recovery": {
       "active_contact_ids": [
