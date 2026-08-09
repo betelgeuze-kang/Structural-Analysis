@@ -216,6 +216,64 @@ def test_large_file_allowlist_keeps_generated_remove_candidate_open(tmp_path: Pa
     assert plan["records"][0]["recommended_action"] == "remove_from_git"
 
 
+def test_release_asset_allowlist_closes_exact_build_output(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    wheel_path = "dist/structural_analysis-0.3.0-py3-none-any.whl"
+    wheel = tmp_path / wheel_path
+    wheel.parent.mkdir(parents=True)
+    wheel.write_bytes(b"x" * 2048)
+    allowlist = {
+        wheel_path: {
+            "classification": "release_asset",
+            "rationale": "exact LFS-bound G1 production wheel",
+        }
+    }
+
+    build_output_only = plan_source_boundary_cleanup.build_plan(
+        [wheel_path],
+        allowlist=allowlist,
+    )
+    build_output_and_large = plan_source_boundary_cleanup.build_plan(
+        [wheel_path],
+        large_file_threshold_mib=0.001,
+        allowlist=allowlist,
+    )
+
+    assert build_output_only["contract_pass"] is True
+    assert build_output_only["allowlisted_records"][0]["buckets"] == ["build_output"]
+    assert build_output_and_large["contract_pass"] is True
+    assert build_output_and_large["allowlisted_records"][0]["buckets"] == [
+        "build_output",
+        "large_file",
+    ]
+
+
+def test_build_output_allowlist_requires_release_asset_classification(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    wheel_path = "dist/structural_analysis-0.3.0-py3-none-any.whl"
+    wheel = tmp_path / wheel_path
+    wheel.parent.mkdir(parents=True)
+    wheel.write_bytes(b"lfs-pointer")
+
+    unlisted = plan_source_boundary_cleanup.build_plan([wheel_path])
+    source_required = plan_source_boundary_cleanup.build_plan(
+        [wheel_path],
+        allowlist={
+            wheel_path: {
+                "classification": "source_required",
+                "rationale": "must not authorize a build output",
+            }
+        },
+    )
+
+    assert unlisted["contract_pass"] is False
+    assert source_required["contract_pass"] is False
+    assert unlisted["records"][0]["recommended_action"] == "remove_from_git"
+    assert source_required["records"][0]["recommended_action"] == "remove_from_git"
+
+
 def test_cli_writes_json_and_markdown_inventory_and_can_fail_on_candidates(tmp_path: Path) -> None:
     tracked_file = tmp_path / "tracked-files.txt"
     tracked_file.write_text(

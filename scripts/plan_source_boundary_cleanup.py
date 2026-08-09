@@ -128,7 +128,13 @@ def _allowlist_closes_candidate(buckets: list[str], allowlist_record: dict[str, 
     if not allowlist_record:
         return False
     classification = str(allowlist_record.get("classification", "") or "")
-    return bool(buckets == ["large_file"] and classification in ALLOWLIST_CLOSING_CLASSIFICATIONS)
+    if classification == "release_asset":
+        bucket_set = set(buckets)
+        return bool(bucket_set and bucket_set <= {"build_output", "large_file"})
+    return bool(
+        buckets == ["large_file"]
+        and classification in {"source_required", "external_restore"}
+    )
 
 
 def build_plan(

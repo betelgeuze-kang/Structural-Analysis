@@ -47,6 +47,12 @@
       "rationale": "Deterministic dynamic-case fixture used by solver breadth regression gates."
     },
     {
+      "path": "dist/structural_analysis-0.3.0-py3-none-any.whl",
+      "classification": "release_asset",
+      "rationale": "Exact LFS-bound G1 production wheel whose declared SHA-256 and size are pinned by the manual dedicated gfx1100 workflow.",
+      "bytes": 1429533
+    },
+    {
       "path": "implementation/phase1/open_data/pbd_hinge/edefense_peer_blind_prediction_seed_01/GMs.xlsx",
       "classification": "external_restore",
       "rationale": "E-Defense/PEER blind prediction ground-motion source retained for PBD benchmark reproducibility."
