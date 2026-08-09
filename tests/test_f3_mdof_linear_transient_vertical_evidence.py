@@ -23,13 +23,22 @@ def receipt() -> dict[str, object]:
 def test_mdof_linear_transient_closes_nine_surfaces_after_sdof(
     receipt: dict[str, object],
 ) -> None:
-    assert receipt["status"] == "ready"
+    assert receipt["status"] == "partial"
     assert receipt["contract_pass"] is True
     gate = receipt["stage_gate"]
     assert gate["predecessor_stage"] == "sdof_authenticated_transient"
     assert gate["stage_index"] == 6
+    assert gate["vertical_stage_contract_passed"] is True
+    assert gate["public_product_promotion_passed"] is False
+    assert gate["technical_blockers"] == []
+    assert gate["promotion_blockers"] == [
+        "external_vv_signature_verification_waived",
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+        "predecessor_stage_not_promoted",
+    ]
+    assert gate["blockers"] == gate["promotion_blockers"]
     assert len(gate["verified_surfaces"]) == 9
-    assert gate["blockers"] == []
 
 
 def test_mdof_checkpoint_and_vector_result_are_authoritative(

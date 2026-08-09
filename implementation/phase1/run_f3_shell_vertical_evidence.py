@@ -151,22 +151,7 @@ def _predecessor(source_commit: str) -> tuple[F3StageGateReceipt, str, dict[str,
     if not current["contract_pass"]:
         raise RuntimeError("f3_nonlinear_mdof_predecessor_replay_failed")
     stage = current["stage_gate"]
-    receipt = F3StageGateReceipt(
-        schema="f3-vertical-evidence-gate.v1",
-        stage="nonlinear_mdof",
-        stage_index=7,
-        source_commit_sha=source_commit,
-        required_surfaces=tuple(stage["required_surfaces"]),
-        verified_surfaces=tuple(stage["verified_surfaces"]),
-        evidence_artifact_sha256=tuple(
-            sorted(stage["evidence_artifact_sha256"].items())
-        ),
-        predecessor_stage="mdof_linear_transient",
-        predecessor_receipt_sha256=stage["predecessor_receipt_sha256"],
-        external_vv_signature_status="waived",
-        blockers=tuple(stage["blockers"]),
-        public_product_promotion_passed=bool(stage["public_product_promotion_passed"]),
-    )
+    receipt = F3StageGateReceipt.from_dict(stage)
     persisted = json.loads((ROOT / PREDECESSOR_RECEIPT).read_text(encoding="utf-8"))
     return (
         receipt,
@@ -177,6 +162,7 @@ def _predecessor(source_commit: str) -> tuple[F3StageGateReceipt, str, dict[str,
             "persisted_source_commit_sha": persisted["source_commit_sha"],
             "current_source_replay_executed": True,
             "replayed_source_commit_sha": source_commit,
+            "vertical_stage_contract_passed": receipt.vertical_stage_contract_passed,
             "public_product_promotion_passed": receipt.public_product_promotion_passed,
         },
     )
@@ -331,22 +317,10 @@ def build_receipt(*, source_commit_sha: str | None = None) -> dict[str, Any]:
         "source_input_checksums": {
             path.as_posix(): LINEAR._file_sha(path) for path in SOURCE_PATHS
         },
-        "status": "ready" if gate.public_product_promotion_passed else "blocked",
-        "contract_pass": gate.public_product_promotion_passed,
+        "status": gate.status,
+        "contract_pass": gate.vertical_stage_contract_passed,
         "predecessor_replay": predecessor_replay,
-        "stage_gate": {
-            "stage": gate.stage,
-            "stage_index": gate.stage_index,
-            "source_commit_sha": gate.source_commit_sha,
-            "required_surfaces": list(gate.required_surfaces),
-            "verified_surfaces": list(gate.verified_surfaces),
-            "evidence_artifact_sha256": dict(gate.evidence_artifact_sha256),
-            "predecessor_stage": gate.predecessor_stage,
-            "predecessor_receipt_sha256": gate.predecessor_receipt_sha256,
-            "external_vv_signature_status": gate.external_vv_signature_status,
-            "blockers": list(gate.blockers),
-            "public_product_promotion_passed": gate.public_product_promotion_passed,
-        },
+        "stage_gate": gate.to_dict(),
         "surface_artifacts": surfaces,
         "claim_boundary": "Closes a bounded four-node, two-triangle, small-displacement linear CST membrane/Mindlin shell stage with physical equilibrium, authoritative recovery ResultIR, exact hash-bound restart, Workbench contour, and closed-form patch/rigid-mode verification. Nonlinear shell, higher-order elements, openings, broad mesh V&V, and contact remain outside.",
     }

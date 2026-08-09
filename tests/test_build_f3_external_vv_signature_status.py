@@ -199,10 +199,11 @@ def test_independence_attestation_is_required() -> None:
 
 
 def test_source_binding_replays_git_ancestry_tree_blobs_and_inputs() -> None:
-    linear = module.stage_evidence_payload("frame3d_linear", root=ROOT)
-    load_control = module.stage_evidence_payload("frame3d_load_control", root=ROOT)
-    direct_control = module.stage_evidence_payload("frame3d_direct_control", root=ROOT)
-    stateful = module.stage_evidence_payload("frame3d_stateful_material", root=ROOT)
+    evidence_rows = [
+        module.stage_evidence_payload(stage, root=ROOT)
+        for stage in module.F3_STAGE_ORDER
+    ]
+    linear, load_control, *later = evidence_rows
 
     assert linear["source_commit_is_ancestor_of_aggregate"] is True
     assert linear["canonical_stage_receipt_bound"] is True
@@ -210,33 +211,23 @@ def test_source_binding_replays_git_ancestry_tree_blobs_and_inputs() -> None:
     assert linear["source_input_binding"]["aggregate_source_inputs_match"] is True
     assert linear["predecessor_binding"]["binding_pass"] is True
     assert linear["current_source_binding_pass"] is True
+    assert linear["vertical_stage_contract_passed"] is True
+    assert linear["recorded_public_product_promotion_passed"] is False
 
     assert (
         load_control["predecessor_binding"]["semantic_replay_hash_recomputed"] is True
     )
     assert load_control["predecessor_binding"]["semantic_replay_hash_matches"] is True
     assert load_control["predecessor_binding"]["binding_pass"] is True
-
-    assert (
-        direct_control["predecessor_binding"]["semantic_replay_hash_recomputed"]
-        is False
+    assert all(
+        row["predecessor_binding"]["semantic_replay_hash_recomputed"] is True
+        and row["predecessor_binding"]["semantic_replay_hash_matches"] is True
+        and row["predecessor_binding"]["binding_pass"] is True
+        and row["source_input_binding"]["recorded_source_inputs_match"] is True
+        and row["source_input_binding"]["aggregate_source_inputs_match"] is True
+        and row["current_source_binding_pass"] is True
+        for row in later
     )
-    assert (
-        direct_control["predecessor_binding"]["semantic_replay_hash_matches"] is False
-    )
-    assert direct_control["predecessor_binding"]["binding_pass"] is False
-    assert direct_control["current_source_binding_pass"] is False
-
-    assert stateful["source_input_binding"]["recorded_source_inputs_match"] is True
-    assert stateful["source_input_binding"]["aggregate_source_inputs_match"] is False
-    assert stateful["source_input_binding"]["aggregate_source_mismatch_paths"] == [
-        "implementation/phase1/run_f3_frame3d_direct_control_vertical_evidence.py",
-        "implementation/phase1/run_f3_frame3d_stateful_material_vertical_evidence.py",
-        "src/structural_analysis/assembly/stateful_corotational_frame3d_sparse.py",
-        "src/structural_analysis/materials/uniaxial_plasticity.py",
-        "src/structural_analysis/schemas/model_ir_v2.schema.json",
-    ]
-    assert stateful["current_source_binding_pass"] is False
 
 
 def test_predecessor_path_and_replay_hash_are_canonical() -> None:
@@ -267,21 +258,18 @@ def test_recomputable_predecessor_replay_hash_tamper_fails_closed() -> None:
         )
 
 
-def test_unreconstructable_semantic_hash_cannot_bind_even_if_tampered() -> None:
+def test_later_predecessor_gate_hash_tamper_fails_closed() -> None:
     path = ROOT / module.STAGE_RECEIPTS["frame3d_direct_control"]
     receipt = json.loads(path.read_text(encoding="utf-8"))
     receipt["stage_gate"]["predecessor_receipt_sha256"] = "sha256:" + "f" * 64
 
-    binding = module._predecessor_binding(
-        stage="frame3d_direct_control",
-        receipt=receipt,
-        root=ROOT,
-        aggregate_source_commit_sha=module._git_commit(ROOT),
-    )
-
-    assert binding["semantic_replay_hash_recomputed"] is False
-    assert binding["semantic_replay_hash_matches"] is False
-    assert binding["binding_pass"] is False
+    with pytest.raises(ValueError, match="predecessor_replay_hash_mismatch"):
+        module._predecessor_binding(
+            stage="frame3d_direct_control",
+            receipt=receipt,
+            root=ROOT,
+            aggregate_source_commit_sha=module._git_commit(ROOT),
+        )
 
 
 @pytest.mark.parametrize("case", ["final", "inside_parent", "outside_parent"])
@@ -355,6 +343,9 @@ def test_all_arbitrary_signatures_remain_non_promotable(tmp_path: Path) -> None:
     )
 
     assert status["status"] == "partial"
+    assert status["public_product_promotion_passed"] is False
+    assert status["vertical_stage_contract_pass_count"] == 10
+    assert status["recorded_public_product_promotion_count"] == 0
     assert status["cryptographically_verified_stage_count"] == 10
     assert status["independently_signed_stage_count"] == 0
     assert status["claims"]["trusted_signer_policy_configured"] is False
@@ -367,7 +358,7 @@ def test_all_arbitrary_signatures_remain_non_promotable(tmp_path: Path) -> None:
     )
 
 
-def test_ephemeral_status_validates_and_v1_schema_rejects_promotion() -> None:
+def test_ephemeral_status_validates_and_v2_schema_rejects_promotion() -> None:
     status = module.build_status(
         root=ROOT,
         generated_at="2026-08-09T00:00:00Z",
@@ -378,12 +369,33 @@ def test_ephemeral_status_validates_and_v1_schema_rejects_promotion() -> None:
     validator.validate(status)
     module.validate_status(status, root=ROOT)
     assert status["status"] == "partial"
+    assert status["schema_version"] == "f3-external-vv-signature-status.v2"
+    assert status["public_product_promotion_passed"] is False
     assert status["trusted_signer_policy_anchor_count"] == 0
     assert status["independently_signed_stage_count"] == 0
+    assert status["vertical_stage_contract_pass_count"] == 10
+    assert status["recorded_public_product_promotion_count"] == 0
+    assert status["current_source_bound_stage_count"] == 10
     assert status["aggregate_source"]["exact_source_binding"] is True
+    assert status["claims"]["all_vertical_stage_contracts_passed"] is True
+    assert status["claims"]["no_stage_self_promoted"] is True
+    assert status["claims"]["planar_product_replay_prerequisite_bound"] is False
+    assert status["claims"]["planar_external_vv_prerequisite_bound"] is False
+    assert status["blockers_remaining"][:2] == [
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    ]
+    assert all(
+        row["vertical_stage_contract_passed"] is True
+        and row["recorded_public_product_promotion_passed"] is False
+        and row["stage_technical_blockers"] == []
+        and row["current_source_binding_pass"] is True
+        for row in status["stage_rows"]
+    )
 
     promoted = deepcopy(status)
     promoted["status"] = "ready"
+    promoted["public_product_promotion_passed"] = True
     promoted["claims"]["all_independent_external_vv_signatures_verified"] = True
     promoted["claims"]["f3_signed_promotion_closure"] = True
     promoted["receipt_hash"] = module._receipt_hash(promoted)

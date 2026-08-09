@@ -438,20 +438,9 @@ def build_receipt(*, source_commit_sha: str | None = None) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "source_commit_sha": source_commit,
         "source_input_checksums": {path.as_posix(): _file_sha(path) for path in SOURCE_PATHS},
-        "status": "ready" if gate.public_product_promotion_passed else "blocked",
-        "contract_pass": gate.public_product_promotion_passed,
-        "stage_gate": {
-            "schema": gate.schema,
-            "stage": gate.stage,
-            "stage_index": gate.stage_index,
-            "source_commit_sha": gate.source_commit_sha,
-            "required_surfaces": list(gate.required_surfaces),
-            "verified_surfaces": list(gate.verified_surfaces),
-            "evidence_artifact_sha256": dict(gate.evidence_artifact_sha256),
-            "external_vv_signature_status": gate.external_vv_signature_status,
-            "blockers": list(gate.blockers),
-            "public_product_promotion_passed": gate.public_product_promotion_passed,
-        },
+        "status": gate.status,
+        "contract_pass": gate.vertical_stage_contract_passed,
+        "stage_gate": gate.to_dict(),
         "surface_artifacts": surface_artifacts,
         "claim_boundary": (
             "Closes the bounded two-node, one-member Frame3D linear cantilever stage "

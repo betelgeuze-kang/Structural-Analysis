@@ -1,14 +1,23 @@
 # F3 external V&V signature runbook
 
-F3 v1 is a fail-closed evidence-audit lane. It replays the ten ordered stages,
-the nine required product surfaces per stage, canonical predecessor bindings,
-and exact Git source identities. It also verifies detached Ed25519 signatures,
-but it deliberately separates cryptographic consistency from trusted external
-identity.
+F3 v2 is a fail-closed evidence-audit lane. It separates each stage's technical
+vertical contract from public-product promotion while replaying the ten ordered
+stages, nine required product surfaces per stage, canonical predecessor
+bindings, and exact Git source identities. It also verifies detached Ed25519
+signatures, but deliberately separates cryptographic consistency from trusted
+external identity.
 
-The repository-owned trusted-signer set is empty in v1. Therefore:
+The repository-owned trusted-signer set is empty in v2. No production adapter
+yet binds the exact Planar product-replay and external-V&V prerequisites.
+Therefore:
 
 - `status` is always `partial`;
+- all ten valid stage receipts can report `contract_pass=true` and
+  `vertical_stage_contract_passed=true`;
+- a valid signature-verifier waiver is technical-only and every stage records
+  `public_product_promotion_passed=false`;
+- `planar_product_replay_prerequisite_bound` and
+  `planar_external_vv_prerequisite_bound` are always `false`;
 - `all_independent_external_vv_signatures_verified` is always `false`;
 - `f3_signed_promotion_closure` is always `false`;
 - an arbitrary valid Ed25519 signature is reported as cryptographically valid,
@@ -16,7 +25,9 @@ The repository-owned trusted-signer set is empty in v1. Therefore:
 
 Adding a signer trust anchor is a separate authority review. An envelope,
 command-line argument, environment variable, or status receipt cannot extend
-the trust policy.
+the trust policy. Likewise, callers cannot inject Planar prerequisite booleans
+or hashes. A future prerequisite adapter must verify canonical repository paths,
+schemas, source epochs, and claims in a separate authority review.
 
 ## Source epoch prerequisites
 
@@ -30,16 +41,16 @@ stage source commit in its Git ancestry. For each stage, the builder verifies:
 4. every recorded input checksum at the stage source;
 5. the same input checksums at the aggregate source;
 6. canonical predecessor path, receipt hash, replay source, and order;
-7. runner-defined predecessor replay-hash semantics where they can be
-   reconstructed without re-executing a historical solver.
+7. runner-defined predecessor replay-hash semantics reconstructed from either
+   the canonical replay object or the canonical predecessor stage gate;
+8. technical predecessor closure independently of promotion ancestry.
 
 The load-control predecessor replay hash is fully reconstructable from its
 canonical replay object and must exactly equal the stage-gate hash. Later
-runner generations hash a freshly executed predecessor stage gate. V1 does not
-pretend that this historical solver result can be recovered from the persisted
-receipt alone: those rows report `predecessor_semantic_hash_recomputed=false`,
-`predecessor_semantic_hash_matches=false`, and fail current-source binding until
-an authoritative replay produces a new receipt.
+runner generations hash a freshly executed predecessor stage gate. V2 compares
+that hash with the same-source canonical predecessor receipt, so all ten rows
+can close current-source binding without treating predecessor public promotion
+as a technical prerequisite.
 
 An additive change to a shared source input still makes the old stage evidence
 non-current. The status remains partial until that stage is replayed in a later,
@@ -96,7 +107,7 @@ PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
 ```
 
 `--check-envelope` prints both signature state and trusted classification. With
-the v1 empty trust-anchor set, a correctly signed candidate prints
+the v2 empty trust-anchor set, a correctly signed candidate prints
 `state=verified | trusted=false`.
 
 Repeat in order for:
@@ -120,18 +131,22 @@ points inside or outside the repository root.
 
 ## Regenerate the partial aggregate
 
-After committing the builder, schema, tests, and runbook, regenerate the status
-against that exact source commit:
+After committing the builder, schema, tests, and runbook, replay and commit all
+ten stage receipts against that exact code source. Then regenerate the status
+against the stage-receipt commit so the aggregate source tree contains every
+canonical receipt:
 
 ```bash
 PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
   scripts/build_f3_external_vv_signature_status.py \
-  --source-commit EXACT_F3_GATE_SOURCE_SHA
+  --source-commit EXACT_F3_STAGE_RECEIPT_COMMIT_SHA
 
 PYTHONPATH=$PWD/src:$PWD/scripts:$PWD/implementation/phase1 python3 \
   scripts/build_f3_external_vv_signature_status.py --check
 ```
 
-Commit the regenerated status separately. This two-commit sequence binds the
-receipt to committed builder and schema bytes without claiming that the receipt
-commit itself was part of the measured source tree.
+Commit the regenerated status separately. The complete ordering is code commit,
+ten-stage current-source replay commit, then aggregate receipt commit. It binds
+the aggregate to committed builder/schema bytes and all ten canonical receipt
+blobs while keeping `status=partial`, trusted signatures `0/10`, and public
+promotion false.

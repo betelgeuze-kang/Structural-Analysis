@@ -16,12 +16,21 @@ SPEC.loader.exec_module(MODULE)
 def test_frame3d_linear_evidence_closes_all_nine_surfaces() -> None:
     payload = MODULE.build_receipt(source_commit_sha="a" * 40)
 
-    assert payload["status"] == "ready"
+    assert payload["status"] == "partial"
     assert payload["contract_pass"] is True
-    assert payload["stage_gate"]["public_product_promotion_passed"] is True
-    assert payload["stage_gate"]["external_vv_signature_status"] == "waived"
-    assert payload["stage_gate"]["blockers"] == []
-    assert len(payload["stage_gate"]["verified_surfaces"]) == 9
+    gate = payload["stage_gate"]
+    assert gate["schema"] == "f3-vertical-evidence-gate.v2"
+    assert gate["vertical_stage_contract_passed"] is True
+    assert gate["public_product_promotion_passed"] is False
+    assert gate["external_vv_signature_status"] == "waived"
+    assert gate["technical_blockers"] == []
+    assert gate["promotion_blockers"] == [
+        "external_vv_signature_verification_waived",
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    ]
+    assert gate["blockers"] == gate["promotion_blockers"]
+    assert len(gate["verified_surfaces"]) == 9
 
 
 def test_four_independent_modes_have_equilibrium_result_and_restart_evidence() -> None:

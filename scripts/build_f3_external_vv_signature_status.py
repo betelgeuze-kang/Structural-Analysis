@@ -27,6 +27,7 @@ if str(SRC) not in sys.path:
 from structural_analysis.validation.f3_vertical_evidence import (  # noqa: E402
     F3_REQUIRED_SURFACES,
     F3_STAGE_ORDER,
+    F3StageGateReceipt,
 )
 
 
@@ -34,10 +35,10 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "f3_external_vv_signature_status.json"
 DEFAULT_SIGNATURE_DIR = PRODUCTIZATION / "f3_external_vv_signatures"
 SCHEMA = Path(
-    "src/structural_analysis/schemas/f3_external_vv_signature_status_v1.schema.json"
+    "src/structural_analysis/schemas/f3_external_vv_signature_status_v2.schema.json"
 )
 BUILDER = Path("scripts/build_f3_external_vv_signature_status.py")
-VERSION = "f3-external-vv-signature-status.v1"
+VERSION = "f3-external-vv-signature-status.v2"
 ENVELOPE_VERSION = "f3-external-vv-signature-envelope.v1"
 STAGE_RECEIPTS: dict[str, Path] = {
     "frame3d_linear": PRODUCTIZATION / "f3_frame3d_linear_vertical_evidence.json",
@@ -57,11 +58,13 @@ STAGE_RECEIPTS: dict[str, Path] = {
     "contact": PRODUCTIZATION / "f3_contact_vertical_evidence.json",
 }
 CLAIM_BOUNDARY = (
-    "This fail-closed v1 status replays every canonical F3 stage receipt, its "
-    "source ancestry and input checksums, all nine required surface bindings, "
-    "and optional detached Ed25519 signatures. Cryptographic consistency is "
-    "reported separately from independently trusted identity. The production "
-    "trust-anchor set is empty, so v1 remains partial and never promotes F3."
+    "This fail-closed v2 status separates ten-stage technical closure from public "
+    "product promotion while replaying every canonical F3 receipt, source "
+    "ancestry, input checksum, predecessor binding, and nine-surface artifact "
+    "binding. Detached Ed25519 consistency remains separate from independently "
+    "trusted identity. The production trust-anchor set is empty, and no canonical "
+    "Planar product-replay or external-V&V prerequisite adapter is bound, so v2 "
+    "remains partial and cannot promote F3."
 )
 
 _SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -79,7 +82,7 @@ class TrustedSignerAnchor:
     independence_authority_receipt_sha256: str
 
 
-# Intentionally empty for v1. Adding an anchor is a separately reviewed authority
+# Intentionally empty for v2. Adding an anchor is a separately reviewed authority
 # change; no CLI or envelope field can extend this set.
 TRUSTED_SIGNER_ANCHORS: Final[tuple[TrustedSignerAnchor, ...]] = ()
 
@@ -336,23 +339,35 @@ def _predecessor_binding(
     predecessor_gate_replay_sha = gate.get("predecessor_receipt_sha256")
     if not _is_sha256(predecessor_gate_replay_sha):
         raise ValueError("f3_predecessor_replay_hash_invalid")
-    semantic_replay_hash_recomputed = index == 1
-    canonical_replay_sha = (
-        _sha_bytes(canonical_bytes(replay)) if semantic_replay_hash_recomputed else None
+    predecessor_receipt = _read(predecessor_target)
+    predecessor_gate = predecessor_receipt.get("stage_gate")
+    if not isinstance(predecessor_gate, dict):
+        raise ValueError("f3_predecessor_stage_gate_missing")
+    predecessor_gate_receipt = F3StageGateReceipt.from_dict(predecessor_gate)
+    # Load control binds its replay object; every later runner binds the freshly
+    # replayed predecessor gate. The latter is reconstructable from the canonical
+    # predecessor receipt when all receipts share one source epoch.
+    canonical_replay_sha = _sha_bytes(
+        canonical_bytes(replay if index == 1 else predecessor_gate)
     )
-    semantic_replay_hash_matches = bool(
-        semantic_replay_hash_recomputed
-        and predecessor_gate_replay_sha == canonical_replay_sha
-    )
-    if semantic_replay_hash_recomputed and not semantic_replay_hash_matches:
+    semantic_replay_hash_recomputed = True
+    semantic_replay_hash_matches = predecessor_gate_replay_sha == canonical_replay_sha
+    if not semantic_replay_hash_matches:
         raise ValueError("f3_predecessor_replay_hash_mismatch")
     if replay.get("current_source_replay_executed") is not True:
         raise ValueError("f3_predecessor_replay_not_executed")
-    if replay.get("public_product_promotion_passed") is not True:
+    if replay.get("vertical_stage_contract_passed") is not True:
         raise ValueError("f3_predecessor_replay_not_passing")
+    if replay.get("vertical_stage_contract_passed") is not (
+        predecessor_gate_receipt.vertical_stage_contract_passed
+    ):
+        raise ValueError("f3_predecessor_replay_technical_state_mismatch")
+    if replay.get("public_product_promotion_passed") is not (
+        predecessor_gate_receipt.public_product_promotion_passed
+    ):
+        raise ValueError("f3_predecessor_replay_promotion_state_mismatch")
     if replay.get("replayed_source_commit_sha") != receipt.get("source_commit_sha"):
         raise ValueError("f3_predecessor_replayed_source_mismatch")
-    predecessor_receipt = _read(predecessor_target)
     persisted_source = replay.get("persisted_source_commit_sha")
     if persisted_source is not None and persisted_source != predecessor_receipt.get(
         "source_commit_sha"
@@ -393,16 +408,27 @@ def stage_evidence_payload(
     surfaces = receipt.get("surface_artifacts")
     if not isinstance(gate, dict) or not isinstance(surfaces, dict):
         raise ValueError("f3_stage_receipt_shape_invalid")
-    if receipt.get("contract_pass") is not True or receipt.get("status") != "ready":
-        raise ValueError("f3_stage_receipt_not_ready")
-    if gate.get("stage") != stage or gate.get("stage_index") != F3_STAGE_ORDER.index(
+    gate_receipt = F3StageGateReceipt.from_dict(gate)
+    if (
+        receipt.get("contract_pass") is not True
+        or receipt.get("status") != "partial"
+        or not gate_receipt.vertical_stage_contract_passed
+        or gate_receipt.public_product_promotion_passed
+    ):
+        raise ValueError("f3_stage_receipt_not_technical_partial")
+    if gate_receipt.stage != stage or gate_receipt.stage_index != F3_STAGE_ORDER.index(
         stage
     ):
         raise ValueError("f3_stage_identity_invalid")
-    if tuple(gate.get("required_surfaces", ())) != F3_REQUIRED_SURFACES:
-        raise ValueError("f3_required_surface_order_invalid")
-    if tuple(gate.get("verified_surfaces", ())) != F3_REQUIRED_SURFACES:
+    if gate_receipt.verified_surfaces != F3_REQUIRED_SURFACES:
         raise ValueError("f3_verified_surface_order_invalid")
+    if gate_receipt.technical_blockers:
+        raise ValueError("f3_stage_technical_blockers_present")
+    if not {
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    }.issubset(gate_receipt.promotion_blockers):
+        raise ValueError("f3_stage_planar_promotion_blockers_missing")
     if set(surfaces) != set(F3_REQUIRED_SURFACES):
         raise ValueError("f3_surface_artifact_set_invalid")
     bindings = gate.get("evidence_artifact_sha256")
@@ -414,7 +440,7 @@ def stage_evidence_payload(
     source_commit = receipt.get("source_commit_sha")
     if not _is_commit_sha(source_commit):
         raise ValueError("f3_source_commit_invalid")
-    if gate.get("source_commit_sha") != source_commit:
+    if gate_receipt.source_commit_sha != source_commit:
         raise ValueError("f3_stage_gate_source_commit_mismatch")
     aggregate_source = dict(
         _aggregate_source
@@ -462,7 +488,13 @@ def stage_evidence_payload(
         "external_vv_reference_profile": external.get("reference_profile"),
         "required_surface_count": len(F3_REQUIRED_SURFACES),
         "all_nine_surfaces_verified": True,
-        "recorded_signature_status": gate.get("external_vv_signature_status"),
+        "vertical_stage_contract_passed": (gate_receipt.vertical_stage_contract_passed),
+        "recorded_public_product_promotion_passed": (
+            gate_receipt.public_product_promotion_passed
+        ),
+        "stage_technical_blockers": list(gate_receipt.technical_blockers),
+        "stage_promotion_blockers": list(gate_receipt.promotion_blockers),
+        "recorded_signature_status": gate_receipt.external_vv_signature_status,
         "source_commit_is_ancestor_of_aggregate": source_is_ancestor,
         "canonical_stage_receipt_bound": canonical_receipt_bound,
         "source_input_binding": source_inputs,
@@ -771,6 +803,14 @@ def build_status(
                     "aggregate_tree_stage_receipt_sha256"
                 ],
                 "external_vv_artifact_sha256": evidence["external_vv_artifact_sha256"],
+                "vertical_stage_contract_passed": evidence[
+                    "vertical_stage_contract_passed"
+                ],
+                "recorded_public_product_promotion_passed": evidence[
+                    "recorded_public_product_promotion_passed"
+                ],
+                "stage_technical_blockers": evidence["stage_technical_blockers"],
+                "stage_promotion_blockers": evidence["stage_promotion_blockers"],
                 "recorded_signature_status": evidence["recorded_signature_status"],
                 "signature_envelope_path": envelope_path.as_posix(),
                 "signature_envelope_receipt_hash": envelope_hash,
@@ -816,7 +856,14 @@ def build_status(
     crypto_count = sum(int(row["cryptographic_signature_valid"]) for row in rows)
     signed = sum(int(row["independent_signature_verified"]) for row in rows)
     current_bound = sum(int(row["current_source_binding_pass"]) for row in rows)
-    blockers: list[str] = []
+    vertical_closed = sum(int(row["vertical_stage_contract_passed"]) for row in rows)
+    recorded_promoted = sum(
+        int(row["recorded_public_product_promotion_passed"]) for row in rows
+    )
+    blockers: list[str] = [
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    ]
     if not aggregate_source["exact_source_binding"]:
         blockers.append("aggregate_source_builder_schema_not_commit_bound")
     for row in rows:
@@ -844,17 +891,22 @@ def build_status(
         or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "status": "partial",
         "contract_pass": True,
+        "public_product_promotion_passed": False,
         "aggregate_source": aggregate_source,
         "trusted_signer_policy_anchor_count": len(TRUSTED_SIGNER_ANCHORS),
         "stage_count": len(rows),
         "required_surface_count_per_stage": len(F3_REQUIRED_SURFACES),
         "self_verified_stage_count": len(rows),
+        "vertical_stage_contract_pass_count": vertical_closed,
+        "recorded_public_product_promotion_count": recorded_promoted,
         "current_source_bound_stage_count": current_bound,
         "cryptographically_verified_stage_count": crypto_count,
         "independently_signed_stage_count": signed,
         "stage_rows": rows,
         "claims": {
             "ten_stage_nine_surface_self_verification": len(rows) == 10,
+            "all_vertical_stage_contracts_passed": vertical_closed == len(rows),
+            "no_stage_self_promoted": recorded_promoted == 0,
             "signature_verification_adapter_available": True,
             "all_canonical_stage_receipts_bound": all(
                 row["canonical_stage_receipt_bound"] for row in rows
@@ -869,6 +921,8 @@ def build_status(
                 row["aggregate_source_inputs_match"] for row in rows
             ),
             "trusted_signer_policy_configured": False,
+            "planar_product_replay_prerequisite_bound": False,
+            "planar_external_vv_prerequisite_bound": False,
             "all_independent_external_vv_signatures_verified": False,
             "f3_signed_promotion_closure": False,
         },

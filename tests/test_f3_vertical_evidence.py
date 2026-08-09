@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
 from structural_analysis.validation.f3_vertical_evidence import (
@@ -34,7 +36,7 @@ def _verified_signature() -> ExternalVVSignatureVerification:
     )
 
 
-def _passing_linear_receipt() -> F3StageGateReceipt:
+def _technically_passing_linear_receipt() -> F3StageGateReceipt:
     return evaluate_f3_stage_gate(
         stage="frame3d_linear",
         source_commit_sha=SOURCE_SHA,
@@ -69,12 +71,24 @@ def test_stage_and_surface_contract_is_complete_and_ordered() -> None:
     )
 
 
-def test_complete_first_stage_with_independent_signature_can_pass() -> None:
-    receipt = _passing_linear_receipt()
+def test_complete_first_stage_passes_technical_gate_but_not_public_promotion() -> None:
+    receipt = _technically_passing_linear_receipt()
 
-    assert receipt.public_product_promotion_passed is True
-    assert receipt.blockers == ()
+    assert receipt.public_product_promotion_passed is False
+    assert receipt.vertical_stage_contract_passed is True
+    assert receipt.technical_blockers == ()
+    assert receipt.promotion_blockers == (
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    )
+    assert receipt.blockers == receipt.promotion_blockers
     assert receipt.verified_surfaces == F3_REQUIRED_SURFACES
+
+
+def test_public_gate_has_no_caller_asserted_planar_prerequisite_input() -> None:
+    parameters = inspect.signature(evaluate_f3_stage_gate).parameters
+
+    assert "promotion_prerequisites" not in parameters
 
 
 def test_external_vv_artifact_without_signature_verification_fails_closed() -> None:
@@ -84,11 +98,16 @@ def test_external_vv_artifact_without_signature_verification_fails_closed() -> N
         evidence=_complete_evidence(),
     )
 
+    assert receipt.vertical_stage_contract_passed is True
     assert receipt.public_product_promotion_passed is False
-    assert receipt.blockers == ("external_vv_signature_verification_missing",)
+    assert receipt.promotion_blockers == (
+        "external_vv_signature_verification_missing",
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    )
 
 
-def test_user_authorized_signature_verifier_waiver_is_explicit_and_passes() -> None:
+def test_user_authorized_signature_verifier_waiver_is_technical_only() -> None:
     receipt = evaluate_f3_stage_gate(
         stage="frame3d_linear",
         source_commit_sha=SOURCE_SHA,
@@ -100,16 +119,89 @@ def test_user_authorized_signature_verifier_waiver_is_explicit_and_passes() -> N
         ),
     )
 
-    assert receipt.public_product_promotion_passed is True
+    assert receipt.vertical_stage_contract_passed is True
+    assert receipt.public_product_promotion_passed is False
     assert receipt.external_vv_signature_status == "waived"
-    assert receipt.blockers == ()
+    assert receipt.technical_blockers == ()
+    assert receipt.promotion_blockers == (
+        "external_vv_signature_verification_waived",
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    )
+    assert receipt.blockers == receipt.promotion_blockers
+
+
+def test_verified_signature_without_planar_prerequisites_never_promotes() -> None:
+    receipt = evaluate_f3_stage_gate(
+        stage="frame3d_linear",
+        source_commit_sha=SOURCE_SHA,
+        evidence=_complete_evidence(),
+        external_vv_signature=_verified_signature(),
+    )
+
+    assert receipt.vertical_stage_contract_passed is True
+    assert receipt.public_product_promotion_passed is False
+    assert receipt.promotion_blockers == (
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+    )
+
+
+def test_v2_gate_round_trip_replays_all_serialized_invariants() -> None:
+    receipt = _technically_passing_linear_receipt()
+
+    assert F3StageGateReceipt.from_dict(receipt.to_dict()) == receipt
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "expected_error"),
+    [
+        ("vertical_stage_contract_passed", "false", "pass_type_invalid"),
+        ("public_product_promotion_passed", 0, "pass_type_invalid"),
+        ("stage_index", True, "stage_index_invalid"),
+    ],
+)
+def test_v2_gate_rejects_non_exact_bool_and_integer_types(
+    field: str, value: object, expected_error: str
+) -> None:
+    payload = _technically_passing_linear_receipt().to_dict()
+    payload[field] = value
+
+    with pytest.raises(ValueError, match=expected_error):
+        F3StageGateReceipt.from_dict(payload)
+
+
+def test_v2_gate_rejects_tampered_blocker_union_and_promotion_bit() -> None:
+    payload = _technically_passing_linear_receipt().to_dict()
+    payload["blockers"] = []
+    with pytest.raises(ValueError, match="blockers_inconsistent"):
+        F3StageGateReceipt.from_dict(payload)
+
+    payload = _technically_passing_linear_receipt().to_dict()
+    payload["public_product_promotion_passed"] = True
+    with pytest.raises(ValueError, match="public_pass_inconsistent"):
+        F3StageGateReceipt.from_dict(payload)
+
+
+def test_v2_gate_rejects_surface_binding_and_source_hash_tampering() -> None:
+    payload = _technically_passing_linear_receipt().to_dict()
+    payload["evidence_artifact_sha256"].pop("solver")
+    with pytest.raises(ValueError, match="evidence_bindings_invalid"):
+        F3StageGateReceipt.from_dict(payload)
+
+    payload = _technically_passing_linear_receipt().to_dict()
+    payload["source_commit_sha"] = "not-a-commit"
+    with pytest.raises(ValueError, match="source_commit_sha_invalid"):
+        F3StageGateReceipt.from_dict(payload)
 
 
 def test_signature_verifier_waiver_requires_authority_reason_and_vv_artifact() -> None:
     receipt = evaluate_f3_stage_gate(
         stage="frame3d_linear",
         source_commit_sha=SOURCE_SHA,
-        evidence=[item for item in _complete_evidence() if item.surface != "external_vv"],
+        evidence=[
+            item for item in _complete_evidence() if item.surface != "external_vv"
+        ],
         external_vv_signature=ExternalVVSignatureVerification(status="waived"),
     )
 
@@ -200,21 +292,54 @@ def test_second_stage_requires_closed_bound_immediate_predecessor() -> None:
         source_commit_sha=SOURCE_SHA,
         evidence=_complete_evidence(),
         external_vv_signature=_verified_signature(),
-        predecessor_receipt=_passing_linear_receipt(),
+        predecessor_receipt=_technically_passing_linear_receipt(),
         predecessor_receipt_sha256=RECEIPT_SHA,
     )
 
     assert missing.public_product_promotion_passed is False
     assert "predecessor_stage_receipt_missing" in missing.blockers
-    assert passed.public_product_promotion_passed is True
+    assert passed.vertical_stage_contract_passed is True
+    assert passed.public_product_promotion_passed is False
+    assert "predecessor_stage_not_promoted" in passed.promotion_blockers
+
+
+def test_waived_predecessor_keeps_vertical_chain_open_but_not_promotion() -> None:
+    waiver = ExternalVVSignatureVerification(
+        status="waived",
+        authority="user_authorized_signature_verifier_waiver",
+        waiver_reason="Internal technical replay only.",
+    )
+    linear = evaluate_f3_stage_gate(
+        stage="frame3d_linear",
+        source_commit_sha=SOURCE_SHA,
+        evidence=_complete_evidence(),
+        external_vv_signature=waiver,
+    )
+    load = evaluate_f3_stage_gate(
+        stage="frame3d_load_control",
+        source_commit_sha=SOURCE_SHA,
+        evidence=_complete_evidence(),
+        external_vv_signature=waiver,
+        predecessor_receipt=linear,
+        predecessor_receipt_sha256=RECEIPT_SHA,
+    )
+
+    assert linear.vertical_stage_contract_passed is True
+    assert load.vertical_stage_contract_passed is True
+    assert load.public_product_promotion_passed is False
+    assert "predecessor_stage_not_closed" not in load.blockers
+    assert "predecessor_stage_not_promoted" in load.promotion_blockers
 
 
 def test_predecessor_source_drift_and_nonclosure_are_rejected() -> None:
-    predecessor = _passing_linear_receipt()
+    predecessor = _technically_passing_linear_receipt()
     drifted = F3StageGateReceipt(
         **{
             **predecessor.__dict__,
             "source_commit_sha": "d" * 40,
+            "technical_blockers": ("synthetic_nonclosure",),
+            "blockers": ("synthetic_nonclosure",),
+            "vertical_stage_contract_passed": False,
             "public_product_promotion_passed": False,
         }
     )

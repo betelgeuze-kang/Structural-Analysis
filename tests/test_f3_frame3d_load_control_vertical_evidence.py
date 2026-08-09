@@ -16,12 +16,22 @@ SPEC.loader.exec_module(MODULE)
 def test_load_control_closes_nine_surfaces_after_linear_predecessor() -> None:
     payload = MODULE.build_receipt(source_commit_sha="d" * 40)
 
-    assert payload["status"] == "ready"
+    assert payload["status"] == "partial"
     assert payload["contract_pass"] is True
-    assert payload["stage_gate"]["predecessor_stage"] == "frame3d_linear"
+    gate = payload["stage_gate"]
+    assert gate["predecessor_stage"] == "frame3d_linear"
     assert payload["predecessor_replay"]["current_source_replay_executed"] is True
-    assert len(payload["stage_gate"]["verified_surfaces"]) == 9
-    assert payload["stage_gate"]["blockers"] == []
+    assert gate["vertical_stage_contract_passed"] is True
+    assert gate["public_product_promotion_passed"] is False
+    assert gate["technical_blockers"] == []
+    assert gate["promotion_blockers"] == [
+        "external_vv_signature_verification_waived",
+        "planar_product_replay_prerequisite_not_bound",
+        "planar_external_vv_prerequisite_not_bound",
+        "predecessor_stage_not_promoted",
+    ]
+    assert gate["blockers"] == gate["promotion_blockers"]
+    assert len(gate["verified_surfaces"]) == 9
 
 
 def test_load_control_reaches_full_load_with_equilibrium_and_exact_restart() -> None:
