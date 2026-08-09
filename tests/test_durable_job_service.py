@@ -22,6 +22,7 @@ from structural_analysis.execution.job_http_api import (
     DurableJobWSGIApplication,
 )
 from structural_analysis.execution.job_service import (
+    JOB_REQUEST_V2_SCHEMA_VERSION,
     DurableJobService,
     JobServiceError,
     build_job_completion_evidence,
@@ -104,6 +105,49 @@ def _model_ir_request(*, load_steps: int = 2) -> dict:
     }
 
 
+def _frame3d_load_control_request(
+    *, load_factors: tuple[float, ...] = (0.25, 0.5, 0.75, 1.0)
+) -> dict:
+    model = json.loads(
+        Path("examples/bounded_frame3d_direct_control.model-ir.v2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    return {
+        "schema_version": JOB_REQUEST_V2_SCHEMA_VERSION,
+        "operation": "bounded_frame3d_load_control",
+        "case_id": "durable-bounded-frame3d-load-control",
+        "model": model,
+        "config": {
+            "schema_version": "bounded-frame3d-load-control-config.v1",
+            "profile": "bounded_multimember_frame3d_load_control_model_ir_api.v1",
+            "load_pattern_id": "LP1",
+            "load_factors": list(load_factors),
+            "solver_config": {
+                "profile": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2",
+                "residual_relative_tolerance": 1.0e-8,
+                "residual_absolute_tolerance_kn": 1.0e-7,
+                "increment_relative_tolerance": 1.0e-10,
+                "increment_absolute_tolerance_m": 1.0e-12,
+                "maximum_iterations": 20,
+                "maximum_condition_number": 1.0e14,
+                "linear_solver": "numpy_dense_solve",
+                "equation_scaling": "centroid_diameter_force_moment_6dof.v1",
+                "condition_number": "scaled_matrix_1_norm",
+                "load_control": "strictly_increasing_positive_factors",
+                "line_search": {
+                    "policy": "strict_scaled_residual_decrease.v1",
+                    "alphas": [1.0, 0.5, 0.25, 0.125, 0.0625, 0.03125],
+                },
+                "regularization_allowed": False,
+                "fallback_allowed": False,
+            },
+        },
+        "result_contract": "bounded-frame3d-load-control-result.v1",
+        "validator_id": "structural_analysis.api.frame3d_load_control.validate_bounded_frame3d_load_control_result_manifest",
+    }
+
+
 def _service(root: Path, *, clock: MutableClock | None = None) -> DurableJobService:
     return DurableJobService(
         root,
@@ -175,6 +219,163 @@ def test_submission_is_idempotent_request_bound_and_tenant_isolated(
             first.job_id,
             tenant_id="tenant-a",
             authorization_token="wrong-token-that-is-long",
+        )
+
+
+def test_v1_request_bytes_progress_and_idempotency_remain_unchanged(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path / "jobs")
+    request = _request(load_steps=4)
+    first = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="v1-byte-contract",
+        request=request,
+    )
+    repeated = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="v1-byte-contract",
+        request=request,
+    )
+    assert repeated.job_id == first.job_id
+    assert first.progress_total == 4
+
+    claim = _claim(service)
+    assert claim.job.job_id == first.job_id
+    assert claim.job.progress_total == 4
+    assert claim.request_bytes == _canonical_bytes(request)
+
+
+def test_v2_frame3d_request_uses_exact_load_schedule_progress_and_bytes(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path / "jobs")
+    request = _frame3d_load_control_request(load_factors=(0.2, 0.4, 0.6, 0.8, 1.0))
+    submitted = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="frame3d-v2-progress",
+        request=request,
+    )
+    repeated = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="frame3d-v2-progress",
+        request=request,
+    )
+    assert repeated.job_id == submitted.job_id
+    assert submitted.status == "queued"
+    assert submitted.progress_completed == 0
+    assert submitted.progress_total == 5
+
+    claim = _claim(service)
+    assert claim.job.job_id == submitted.job_id
+    assert claim.job.progress_total == 5
+    assert claim.request_bytes == _canonical_bytes(request)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("schema_version", "structural-analysis-job-request.v1"),
+        ("schema_version", "structural-analysis-job-request.v3"),
+        ("schema_version", []),
+        ("operation", "nonlinear_frame"),
+        ("result_contract", "unified-nonlinear-frame-result.v1"),
+        (
+            "validator_id",
+            "structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result",
+        ),
+    ],
+)
+def test_v2_frame3d_request_identity_is_exactly_allowlisted(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    service = _service(tmp_path / "jobs")
+    request = _frame3d_load_control_request()
+    request[field] = value
+    with pytest.raises(JobServiceError, match="job_schema_invalid"):
+        service.submit_job(
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+            idempotency_key=f"frame3d-v2-identity-{field}",
+            request=request,
+        )
+
+
+@pytest.mark.parametrize(
+    ("case_id", "load_factors"),
+    [
+        ("duplicate", (0.5, 0.5)),
+        ("descending", (0.5, 0.25)),
+        ("zero", (0.0, 0.5)),
+        ("over-one", (0.5, 1.01)),
+    ],
+)
+def test_v2_frame3d_load_schedule_fails_closed(
+    tmp_path: Path,
+    case_id: str,
+    load_factors: tuple[float, ...],
+) -> None:
+    service = _service(tmp_path / "jobs")
+    with pytest.raises(JobServiceError, match="job_schema_invalid"):
+        service.submit_job(
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+            idempotency_key=f"frame3d-v2-schedule-{case_id}",
+            request=_frame3d_load_control_request(load_factors=load_factors),
+        )
+
+
+def test_v2_frame3d_config_and_line_search_are_exact_and_fail_closed(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path / "jobs")
+    request = _frame3d_load_control_request()
+    request["config"]["unexpected"] = True
+    with pytest.raises(JobServiceError, match="job_schema_invalid"):
+        service.submit_job(
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+            idempotency_key="frame3d-v2-extra-config",
+            request=request,
+        )
+
+    request = _frame3d_load_control_request()
+    request["config"]["solver_config"]["line_search"]["alphas"] = [
+        1.0,
+        0.25,
+        0.5,
+    ]
+    with pytest.raises(JobServiceError, match="job_schema_invalid"):
+        service.submit_job(
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+            idempotency_key="frame3d-v2-line-search-order",
+            request=request,
+        )
+
+
+def test_v2_frame3d_idempotency_is_bound_to_the_exact_schedule(
+    tmp_path: Path,
+) -> None:
+    service = _service(tmp_path / "jobs")
+    service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="frame3d-v2-idempotency",
+        request=_frame3d_load_control_request(load_factors=(0.5, 1.0)),
+    )
+    with pytest.raises(JobServiceError, match="idempotency_conflict"):
+        service.submit_job(
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+            idempotency_key="frame3d-v2-idempotency",
+            request=_frame3d_load_control_request(load_factors=(0.25, 0.5, 1.0)),
         )
 
 

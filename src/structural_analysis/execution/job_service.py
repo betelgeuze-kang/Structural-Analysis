@@ -20,6 +20,7 @@ import hashlib
 import hmac
 from importlib import resources
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -33,6 +34,7 @@ from jsonschema import Draft202012Validator
 
 
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
+JOB_REQUEST_V2_SCHEMA_VERSION = "structural-analysis-job-request.v2"
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
     "structural-analysis-job-completion-evidence.v1"
@@ -58,6 +60,30 @@ _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
 _STABLE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$")
 _ERROR_CODE = re.compile(r"^[a-z][a-z0-9_]{0,95}$")
 _MEDIA_TYPE = re.compile(r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]{0,95}$")
+_NONLINEAR_FRAME_JOB_IDENTITY = (
+    JOB_REQUEST_SCHEMA_VERSION,
+    "nonlinear_frame",
+    "unified-nonlinear-frame-result.v1",
+    None,
+)
+_BOUNDED_FRAME3D_LOAD_CONTROL_JOB_IDENTITY = (
+    JOB_REQUEST_V2_SCHEMA_VERSION,
+    "bounded_frame3d_load_control",
+    "bounded-frame3d-load-control-result.v1",
+    "structural_analysis.api.frame3d_load_control.validate_bounded_frame3d_load_control_result_manifest",
+)
+_JOB_REQUEST_SCHEMA_BY_IDENTITY: Final = MappingProxyType(
+    {
+        _NONLINEAR_FRAME_JOB_IDENTITY: "job_request_v1.schema.json",
+        _BOUNDED_FRAME3D_LOAD_CONTROL_JOB_IDENTITY: "job_request_v2.schema.json",
+    }
+)
+_JOB_REQUEST_SCHEMA_BY_VERSION: Final = MappingProxyType(
+    {
+        JOB_REQUEST_SCHEMA_VERSION: "job_request_v1.schema.json",
+        JOB_REQUEST_V2_SCHEMA_VERSION: "job_request_v2.schema.json",
+    }
+)
 _MAX_REQUEST_BYTES = 16 * 1024 * 1024
 _MAX_CHECKPOINT_BYTES = 128 * 1024 * 1024
 _MAX_RESULT_BYTES = 64 * 1024 * 1024
@@ -287,7 +313,7 @@ class DurableJobService:
         self._authorize_tenant(tenant_id, authorization_token)
         _stable(idempotency_key, "/idempotency_key")
         normalized_request = _canonical_mapping(request, "/request")
-        _validate_schema(normalized_request, "job_request_v1.schema.json", "/request")
+        total_steps = _validate_job_request(normalized_request)
         request_bytes = _canonical_json_bytes(normalized_request)
         _bounded(request_bytes, _MAX_REQUEST_BYTES, "/request")
         request_hash = _sha256(request_bytes)
@@ -297,7 +323,6 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        total_steps = int(normalized_request["config"]["load_steps"])
         request_ref = self._put_blob(
             request_bytes,
             role="request",
@@ -1657,6 +1682,101 @@ def _strict_json_object(payload: bytes, path: str) -> dict[str, Any]:
     return value
 
 
+def _validate_job_request(payload: Mapping[str, Any]) -> int:
+    """Validate one exact allowlisted request arm and return its durable progress."""
+
+    schema_version = payload.get("schema_version")
+    if type(schema_version) is not str:
+        _fail(
+            "job_schema_invalid",
+            "/request/schema_version",
+            "The durable job request schema version must be an allowlisted string.",
+        )
+    schema_name = _JOB_REQUEST_SCHEMA_BY_VERSION.get(schema_version)
+    if schema_name is None:
+        _fail(
+            "job_schema_invalid",
+            "/request/schema_version",
+            "The durable job request schema version is not allowlisted.",
+        )
+    _validate_schema(payload, schema_name, "/request")
+    identity = (
+        payload.get("schema_version"),
+        payload.get("operation"),
+        payload.get("result_contract"),
+        payload.get("validator_id"),
+    )
+    if _JOB_REQUEST_SCHEMA_BY_IDENTITY.get(identity) != schema_name:
+        _fail(
+            "job_schema_invalid",
+            "/request/operation",
+            "The request schema, operation, result contract, and validator are not allowlisted.",
+        )
+    if identity == _NONLINEAR_FRAME_JOB_IDENTITY:
+        return int(payload["config"]["load_steps"])
+    if identity == _BOUNDED_FRAME3D_LOAD_CONTROL_JOB_IDENTITY:
+        model = payload["model"]
+        assert isinstance(model, Mapping)
+        _validate_schema(model, "model_ir_v2.schema.json", "/request/model")
+        return _bounded_frame3d_load_control_progress_total(payload)
+    raise AssertionError("allowlisted job request identity has no progress resolver")
+
+
+def _bounded_frame3d_load_control_progress_total(
+    payload: Mapping[str, Any],
+) -> int:
+    config = payload["config"]
+    assert isinstance(config, Mapping)
+    load_factors = config["load_factors"]
+    assert isinstance(load_factors, list)
+    previous_factor = 0.0
+    for index, raw_factor in enumerate(load_factors):
+        if type(raw_factor) not in (int, float):
+            _fail(
+                "job_schema_invalid",
+                f"/request/config/load_factors/{index}",
+                "Frame3D load factors must be finite JSON numbers.",
+            )
+        factor = float(raw_factor)
+        if not math.isfinite(factor) or factor <= previous_factor or factor > 1.0:
+            _fail(
+                "job_schema_invalid",
+                f"/request/config/load_factors/{index}",
+                "Frame3D load factors must be positive, strictly increasing, and at most 1.0.",
+            )
+        previous_factor = factor
+
+    solver_config = config["solver_config"]
+    assert isinstance(solver_config, Mapping)
+    line_search = solver_config["line_search"]
+    assert isinstance(line_search, Mapping)
+    alphas = line_search["alphas"]
+    assert isinstance(alphas, list)
+    previous_alpha = math.inf
+    for index, raw_alpha in enumerate(alphas):
+        if type(raw_alpha) not in (int, float):
+            _fail(
+                "job_schema_invalid",
+                f"/request/config/solver_config/line_search/alphas/{index}",
+                "Frame3D line-search alphas must be finite JSON numbers.",
+            )
+        alpha = float(raw_alpha)
+        if (
+            not math.isfinite(alpha)
+            or alpha <= 0.0
+            or alpha > 1.0
+            or (index == 0 and alpha != 1.0)
+            or (index > 0 and alpha >= previous_alpha)
+        ):
+            _fail(
+                "job_schema_invalid",
+                f"/request/config/solver_config/line_search/alphas/{index}",
+                "Frame3D line-search alphas must start at 1.0 and strictly decrease in (0, 1].",
+            )
+        previous_alpha = alpha
+    return len(load_factors)
+
+
 def _validate_schema(payload: Mapping[str, Any], name: str, path: str) -> None:
     schema_resource = (
         resources.files("structural_analysis").joinpath("schemas").joinpath(name)
@@ -1732,6 +1852,7 @@ __all__ = [
     "JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION",
     "JOB_INTEGRITY_REPORT_SCHEMA_VERSION",
     "JOB_REQUEST_SCHEMA_VERSION",
+    "JOB_REQUEST_V2_SCHEMA_VERSION",
     "JOB_SERVICE_CLAIM_BOUNDARY",
     "JOB_SERVICE_PROFILE",
     "JOB_VIEW_SCHEMA_VERSION",

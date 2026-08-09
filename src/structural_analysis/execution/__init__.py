@@ -3,6 +3,7 @@
 from structural_analysis.execution.job_service import (
     JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION,
     JOB_REQUEST_SCHEMA_VERSION,
+    JOB_REQUEST_V2_SCHEMA_VERSION,
     JOB_VIEW_SCHEMA_VERSION,
     ArtifactReference,
     DurableJobService,
@@ -26,6 +27,7 @@ from structural_analysis.execution.nonlinear_frame_worker import (
 __all__ = [
     "JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION",
     "JOB_REQUEST_SCHEMA_VERSION",
+    "JOB_REQUEST_V2_SCHEMA_VERSION",
     "JOB_HTTP_API_PROFILE",
     "JOB_VIEW_SCHEMA_VERSION",
     "ArtifactReference",
