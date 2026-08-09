@@ -611,8 +611,10 @@ class LoadCoupledArcLengthCallbackProblem:
             "displacement_unit": "m",
             "tangent_action_unit": "kN/m",
             "load_factor_unit": "dimensionless",
-            "exact_restart_binding": self.exact_restart_binding(),
         }
+        exact_restart_binding = self.exact_restart_binding()
+        if exact_restart_binding["complete"]:
+            binding["exact_restart_binding"] = exact_restart_binding
         if self.current_tangent_operator is not None:
             binding.update(
                 {

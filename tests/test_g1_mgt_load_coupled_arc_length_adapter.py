@@ -551,6 +551,7 @@ def test_backend_neutral_operator_drives_callback_and_extended_binding() -> None
         CURRENT_TANGENT_OPERATOR_REFERENCE_EVALUATOR
     )
     assert binding["operator_callback_outputs_in_contract"] is True
+    assert "exact_restart_binding" not in binding
     assert problem.zero_state_problem().current_tangent_operator is operator
 
 
