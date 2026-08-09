@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_frame3d_load_control_checkpoint_v1.schema.json",
+  "title": "Bounded multi-member Frame3D load-control checkpoint artifact v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "artifact_hash",
+    "model_ir_content_hash",
+    "adapter_hash",
+    "model_hash",
+    "load_pattern_id",
+    "node_ids",
+    "member_ids",
+    "solver_contract_hash",
+    "request_hash",
+    "resume_contract_hash",
+    "checkpoint",
+    "public_product_promotion",
+    "release_eligible"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-frame3d-load-control-checkpoint-artifact.v1"},
+    "profile": {"const": "bounded_multimember_frame3d_load_control_model_ir_api.v1"},
+    "artifact_hash": {"$ref": "#/$defs/hash"},
+    "model_ir_content_hash": {"$ref": "#/$defs/hash"},
+    "adapter_hash": {"$ref": "#/$defs/hash"},
+    "model_hash": {"$ref": "#/$defs/hash"},
+    "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+    "node_ids": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/stable_id"}
+    },
+    "member_ids": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/stable_id"}
+    },
+    "solver_contract_hash": {"$ref": "#/$defs/hash"},
+    "request_hash": {"$ref": "#/$defs/hash"},
+    "resume_contract_hash": {"$ref": "#/$defs/hash"},
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "profile",
+        "model_hash",
+        "solver_contract_hash",
+        "load_factor",
+        "displacement",
+        "converged_iterations",
+        "residual_inf_norm_kn",
+        "parent_checkpoint_hash",
+        "checkpoint_hash"
+      ],
+      "properties": {
+        "schema_version": {"const": "corotational-frame3d-global-checkpoint.v1"},
+        "profile": {"const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2"},
+        "model_hash": {"$ref": "#/$defs/hash"},
+        "solver_contract_hash": {"$ref": "#/$defs/hash"},
+        "load_factor": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "displacement": {
+          "type": "array",
+          "minItems": 18,
+          "maxItems": 96,
+          "items": {"type": "number"}
+        },
+        "converged_iterations": {"type": "integer", "minimum": 0, "maximum": 100},
+        "residual_inf_norm_kn": {"type": "number", "minimum": 0.0},
+        "parent_checkpoint_hash": {
+          "oneOf": [{"type": "null"}, {"$ref": "#/$defs/hash"}]
+        },
+        "checkpoint_hash": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "public_product_promotion": {"const": false},
+    "release_eligible": {"const": false}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"}
+  }
+}

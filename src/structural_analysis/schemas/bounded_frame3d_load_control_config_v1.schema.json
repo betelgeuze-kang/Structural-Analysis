@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded_frame3d_load_control_config_v1.schema.json",
+  "title": "Bounded multi-member Frame3D load-control config v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "load_pattern_id",
+    "load_factors",
+    "solver_config"
+  ],
+  "properties": {
+    "schema_version": {"const": "bounded-frame3d-load-control-config.v1"},
+    "profile": {"const": "bounded_multimember_frame3d_load_control_model_ir_api.v1"},
+    "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+    "load_factors": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0}
+    },
+    "solver_config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "residual_relative_tolerance",
+        "residual_absolute_tolerance_kn",
+        "increment_relative_tolerance",
+        "increment_absolute_tolerance_m",
+        "maximum_iterations",
+        "maximum_condition_number",
+        "linear_solver",
+        "equation_scaling",
+        "condition_number",
+        "load_control",
+        "line_search",
+        "regularization_allowed",
+        "fallback_allowed"
+      ],
+      "properties": {
+        "profile": {"const": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2"},
+        "residual_relative_tolerance": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0},
+        "residual_absolute_tolerance_kn": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1000000000.0},
+        "increment_relative_tolerance": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0},
+        "increment_absolute_tolerance_m": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1000000.0},
+        "maximum_iterations": {"type": "integer", "minimum": 1, "maximum": 100},
+        "maximum_condition_number": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 10000000000000000.0},
+        "linear_solver": {"const": "numpy_dense_solve"},
+        "equation_scaling": {"const": "centroid_diameter_force_moment_6dof.v1"},
+        "condition_number": {"const": "scaled_matrix_1_norm"},
+        "load_control": {"const": "strictly_increasing_positive_factors"},
+        "line_search": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["policy", "alphas"],
+          "properties": {
+            "policy": {"const": "strict_scaled_residual_decrease.v1"},
+            "alphas": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16,
+              "items": {"type": "number", "exclusiveMinimum": 0.0, "maximum": 1.0}
+            }
+          }
+        },
+        "regularization_allowed": {"const": false},
+        "fallback_allowed": {"const": false}
+      }
+    }
+  },
+  "$defs": {
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    }
+  }
+}
