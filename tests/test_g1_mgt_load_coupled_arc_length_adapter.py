@@ -444,6 +444,52 @@ def test_matrix_free_operator_binding_propagates_to_zero_state() -> None:
 
 
 @pytest.mark.parametrize(
+    "restart_identity",
+    [
+        {},
+        {
+            "source_commit_sha": "a" * 40,
+            "model_source_sha256": "sha256:" + "b" * 64,
+        },
+    ],
+)
+def test_matrix_free_operator_binding_omits_incomplete_exact_restart_identity(
+    restart_identity: dict[str, str],
+) -> None:
+    reference_load_n = np.asarray([500.0, -250.0], dtype=np.float64)
+    problem = module.LoadCoupledArcLengthCallbackProblem(
+        case_id="matrix_free_without_complete_restart_identity",
+        initial_displacements_m=np.zeros(2),
+        initial_factor=0.0,
+        reference_load_free_n=reference_load_n,
+        residual_free_n=lambda displacement, load_factor: (
+            displacement - load_factor * reference_load_n
+        ),
+        negative_load_derivative_free_n=(
+            lambda displacement, load_factor: reference_load_n
+        ),
+        state_tangent_action_free_n_per_m=(
+            lambda displacement, load_factor, direction: direction
+        ),
+        free_equation_global_dofs=np.asarray([2, 5], dtype=np.int64),
+        residual_formula_hash="sha256:" + "4" * 64,
+        current_tangent_action_contract=(
+            module.MGT_CURRENT_STATE_TANGENT_ACTION_CONTRACT
+        ),
+        **restart_identity,
+    )
+
+    assert problem.exact_restart_binding()["complete"] is False
+    binding = problem.matrix_free_current_tangent_operator_binding()
+    assert binding is not None
+    assert "exact_restart_binding" not in binding
+    assert (
+        problem.zero_state_problem().matrix_free_current_tangent_operator_binding()
+        == binding
+    )
+
+
+@pytest.mark.parametrize(
     ("field", "value", "message"),
     [
         ("source_commit_sha", "not-a-commit", "source_commit_sha"),
