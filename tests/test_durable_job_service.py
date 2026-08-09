@@ -109,9 +109,9 @@ def _frame3d_load_control_request(
     *, load_factors: tuple[float, ...] = (0.25, 0.5, 0.75, 1.0)
 ) -> dict:
     model = json.loads(
-        Path("examples/bounded_frame3d_direct_control.model-ir.v2.json").read_text(
-            encoding="utf-8"
-        )
+        Path(
+            "examples/bounded_frame3d_load_control_multimember.model-ir.v2.json"
+        ).read_text(encoding="utf-8")
     )
     return {
         "schema_version": JOB_REQUEST_V2_SCHEMA_VERSION,
@@ -121,7 +121,7 @@ def _frame3d_load_control_request(
         "config": {
             "schema_version": "bounded-frame3d-load-control-config.v1",
             "profile": "bounded_multimember_frame3d_load_control_model_ir_api.v1",
-            "load_pattern_id": "LP1",
+            "load_pattern_id": "LC_MULTI",
             "load_factors": list(load_factors),
             "solver_config": {
                 "profile": "dense_elastic_corotational_timoshenko_frame3d_load_control.v2",

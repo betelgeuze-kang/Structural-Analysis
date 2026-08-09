@@ -66,11 +66,15 @@ _NONLINEAR_FRAME_JOB_IDENTITY = (
     "unified-nonlinear-frame-result.v1",
     None,
 )
+_FRAME3D_LOAD_CONTROL_VALIDATOR_ID = (
+    "structural_analysis.api.frame3d_load_control."
+    "validate_bounded_frame3d_load_control_result_manifest"
+)
 _BOUNDED_FRAME3D_LOAD_CONTROL_JOB_IDENTITY = (
     JOB_REQUEST_V2_SCHEMA_VERSION,
     "bounded_frame3d_load_control",
     "bounded-frame3d-load-control-result.v1",
-    "structural_analysis.api.frame3d_load_control.validate_bounded_frame3d_load_control_result_manifest",
+    _FRAME3D_LOAD_CONTROL_VALIDATOR_ID,
 )
 _JOB_REQUEST_SCHEMA_BY_IDENTITY: Final = MappingProxyType(
     {
@@ -670,6 +674,39 @@ class DurableJobService:
                     "result_contract_mismatch",
                     "/result/schema_version",
                     "The result does not implement the immutable requested contract.",
+                )
+            if request.get("schema_version") == JOB_REQUEST_V2_SCHEMA_VERSION:
+                resume_checkpoint_artifact_bytes = (
+                    self._read_blob(
+                        str(row["checkpoint_hash"]),
+                        int(row["checkpoint_size"]),
+                        maximum_bytes=_MAX_CHECKPOINT_BYTES,
+                    )
+                    if row["checkpoint_hash"] is not None
+                    else None
+                )
+                _validate_frame3d_completion_envelope(
+                    request=request,
+                    result=result_payload,
+                    result_bytes=normalized_result,
+                    result_artifact_sha256=result_hash,
+                    evidence=normalized_evidence,
+                    job_request_artifact_sha256=str(row["request_hash"]),
+                    resume_checkpoint_artifact_sha256=(
+                        str(row["checkpoint_hash"])
+                        if row["checkpoint_hash"] is not None
+                        else None
+                    ),
+                    resume_checkpoint_artifact_bytes=(
+                        resume_checkpoint_artifact_bytes
+                    ),
+                    durable_resume_contract_hash=(
+                        str(row["resume_contract_hash"])
+                        if row["resume_contract_hash"] is not None
+                        else None
+                    ),
+                    durable_progress_completed=int(row["progress_completed"]),
+                    durable_progress_total=int(row["progress_total"]),
                 )
             expected_bindings = {
                 "job_id": job_id,
@@ -1720,6 +1757,367 @@ def _validate_job_request(payload: Mapping[str, Any]) -> int:
         _validate_schema(model, "model_ir_v2.schema.json", "/request/model")
         return _bounded_frame3d_load_control_progress_total(payload)
     raise AssertionError("allowlisted job request identity has no progress resolver")
+
+
+def _validate_frame3d_completion_envelope(
+    *,
+    request: Mapping[str, Any],
+    result: Mapping[str, Any],
+    result_bytes: bytes,
+    result_artifact_sha256: str,
+    evidence: Mapping[str, Any],
+    job_request_artifact_sha256: str,
+    resume_checkpoint_artifact_sha256: str | None,
+    resume_checkpoint_artifact_bytes: bytes | None,
+    durable_resume_contract_hash: str | None,
+    durable_progress_completed: int,
+    durable_progress_total: int,
+) -> None:
+    """Reject any detached, partial, or authority-promoted v2 publication."""
+
+    from structural_analysis.api.frame3d_load_control import (
+        parse_bounded_frame3d_load_control_config,
+        validate_bounded_frame3d_load_control_result_manifest,
+    )
+    from structural_analysis.execution.frame3d_load_control_validation import (
+        validate_frame3d_load_control_validation_report,
+    )
+    from structural_analysis.model_ir import parse_model_ir_v2
+
+    _validate_schema(
+        result,
+        "bounded_frame3d_load_control_result_v1.schema.json",
+        "/result",
+    )
+    report = evidence.get("validation_report")
+    if not isinstance(report, Mapping):
+        _fail(
+            "frame3d_completion_report_invalid",
+            "/evidence/validation_report",
+            "Frame3D completion requires the exact validation report.",
+        )
+    _validate_schema(
+        report,
+        "bounded_frame3d_load_control_validation_report_v1.schema.json",
+        "/evidence/validation_report",
+    )
+    try:
+        validate_frame3d_load_control_validation_report(report)
+    except ValueError as error:
+        _fail(
+            "frame3d_completion_report_invalid",
+            "/evidence/validation_report",
+            f"Strict validation report contract failed: {error}",
+        )
+    validator_id = request.get("validator_id")
+    if (
+        validator_id != _FRAME3D_LOAD_CONTROL_VALIDATOR_ID
+        or evidence.get("validator_id") != validator_id
+        or report.get("validator_id") != validator_id
+    ):
+        _fail(
+            "frame3d_completion_validator_mismatch",
+            "/evidence/validator_id",
+            "Request, evidence, and report validator identities must match.",
+        )
+    if (
+        resume_checkpoint_artifact_sha256 is None
+        and durable_resume_contract_hash is not None
+    ) or (
+        resume_checkpoint_artifact_sha256 is not None
+        and report.get("resume_contract_hash") != durable_resume_contract_hash
+    ):
+        _fail(
+            "frame3d_completion_resume_contract_mismatch",
+            "/evidence/validation_report/resume_contract_hash",
+            "Durable checkpoint and report resume contracts disagree.",
+        )
+
+    source_binding = result["source_binding"]
+    solver = result["solver"]
+    source_receipt = solver["source_receipt"]
+    execution = solver["execution"]
+    equilibrium = solver["full_node_equilibrium"]
+    numerical_result_ir = result["numerical_result_ir"]
+    checkpoint_artifact = result["checkpoint_artifact"]
+    terminal_checkpoint = checkpoint_artifact["checkpoint"]
+    metrics = result["metrics"]
+    authority = result["authority"]
+    schedule = request["config"]["load_factors"]
+    accepted_suffix = schedule[durable_progress_completed:]
+    terminal_checkpoint_artifact_bytes = (
+        _canonical_json_bytes(checkpoint_artifact) + b"\n"
+    )
+    try:
+        document = parse_model_ir_v2(
+            request["model"],
+            require_analysis_ready=True,
+        )
+        config = parse_bounded_frame3d_load_control_config(request["config"])
+        validate_bounded_frame3d_load_control_result_manifest(
+            result_bytes,
+            document=document,
+            config=config,
+            checkpoint_artifact_bytes=terminal_checkpoint_artifact_bytes,
+        )
+    except ValueError as error:
+        _fail(
+            "frame3d_completion_persisted_replay_failed",
+            "/result",
+            f"Persisted Frame3D replay validation failed: {error}",
+        )
+
+    if (
+        _canonical_json_bytes(result["load_factors"])
+        != _canonical_json_bytes(schedule)
+        or _canonical_json_bytes(execution["requested_load_factors"])
+        != _canonical_json_bytes(schedule)
+        or _canonical_json_bytes(execution["accepted_load_factors"])
+        != _canonical_json_bytes(accepted_suffix)
+        or execution["maximum_new_steps"] is not None
+    ):
+        _fail(
+            "frame3d_completion_schedule_mismatch",
+            "/result/load_factors",
+            "Published result is detached from the immutable remaining schedule.",
+        )
+    steps = source_receipt["steps"]
+    step_factors = [step.get("load_factor") for step in steps]
+    if (
+        type(durable_progress_completed) is not int
+        or type(durable_progress_total) is not int
+        or durable_progress_total != len(schedule)
+        or not 0 <= durable_progress_completed < durable_progress_total
+        or metrics["completed_prefix_count"] != durable_progress_total
+        or execution["completed_prefix_count"] != durable_progress_total
+        or metrics["remaining_load_factor_count"] != 0
+        or execution["remaining_load_factor_count"] != 0
+        or metrics["accepted_step_count"] != len(accepted_suffix)
+        or len(steps) != len(accepted_suffix)
+        or _canonical_json_bytes(step_factors)
+        != _canonical_json_bytes(accepted_suffix)
+        or source_receipt["start_checkpoint_hash"]
+        != execution["start_checkpoint"]["checkpoint_hash"]
+        or steps[0]["checkpoint"]["parent_checkpoint_hash"]
+        != execution["start_checkpoint"]["checkpoint_hash"]
+        or metrics["final_load_factor"] != schedule[-1]
+        or numerical_result_ir["load_factor"] != schedule[-1]
+        or terminal_checkpoint["load_factor"] != schedule[-1]
+    ):
+        _fail(
+            "frame3d_completion_progress_mismatch",
+            "/result/metrics",
+            "Only the exact terminal remaining suffix may be published.",
+        )
+    if resume_checkpoint_artifact_bytes is None:
+        if (
+            resume_checkpoint_artifact_sha256 is not None
+            or durable_progress_completed != 0
+            or execution["start_checkpoint"]["load_factor"] != 0.0
+        ):
+            _fail(
+                "frame3d_completion_initial_checkpoint_mismatch",
+                "/result/solver/execution/start_checkpoint",
+                "Uninterrupted publication must begin at exact initial progress.",
+            )
+    else:
+        if (
+            resume_checkpoint_artifact_sha256 is None
+            or _sha256(resume_checkpoint_artifact_bytes)
+            != resume_checkpoint_artifact_sha256
+            or resume_checkpoint_artifact_bytes
+            != _canonical_json_bytes(
+                _strict_json_object(
+                    resume_checkpoint_artifact_bytes,
+                    "/checkpoint",
+                )
+            )
+            + b"\n"
+        ):
+            _fail(
+                "frame3d_completion_resume_checkpoint_artifact_invalid",
+                "/checkpoint",
+                "Prior checkpoint blob bytes or SHA are not exact.",
+            )
+        resume_checkpoint_artifact = _strict_json_object(
+            resume_checkpoint_artifact_bytes,
+            "/checkpoint",
+        )
+        _validate_schema(
+            resume_checkpoint_artifact,
+            "bounded_frame3d_load_control_checkpoint_v1.schema.json",
+            "/checkpoint",
+        )
+        resume_checkpoint_logical_payload = dict(resume_checkpoint_artifact)
+        resume_checkpoint_logical_payload.pop("artifact_hash")
+        if (
+            durable_progress_completed <= 0
+            or resume_checkpoint_artifact.get("artifact_hash")
+            != _sha256(_canonical_json_bytes(resume_checkpoint_logical_payload))
+            or _canonical_json_bytes(resume_checkpoint_artifact.get("checkpoint"))
+            != _canonical_json_bytes(execution["start_checkpoint"])
+            or resume_checkpoint_artifact.get("model_ir_content_hash")
+            != source_binding["model_ir_content_hash"]
+            or resume_checkpoint_artifact.get("adapter_hash")
+            != source_binding["adapter_hash"]
+            or resume_checkpoint_artifact.get("request_hash")
+            != source_binding["request_hash"]
+            or resume_checkpoint_artifact.get("resume_contract_hash")
+            != checkpoint_artifact["resume_contract_hash"]
+            or resume_checkpoint_artifact.get("public_product_promotion") is not False
+            or resume_checkpoint_artifact.get("release_eligible") is not False
+            or execution["start_checkpoint"]["load_factor"]
+            != schedule[durable_progress_completed - 1]
+        ):
+            _fail(
+                "frame3d_completion_resume_checkpoint_binding_mismatch",
+                "/checkpoint",
+                "Prior checkpoint blob is detached from the persisted suffix start.",
+            )
+    for index, step in enumerate(steps):
+        if not isinstance(step, Mapping) or any(
+            step.get(name) is not True
+            for name in (
+                "residual_gate_passed",
+                "increment_gate_passed",
+                "line_search_valid",
+                "final_reassembled_equilibrium_passed",
+                "parent_state_immutable",
+            )
+        ):
+            _fail(
+                "frame3d_completion_step_gate_failed",
+                f"/result/solver/source_receipt/steps/{index}",
+                "Every accepted suffix step gate must pass.",
+            )
+    if (
+        equilibrium["contract_pass"] is not True
+        or equilibrium["maximum_scaled_balance_residual"]
+        > equilibrium["scaled_tolerance"]
+        or equilibrium["maximum_force_balance_residual_n"]
+        > equilibrium["force_tolerance_n"]
+        or equilibrium["maximum_moment_balance_residual_n_m"]
+        > equilibrium["moment_tolerance_n_m"]
+        or metrics["fallback_count"] != 0
+        or metrics["regularization_count"] != 0
+    ):
+        _fail(
+            "frame3d_completion_gate_failed",
+            "/result/solver/full_node_equilibrium",
+            "Equilibrium, fallback, or regularization gate did not close.",
+        )
+    numerical_authority = numerical_result_ir["authority"]
+    if (
+        numerical_authority.get("reaction") != "not_evaluated"
+        or numerical_authority.get("member_force") != "not_evaluated"
+        or authority["solver_derived_reaction_recovery"] != "bounded_candidate"
+        or authority["solver_derived_member_recovery"] != "bounded_candidate"
+        or authority["full_node_equilibrium"] != "authoritative_reassembled"
+        or authority["external_vv_level"] != 0
+        or authority["workbench_execution"] is not False
+        or authority["public_product_promotion"] is not False
+        or authority["release_eligible"] is not False
+    ):
+        _fail(
+            "frame3d_completion_authority_mismatch",
+            "/result/authority",
+            "Candidate and Numerical ResultIR authority axes cannot be promoted.",
+        )
+
+    result_logical_payload = dict(result)
+    result_logical_payload.pop("result_hash")
+    checkpoint_logical_payload = dict(checkpoint_artifact)
+    checkpoint_logical_payload.pop("artifact_hash")
+    source_receipt_logical_payload = dict(source_receipt)
+    source_receipt_logical_payload.pop("result_hash")
+    numerical_result_logical_payload = dict(numerical_result_ir)
+    numerical_result_logical_payload.pop("result_hash")
+    recovery_hash = _sha256(
+        _canonical_json_bytes(
+            {
+                "node_displacements": result["node_displacements"],
+                "support_reactions": result["support_reactions"],
+                "member_recovery": result["member_recovery"],
+            }
+        )
+    )
+    equilibrium_hash = _sha256(
+        _canonical_json_bytes(
+            {
+                "summary": equilibrium,
+                "nodes": result["full_node_equilibrium"],
+            }
+        )
+    )
+    expected_report_bindings = {
+        "result_schema_version": result["schema_version"],
+        "profile": result["profile"],
+        "source_adapter_profile": source_binding["adapter_profile"],
+        "solver_profile": source_receipt["profile"],
+        "backend_role": numerical_result_ir["backend"]["role"],
+        "result_hash": result["result_hash"],
+        "result_artifact_sha256": result_artifact_sha256,
+        "job_request_artifact_sha256": job_request_artifact_sha256,
+        "model_ir_content_hash": source_binding["model_ir_content_hash"],
+        "model_ir_semantic_hash": source_binding["model_ir_semantic_hash"],
+        "model_ir_provenance_hash": source_binding["model_ir_provenance_hash"],
+        "adapter_hash": source_binding["adapter_hash"],
+        "compiled_model_hash": source_binding["model_hash"],
+        "api_request_hash": source_binding["request_hash"],
+        "resume_contract_hash": checkpoint_artifact["resume_contract_hash"],
+        "source_solver_receipt_hash": source_receipt["result_hash"],
+        "numerical_result_ir_hash": numerical_result_ir["result_hash"],
+        "resume_checkpoint_artifact_sha256": (
+            resume_checkpoint_artifact_sha256
+        ),
+        "terminal_checkpoint_hash": terminal_checkpoint["checkpoint_hash"],
+        "terminal_checkpoint_artifact_hash": checkpoint_artifact["artifact_hash"],
+        "terminal_checkpoint_artifact_sha256": _sha256(
+            terminal_checkpoint_artifact_bytes
+        ),
+        "recovery_hash": recovery_hash,
+        "full_node_equilibrium_hash": equilibrium_hash,
+        "equilibrium_scaling_hash": equilibrium["equilibrium_scaling_hash"],
+        "final_load_factor": metrics["final_load_factor"],
+        "total_load_factor_count": durable_progress_total,
+        "resume_completed_prefix_count": durable_progress_completed,
+        "accepted_suffix_step_count": len(accepted_suffix),
+        "completed_prefix_count": durable_progress_total,
+        "remaining_load_factor_count": 0,
+        "fallback_count": 0,
+        "regularization_count": 0,
+        "external_vv_level": 0,
+        "workbench_execution": False,
+        "public_product_promotion": False,
+        "release_eligible": False,
+        "claim_boundary": result["claim_boundary"],
+    }
+    for name, expected in expected_report_bindings.items():
+        if report.get(name) != expected:
+            _fail(
+                "frame3d_completion_report_binding_mismatch",
+                f"/evidence/validation_report/{name}",
+                "Validation report is detached from the exact persisted result.",
+            )
+    computed_hashes = {
+        "result_hash": _sha256(_canonical_json_bytes(result_logical_payload)),
+        "terminal_checkpoint_artifact_hash": _sha256(
+            _canonical_json_bytes(checkpoint_logical_payload)
+        ),
+        "source_solver_receipt_hash": _sha256(
+            _canonical_json_bytes(source_receipt_logical_payload)
+        ),
+        "numerical_result_ir_hash": _sha256(
+            _canonical_json_bytes(numerical_result_logical_payload)
+        ),
+    }
+    for name, computed in computed_hashes.items():
+        if report.get(name) != computed:
+            _fail(
+                "frame3d_completion_logical_hash_mismatch",
+                f"/evidence/validation_report/{name}",
+                "Logical contract hash does not match its canonical payload.",
+            )
 
 
 def _bounded_frame3d_load_control_progress_total(
