@@ -215,3 +215,21 @@ def test_committed_receipt_is_reproducible() -> None:
 
     assert passed is True, reason
     assert reason == "g1_mgt_state_updated_matrix_free_fgmres_smoke_consistent"
+
+
+def test_source_commit_only_drift_is_volatile_but_input_checksums_are_not() -> None:
+    recorded = {
+        "generated_at": "2026-08-08T00:00:00Z",
+        "source_commit_sha": "a" * 40,
+        "input_checksums": {"adapter_receipt": "sha256:recorded"},
+    }
+    descendant = {
+        "generated_at": "2026-08-09T00:00:00Z",
+        "source_commit_sha": "b" * 40,
+        "input_checksums": {"adapter_receipt": "sha256:recorded"},
+    }
+
+    assert module._strip_volatile(recorded) == module._strip_volatile(descendant)
+
+    descendant["input_checksums"]["adapter_receipt"] = "sha256:changed"
+    assert module._strip_volatile(recorded) != module._strip_volatile(descendant)
