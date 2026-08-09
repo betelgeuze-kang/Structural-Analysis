@@ -66,9 +66,9 @@
     "schedule_profile": "free_row_sorted_element_local_incidence.v1",
     "schema_version": "engine-v2-hip-current-tangent-operator-fixture.v1"
   },
-  "generated_at": "2026-08-08T10:09:13.559253+00:00",
+  "generated_at": "2026-08-09T05:14:38.530146+00:00",
   "input_checksums": {
-    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:c9e029534b3c961cf896efaca8caf9c8534d7c5b72df2adfd79b9de7b5835fb4",
+    "implementation/phase1/g1_mgt_load_coupled_arc_length_adapter.py": "sha256:ee41609c6fb1f928fe3f8fbf8d41c3f104d310ef5769bcb1476006b2ed7ae6b0",
     "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:1cc3f97c879d72f2f2457509062f810f774fc5ce9f882a4e80044f028068fed5",
@@ -91,10 +91,10 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:42755f94ed5dadf231531e07b0c73339f34fd5302215bd358d7c003c21236b02",
+  "receipt_hash": "sha256:e624220f65d204a45f2890b636ea5d28092be01ac6091b39a92581697a6af78f",
   "schema_version": "g1-mgt-hip-current-tangent-host-parser-receipt.v1",
   "source_commit_exact_replay_claim": false,
-  "source_commit_sha": "9f5fdb2a981b6f28266b26656b42b3ca8fbca8e7",
+  "source_commit_sha": "d7c40319c44bc1912f96c9a71ff3c825969b1be9",
   "source_tree_state": "working_tree_with_uncommitted_goal_changes",
   "status": "partial",
   "synthetic_compile_receipt": {
