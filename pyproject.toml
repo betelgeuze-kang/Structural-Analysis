@@ -58,6 +58,10 @@ extend-exclude = [
   "implementation/phase1/open_data/demo/**",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# This hardware receipt source is byte-bound to the signed gfx1030 run.
+"tests/test_engine_v2_hip_fgmres_device_receipt.py" = ["F401"]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-q"
