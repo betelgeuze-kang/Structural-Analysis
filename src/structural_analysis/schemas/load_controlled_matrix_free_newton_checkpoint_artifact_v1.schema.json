@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/load_controlled_matrix_free_newton_checkpoint_artifact_v1.schema.json",
+  "title": "Load-controlled matrix-free Newton durable checkpoint artifact v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "storage_profile",
+    "core_checkpoint_schema_version",
+    "case_id",
+    "path_contract_hash",
+    "step_index",
+    "load_factor",
+    "equation_count",
+    "displacement_artifact",
+    "checkpoint_state_hash",
+    "descriptor_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "load-controlled-matrix-free-newton-checkpoint-artifact.v1"
+    },
+    "storage_profile": {
+      "const": "canonical-json-descriptor-plus-little-endian-fp64.v1"
+    },
+    "core_checkpoint_schema_version": {
+      "const": "load-controlled-matrix-free-newton-checkpoint.v1"
+    },
+    "case_id": {"type": "string", "minLength": 1},
+    "path_contract_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "step_index": {"type": "integer", "minimum": 0},
+    "load_factor": {"type": "number"},
+    "equation_count": {"type": "integer", "minimum": 1, "maximum": 10000000},
+    "displacement_artifact": {
+      "type": "object",
+      "required": [
+        "file_name",
+        "dtype",
+        "byte_order",
+        "shape",
+        "byte_length",
+        "data_hash"
+      ],
+      "properties": {
+        "file_name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*\\.f64le$"
+        },
+        "dtype": {"const": "<f8"},
+        "byte_order": {"const": "little"},
+        "shape": {
+          "type": "array",
+          "prefixItems": [{"type": "integer", "minimum": 1}],
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "byte_length": {"type": "integer", "minimum": 8},
+        "data_hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "checkpoint_state_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "descriptor_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false
+}
