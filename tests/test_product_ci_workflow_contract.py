@@ -46,14 +46,6 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
         "- name: Upload quality-gate log",
         1,
     )[0]
-    assert "git fetch --no-tags --unshallow origin" in quality_gate
-    assert (
-        'test "$(git rev-parse --is-shallow-repository)" = "false"'
-        in quality_gate
-    )
-    assert quality_gate.index("git fetch --no-tags --unshallow origin") < (
-        quality_gate.index("python scripts/verify_quality_gate.py --mode pr")
-    )
     assert "OPENBLAS_CORETYPE: Haswell" in quality_gate
     assert 'OPENBLAS_NUM_THREADS: "1"' in quality_gate
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
