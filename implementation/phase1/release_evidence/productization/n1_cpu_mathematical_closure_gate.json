@@ -4,7 +4,7 @@
     "generator_script_sha256": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
     "generator_source_control_state": "commit_bound",
     "input_checksums": {
-      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+      "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json": "sha256:7a255fc6b4405f9ffdee2ab18a148efe02567d866ffc8ded20705b15db6ba7f4",
       "implementation/phase1/release_evidence/productization/n1_stateful_material_matrix_free_newton_breadth_receipt.json": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
       "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py": "sha256:bf98beea178d07e850d4e2fc43bef61c78a6795fdcdc041d5f474a78c689843f",
       "scripts/build_n1_cpu_mathematical_closure_gate.py": "sha256:da7eb12f6c7db3f5d625c86c0119d43a39fba353121c428a91c592085b4bf602",
@@ -13,7 +13,7 @@
       "src/structural_analysis/schemas/n1_cpu_mathematical_closure_gate_v1.schema.json": "sha256:0cdbfd11b27a909e1441e4eda5528c52c753b1343c157df224d71a341fa9030a"
     },
     "source_commit_is_ancestor_of_head": true,
-    "source_commit_sha": "b8ebc925009fc1d8fb073070f455b656e7db33c9",
+    "source_commit_sha": "db75acc7a449a9d2eb22b08c3dc7ca288b9f1ffc",
     "source_input_provenance": {
       "blocker_count": 0,
       "blockers": [],
@@ -64,9 +64,9 @@
         {
           "blocker": "",
           "path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json",
-          "source_checksum": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+          "source_checksum": "sha256:7a255fc6b4405f9ffdee2ab18a148efe02567d866ffc8ded20705b15db6ba7f4",
           "source_state": "tracked",
-          "workspace_checksum": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+          "workspace_checksum": "sha256:7a255fc6b4405f9ffdee2ab18a148efe02567d866ffc8ded20705b15db6ba7f4",
           "workspace_matches_source": true
         },
         {
@@ -111,7 +111,7 @@
     "residual_jacobian_directional_consistency": true,
     "residual_pass": true
   },
-  "generated_at": "2026-08-08T23:58:09.866069Z",
+  "generated_at": "2026-08-09T02:17:03.000441Z",
   "metrics": {
     "fallback_count": 0,
     "final_load_factor": 1.0,
@@ -133,15 +133,15 @@
     "full_corotational_frame_bending_torsion",
     "production_rocm_hip_cross_device_execution"
   ],
-  "receipt_hash": "sha256:22a646f0b4047b2153b782128c79149fa0301210c5bb3f2b94edb5a52740df32",
+  "receipt_hash": "sha256:21a5e98e345f986d6bc2f58a0f6ab548c8ea4456ad326b7e01aa50926f4655ba",
   "schema_version": "n1-cpu-mathematical-closure-gate.v1",
   "sources": {
     "actual_mgt_full_mesh": {
-      "file_sha256": "sha256:c57cdff90cb6018f63a87ac8f76358cbe3ee9b432ba783b34093fba67e84bc60",
+      "file_sha256": "sha256:7a255fc6b4405f9ffdee2ab18a148efe02567d866ffc8ded20705b15db6ba7f4",
       "path": "implementation/phase1/release_evidence/productization/g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.json",
       "schema_version": "g1-mgt-state-updated-frame-axial-matrix-free-newton-continuation-receipt.v1",
       "source_commit_exact_replay": true,
-      "source_commit_sha": "8c14288b4896a9e45e0c118545ffb0b85d6fafc5"
+      "source_commit_sha": "e2bca984dd669c1c2203006ed3341551f0627d20"
     },
     "material_family_breadth": {
       "file_sha256": "sha256:c95ddd77da20b5f2012548463cf4fed7ac43f038b5779b08215c682b31c287de",
