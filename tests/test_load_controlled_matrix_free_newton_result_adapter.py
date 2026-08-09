@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, replace
 from pathlib import Path
 import sys
@@ -260,6 +261,102 @@ def test_solver_escape_counts_cannot_create_result_ir(
         create_n1_load_controlled_matrix_free_numerical_result(
             result_id="n1.escape.cpu",
             source_result=escaped,
+            binding=_binding(),
+            checkpoint_descriptor_path=durable.descriptor_path,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("target_load_factor", True),
+        ("final_load_factor", "1.0"),
+        ("final_residual_inf_kn", False),
+        ("final_residual_inf_kn", float("nan")),
+    ),
+)
+def test_terminal_metric_numbers_fail_closed_on_non_numeric_or_nonfinite_values(
+    tmp_path: Path,
+    field: str,
+    value: object,
+) -> None:
+    one_shot, _ = _solve_pair()
+    metrics = dict(one_shot.metrics)
+    metrics[field] = value
+    tampered = replace(one_shot, metrics=metrics)
+    durable = write_load_controlled_matrix_free_newton_checkpoint_artifact(
+        one_shot.final_checkpoint,
+        tmp_path / f"metric-{field}.json",
+    )
+
+    with pytest.raises(
+        N1LoadControlledMatrixFreeResultAdapterError,
+        match="finite numeric value",
+    ):
+        create_n1_load_controlled_matrix_free_numerical_result(
+            result_id="n1.numeric-tamper.cpu",
+            source_result=tampered,
+            binding=_binding(),
+            checkpoint_descriptor_path=durable.descriptor_path,
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("residual_inf_kn", False, "finite numeric value"),
+        ("last_increment_inf_m", float("inf"), "finite numeric value"),
+        ("residual_inf_kn", 1.0, "numeric gate did not pass"),
+    ),
+)
+def test_terminal_history_numbers_are_recomputed_not_trusted(
+    tmp_path: Path,
+    field: str,
+    value: object,
+    message: str,
+) -> None:
+    one_shot, _ = _solve_pair()
+    attempts = deepcopy(one_shot.attempts)
+    accepted = [row for row in attempts if row.get("accepted") is True]
+    accepted[-1]["history"][-1][field] = value
+    tampered = replace(one_shot, attempts=attempts)
+    durable = write_load_controlled_matrix_free_newton_checkpoint_artifact(
+        one_shot.final_checkpoint,
+        tmp_path / f"history-{field}.json",
+    )
+
+    with pytest.raises(N1LoadControlledMatrixFreeResultAdapterError, match=message):
+        create_n1_load_controlled_matrix_free_numerical_result(
+            result_id="n1.history-tamper.cpu",
+            source_result=tampered,
+            binding=_binding(),
+            checkpoint_descriptor_path=durable.descriptor_path,
+        )
+
+
+def test_terminal_increment_values_must_independently_satisfy_gate(
+    tmp_path: Path,
+) -> None:
+    one_shot, _ = _solve_pair()
+    attempts = deepcopy(one_shot.attempts)
+    terminal = [row for row in attempts if row.get("accepted") is True][-1]["history"][
+        -1
+    ]
+    terminal["last_increment_inf_m"] = 1.0
+    terminal["last_relative_increment"] = 1.0
+    tampered = replace(one_shot, attempts=attempts)
+    durable = write_load_controlled_matrix_free_newton_checkpoint_artifact(
+        one_shot.final_checkpoint,
+        tmp_path / "history-increment-gate.json",
+    )
+
+    with pytest.raises(
+        N1LoadControlledMatrixFreeResultAdapterError,
+        match="numeric gate did not pass",
+    ):
+        create_n1_load_controlled_matrix_free_numerical_result(
+            result_id="n1.increment-tamper.cpu",
+            source_result=tampered,
             binding=_binding(),
             checkpoint_descriptor_path=durable.descriptor_path,
         )

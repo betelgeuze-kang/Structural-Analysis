@@ -76,6 +76,24 @@ def _hash(value: Any, *, field: str) -> str:
     return value
 
 
+def _finite_number(
+    value: Any,
+    *,
+    field: str,
+    nonnegative: bool = False,
+) -> float:
+    if type(value) not in (int, float):
+        raise N1LoadControlledMatrixFreeResultAdapterError(
+            f"{field} must be a finite numeric value"
+        )
+    result = float(value)
+    if not math.isfinite(result) or (nonnegative and result < 0.0):
+        raise N1LoadControlledMatrixFreeResultAdapterError(
+            f"{field} must be a finite numeric value"
+        )
+    return result
+
+
 def n1_free_global_dof_order_hash(
     *,
     global_dof_count: int,
@@ -211,10 +229,22 @@ def _terminal_projection(
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "only a ready target-reached continuation can create ResultIR"
         )
+    target_load_factor = _finite_number(
+        metrics.get("target_load_factor"),
+        field="metrics.target_load_factor",
+    )
+    final_load_factor = _finite_number(
+        metrics.get("final_load_factor"),
+        field="metrics.final_load_factor",
+    )
+    checkpoint_load_factor = _finite_number(
+        result.final_checkpoint.load_factor,
+        field="final_checkpoint.load_factor",
+    )
     if (
-        float(metrics.get("target_load_factor", math.nan)) != 1.0
-        or float(metrics.get("final_load_factor", math.nan)) != 1.0
-        or result.final_checkpoint.load_factor != 1.0
+        target_load_factor != 1.0
+        or final_load_factor != 1.0
+        or checkpoint_load_factor != 1.0
     ):
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "N1 ResultIR requires exact target and final load factor 1.0"
@@ -225,7 +255,10 @@ def _terminal_projection(
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "final checkpoint is not the committed path terminal"
         )
-    if result.final_checkpoint.step_index < 1:
+    if (
+        type(result.final_checkpoint.step_index) is not int
+        or result.final_checkpoint.step_index < 1
+    ):
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "terminal checkpoint must have a positive committed epoch"
         )
@@ -238,15 +271,31 @@ def _terminal_projection(
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "terminal free-equation cardinality is invalid"
         )
-    final_residual = float(metrics.get("final_residual_inf_kn", math.nan))
-    if (
-        not math.isfinite(final_residual)
-        or final_residual > result.config.residual_tolerance_inf_kn
-    ):
+    final_residual = _finite_number(
+        metrics.get("final_residual_inf_kn"),
+        field="metrics.final_residual_inf_kn",
+        nonnegative=True,
+    )
+    if final_residual > result.config.residual_tolerance_inf_kn:
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "physical residual gate did not pass"
         )
     terminal = _terminal_row(result)
+    terminal_residual = _finite_number(
+        terminal.get("residual_inf_kn"),
+        field="terminal.residual_inf_kn",
+        nonnegative=True,
+    )
+    terminal_increment = _finite_number(
+        terminal.get("last_increment_inf_m"),
+        field="terminal.last_increment_inf_m",
+        nonnegative=True,
+    )
+    terminal_relative_increment = _finite_number(
+        terminal.get("last_relative_increment"),
+        field="terminal.last_relative_increment",
+        nonnegative=True,
+    )
     if (
         terminal.get("convergence_gate_passed") is not True
         or terminal.get("residual_gate_passed") is not True
@@ -255,6 +304,17 @@ def _terminal_projection(
     ):
         raise N1LoadControlledMatrixFreeResultAdapterError(
             "residual-plus-increment terminal gate did not pass"
+        )
+    if (
+        terminal_residual != final_residual
+        or terminal_residual > result.config.residual_tolerance_inf_kn
+        or (
+            terminal_increment > result.config.increment_absolute_tolerance_inf_m
+            and terminal_relative_increment > result.config.increment_relative_tolerance
+        )
+    ):
+        raise N1LoadControlledMatrixFreeResultAdapterError(
+            "terminal residual/increment numeric gate did not pass"
         )
     fallback_count = metrics.get("fallback_count")
     regularization_count = metrics.get("regularization_count")
@@ -286,10 +346,10 @@ def _terminal_projection(
         "state_epoch": result.final_checkpoint.step_index,
         "equation_count": equation_count,
         "terminal": {
-            "residual_inf_kn": terminal["residual_inf_kn"],
+            "residual_inf_kn": terminal_residual,
             "residual_tolerance_inf_kn": result.config.residual_tolerance_inf_kn,
-            "increment_inf_m": terminal["last_increment_inf_m"],
-            "relative_increment": terminal["last_relative_increment"],
+            "increment_inf_m": terminal_increment,
+            "relative_increment": terminal_relative_increment,
             "absolute_increment_tolerance_inf_m": (
                 result.config.increment_absolute_tolerance_inf_m
             ),
