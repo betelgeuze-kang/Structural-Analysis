@@ -120,6 +120,8 @@ jobs:
             tests/test_check_github_actions_runner_policy.py \
             tests/test_check_product_ci_boundaries.py \
             tests/test_external_vv_receipt_ancestry_contract.py \
+            tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary \
+            tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_probe_preserves_git_errors \
             tests/test_external_vv_clean_runner_contract.py::test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources \
             tests/test_product_ci_workflow_contract.py \
             tests/test_build_github_actions_ci_streak_evidence.py \
