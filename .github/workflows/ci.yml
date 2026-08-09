@@ -94,8 +94,9 @@ jobs:
         shell: bash
         run: |
           if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
-            git fetch --no-tags --deepen=512 origin
+            git fetch --no-tags --unshallow origin
           fi
+          test "$(git rev-parse --is-shallow-repository)" = "false"
           git cat-file -e "${GITHUB_SHA}^{commit}"
 
       - name: Set up Python
