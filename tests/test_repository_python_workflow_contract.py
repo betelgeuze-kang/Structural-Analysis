@@ -38,6 +38,7 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
         1,
     )[0]
     assert "fetch-depth: 0" in full_checkout
+    assert "lfs: true" in full_checkout
     pristine_ledger = workflow.index("- name: Validate pristine commercial gap ledger")
     hosted_hip_source = workflow.index(
         "- name: Validate hosted HIP receipt source binding"
