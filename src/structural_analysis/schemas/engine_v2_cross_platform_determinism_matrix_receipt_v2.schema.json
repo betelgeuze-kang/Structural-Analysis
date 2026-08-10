@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Engine v2 four-way cross-platform determinism matrix receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "generated_at",
+    "receipt_hash",
+    "source_commit_sha",
+    "execution",
+    "required_coordinates",
+    "observed_coordinates",
+    "observed_coordinate_count",
+    "golden_set_hash",
+    "receipts",
+    "contract_pass",
+    "blockers",
+    "claims",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "engine-v2-cross-platform-determinism-matrix-receipt.v2"
+    },
+    "generated_at": {"type": "string", "minLength": 1},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "source_commit_sha": {"type": "string"},
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin_kind",
+        "run_id",
+        "run_attempt",
+        "run_url",
+        "matrix_job_result"
+      ],
+      "properties": {
+        "origin_kind": {"const": "github_actions"},
+        "run_id": {"type": "string"},
+        "run_attempt": {"type": "integer", "minimum": 0},
+        "run_url": {"type": "string"},
+        "matrix_job_result": {"type": "string", "minLength": 1}
+      }
+    },
+    "required_coordinates": {
+      "const": [
+        "ubuntu-latest|python-3.10",
+        "ubuntu-latest|python-3.12",
+        "windows-latest|python-3.10",
+        "windows-latest|python-3.12"
+      ]
+    },
+    "observed_coordinates": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/coordinate"},
+      "uniqueItems": true,
+      "maxItems": 4
+    },
+    "observed_coordinate_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4
+    },
+    "golden_set_hash": {"$ref": "#/$defs/hash"},
+    "receipts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/receiptSummary"}
+    },
+    "contract_pass": {"type": "boolean"},
+    "blockers": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "four_way_github_actions_exact_replay",
+        "reference_github_actions_exact_replay",
+        "ubuntu_python_3_10_and_3_12_execution",
+        "windows_python_3_10_and_3_12_execution",
+        "cross_platform_contract_and_binary_hash_identity",
+        "nonreference_semantic_parity",
+        "bounded_planar_four_way_exact_replay",
+        "bounded_planar_four_way_semantic_parity",
+        "bounded_planar_settlement_four_way_exact_replay",
+        "bounded_planar_settlement_four_way_semantic_parity",
+        "cpu_hip_numerical_parity",
+        "developer_preview_windows_gate",
+        "product_readiness"
+      ],
+      "properties": {
+        "four_way_github_actions_exact_replay": {"type": "boolean"},
+        "reference_github_actions_exact_replay": {"type": "boolean"},
+        "ubuntu_python_3_10_and_3_12_execution": {"type": "boolean"},
+        "windows_python_3_10_and_3_12_execution": {"type": "boolean"},
+        "cross_platform_contract_and_binary_hash_identity": {"type": "boolean"},
+        "nonreference_semantic_parity": {"type": "boolean"},
+        "bounded_planar_four_way_exact_replay": {"type": "boolean"},
+        "bounded_planar_four_way_semantic_parity": {"type": "boolean"},
+        "bounded_planar_settlement_four_way_exact_replay": {"type": "boolean"},
+        "bounded_planar_settlement_four_way_semantic_parity": {"type": "boolean"},
+        "cpu_hip_numerical_parity": {"const": false},
+        "developer_preview_windows_gate": {"const": false},
+        "product_readiness": {"const": false}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "coordinate": {
+      "enum": [
+        "ubuntu-latest|python-3.10",
+        "ubuntu-latest|python-3.12",
+        "windows-latest|python-3.10",
+        "windows-latest|python-3.12"
+      ]
+    },
+    "receiptSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinate_id",
+        "receipt_file",
+        "receipt_hash",
+        "contract_pass",
+        "actual_system",
+        "actual_python_version",
+        "numpy_version",
+        "runner_name"
+      ],
+      "properties": {
+        "coordinate_id": {"$ref": "#/$defs/coordinate"},
+        "receipt_file": {"type": "string", "minLength": 1},
+        "receipt_hash": {"$ref": "#/$defs/hash"},
+        "contract_pass": {"type": "boolean"},
+        "actual_system": {"type": "string", "minLength": 1},
+        "actual_python_version": {"type": "string", "minLength": 1},
+        "numpy_version": {"type": "string", "minLength": 1},
+        "runner_name": {"type": "string"},
+        "run_attempt": {"type": "integer", "minimum": 1}
+      }
+    }
+  }
+}

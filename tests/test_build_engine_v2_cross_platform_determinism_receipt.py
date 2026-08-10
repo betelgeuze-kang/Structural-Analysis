@@ -5,6 +5,7 @@ import importlib.util
 import json
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -115,10 +116,16 @@ def test_local_coordinate_receipt_passes_without_claiming_matrix() -> None:
     }
     assert receipt["claims"]["exact_contract_hash_replay"] is True
     assert receipt["claims"]["canonical_binary_write_readback"] is True
+    assert receipt["claims"]["reference_coordinate_exact_replay"] is False
     assert receipt["claims"]["github_actions_coordinate_execution"] is False
     assert receipt["claims"]["bounded_planar_exact_replay"] is True
+    assert receipt["claims"]["bounded_planar_semantic_parity"] is True
     assert receipt["claims"]["bounded_planar_settlement_exact_replay"] is True
+    assert (
+        receipt["claims"]["bounded_planar_settlement_semantic_parity"] is True
+    )
     assert receipt["claims"]["four_way_cross_platform_determinism"] is False
+    assert receipt["semantic_policy"] == module.SEMANTIC_POLICY
     assert receipt["model_fixture"] == {
         "path": "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json",
         "expected_data_hash": module.EXPECTED_MODEL_FIXTURE_DATA_HASH,
@@ -141,6 +148,126 @@ def test_local_coordinate_receipt_passes_without_claiming_matrix() -> None:
     assert receipt["observed_goldens"] == module.EXPECTED_GOLDENS
     assert receipt["observed_binary_artifacts"] == module.EXPECTED_BINARY_ARTIFACTS
     assert receipt["receipt_hash"] == module._receipt_hash(receipt)
+
+
+def test_semantic_policy_is_quantity_aware_and_bound_to_golden_set(
+    monkeypatch,
+) -> None:
+    assert module._semantic_normalize({"UX_m": 5.0e-13}) == {"UX_m": 0.0}
+    assert module._semantic_normalize({"value_si": 5.0e-7}) == {"value_si": 0.0}
+    assert module._semantic_normalize({"stress_Pa": 5.0e-4}) == {
+        "stress_Pa": 0.0
+    }
+    assert module._semantic_normalize({"UX_m": 1.234567891}) == (
+        module._semantic_normalize({"UX_m": 1.234567892})
+    )
+    assert module._semantic_normalize({"UX_m": 1.234567891}) != (
+        module._semantic_normalize({"UX_m": 1.2345689})
+    )
+    assert module._semantic_normalize({"relative_residual": 1.0e-10}) == {
+        "relative_residual": 0.0
+    }
+    assert module._semantic_normalize({"relative_residual": 9.0e-10}) == {
+        "relative_residual": 0.0
+    }
+    assert module._semantic_normalize({"relative_residual": 1.1e-9}) == {
+        "relative_residual": 1.1e-9
+    }
+    assert module._semantic_normalize(
+        {"dimensionless_scaled_residual_linf": 9.0e-10}
+    ) == {"dimensionless_scaled_residual_linf": 0.0}
+
+    before = module.expected_golden_set_hash()
+    monkeypatch.setitem(
+        module.SEMANTIC_POLICY["absolute_zero_by_quantity"],
+        "force_N",
+        1.0e-5,
+    )
+    assert module.expected_golden_set_hash() != before
+
+
+def test_semantic_hash_collapses_only_gate_passed_relative_residuals() -> None:
+    def result(relative_residual: float) -> SimpleNamespace:
+        payload = {
+            "status": "converged",
+            "contract_pass": True,
+            "profile": "test",
+            "configuration": {"residual_tolerance": 1.0e-9},
+            "authority": {},
+            "node_displacements": [],
+            "support_reactions": [],
+            "member_end_forces": [],
+            "section_results": [],
+            "fiber_results": [],
+            "convergence_history": [
+                {"relative_residual": relative_residual},
+            ],
+            "metrics": {
+                "free_residual_relative": relative_residual,
+                "dimensionless_scaled_residual_linf": relative_residual,
+            },
+            "unsupported_features": [],
+            "warnings": [],
+        }
+        return SimpleNamespace(to_dict=lambda: payload)
+
+    below_gate = module._bounded_planar_semantic_hash(result(1.0e-10))
+    at_gate = module._bounded_planar_semantic_hash(result(1.0e-9))
+    above_gate = module._bounded_planar_semantic_hash(result(1.1e-9))
+
+    assert below_gate == at_gate
+    assert above_gate != at_gate
+
+
+def test_nonreference_coordinate_accepts_semantic_not_raw_numerical_identity(
+    monkeypatch,
+) -> None:
+    original_compute = module.compute_engine_v2_cross_platform_goldens
+
+    def compute_with_platform_roundoff(*args, **kwargs):
+        goldens, binary_artifacts = original_compute(*args, **kwargs)
+        for index, name in enumerate(
+            sorted(module.REFERENCE_ONLY_NUMERICAL_GOLDENS), start=1
+        ):
+            goldens[name] = "sha256:" + format(index, "064x")
+        return goldens, binary_artifacts
+
+    monkeypatch.setattr(
+        module,
+        "compute_engine_v2_cross_platform_goldens",
+        compute_with_platform_roundoff,
+    )
+
+    receipt = module.build_run_receipt(
+        os_label="windows-latest",
+        python_version="3.10",
+        source_commit_sha=SOURCE_COMMIT,
+        origin_kind="github_actions",
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        job="cross-platform-goldens",
+        runner_name="test-windows-roundoff",
+        repo_root=REPO_ROOT,
+        actual_system="Windows",
+        actual_python_version="3.10.9",
+        actual_python_implementation="CPython",
+        platform_release="test-release",
+        checkout_head_sha=SOURCE_COMMIT,
+        tracked_source_clean=True,
+        generated_at=GENERATED_AT,
+    )
+
+    assert receipt["contract_pass"] is True
+    assert receipt["blockers"] == []
+    assert receipt["claims"]["exact_contract_hash_replay"] is True
+    assert receipt["claims"]["reference_coordinate_exact_replay"] is False
+    assert receipt["claims"]["bounded_planar_exact_replay"] is False
+    assert receipt["claims"]["bounded_planar_semantic_parity"] is True
+    assert receipt["claims"]["bounded_planar_settlement_exact_replay"] is False
+    assert (
+        receipt["claims"]["bounded_planar_settlement_semantic_parity"] is True
+    )
 
 
 def test_coordinate_receipt_blocks_wrong_actual_runtime() -> None:
@@ -208,14 +335,181 @@ def test_four_github_receipts_aggregate_to_exact_matrix_receipt(
     assert matrix["observed_coordinates"] == sorted(module.REQUIRED_COORDINATES)
     assert matrix["observed_coordinate_count"] == 4
     assert len(matrix["receipts"]) == 4
+    assert {row["run_attempt"] for row in matrix["receipts"]} == {RUN_ATTEMPT}
     assert matrix["claims"]["four_way_github_actions_exact_replay"] is True
+    assert matrix["claims"]["reference_github_actions_exact_replay"] is True
     assert matrix["claims"]["windows_python_3_10_and_3_12_execution"] is True
+    assert matrix["claims"]["nonreference_semantic_parity"] is True
     assert matrix["claims"]["bounded_planar_four_way_exact_replay"] is True
+    assert matrix["claims"]["bounded_planar_four_way_semantic_parity"] is True
     assert (
         matrix["claims"]["bounded_planar_settlement_four_way_exact_replay"] is True
     )
+    assert (
+        matrix["claims"][
+            "bounded_planar_settlement_four_way_semantic_parity"
+        ]
+        is True
+    )
     assert matrix["claims"]["developer_preview_windows_gate"] is False
     assert matrix["receipt_hash"] == module._receipt_hash(matrix)
+
+
+def test_matrix_accepts_successful_coordinates_from_prior_failed_job_attempt(
+    tmp_path: Path,
+) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    for receipt in receipts[:3]:
+        receipt["execution"]["run_attempt"] = RUN_ATTEMPT - 1
+        receipt["receipt_hash"] = module._receipt_hash(receipt)
+        coordinate = receipt["coordinate"]
+        path = tmp_path / (
+            f"{coordinate['os_label']}-python-"
+            f"{coordinate['requested_python_version']}.json"
+        )
+        path.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is True
+    assert [row["run_attempt"] for row in matrix["receipts"]].count(
+        RUN_ATTEMPT - 1
+    ) == 3
+    assert [row["run_attempt"] for row in matrix["receipts"]].count(
+        RUN_ATTEMPT
+    ) == 1
+
+
+def test_matrix_v2_schema_keeps_historical_summaries_without_attempt_field(
+    tmp_path: Path,
+) -> None:
+    _write_four_receipts(tmp_path)
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+    historical = copy.deepcopy(matrix)
+    for receipt in historical["receipts"]:
+        receipt.pop("run_attempt")
+    historical["receipt_hash"] = module._receipt_hash(historical)
+
+    module._validate_schema(
+        historical,
+        repo_root=REPO_ROOT,
+        schema_path=module.MATRIX_SCHEMA,
+    )
+
+
+def test_matrix_rejects_coordinate_from_future_attempt(tmp_path: Path) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    future = receipts[-1]
+    future["execution"]["run_attempt"] = RUN_ATTEMPT + 1
+    future["receipt_hash"] = module._receipt_hash(future)
+    path = tmp_path / "windows-latest-python-3.12.json"
+    path.write_text(
+        json.dumps(future, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is False
+    assert (
+        "coordinate_run_attempt_out_of_range:"
+        f"windows-latest|python-3.12:{RUN_ATTEMPT + 1}>{RUN_ATTEMPT}"
+    ) in matrix["blockers"]
+
+
+def test_matrix_recomputes_nonreference_exact_claims_from_observations(
+    tmp_path: Path,
+) -> None:
+    receipts = _write_four_receipts(tmp_path)
+    drifted = copy.deepcopy(
+        next(
+            receipt
+            for receipt in receipts
+            if receipt["coordinate"]["coordinate_id"]
+            == "windows-latest|python-3.10"
+        )
+    )
+    for index, name in enumerate(
+        sorted(module.REFERENCE_ONLY_NUMERICAL_GOLDENS), start=1
+    ):
+        drifted["observed_goldens"][name] = "sha256:" + format(index, "064x")
+    drifted["claims"]["bounded_planar_exact_replay"] = False
+    drifted["claims"]["bounded_planar_settlement_exact_replay"] = False
+    drifted["receipt_hash"] = module._receipt_hash(drifted)
+    path = tmp_path / "windows-latest-python-3.10.json"
+    path.write_text(
+        json.dumps(drifted, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    matrix = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert matrix["contract_pass"] is True
+    assert matrix["claims"]["four_way_github_actions_exact_replay"] is False
+    assert matrix["claims"]["bounded_planar_four_way_exact_replay"] is False
+    assert matrix["claims"]["bounded_planar_four_way_semantic_parity"] is True
+
+    drifted["claims"]["bounded_planar_exact_replay"] = True
+    drifted["receipt_hash"] = module._receipt_hash(drifted)
+    path.write_text(
+        json.dumps(drifted, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    blocked = module.build_matrix_receipt(
+        receipts_directory=tmp_path,
+        source_commit_sha=SOURCE_COMMIT,
+        run_id=RUN_ID,
+        run_attempt=RUN_ATTEMPT,
+        run_url=RUN_URL,
+        matrix_job_result="success",
+        repo_root=REPO_ROOT,
+        generated_at=GENERATED_AT,
+    )
+
+    assert blocked["contract_pass"] is False
+    assert (
+        "coordinate_claim_inconsistent:windows-latest|python-3.10:"
+        "bounded_planar_exact_replay"
+    ) in blocked["blockers"]
 
 
 def test_matrix_blocks_missing_or_tampered_coordinate(tmp_path: Path) -> None:
@@ -294,7 +588,7 @@ def test_matrix_rejects_rehashed_settlement_fixture_tampering(
     tampered["bounded_planar_settlement_fixture"]["observed_data_hash"] = (
         "sha256:" + "f" * 64
     )
-    tampered["claims"]["bounded_planar_settlement_exact_replay"] = False
+    tampered["claims"]["bounded_planar_settlement_semantic_parity"] = False
     tampered["receipt_hash"] = module._receipt_hash(tampered)
     path = tmp_path / "ubuntu-latest-python-3.10.json"
     path.write_text(
@@ -315,7 +609,7 @@ def test_matrix_rejects_rehashed_settlement_fixture_tampering(
 
     assert matrix["contract_pass"] is False
     assert (
-        "coordinate_planar_settlement_replay_blocked:"
+        "coordinate_planar_settlement_semantic_parity_blocked:"
         "ubuntu-latest|python-3.10"
     ) in matrix["blockers"]
     assert (

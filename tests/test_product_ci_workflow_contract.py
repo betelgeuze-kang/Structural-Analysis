@@ -16,6 +16,8 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
 
     assert "name: CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
+    assert "timeout-minutes: 180" in workflow
+    assert "fetch-depth: 0" in workflow
     assert "scripts/check_product_ci_boundaries.py" in workflow
     assert "scripts/run_product_ci_lane.py --lane core" in workflow
     assert "scripts/verify_quality_gate.py --mode pr" in workflow
@@ -92,11 +94,19 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
 
     assert "name: Legacy Evidence CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
+    assert "timeout-minutes: 180" in workflow
+    assert "fetch-depth: 0" in workflow
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
     assert "scripts/run_product_ci_lane.py" in workflow
     assert "--lane legacy_evidence" in workflow
     assert "tests/test_build_product_readiness_snapshot.py" in workflow
     assert "tests/test_validate_external_vv_operator_attestation.py" in workflow
     assert "tests/test_promote_external_vv_level2.py" in workflow
+    assert "run_clean_runner.py" in workflow
+    assert "--refresh-product-replay-summary" in workflow
     assert (
         "scripts/build_bounded_planar_external_linear_case_package.py" in workflow
     )
@@ -156,6 +166,12 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
 
     assert "name: Engine v2 Contract CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
+    assert 'MKL_NUM_THREADS: "1"' in workflow
+    assert 'PYTHONHASHSEED: "0"' in workflow
     assert "python -m pytest -q" in workflow
     assert "tests/test_engine_v2*.py" in workflow
     assert "tests/test_model_ir_v2_contract.py" in workflow

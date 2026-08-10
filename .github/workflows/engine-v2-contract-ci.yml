@@ -4,6 +4,7 @@ name: Engine v2 Contract CI
 # HIP/ROCm hardware and cannot create hardware or readiness evidence.
 
 on:
+  merge_group:
   pull_request:
     paths:
       - "src/structural_analysis/engine_v2/**"
@@ -134,6 +135,11 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+  PYTHONHASHSEED: "0"
 
 concurrency:
   group: engine-v2-contract-${{ github.workflow }}-${{ github.ref }}
@@ -154,7 +160,9 @@ jobs:
           cache: pip
 
       - name: Install package and contract tools
-        run: python -m pip install -e .[dev]
+        run: |
+          python -m pip install numpy==1.26.4 scipy==1.12.0
+          python -m pip install -e .[dev]
 
       - name: Lint Engine v2 contracts
         run: >-

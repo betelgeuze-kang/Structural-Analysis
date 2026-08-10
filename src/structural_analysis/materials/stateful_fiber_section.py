@@ -386,12 +386,14 @@ class StatefulRCFiberSection:
             strain = axial_strain - curvature * fiber.y_m
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                response: FiberResponse = self.steel.integrate(strain, parent)
-                yielded_count += int(response.yielded)
+                steel_response = self.steel.integrate(strain, parent)
+                yielded_count += int(steel_response.yielded)
+                response: FiberResponse = steel_response
             else:
                 assert type(parent) is ConcreteDamageState
-                response = self.concrete.integrate(strain, parent)
-                damaged_count += int(response.damage_evolved)
+                concrete_response = self.concrete.integrate(strain, parent)
+                damaged_count += int(concrete_response.damage_evolved)
+                response = concrete_response
             stress = float(response.stress_mpa)
             algorithmic_tangent = float(response.consistent_tangent_mpa)
             force = stress * fiber.area_m2 * _MPA_M2_TO_KN
@@ -870,10 +872,8 @@ def solve_stateful_fiber_section_resultants(
             terminal_reason = "maximum_iterations_exhausted"
             break
 
-    parent_unchanged = bool(
-        committed_state.canonical_bytes() == parent_bytes
-        and section.validate_state(committed_state) is None
-    )
+    section.validate_state(committed_state)
+    parent_unchanged = committed_state.canonical_bytes() == parent_bytes
     if accepted_response is None:
         accepted_state = committed_state
         status = "blocked"

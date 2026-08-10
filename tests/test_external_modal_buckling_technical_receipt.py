@@ -186,6 +186,31 @@ def test_offline_validator_rejects_tampered_mode_vector_bytes(
         )
 
 
+def test_offline_validator_reads_explicit_mode_vector_paths(tmp_path: Path) -> None:
+    payload = _payload()
+    overrides: dict[str, Path] = {}
+    for descriptor in payload["mode_vector_artifacts"]:
+        source = ROOT / descriptor["artifact_path"]
+        target = tmp_path / source.name
+        shutil.copy2(source, target)
+        overrides[descriptor["name"]] = target
+    tampered = overrides[payload["mode_vector_artifacts"][0]["name"]]
+    raw = bytearray(tampered.read_bytes())
+    raw[-1] ^= 1
+    tampered.write_bytes(raw)
+
+    with pytest.raises(
+        module.ExternalModalBucklingReceiptError,
+        match="mode_vector_data_hash_invalid",
+    ):
+        module.validate_external_modal_buckling_technical_receipt(
+            payload,
+            repo_root=ROOT,
+            require_current_sources=False,
+            mode_vector_paths=overrides,
+        )
+
+
 def test_schema_and_offline_cli_check() -> None:
     schema = json.loads((ROOT / module.SCHEMA_PATH).read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)

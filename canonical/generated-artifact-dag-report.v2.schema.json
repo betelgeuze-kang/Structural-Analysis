@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/generated-artifact-dag-report.v2.schema.json",
+  "title": "Generated artifact DAG evaluation report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "evaluation_mode",
+    "evaluated_through",
+    "contract_pass",
+    "scope_pass",
+    "stale_nodes",
+    "nodes",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "generated-artifact-dag-report.v2"},
+    "evaluation_mode": {"enum": ["full", "candidate"]},
+    "evaluated_through": {"type": "string", "minLength": 1},
+    "contract_pass": {"type": "boolean"},
+    "scope_pass": {"type": "boolean"},
+    "stale_nodes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status", "fingerprint", "reasons", "current_binding"],
+        "properties": {
+          "status": {"enum": ["fresh", "stale"]},
+          "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "reasons": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          },
+          "current_binding": {"$ref": "#/$defs/currentBinding"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "currentBinding": {
+      "type": "object",
+      "required": ["validator", "status", "contract_pass", "violations"],
+      "properties": {
+        "validator": {"type": "string", "minLength": 1},
+        "status": {"enum": ["current", "stale", "out_of_scope"]},
+        "contract_pass": {"type": "boolean"},
+        "violations": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"status": {"const": "current"}}},
+          "then": {
+            "properties": {
+              "contract_pass": {"const": true},
+              "violations": {"maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"status": {"enum": ["stale", "out_of_scope"]}}},
+          "then": {
+            "properties": {
+              "contract_pass": {"const": false},
+              "violations": {"minItems": 1}
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

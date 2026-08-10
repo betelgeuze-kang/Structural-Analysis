@@ -50,6 +50,9 @@ DEFAULT_SUPPORT_BUNDLE_ARCHIVE = Path("implementation/phase1/release/support_bun
 DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
 )
+DEFAULT_GAP_LEDGER_EVIDENCE_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json"
+)
 DEFAULT_GAP_CLOSURE_STATUS = Path("implementation/phase1/release_evidence/productization/gap_closure_status.json")
 DEFAULT_G1_DIRECT_RESIDUAL_TERMINAL_GATE_REPORT = Path(
     "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json"
@@ -321,6 +324,7 @@ def _package_regeneration_commands() -> list[str]:
         f"python3 scripts/build_mgt_g1_direct_residual_terminal_gate_report.py --out {DEFAULT_G1_DIRECT_RESIDUAL_TERMINAL_GATE_REPORT}",
         f"python3 scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py --out {DEFAULT_G1_SHELL_MATERIAL_BUDGETED_CONTINUATION_STATUS}",
         f"python3 scripts/report_commercial_gap_ledger_status.py --output-json {DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS}",
+        f"python3 scripts/build_gap_ledger_evidence_audit.py --out {DEFAULT_GAP_LEDGER_EVIDENCE_AUDIT}",
         f"python3 scripts/report_gap_closure_status.py --output-json {DEFAULT_GAP_CLOSURE_STATUS}",
         "python3 scripts/build_support_bundle.py",
         f"python3 scripts/build_paid_pilot_scope_guard_report.py --out {DEFAULT_PAID_PILOT_SCOPE_GUARD} --out-md {DEFAULT_PAID_PILOT_SCOPE_GUARD_MD}",
@@ -352,6 +356,7 @@ def _package_regeneration_output_specs() -> list[tuple[str, Path, str]]:
             "build_mgt_g1_shell_material_budgeted_continuation_status.py",
         ),
         ("commercial_gap_ledger_status", DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS, "report_commercial_gap_ledger_status.py"),
+        ("gap_ledger_evidence_audit", DEFAULT_GAP_LEDGER_EVIDENCE_AUDIT, "build_gap_ledger_evidence_audit.py"),
         ("gap_closure_status", DEFAULT_GAP_CLOSURE_STATUS, "report_gap_closure_status.py"),
         ("support_bundle_manifest", DEFAULT_SUPPORT_BUNDLE_MANIFEST, "build_support_bundle.py"),
         ("pm_failure_bundle_coverage", DEFAULT_SUPPORT_BUNDLE_PM_FAILURE_COVERAGE, "build_support_bundle.py"),

@@ -175,7 +175,12 @@ def solve_sparse_modal_modes(
                 maximum_iterations=maximum_iterations,
                 arpack_tolerance=tolerances["arpack_tolerance"],
             )
-        except (ArpackNoConvergence, RuntimeError, ValueError, np.linalg.LinAlgError) as exc:
+        except (
+            ArpackNoConvergence,
+            RuntimeError,
+            ValueError,
+            np.linalg.LinAlgError,
+        ) as exc:
             raise SparseGeneralizedEigenError(
                 "mass must be numerically positive definite"
             ) from exc
@@ -426,6 +431,10 @@ def solve_sparse_linear_buckling(
         raw_reciprocals, raw_vectors = eigsh(
             kg_matrix,
             k=candidate_count,
+            # Keep the Arnoldi workspace immediately above the requested
+            # candidate subspace. ARPACK can fail to factorize when its wider
+            # default workspace is forced into the nullspace of singular Kg.
+            ncv=min(n, candidate_count + 1),
             M=k_matrix,
             Minv=stiffness_inverse,
             which="LA",

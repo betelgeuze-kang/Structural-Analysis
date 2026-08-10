@@ -9,6 +9,7 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "build_goal_bottleneck_roadmap_surface.py"
+PROVENANCE_BLOCKER = "source_provenance::input_not_reproducible_at_declared_commit"
 if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -108,9 +109,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         )
     }
     assert kpis["blocked_release_count"] == len(pm_report["full_release_blockers"])
-    assert kpis["first_blocker"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
+    assert kpis["first_blocker"] == PROVENANCE_BLOCKER
     assert kpis["evidence_surface_count"] == 8
     assert kpis["locked_evidence_surface_count"] == 0
     assert kpis["missing_evidence_surface_count"] == 0
@@ -120,9 +119,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     briefing = surface["non_expert_release_briefing"]
     assert briefing["audience"] == "non_expert_pm_operator"
     assert briefing["release_allowed"] is False
-    assert briefing["primary_release_blocker"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
+    assert briefing["primary_release_blocker"] == PROVENANCE_BLOCKER
     assert briefing["refresh_required_operator_action_count"] == 1
     assert briefing["refresh_required_operator_actions"] == [
         {
@@ -244,9 +241,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "gate by itself."
     )
 
-    assert briefing["primary_roadmap_bottleneck"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
+    assert briefing["primary_roadmap_bottleneck"] == PROVENANCE_BLOCKER
     assert briefing["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
     assert briefing["blocked_science_or_beta_phase_count"] == 0
     assert briefing["blocked_science_or_beta_phases"] == []
@@ -384,12 +379,8 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
     assert rows["phase_0_source_of_truth_hardening"]["state"] == "ready"
     phase_1 = rows["phase_1_goal_release_cockpit"]
     assert phase_1["state"] == "blocked"
-    assert phase_1["bottleneck"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
-    assert phase_1["first_blocker"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
+    assert phase_1["bottleneck"] == PROVENANCE_BLOCKER
+    assert phase_1["first_blocker"] == PROVENANCE_BLOCKER
     kpis = surface["release_decision_kpis"]
     assert phase_1["summary"] == {
         "release_allowed": kpis["release_allowed"],
@@ -401,9 +392,7 @@ def test_goal_bottleneck_roadmap_surface_links_structural_release_bottleneck() -
         "blocked_capability_count": product_capabilities["blocked_capability_count"],
     }
     assert phase_1["next_actions"] == ["work_release_decision_operator_actions"]
-    assert surface["primary_roadmap_bottleneck"] == (
-        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
-    )
+    assert surface["primary_roadmap_bottleneck"] == PROVENANCE_BLOCKER
     assert surface["primary_roadmap_phase_id"] == "phase_1_goal_release_cockpit"
 
 

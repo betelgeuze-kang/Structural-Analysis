@@ -4,18 +4,21 @@
 from __future__ import annotations
 
 import argparse
+from contextvars import ContextVar
 from datetime import datetime, timezone
-import hashlib
 import json
 from pathlib import Path
 import re
-import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "pm-release-blocker-action-register.v1"
 ROOT = Path(__file__).resolve().parents[1]
-from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    CANONICAL_ENGINE_VERSION,
+    commit_bound_input_metadata,
+    resolve_input_path,
+)
 
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 AGGREGATOR_REUSE_POLICY = "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions"
@@ -151,6 +154,9 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
 )
 GITHUB_SYNC_APPROVAL_PHRASE = "feature push + main fast-forward 승인"
 STRUCTURAL_SCOPE_CLEANUP_BLOCKER_ID = "structural_scope_cleanup::owner_review_decisions_pending"
+_OBSERVED_INPUT_PATHS: ContextVar[set[Path] | None] = ContextVar(
+    "pm_action_register_observed_input_paths", default=None
+)
 
 
 def _receipt_path(lane_id: str) -> Path:
@@ -170,52 +176,47 @@ def _now_utc_iso() -> str:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
+    resolved = _observe_input(path)
+    if not resolved.exists():
         return {}
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(resolved.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
 
 
-def _git_head() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return ""
+def _observe_input(path: Path) -> Path:
+    resolved = resolve_input_path(path, repo_root=ROOT)
+    observed = _OBSERVED_INPUT_PATHS.get()
+    if observed is not None:
+        observed.add(resolved)
+    return resolved
 
 
 def _path_key(path: Path) -> str:
+    resolved = resolve_input_path(path, repo_root=ROOT)
     try:
-        return path.resolve().relative_to(ROOT).as_posix()
+        return resolved.relative_to(ROOT.resolve()).as_posix()
     except ValueError:
-        return path.as_posix()
-
-
-def _sha256_or_missing(path: Path) -> str:
-    resolved = path if path.is_absolute() else ROOT / path
-    if not resolved.exists() or not resolved.is_file():
-        return "missing"
-    digest = hashlib.sha256()
-    with resolved.open("rb") as handle:
-        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return f"sha256:{digest.hexdigest()}"
+        return resolved.as_posix()
 
 
 def _source_tracking_metadata(source_paths: list[Path]) -> dict[str, Any]:
+    deduped_paths: list[Path] = []
+    seen: set[Path] = set()
+    for path in source_paths:
+        resolved = resolve_input_path(path, repo_root=ROOT)
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        deduped_paths.append(path)
+    provenance = commit_bound_input_metadata(deduped_paths, repo_root=ROOT)
     return {
-        "source_commit_sha": _git_head(),
+        **provenance,
         "engine_version": ENGINE_VERSION,
-        "input_checksums": {_path_key(path): _sha256_or_missing(path) for path in source_paths},
         "reused_evidence": True,
         "reuse_policy": AGGREGATOR_REUSE_POLICY,
         "aggregator_freshness_policy": {
             "mode": "direct_aggregator_source_tracking",
-            "source_artifacts": [_path_key(path) for path in source_paths],
+            "source_artifacts": [_path_key(path) for path in deduped_paths],
             "claim_boundary": (
                 "This operator action aggregator does not close blockers. It exposes source commit "
                 "and input checksums for its direct upstream PM/freshness artifacts so stale action "
@@ -259,6 +260,29 @@ def _as_int(value: Any, default: int = 0) -> int:
         return int(value)
     except Exception:
         return int(default)
+
+
+def _upstream_contract_status(payload: dict[str, Any]) -> dict[str, Any]:
+    provenance = _as_dict(payload.get("source_input_provenance"))
+    loaded = bool(payload)
+    contract_field_present = "contract_pass" in payload
+    provenance_present = bool(provenance)
+    contract_pass = payload.get("contract_pass") is True
+    provenance_pass = provenance.get("contract_pass") is True
+    return {
+        "loaded": loaded,
+        "contract_field_present": contract_field_present,
+        "contract_pass": contract_pass,
+        "source_input_provenance_present": provenance_present,
+        "source_input_provenance_contract_pass": provenance_pass,
+        "required_pass": bool(
+            loaded
+            and contract_field_present
+            and contract_pass
+            and provenance_present
+            and provenance_pass
+        ),
+    }
 
 
 def _structural_scope_cleanup_open(plan: dict[str, Any]) -> bool:
@@ -1141,7 +1165,7 @@ def _expected_intake_artifact(*, namespace: str, code: str) -> str:
 
 def _path_within_root(path: Path) -> bool:
     try:
-        path.resolve().relative_to(ROOT.resolve())
+        resolve_input_path(path, repo_root=ROOT).relative_to(ROOT.resolve())
     except ValueError:
         return False
     except Exception:
@@ -1153,20 +1177,21 @@ def _resolve_artifact_json_path(*, pm_report: Path, artifact_ref: str) -> Path |
     if not artifact_ref:
         return None
     artifact = Path(artifact_ref)
+    resolved_pm_report = resolve_input_path(pm_report, repo_root=ROOT)
     candidates: list[Path] = []
     if artifact.is_absolute():
-        candidates.append(artifact)
+        candidates.append(resolve_input_path(artifact, repo_root=ROOT))
     else:
         candidates.extend(
             [
-                pm_report.parent / artifact,
-                pm_report.parent / artifact.name,
-                artifact,
+                resolved_pm_report.parent / artifact,
+                resolved_pm_report.parent / artifact.name,
+                ROOT.resolve() / artifact,
             ]
         )
-        if _path_within_root(pm_report):
-            candidates.append(ROOT / artifact)
-    for candidate in candidates:
+    deduped_candidates = list(dict.fromkeys(candidate.resolve() for candidate in candidates))
+    for candidate in deduped_candidates:
+        _observe_input(candidate)
         try:
             if candidate.exists() and candidate.is_file():
                 return candidate
@@ -1564,7 +1589,7 @@ def _handoff_payload(
     }
 
 
-def build_register(
+def _build_register(
     pm_report: Path = DEFAULT_PM_REPORT,
     structural_scope_plan: Path | None = None,
 ) -> dict[str, Any]:
@@ -1741,26 +1766,71 @@ def build_register(
             "from release-tier/open blocker lists used for owner handoff."
         ),
     }
-    contract_pass = not rows
+    computed_contract_pass = not rows
+    upstream_pm_status = _upstream_contract_status(report)
+    source_metadata = _source_tracking_metadata(
+        [
+            Path("scripts/build_pm_release_blocker_action_register.py"),
+            Path("scripts/release_evidence_metadata.py"),
+            pm_report,
+            DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT,
+            DEFAULT_CI_STREAK_INTAKE_PACKET,
+            DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
+            DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
+            *([structural_scope_plan] if structural_scope_plan is not None else []),
+            *sorted(_OBSERVED_INPUT_PATHS.get() or set()),
+        ]
+    )
+    provenance_pass = bool(
+        source_metadata["source_input_provenance"]["contract_pass"]
+    )
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    upstream_blockers = (
+        []
+        if upstream_pm_status["required_pass"]
+        else ["ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"]
+    )
+    effective_blockers = [
+        *upstream_blockers,
+        *([] if provenance_pass else [provenance_blocker]),
+    ]
+    contract_pass = bool(
+        computed_contract_pass
+        and upstream_pm_status["required_pass"]
+        and provenance_pass
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
-        **_source_tracking_metadata(
-            [
-                Path("scripts/build_pm_release_blocker_action_register.py"),
-                pm_report,
-                DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT,
-                DEFAULT_CI_STREAK_INTAKE_PACKET,
-                DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
-                DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
-                *([structural_scope_plan] if structural_scope_plan is not None else []),
-            ]
-        ),
-        "pm_release_gate_report": str(pm_report),
+        **source_metadata,
+        "pm_release_gate_report": _path_key(pm_report),
         "pm_summary_line": str(report.get("summary_line", "")),
         "canonical_release_area_evidence": canonical_release_area_evidence,
+        "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
-        "reason_code": "PASS" if contract_pass else "ERR_PM_RELEASE_BLOCKERS_OPEN",
+        "reason_code": (
+            "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+            if not upstream_pm_status["required_pass"]
+            else "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+            if not provenance_pass
+            else "PASS"
+            if computed_contract_pass
+            else "ERR_PM_RELEASE_BLOCKERS_OPEN"
+        ),
+        "blockers": effective_blockers,
+        "computed_without_provenance": {
+            "status": "ready" if computed_contract_pass else "blocked",
+            "contract_pass": computed_contract_pass,
+            "reason_code": (
+                "PASS" if computed_contract_pass else "ERR_PM_RELEASE_BLOCKERS_OPEN"
+            ),
+            "open_blocker_count": len(rows),
+            "upstream_contracts": {
+                "pm_release_gate_report": upstream_pm_status,
+            },
+        },
         "summary": {
             "open_blocker_count": len(rows),
             "release_area_blocker_count": len(release_area_blockers),
@@ -1796,6 +1866,21 @@ def build_register(
         "release_decision_operator_actions": release_decision_operator_actions,
         "next_actions": [row["next_action"] for row in rows],
     }
+
+
+def build_register(
+    pm_report: Path = DEFAULT_PM_REPORT,
+    structural_scope_plan: Path | None = None,
+) -> dict[str, Any]:
+    observed_inputs: set[Path] = set()
+    token = _OBSERVED_INPUT_PATHS.set(observed_inputs)
+    try:
+        return _build_register(
+            pm_report=pm_report,
+            structural_scope_plan=structural_scope_plan,
+        )
+    finally:
+        _OBSERVED_INPUT_PATHS.reset(token)
 
 
 def _markdown(payload: dict[str, Any]) -> str:

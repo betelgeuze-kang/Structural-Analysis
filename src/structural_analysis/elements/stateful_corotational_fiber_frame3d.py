@@ -428,7 +428,7 @@ class StatefulCorotationalFiberFrame3D:
         tangent = (
             np.asarray(elastic.consistent_tangent_global) + global_tangent_correction
         )
-        tangent = 0.5 * (tangent + tangent.T)
+        tangent[...] = 0.5 * (tangent + tangent.T)
         if not np.all(np.isfinite(internal)) or not np.all(np.isfinite(tangent)):
             raise ValueError("distributed fiber member response is non-finite")
         state = StatefulCorotationalFiberFrame3DState(
@@ -507,7 +507,7 @@ class StatefulCorotationalFiberFrame3D:
             )
             responses.append(response)
             states.append(response.state)
-        tangent = 0.5 * (tangent + tangent.T)
+        tangent[...] = 0.5 * (tangent + tangent.T)
         return force, tangent, tuple(responses), tuple(states)
 
     def _initial_basic_tangent(self) -> np.ndarray:

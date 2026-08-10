@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import { validateWorkbenchCaseV2 } from '../../src/workbench-v2/model/caseSchema'
+import { deriveRunStatus } from '../../src/workbench-v2/model/workbenchState'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const routeUrl = `${baseUrl}/#/workbench-v2`
@@ -7,6 +9,7 @@ const routeUrl = `${baseUrl}/#/workbench-v2`
 function liveCase(): Record<string, unknown> {
   return {
     schemaVersion: 'workbench-case.v2',
+    capability_profile: 'planar_frame_verified_alpha.v1',
     provenance: {
       sourcePath: 'tests/engineering-value-case.json',
       sourceSha256: `sha256:${'e'.repeat(64)}`,
@@ -53,6 +56,38 @@ function valueFor(panel: Locator, label: string): Locator {
 }
 
 test.describe('Workbench v2 — explicit engineering value states', () => {
+  test('status and convergence normalize to one consistent source of solver truth', () => {
+    const cases = [
+      { status: 'converged', converged: true, evidence: 'available', run: 'converged' },
+      { status: 'failed', converged: false, evidence: 'unavailable', run: 'failed' },
+      { status: 'not_converged', converged: false, evidence: 'available', run: 'not_converged' },
+      { status: 'blocked', converged: true, evidence: 'unavailable', run: 'blocked' },
+      { status: 'not_run', converged: false, evidence: 'unavailable', run: 'not_run' },
+    ] as const
+    for (const expected of cases) {
+      const payload = liveCase()
+      payload.analysis = { ...(payload.analysis as object), status: expected.status, converged: expected.converged }
+      const validation = validateWorkbenchCaseV2(payload)
+      expect(validation.ok).toBe(true)
+      expect(validation.value?.analysis?.converged.status).toBe(expected.evidence)
+      expect(deriveRunStatus(validation.value!, validation.convergenceAvailable)).toBe(expected.run)
+    }
+
+    const contradictory = liveCase()
+    contradictory.analysis = { ...(contradictory.analysis as object), status: 'converged', converged: false }
+    const validation = validateWorkbenchCaseV2(contradictory)
+    expect(validation.value?.analysis?.converged.status).toBe('invalid')
+    expect(validation.warnings.join(' ')).toContain('contradicts')
+  })
+
+  test('P1 profile is explicitly public but remains non-release', async ({ page }) => {
+    await openLiveCase(page, liveCase())
+    const summary = page.locator('#wb2-sec-project')
+    await expect(summary.locator('[data-product-profile]')).toContainText('planar_frame_verified_alpha.v1')
+    await expect(valueFor(summary, 'Public profile')).toHaveText('true')
+    await expect(valueFor(summary, 'Release eligible')).toHaveText('false')
+  })
+
   test('missing engineering numbers stay unavailable and never become synthetic zeroes or ones', async ({ page }) => {
     await openLiveCase(page, liveCase())
 
@@ -224,13 +259,16 @@ test.describe('Workbench v2 — explicit engineering value states', () => {
 
     await expect(page.locator('[data-result-verdict]')).toHaveAttribute('data-result-verdict', 'unavailable')
     const availableValues = page.locator(
-      '#wb2-sec-project [data-engineering-value-state], '
-      + '#wb2-sec-analysis [data-engineering-value-state], '
+      '#wb2-sec-analysis [data-engineering-value-state], '
       + '#wb2-sec-results .wb2-table [data-engineering-value-state]',
     )
     expect(await availableValues.count()).toBeGreaterThan(0)
     for (let index = 0; index < await availableValues.count(); index += 1) {
       await expect(availableValues.nth(index)).toHaveAttribute('data-engineering-value-state', 'available')
+    }
+    for (const label of ['Nodes', 'Elements', 'DOF']) {
+      await expect(valueFor(page.locator('#wb2-sec-project'), label))
+        .toHaveAttribute('data-engineering-value-state', 'available')
     }
     await expect(valueFor(page.locator('#wb2-sec-analysis'), 'Load scale')).toHaveText('1')
     await expect(valueFor(page.locator('#wb2-sec-analysis'), 'Final normalized residual')).toHaveText('0')
@@ -401,3 +439,57 @@ test.describe('Workbench v2 — explicit engineering value states', () => {
     await expect(page.getByText('Case & provenance')).toHaveCount(0)
   })
 })
+
+type EvidenceState = 'available' | 'unavailable' | 'invalid' | 'unsupported'
+
+function evidenceFor(state: EvidenceState, value: number | boolean | string): unknown {
+  if (state === 'available') return { status: state, value }
+  if (state === 'unavailable') return { status: state }
+  return { status: state, reason: `${state} test evidence` }
+}
+
+function allStateCase(state: EvidenceState): Record<string, unknown> {
+  const payload = liveCase()
+  const number = evidenceFor(state, 1)
+  payload.model = {
+    unitSystem: 'SI', coordinateSystem: 'global_xyz',
+    nodeCount: number, elementCount: number, dofCount: number,
+  }
+  const converged = state === 'available'
+    ? evidenceFor(state, true)
+    : state === 'invalid'
+      ? false // contradicts status=converged and must normalize to INVALID
+      : evidenceFor(state, false)
+  payload.analysis = {
+    type: 'nonlinear_static', solver: 'truth-state-test', status: 'converged', converged,
+    loadScale: number, iterationCount: number, residualTolerance: number,
+    finalNormalizedResidual: number, finalRelativeIncrement: number,
+    equation_scaling_6dof: {
+      reference_force: number, characteristic_length: number,
+      translation_residual_norm: number, rotation_residual_norm: number,
+      scaled_residual_norm: number, translation_increment_norm: number,
+      rotation_increment_norm: number, scaled_increment_norm: number,
+      scaled_tangent_condition: number,
+      scaling_hash: evidenceFor(state, `sha256:${'a'.repeat(64)}`),
+    },
+  }
+  payload.residualHistory = [{ iteration: number, residual: number, relativeIncrement: number, alpha: number }]
+  return payload
+}
+
+for (const state of ['available', 'unavailable', 'invalid', 'unsupported'] as const) {
+  test(`renders ${state} evidence across every Workbench truth surface`, async ({ page }) => {
+    await openLiveCase(page, allStateCase(state))
+    const surfaces = [
+      page.locator('#wb2-sec-project'),
+      page.locator('[data-run-monitor]'),
+      page.locator('[data-result-verdict]'),
+      page.locator('#wb2-sec-results').getByRole('heading', { name: 'Residual audit' }).locator('..'),
+      page.locator('[data-equation-scaling-6dof]'),
+      page.locator('[data-export-truth-state]'),
+    ]
+    for (const surface of surfaces) {
+      await expect(surface.locator(`[data-engineering-value-state="${state}"]`).first()).toBeVisible()
+    }
+  })
+}

@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:7d57fafa151a02322bade30f12278b1b183c57b4a31bb07338d5a94a210fbe04",
+  "artifact_hash": "sha256:f360a5cf7234d07500d95d7a8357579a995d76a0dcdbf6cd260e0dc14f3e2937",
   "blockers_remaining": [
     "arbitrary_frame_or_shell_localization_not_verified",
     "multiaxial_and_confined_concrete_not_verified",
@@ -654,21 +654,21 @@
   "schema_version": "fracture-energy-concrete-mesh-objectivity-benchmark.v1",
   "source": {
     "input_checksums": {
-      "artifacts/manifests/capabilities.yaml": "sha256:e3d00e465737412da42787b7c78e1062d17d1f48af575b07ea1c4e82a24936a5",
+      "artifacts/manifests/capabilities.yaml": "sha256:06859beda6295cbd9c766db88a18bf58d700be3b4bb34e43768b62f67a37ebb8",
       "docs/fracture-energy-concrete-mesh-objectivity.md": "sha256:6cf1144bf627c0777d9aa7b463d902333331c596df232d90a39f435ba2b52f6e",
       "scripts/build_fracture_energy_concrete_benchmark.py": "sha256:9e0023130087722e575e96ea529dd359f6b11bd5ea3cf04386a0ad5442bf9af3",
       "src/structural_analysis/assembly/stateful_axial.py": "sha256:4a4598faa4c0a9ebcc9c6e64d5df45be6dff2f97dbad00bfe85d212d4fc57e62",
       "src/structural_analysis/benchmark/__init__.py": "sha256:6eeea3a385d79485d53fc27faf38b16314ec14d2d4669ecfe4e86d87198306fb",
       "src/structural_analysis/benchmark/fracture_energy_concrete.py": "sha256:6820c218d5e572dbbd0dff459e3c6e12fdbc0bace0968f87966b8745b7005d5e",
       "src/structural_analysis/engine_v2/contracts/_canonical.py": "sha256:78883ad07598edeb838de0ccce2717b362a323574bfe86822dfcfda665ecf11b",
-      "src/structural_analysis/materials/__init__.py": "sha256:7dd25a2227924167b1362d9992b1d3d6e0e7c3cfd3d02792fce07167d8f845d6",
-      "src/structural_analysis/materials/concrete_damage.py": "sha256:1d644f6417a2adf994493dca41e306a2e5e80843fe0df53bad88989915b109df",
-      "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:9bbb52ba8db6dc572f2b5e5cdf78762da3b42464f818e88ae21863ad85c77932",
+      "src/structural_analysis/materials/__init__.py": "sha256:dc721269ee314e36fe49a0f117683deb81e356fce898d6ee100ea01830603997",
+      "src/structural_analysis/materials/concrete_damage.py": "sha256:dcbc837fee1ceb746ad3b2f1d76428a33a7c7fcb699562a0370a556fd028f9e4",
+      "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
       "src/structural_analysis/schemas/fracture_energy_concrete_mesh_objectivity_v1.schema.json": "sha256:b9da09978768376cc33365e389deaac8babe8cf514937e4d4da40e9215246fd6",
       "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
-      "tests/test_fracture_energy_concrete.py": "sha256:ba0e37b59a4e53ce992685ff6527cacc705a688682536311db9f0e4631e1732e"
+      "tests/test_fracture_energy_concrete.py": "sha256:222bc31544f09fd939b140e5f5339ac8decd576f17e7a5ea29d76616b2f9e096"
     },
-    "source_set_hash": "sha256:a79e2a40b8d8ad9512d34578b0ee6bd063729fb0192758525caa79a76c5a1e0d"
+    "source_set_hash": "sha256:7055942938e80b8da5a789290d04f6412cb317f1b4c82744654119d79e027352"
   },
   "status": "candidate_verified",
   "tangent_checks": [

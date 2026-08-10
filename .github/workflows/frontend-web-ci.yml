@@ -6,6 +6,7 @@ name: Frontend Web CI
 # lane while mixed Python/frontend pull requests still trigger it.
 
 on:
+  merge_group:
   pull_request:
     paths:
       - "index.html"

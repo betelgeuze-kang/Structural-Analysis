@@ -8,7 +8,24 @@ import { isAvailableValue, type WorkbenchCaseV2 } from './caseSchema'
 
 export type DataMode = 'demo' | 'live' | 'stale' | 'unavailable'
 
-export type RunStatus = 'idle' | 'validating' | 'running' | 'converged' | 'failed'
+export type RunStatus =
+  | 'idle'
+  | 'validating'
+  | 'running'
+  | 'converged'
+  | 'not_converged'
+  | 'failed'
+  | 'blocked'
+  | 'not_run'
+
+export type ResultVerdict =
+  | 'converged'
+  | 'not_converged'
+  | 'failed'
+  | 'blocked'
+  | 'unavailable'
+  | 'invalid'
+  | 'unsupported'
 
 export interface WorkbenchState {
   dataMode: DataMode
@@ -30,10 +47,34 @@ export const initialWorkbenchState: WorkbenchState = {
 
 /** Derive run status from analysis. Never infers convergence from residual length. */
 export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: boolean): RunStatus {
-  if (!convergenceAvailable || !caseV2.analysis) return 'idle'
-  if (!isAvailableValue(caseV2.analysis.converged)) return 'idle'
-  if (caseV2.analysis.converged.value) return 'converged'
-  return caseV2.analysis.status ?? 'failed'
+  if (!caseV2.analysis) return 'not_run'
+  const { status, converged } = caseV2.analysis
+  if (status === 'failed' || status === 'blocked' || status === 'not_run' || status === 'idle'
+      || status === 'validating' || status === 'running') return status
+  if (!convergenceAvailable || !isAvailableValue(converged)) return 'not_run'
+  if (status === 'converged') return converged.value ? 'converged' : 'not_run'
+  return converged.value ? 'not_run' : 'not_converged'
+}
+
+/**
+ * Derive the machine-readable result verdict without collapsing execution
+ * failure, execution blocking, and completed numerical non-convergence. A
+ * numerical terminal status is accepted only with matching available evidence;
+ * invalid, unsupported, or missing convergence evidence remains explicit.
+ */
+export function deriveResultVerdict(
+  caseV2: WorkbenchCaseV2,
+  convergenceAvailable: boolean,
+): ResultVerdict {
+  if (!caseV2.analysis) return 'unavailable'
+  const { status, converged } = caseV2.analysis
+  if (status === 'failed') return 'failed'
+  if (status === 'blocked') return 'blocked'
+  if (!isAvailableValue(converged)) return converged.status
+  if (!convergenceAvailable) return 'unavailable'
+  if (status === 'converged') return converged.value ? 'converged' : 'invalid'
+  if (status === 'not_converged') return converged.value ? 'invalid' : 'not_converged'
+  return 'unavailable'
 }
 
 export type WorkbenchAction =

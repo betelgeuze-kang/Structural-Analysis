@@ -13,7 +13,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from release_evidence_metadata import (  # noqa: E402
+    commit_bound_release_evidence_metadata,
+    resolve_input_path,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,15 +30,16 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def _strip_volatile(payload: Any) -> Any:
+def _strip_volatile(payload: Any, path: tuple[str, ...] = ()) -> Any:
     if isinstance(payload, dict):
         return {
-            key: _strip_volatile(value)
+            key: _strip_volatile(value, (*path, key))
             for key, value in payload.items()
             if key not in {"generated_at"}
+            and not (path == () and key == "source_commit_sha")
         }
     if isinstance(payload, list):
-        return [_strip_volatile(item) for item in payload]
+        return [_strip_volatile(item, path) for item in payload]
     return payload
 
 
@@ -224,6 +228,22 @@ def _source_receipt_path_summary(
     }
 
 
+def _source_receipt_input_paths(
+    rows: list[dict[str, Any]], *, repo_root: Path
+) -> list[Path]:
+    deduped: list[Path] = []
+    seen: set[Path] = set()
+    for row in rows:
+        for entry in _collect_source_receipt_paths(_as_dict(row.get("evidence"))):
+            declared = Path(entry["path"])
+            resolved = resolve_input_path(declared, repo_root=repo_root)
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            deduped.append(declared)
+    return deduped
+
+
 def build_gap_ledger_evidence_audit(
     *,
     repo_root: Path = ROOT,
@@ -248,6 +268,9 @@ def build_gap_ledger_evidence_audit(
         _row_id(row): _source_receipt_path_summary(row, repo_root=repo_root)
         for row in rows
     }
+    source_receipt_inputs = _source_receipt_input_paths(
+        rows, repo_root=repo_root
+    )
     source_receipt_missing_rows = [
         row_id
         for row_id, summary in source_receipt_path_summaries.items()
@@ -281,7 +304,7 @@ def build_gap_ledger_evidence_audit(
             for row_id in source_receipt_unavailable_but_present_rows
         ],
     ]
-    contract_pass = not blockers
+    computed_contract_pass = not blockers
     total_source_receipt_path_count = sum(
         int(summary["source_receipt_path_count"])
         for summary in source_receipt_path_summaries.values()
@@ -295,23 +318,59 @@ def build_gap_ledger_evidence_audit(
         for summary in source_receipt_path_summaries.values()
     )
 
+    metadata = commit_bound_release_evidence_metadata(
+        input_paths=[
+            ledger_status_path,
+            Path("docs/commercial-structural-solver-product-gap-ledger.md"),
+            Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
+            Path("scripts/build_gap_ledger_evidence_audit.py"),
+            Path("scripts/release_evidence_metadata.py"),
+            *source_receipt_inputs,
+        ],
+        reused_evidence=True,
+        reuse_policy="gap_ledger_evidence_audit_reads_existing_gap_ledger_status_without_creating_closure",
+        repo_root=repo_root,
+    )
+    provenance_pass = bool(
+        metadata["source_input_provenance"]["contract_pass"]
+    )
+    provenance_blocker = (
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    )
+    effective_blockers = list(blockers)
+    if not provenance_pass and provenance_blocker not in effective_blockers:
+        effective_blockers.append(provenance_blocker)
+    contract_pass = bool(computed_contract_pass and provenance_pass)
+
     return {
         "schema_version": SCHEMA_VERSION,
-        **release_evidence_metadata(
-            input_paths=[
-                ledger_status_path,
-                Path("docs/commercial-structural-solver-product-gap-ledger.md"),
-                Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
-                Path("scripts/build_gap_ledger_evidence_audit.py"),
-            ],
-            reused_evidence=True,
-            reuse_policy="gap_ledger_evidence_audit_reads_existing_gap_ledger_status_without_creating_closure",
-            repo_root=repo_root,
-        ),
+        **metadata,
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
-        "full_gap_ledger_ready": bool(ledger.get("full_gap_ledger_ready") is True),
-        "ledger_status": str(ledger.get("status", "missing")),
+        "reason_code": (
+            "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+            if not provenance_pass
+            else "PASS"
+            if computed_contract_pass
+            else "ERR_GAP_LEDGER_EVIDENCE_INCOMPLETE"
+        ),
+        "computed_without_provenance": {
+            "status": "ready" if computed_contract_pass else "blocked",
+            "contract_pass": computed_contract_pass,
+            "blockers": list(blockers),
+            "ledger_status": str(ledger.get("status", "missing")),
+            "full_gap_ledger_ready": bool(
+                ledger.get("full_gap_ledger_ready") is True
+            ),
+        },
+        "full_gap_ledger_ready": bool(
+            ledger.get("full_gap_ledger_ready") is True and provenance_pass
+        ),
+        "ledger_status": (
+            str(ledger.get("status", "missing"))
+            if provenance_pass
+            else "blocked"
+        ),
         "row_count": len(rows),
         "closed_row_count": len(closed_rows),
         "nonclosed_row_count": len(nonclosed_rows),
@@ -386,12 +445,13 @@ def build_gap_ledger_evidence_audit(
             }
             for row in rows
         ],
-        "blockers": blockers,
+        "blockers": effective_blockers,
         "summary_line": (
             "Gap ledger evidence audit: "
             f"{'READY' if contract_pass else 'BLOCKED'} | closed_evidence="
             f"{len(closed_rows) - len(closed_missing_evidence)}/{len(closed_rows)} | "
-            f"nonclosed_boundaries={len(nonclosed_rows) - len(nonclosed_missing_claim_boundary)}/{len(nonclosed_rows)}"
+            f"nonclosed_boundaries={len(nonclosed_rows) - len(nonclosed_missing_claim_boundary)}/{len(nonclosed_rows)} | "
+            f"computed_without_provenance={'READY' if computed_contract_pass else 'BLOCKED'}"
         ),
         "claim_boundary": (
             "This audit verifies whether the current G1-G10 and AI-G1-AI-G10 ledger rows "
@@ -440,6 +500,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ledger-status", type=Path, default=DEFAULT_LEDGER_STATUS)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--fail-blocked",
+        action="store_true",
+        help="Exit non-zero when the top-level audit contract is blocked, including by source provenance.",
+    )
     return parser
 
 
@@ -451,13 +516,20 @@ def main(argv: list[str] | None = None) -> int:
             ledger_status_path=args.ledger_status,
         )
         print(f"Gap ledger evidence audit check: {message}")
-        return 0 if ok else 1
+        if not ok:
+            return 1
+        if args.fail_blocked:
+            payload = build_gap_ledger_evidence_audit(
+                ledger_status_path=args.ledger_status
+            )
+            return 2 if not payload["contract_pass"] else 0
+        return 0
     payload = write_gap_ledger_evidence_audit(out_path=args.out, ledger_status_path=args.ledger_status)
     if args.json:
         print(_json_text(payload), end="")
     else:
         print(payload["summary_line"])
-    return 0
+    return 2 if args.fail_blocked and not payload["contract_pass"] else 0
 
 
 if __name__ == "__main__":

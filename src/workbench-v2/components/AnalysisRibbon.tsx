@@ -19,7 +19,14 @@ interface AnalysisRibbonProps {
 
 export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: AnalysisRibbonProps): ReactElement {
   const activeIndex = STAGES.findIndex((s) => s.key === runStatus)
-  const failed = runStatus === 'failed'
+  const terminalProblem = runStatus === 'failed' || runStatus === 'not_converged' || runStatus === 'blocked'
+  const terminalMessage = runStatus === 'failed'
+    ? 'Analysis execution failed; numerical convergence is unavailable.'
+    : runStatus === 'not_converged'
+      ? 'Analysis completed but did not converge.'
+      : runStatus === 'blocked'
+        ? 'Analysis was blocked before a numerical convergence outcome.'
+        : null
 
   return (
     <section className="wb2-panel wb2-ribbon" aria-labelledby="wb2-ribbon-title">
@@ -28,8 +35,8 @@ export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: An
       {convergenceAvailable ? (
         <ol className="wb2-ribbon-steps" aria-label="Analysis stages">
           {STAGES.map((stage, index) => {
-            const isActive = !failed && activeIndex >= 0 && index <= activeIndex
-            const isCurrent = !failed && index === activeIndex
+            const isActive = !terminalProblem && activeIndex >= 0 && index <= activeIndex
+            const isCurrent = !terminalProblem && index === activeIndex
             return (
               <li
                 key={stage.key}
@@ -45,11 +52,13 @@ export function AnalysisRibbon({ runStatus, analysis, convergenceAvailable }: An
       ) : (
         <div className="wb2-ribbon-steps">
           <StateChip state="UNAVAILABLE" srLabel="Convergence" />
-          <p className="wb2-note">Convergence information is not present in this case; run status is not inferred.</p>
+          <p className="wb2-note">
+            Convergence information is unavailable; the explicit run status is preserved and convergence is not inferred.
+          </p>
         </div>
       )}
 
-      {failed ? <p className="wb2-note wb2-note--warn">Run did not converge.</p> : null}
+      {terminalMessage ? <p className="wb2-note wb2-note--warn">{terminalMessage}</p> : null}
 
       {analysis ? (
         <dl className="wb2-kv wb2-analysis-kv">

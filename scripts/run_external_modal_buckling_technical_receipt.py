@@ -16,7 +16,7 @@ import re
 import subprocess
 import sys
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, Mapping
 
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError, ValidationError
@@ -198,6 +198,10 @@ CALCULIX_BUCKLING_DECK = _build_calculix_buckling_deck()
 class ExternalModalBucklingReceiptError(ValueError):
     """Fail-closed external modal/buckling technical receipt error."""
 
+    def __init__(self, code: str) -> None:
+        self.code = code
+        super().__init__(code)
+
 
 def _canonical_bytes(value: Any) -> bytes:
     return json.dumps(
@@ -302,8 +306,13 @@ def _load_matrix_artifact(
     *,
     repo_root: Path,
     descriptor: dict[str, Any],
+    artifact_path: Path | None = None,
 ) -> np.ndarray:
-    path = Path(str(descriptor["artifact_path"]))
+    path = (
+        artifact_path
+        if artifact_path is not None
+        else Path(str(descriptor["artifact_path"]))
+    )
     resolved = path if path.is_absolute() else repo_root / path
     try:
         raw = resolved.read_bytes()
@@ -1181,6 +1190,7 @@ def validate_external_modal_buckling_technical_receipt(
     *,
     repo_root: Path,
     require_current_sources: bool,
+    mode_vector_paths: Mapping[str, Path] | None = None,
 ) -> dict[str, Any]:
     schema = _read_json(repo_root / SCHEMA_PATH)
     try:
@@ -1231,15 +1241,28 @@ def validate_external_modal_buckling_technical_receipt(
         raise ExternalModalBucklingReceiptError("receipt_external_assets_invalid")
 
     descriptors = payload["mode_vector_artifacts"]
-    if [row["name"] for row in descriptors] != [
+    expected_vector_names = [
         "product_modal_modes",
         "opensees_modal_modes",
         "product_buckling_modes",
         "calculix_buckling_modes",
-    ]:
+    ]
+    if [row["name"] for row in descriptors] != expected_vector_names:
         raise ExternalModalBucklingReceiptError("mode_vector_artifact_order_invalid")
+    if mode_vector_paths is not None and set(mode_vector_paths) != set(
+        expected_vector_names
+    ):
+        raise ExternalModalBucklingReceiptError("mode_vector_path_override_invalid")
     matrices = {
-        row["name"]: _load_matrix_artifact(repo_root=repo_root, descriptor=row)
+        row["name"]: _load_matrix_artifact(
+            repo_root=repo_root,
+            descriptor=row,
+            artifact_path=(
+                mode_vector_paths[row["name"]]
+                if mode_vector_paths is not None
+                else None
+            ),
+        )
         for row in descriptors
     }
     if matrices["product_modal_modes"].shape != (2, 2) or matrices[

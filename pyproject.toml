@@ -1,5 +1,10 @@
 [build-system]
-requires = ["setuptools>=68", "wheel", "tomli; python_version < '3.11'"]
+requires = [
+  "setuptools==80.9.0",
+  "wheel==0.45.1",
+  "packaging==26.2",
+  "tomli==2.4.1; python_version < '3.11'",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -30,6 +35,7 @@ dev = [
   "reportlab>=4.0",
   "requests>=2.31",
   "ruff>=0.5,<0.16",
+  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [project.scripts]
@@ -37,6 +43,7 @@ structural-analysis = "structural_analysis.api.cli:main"
 structural-analysis-benchmark = "structural_analysis.benchmark.cli:main"
 structural-analysis-nonlinear-fiber-frame = "structural_analysis.api.nonlinear_fiber_frame_cli:main"
 structural-analysis-nonlinear-frame = "structural_analysis.api.nonlinear_frame_cli:main"
+structural-analysis-planar-frame = "structural_analysis.api.planar_frame_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -59,10 +66,17 @@ testpaths = ["tests"]
 [tool.mypy]
 python_version = "3.10"
 files = [
+  "src/structural_analysis/adapters",
   "src/structural_analysis/analyses",
+  "src/structural_analysis/dynamics/transient_checkpoint.py",
+  "src/structural_analysis/elements/corotational_frame3d.py",
+  "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+  "src/structural_analysis/materials",
   "src/structural_analysis/model",
   "src/structural_analysis/results/schema.py",
   "src/structural_analysis/results/validation.py",
+  "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+  "src/structural_analysis/solvers/nonlinear/transient.py",
   "src/structural_analysis/units",
 ]
 check_untyped_defs = true

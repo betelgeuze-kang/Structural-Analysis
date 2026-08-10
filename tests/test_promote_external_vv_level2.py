@@ -52,186 +52,26 @@ def _runtime(receipt: dict, distribution: str) -> dict:
 
 
 def _complete_matrix(bundle_root: Path, source_commit: str, attestation: dict) -> dict:
-    matrix = module.vv_matrix.build_bounded_planar_external_vv_matrix(
-        repo_root=ROOT,
-        same_operator_supplemental_receipt_path=(
-            bundle_root / "local-supplement-must-not-shadow-operator-evidence.json"
-        ),
-    )
-    assert matrix["source_commit_sha"] == source_commit
-    for binding in matrix["receipt_bindings"]:
-        descriptor = attestation["bundle"][binding["receipt_id"]]
-        binding.update(
-            {
-                "path": descriptor["path"],
-                "file_sha256": descriptor["file_sha256"],
-                "artifact_hash": descriptor["artifact_hash"],
-                "source_commit_sha": source_commit,
-            }
-        )
-        binding["fresh_current_source_external_execution"] = True
-
-    dedicated_bindings = []
-    dedicated_case_ids: set[str] = set()
-    for receipt_id in (
-        "bounded_planar_linear",
-        "bounded_planar_modal_buckling",
-        "bounded_planar_negative",
-        "bounded_planar_scaling",
-        "bounded_planar_nonlinear_material_recovery",
-    ):
-        descriptor = attestation["bundle"][receipt_id]["technical_receipt"]
-        receipt_path = bundle_root / descriptor["path"]
-        receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
-        case_ids = sorted(case["case_id"] for case in receipt["cases"])
-        invoked_case_ids = sorted(
-            case["case_id"]
-            for case in receipt["cases"]
-            if case.get("external_engine_invoked", True) is True
-        )
-        dedicated_case_ids.update(case_ids)
-        package_binding = receipt.get("package_binding")
-        source_binding_hash = (
-            package_binding["artifact_hash"]
-            if isinstance(package_binding, dict)
-            else receipt.get("package_manifest_artifact_hash", receipt["artifact_hash"])
-        )
-        dedicated_bindings.append(
-            {
-                "receipt_id": receipt_id,
-                "path": descriptor["path"],
-                "file_sha256": descriptor["file_sha256"],
-                "artifact_hash": descriptor["artifact_hash"],
-                "source_commit_sha": source_commit,
-                "source_binding_hash": source_binding_hash,
-                "case_ids": case_ids,
-                "external_engine_invoked_case_ids": invoked_case_ids,
-                "technical_contract_pass": True,
-                "current_product_replay_pass": True,
-                "external_execution_reused": False,
-                "fresh_current_source_external_execution": True,
-            }
-        )
-    core_case_ids = {
-        case_id
-        for binding in matrix["receipt_bindings"]
-        for case_id in binding["case_ids"]
-    }
-    all_required_case_ids = {
-        case_id
-        for row in matrix["requirements"]
-        for case_id in row["required_external_case_ids"]
-    }
-    additional_case_ids = sorted(
-        all_required_case_ids - core_case_ids - dedicated_case_ids
-    )
-    assert additional_case_ids == []
     attestation["bundle"].pop("additional_receipts", None)
     operator_fixture._resign(attestation, bundle_root)
-    # This helper also builds deliberately invalid promotion candidates.  Bind
-    # the candidate structurally here and leave fresh-execution verification to
-    # promote_external_vv_level2(), which must reject the reused submission.
-    signature = attestation["signature"]
-    matrix["operator_intake_binding"] = {
-        "status": "available",
-        "attestation_id": attestation["attestation_id"],
-        "attestation_sha256": module.sha256_bytes(
-            module.canonical_bytes(attestation)
-        ),
-        "source_commit_sha": attestation["source_commit_sha"],
-        "signed_payload_sha256": signature["signed_payload_sha256"],
-        "public_key_sha256": signature["public_key_sha256"],
-        "signature_sha256": signature["signature_sha256"],
-        "intake_contract_pass": True,
-        "fresh_external_runtime_execution": True,
-        "cryptographic_signature_verified": True,
-        "operator_independence_declared": True,
-        "operator_identity_credentials_verified": False,
-        "verification_level_2": False,
-    }
-    matrix["supplemental_receipt_bindings"] = dedicated_bindings
-    all_bindings = [
-        *matrix["receipt_bindings"],
-        *matrix["supplemental_receipt_bindings"],
-    ]
-    for row in matrix["requirements"]:
-        required = list(row["required_external_case_ids"])
-        assert required
-        binding = next(
-            binding
-            for binding in all_bindings
-            if set(required).issubset(set(binding["case_ids"]))
+    try:
+        matrix = module.operator_matrix.build_operator_attested_matrix(
+            attestation,
+            bundle_root=bundle_root,
+            expected_source_commit_sha=source_commit,
+            repo_root=ROOT,
         )
-        verification_method = row["verification_method"]
-        external_execution = bool(
-            verification_method == "external_solver_execution"
-            and set(required).issubset(
-                set(binding["external_engine_invoked_case_ids"])
-            )
+    except module.operator_matrix.OperatorMatrixBuildError:
+        # Deliberately stale operator fixtures must reach the promotion entry
+        # point so that its attestation gate is exercised. The matrix carries
+        # no promotion authority in that negative path.
+        matrix = module.vv_matrix.build_bounded_planar_external_vv_matrix(
+            repo_root=ROOT,
+            same_operator_supplemental_receipt_path=(
+                bundle_root / "intentionally-unavailable-supplement.json"
+            ),
         )
-        row.update(
-            {
-                "technical_reference_present": True,
-                "current_product_replay_pass": True,
-                "fresh_current_source_technical_validation": True,
-                "fresh_current_source_external_execution": external_execution,
-                "status": (
-                    "fresh_external_technical"
-                    if external_execution
-                    else "fresh_independent_preflight_technical"
-                ),
-                "evidence": [
-                    {
-                        "receipt_id": binding["receipt_id"],
-                        "path": binding["path"],
-                        "artifact_hash": binding["artifact_hash"],
-                        "case_ids": required,
-                    }
-                ],
-            }
-        )
-        row["blockers"] = [
-            "independent_operator_attestation_missing",
-            "product_legal_license_approval_missing",
-            "scientific_promotion_decision_missing",
-            "formal_level2_promotion_receipt_missing",
-        ]
-    matrix["summary"].update(
-        {
-            "technical_reference_present_count": 25,
-            "fresh_current_source_technical_count": 25,
-            "current_product_replay_only_count": 0,
-            "fresh_external_technical_count": 24,
-            "fresh_independent_preflight_technical_count": 1,
-            "promotion_eligible_count": 0,
-            "missing_count": 0,
-        }
-    )
-    matrix["claims"]["recommended_matrix_technical_coverage_complete"] = True
-    matrix["claims"]["fresh_current_source_technical_matrix_complete"] = True
-    matrix["claims"]["fresh_current_source_external_matrix_complete"] = True
-    matrix["blockers"] = [
-        blocker
-        for blocker in matrix["blockers"]
-        if blocker
-        not in {
-            "recommended_external_vv_matrix_incomplete",
-            "fresh_current_source_technical_matrix_incomplete",
-            "fresh_current_source_external_matrix_incomplete",
-        }
-    ]
-    matrix["artifact_hash"] = module.vv_matrix._artifact_hash(matrix)
-    module.vv_matrix._validate_status(
-        matrix,
-        ROOT,
-        verified_operator_context={
-            "receipt_bindings": matrix["receipt_bindings"],
-            "supplemental_receipt_bindings": matrix[
-                "supplemental_receipt_bindings"
-            ],
-            "operator_intake_binding": matrix["operator_intake_binding"],
-        },
-    )
+    assert matrix["source_commit_sha"] == source_commit
     path = bundle_root / "bounded-planar-external-vv-matrix.json"
     path.write_text(
         json.dumps(matrix, indent=2, sort_keys=True) + "\n",
@@ -604,7 +444,7 @@ def test_deliberately_incomplete_matrix_cannot_be_promoted(tmp_path: Path) -> No
 
     with pytest.raises(
         module.ExternalVVLevel2PromotionError,
-        match="level2_promotion_verification_matrix_incomplete",
+        match="level2_promotion_verification_matrix_replay_mismatch",
     ):
         module.promote_external_vv_level2(
             promotion,

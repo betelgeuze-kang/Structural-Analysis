@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/generated-artifact-dag-report.v1.schema.json",
+  "title": "Generated artifact DAG legacy evaluation report",
+  "type": "object",
+  "required": ["schema_version", "contract_pass", "stale_nodes", "nodes"],
+  "properties": {
+    "schema_version": {"const": "generated-artifact-dag-report.v1"},
+    "contract_pass": {"type": "boolean"},
+    "stale_nodes": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["status", "fingerprint", "reasons"],
+        "properties": {
+          "status": {"enum": ["fresh", "stale"]},
+          "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "reasons": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

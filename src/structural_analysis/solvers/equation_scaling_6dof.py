@@ -26,9 +26,7 @@ from structural_analysis.engine_v2.contracts._canonical import (
 )
 
 
-EQUATION_SCALING_6DOF_SCHEMA_VERSION = (
-    "structural-analysis-equation-scaling-6dof.v1"
-)
+EQUATION_SCALING_6DOF_SCHEMA_VERSION = "structural-analysis-equation-scaling-6dof.v1"
 EQUATION_SCALING_6DOF_POLICY = "centroid_diameter_force_moment_6dof.v1"
 _ZERO_HASH = "sha256:" + "0" * 64
 _HASH_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -114,9 +112,7 @@ def create_equation_scaling_6dof(
         2.0 * float(np.max(radii)),
         minimum_length,
     )
-    translational = [
-        abs(float(loads[dof])) for dof in free.tolist() if dof % 6 < 3
-    ]
+    translational = [abs(float(loads[dof])) for dof in free.tolist() if dof % 6 < 3]
     rotational = [
         abs(float(loads[dof])) / characteristic_length
         for dof in free.tolist()
@@ -247,15 +243,11 @@ def scale_linear_system_6dof(
     """Apply ``R K C`` and ``R f``; physical solution is ``C q_scaled``."""
 
     if type(scaling) is not EquationScaling6DOF:
-        raise EquationScaling6DOFError(
-            "scaling must be an exact EquationScaling6DOF"
-        )
+        raise EquationScaling6DOFError("scaling must be an exact EquationScaling6DOF")
     scaling.to_manifest()
     free_array = _free_dof_array(free_dofs, scaling.dof_count)
     if free_array.size != scaling.free_equation_count:
-        raise EquationScaling6DOFError(
-            "free DOF count does not match equation scaling"
-        )
+        raise EquationScaling6DOFError("free DOF count does not match equation scaling")
     if (
         array_data_hash(np.asarray(free_array, dtype="<i8"))
         != scaling.source_free_dofs_hash
@@ -285,9 +277,7 @@ def scale_linear_system_6dof(
         _real_binary64_array(source.data, "matrix")
         source = source.astype(np.float64, copy=False)
         scaled_sparse = (
-            diags(row_scale, format="csr")
-            @ source
-            @ diags(column_scale, format="csr")
+            diags(row_scale, format="csr") @ source @ diags(column_scale, format="csr")
         ).tocsr()
         scaled_sparse.sum_duplicates()
         scaled_sparse.eliminate_zeros()
@@ -315,17 +305,19 @@ def exact_scaled_condition_number_1(
 
     if type(maximum_equations) is not int or maximum_equations < 1:
         raise EquationScaling6DOFError("maximum_equations must be a positive integer")
-    shape = getattr(scaled_matrix, "shape", None)
-    if shape is None or len(shape) != 2 or shape[0] != shape[1]:
+    if issparse(scaled_matrix):
+        source = scaled_matrix.tocsr()
+        _real_binary64_array(source.data, "condition matrix")
+        shape = source.shape
+    else:
+        dense = _real_binary64_array(scaled_matrix, "condition matrix")
+        shape = dense.shape
+    if len(shape) != 2 or shape[0] != shape[1]:
         raise EquationScaling6DOFError("condition matrix must be square")
     if int(shape[0]) > maximum_equations:
         return None
     if issparse(scaled_matrix):
-        source = scaled_matrix.tocsr()
-        _real_binary64_array(source.data, "condition matrix")
         dense = source.astype(np.float64, copy=False).toarray()
-    else:
-        dense = _real_binary64_array(scaled_matrix, "condition matrix")
     value = float(np.linalg.cond(dense, p=1))
     return value if math.isfinite(value) else None
 
@@ -333,8 +325,7 @@ def exact_scaled_condition_number_1(
 def _free_dof_array(values: Iterable[int], dof_count: int) -> np.ndarray:
     raw = tuple(values)
     if not raw or any(
-        isinstance(value, bool) or not isinstance(value, Integral)
-        for value in raw
+        isinstance(value, bool) or not isinstance(value, Integral) for value in raw
     ):
         raise EquationScaling6DOFError("free_dofs must contain integers")
     normalized = tuple(int(value) for value in raw)
@@ -348,15 +339,14 @@ def _free_dof_array(values: Iterable[int], dof_count: int) -> np.ndarray:
 def _unbounded_free_dof_array(values: Iterable[int]) -> np.ndarray:
     raw = tuple(values)
     if not raw or any(
-        isinstance(value, bool) or not isinstance(value, Integral)
-        for value in raw
+        isinstance(value, bool) or not isinstance(value, Integral) for value in raw
     ):
         raise EquationScaling6DOFError("free_dofs must contain integers")
     normalized = tuple(int(value) for value in raw)
-    if len(set(normalized)) != len(normalized) or any(value < 0 for value in normalized):
-        raise EquationScaling6DOFError(
-            "free_dofs must be unique non-negative integers"
-        )
+    if len(set(normalized)) != len(normalized) or any(
+        value < 0 for value in normalized
+    ):
+        raise EquationScaling6DOFError("free_dofs must be unique non-negative integers")
     return np.asarray(normalized, dtype=np.int64)
 
 
@@ -519,13 +509,18 @@ def _validate_scaling_source_binding(
     row_scale, column_scale = equilibration_vectors_6dof(free_dofs, length)
     expected_row_hash = array_data_hash(np.asarray(row_scale, dtype="<f8"))
     expected_column_hash = array_data_hash(np.asarray(column_scale, dtype="<f8"))
-    if _require_hash(
-        getattr(scaling, "row_equilibration_hash", None),
-        "row_equilibration_hash",
-    ) != expected_row_hash or _require_hash(
-        getattr(scaling, "column_equilibration_hash", None),
-        "column_equilibration_hash",
-    ) != expected_column_hash:
+    if (
+        _require_hash(
+            getattr(scaling, "row_equilibration_hash", None),
+            "row_equilibration_hash",
+        )
+        != expected_row_hash
+        or _require_hash(
+            getattr(scaling, "column_equilibration_hash", None),
+            "column_equilibration_hash",
+        )
+        != expected_column_hash
+    ):
         raise EquationScaling6DOFError(
             "equilibration vectors do not match equation scaling source binding"
         )

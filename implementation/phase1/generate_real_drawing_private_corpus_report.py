@@ -7,9 +7,15 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from implementation.phase1.real_drawing_private_corpus_report_helper import (
+
+_IMPORT_ROOT = Path(__file__).resolve().parents[2]
+if str(_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_IMPORT_ROOT))
+
+from implementation.phase1.real_drawing_private_corpus_report_helper import (  # noqa: E402
     build_input_artifact_freshness_check,
     build_readiness_lanes,
     build_remaining_blocker_details,
@@ -19,10 +25,18 @@ from implementation.phase1.real_drawing_private_corpus_report_helper import (
 
 
 REPORT_SCHEMA_VERSION = "real-drawing-private-corpus-report.v1"
-DEFAULT_REDACTED_MANIFEST = Path("tmp/real_drawing_private_corpus/redacted_manifest.json")
-DEFAULT_INTAKE_QUEUE = Path("tmp/real_drawing_private_corpus/model_optimization_intake_queue.json")
-DEFAULT_OUT_JSON = Path("tmp/real_drawing_private_corpus/real_drawing_private_corpus_report.json")
-DEFAULT_OUT_MD = Path("tmp/real_drawing_private_corpus/real_drawing_private_corpus_report.md")
+DEFAULT_REDACTED_MANIFEST = Path(
+    "tmp/real_drawing_private_corpus/redacted_manifest.json"
+)
+DEFAULT_INTAKE_QUEUE = Path(
+    "tmp/real_drawing_private_corpus/model_optimization_intake_queue.json"
+)
+DEFAULT_OUT_JSON = Path(
+    "tmp/real_drawing_private_corpus/real_drawing_private_corpus_report.json"
+)
+DEFAULT_OUT_MD = Path(
+    "tmp/real_drawing_private_corpus/real_drawing_private_corpus_report.md"
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -32,7 +46,10 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _write_json(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _coerce_int(value: Any) -> int:
@@ -151,8 +168,12 @@ def _manifest_payload(manifest: dict[str, Any]) -> dict[str, Any]:
         **summary,
         "contract_pass": _coerce_bool(manifest.get("contract_pass", False)),
         "reason_code": str(manifest.get("reason_code", "") or ""),
-        "raw_redistribution_allowed": _coerce_bool(policy.get("raw_redistribution_allowed", False)),
-        "release_surface_allowed": _coerce_bool(policy.get("release_surface_allowed", False)),
+        "raw_redistribution_allowed": _coerce_bool(
+            policy.get("raw_redistribution_allowed", False)
+        ),
+        "release_surface_allowed": _coerce_bool(
+            policy.get("release_surface_allowed", False)
+        ),
         "storage_boundary": str(policy.get("storage_boundary", "") or ""),
         "license_basis": str(policy.get("license_basis", "") or ""),
         "total_mb": round(total_bytes / 1_000_000, 1) if total_bytes else 0.0,
@@ -190,28 +211,45 @@ def _build_report(
     queue_summary = _queue_payload(queue)
     status_counts = _as_dict(queue_summary.get("status_counts"))
     direct_mgt_ready_count = _coerce_int(
-        queue_summary.get("direct_solver_graph_ready_count", status_counts.get("solver_graph_ready", 0))
+        queue_summary.get(
+            "direct_solver_graph_ready_count",
+            status_counts.get("solver_graph_ready", 0),
+        )
     )
     queue_rows = [row for row in (queue.get("queue") or []) if isinstance(row, dict)]
-    solver_exact_ready_count = sum(1 for row in queue_rows if row.get("solver_exact") is True)
+    solver_exact_ready_count = sum(
+        1 for row in queue_rows if row.get("solver_exact") is True
+    )
     if not queue_rows:
         solver_exact_ready_count = _coerce_int(
-            queue_summary.get("solver_exact_ready_count", queue_summary.get("solver_graph_ready_count", 0))
+            queue_summary.get(
+                "solver_exact_ready_count",
+                queue_summary.get("solver_graph_ready_count", 0),
+            )
         )
     direct_mgt_solver_exact_count = sum(
         1
         for row in queue_rows
-        if row.get("solver_exact") is True and row.get("optimization_route") == "midas_mgt_direct_parser"
+        if row.get("solver_exact") is True
+        and row.get("optimization_route") == "midas_mgt_direct_parser"
     )
     if not queue_rows:
         direct_mgt_solver_exact_count = _coerce_int(
             queue_summary.get("direct_mgt_solver_exact_count", direct_mgt_ready_count)
         )
-    mgt_hard_tier_ready_count = _coerce_int(queue_summary.get("mgt_hard_tier_ready_count", direct_mgt_ready_count))
-    mgt_hard_tier_blocked_count = _coerce_int(queue_summary.get("mgt_hard_tier_blocked_count", 0))
-    mgt_hard_tier_blocked_reason_counts = _as_dict(queue_summary.get("mgt_hard_tier_blocked_reason_counts"))
+    mgt_hard_tier_ready_count = _coerce_int(
+        queue_summary.get("mgt_hard_tier_ready_count", direct_mgt_ready_count)
+    )
+    mgt_hard_tier_blocked_count = _coerce_int(
+        queue_summary.get("mgt_hard_tier_blocked_count", 0)
+    )
+    mgt_hard_tier_blocked_reason_counts = _as_dict(
+        queue_summary.get("mgt_hard_tier_blocked_reason_counts")
+    )
     ifc_proxy_graph_ready_count = _coerce_int(
-        queue_summary.get("ifc_proxy_graph_ready_count", status_counts.get("ifc_proxy_graph_ready", 0))
+        queue_summary.get(
+            "ifc_proxy_graph_ready_count", status_counts.get("ifc_proxy_graph_ready", 0)
+        )
     )
     archive_preview_ready_count = _coerce_int(
         queue_summary.get(
@@ -219,10 +257,18 @@ def _build_report(
             status_counts.get("archive_decoded_preview_bridge_ready", 0),
         )
     )
-    archive_hard_tier_ready_count = _coerce_int(queue_summary.get("archive_hard_tier_ready_count", 0))
-    archive_hard_tier_blocked_count = _coerce_int(queue_summary.get("archive_hard_tier_blocked_count", 0))
-    archive_exact_topology_candidate_count = _coerce_int(queue_summary.get("archive_exact_topology_candidate_count", 0))
-    archive_verified_geometry_preview_count = _coerce_int(queue_summary.get("archive_verified_geometry_preview_count", 0))
+    archive_hard_tier_ready_count = _coerce_int(
+        queue_summary.get("archive_hard_tier_ready_count", 0)
+    )
+    archive_hard_tier_blocked_count = _coerce_int(
+        queue_summary.get("archive_hard_tier_blocked_count", 0)
+    )
+    archive_exact_topology_candidate_count = _coerce_int(
+        queue_summary.get("archive_exact_topology_candidate_count", 0)
+    )
+    archive_verified_geometry_preview_count = _coerce_int(
+        queue_summary.get("archive_verified_geometry_preview_count", 0)
+    )
     archive_hard_tier_blocked_reason_counts = _as_dict(
         queue_summary.get("archive_hard_tier_blocked_reason_counts")
     )
@@ -239,14 +285,27 @@ def _build_report(
         )
     )
     proxy_or_preview_ready_count = _coerce_int(
-        queue_summary.get("proxy_or_preview_ready_count", ifc_proxy_graph_ready_count + archive_preview_ready_count)
+        queue_summary.get(
+            "proxy_or_preview_ready_count",
+            ifc_proxy_graph_ready_count + archive_preview_ready_count,
+        )
     )
-    ifc_adapter_required_count = _coerce_int(queue_summary.get("ifc_adapter_required_count", 0))
-    archive_adapter_required_count = _coerce_int(queue_summary.get("archive_adapter_required_count", 0))
+    ifc_adapter_required_count = _coerce_int(
+        queue_summary.get("ifc_adapter_required_count", 0)
+    )
+    archive_adapter_required_count = _coerce_int(
+        queue_summary.get("archive_adapter_required_count", 0)
+    )
 
-    raw_redistribution_allowed = _coerce_bool(manifest_summary.get("raw_redistribution_allowed"))
-    release_surface_allowed = _coerce_bool(manifest_summary.get("release_surface_allowed"))
-    release_surface_allowed_count = _coerce_int(manifest_summary.get("release_surface_allowed_count", 0))
+    raw_redistribution_allowed = _coerce_bool(
+        manifest_summary.get("raw_redistribution_allowed")
+    )
+    release_surface_allowed = _coerce_bool(
+        manifest_summary.get("release_surface_allowed")
+    )
+    release_surface_allowed_count = _coerce_int(
+        manifest_summary.get("release_surface_allowed_count", 0)
+    )
     manifest_contract_pass = _coerce_bool(manifest_summary.get("contract_pass"))
     queue_contract_pass = _coerce_bool(queue_summary.get("contract_pass"))
     freshness_check = build_input_artifact_freshness_check(
@@ -254,27 +313,43 @@ def _build_report(
         queue_generated_at=queue.get("generated_at", ""),
     )
 
-    candidate_count_match = _coerce_int(manifest_summary.get("model_optimization_candidate_count", 0)) == _coerce_int(
-        queue_summary.get("candidate_file_count", 0)
-    )
-    model_asset_count_match = _coerce_int(manifest_summary.get("model_optimization_asset_count", 0)) == _coerce_int(
-        queue_summary.get("candidate_model_asset_count", 0)
-    )
+    candidate_count_match = _coerce_int(
+        manifest_summary.get("model_optimization_candidate_count", 0)
+    ) == _coerce_int(queue_summary.get("candidate_file_count", 0))
+    model_asset_count_match = _coerce_int(
+        manifest_summary.get("model_optimization_asset_count", 0)
+    ) == _coerce_int(queue_summary.get("candidate_model_asset_count", 0))
     ready_tier_sum = (
         direct_mgt_ready_count
         + ifc_proxy_graph_ready_count
         + archive_preview_ready_count
         + archive_hard_tier_ready_count
     )
-    ready_count_match = ready_tier_sum == _coerce_int(queue_summary.get("optimized_drawing_generation_ready_count", 0))
-    lane_sum = ready_tier_sum + ifc_adapter_required_count + archive_adapter_required_count
-    lane_sum_match = lane_sum == _coerce_int(queue_summary.get("candidate_file_count", 0))
+    ready_count_match = ready_tier_sum == _coerce_int(
+        queue_summary.get("optimized_drawing_generation_ready_count", 0)
+    )
+    lane_sum = (
+        ready_tier_sum + ifc_adapter_required_count + archive_adapter_required_count
+    )
+    lane_sum_match = lane_sum == _coerce_int(
+        queue_summary.get("candidate_file_count", 0)
+    )
     ready_asset_count_match = _coerce_int(
         queue_summary.get("optimized_drawing_generation_ready_model_asset_count", 0)
     ) <= _coerce_int(queue_summary.get("candidate_model_asset_count", 0))
 
-    surface_safe = (not raw_redistribution_allowed) and (not release_surface_allowed) and release_surface_allowed_count == 0
-    counts_consistent = candidate_count_match and model_asset_count_match and ready_count_match and lane_sum_match and ready_asset_count_match
+    surface_safe = (
+        (not raw_redistribution_allowed)
+        and (not release_surface_allowed)
+        and release_surface_allowed_count == 0
+    )
+    counts_consistent = (
+        candidate_count_match
+        and model_asset_count_match
+        and ready_count_match
+        and lane_sum_match
+        and ready_asset_count_match
+    )
 
     if not manifest_contract_pass:
         reason_code = "ERR_MANIFEST_CONTRACT_FAILED"
@@ -287,20 +362,28 @@ def _build_report(
     else:
         reason_code = "PASS"
 
-    drawing_sheet_candidate_count = _coerce_int(manifest_summary.get("drawing_sheet_candidate_count", 0))
+    drawing_sheet_candidate_count = _coerce_int(
+        manifest_summary.get("drawing_sheet_candidate_count", 0)
+    )
     model_asset_count = _coerce_int(queue_summary.get("candidate_model_asset_count", 0))
-    hard_solver_graph_ready_count = _coerce_int(queue_summary.get("solver_graph_ready_count", direct_mgt_ready_count))
+    hard_solver_graph_ready_count = _coerce_int(
+        queue_summary.get("solver_graph_ready_count", direct_mgt_ready_count)
+    )
 
     summary = {
         "project_count": _coerce_int(manifest_summary.get("project_count", 0)),
         "file_count": _coerce_int(manifest_summary.get("file_count", 0)),
         "total_bytes": _coerce_int(manifest_summary.get("total_bytes", 0)),
         "total_mb": manifest_summary.get("total_mb", 0.0),
-        "raw_redistribution_allowed_count": _coerce_int(manifest_summary.get("raw_redistribution_allowed_count", 0)),
+        "raw_redistribution_allowed_count": _coerce_int(
+            manifest_summary.get("raw_redistribution_allowed_count", 0)
+        ),
         "release_surface_allowed_count": release_surface_allowed_count,
         "private_only": _coerce_bool(manifest_summary.get("private_only", False)),
         "drawing_sheet_candidate_count": drawing_sheet_candidate_count,
-        "model_optimization_candidate_count": _coerce_int(manifest_summary.get("model_optimization_candidate_count", 0)),
+        "model_optimization_candidate_count": _coerce_int(
+            manifest_summary.get("model_optimization_candidate_count", 0)
+        ),
         "model_asset_count": model_asset_count,
         "direct_mgt_ready_count": direct_mgt_ready_count,
         "direct_mgt_solver_exact_count": direct_mgt_solver_exact_count,
@@ -314,15 +397,27 @@ def _build_report(
         "ifc_proxy_graph_ready_count": ifc_proxy_graph_ready_count,
         "archive_decoded_preview_bridge_ready_count": archive_preview_ready_count,
         "proxy_or_preview_ready_count": proxy_or_preview_ready_count,
-        "real_data_route_ready_count": _coerce_int(queue_summary.get("optimized_drawing_generation_ready_count", 0)),
+        "real_data_route_ready_count": _coerce_int(
+            queue_summary.get("optimized_drawing_generation_ready_count", 0)
+        ),
         "hard_solver_graph_ready_count": hard_solver_graph_ready_count,
         "ifc_adapter_required_count": ifc_adapter_required_count,
         "archive_adapter_required_count": archive_adapter_required_count,
-        "ready_model_asset_count": _coerce_int(queue_summary.get("optimized_drawing_generation_ready_model_asset_count", 0)),
-        "ready_node_count_total": _coerce_int(queue_summary.get("ready_node_count_total", 0)),
-        "ready_element_count_total": _coerce_int(queue_summary.get("ready_element_count_total", 0)),
-        "ready_ifc_proxy_node_count_total": _coerce_int(queue_summary.get("ready_ifc_proxy_node_count_total", 0)),
-        "ready_ifc_proxy_edge_count_total": _coerce_int(queue_summary.get("ready_ifc_proxy_edge_count_total", 0)),
+        "ready_model_asset_count": _coerce_int(
+            queue_summary.get("optimized_drawing_generation_ready_model_asset_count", 0)
+        ),
+        "ready_node_count_total": _coerce_int(
+            queue_summary.get("ready_node_count_total", 0)
+        ),
+        "ready_element_count_total": _coerce_int(
+            queue_summary.get("ready_element_count_total", 0)
+        ),
+        "ready_ifc_proxy_node_count_total": _coerce_int(
+            queue_summary.get("ready_ifc_proxy_node_count_total", 0)
+        ),
+        "ready_ifc_proxy_edge_count_total": _coerce_int(
+            queue_summary.get("ready_ifc_proxy_edge_count_total", 0)
+        ),
         "eb_rh_external_validation_status": "pending",
         "l3_claim_state": "maintained",
         "readiness_tier_note": "hard solver graph count is derived from queue rows with solver_exact=true; IFC rows are proxy graphs and archive preview rows are not hard tier unless promoted.",
@@ -391,16 +486,22 @@ def _build_report(
         remaining_blockers=report_blockers,
     )
 
-    external_validation_status = str(summary.get("eb_rh_external_validation_status", "") or "").strip().lower()
+    external_validation_status = (
+        str(summary.get("eb_rh_external_validation_status", "") or "").strip().lower()
+    )
     external_validation_check = _check_item(
         check_id="eb_rh_external_validation_hold",
         category="external_validation",
         status="pending" if external_validation_status == "pending" else "pass",
         accepted=external_validation_status != "pending",
         signals={
-            "eb_rh_external_validation_status": summary.get("eb_rh_external_validation_status", ""),
+            "eb_rh_external_validation_status": summary.get(
+                "eb_rh_external_validation_status", ""
+            ),
         },
-        remaining_blockers=["eb_rh_external_validation_hold"] if external_validation_status == "pending" else [],
+        remaining_blockers=["eb_rh_external_validation_hold"]
+        if external_validation_status == "pending"
+        else [],
     )
 
     ifc_hard_tier_check = _check_item(
@@ -468,20 +569,33 @@ def _build_report(
         external_validation_check,
     ]
     evidence_checklist = decorate_check_items(evidence_checklist)
-    tier_acceptance = [row for row in evidence_checklist if str(row.get("category", "") or "") == "tier_acceptance"]
+    tier_acceptance = [
+        row
+        for row in evidence_checklist
+        if str(row.get("category", "") or "") == "tier_acceptance"
+    ]
     mgt_hard_tier_check = next(
-        (row for row in evidence_checklist if str(row.get("check_id", "") or "") == "mgt_direct_solver_exact_hard_tier"),
+        (
+            row
+            for row in evidence_checklist
+            if str(row.get("check_id", "") or "") == "mgt_direct_solver_exact_hard_tier"
+        ),
         mgt_hard_tier_check,
     )
     ifc_hard_tier_check = next(
-        (row for row in evidence_checklist if str(row.get("check_id", "") or "") == "ifc_solver_exact_hard_tier"),
+        (
+            row
+            for row in evidence_checklist
+            if str(row.get("check_id", "") or "") == "ifc_solver_exact_hard_tier"
+        ),
         ifc_hard_tier_check,
     )
     archive_hard_tier_check = next(
         (
             row
             for row in evidence_checklist
-            if str(row.get("check_id", "") or "") == "archive_native_solver_exact_hard_tier"
+            if str(row.get("check_id", "") or "")
+            == "archive_native_solver_exact_hard_tier"
         ),
         archive_hard_tier_check,
     )
@@ -494,15 +608,27 @@ def _build_report(
         external_validation_check,
     )
     report_contract_check = next(
-        (row for row in evidence_checklist if str(row.get("check_id", "") or "") == "report_contract"),
+        (
+            row
+            for row in evidence_checklist
+            if str(row.get("check_id", "") or "") == "report_contract"
+        ),
         report_contract_check,
     )
     freshness_check = next(
-        (row for row in evidence_checklist if str(row.get("check_id", "") or "") == "input_artifact_freshness"),
+        (
+            row
+            for row in evidence_checklist
+            if str(row.get("check_id", "") or "") == "input_artifact_freshness"
+        ),
         freshness_check,
     )
     release_surface_check = next(
-        (row for row in evidence_checklist if str(row.get("check_id", "") or "") == "release_surface_redaction"),
+        (
+            row
+            for row in evidence_checklist
+            if str(row.get("check_id", "") or "") == "release_surface_redaction"
+        ),
         release_surface_check,
     )
 
@@ -539,26 +665,43 @@ def _build_report(
             evidence_target="external benchmark and residual holdout evidence sidecars",
         ),
     ]
-    blocker_register = [row for row in blocker_register if row["blocker_id"] in remaining_blockers]
+    blocker_register = [
+        row for row in blocker_register if row["blocker_id"] in remaining_blockers
+    ]
     readiness_lanes = build_readiness_lanes(evidence_checklist)
-    remaining_blocker_details = build_remaining_blocker_details(evidence_checklist, remaining_blockers)
+    remaining_blocker_details = build_remaining_blocker_details(
+        evidence_checklist, remaining_blockers
+    )
     readiness_summary = summarize_readiness(
         check_items=evidence_checklist,
         readiness_lanes=readiness_lanes,
         input_artifact_freshness=freshness_check,
     )
 
-    tier_acceptance_pass_count = sum(1 for item in tier_acceptance if _coerce_bool(item.get("accepted")))
-    evidence_checklist_pass_count = sum(1 for item in evidence_checklist if _coerce_bool(item.get("accepted")))
-    evidence_checklist_pending_count = sum(1 for item in evidence_checklist if str(item.get("status", "") or "").lower() == "pending")
-    evidence_checklist_blocked_count = sum(1 for item in evidence_checklist if str(item.get("status", "") or "").lower() == "blocked")
+    tier_acceptance_pass_count = sum(
+        1 for item in tier_acceptance if _coerce_bool(item.get("accepted"))
+    )
+    evidence_checklist_pass_count = sum(
+        1 for item in evidence_checklist if _coerce_bool(item.get("accepted"))
+    )
+    evidence_checklist_pending_count = sum(
+        1
+        for item in evidence_checklist
+        if str(item.get("status", "") or "").lower() == "pending"
+    )
+    evidence_checklist_blocked_count = sum(
+        1
+        for item in evidence_checklist
+        if str(item.get("status", "") or "").lower() == "blocked"
+    )
 
     summary.update(
         {
             "tier_acceptance": tier_acceptance,
             "tier_count": len(tier_acceptance),
             "tier_acceptance_pass_count": tier_acceptance_pass_count,
-            "tier_acceptance_all_pass": tier_acceptance_pass_count == len(tier_acceptance),
+            "tier_acceptance_all_pass": tier_acceptance_pass_count
+            == len(tier_acceptance),
             "evidence_checklist": evidence_checklist,
             "evidence_checklist_count": len(evidence_checklist),
             "evidence_checklist_pass_count": evidence_checklist_pass_count,
@@ -572,13 +715,25 @@ def _build_report(
             "readiness_lanes": readiness_lanes,
             "readiness_lane_count": len(readiness_lanes),
             "readiness_state": readiness_summary.get("readiness_state", "pending"),
-            "readiness_lane_state_counts": readiness_summary.get("readiness_lane_state_counts", {}),
-            "evidence_checklist_state_counts": readiness_summary.get("evidence_checklist_state_counts", {}),
-            "readiness_summary_line": readiness_summary.get("readiness_summary_line", ""),
+            "readiness_lane_state_counts": readiness_summary.get(
+                "readiness_lane_state_counts", {}
+            ),
+            "evidence_checklist_state_counts": readiness_summary.get(
+                "evidence_checklist_state_counts", {}
+            ),
+            "readiness_summary_line": readiness_summary.get(
+                "readiness_summary_line", ""
+            ),
             "input_artifact_freshness": freshness_check,
-            "input_artifact_freshness_status": readiness_summary.get("input_artifact_freshness_status", "pending"),
-            "input_artifact_freshness_skew_seconds": readiness_summary.get("input_artifact_freshness_skew_seconds", -1),
-            "stale_artifact_detected": readiness_summary.get("stale_artifact_detected", False),
+            "input_artifact_freshness_status": readiness_summary.get(
+                "input_artifact_freshness_status", "pending"
+            ),
+            "input_artifact_freshness_skew_seconds": readiness_summary.get(
+                "input_artifact_freshness_skew_seconds", -1
+            ),
+            "stale_artifact_detected": readiness_summary.get(
+                "stale_artifact_detected", False
+            ),
         }
     )
 
@@ -600,7 +755,11 @@ def _build_report(
         "input_artifact_freshness_pass": freshness_check.get("status") == "pass",
         "input_artifact_freshness_pending": freshness_check.get("status") == "pending",
         "input_artifact_freshness_blocked": freshness_check.get("status") == "blocked",
-        "input_artifact_freshness_skew_seconds": _coerce_int(_as_dict(freshness_check.get("signals")).get("generated_at_skew_seconds", -1)),
+        "input_artifact_freshness_skew_seconds": _coerce_int(
+            _as_dict(freshness_check.get("signals")).get(
+                "generated_at_skew_seconds", -1
+            )
+        ),
         "stale_artifact_detected": freshness_check.get("status") == "blocked",
     }
 
@@ -664,11 +823,25 @@ def _markdown(report: dict[str, Any]) -> str:
             for key in ("all-pass", "blocked", "pending")
         )
 
-    tier_acceptance = [row for row in (summary.get("tier_acceptance") or []) if isinstance(row, dict)]
-    evidence_checklist = [row for row in (summary.get("evidence_checklist") or []) if isinstance(row, dict)]
-    readiness_lanes = [row for row in (summary.get("readiness_lanes") or []) if isinstance(row, dict)]
-    remaining_blocker_details = [row for row in (summary.get("remaining_blocker_details") or []) if isinstance(row, dict)]
-    blocker_register = [row for row in (summary.get("blocker_register") or []) if isinstance(row, dict)]
+    tier_acceptance = [
+        row for row in (summary.get("tier_acceptance") or []) if isinstance(row, dict)
+    ]
+    evidence_checklist = [
+        row
+        for row in (summary.get("evidence_checklist") or [])
+        if isinstance(row, dict)
+    ]
+    readiness_lanes = [
+        row for row in (summary.get("readiness_lanes") or []) if isinstance(row, dict)
+    ]
+    remaining_blocker_details = [
+        row
+        for row in (summary.get("remaining_blocker_details") or [])
+        if isinstance(row, dict)
+    ]
+    blocker_register = [
+        row for row in (summary.get("blocker_register") or []) if isinstance(row, dict)
+    ]
     tier_acceptance_rows = [
         f"| `{row.get('tier_id', '')}` / {row.get('label', '')} | {str(row.get('readiness_state', '') or '')} | {str(row.get('status', '') or '')} | "
         f"{str(row.get('exactness_policy', '') or 'n/a')} | {str(row.get('owner', '') or 'n/a')} | "
@@ -843,14 +1016,18 @@ def _markdown(report: dict[str, Any]) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--redacted-manifest", type=Path, default=DEFAULT_REDACTED_MANIFEST)
+    parser.add_argument(
+        "--redacted-manifest", type=Path, default=DEFAULT_REDACTED_MANIFEST
+    )
     parser.add_argument("--intake-queue", type=Path, default=DEFAULT_INTAKE_QUEUE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_JSON)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
-    report = _build_report(redacted_manifest=args.redacted_manifest, intake_queue=args.intake_queue)
+    report = _build_report(
+        redacted_manifest=args.redacted_manifest, intake_queue=args.intake_queue
+    )
     _write_json(args.out, report)
     args.out_md.parent.mkdir(parents=True, exist_ok=True)
     args.out_md.write_text(_markdown(report), encoding="utf-8")

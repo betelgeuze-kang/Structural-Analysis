@@ -1,0 +1,75 @@
+name: Profile-scoped Product State
+
+on:
+  merge_group:
+  pull_request:
+    paths:
+      - "scripts/build_profile_scoped_product_states.py"
+      - "tests/test_build_profile_scoped_product_states.py"
+      - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+      - "implementation/phase1/customer_shadow_evidence_status.json"
+      - "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
+      - "implementation/phase1/workstation_delivery_readiness.json"
+      - "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
+      - ".github/workflows/profile-scoped-product-state.yml"
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/build_profile_scoped_product_states.py"
+      - "tests/test_build_profile_scoped_product_states.py"
+      - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
+      - "implementation/phase1/customer_shadow_evidence_status.json"
+      - "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
+      - "implementation/phase1/workstation_delivery_readiness.json"
+      - "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
+      - ".github/workflows/profile-scoped-product-state.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+
+concurrency:
+  group: profile-scoped-product-state-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-states:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+
+      - name: Install contract test tool
+        run: python -m pip install pytest==8.4.2
+
+      - name: Verify profile-scoped state contracts
+        run: python -m pytest -q tests/test_build_profile_scoped_product_states.py
+
+      - name: Build ephemeral exact-SHA states
+        run: >-
+          python scripts/build_profile_scoped_product_states.py
+          --source-commit "$SOURCE_SHA"
+          --developer-preview-out ".ci/profile-states/developer-preview.json"
+          --commercial-out ".ci/profile-states/commercial-release.json"
+          --json
+
+      - name: Upload profile-scoped states
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: profile-scoped-product-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci/profile-states/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90

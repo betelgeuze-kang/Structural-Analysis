@@ -33,6 +33,7 @@
       "enum": [
         "engine_v2_phase0_linear_3d",
         "bounded_planar_frame_alpha",
+        "planar_frame_verified_alpha.v1",
         "bounded_frame3d_direct_displacement_control"
       ]
     },
@@ -129,7 +130,12 @@
     {
       "if": {
         "properties": {
-          "capability_profile": {"const": "bounded_planar_frame_alpha"}
+          "capability_profile": {
+            "enum": [
+              "bounded_planar_frame_alpha",
+              "planar_frame_verified_alpha.v1"
+            ]
+          }
         }
       },
       "then": {

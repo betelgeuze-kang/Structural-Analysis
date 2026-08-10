@@ -4,29 +4,14 @@ import {
   type EngineeringValue,
   type TextValue,
 } from '../model/caseSchema'
-import { EngineeringValueText } from './EngineeringValueText'
+import { EngineeringValueText, EvidenceValueText } from './EngineeringValueText'
 
 interface EquationScalingPanelProps {
   analysis?: CaseAnalysis
 }
 
 function ExplicitText({ value }: { value: TextValue }): ReactElement {
-  if (value.status === 'available') {
-    return (
-      <span className="wb2-engineering-value" data-engineering-value-state="available">
-        {value.value}
-      </span>
-    )
-  }
-  return (
-    <span
-      className={`wb2-engineering-value wb2-engineering-value--${value.status}`}
-      data-engineering-value-state={value.status}
-      title={value.status === 'unavailable' ? 'Evidence is unavailable' : value.reason}
-    >
-      {value.status.toUpperCase()}
-    </span>
-  )
+  return <EvidenceValueText value={value} format={(available) => available} />
 }
 
 const NUMERIC_ROWS: Array<{

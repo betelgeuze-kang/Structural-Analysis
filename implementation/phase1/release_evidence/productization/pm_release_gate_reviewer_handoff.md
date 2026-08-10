@@ -1,10 +1,10 @@
 # PM Release Gate Reviewer Handoff
 
-- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=63 | incomplete=0 | release_tiers=1/4`
-- `pm_summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
+- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=72 | incomplete=0 | release_tiers=1/4`
+- `pm_summary_line`: `PM release gate: BLOCKED | source_provenance=BLOCKED | computed_without_provenance=PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=2/5 | release_areas_green=4/16 | measured_cases=304`
 - `contract_pass`: `True`
 - `release_area_summary`: `4/16`
-- `release_area_blocker_count`: `42`
+- `release_area_blocker_count`: `51`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
 |---|---|---|---|
@@ -22,27 +22,35 @@
 | `M5::pdf_report_or_reviewer_package_missing` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `M5::audit_trail_action_source_trace_missing` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `M5::signed_release_registry_missing_or_failed` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
-| `M5::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
+| `M5::support_bundle_export_missing_or_failed` | `release_owner` | `local_remediation_ready` | An owning PM completion-audit requirement row must be identified.<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_runner_precondition_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass` |
 | `strict_ci::direct_require_hip_failed_without_cpu_only_scope` | `release_owner` | `local_remediation_ready` | `release_area.strict_ci` status is `pass` in `pm_release_gate_completion_audit.json`<br>`strict_ci::direct_require_hip_failed_without_cpu_only_scope` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `cpu_only_product_mode_declared`, `direct_require_hip_or_cpu_scope_pass` |
 | `evidence_freshness::p0_closure_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::p0_closure_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::p1_readiness_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::p1_readiness_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
-| `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::evidence_console_scope_status::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::evidence_console_scope_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
+| `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`<br>`evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match` |
 | `core_engine::core_depth_milestone_not_green` | `release_owner` | `local_remediation_ready` | `release_area.core_engine` status is `pass` in `pm_release_gate_completion_audit.json`<br>`core_engine::core_depth_milestone_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `commercial_accuracy_contract_pass`, `commercial_readiness_contract_pass`, `core_depth_milestone_pass` |
@@ -61,10 +69,11 @@
 | `report::reproducibility_lock_not_green` | `release_owner` | `local_remediation_ready` | `release_area.report` status is `pass` in `pm_release_gate_completion_audit.json`<br>`report::reproducibility_lock_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `commercial_packaging_milestone_pass`, `repro_command_present`, `reproducibility_lock_pass`, `reviewer_package_auto_pass` |
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_observation_missing_or_failed` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_observation_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_30min_sample_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`<br>`release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
-| `support::pm_blocker_closure_board_count_mismatch` | `release_owner` | `local_remediation_ready` | `release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`<br>`support::pm_blocker_closure_board_count_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `pm_blocker_closure_board_register_count_match` |
+| `support::failure_bundle_export_not_green` | `release_owner` | `local_remediation_ready` | `release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`<br>`support::failure_bundle_export_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `failure_bundle_export_pass` |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::license_status_not_configured` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`<br>`release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `license_status_configured_pass`, `repro_build_pass` |
 | `security::repro_build_not_green` | `release_owner` | `local_remediation_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::repro_build_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `license_status_configured_pass`, `repro_build_pass` |
 | `github_sync::github_sync_preflight::local_head_mismatch` | `release_owner` | `external_owner_input_ready` | `release_area.github_sync` status is `pass` in `pm_release_gate_completion_audit.json`<br>`github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report.<br>Current false audit check(s): `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`, `github_sync_remote_mutation_approval_pending`, `github_sync_remote_sync_needed` |
+| `source_provenance::input_not_reproducible_at_declared_commit` | `release_owner` | `local_remediation_ready` | `release_tier.limited_commercial_full_gate_ready` pass is `true` in `pm_release_gate_completion_audit.json`<br>`source_provenance::input_not_reproducible_at_declared_commit` is absent from `release_tier.limited_commercial_full_gate_ready.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `limited_commercial_full_gate_ready` |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`independent_vv_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`family_validation_manual_signoff_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_tier.ga_enterprise_evidence_gate_pass` pass is `true` in `pm_release_gate_completion_audit.json`<br>`customer_audit_failure_bundle_sla_missing` is absent from `release_tier.ga_enterprise_evidence_gate_pass.blockers` in `pm_release_gate_completion_audit.json`<br>Current false audit check(s): `ga_enterprise_evidence_gate_pass` |
@@ -78,8 +87,8 @@
 |---|---|---|---|---|
 | `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `blocked` | `technical_paid_pilot_candidate_false` | Regenerate the PM release gate after milestone or scope-guard evidence changes. | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
 | `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
-| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `strict_ci::direct_require_hip_failed_without_cpu_only_scope`, `evidence_freshness::p0_closure_status::producer_newer_than_artifact`, `evidence_freshness::p1_readiness_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::source_commit_mismatch`, `evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact`, `core_engine::core_depth_milestone_not_green`, `core_engine::commercial_readiness_contract_not_green`, `core_engine::commercial_accuracy_contract_not_green`, `runtime::strict_runtime_milestone_not_green`, `gpu_device::gpu_strict_failed_without_cpu_only_scope`, `gpu_device::device_residency_target_not_met`, `interop::midas_interop_not_green`, `interop::midas_native_roundtrip_not_green`, `interop::midas_exact_roundtrip_not_green`, `interop::kds_full_crosswalk_not_green`, `report::commercial_packaging_milestone_not_green`, `report::reviewer_package_auto_not_green`, `report::repro_command_missing_from_report_evidence`, `report::reproducibility_lock_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::pm_blocker_closure_board_count_mismatch`, `security::license_status_not_configured`, `security::repro_build_not_green`, `github_sync::github_sync_preflight::local_head_mismatch` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
-| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed`, `fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `strict_ci::direct_require_hip_failed_without_cpu_only_scope`, `evidence_freshness::p0_closure_status::producer_newer_than_artifact`, `evidence_freshness::p1_readiness_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::source_commit_mismatch`, `evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact`, `core_engine::core_depth_milestone_not_green`, `core_engine::commercial_readiness_contract_not_green`, `core_engine::commercial_accuracy_contract_not_green`, `runtime::strict_runtime_milestone_not_green`, `gpu_device::gpu_strict_failed_without_cpu_only_scope`, `gpu_device::device_residency_target_not_met`, `interop::midas_interop_not_green`, `interop::midas_native_roundtrip_not_green`, `interop::midas_exact_roundtrip_not_green`, `interop::kds_full_crosswalk_not_green`, `report::commercial_packaging_milestone_not_green`, `report::reviewer_package_auto_not_green`, `report::repro_command_missing_from_report_evidence`, `report::reproducibility_lock_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::pm_blocker_closure_board_count_mismatch`, `security::license_status_not_configured`, `security::repro_build_not_green`, `github_sync::github_sync_preflight::local_head_mismatch` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
+| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `strict_ci::direct_require_hip_failed_without_cpu_only_scope`, `evidence_freshness::p0_closure_status::producer_newer_than_artifact`, `evidence_freshness::p1_readiness_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch`, `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact`, `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window`, `evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch`, `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch`, `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::source_commit_mismatch`, `evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact`, `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact`, `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch`, `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch`, `evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact`, `core_engine::core_depth_milestone_not_green`, `core_engine::commercial_readiness_contract_not_green`, `core_engine::commercial_accuracy_contract_not_green`, `runtime::strict_runtime_milestone_not_green`, `gpu_device::gpu_strict_failed_without_cpu_only_scope`, `gpu_device::device_residency_target_not_met`, `interop::midas_interop_not_green`, `interop::midas_native_roundtrip_not_green`, `interop::midas_exact_roundtrip_not_green`, `interop::kds_full_crosswalk_not_green`, `report::commercial_packaging_milestone_not_green`, `report::reviewer_package_auto_not_green`, `report::repro_command_missing_from_report_evidence`, `report::reproducibility_lock_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::failure_bundle_export_not_green`, `security::license_status_not_configured`, `security::repro_build_not_green`, `github_sync::github_sync_preflight::local_head_mismatch`, `source_provenance::input_not_reproducible_at_declared_commit` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed`, `fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `strict_ci::direct_require_hip_failed_without_cpu_only_scope`, `evidence_freshness::p0_closure_status::producer_newer_than_artifact`, `evidence_freshness::p1_readiness_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch`, `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact`, `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact`, `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window`, `evidence_freshness::customer_shadow_evidence_status::input_dependency_newer_than_artifact`, `evidence_freshness::customer_shadow_evidence_intake_packet::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch`, `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact`, `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact`, `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch`, `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact`, `evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::source_commit_mismatch`, `evidence_freshness::evidence_console_scope_status::producer_newer_than_artifact`, `evidence_freshness::evidence_console_scope_status::input_dependency_newer_than_artifact`, `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact`, `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch`, `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact`, `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch`, `evidence_freshness::product_production_ai_checkpoint_readiness::producer_newer_than_artifact`, `evidence_freshness::product_production_ai_checkpoint_readiness::input_dependency_newer_than_artifact`, `core_engine::core_depth_milestone_not_green`, `core_engine::commercial_readiness_contract_not_green`, `core_engine::commercial_accuracy_contract_not_green`, `runtime::strict_runtime_milestone_not_green`, `gpu_device::gpu_strict_failed_without_cpu_only_scope`, `gpu_device::device_residency_target_not_met`, `interop::midas_interop_not_green`, `interop::midas_native_roundtrip_not_green`, `interop::midas_exact_roundtrip_not_green`, `interop::kds_full_crosswalk_not_green`, `report::commercial_packaging_milestone_not_green`, `report::reviewer_package_auto_not_green`, `report::repro_command_missing_from_report_evidence`, `report::reproducibility_lock_not_green`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `support::failure_bundle_export_not_green`, `security::license_status_not_configured`, `security::repro_build_not_green`, `github_sync::github_sync_preflight::local_head_mismatch`, `source_provenance::input_not_reproducible_at_declared_commit` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
@@ -570,7 +579,7 @@ Verdict change conditions:
 - An owning PM completion-audit requirement row must be identified.
 - The owning release-area row has no blocker-specific false check in the PM report.
 
-### `M5::pm_blocker_closure_board_count_mismatch`
+### `M5::support_bundle_export_missing_or_failed`
 
 - Owner: `release_owner`
 - Verdict requirement: `unmapped`
@@ -580,10 +589,10 @@ Verdict change conditions:
 - Evidence state: `open_release_evidence_blocker`
 - External input required: `False`
 - Owner input required: `False`
-- Next action: Resolve `pm_blocker_closure_board_count_mismatch` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.
+- Next action: Resolve `support_bundle_export_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.
 
 Acceptance criteria:
-- `M5::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`
+- `M5::support_bundle_export_missing_or_failed` absent from `full_release_blockers`
 - `full_release_gate_ready == true` after PM report regeneration
 
 Evidence artifact paths:
@@ -808,6 +817,44 @@ Verdict change conditions:
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
+### `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::p1_benchmark_breadth_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
 ### `evidence_freshness::p1_benchmark_breadth_status::producer_newer_than_artifact`
 
 - Owner: `release_owner`
@@ -881,6 +928,44 @@ Verification commands:
 Verdict change conditions:
 - `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
 - `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
+### `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
@@ -960,6 +1045,44 @@ Verdict change conditions:
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
+### `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
 ### `evidence_freshness::fresh_full_validation_lane_status::producer_newer_than_artifact`
 
 - Owner: `release_owner`
@@ -1036,6 +1159,44 @@ Verdict change conditions:
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
+### `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
 ### `evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact`
 
 - Owner: `release_owner`
@@ -1074,7 +1235,7 @@ Verdict change conditions:
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
-### `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact`
+### `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch`
 
 - Owner: `release_owner`
 - Verdict requirement: `release_area.evidence_freshness`
@@ -1089,7 +1250,7 @@ Verdict change conditions:
 Acceptance criteria:
 - `release_evidence_freshness_report.json.contract_pass == true`
 - `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
-- `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact` absent from `release_area_blockers`
+- `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch` absent from `release_area_blockers`
 
 Evidence artifact paths:
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
@@ -1108,7 +1269,7 @@ Verification commands:
 
 Verdict change conditions:
 - `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
-- `evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`
+- `evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
@@ -1302,6 +1463,120 @@ Verdict change conditions:
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
+### `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::developer_preview_rc_status::producer_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
+### `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::developer_preview_rc_status::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
+### `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::accuracy_parity_scorecard::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
 ### `evidence_freshness::accuracy_parity_scorecard::producer_newer_than_artifact`
 
 - Owner: `release_owner`
@@ -1375,6 +1650,44 @@ Verification commands:
 Verdict change conditions:
 - `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
 - `evidence_freshness::accuracy_parity_scorecard::input_dependency_newer_than_artifact` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+- Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
+
+### `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_area.evidence_freshness`
+- Verdict requirement group: `release_area`
+- Verdict requirement status: `blocked_local_remediation_ready`
+- Closure state: `local_remediation_ready`
+- Evidence state: `release_evidence_metadata_missing`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.
+
+Acceptance criteria:
+- `release_evidence_freshness_report.json.contract_pass == true`
+- `source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`
+- `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch` absent from `release_area_blockers`
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- `release_evidence_freshness`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+- `release_evidence_freshness_report`: `implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`
+- `evidence_freshness::product_production_ai_checkpoint_readiness::source_commit_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `dependency_mtime_rows_pass`, `release_evidence_freshness_contract_pass`, `source_commit_rows_match`
 
@@ -2043,7 +2356,7 @@ Verdict change conditions:
 - `release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`
 - Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass`
 
-### `support::pm_blocker_closure_board_count_mismatch`
+### `support::failure_bundle_export_not_green`
 
 - Owner: `release_owner`
 - Verdict requirement: `release_area.support`
@@ -2053,10 +2366,10 @@ Verdict change conditions:
 - Evidence state: `open_release_evidence_blocker`
 - External input required: `False`
 - Owner input required: `False`
-- Next action: Resolve `pm_blocker_closure_board_count_mismatch` in Support evidence, regenerate PM release reports, and attach the updated evidence.
+- Next action: Resolve `failure_bundle_export_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.
 
 Acceptance criteria:
-- `support::pm_blocker_closure_board_count_mismatch` absent from `full_release_blockers`
+- `support::failure_bundle_export_not_green` absent from `full_release_blockers`
 - `full_release_gate_ready == true` after PM report regeneration
 
 Evidence artifact paths:
@@ -2078,9 +2391,9 @@ Verification commands:
 
 Verdict change conditions:
 - `release_area.support` status is `pass` in `pm_release_gate_completion_audit.json`
-- `support::pm_blocker_closure_board_count_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
+- `support::failure_bundle_export_not_green` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
-- Current false audit check(s): `pm_blocker_closure_board_register_count_match`
+- Current false audit check(s): `failure_bundle_export_pass`
 
 ### `security::license_status_not_configured`
 
@@ -2202,6 +2515,37 @@ Verdict change conditions:
 - `github_sync::github_sync_preflight::local_head_mismatch` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
 - Current false audit check(s): `github_sync_preflight_clean`, `github_sync_preflight_head_matches_current`, `github_sync_preflight_source_state_fresh`, `github_sync_remote_mutation_approval_pending`, `github_sync_remote_sync_needed`
+
+### `source_provenance::input_not_reproducible_at_declared_commit`
+
+- Owner: `release_owner`
+- Verdict requirement: `release_tier.limited_commercial_full_gate_ready`
+- Verdict requirement group: `release_tier`
+- Verdict requirement status: `blocked`
+- Closure state: `local_remediation_ready`
+- Evidence state: `open_release_evidence_blocker`
+- External input required: `False`
+- Owner input required: `False`
+- Next action: Resolve `input_not_reproducible_at_declared_commit` in source_provenance evidence, regenerate PM release reports, and attach the updated evidence.
+
+Acceptance criteria:
+- `source_provenance::input_not_reproducible_at_declared_commit` absent from `full_release_blockers`
+- `full_release_gate_ready == true` after PM report regeneration
+
+Evidence artifact paths:
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked`
+
+Verdict change conditions:
+- `release_tier.limited_commercial_full_gate_ready` pass is `true` in `pm_release_gate_completion_audit.json`
+- `source_provenance::input_not_reproducible_at_declared_commit` is absent from `release_tier.limited_commercial_full_gate_ready.blockers` in `pm_release_gate_completion_audit.json`
+- Current false audit check(s): `limited_commercial_full_gate_ready`
 
 ### `independent_vv_missing`
 

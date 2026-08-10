@@ -318,10 +318,12 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
     if finite_issues:
         return
     yield from _unit_scale_issues(payload)
-    bounded_planar = payload["capability_profile"] == "bounded_planar_frame_alpha"
+    bounded_planar = payload["capability_profile"] in {
+        "bounded_planar_frame_alpha",
+        "planar_frame_verified_alpha.v1",
+    }
     bounded_frame3d_direct_control = (
-        payload["capability_profile"]
-        == "bounded_frame3d_direct_displacement_control"
+        payload["capability_profile"] == "bounded_frame3d_direct_displacement_control"
     )
 
     families = (
@@ -373,9 +375,7 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
             expected_family = (
                 "rectangular_rc_fiber_2d"
                 if bounded_planar
-                else (
-                    "frame_3d" if element["type"] == "frame_3d" else "truss_3d"
-                )
+                else ("frame_3d" if element["type"] == "frame_3d" else "truss_3d")
             )
             if section["family_id"] != expected_family:
                 yield ModelIRValidationIssue(
@@ -386,9 +386,7 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
         if not bounded_planar:
             material_id = str(element["material_id"])
             if material_id not in material_ids:
-                yield _missing_reference(
-                    f"{base}/material_id", "material", material_id
-                )
+                yield _missing_reference(f"{base}/material_id", "material", material_id)
         if all(node_id in node_coordinates for node_id in node_pair):
             offsets = element["offsets"]
             start = tuple(
@@ -697,9 +695,7 @@ def _bounded_frame3d_direct_control_issues(
         characteristic_length = max(float(np.linalg.norm(spans)), 1.0)
         coordinate_origin = np.mean(coordinate_values, axis=0)
         rigid_rows: list[tuple[float, float, float, float, float, float]] = []
-        for (node_id, component), _value in sorted(
-            known_constrained_dofs.items()
-        ):
+        for (node_id, component), _value in sorted(known_constrained_dofs.items()):
             x, y, z = (
                 (coordinate - origin) / characteristic_length
                 for coordinate, origin in zip(
@@ -740,9 +736,7 @@ def _bounded_frame3d_direct_control_issues(
         seen_load_nodes.add(node_id)
         components = load["components_si"]
         nonzero_components = [
-            component
-            for component, value in components.items()
-            if float(value) != 0.0
+            component for component, value in components.items() if float(value) != 0.0
         ]
         if not nonzero_components:
             yield ModelIRValidationIssue(
@@ -880,8 +874,7 @@ def _bounded_planar_issues(
     active_components = {"UX", "UY", "RZ"}
     inactive_components = {"UZ", "RX", "RY"}
     material_law_by_id = {
-        material_id: str(row["law_id"])
-        for material_id, row in material_by_id.items()
+        material_id: str(row["law_id"]) for material_id, row in material_by_id.items()
     }
     referenced_materials: set[str] = set()
     for index, section in enumerate(payload["sections"]):
@@ -956,10 +949,7 @@ def _bounded_planar_issues(
             graph[node_j].add(node_i)
         referenced_sections.add(str(element["section_id"]))
         offsets = element["offsets"]
-        if any(
-            float(offsets[end][2]) != 0.0
-            for end in ("i_global_m", "j_global_m")
-        ):
+        if any(float(offsets[end][2]) != 0.0 for end in ("i_global_m", "j_global_m")):
             yield ModelIRValidationIssue(
                 "bounded_planar_offset_out_of_plane",
                 f"{base}/offsets",

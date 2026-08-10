@@ -14,6 +14,7 @@ from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.units import mm
 from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen.canvas import Canvas
 
@@ -32,18 +33,29 @@ PAGE_WIDTH, PAGE_HEIGHT = PAGE_SIZE
 PAGE_MARGIN = 14 * mm
 PDF_FONT_REGULAR = "ExpertReviewNanum"
 PDF_FONT_BOLD = "ExpertReviewNanum-Bold"
+PDF_KOREAN_CID_FALLBACK = "HYSMyeongJo-Medium"
 PDF_FONT_CANDIDATES = {
     PDF_FONT_REGULAR: [
         Path("/usr/share/fonts/truetype/nanum/NanumGothic.ttf"),
         Path("/usr/share/fonts/truetype/nanum/NanumSquareR.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
     ],
     PDF_FONT_BOLD: [
         Path("/usr/share/fonts/truetype/nanum/NanumGothicBold.ttf"),
         Path("/usr/share/fonts/truetype/nanum/NanumBarunGothicBold.ttf"),
-        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
     ],
 }
+PDF_FONT_PATHS: dict[str, Path] = {}
+for _font_name, _font_candidates in PDF_FONT_CANDIDATES.items():
+    _font_path = next((candidate for candidate in _font_candidates if candidate.exists()), None)
+    if _font_path is not None:
+        PDF_FONT_PATHS[_font_name] = _font_path
+if len(PDF_FONT_PATHS) != len(PDF_FONT_CANDIDATES):
+    # DejaVu is commonly present on hosted Linux runners but does not cover
+    # Hangul.  ReportLab's built-in Korean CID font keeps Korean review text
+    # renderable and extractable when the optional Nanum TTFs are absent.
+    PDF_FONT_PATHS.clear()
+    PDF_FONT_REGULAR = PDF_KOREAN_CID_FALLBACK
+    PDF_FONT_BOLD = PDF_KOREAN_CID_FALLBACK
 PDF_TEMPLATE_PRESETS: dict[str, dict[str, Any]] = {
     "default": {
         "label": "Default expert review package",
@@ -310,13 +322,12 @@ def _write_deterministic_zip(zip_path: Path, *, entries: list[tuple[str, Path]])
 
 
 def _register_pdf_fonts() -> None:
-    for font_name, candidates in PDF_FONT_CANDIDATES.items():
+    for font_name, font_path in PDF_FONT_PATHS.items():
         if font_name in pdfmetrics.getRegisteredFontNames():
             continue
-        font_path = next((candidate for candidate in candidates if candidate.exists()), None)
-        if font_path is None:
-            raise FileNotFoundError(f"Unable to locate a font file for {font_name}")
         pdfmetrics.registerFont(TTFont(font_name, str(font_path)))
+    if not PDF_FONT_PATHS and PDF_KOREAN_CID_FALLBACK not in pdfmetrics.getRegisteredFontNames():
+        pdfmetrics.registerFont(UnicodeCIDFont(PDF_KOREAN_CID_FALLBACK))
 
 
 def _draw_wrapped_text(
@@ -326,14 +337,15 @@ def _draw_wrapped_text(
     x: float,
     y: float,
     max_width: float,
-    font_name: str = PDF_FONT_REGULAR,
+    font_name: str | None = None,
     font_size: float = 9.0,
     leading: float = 12.0,
     color: colors.Color = colors.black,
 ) -> float:
-    lines = simpleSplit(_pdf_text(text), font_name, font_size, max_width)
+    resolved_font_name = font_name or PDF_FONT_REGULAR
+    lines = simpleSplit(_pdf_text(text), resolved_font_name, font_size, max_width)
     cursor_y = y
-    canvas.setFont(font_name, font_size)
+    canvas.setFont(resolved_font_name, font_size)
     canvas.setFillColor(color)
     for line in lines:
         canvas.drawString(x, cursor_y, line)
@@ -790,6 +802,9 @@ def export_expert_review_pdf(
         "revision_code": _pdf_text(issue_fields.get("revision_code", "")),
         "embedded_font_regular": PDF_FONT_REGULAR,
         "embedded_font_bold": PDF_FONT_BOLD,
+        "font_delivery_mode": (
+            "embedded_ttf" if PDF_FONT_PATHS else "built_in_korean_cid_fallback"
+        ),
     }
 
 

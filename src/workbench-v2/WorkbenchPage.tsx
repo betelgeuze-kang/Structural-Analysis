@@ -255,6 +255,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
               residualHistory={caseV2.residualHistory}
               sourceLabel={sourceLabel}
               residualTolerance={caseV2.analysis?.residualTolerance}
+              converged={caseV2.analysis?.converged ?? { status: 'unavailable' }}
             />
           </>
         ) : (

@@ -134,7 +134,7 @@
     "contract_pass": true,
     "fixture_hash": "sha256:e1163543967ed51afb8db7a4fea0a684ef2e115543294f6073ab79a18060115d",
     "receipt": "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json",
-    "receipt_hash": "sha256:bd0058768bed8461b0be4ce51934fbb4b63e495b08aa59a3027c34bd66091f8d",
+    "receipt_hash": "sha256:e833e26b9f4d84ee0c80453d3547321b95c327031f43f4d6645c6ff72a513259",
     "target_binary_identity_pass": true
   },
   "input_checksums": {
@@ -142,9 +142,9 @@
     "implementation/phase1/hip_kernels/engine_v2_current_tangent_operator.hip.cpp": "sha256:6e91fc48bf9947b085bde5b84342dcf2623bcfd865111a029e9e25a0051410e7",
     "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt": "sha256:1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
     "implementation/phase1/release_evidence/productization/engine_v2_hip_current_tangent_operator_compile_receipt.json": "sha256:1cc3f97c879d72f2f2457509062f810f774fc5ce9f882a4e80044f028068fed5",
-    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json": "sha256:391d669baa306eb637fc2a5723ca89c9668ae2fcb2cc061014da630228b56cb2",
+    "implementation/phase1/release_evidence/productization/g1_mgt_hip_current_tangent_host_parser_receipt.json": "sha256:15e5777dc878acc3e0c8f4f9e6773d6ae2752c85a86cf87c0bb45c79eff494b9",
     "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz": "sha256:ed11063aaa477efa54ed0663f8b38b844c28d4c7a7ca043ac47c5aef24ff37b1",
-    "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:88b0c6ee0c9bf8640dffde0cef4d0972539a398dd30a5ab354558b9992dc974a",
+    "scripts/build_g1_mgt_hip_current_tangent_host_parser_receipt.py": "sha256:d34820a52c9a3b7bf9728b30c559920c057b31f9c54fc39c1943bb6a3b3a9c24",
     "scripts/run_engine_v2_hip_current_tangent_operator.py": "sha256:7e182b1fde74743dc7399108d24d55a30d237674ccd5b4883f74e427dd050752",
     "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py": "sha256:1125e6522c8add5a305869047214a203c65548d29727b01a7ddf3970ecaffff2",
     "src/structural_analysis/engine_v2/contracts/current_tangent_operator.py": "sha256:601d03ad03863f7e4ca7713b4fb3d51c7d1361c811a8588778a35004305035e0",
@@ -166,7 +166,7 @@
     "state_data_hash": "sha256:7da92568f855e09df91d4a561cf678c65bddd0cd2d161393aa548cafb316a58d",
     "state_policy": "full_unit_zero_state_linear_predictor"
   },
-  "receipt_hash": "sha256:a807b0d4746f505c7ce5151b32154cb2077ab2fd50e1f9ab17247236d66e636a",
+  "receipt_hash": "sha256:59be72636cb4e6ca43f96b28d14eab811ce3e093fd021c4c219e4d6021c49990",
   "schema_version": "g1-mgt-hip-current-tangent-hardware-parity-receipt.v1",
   "source_commit_exact_replay_claim": false,
   "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",

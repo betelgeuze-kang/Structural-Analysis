@@ -8,8 +8,15 @@ import subprocess
 import sys
 from typing import Any
 
-from implementation.phase1.batch_job_runner import build_batch_job_report
-from implementation.phase1.generate_external_benchmark_execution_status_manifest import (
+
+_IMPORT_ROOT = Path(__file__).resolve().parents[2]
+if str(_IMPORT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_IMPORT_ROOT))
+
+from implementation.phase1.batch_job_runner import (  # noqa: E402
+    build_batch_job_report,
+)
+from implementation.phase1.generate_external_benchmark_execution_status_manifest import (  # noqa: E402
     build_execution_status_manifest,
 )
 
@@ -29,9 +36,15 @@ DEFAULT_BATCH_JOB_REPORT = Path(
 DEFAULT_BATCH_SNAPSHOT_ROOT = Path(
     "implementation/phase1/release/external_benchmark_kickoff/batch_snapshots"
 )
-DEFAULT_COMMITTEE_SCRIPT = Path("implementation/phase1/generate_committee_review_package.py")
-DEFAULT_REGISTRY_SCRIPT = Path("implementation/phase1/generate_signed_release_registry.py")
-DEFAULT_EXTERNAL_SCRIPT = Path("implementation/phase1/prepare_external_validation_submission.py")
+DEFAULT_COMMITTEE_SCRIPT = Path(
+    "implementation/phase1/generate_committee_review_package.py"
+)
+DEFAULT_REGISTRY_SCRIPT = Path(
+    "implementation/phase1/generate_signed_release_registry.py"
+)
+DEFAULT_EXTERNAL_SCRIPT = Path(
+    "implementation/phase1/prepare_external_validation_submission.py"
+)
 
 ALLOWED_STATUSES = {"planned", "in_progress", "completed", "failed"}
 
@@ -61,7 +74,9 @@ def _normalize_updates(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         normalized[task_id] = {
             "task_id": task_id,
             "lifecycle_status": status,
-            "updated_at": str(row.get("updated_at", "") or datetime.now(timezone.utc).isoformat()),
+            "updated_at": str(
+                row.get("updated_at", "") or datetime.now(timezone.utc).isoformat()
+            ),
             "note": str(row.get("note", "") or ""),
             "artifact_path": str(row.get("artifact_path", "") or ""),
             "kpi_receipt_path": str(row.get("kpi_receipt_path", "") or ""),
@@ -82,7 +97,9 @@ def _build_update_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     if str(args.batch_updates_json).strip():
         payload = _load_json(Path(args.batch_updates_json))
-        batch_rows = payload.get("updates") if isinstance(payload.get("updates"), list) else []
+        batch_rows = (
+            payload.get("updates") if isinstance(payload.get("updates"), list) else []
+        )
         rows.extend([row for row in batch_rows if isinstance(row, dict)])
     if str(args.task_id).strip():
         rows.append(
@@ -104,7 +121,11 @@ def _build_update_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
 def _known_task_ids(execution_manifest: dict[str, Any]) -> set[str]:
     ids: set[str] = set()
     for bucket in ("ready_tasks", "blocked_tasks"):
-        rows = execution_manifest.get(bucket) if isinstance(execution_manifest.get(bucket), list) else []
+        rows = (
+            execution_manifest.get(bucket)
+            if isinstance(execution_manifest.get(bucket), list)
+            else []
+        )
         for row in rows:
             if not isinstance(row, dict):
                 continue
@@ -115,7 +136,9 @@ def _known_task_ids(execution_manifest: dict[str, Any]) -> set[str]:
 
 
 def _status_markdown(payload: dict[str, Any]) -> str:
-    summary = payload.get("summary", {}) if isinstance(payload.get("summary"), dict) else {}
+    summary = (
+        payload.get("summary", {}) if isinstance(payload.get("summary"), dict) else {}
+    )
     return (
         "# External Benchmark Execution Status Update\n\n"
         f"- `status_mode`: `{summary.get('status_mode', '')}`\n"
@@ -134,7 +157,10 @@ def _refresh_release_surfaces() -> list[dict[str, Any]]:
     commands = [
         ("committee_review_package", [sys.executable, str(DEFAULT_COMMITTEE_SCRIPT)]),
         ("signed_release_registry", [sys.executable, str(DEFAULT_REGISTRY_SCRIPT)]),
-        ("external_validation_submission", [sys.executable, str(DEFAULT_EXTERNAL_SCRIPT)]),
+        (
+            "external_validation_submission",
+            [sys.executable, str(DEFAULT_EXTERNAL_SCRIPT)],
+        ),
     ]
     results: list[dict[str, Any]] = []
     for label, cmd in commands:
@@ -162,7 +188,9 @@ def main() -> None:
     parser.add_argument("--status-manifest-out", default=str(DEFAULT_STATUS_MANIFEST))
     parser.add_argument("--batch-updates-json", default="")
     parser.add_argument("--task-id", default="")
-    parser.add_argument("--set-status", choices=sorted(ALLOWED_STATUSES), default="planned")
+    parser.add_argument(
+        "--set-status", choices=sorted(ALLOWED_STATUSES), default="planned"
+    )
     parser.add_argument("--note", default="")
     parser.add_argument("--artifact-path", default="")
     parser.add_argument("--kpi-receipt-path", default="")
@@ -171,9 +199,19 @@ def main() -> None:
     parser.add_argument("--bundle-id", default="")
     parser.add_argument("--batch-job-report-out", default="")
     parser.add_argument("--batch-snapshot-root", default="")
-    parser.add_argument("--materialize-batch-snapshots", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=False)
-    parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument(
+        "--materialize-batch-snapshots",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--refresh-release-surfaces",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--dry-run", action=argparse.BooleanOptionalAction, default=False
+    )
     args = parser.parse_args()
 
     execution_manifest_path = Path(args.execution_manifest)
@@ -186,8 +224,14 @@ def main() -> None:
     merged_updates = dict(existing_updates)
     merged_updates.update(_normalize_updates(incoming_rows))
     known_task_ids = _known_task_ids(execution_manifest)
-    stale_update_task_ids = sorted(task_id for task_id in merged_updates.keys() if task_id not in known_task_ids)
-    merged_updates = {task_id: row for task_id, row in merged_updates.items() if task_id in known_task_ids}
+    stale_update_task_ids = sorted(
+        task_id for task_id in merged_updates.keys() if task_id not in known_task_ids
+    )
+    merged_updates = {
+        task_id: row
+        for task_id, row in merged_updates.items()
+        if task_id in known_task_ids
+    }
 
     status_manifest = build_execution_status_manifest(
         execution_manifest,
@@ -200,8 +244,16 @@ def main() -> None:
     refresh_guard_status = "not_requested"
     refresh_results: list[dict[str, Any]] = []
     batch_job_report: dict[str, Any] = {}
-    batch_job_report_out = Path(str(args.batch_job_report_out).strip()) if str(args.batch_job_report_out).strip() else Path(args.status_manifest_out).with_name(DEFAULT_BATCH_JOB_REPORT.name)
-    batch_snapshot_root = Path(str(args.batch_snapshot_root).strip()) if str(args.batch_snapshot_root).strip() else Path(args.status_manifest_out).with_name(DEFAULT_BATCH_SNAPSHOT_ROOT.name)
+    batch_job_report_out = (
+        Path(str(args.batch_job_report_out).strip())
+        if str(args.batch_job_report_out).strip()
+        else Path(args.status_manifest_out).with_name(DEFAULT_BATCH_JOB_REPORT.name)
+    )
+    batch_snapshot_root = (
+        Path(str(args.batch_snapshot_root).strip())
+        if str(args.batch_snapshot_root).strip()
+        else Path(args.status_manifest_out).with_name(DEFAULT_BATCH_SNAPSHOT_ROOT.name)
+    )
 
     if refresh_requested and args.dry_run:
         refresh_guard_status = "dry_run_preview"

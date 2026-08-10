@@ -25,6 +25,35 @@ def test_ci_materializes_validates_and_uploads_current_head_snapshot() -> None:
     )
 
 
+def test_ci_materializes_runtime_evidence_before_snapshot_and_quality_gate() -> None:
+    workflow = _workflow()
+    workflow_environment = workflow.split("concurrency:", 1)[0]
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
+    snapshot = workflow.index("- name: Build current-HEAD readiness snapshot")
+    quality_gate = workflow.index("- name: PR quality gate")
+
+    assert materialize < snapshot < quality_gate
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow_environment
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow_environment
+    assert 'OMP_NUM_THREADS: "1"' in workflow_environment
+    for command in (
+        "run_external_code_to_code_technical_receipt.py",
+        "run_external_modal_buckling_technical_receipt.py",
+        "run_clean_runner.py",
+        "--refresh-product-replay-summary",
+        "build_bounded_planar_external_linear_case_package.py",
+        "build_bounded_planar_external_negative_case_package.py",
+        "build_bounded_planar_external_scaling_case_package.py",
+        "build_bounded_planar_external_modal_buckling_case_package.py",
+        "build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        "build_bounded_planar_external_vv_matrix.py",
+        "build_internal_license_due_diligence.py --fail-blocked",
+    ):
+        assert command in workflow[materialize:snapshot]
+
+
 def test_current_head_snapshot_preserves_blocked_release_state() -> None:
     workflow = _workflow()
     step = workflow.split("- name: Build current-HEAD readiness snapshot", 1)[1]

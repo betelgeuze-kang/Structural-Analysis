@@ -444,7 +444,7 @@ class StatefulBiaxialFiberSection:
             damaged += int(
                 isinstance(response, ConcreteDamageResponse) and response.damage_evolved
             )
-        tangent = 0.5 * (tangent + tangent.T)
+        tangent[...] = 0.5 * (tangent + tangent.T)
         next_state = StatefulBiaxialFiberSectionState(
             section_id=self.section_id,
             section_contract_hash=self.contract_hash,

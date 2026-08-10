@@ -1,0 +1,45 @@
+name: Git LFS Integrity
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  verify:
+    name: git-lfs-integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout committed bytes without hydration
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Verify pointer and attribute integrity
+        run: >-
+          python scripts/check_git_lfs_integrity.py
+          --json
+          --out git-lfs-integrity-report.json
+
+      - name: Upload integrity report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: git-lfs-integrity-${{ github.sha }}
+          path: git-lfs-integrity-report.json
+          if-no-files-found: error
+          retention-days: 90

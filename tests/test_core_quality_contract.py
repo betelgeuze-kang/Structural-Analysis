@@ -37,11 +37,54 @@ def test_core_quality_manifest_contract() -> None:
     ]
     assert payload["compatibility_matrix"]["required_coordinate_count"] == 9
     assert len(payload["coverage"]["tests"]) == 9
-    assert len(payload["typecheck"]["paths"]) == 6
-    assert (
-        "src/structural_analysis/engine_v2/contracts/result_quantity.py"
-        in payload["typecheck"]["paths"]
+    assert "exact parity" in payload["claim_boundary"]
+    assert set(payload["typecheck"]["paths"]) == {
+        "src/structural_analysis/adapters",
+        "src/structural_analysis/analyses",
+        "src/structural_analysis/dynamics/transient_checkpoint.py",
+        "src/structural_analysis/elements/corotational_frame3d.py",
+        "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+        "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+        "src/structural_analysis/materials",
+        "src/structural_analysis/model",
+        "src/structural_analysis/results/schema.py",
+        "src/structural_analysis/results/validation.py",
+        "src/structural_analysis/solvers/nonlinear/transient.py",
+        "src/structural_analysis/units",
+    }
+
+
+def test_contract_rejects_mypy_config_scope_missing_from_manifest() -> None:
+    module = _load_module()
+    payload = module.load_manifest()
+    weakened = deepcopy(payload)
+    weakened["typecheck"]["paths"].remove("src/structural_analysis/adapters")
+
+    try:
+        module.check_contract(weakened)
+    except ValueError as exc:
+        assert "must match exactly and in order" in str(exc)
+        assert "src/structural_analysis/adapters" in str(exc)
+    else:
+        raise AssertionError("unowned mypy config scope was accepted")
+
+
+def test_contract_rejects_manifest_scope_missing_from_mypy_config() -> None:
+    module = _load_module()
+    payload = module.load_manifest()
+    weakened = deepcopy(payload)
+    weakened["typecheck"]["paths"].append(
+        "src/structural_analysis/engine_v2/contracts/__init__.py"
     )
+
+    try:
+        module.check_contract(weakened)
+    except ValueError as exc:
+        assert "must match exactly and in order" in str(exc)
+        assert "missing_from_config" in str(exc)
+        assert "src/structural_analysis/engine_v2/contracts/__init__.py" in str(exc)
+    else:
+        raise AssertionError("manifest-only mypy scope was accepted")
 
 
 def test_core_quality_commands_are_manifest_driven() -> None:
@@ -110,6 +153,9 @@ def test_workflow_matches_manifest_matrix_and_runs_bounded_gate() -> None:
     assert "src/structural_analysis/engine_v2/contracts/result_quantity.py" in workflow
     assert "--fail-under=90" in workflow
     assert "fail-fast: false" in workflow
+    for path in payload["typecheck"]["paths"]:
+        trigger = f"{path}/**" if (ROOT / path).is_dir() else path
+        assert workflow.count(f'- "{trigger}"') == 2
     git_checkout_config = [
         ("core.longpaths", '"true"'),
         ("filter.lfs.required", '"false"'),

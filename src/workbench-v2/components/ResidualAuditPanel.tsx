@@ -1,11 +1,17 @@
 import type { ReactElement } from 'react'
-import { isAvailableValue, type EngineeringValue, type ResidualStep } from '../model/caseSchema'
-import { EngineeringValueText } from './EngineeringValueText'
+import {
+  isAvailableValue,
+  type EngineeringValue,
+  type EvidenceValue,
+  type ResidualStep,
+} from '../model/caseSchema'
+import { BooleanEvidenceValueText, EngineeringValueText } from './EngineeringValueText'
 
 interface ResidualAuditPanelProps {
   residualHistory: ResidualStep[]
   sourceLabel: string
   residualTolerance?: EngineeringValue
+  converged: EvidenceValue<boolean>
 }
 
 const CHART_W = 460
@@ -85,7 +91,12 @@ function ResidualChart({ history, tolerance }: { history: ResidualStep[]; tolera
   )
 }
 
-export function ResidualAuditPanel({ residualHistory, sourceLabel, residualTolerance }: ResidualAuditPanelProps): ReactElement {
+export function ResidualAuditPanel({
+  residualHistory,
+  sourceLabel,
+  residualTolerance,
+  converged,
+}: ResidualAuditPanelProps): ReactElement {
   const tolerance = residualTolerance && isAvailableValue(residualTolerance) ? residualTolerance.value : undefined
   const hasPositive = residualHistory.some(
     (step) => isAvailableValue(step.iteration) && isAvailableValue(step.residual) && step.residual.value > 0,
@@ -93,6 +104,9 @@ export function ResidualAuditPanel({ residualHistory, sourceLabel, residualToler
   return (
     <section className="wb2-panel" aria-labelledby="wb2-residual-title">
       <h2 id="wb2-residual-title" className="wb2-panel__title">Residual audit</h2>
+      <dl className="wb2-kv">
+        <dt>Converged</dt><dd><BooleanEvidenceValueText value={converged} /></dd>
+      </dl>
       {residualHistory.length ? (
         <>
           {hasPositive ? <ResidualChart history={residualHistory} tolerance={tolerance} /> : null}

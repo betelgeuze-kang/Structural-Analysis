@@ -1102,6 +1102,10 @@ U, RF
 class ExternalCodeToCodeReceiptError(ValueError):
     """Fail-closed external technical receipt error."""
 
+    def __init__(self, code: str) -> None:
+        self.code = code
+        super().__init__(code)
+
 
 def _canonical_bytes(value: Any) -> bytes:
     return json.dumps(

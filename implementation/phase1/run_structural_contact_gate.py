@@ -8,17 +8,36 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import sys
 
-from runtime_contracts import InputContractError, validate_input_contract
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.runtime_contracts import (  # noqa: E402
+    InputContractError,
+    validate_input_contract,
+)
+
 try:
-    from foundation_link_library import describe_foundation_link_library
-except Exception:  # pragma: no cover - additive fallback when the library is unavailable.
+    from implementation.phase1.foundation_link_library import (
+        describe_foundation_link_library,
+    )
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the library is unavailable.
+
     def describe_foundation_link_library() -> dict[str, object]:
         return {}
 
+
 try:
-    from device_library import describe_device_library
-except Exception:  # pragma: no cover - additive fallback when the library is unavailable.
+    from implementation.phase1.device_library import describe_device_library
+except (
+    Exception
+):  # pragma: no cover - additive fallback when the library is unavailable.
+
     def describe_device_library() -> dict[str, object]:
         return {}
 
@@ -177,7 +196,9 @@ def _contact_readiness_evidence(payload: dict) -> dict:
         "report_present": bool(payload),
         "contract_pass": bool(upstream_pass),
         "bounded_scope_pass": bool(bounded_scope_pass),
-        "upstream_contact_ready": bool(payload and upstream_pass and bounded_scope_pass),
+        "upstream_contact_ready": bool(
+            payload and upstream_pass and bounded_scope_pass
+        ),
         "coverage_scope": coverage_scope,
         "summary_line": summary_line,
         "structural_contact_label": structural_contact_label,
@@ -191,7 +212,8 @@ def _roadmap_contact_gap_state(roadmap_text: str) -> dict:
     }
     tracked_gap_markers = {
         "broad_contact_gap": "contact / gap / uplift / compression-only" in lowered,
-        "special_link_gap": "gap, uplift, bearing, isolator, friction, pounding" in lowered,
+        "special_link_gap": "gap, uplift, bearing, isolator, friction, pounding"
+        in lowered,
         "event_sequence_target": "contact / uplift event sequence mismatch" in lowered
         or "event sequence mismatch" in lowered,
     }
@@ -205,7 +227,9 @@ def _roadmap_contact_gap_state(roadmap_text: str) -> dict:
 def _design_rule_partial_evidence(rule_engine_text: str) -> dict:
     lowered = rule_engine_text.lower()
     bearing_design_rule_present = "foundation:bearing" in lowered
-    friction_design_rule_present = "connection:shear_friction" in lowered or "shear_friction" in lowered
+    friction_design_rule_present = (
+        "connection:shear_friction" in lowered or "shear_friction" in lowered
+    )
     partial_categories = {
         "gap": False,
         "uplift": False,
@@ -224,7 +248,9 @@ def _design_rule_partial_evidence(rule_engine_text: str) -> dict:
 def _implementation_evidence(library_text: str, *, exists: bool) -> dict:
     per_category = {}
     for key in CATEGORY_ORDER:
-        per_category[key] = bool(exists and _contains_any(library_text, CATEGORY_KEYWORDS[key]))
+        per_category[key] = bool(
+            exists and _contains_any(library_text, CATEGORY_KEYWORDS[key])
+        )
     return {
         "library_present": bool(exists),
         "per_category": per_category,
@@ -233,7 +259,9 @@ def _implementation_evidence(library_text: str, *, exists: bool) -> dict:
 
 
 def _validation_evidence(payload: dict) -> dict:
-    categories = payload.get("categories") if isinstance(payload.get("categories"), dict) else {}
+    categories = (
+        payload.get("categories") if isinstance(payload.get("categories"), dict) else {}
+    )
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
 
     event_sequence_mismatch = summary.get("contact_uplift_event_sequence_mismatch")
@@ -271,10 +299,20 @@ def _build_report(
     contact_evidence = _contact_readiness_evidence(contact_payload)
     roadmap_evidence = _roadmap_contact_gap_state(roadmap_text)
     design_partial = _design_rule_partial_evidence(rule_engine_text)
-    implementation_evidence = _implementation_evidence(special_link_text, exists=special_link_path.exists())
+    implementation_evidence = _implementation_evidence(
+        special_link_text, exists=special_link_path.exists()
+    )
     validation_evidence = _validation_evidence(validation_payload)
-    validation_summary = validation_payload.get("summary") if isinstance(validation_payload.get("summary"), dict) else {}
-    categories = validation_payload.get("categories") if isinstance(validation_payload.get("categories"), dict) else {}
+    validation_summary = (
+        validation_payload.get("summary")
+        if isinstance(validation_payload.get("summary"), dict)
+        else {}
+    )
+    categories = (
+        validation_payload.get("categories")
+        if isinstance(validation_payload.get("categories"), dict)
+        else {}
+    )
     foundation_catalog = describe_foundation_link_library()
     device_catalog = describe_device_library()
     foundation_support_model_types = _sorted_string_union(
@@ -325,7 +363,9 @@ def _build_report(
         mode = str(item.get("search_surface_mode", "")).strip()
         if not mode:
             continue
-        derived_search_surface_mode_counts[mode] = derived_search_surface_mode_counts.get(mode, 0) + 1
+        derived_search_surface_mode_counts[mode] = (
+            derived_search_surface_mode_counts.get(mode, 0) + 1
+        )
     search_surface_mode_counts = _merge_int_maps_max(
         validation_summary.get("search_surface_mode_counts"),
         derived_search_surface_mode_counts,
@@ -337,20 +377,32 @@ def _build_report(
         family = str(item.get("search_family", "")).strip()
         if not family:
             continue
-        derived_search_family_counts[family] = derived_search_family_counts.get(family, 0) + 1
+        derived_search_family_counts[family] = (
+            derived_search_family_counts.get(family, 0) + 1
+        )
     search_family_counts = _merge_int_maps_max(
         validation_summary.get("search_family_counts"),
         derived_search_family_counts,
     )
-    search_ready_group_counts = _int_map(validation_summary.get("search_ready_group_counts"))
+    search_ready_group_counts = _int_map(
+        validation_summary.get("search_ready_group_counts")
+    )
     if not search_ready_group_counts:
         search_ready_group_counts = {
-            "contact": len([key for key in CATEGORY_ORDER if validation_evidence["per_category"][key]]),
+            "contact": len(
+                [
+                    key
+                    for key in CATEGORY_ORDER
+                    if validation_evidence["per_category"][key]
+                ]
+            ),
             "support_ready": len(support_search_model_types),
             "node_to_surface_proxy": len(node_to_surface_proxy_model_types),
         }
     support_search_evidence_rows = [
-        row for row in (validation_summary.get("support_search_evidence_rows") or []) if isinstance(row, dict)
+        row
+        for row in (validation_summary.get("support_search_evidence_rows") or [])
+        if isinstance(row, dict)
     ]
     if not support_search_evidence_rows:
         support_search_evidence_rows = []
@@ -361,7 +413,9 @@ def _build_report(
                 {
                     "link_name": str(item.get("link_name", name) or name),
                     "support_role": str(item.get("support_role", "") or ""),
-                    "search_surface_mode": str(item.get("search_surface_mode", "") or ""),
+                    "search_surface_mode": str(
+                        item.get("search_surface_mode", "") or ""
+                    ),
                     "node_to_surface_proxy": bool(item.get("node_to_surface_proxy")),
                     "support_search_ready": bool(item.get("support_search_ready")),
                     "sample_probe_state": str(item.get("sample_probe_state", "") or ""),
@@ -377,7 +431,8 @@ def _build_report(
         {
             str(row.get("search_family", "")).strip()
             for row in support_search_evidence_rows
-            if bool(row.get("node_to_surface_proxy", False)) and str(row.get("search_family", "")).strip()
+            if bool(row.get("node_to_surface_proxy", False))
+            and str(row.get("search_family", "")).strip()
         }
     )
     if not derived_node_to_surface_proxy_family_types:
@@ -394,9 +449,14 @@ def _build_report(
         validation_summary.get("node_to_surface_proxy_family_types"),
         derived_node_to_surface_proxy_family_types,
     )
-    support_search_family_requirements = _sorted_string_list(validation_summary.get("support_search_family_requirements"))
+    support_search_family_requirements = _sorted_string_list(
+        validation_summary.get("support_search_family_requirements")
+    )
     if not support_search_family_requirements:
-        support_search_family_requirements = ["device_support_search", "foundation_support_search"]
+        support_search_family_requirements = [
+            "device_support_search",
+            "foundation_support_search",
+        ]
     try:
         support_depth_score = int(validation_summary.get("support_depth_score", 0) or 0)
     except Exception:
@@ -408,15 +468,21 @@ def _build_report(
     )
     support_depth_score = max(support_depth_score, derived_support_depth_score)
     try:
-        explicit_contact_family_count = int(validation_summary.get("contact_family_count", 0) or 0)
+        explicit_contact_family_count = int(
+            validation_summary.get("contact_family_count", 0) or 0
+        )
     except Exception:
         explicit_contact_family_count = 0
     derived_contact_family_count = max(
         int(search_ready_group_counts.get("contact", 0) or 0),
         len(contact_search_surface_types),
-        len([key for key in CATEGORY_ORDER if validation_evidence["per_category"][key]]),
+        len(
+            [key for key in CATEGORY_ORDER if validation_evidence["per_category"][key]]
+        ),
     )
-    contact_family_count = max(explicit_contact_family_count, derived_contact_family_count)
+    contact_family_count = max(
+        explicit_contact_family_count, derived_contact_family_count
+    )
     support_surface_evidence = {
         "foundation_support_model_types": foundation_support_model_types,
         "device_model_types": device_model_types,
@@ -449,7 +515,9 @@ def _build_report(
     for key in CATEGORY_ORDER:
         implementation_present = bool(implementation_evidence["per_category"][key])
         validation_present = bool(validation_evidence["per_category"][key])
-        partial_only = bool(design_partial["partial_categories"][key] and not implementation_present)
+        partial_only = bool(
+            design_partial["partial_categories"][key] and not implementation_present
+        )
         ready = bool(
             contact_evidence["upstream_contact_ready"]
             and implementation_present
@@ -474,36 +542,76 @@ def _build_report(
         )
 
     checks = {
-        "bounded_contact_evidence_pass": bool(contact_evidence["upstream_contact_ready"]),
-        "roadmap_tracks_broader_structural_contact_gap": bool(roadmap_evidence["tracked_gap"]),
-        "special_link_library_present": bool(implementation_evidence["library_present"]),
-        "special_link_categories_present": bool(implementation_evidence["all_categories_present"]),
-        "structural_contact_validation_present": bool(validation_evidence["report_present"]),
-        "structural_contact_event_sequence_zero_pass": bool(validation_evidence["event_sequence_zero_pass"]),
-        "bearing_design_rule_present": bool(design_partial["bearing_design_rule_present"]),
-        "friction_design_rule_present": bool(design_partial["friction_design_rule_present"]),
+        "bounded_contact_evidence_pass": bool(
+            contact_evidence["upstream_contact_ready"]
+        ),
+        "roadmap_tracks_broader_structural_contact_gap": bool(
+            roadmap_evidence["tracked_gap"]
+        ),
+        "special_link_library_present": bool(
+            implementation_evidence["library_present"]
+        ),
+        "special_link_categories_present": bool(
+            implementation_evidence["all_categories_present"]
+        ),
+        "structural_contact_validation_present": bool(
+            validation_evidence["report_present"]
+        ),
+        "structural_contact_event_sequence_zero_pass": bool(
+            validation_evidence["event_sequence_zero_pass"]
+        ),
+        "bearing_design_rule_present": bool(
+            design_partial["bearing_design_rule_present"]
+        ),
+        "friction_design_rule_present": bool(
+            design_partial["friction_design_rule_present"]
+        ),
         "foundation_support_surface_present": bool(foundation_support_model_types),
         "device_model_surface_present": bool(device_model_types),
         "contact_search_surface_present": bool(contact_search_surface_types),
         "support_search_surface_present": bool(support_search_model_types),
-        "node_to_surface_proxy_surface_present": bool(node_to_surface_proxy_model_types),
+        "node_to_surface_proxy_surface_present": bool(
+            node_to_surface_proxy_model_types
+        ),
         "support_depth_surface_present": support_depth_score > 0,
         "contact_family_surface_present": contact_family_count >= len(CATEGORY_ORDER),
         "support_search_family_surface_present": bool(
             support_search_family_types
-            and all(label in support_search_family_types for label in support_search_family_requirements)
+            and all(
+                label in support_search_family_types
+                for label in support_search_family_requirements
+            )
         ),
         "node_to_surface_proxy_family_surface_present": bool(
             node_to_surface_proxy_family_types
-            and all(label in node_to_surface_proxy_family_types for label in support_search_family_requirements)
+            and all(
+                label in node_to_surface_proxy_family_types
+                for label in support_search_family_requirements
+            )
         ),
-        "gap_ready": bool(any(row["category"] == "gap" and row["ready"] for row in category_rows)),
-        "uplift_ready": bool(any(row["category"] == "uplift" and row["ready"] for row in category_rows)),
-        "compression_only_ready": bool(any(row["category"] == "compression-only" and row["ready"] for row in category_rows)),
-        "bearing_ready": bool(any(row["category"] == "bearing" and row["ready"] for row in category_rows)),
-        "friction_ready": bool(any(row["category"] == "friction" and row["ready"] for row in category_rows)),
-        "pounding_ready": bool(any(row["category"] == "pounding" and row["ready"] for row in category_rows)),
-        "all_structural_contact_categories_ready": len(ready_categories) == len(CATEGORY_ORDER),
+        "gap_ready": bool(
+            any(row["category"] == "gap" and row["ready"] for row in category_rows)
+        ),
+        "uplift_ready": bool(
+            any(row["category"] == "uplift" and row["ready"] for row in category_rows)
+        ),
+        "compression_only_ready": bool(
+            any(
+                row["category"] == "compression-only" and row["ready"]
+                for row in category_rows
+            )
+        ),
+        "bearing_ready": bool(
+            any(row["category"] == "bearing" and row["ready"] for row in category_rows)
+        ),
+        "friction_ready": bool(
+            any(row["category"] == "friction" and row["ready"] for row in category_rows)
+        ),
+        "pounding_ready": bool(
+            any(row["category"] == "pounding" and row["ready"] for row in category_rows)
+        ),
+        "all_structural_contact_categories_ready": len(ready_categories)
+        == len(CATEGORY_ORDER),
     }
 
     contract_pass = bool(
@@ -581,15 +689,28 @@ def _build_report(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--contact-readiness-report", default="implementation/phase1/contact_readiness_report.json")
-    parser.add_argument("--roadmap", default="implementation/phase1/commercial_tool_replacement_roadmap.md")
-    parser.add_argument("--kds-rc-rule-engine", default="implementation/phase1/kds_rc_rule_engine.py")
-    parser.add_argument("--special-link-library", default="implementation/phase1/special_link_library.py")
+    parser.add_argument(
+        "--contact-readiness-report",
+        default="implementation/phase1/contact_readiness_report.json",
+    )
+    parser.add_argument(
+        "--roadmap",
+        default="implementation/phase1/commercial_tool_replacement_roadmap.md",
+    )
+    parser.add_argument(
+        "--kds-rc-rule-engine", default="implementation/phase1/kds_rc_rule_engine.py"
+    )
+    parser.add_argument(
+        "--special-link-library",
+        default="implementation/phase1/special_link_library.py",
+    )
     parser.add_argument(
         "--structural-contact-validation-report",
         default="implementation/phase1/structural_contact_validation_report.json",
     )
-    parser.add_argument("--out", default="implementation/phase1/structural_contact_gate_report.json")
+    parser.add_argument(
+        "--out", default="implementation/phase1/structural_contact_gate_report.json"
+    )
     args = parser.parse_args()
 
     input_payload = {
@@ -597,14 +718,18 @@ def main() -> None:
         "roadmap": str(args.roadmap),
         "kds_rc_rule_engine": str(args.kds_rc_rule_engine),
         "special_link_library": str(args.special_link_library),
-        "structural_contact_validation_report": str(args.structural_contact_validation_report),
+        "structural_contact_validation_report": str(
+            args.structural_contact_validation_report
+        ),
         "out": str(args.out),
     }
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        validate_input_contract(input_payload, INPUT_SCHEMA, label="phase1.run_structural_contact_gate")
+        validate_input_contract(
+            input_payload, INPUT_SCHEMA, label="phase1.run_structural_contact_gate"
+        )
 
         contact_path = Path(args.contact_readiness_report)
         roadmap_path = Path(args.roadmap)
@@ -632,11 +757,15 @@ def main() -> None:
             },
             "kds_rc_rule_engine": {
                 "path": str(rule_engine_path),
-                "sha256": _sha256(rule_engine_path) if rule_engine_path.exists() else "",
+                "sha256": _sha256(rule_engine_path)
+                if rule_engine_path.exists()
+                else "",
             },
             "special_link_library": {
                 "path": str(special_link_path),
-                "sha256": _sha256(special_link_path) if special_link_path.exists() else "",
+                "sha256": _sha256(special_link_path)
+                if special_link_path.exists()
+                else "",
             },
             "structural_contact_validation_report": {
                 "path": str(validation_path),

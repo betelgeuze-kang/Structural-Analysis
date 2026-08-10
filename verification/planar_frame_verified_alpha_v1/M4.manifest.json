@@ -1,0 +1,1 @@
+{"case_id":"M4","fixture_schema":"planar-frame-deterministic-fixture.v1","generator":"seeded_irregular_connected_planar_graph.v1","parameters":{"seed":240731,"material":"rc_fiber","uniform_local_member_loads":true},"expected":{"node_count":48,"member_count":78,"connected":true},"claim":"fixture_definition_only"}

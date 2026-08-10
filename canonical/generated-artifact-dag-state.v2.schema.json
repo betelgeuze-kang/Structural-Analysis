@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/generated-artifact-dag-state.v2.schema.json",
+  "title": "Generated artifact DAG state",
+  "type": "object",
+  "required": ["schema_version", "state_kind", "evaluated_through", "nodes"],
+  "properties": {
+    "schema_version": {"const": "generated-artifact-dag-state.v2"},
+    "state_kind": {"enum": ["full", "candidate"]},
+    "evaluated_through": {"type": "string", "minLength": 1},
+    "nodes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["id", "kind", "dependencies", "inputs", "outputs", "fingerprint"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["source", "generated", "receipt", "product-state"]},
+          "dependencies": {
+            "type": "object",
+            "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+          },
+          "inputs": {"$ref": "#/$defs/pathIdentities"},
+          "outputs": {"$ref": "#/$defs/pathIdentities"},
+          "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "pathIdentities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "status", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "status": {"enum": ["available", "missing", "unavailable"]},
+          "sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

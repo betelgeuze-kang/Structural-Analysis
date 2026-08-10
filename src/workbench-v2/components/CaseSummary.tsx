@@ -1,6 +1,10 @@
 import type { ReactElement } from 'react'
 import type { WorkbenchCaseV2 } from '../model/caseSchema'
-import { EngineeringValueText } from './EngineeringValueText'
+import {
+  BooleanEvidenceValueText,
+  EngineeringValueText,
+  EvidenceValueText,
+} from './EngineeringValueText'
 
 function shortSha(s: string): string {
   const v = s.startsWith('sha256:') ? s.slice(7) : s
@@ -24,11 +28,24 @@ export function CaseSummary({ caseV2 }: { caseV2: WorkbenchCaseV2 }): ReactEleme
 
       <h3 className="wb2-subhead">Model health</h3>
       <dl className="wb2-kv">
+        <dt>Product profile</dt><dd data-product-profile>
+          <EvidenceValueText value={caseV2.productProfile.id} format={(value) => value} />
+        </dd>
+        <dt>Public profile</dt><dd>
+          <BooleanEvidenceValueText value={caseV2.productProfile.public} />
+        </dd>
+        <dt>Release eligible</dt><dd>
+          <BooleanEvidenceValueText value={caseV2.productProfile.releaseEligible} />
+        </dd>
         <dt>Unit system</dt><dd>{m.unitSystem}</dd>
         <dt>Coordinate system</dt><dd>{m.coordinateSystem}</dd>
         <dt>Nodes</dt><dd><EngineeringValueText value={m.nodeCount} integer /></dd>
         <dt>Elements</dt><dd><EngineeringValueText value={m.elementCount} integer /></dd>
         <dt>DOF</dt><dd><EngineeringValueText value={m.dofCount} integer /></dd>
+        <dt>Analysis status</dt><dd data-case-analysis-status>{caseV2.analysis?.status ?? 'not_run'}</dd>
+        <dt>Converged</dt><dd>
+          <BooleanEvidenceValueText value={caseV2.analysis?.converged ?? { status: 'unavailable' }} />
+        </dd>
       </dl>
     </section>
   )

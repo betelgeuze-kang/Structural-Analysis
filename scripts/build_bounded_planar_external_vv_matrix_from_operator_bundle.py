@@ -159,20 +159,26 @@ def _supplemental_binding(
     cases = receipt.get("cases", receipt.get("comparisons"))
     if not isinstance(cases, list):
         _fail("operator_matrix_supplemental_case_inventory_invalid")
-    engine_invocation_by_case = {
-        str(row.get("case_id") or ""): row.get("external_engine_invoked", True)
-        for row in cases
-        if isinstance(row, Mapping)
-    }
+    engine_invocation_by_case: dict[str, bool] = {}
+    for row in cases:
+        if not isinstance(row, Mapping):
+            continue
+        external_engine_invoked = row.get("external_engine_invoked")
+        external_result = row.get("external_result")
+        if external_engine_invoked is None and isinstance(external_result, Mapping):
+            external_engine_invoked = external_result.get("external_engine_invoked")
+        if external_engine_invoked is None:
+            external_engine_invoked = True
+        engine_invocation_by_case[str(row.get("case_id") or "")] = (
+            external_engine_invoked
+        )
     if any(
         not isinstance(engine_invocation_by_case.get(case_id), bool)
         for case_id in case_ids
     ):
         _fail("operator_matrix_supplemental_engine_invocation_invalid")
     external_engine_invoked_case_ids = [
-        case_id
-        for case_id in case_ids
-        if engine_invocation_by_case[case_id] is True
+        case_id for case_id in case_ids if engine_invocation_by_case[case_id] is True
     ]
     return {
         "receipt_id": receipt_id,
@@ -348,7 +354,10 @@ def build_operator_attested_matrix(
             )
         )
 
-    all_bindings = [*core_bindings, *supplemental_bindings]
+    # A supplemental receipt carries the per-case engine-invocation truth that
+    # a broad core receipt cannot express. Prefer it when both cover a row so
+    # independent preflight cases are not mislabeled as external executions.
+    all_bindings = [*supplemental_bindings, *core_bindings]
     rows: list[dict[str, Any]] = []
     for baseline_row in baseline["requirements"]:
         row = dict(baseline_row)
@@ -428,9 +437,7 @@ def build_operator_attested_matrix(
         1 for row in rows if row["status"] == "fresh_external_technical"
     )
     fresh_preflight_count = sum(
-        1
-        for row in rows
-        if row["status"] == "fresh_independent_preflight_technical"
+        1 for row in rows if row["status"] == "fresh_independent_preflight_technical"
     )
     missing_count = sum(1 for row in rows if row["status"] == "missing")
     complete = technical_count == len(rows)
@@ -469,23 +476,17 @@ def build_operator_attested_matrix(
                 "technical_reference_present_count": technical_count,
                 "fresh_current_source_technical_count": fresh_technical_count,
                 "current_product_replay_only_count": sum(
-                    1
-                    for row in rows
-                    if row["status"] == "current_product_replay_only"
+                    1 for row in rows if row["status"] == "current_product_replay_only"
                 ),
                 "fresh_external_technical_count": fresh_external_count,
-                "fresh_independent_preflight_technical_count": (
-                    fresh_preflight_count
-                ),
+                "fresh_independent_preflight_technical_count": (fresh_preflight_count),
                 "promotion_eligible_count": 0,
                 "missing_count": missing_count,
                 "execution_package_available_count": sum(
                     1 for row in rows if row["execution_package_available"]
                 ),
                 "current_source_execution_prepared_count": sum(
-                    1
-                    for row in rows
-                    if row["current_source_execution_prepared"]
+                    1 for row in rows if row["current_source_execution_prepared"]
                 ),
             },
             "status": "blocked",

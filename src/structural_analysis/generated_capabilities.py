@@ -198,6 +198,34 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'representable': True,
   'status': 'bounded_public',
   'title': 'ResultIR SI quantity and tolerance catalog'},
+ {'authority': 'exact_bounded_candidate',
+  'category': 'analysis',
+  'evidence': ['docs/planar-frame-verified-alpha-v1.md',
+               'src/structural_analysis/api/planar_frame.py',
+               'src/structural_analysis/api/planar_frame_cli.py',
+               'tests/test_planar_frame_verified_alpha_api.py',
+               'tests/test_planar_frame_verified_alpha_corpus.py',
+               'verification/planar_frame_verified_alpha_v1/corpus.manifest.json'],
+  'executable': True,
+  'external_vv_level': 0,
+  'id': 'analysis.planar_frame_verified_alpha',
+  'implemented': True,
+  'interfaces': ['python_api', 'cli'],
+  'limitations': ['This Developer Preview row promotes only the source-bound nonlinear '
+                  'load-control path; the wider linear-static, modal, and linear-buckling product '
+                  'profile remains to be unified behind this API.',
+                  'Direct displacement-control and arc-length remain separate experimental '
+                  'profiles.',
+                  'Independent external V&V, release eligibility, design-code authority, and '
+                  'signed-export authority are not attached.'],
+  'numerical_authority': 'exact_bounded_candidate',
+  'profile': 'planar_frame_verified_alpha.v1',
+  'public': True,
+  'recovery_authority': 'exact_bounded_candidate',
+  'release_eligible': False,
+  'representable': True,
+  'status': 'bounded_public',
+  'title': 'Planar frame verified alpha'},
  {'authority': 'bounded_j1_j5_and_exact_engineering_recovery_candidate',
   'category': 'analysis',
   'evidence': ['docs/unified-nonlinear-frame-api.md',
@@ -220,6 +248,8 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                'scripts/build_engine_v2_cross_platform_determinism_receipt.py',
                'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_run_receipt_v1.schema.json',
                'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_matrix_receipt_v1.schema.json',
+               'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_run_receipt_v2.schema.json',
+               'src/structural_analysis/schemas/engine_v2_cross_platform_determinism_matrix_receipt_v2.schema.json',
                'scripts/verify_bounded_planar_wheel_smoke.py',
                '.github/workflows/opensees-calculix-current-source.yml',
                'tests/test_corotational_fiber_frame_general.py',
@@ -255,18 +285,20 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                   'authority; blocked results expose a schema-enforced stable reason_code plus '
                   'detailed kind/path/detail. The nonlinear ExecutionPlan remains distinct from '
                   'linear-static Engine v2 ExecutionPlan v1. A source-bound Ubuntu/Windows and '
-                  'Python 3.10/3.12 exact result/checkpoint/recovery replay gate now enters '
-                  'through the public ModelIR v2 adapter for both the member-feature and '
-                  "prescribed-settlement fixtures and binds each fixture's content, semantic, "
-                  'provenance, adapter, execution-plan, result, checkpoint, and recovery hashes; '
-                  'no retained passing current-source four-way platform matrix receipt is attached '
-                  'yet. Fresh checksum-bound current-source host receipts record actual '
-                  'same-operator OpenSees/CalculiX execution for the exact cantilever, '
-                  'member-feature, prescribed-settlement, column-buckling, reaction, and '
-                  'member-recovery rows. The retained clean-runner summary has mismatched '
-                  'host/container source and metric sets, so same_operator_execution_binding is '
-                  'unavailable and supplies no current container-parity credit. The separate '
-                  'main-only GitHub provenance workflow still has no retained run attestation, so '
+                  'Python 3.10/3.12 gate retains raw result/checkpoint/recovery hashes at every '
+                  'coordinate, requires exact numerical replay only at the designated '
+                  'Ubuntu/Python 3.12 reference coordinate, and requires a versioned '
+                  'significant-digit semantic projection elsewhere for both member-feature and '
+                  'prescribed-settlement fixtures; the separately pinned P0 workflow owns '
+                  'canonical-environment truth, and no retained passing current-source four-way '
+                  'platform matrix receipt is attached yet. Fresh checksum-bound current-source '
+                  'host receipts record actual same-operator OpenSees/CalculiX execution for the '
+                  'exact cantilever, member-feature, prescribed-settlement, column-buckling, '
+                  'reaction, and member-recovery rows. The retained clean-runner summary has '
+                  'mismatched host/container source and metric sets, so '
+                  'same_operator_execution_binding is unavailable and supplies no current '
+                  'container-parity credit. The separate main-only GitHub provenance workflow '
+                  'still has no retained run attestation, so '
                   'current_source_execution_attached=false remains for that workflow only. '
                   'Independent operator attestation and Level 2 promotion remain absent, so '
                   'external_vv_level stays 0. Direct displacement control remains lower-level '
@@ -366,15 +398,7 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
                'docs/external-vv-independent-operator-intake.md',
                'docs/external-vv-level2-promotion-gate.md',
                'docs/bounded-planar-external-vv-matrix.md',
-               'docs/opensees-calculix-current-source-workflow.md',
-               'artifacts/vv/bounded_planar_external_linear_case_package/manifest.json',
-               'artifacts/vv/bounded_planar_external_negative_case_package/manifest.json',
-               'artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json',
-               'artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json',
-               'artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json',
-               'artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json',
-               'artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json',
-               'artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json'],
+               'docs/opensees-calculix-current-source-workflow.md'],
   'executable': True,
   'external_vv_level': 0,
   'id': 'vv.opensees_level2',
@@ -401,6 +425,38 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'recovery_authority': 'not_applicable',
   'release_eligible': False,
   'representable': True,
+  'runtime_artifacts': [{'path': 'artifacts/vv/bounded_planar_external_linear_case_package/manifest.json',
+                         'producer': 'scripts/build_bounded_planar_external_linear_case_package.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-linear-case-package.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_external_negative_case_package/manifest.json',
+                         'producer': 'scripts/build_bounded_planar_external_negative_case_package.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-negative-case-package.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_external_scaling_case_package/manifest.json',
+                         'producer': 'scripts/build_bounded_planar_external_scaling_case_package.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-scaling-case-package.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_external_modal_buckling_case_package/manifest.json',
+                         'producer': 'scripts/build_bounded_planar_external_modal_buckling_case_package.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-modal-buckling-case-package.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/manifest.json',
+                         'producer': 'scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-nonlinear-material-recovery-case-package.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipts/nonlinear-material-recovery-technical-receipt.json',
+                         'producer': 'scripts/build_bounded_planar_same_operator_supplemental_execution.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-nonlinear-material-recovery-execution-receipt.v1'},
+                        {'path': 'artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json',
+                         'producer': 'scripts/build_bounded_planar_same_operator_supplemental_execution.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-same-operator-supplemental-execution.v1'},
+                        {'path': 'artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json',
+                         'producer': 'scripts/build_bounded_planar_external_vv_matrix.py',
+                         'required_at': 'verification',
+                         'schema_version': 'bounded-planar-external-vv-matrix-status.v1'}],
   'status': 'blocked',
   'title': 'OpenSees Level 2 verification'},
  {'authority': 'none',

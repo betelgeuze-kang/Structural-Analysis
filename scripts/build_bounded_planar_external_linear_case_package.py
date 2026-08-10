@@ -400,14 +400,19 @@ def _metric_ids(case: dict[str, Any]) -> list[str]:
     return ids
 
 
-def _product_projection(case: dict[str, Any], model: dict[str, Any]) -> dict[str, Any]:
+def _product_projection(
+    case: dict[str, Any],
+    model: dict[str, Any],
+    *,
+    residual_tolerance: float = 1.0e-8,
+) -> dict[str, Any]:
     document = parse_model_ir_v2(model, require_analysis_ready=True)
     result = analyze_nonlinear_frame_model_ir(
         document,
         NonlinearFrameConfig(
             profile=COROTATIONAL_GENERAL_PROFILE,
             load_steps=4,
-            residual_tolerance=1.0e-8,
+            residual_tolerance=residual_tolerance,
             maximum_iterations=80,
         ),
     )

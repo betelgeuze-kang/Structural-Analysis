@@ -3,6 +3,10 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+from typing import Any
+
+import pytest
 
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_pm_release_blocker_action_register.py"
@@ -11,12 +15,66 @@ assert SPEC is not None
 build_register_module = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(build_register_module)
+REAL_COMMIT_BOUND_INPUT_METADATA = build_register_module.commit_bound_input_metadata
+
+
+@pytest.fixture(autouse=True)
+def _clean_source_provenance_for_computation_tests(monkeypatch: pytest.MonkeyPatch):
+    original = build_register_module.commit_bound_input_metadata
+
+    def _passing_metadata(*args: Any, **kwargs: Any) -> dict[str, Any]:
+        metadata = original(*args, **kwargs)
+        provenance = dict(metadata["source_input_provenance"])
+        provenance.update(
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "blocker_count": 0,
+                "blockers": [],
+            }
+        )
+        metadata["source_input_provenance"] = provenance
+        return metadata
+
+    monkeypatch.setattr(
+        build_register_module, "commit_bound_input_metadata", _passing_metadata
+    )
 
 
 def _write_json(path: Path, payload: object) -> Path:
+    if isinstance(payload, dict) and (
+        "pm_release_gate" in path.name
+        or path.name in {"pm.json", "pm-release-gate.json"}
+    ):
+        payload = dict(payload)
+        payload.setdefault("contract_pass", True)
+        payload.setdefault("source_input_provenance", {"contract_pass": True})
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
+
+
+def _git(repo: Path, *args: str) -> str:
+    return subprocess.check_output(
+        ["git", *args],
+        cwd=repo,
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
+
+
+def _blocked_source_metadata(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    paths = list(args[0] if args else kwargs.get("paths", []))
+    return {
+        "source_commit_sha": "a" * 40,
+        "input_checksums": {str(path): "missing" for path in paths},
+        "source_input_provenance": {
+            "contract_pass": False,
+            "reason_code": "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
+            "blocker_count": 1,
+            "blockers": ["source_commit_unresolved"],
+        },
+    }
 
 
 def _pm_report(path: Path, *, blockers: list[str] | None = None) -> Path:
@@ -140,6 +198,8 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
         == "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions"
     )
     assert report.as_posix() in payload["input_checksums"]
+    assert "scripts/build_pm_release_blocker_action_register.py" in payload["input_checksums"]
+    assert "scripts/release_evidence_metadata.py" in payload["input_checksums"]
     assert (
         "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
         in payload["input_checksums"]
@@ -378,6 +438,45 @@ def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) ->
     assert payload["reason_code"] == "PASS"
     assert payload["rows"] == []
     assert payload["next_actions"] == []
+
+
+def test_build_register_and_cli_fail_closed_on_source_provenance(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys
+) -> None:
+    monkeypatch.setattr(
+        build_register_module,
+        "commit_bound_input_metadata",
+        _blocked_source_metadata,
+    )
+    report = _pm_report(tmp_path / "pm_release_gate_report.json", blockers=[])
+    payload = build_register_module.build_register(
+        pm_report=report,
+        structural_scope_plan=None,
+    )
+
+    assert payload["computed_without_provenance"]["contract_pass"] is True
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+    assert payload["blockers"] == [
+        "source_provenance::input_not_reproducible_at_declared_commit"
+    ]
+
+    exit_code = build_register_module.main(
+        [
+            "--pm-report",
+            str(report),
+            "--structural-scope-plan",
+            str(tmp_path / "missing-plan.json"),
+            "--out",
+            str(tmp_path / "register.json"),
+            "--out-md",
+            str(tmp_path / "register.md"),
+            "--fail-blocked",
+        ]
+    )
+    capsys.readouterr()
+    assert exit_code == 1
 
 
 def test_build_register_preserves_release_decision_operator_actions(tmp_path: Path) -> None:
@@ -1194,3 +1293,249 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert "external_owner_input_ready" in out_md.read_text(encoding="utf-8")
     assert "## Source Intake Links" in out_md.read_text(encoding="utf-8")
     assert "ci_streak::pr_30_run_streak_missing" in out_md.read_text(encoding="utf-8")
+
+
+def test_build_register_relative_reads_are_independent_of_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(build_register_module.ROOT)
+    expected = build_register_module.build_register(structural_scope_plan=None)
+    alternate_cwd = tmp_path / "alternate-cwd"
+    alternate_cwd.mkdir()
+    monkeypatch.chdir(alternate_cwd)
+
+    actual = build_register_module.build_register(structural_scope_plan=None)
+
+    assert actual["pm_summary_line"] == expected["pm_summary_line"]
+    assert actual["summary"] == expected["summary"]
+    assert actual["rows"] == expected["rows"]
+    assert actual["input_checksums"] == expected["input_checksums"]
+
+
+def test_build_register_propagates_blocked_upstream_pm_contract_and_cli(
+    tmp_path: Path, capsys
+) -> None:
+    report = _write_json(
+        tmp_path / "pm-release-gate.json",
+        {
+            "summary_line": "PM release gate: BLOCKED",
+            "contract_pass": False,
+            "source_input_provenance": {"contract_pass": True},
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "release_tiers": {"ga_enterprise_blockers": []},
+        },
+    )
+
+    payload = build_register_module.build_register(
+        pm_report=report,
+        structural_scope_plan=None,
+    )
+
+    assert payload["rows"] == []
+    assert payload["computed_without_provenance"]["contract_pass"] is True
+    upstream = payload["computed_without_provenance"]["upstream_contracts"][
+        "pm_release_gate_report"
+    ]
+    assert upstream["contract_pass"] is False
+    assert upstream["required_pass"] is False
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+    assert payload["blockers"] == ["ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"]
+
+    report_payload = json.loads(report.read_text(encoding="utf-8"))
+    report_payload["contract_pass"] = True
+    report_payload["source_input_provenance"] = {"contract_pass": False}
+    _write_json(report, report_payload)
+    provenance_blocked = build_register_module.build_register(
+        pm_report=report,
+        structural_scope_plan=None,
+    )
+    assert provenance_blocked["rows"] == []
+    assert provenance_blocked["reason_code"] == (
+        "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+    )
+    assert provenance_blocked["computed_without_provenance"][
+        "upstream_contracts"
+    ]["pm_release_gate_report"]["source_input_provenance_contract_pass"] is False
+
+    exit_code = build_register_module.main(
+        [
+            "--pm-report",
+            str(report),
+            "--structural-scope-plan",
+            str(tmp_path / "missing-plan.json"),
+            "--out",
+            str(tmp_path / "action-register.json"),
+            "--out-md",
+            str(tmp_path / "action-register.md"),
+            "--fail-blocked",
+        ]
+    )
+    capsys.readouterr()
+    assert exit_code == 1
+
+
+@pytest.mark.parametrize(
+    ("workspace_state", "expected_blocker"),
+    [
+        (
+            "dirty",
+            "input_differs_from_source_commit:dynamic/fresh-status.json",
+        ),
+        (
+            "deleted",
+            "input_missing_from_workspace:dynamic/fresh-status.json",
+        ),
+        (
+            "untracked",
+            "input_untracked_at_source_commit:dynamic/fresh-status.json",
+        ),
+        ("missing", ""),
+    ],
+)
+def test_build_register_binds_dynamic_fresh_status_path(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    workspace_state: str,
+    expected_blocker: str,
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "action-test@example.invalid")
+    _git(repo, "config", "user.name", "Action Test")
+    report = repo / "reports" / "pm.json"
+    _write_json(
+        report,
+        {
+            "summary_line": "PM release gate: READY",
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "release_tiers": {
+                "fresh_full_validation_lane_status": "dynamic/fresh-status.json",
+                "ga_enterprise_blockers": [],
+            },
+        },
+    )
+    fresh = repo / "dynamic" / "fresh-status.json"
+    if workspace_state in {"dirty", "deleted"}:
+        _write_json(fresh, {"rows": []})
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "source")
+    if workspace_state == "dirty":
+        _write_json(fresh, {"rows": [{"lane_id": "changed"}]})
+    elif workspace_state == "deleted":
+        fresh.unlink()
+    elif workspace_state == "untracked":
+        _write_json(fresh, {"rows": []})
+
+    monkeypatch.setattr(build_register_module, "ROOT", repo)
+    monkeypatch.setattr(
+        build_register_module,
+        "commit_bound_input_metadata",
+        REAL_COMMIT_BOUND_INPUT_METADATA,
+    )
+    payload = build_register_module.build_register(
+        pm_report=Path("reports/pm.json"),
+        structural_scope_plan=None,
+    )
+
+    assert "dynamic/fresh-status.json" in payload["input_checksums"]
+    provenance_blockers = payload["source_input_provenance"]["blockers"]
+    if expected_blocker:
+        assert expected_blocker in provenance_blockers
+        assert payload["reason_code"] == "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE"
+    else:
+        assert payload["input_checksums"]["dynamic/fresh-status.json"] == "missing"
+        assert payload["source_input_provenance"]["contract_pass"] is True
+
+
+def test_build_register_binds_untracked_deterministic_source_intake_path(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init")
+    _git(repo, "config", "user.email", "action-test@example.invalid")
+    _git(repo, "config", "user.name", "Action Test")
+    report = repo / "reports" / "pm.json"
+    _write_json(
+        report,
+        {
+            "summary_line": "PM release gate: BLOCKED",
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "release_tiers": {
+                "ga_enterprise_blockers": [
+                    "customer_shadow::completed_shadow_case_count_below_minimum"
+                ],
+                "customer_shadow_summary": {
+                    "completed_shadow_case_count": 0,
+                    "min_completed_shadow_cases": 3,
+                },
+            },
+        },
+    )
+    _git(repo, "add", ".")
+    _git(repo, "commit", "-m", "source")
+    intake = repo / build_register_module.DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET
+    _write_json(intake, {"status": "pending"})
+    monkeypatch.setattr(build_register_module, "ROOT", repo)
+    monkeypatch.setattr(
+        build_register_module,
+        "commit_bound_input_metadata",
+        REAL_COMMIT_BOUND_INPUT_METADATA,
+    )
+
+    payload = build_register_module.build_register(
+        pm_report=Path("reports/pm.json"),
+        structural_scope_plan=None,
+    )
+
+    intake_key = build_register_module.DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET.as_posix()
+    assert intake_key in payload["input_checksums"]
+    assert (
+        f"input_untracked_at_source_commit:{intake_key}"
+        in payload["source_input_provenance"]["blockers"]
+    )
+    row = next(
+        row
+        for row in payload["rows"]
+        if row["blocker_id"].startswith("customer_shadow::")
+    )
+    assert row["source_intake_path"] == intake_key
+
+
+def test_build_register_requires_explicit_upstream_provenance_contract(
+    tmp_path: Path,
+) -> None:
+    report = tmp_path / "legacy-pm-report.json"
+    report.write_text(
+        json.dumps(
+            {
+                "summary_line": "PM release gate: READY",
+                "contract_pass": True,
+                "full_release_blockers": [],
+                "release_area_blockers": [],
+                "blockers": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_register_module.build_register(
+        pm_report=report,
+        structural_scope_plan=None,
+    )
+
+    assert payload["reason_code"] == "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED"
+    upstream = payload["computed_without_provenance"]["upstream_contracts"][
+        "pm_release_gate_report"
+    ]
+    assert upstream["contract_field_present"] is True
+    assert upstream["source_input_provenance_present"] is False
+    assert upstream["required_pass"] is False

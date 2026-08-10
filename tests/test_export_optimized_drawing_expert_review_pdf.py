@@ -211,6 +211,46 @@ def test_export_expert_review_pdf_is_deterministic(tmp_path: Path) -> None:
     assert "external_benchmark_batch_job_report.json" in extracted_text
 
 
+def test_export_expert_review_pdf_uses_portable_korean_cid_fallback(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    exporter = _load_module(
+        "implementation/phase1/export_optimized_drawing_expert_review_pdf.py",
+        "optimized_drawing_expert_review_pdf_exporter_cid_fallback",
+    )
+    monkeypatch.setattr(exporter, "PDF_FONT_PATHS", {})
+    monkeypatch.setattr(
+        exporter,
+        "PDF_FONT_REGULAR",
+        exporter.PDF_KOREAN_CID_FALLBACK,
+    )
+    monkeypatch.setattr(
+        exporter,
+        "PDF_FONT_BOLD",
+        exporter.PDF_KOREAN_CID_FALLBACK,
+    )
+
+    fixture = _build_expert_review_metadata_fixture(tmp_path)
+    metadata_path = fixture["out_expert_metadata_json"]
+    assert isinstance(metadata_path, Path)
+    out_pdf = tmp_path / "optimized_drawing_expert_review_cid_fallback.pdf"
+
+    result = exporter.export_expert_review_pdf(
+        expert_review_metadata_json=metadata_path,
+        out_pdf=out_pdf,
+    )
+
+    from pypdf import PdfReader
+
+    extracted_text = "\n".join(
+        (page.extract_text() or "") for page in PdfReader(str(out_pdf)).pages
+    )
+    assert result["font_delivery_mode"] == "built_in_korean_cid_fallback"
+    assert "한글 PDF 타워" in extracted_text
+    assert "서울 구조 심의위원회" in extracted_text
+
+
 def test_export_expert_review_pdf_batch_generates_templates_and_receipt(tmp_path: Path) -> None:
     exporter = _load_module(
         "implementation/phase1/export_optimized_drawing_expert_review_pdf.py",

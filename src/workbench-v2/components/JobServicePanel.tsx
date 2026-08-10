@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import type { EngineeringResultIrManifest, JobLoadStatus } from '../model/jobProvider'
 import type { WorkbenchJobView } from '../model/jobSchema'
 import { StateChip, type ChipState } from './StateChip'
+import { BooleanEvidenceValueText } from './EngineeringValueText'
 
 interface JobServicePanelProps {
   loadStatus: JobLoadStatus
@@ -61,6 +62,10 @@ export function JobServicePanel({
         <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
         <dt>Evidence</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
         <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
+        <dt>Solver converged</dt>
+        <dd data-job-convergence="unavailable">
+          <BooleanEvidenceValueText value={{ status: 'unavailable' }} />
+        </dd>
         <dt>Engineering ResultIR</dt>
         <dd className="wb2-mono" data-job-result-ir={engineeringResultIr ? 'verified' : 'unavailable'}>
           {engineeringResultIr ? shortHash(engineeringResultIr.engineering_result_hash) : 'not verified'}

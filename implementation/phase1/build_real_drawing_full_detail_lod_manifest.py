@@ -7,9 +7,15 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
-from implementation.phase1.build_real_drawing_private_3d_webviewer import (
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from implementation.phase1.build_real_drawing_private_3d_webviewer import (  # noqa: E402
     DEFAULT_INTAKE_QUEUE,
     DEFAULT_MAX_SEGMENTS_PER_ASSET,
     _candidate_path,
@@ -19,8 +25,12 @@ from implementation.phase1.build_real_drawing_private_3d_webviewer import (
 )
 
 
-DEFAULT_OUT = Path("implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json")
-DEFAULT_OUT_MD = Path("implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.md")
+DEFAULT_OUT = Path(
+    "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.json"
+)
+DEFAULT_OUT_MD = Path(
+    "implementation/phase1/commercialization_status/real_drawing_full_detail_lod_manifest.md"
+)
 
 
 def _safe_int(value: Any, default: int = 0) -> int:
@@ -32,19 +42,25 @@ def _safe_int(value: Any, default: int = 0) -> int:
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, ensure_ascii=True, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n", encoding="utf-8")
+    path.write_text(
+        "\n".join(line.rstrip() for line in text.splitlines()) + "\n", encoding="utf-8"
+    )
 
 
 def _ready_rows(intake_queue: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         row
         for row in (intake_queue.get("queue") or [])
-        if isinstance(row, dict) and bool(row.get("ready_for_optimized_drawing_generation", False))
+        if isinstance(row, dict)
+        and bool(row.get("ready_for_optimized_drawing_generation", False))
     ]
 
 
@@ -65,12 +81,20 @@ def _lod_item(
     if graph_path is None:
         return None
     payload = _load_json(graph_path)
-    sampled_segments, metrics = _extract_xyz_segments(payload, max_segments=max_segments_per_asset)
-    full_segment_count = _safe_int(metrics.get("renderable_segment_count"), len(sampled_segments))
+    sampled_segments, metrics = _extract_xyz_segments(
+        payload, max_segments=max_segments_per_asset
+    )
+    full_segment_count = _safe_int(
+        metrics.get("renderable_segment_count"), len(sampled_segments)
+    )
     sample_segment_count = len(sampled_segments)
     if full_segment_count <= sample_segment_count or sample_segment_count <= 0:
         return None
-    sample_ratio = round(sample_segment_count / full_segment_count, 6) if full_segment_count > 0 else 0.0
+    sample_ratio = (
+        round(sample_segment_count / full_segment_count, 6)
+        if full_segment_count > 0
+        else 0.0
+    )
     return {
         "asset_ref": asset_ref,
         "file_type": str(row.get("file_type") or ""),
@@ -128,7 +152,9 @@ def build_full_detail_lod_manifest(
         ]
         if item is not None
     ]
-    sampled_solver_exact_count = sum(1 for item in items if bool(item.get("solver_exact", False)))
+    sampled_solver_exact_count = sum(
+        1 for item in items if bool(item.get("solver_exact", False))
+    )
     sampled_preview_count = len(items) - sampled_solver_exact_count
     return {
         "schema_version": "real-drawing-full-detail-lod-manifest.v1",
@@ -195,8 +221,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--intake-queue", type=Path, default=DEFAULT_INTAKE_QUEUE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
-    parser.add_argument("--max-segments-per-asset", type=int, default=DEFAULT_MAX_SEGMENTS_PER_ASSET)
-    parser.add_argument("--json", action="store_true", help="Print the LOD manifest JSON to stdout.")
+    parser.add_argument(
+        "--max-segments-per-asset", type=int, default=DEFAULT_MAX_SEGMENTS_PER_ASSET
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="Print the LOD manifest JSON to stdout."
+    )
     return parser.parse_args(argv)
 
 

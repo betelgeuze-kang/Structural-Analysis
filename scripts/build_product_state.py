@@ -31,6 +31,9 @@ CURRENT_OUT = Path("artifacts/manifests/product_state.current.v1.json")
 HISTORY_OUT = Path("artifacts/manifests/product_state.history.v1.json")
 LEGACY_CATALOG = Path("artifacts/manifests/product_state.legacy-sources.v1.json")
 REGISTRY = Path("artifacts/manifests/capabilities.yaml")
+CANONICAL_VERIFICATION_RECEIPT = Path(
+    "artifacts/manifests/canonical_verification_environment.current.v1.json"
+)
 BOUNDED_PLANAR_EXTERNAL_VV_MATRIX = Path(
     "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json"
 )
@@ -107,6 +110,12 @@ def _git(repo_root: Path, *args: str) -> str:
         text=True,
         stderr=subprocess.DEVNULL,
     ).strip()
+
+
+def _status_row_matches_exact_path(row: str, path: Path) -> bool:
+    """Match one porcelain-v1 path without accepting rename destinations."""
+
+    return len(row) >= 4 and row[2] == " " and row[3:] == path.as_posix()
 
 
 def _verify_legacy_git_objects(
@@ -257,8 +266,9 @@ def build_product_state(
             repo_root, "status", "--short", "--untracked-files=normal"
         ).splitlines()
         if row.strip()
-        and not row.endswith(CURRENT_OUT.as_posix())
-        and not row.endswith(HISTORY_OUT.as_posix())
+        and not _status_row_matches_exact_path(row, CURRENT_OUT)
+        and not _status_row_matches_exact_path(row, HISTORY_OUT)
+        and not _status_row_matches_exact_path(row, CANONICAL_VERIFICATION_RECEIPT)
     ]
     registry = _load(repo_root, REGISTRY)
     external_vv_matrix: dict[str, Any] = {}

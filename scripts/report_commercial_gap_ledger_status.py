@@ -36,6 +36,11 @@ def main() -> int:
         action="store_true",
         help="Exit non-zero when any ledger requirement remains open, partial, external-blocked, or undocumented.",
     )
+    parser.add_argument(
+        "--fail-blocked",
+        action="store_true",
+        help="Exit non-zero when the top-level ledger contract is blocked, including by source provenance.",
+    )
     args = parser.parse_args()
 
     output_json = args.output_json or (args.productization_dir / "commercial_gap_ledger_status.json")
@@ -50,6 +55,8 @@ def main() -> int:
         f"partial={summary['partial_count']} open={summary['open_count']} "
         f"external_blocked={summary['external_blocked_count']} -> {output_json}"
     )
+    if args.fail_blocked and not payload.get("contract_pass"):
+        return 2
     if args.fail_open and not payload.get("full_gap_ledger_ready"):
         return 3
     return 0

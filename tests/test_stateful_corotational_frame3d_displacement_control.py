@@ -85,9 +85,7 @@ def _cantilever_model(
     load[reference_dof] = reference_value
     elastic = CorotationalFrame3DModel(
         node_coordinates_m=((0.0, 0.0, 0.0), (2.0, 0.0, 0.0)),
-        members=(
-            CorotationalFrame3DMember("member-1", 0, 1, _section()),
-        ),
+        members=(CorotationalFrame3DMember("member-1", 0, 1, _section()),),
         restrained_dofs=restrained_dofs,
         reference_load_kn=tuple(load),
         model_id=model_id,
@@ -147,12 +145,11 @@ def test_axial_yield_path_commits_and_exact_checkpoint_resume_matches() -> None:
         metrics = step.solution.metrics
         assert metrics["contract_pass"] is True
         assert step.accepted_checkpoint is not None
-        assert step.accepted_checkpoint.converged_iterations == metrics[
-            "converged_iterations"
-        ]
-        assert metrics["converged_iterations"] == metrics[
-            "line_search_step_count"
-        ]
+        assert (
+            step.accepted_checkpoint.converged_iterations
+            == metrics["converged_iterations"]
+        )
+        assert metrics["converged_iterations"] == metrics["line_search_step_count"]
         assert metrics["iteration_count"] == metrics["converged_iterations"] + 1
         assert metrics["raw_translational_residual_inf_norm_kn"] >= 0.0
         assert metrics["raw_rotational_residual_inf_norm_kn_m"] >= 0.0
@@ -171,8 +168,7 @@ def test_axial_yield_path_commits_and_exact_checkpoint_resume_matches() -> None:
 
     schema = json.loads(
         (
-            ROOT
-            / "src/structural_analysis/schemas/"
+            ROOT / "src/structural_analysis/schemas/"
             "stateful_corotational_frame3d_displacement_control_resume_binding_v1.schema.json"
         ).read_text(encoding="utf-8")
     )
@@ -227,9 +223,7 @@ def test_cyclic_reversal_v2_chain_and_exact_resume_match() -> None:
     assert one_shot.final_checkpoint.material_states == (
         resumed.final_checkpoint.material_states
     )
-    assert one_shot.accepted_target_chain_hash == (
-        resumed.accepted_target_chain_hash
-    )
+    assert one_shot.accepted_target_chain_hash == (resumed.accepted_target_chain_hash)
     assert one_shot.resume_binding == resumed.resume_binding
     assert isinstance(
         one_shot.resume_binding,
@@ -241,8 +235,7 @@ def test_cyclic_reversal_v2_chain_and_exact_resume_match() -> None:
 
     schema = json.loads(
         (
-            ROOT
-            / "src/structural_analysis/schemas/"
+            ROOT / "src/structural_analysis/schemas/"
             "stateful_corotational_frame3d_displacement_control_resume_binding_v2.schema.json"
         ).read_text(encoding="utf-8")
     )
@@ -255,7 +248,7 @@ def test_cyclic_reversal_v2_chain_and_exact_resume_match() -> None:
     )
     with pytest.raises(
         StatefulCorotationalFrame3DDisplacementControlError,
-        match="direct_control_cyclic_resume_binding_hash_mismatch",
+        match="direct_control_cyclic_resume_binding_invalid",
     ):
         validate_stateful_corotational_frame3d_displacement_control_resume_binding(
             tampered,
@@ -390,23 +383,19 @@ def test_adaptive_target_cutback_is_deterministic_and_bound_resume_is_exact(
         config=config,
     )
     assert accepted_target.accepted_checkpoint is not None
-    accepted_followup = (
-        solve_stateful_corotational_frame3d_displacement_control_step(
-            model,
-            accepted_target.accepted_checkpoint,
-            control_global_dof=6,
-            target_control_coordinate=0.005,
-            config=config,
-        )
+    accepted_followup = solve_stateful_corotational_frame3d_displacement_control_step(
+        model,
+        accepted_target.accepted_checkpoint,
+        control_global_dof=6,
+        target_control_coordinate=0.005,
+        config=config,
     )
     assert accepted_followup.accepted_checkpoint is not None
 
     lookup = {
         (initial.checkpoint_hash, 0.004): blocked_large,
         (initial.checkpoint_hash, 0.002): accepted_half,
-        (accepted_half.accepted_checkpoint.checkpoint_hash, 0.004): (
-            accepted_target
-        ),
+        (accepted_half.accepted_checkpoint.checkpoint_hash, 0.004): (accepted_target),
         (accepted_target.accepted_checkpoint.checkpoint_hash, 0.005): (
             accepted_followup
         ),
@@ -524,9 +513,7 @@ def test_adaptive_target_cutback_is_deterministic_and_bound_resume_is_exact(
                 terminal_after_half
             ),
         }
-        return incomplete_lookup[
-            (parent.checkpoint_hash, target_control_coordinate)
-        ]
+        return incomplete_lookup[(parent.checkpoint_hash, target_control_coordinate)]
 
     monkeypatch.setattr(
         direct_control_module,
@@ -549,15 +536,13 @@ def test_adaptive_target_cutback_is_deterministic_and_bound_resume_is_exact(
         "direct_control_terminal_contract_failed"
     )
     assert incomplete.resume_binding is None
-    unbound_restart = (
-        run_stateful_corotational_frame3d_displacement_control_path(
-            model,
-            (0.004,),
-            control_global_dof=6,
-            config=config,
-            resume_from=incomplete.final_checkpoint,
-            resume_binding=incomplete.resume_binding,
-        )
+    unbound_restart = run_stateful_corotational_frame3d_displacement_control_path(
+        model,
+        (0.004,),
+        control_global_dof=6,
+        config=config,
+        resume_from=incomplete.final_checkpoint,
+        resume_binding=incomplete.resume_binding,
     )
     assert unbound_restart.resume_mode == "unbound_equilibrium_checkpoint_restart"
     assert unbound_restart.resume_contract_verified is False
@@ -596,9 +581,7 @@ def test_adaptive_target_cutback_is_deterministic_and_bound_resume_is_exact(
     )
     assert attempt_limited.solve_attempt_count == 1
     assert len(attempt_limited.target_cutback_history) == 1
-    assert attempt_limited.target_cutback_history[0].outcome == (
-        "cutback_scheduled"
-    )
+    assert attempt_limited.target_cutback_history[0].outcome == ("cutback_scheduled")
 
 
 def test_target_cutback_exhaustion_preserves_resume_parent() -> None:
@@ -629,9 +612,7 @@ def test_target_cutback_exhaustion_preserves_resume_parent() -> None:
     assert len(result.target_cutback_history) == 1
     exhausted = result.target_cutback_history[0]
     assert exhausted.outcome == "bounds_exhausted"
-    assert exhausted.outcome_reason_code == (
-        "direct_control_target_cutback_exhausted"
-    )
+    assert exhausted.outcome_reason_code == ("direct_control_target_cutback_exhausted")
     assert exhausted.cutback_target_control_coordinate is None
     assert exhausted.rejected_result_hash == result.steps[-1].result_hash
     assert exhausted.parent_state_immutable is True
@@ -813,9 +794,7 @@ def test_resume_binding_objects_reject_numeric_type_aliases() -> None:
     )
     invalid_direction = replace(
         invalid_direction,
-        binding_hash=direct_control_module.canonical_hash(
-            invalid_direction_payload
-        ),
+        binding_hash=direct_control_module.canonical_hash(invalid_direction_payload),
     )
     with pytest.raises(
         StatefulCorotationalFrame3DDisplacementControlError,
@@ -1042,8 +1021,7 @@ def test_invalid_control_contracts_and_zero_reference_load_fail_closed() -> None
             config=config,
         )
     assert (
-        tiny_target_error.value.reason_code
-        == "direct_control_target_within_tolerance"
+        tiny_target_error.value.reason_code == "direct_control_target_within_tolerance"
     )
 
     zero_load = _cantilever_model(
@@ -1078,23 +1056,17 @@ def test_config_is_bounded_and_public_assembly_namespace_exports_candidate() -> 
     assert default.maximum_iterations == default.frame_config.maximum_iterations
     with pytest.raises(ValueError, match="cannot exceed frame_config"):
         StatefulCorotationalFrame3DDisplacementControlConfig(
-            frame_config=StatefulCorotationalFrame3DSparseConfig(
-                maximum_iterations=2
-            ),
+            frame_config=StatefulCorotationalFrame3DSparseConfig(maximum_iterations=2),
             maximum_iterations=3,
         )
     with pytest.raises(ValueError, match="must start with 1"):
-        StatefulCorotationalFrame3DDisplacementControlConfig(
-            line_search_alphas=(0.5,)
-        )
+        StatefulCorotationalFrame3DDisplacementControlConfig(line_search_alphas=(0.5,))
     with pytest.raises(ValueError, match="strictly decreasing"):
         StatefulCorotationalFrame3DDisplacementControlConfig(
             line_search_alphas=(1.0, 0.5, 0.5)
         )
     with pytest.raises(ValueError, match="maximum_path_targets"):
-        StatefulCorotationalFrame3DDisplacementControlConfig(
-            maximum_path_targets=0
-        )
+        StatefulCorotationalFrame3DDisplacementControlConfig(maximum_path_targets=0)
     with pytest.raises(ValueError, match="load_factor_increment_tolerance"):
         StatefulCorotationalFrame3DDisplacementControlConfig(
             load_factor_increment_tolerance=0.0
@@ -1104,9 +1076,7 @@ def test_config_is_bounded_and_public_assembly_namespace_exports_candidate() -> 
             adaptive_target_cutback_enabled=1,  # type: ignore[arg-type]
         )
     with pytest.raises(ValueError, match="target_cutback_ratio"):
-        StatefulCorotationalFrame3DDisplacementControlConfig(
-            target_cutback_ratio=1.0
-        )
+        StatefulCorotationalFrame3DDisplacementControlConfig(target_cutback_ratio=1.0)
     with pytest.raises(ValueError, match="maximum_target_cutback_depth"):
         StatefulCorotationalFrame3DDisplacementControlConfig(
             maximum_target_cutback_depth=-1

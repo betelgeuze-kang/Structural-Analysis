@@ -16,6 +16,11 @@ from structural_analysis.units.schema import CoordinateSystem, UnitSystem
 
 
 BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILE = "bounded_planar_frame_alpha"
+PLANAR_FRAME_VERIFIED_ALPHA_V1_PROFILE = "planar_frame_verified_alpha.v1"
+BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILES = (
+    BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILE,
+    PLANAR_FRAME_VERIFIED_ALPHA_V1_PROFILE,
+)
 BOUNDED_PLANAR_MODEL_IR_ADAPTER_SCHEMA_VERSION = "bounded-planar-model-ir-adapter.v1"
 BOUNDED_PLANAR_MODEL_IR_ADAPTER_PROFILE = (
     "model_ir_v2_to_corotational_connected_frame2d.v1"
@@ -127,11 +132,11 @@ def adapt_bounded_planar_model_ir_v2(
                 f"/{name}",
                 "Retained ModelIR document hash does not match canonical content.",
             )
-    if reparsed.capability_profile != BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILE:
+    if reparsed.capability_profile not in BOUNDED_PLANAR_MODEL_IR_CAPABILITY_PROFILES:
         _fail(
             "bounded_planar_model_ir_profile_unsupported",
             "/capability_profile",
-            "ModelIR document is not the bounded planar frame alpha profile.",
+            "ModelIR document is not a supported bounded planar frame profile.",
         )
     if len(payload["load_patterns"]) != 1:  # pragma: no cover - schema invariant
         _fail(

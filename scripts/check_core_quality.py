@@ -13,6 +13,11 @@ import sys
 import tempfile
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib  # type: ignore[no-redef]
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = Path("artifacts/manifests/core_quality.json")
@@ -81,6 +86,16 @@ def _coverage_config(path: Path) -> tuple[bool, int, list[str], list[str]]:
     return branch, fail_under, sources, omits
 
 
+def _mypy_config_files(path: Path) -> list[str]:
+    with path.open("rb") as handle:
+        payload = tomllib.load(handle)
+    try:
+        files = payload["tool"]["mypy"]["files"]
+    except (KeyError, TypeError) as exc:
+        raise ValueError("mypy config must declare tool.mypy.files") from exc
+    return _string_list(files, field="tool.mypy.files")
+
+
 def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
     typecheck = _mapping(payload.get("typecheck"), field="typecheck")
     coverage = _mapping(payload.get("coverage"), field="coverage")
@@ -95,6 +110,7 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
         raise ValueError("bounded coverage tool must be coverage.py")
 
     typecheck_paths = _string_list(typecheck.get("paths"), field="typecheck.paths")
+    typecheck_config = _resolve(root, str(typecheck.get("config", "")))
     coverage_tests = _string_list(coverage.get("tests"), field="coverage.tests")
     coverage_sources = _string_list(
         coverage.get("sources"),
@@ -119,6 +135,20 @@ def check_contract(payload: dict[str, Any], *, root: Path = ROOT) -> None:
     ]
     if missing:
         raise ValueError(f"core-quality manifest references missing paths: {missing}")
+
+    configured_typecheck_paths = _mypy_config_files(typecheck_config)
+    if configured_typecheck_paths != typecheck_paths:
+        missing_from_manifest = [
+            path for path in configured_typecheck_paths if path not in typecheck_paths
+        ]
+        missing_from_config = [
+            path for path in typecheck_paths if path not in configured_typecheck_paths
+        ]
+        raise ValueError(
+            "typecheck.paths and tool.mypy.files must match exactly and in order: "
+            f"missing_from_manifest={missing_from_manifest}, "
+            f"missing_from_config={missing_from_config}"
+        )
 
     minimum_percent = int(coverage.get("minimum_percent") or 0)
     if coverage.get("branch") is not True:

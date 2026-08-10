@@ -42,13 +42,23 @@ def test_v2_registry_splits_authority_axes_and_retains_all_product_rows() -> Non
 
     assert payload["schema_version"] == "structural-analysis-capabilities.v2"
     assert REQUIRED_GRANULAR_ROWS <= set(rows)
-    assert len(rows) == 31
+    assert len(rows) == 32
     for capability_id, row in rows.items():
         assert REQUIRED_AXES <= set(row), capability_id
         assert isinstance(row["external_vv_level"], int)
         assert 0 <= row["external_vv_level"] <= 3
         assert isinstance(row["limitations"], list) and row["limitations"]
         assert isinstance(row["evidence"], list) and row["evidence"]
+
+
+def test_runtime_artifacts_bind_producers_without_requiring_generated_outputs() -> None:
+    rows = {row["id"]: row for row in _load()["capabilities"]}
+    artifacts = rows["vv.opensees_level2"]["runtime_artifacts"]
+
+    assert artifacts
+    assert all(row["path"].startswith("artifacts/") for row in artifacts)
+    assert all(row["producer"].startswith("scripts/") for row in artifacts)
+    assert {row["required_at"] for row in artifacts} == {"verification"}
 
 
 def test_v2_registry_enforces_non_promoting_invariants() -> None:
@@ -105,4 +115,4 @@ def test_readme_and_generated_consumers_expose_axis_split_registry() -> None:
     assert "Numerical authority" in api_doc
     assert "Recovery authority" in api_doc
     assert workbench["schemaVersion"] == "structural-analysis-capabilities.v2"
-    assert len(workbench["capabilities"]) == 31
+    assert len(workbench["capabilities"]) == 32

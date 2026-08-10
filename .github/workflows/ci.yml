@@ -6,6 +6,7 @@ name: CI
 # this lane is triggered by the Python structural package and shared product gates.
 
 on:
+  merge_group:
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "solver/**", "ci/**"]
     paths:
@@ -71,6 +72,9 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  OPENBLAS_CORETYPE: Haswell
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -79,10 +83,20 @@ concurrency:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 180
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Hydrate merge-ref ancestry for provenance tests
+        shell: bash
+        run: |
+          if [[ "$(git rev-parse --is-shallow-repository)" == "true" ]]; then
+            git fetch --no-tags --deepen=512 origin
+          fi
+          git cat-file -e "${GITHUB_SHA}^{commit}"
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -106,6 +120,27 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      - name: Materialize exact current-source test evidence
+        shell: bash
+        run: |
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "CI product replay; external execution bytes reused without freshness credit."
+          python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            --repo-root . \
+            --output-dir artifacts/vv/opensees_calculix_clean_runner \
+            --refresh-product-replay-summary
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          python scripts/build_bounded_planar_external_scaling_case_package.py
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_vv_matrix.py
+          python scripts/build_internal_license_due_diligence.py --fail-blocked
 
       - name: Build current-HEAD readiness snapshot
         run: |

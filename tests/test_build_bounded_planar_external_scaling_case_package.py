@@ -7,6 +7,7 @@ import shutil
 import sys
 
 from jsonschema import Draft202012Validator
+import pytest
 
 from structural_analysis.model_ir.loader import parse_model_ir_v2
 
@@ -124,6 +125,25 @@ def test_characteristic_length_pair_obeys_similarity_contract() -> None:
         == package._INVARIANCE_RELATIVE_TOLERANCE
     )
     assert product["maximum_relative_difference"] > 0.0
+    assert product["maximum_relative_difference"] <= (
+        0.2 * package._INVARIANCE_RELATIVE_TOLERANCE
+    )
+    assert package._PRODUCT_SOLVER_RESIDUAL_TOLERANCE == 2.0e-8
+    assert (
+        package._PRODUCT_SOLVER_RESIDUAL_TOLERANCE
+        < package._INVARIANCE_RELATIVE_TOLERANCE
+    )
+
+
+def test_loose_solver_tolerance_cannot_bypass_similarity_gate(monkeypatch) -> None:
+    monkeypatch.setattr(package, "_PRODUCT_SOLVER_RESIDUAL_TOLERANCE", 5.0e-8)
+    case = package.CASE_DEFINITIONS[1]
+
+    with pytest.raises(
+        package.ExternalScalingCasePackageError,
+        match="external_scaling_product_invariance_failed",
+    ):
+        package._product_result(case, package._model_pair(case))
 
 
 def test_scaling_runners_are_source_bound_without_stored_external_values() -> None:

@@ -55,6 +55,10 @@ _ZERO_HASH = "sha256:" + "0" * 64
 _PINNED_OPENSEESPY_VERSION = "3.7.1.2"
 _PINNED_OPENSEES_CORE_VERSION = "3.7.1"
 _INVARIANCE_RELATIVE_TOLERANCE = 1.0e-7
+# Hosted coordinates can place the assembled final residual between 1e-8 and
+# 2e-8. The latter preserves the same response branch while the independent
+# 1e-7 similarity gate remains authoritative; 5e-8 is rejected by that gate.
+_PRODUCT_SOLVER_RESIDUAL_TOLERANCE = 2.0e-8
 
 CASE_DEFINITIONS: tuple[dict[str, str], ...] = (
     {
@@ -289,6 +293,7 @@ def _product_result(
         linear_package._product_projection(
             base_case,
             variant["model_ir"],
+            residual_tolerance=_PRODUCT_SOLVER_RESIDUAL_TOLERANCE,
         )
         for variant in pair["variants"]
     ]

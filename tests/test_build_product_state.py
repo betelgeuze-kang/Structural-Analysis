@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
 import sys
 
+from jsonschema import Draft202012Validator, ValidationError
 import pytest
 
 
@@ -39,6 +41,98 @@ def _nightly_event(
             "html_url": "https://github.com/example/repository/actions/runs/30207954772",
         }
     }
+
+
+def test_current_product_state_matches_schema_and_cannot_promote_release() -> None:
+    current, _ = product_state.build_product_state(ROOT)
+    schema = json.loads(
+        (ROOT / "canonical/product-state.current.v1.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    validator = Draft202012Validator(schema)
+
+    Draft202012Validator.check_schema(schema)
+    validator.validate(current)
+
+    promoted = {**current, "release_authority": True}
+    with pytest.raises(ValidationError):
+        validator.validate(promoted)
+
+    unbound = {**current, "source_commit_sha": "main"}
+    with pytest.raises(ValidationError):
+        validator.validate(unbound)
+
+    contradictory_status = {**current, "contract_pass": True, "status": "blocked"}
+    with pytest.raises(ValidationError):
+        validator.validate(contradictory_status)
+
+    missing_source_mismatch_blocker = deepcopy(current)
+    missing_source_mismatch_blocker["source_matches_observed_github_main"] = False
+    missing_source_mismatch_blocker["blockers"] = [
+        blocker
+        for blocker in missing_source_mismatch_blocker["blockers"]
+        if blocker != "source_commit_does_not_match_observed_github_main"
+    ]
+    with pytest.raises(ValidationError):
+        validator.validate(missing_source_mismatch_blocker)
+
+    impossible_clean_count = {
+        **current,
+        "candidate_worktree_dirty": False,
+        "candidate_worktree_change_count": 1,
+    }
+    with pytest.raises(ValidationError):
+        validator.validate(impossible_clean_count)
+
+    empty_authority_track = deepcopy(current)
+    empty_authority_track["authority_tracks"]["solo_developer_technical"] = {}
+    with pytest.raises(ValidationError):
+        validator.validate(empty_authority_track)
+
+    incomplete_available_quality = deepcopy(current)
+    incomplete_available_quality["quality_evidence"] = {
+        "status": "available",
+        "authority": "github_actions_workflow_run_event",
+    }
+    with pytest.raises(ValidationError):
+        validator.validate(incomplete_available_quality)
+
+
+def test_observed_main_mismatch_is_blocked_without_false_current_match() -> None:
+    head = product_state._git(ROOT, "rev-parse", "HEAD")
+    observed_main = "0" * 40 if head != "0" * 40 else "1" * 40
+
+    current, _ = product_state.build_product_state(
+        ROOT,
+        observed_main_sha=observed_main,
+        observed_main_source="github_api_refs_heads_main_pre_build",
+        nightly_workflow_run_event=_nightly_event(head),
+    )
+
+    assert current["observed_github_main_sha"] == observed_main
+    assert current["source_matches_observed_github_main"] is False
+    assert current["status"] == "blocked"
+    assert current["contract_pass"] is False
+    assert "source_commit_does_not_match_observed_github_main" in current["blockers"]
+    assert "nightly_full_quality_evidence_invalid:head_sha" in current["blockers"]
+
+
+def test_generated_worktree_allowance_is_exact_and_receipt_only() -> None:
+    receipt = product_state.CANONICAL_VERIFICATION_RECEIPT
+
+    assert product_state._status_row_matches_exact_path(
+        f"?? {receipt.as_posix()}", receipt
+    )
+    assert product_state._status_row_matches_exact_path(
+        f" M {receipt.as_posix()}", receipt
+    )
+    assert not product_state._status_row_matches_exact_path(
+        f"R  other.json -> {receipt.as_posix()}", receipt
+    )
+    assert not product_state._status_row_matches_exact_path(
+        f"?? prefix-{receipt.as_posix()}", receipt
+    )
 
 
 @pytest.mark.skipif(
@@ -77,9 +171,7 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
         "current_source_execution_prepared_count": 9,
     }
     assert current["bounded_planar_external_vv"]["summary"] == expected_summary
-    assert current["bounded_planar_external_vv"][
-        "stored_summary"
-    ] == expected_summary
+    assert current["bounded_planar_external_vv"]["stored_summary"] == expected_summary
     matrix = current["bounded_planar_external_vv"]
     for live_name, stored_name in (
         ("execution_package_binding", "stored_execution_package_binding"),
@@ -102,16 +194,12 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
         ("operator_intake_binding", "stored_operator_intake_binding"),
     ):
         assert matrix[live_name] == matrix[stored_name]
-    stored_execution_package = matrix[
-        "execution_package_binding"
-    ]
+    stored_execution_package = matrix["execution_package_binding"]
     assert stored_execution_package["requirement_ids"] == [
         "linear.portal",
         "linear.multistory",
     ]
-    assert (
-        stored_execution_package["external_solver_execution"] is False
-    )
+    assert stored_execution_package["external_solver_execution"] is False
     negative_binding = matrix["supplemental_execution_package_bindings"][0]
     assert negative_binding["requirement_ids"] == [
         "negative.mechanism",
@@ -139,8 +227,7 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     assert same_operator_binding["status"] == "unavailable"
     assert same_operator_binding["fresh_external_runtime_execution"] is False
     assert (
-        same_operator_binding["same_operator_container_isolated_reproduction"]
-        is False
+        same_operator_binding["same_operator_container_isolated_reproduction"] is False
     )
     assert same_operator_binding["reason"] == (
         "current_source_clean_runner_cross_environment_parity_missing"
@@ -148,9 +235,7 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     assert same_operator_binding["independent_operator_attested"] is False
     assert same_operator_binding["product_legal_license_approval"] is False
     assert same_operator_binding["verification_level_2"] is False
-    supplemental_binding = matrix[
-        "same_operator_supplemental_execution_binding"
-    ]
+    supplemental_binding = matrix["same_operator_supplemental_execution_binding"]
     assert supplemental_binding["status"] == "attached"
     assert supplemental_binding["fresh_current_source_external_execution"] is True
     assert supplemental_binding["same_operator_local_execution"] is True
@@ -237,8 +322,7 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     assert license_track["claims"]["internal_due_diligence_complete"] is True
     assert license_track["claims"]["product_legal_approval"] is False
     assert (
-        license_track["claims"]["product_commercial_redistribution_approved"]
-        is False
+        license_track["claims"]["product_commercial_redistribution_approved"] is False
     )
     assert license_track["claims"]["formal_verification_level_2"] is False
     assert license_track["claims"]["release_authority"] is False
@@ -248,9 +332,9 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
         "authority": "github_actions_workflow_run_event",
     }
     assert "nightly_full_quality_evidence_unavailable" in current["blockers"]
-    assert "bounded_planar_external_vv_matrix_stale_or_invalid" not in current[
-        "blockers"
-    ]
+    assert (
+        "bounded_planar_external_vv_matrix_stale_or_invalid" not in current["blockers"]
+    )
     assert current["legacy_readiness"] == {
         "path": (
             "implementation/phase1/release_evidence/productization/"
@@ -295,8 +379,23 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     )
 
 
-def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness() -> None:
-    current, _ = product_state.build_product_state(ROOT)
+def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original_git = product_state._git
+
+    def dirty_git(repo_root: Path, *arguments: str) -> str:
+        if arguments == ("status", "--short", "--untracked-files=normal"):
+            return " M README.md"
+        return original_git(repo_root, *arguments)
+
+    monkeypatch.setattr(product_state, "_git", dirty_git)
+    current_head = product_state._git(ROOT, "rev-parse", "HEAD")
+    current, _ = product_state.build_product_state(
+        ROOT,
+        observed_main_sha=current_head,
+        observed_main_source="test_exact_current_head",
+    )
 
     assert current["source_matches_observed_github_main"] is True
     assert current["contract_pass"] is False
@@ -305,7 +404,10 @@ def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness() -> No
     assert "readiness_snapshot_not_bound_to_current_source" not in current["blockers"]
     assert "current_readiness_not_ready" not in current["blockers"]
     assert "current_workstation_readiness_not_ready" not in current["blockers"]
-    assert "current_workstation_readiness_not_ready" in current["promotion_blockers"]
+    assert (
+        "workstation_readiness_not_bound_to_current_source"
+        in current["promotion_blockers"]
+    )
     assert "do not promote" in current["claim_boundary"]
 
 
@@ -330,17 +432,17 @@ def test_stale_external_vv_matrix_claims_fail_closed(monkeypatch) -> None:
     assert matrix["summary"] is None
     assert matrix["stored_contract_pass"] is True
     assert matrix["stored_summary"]["technical_reference_present_count"] == 25
-    assert matrix["stored_claims"][
-        "recommended_matrix_technical_coverage_complete"
-    ] is True
+    assert (
+        matrix["stored_claims"]["recommended_matrix_technical_coverage_complete"]
+        is True
+    )
     assert matrix["same_operator_supplemental_execution_binding"] is None
-    assert matrix["stored_same_operator_supplemental_execution_binding"][
-        "status"
-    ] == "attached"
+    assert (
+        matrix["stored_same_operator_supplemental_execution_binding"]["status"]
+        == "attached"
+    )
     assert all(value is False for value in matrix["claims"].values())
-    assert "bounded_planar_external_vv_matrix_stale_or_invalid" in current[
-        "blockers"
-    ]
+    assert "bounded_planar_external_vv_matrix_stale_or_invalid" in current["blockers"]
 
 
 def test_external_vv_claims_require_current_head_binding(monkeypatch) -> None:
@@ -398,9 +500,7 @@ def test_missing_external_vv_matrix_emits_blocked_manifest(
     assert matrix["status"] == "stale_or_invalid"
     assert matrix["summary"] is None
     assert all(value is False for value in matrix["claims"].values())
-    assert "bounded_planar_external_vv_matrix_stale_or_invalid" in current[
-        "blockers"
-    ]
+    assert "bounded_planar_external_vv_matrix_stale_or_invalid" in current["blockers"]
 
 
 def test_internal_license_due_diligence_tamper_blocks_product_state(
@@ -423,9 +523,7 @@ def test_internal_license_due_diligence_tamper_blocks_product_state(
 
     current, _ = product_state.build_product_state(ROOT)
 
-    assert "internal_license_due_diligence_missing_or_invalid" in current[
-        "blockers"
-    ]
+    assert "internal_license_due_diligence_missing_or_invalid" in current["blockers"]
     license_track = current["authority_tracks"]["internal_license_due_diligence"]
     assert license_track["status"] == "blocked"
     assert license_track["blockers"] == [
@@ -436,9 +534,10 @@ def test_internal_license_due_diligence_tamper_blocks_product_state(
     assert license_track["claims"]["internal_due_diligence_complete"] is False
     assert license_track["claims"]["product_legal_approval"] is False
     assert license_track["claims"]["release_authority"] is False
-    assert "internal_license_due_diligence_mismatch" in license_track["evidence"][
-        "validation_reason"
-    ]
+    assert (
+        "internal_license_due_diligence_mismatch"
+        in license_track["evidence"]["validation_reason"]
+    )
     assert current["release_authority"] is False
     assert current["release_eligible"] is False
 

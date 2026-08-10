@@ -5,11 +5,17 @@
     "tool": "mypy",
     "config": "pyproject.toml",
     "paths": [
+      "src/structural_analysis/adapters",
       "src/structural_analysis/analyses",
+      "src/structural_analysis/dynamics/transient_checkpoint.py",
+      "src/structural_analysis/elements/corotational_frame3d.py",
+      "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py",
+      "src/structural_analysis/materials",
       "src/structural_analysis/model",
       "src/structural_analysis/results/schema.py",
       "src/structural_analysis/results/validation.py",
       "src/structural_analysis/engine_v2/contracts/result_quantity.py",
+      "src/structural_analysis/solvers/nonlinear/transient.py",
       "src/structural_analysis/units"
     ]
   },
@@ -54,5 +60,5 @@
     "required_coordinate_count": 9,
     "workflow": ".github/workflows/core-quality-ci.yml"
   },
-  "claim_boundary": "This gate typechecks and compatibility-tests the ResultIR SI quantity contract alongside the declared public analysis, model, result-schema, result-validation, and unit paths; the 85 percent branch metric remains scoped to the coverage.sources list. It does not erase type debt outside that bounded scope, promote experimental or legacy code, prove release readiness, or replace independent engineering review."
+  "claim_boundary": "This gate enforces exact parity between the manifest-driven mypy inputs and pyproject.toml tool.mypy.files for the P0 adapters, analyses, transient checkpoint and solver, Frame3D elements, materials, model, result schema and validation, ResultIR SI quantity contract, and units. The compatibility matrix remains scoped to its declared tests, and the 85 percent branch metric remains scoped to the coverage.sources list. It does not erase type debt outside that bounded scope, promote experimental or legacy code, prove release readiness, or replace independent engineering review."
 }

@@ -6,33 +6,104 @@
     "closed_missing_boundary_or_next_gate_ids": [],
     "closed_missing_claim_boundary_ids": [],
     "closed_missing_evidence_ids": [],
-    "closed_row_count": 16,
-    "closed_rows_with_evidence_count": 16,
-    "closed_rows_without_blockers_count": 16,
+    "closed_row_count": 17,
+    "closed_rows_with_evidence_count": 17,
+    "closed_rows_without_blockers_count": 17,
     "closed_with_blockers_ids": []
   },
-  "closed_row_count": 16,
+  "closed_row_count": 17,
+  "computed_without_provenance": {
+    "blockers": [],
+    "contract_pass": true,
+    "full_gap_ledger_ready": false,
+    "ledger_status": "open",
+    "status": "ready"
+  },
   "contract_pass": true,
   "engine_version": "structural-analysis@0.3.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-07-28T14:32:56.499033+00:00",
+  "generated_at": "2026-08-02T04:20:58.538195+00:00",
   "input_checksums": {
-    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b0843cef68c05f5b4cef73a68c446861be1c47a3b7c5393c42aedcb413d86b91",
+    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:b724b4bcb202960341488cfe2c35e85e3d6093dff0bf59728cd8f6add01e4154",
-    "scripts/build_gap_ledger_evidence_audit.py": "sha256:d941fad0ebd6d1f54cdd81867f5cd5b16a467bf6ca609d83c49da4b6faf02146"
+    "implementation/phase1/kds_rc_rule_engine.py": "sha256:42d99a4169a73880a9995fdbc796ac730a3ae10da1daa8f3cfdc20029822410c",
+    "implementation/phase1/open_data/korea/korean_medium_large_ingest_receipt.json": "sha256:7519fa3d9ea7f8561bcf77ef9ae616849d30c6bf872a7542edfef8223b45c572",
+    "implementation/phase1/open_data/korea/operator_attachment_direct_download_review.json": "sha256:d71f5777ded0b380ab859cf4188bf7cb7d8f1a3e4cef94ad5d94703ceb2faded",
+    "implementation/phase1/open_data/korea/operator_attachment_manifest.queue.json": "sha256:c0fe5f06b0bded76f838b7ba2273c749e673b6b5866055c1d40d00a624d39246",
+    "implementation/phase1/open_data/korea/operator_attachment_manifest.queue.validation_report.json": "sha256:29384db06dd09b4a1fb39b774ebba0623397812af7418625da9b0f3e37fd8ede",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "missing",
+    "implementation/phase1/release_evidence/productization/ai_code_reasoning_guard.json": "sha256:10fc706a62df9c42f07ca638939883541cc7567f30cf5d852f523a60f91cc2aa",
+    "implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json": "sha256:0dcb4f337ed8cb7c0aa0c2d793f0e78bcc31a141adc8c1ab833a6b8d39557b37",
+    "implementation/phase1/release_evidence/productization/ai_decision_trace_contract.json": "sha256:486aa18b55e2a602a22e70ea3acb1afb995d402df5a11445ec54a76070bafd4b",
+    "implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json": "sha256:7d657b10cfd375d191dad84cfa22940686052c7220bf4cca23560f08153a0697",
+    "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json": "sha256:208f7a05a7a53fa57d1dde4de4a5318c931afad067ca5e9680f87ade218a7806",
+    "implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
+    "implementation/phase1/release_evidence/productization/ai_inference_runtime_receipt.json": "sha256:472e90a22e085f1f3ecbb9a07f65761cb856f313e06e42b17fe79b7a64d5d12a",
+    "implementation/phase1/release_evidence/productization/ai_input_semantic_normalization_receipt.json": "sha256:740d206e8df792ad99f4befada6031c8582b5789117ba84e4d53c9734c890974",
+    "implementation/phase1/release_evidence/productization/ai_model_registry.json": "sha256:ff9b9432ce2d1361cee2a83c660fe5d0fc56346f3fdec14d678a8c3f56a435ea",
+    "implementation/phase1/release_evidence/productization/ai_physics_guard_contract.json": "sha256:e5fb71713dbabd8471745ad83edd03fe0b23d436425d3406ad4a77f0e1b9ad1b",
+    "implementation/phase1/release_evidence/productization/ai_physics_guard_execution.json": "sha256:15af19472837c8034be34eb9134a070456c12ae8e28b505d20df3150658b5491",
+    "implementation/phase1/release_evidence/productization/ai_review_queue.json": "sha256:dd06bba30ce85231c81b6a6d754010f2463f5967aad917279ba063d4a9e36423",
+    "implementation/phase1/release_evidence/productization/ai_review_queue_contract.json": "sha256:0057cf589f7ce758b69ab20c213eeeb35bf8db8ba86ec5fd4e3276823ec01ed4",
+    "implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json": "sha256:beac139726ffe81622a7573db21abc3d2ef65f16df01c9399aafd40edfa03b8c",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:7fc851c85184a0249577ac96f0fe618c2ff26f18c4845a34afe2528591d020f6",
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
+    "implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
+    "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:e2cb4218163856b88483f65c7b62db0aeb664ac3845103f7ae6e184916177607",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64",
+    "implementation/phase1/release_evidence/productization/gpu_rocm_workstation_receipt.json": "sha256:816ac1c6ad55512f855d4865328e6aa1145e716c33b2eabbfe50ea1222d03faf",
+    "implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
+    "implementation/phase1/release_evidence/productization/independent_product_readiness.json": "sha256:613a5fb8cdde4ed20c87cfa4382a154bb3efa2e979fb4e5d944737fa995cf65c",
+    "implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json": "sha256:b6d543992a13467955c6cf9354d8305dd5529d5d7fb4a902d6e302fbc962bd37",
+    "implementation/phase1/release_evidence/productization/load_stage_runtime_flow_receipt.json": "sha256:11cc92dad3525c698547d90f3939f50eb8065fd8692b18fe20d63019f99379d7",
+    "implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json": "sha256:5cd3ddec9aeb1ad545a1a6eb439321da75e680f00ec173fd8574cbfec040e628",
+    "implementation/phase1/release_evidence/productization/material_element_tangent_support_matrix.json": "sha256:4a7cc89593ff6dfde20d766bd0db7d8f05af53857b8480efb0974153128ac5cf",
+    "implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_sparse_equilibrium.json": "sha256:e4e22c6a5ebc5eb2951c0612fd1cfc53ad33708302d8e7b5a9ad8ad6bb8c2b0c",
+    "implementation/phase1/release_evidence/productization/mgt_coupled_frame_surface_sparse_equilibrium.json": "sha256:44cb37f406819504d4d7a9fe0fee956095f388f4408b751c6baa9dd5d293d24f",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+    "implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json": "sha256:b34e09878305b0fec30c38fbac72a5ce7e6308eff0153134b277d09f33d40764",
+    "implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json": "sha256:5bf144aab17c0193a51b72e2ad26f1339a62de8b14e4581e9c1e9a8fa9f20ddf",
+    "implementation/phase1/release_evidence/productization/mgt_full_line_mesh_sparse_equilibrium.json": "sha256:0cf2dd2da6f48295e32d7c42e5dc9e61a27be2d997869686f352c31212b66b53",
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:1ce5827e6a53ccda3427b48071c25d3b88aad5c0fd44ba6b2404686421cfda5b",
+    "implementation/phase1/release_evidence/productization/mgt_native_modal_buckling_solver.json": "sha256:a9f0937e328b49a83365a6aa7b68f226b1c9ef1cfddb3ff7b6a8065ab43981e2",
+    "implementation/phase1/release_evidence/productization/mgt_pdelta_continuation_probe.json": "sha256:769d1e8b5d3b48f8dd6642e393028ca4f1c3c9ce4e9f16d7f00715dd1e4eadc0",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_probe.json": "sha256:1b2a275381732223fd4c12795f2a760f23cecd3a9441a349d5aa198d903fe64b",
+    "implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json": "sha256:af8b1d2f9c3fbc762042ce24312369f83ce56d61e1e26b6e1db56c87d3ee8eec",
+    "implementation/phase1/release_evidence/productization/mgt_shell_calibration_benchmarks.json": "sha256:f1bc0b6cc77a305b37d08905aae9db052ae39ab0ff02b8b490d308fb32962064",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_nonlinear_tangent.json": "sha256:d6b31202120010a121a577d606d9eeeb8caee211ebedbf3e552c1e0410f888dc",
+    "implementation/phase1/release_evidence/productization/mgt_surface_membrane_tangent.json": "sha256:b2215e1f05eebee51c65001658a715898968e53a245cf1429352a416ac7991ca",
+    "implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json": "sha256:3a8ceea53ab55f5fc48d8acd6954770bf8a797300f024e17803e7379c5261730",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json": "sha256:40953bbc36d7c08379e34af9b413dd682df30f9b62b58aac0ad5bcec49e158dd",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.json": "sha256:beec9bf82334d2fa6de106cf3d3728e3181a1f19ee682129df332880964e79b6",
+    "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_probe.json": "sha256:4597c53d8695b1f71fc942c4fac3b2e6ba414953b2f488fba668a605a10e1b92",
+    "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json": "sha256:f5d5ba45e8975563d74d69d03b81cc979818499039255408ba8308fdd9c74312",
+    "implementation/phase1/release_evidence/productization/ml_surrogate_checkpoint_manifest.json": "sha256:7982fd2fbfce52e17cb88d42a5c62cc8654196fc580af370a3062f989f58cd2b",
+    "implementation/phase1/release_evidence/productization/optimization_productization_audit.json": "sha256:4d18f81c2b0aab0bee3e84a1c748309010f39c1b6ac2c651120d9a2994fb9ea9",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:0f733860f02feca80fb065ee4dd6b93285e6393d8aac87d5c1c6d233516160b7",
+    "implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json": "sha256:7c78d9bfac3ea8895d074f3096a5cb85a5fd0acb0afe2a90b05c685464453a18",
+    "implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json": "sha256:df048c6ee28aa4237a3721534411fbfb333a16c7348fed55c8df8fd391f4917c",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:5cdcf8b8a530777df0e427639b94985ff3f5538d7367a67646e8dfdcd12ea115",
+    "implementation/phase1/release_evidence/productization/solver_governance_support_contract.json": "sha256:28f64aca4783ecf7f4e5c19628445ff04deebb1b6ba5e96ed0d8a6a204395b84",
+    "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
+    "implementation/phase1/workstation_delivery_readiness.json": "sha256:3423dadc5da253046b1d41410bec9f9dc1f533d7cb84e346c3b1a6ec764f2322",
+    "scripts/build_gap_ledger_evidence_audit.py": "sha256:72035a0f60f4f4a04244ed7dfec0938807ad81bdbe75e36db2fa3542473d1d62",
+    "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671"
   },
   "ledger_status": "open",
-  "nonclosed_row_count": 4,
+  "nonclosed_row_count": 3,
   "nonclosed_visibility": {
     "nonclosed_missing_blocker_ids": [],
     "nonclosed_missing_claim_boundary_ids": [],
     "nonclosed_missing_evidence_ids": [],
-    "nonclosed_row_count": 4,
-    "nonclosed_rows_with_blockers_count": 4,
-    "nonclosed_rows_with_claim_boundary_count": 4,
-    "nonclosed_rows_with_evidence_count": 4
+    "nonclosed_row_count": 3,
+    "nonclosed_rows_with_blockers_count": 3,
+    "nonclosed_rows_with_claim_boundary_count": 3,
+    "nonclosed_rows_with_evidence_count": 3
   },
+  "reason_code": "PASS",
   "reuse_policy": "gap_ledger_evidence_audit_reads_existing_gap_ledger_status_without_creating_closure",
   "reused_evidence": true,
   "row_count": 20,
@@ -277,9 +348,9 @@
       "status": "closed"
     },
     {
-      "blocker_count": 1,
+      "blocker_count": 0,
       "claim_boundary_present": true,
-      "closed": false,
+      "closed": true,
       "closure_requirement_count": 0,
       "closure_requirement_fail_count": 0,
       "closure_requirement_failed_ids": [],
@@ -297,7 +368,7 @@
       "source_receipt_unavailable_but_present_paths": [],
       "source_receipt_unavailable_path_count": 0,
       "source_receipt_unavailable_paths": [],
-      "status": "open"
+      "status": "closed"
     },
     {
       "blocker_count": 0,
@@ -538,7 +609,556 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "e3b1d59cfa49cf8b9e10e5ce0e9b3d177d2d3152",
+  "source_input_provenance": {
+    "blocker_count": 0,
+    "blockers": [],
+    "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
+    "contract_pass": true,
+    "input_count": 67,
+    "inputs": [
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
+        "source_checksum": "sha256:7fc851c85184a0249577ac96f0fe618c2ff26f18c4845a34afe2528591d020f6",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7fc851c85184a0249577ac96f0fe618c2ff26f18c4845a34afe2528591d020f6",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "docs/commercial-structural-solver-product-gap-ledger.md",
+        "source_checksum": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0672c6217393d9f74dc566fadf5158fc940878811f2a7cbec50a7e878e319088",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "source_checksum": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/build_gap_ledger_evidence_audit.py",
+        "source_checksum": "sha256:72035a0f60f4f4a04244ed7dfec0938807ad81bdbe75e36db2fa3542473d1d62",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:72035a0f60f4f4a04244ed7dfec0938807ad81bdbe75e36db2fa3542473d1d62",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "scripts/release_evidence_metadata.py",
+        "source_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_pdelta_continuation_probe.json",
+        "source_checksum": "sha256:769d1e8b5d3b48f8dd6642e393028ca4f1c3c9ce4e9f16d7f00715dd1e4eadc0",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:769d1e8b5d3b48f8dd6642e393028ca4f1c3c9ce4e9f16d7f00715dd1e4eadc0",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_probe.json",
+        "source_checksum": "sha256:4597c53d8695b1f71fc942c4fac3b2e6ba414953b2f488fba668a605a10e1b92",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:4597c53d8695b1f71fc942c4fac3b2e6ba414953b2f488fba668a605a10e1b92",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json",
+        "source_checksum": "sha256:40953bbc36d7c08379e34af9b413dd682df30f9b62b58aac0ad5bcec49e158dd",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:40953bbc36d7c08379e34af9b413dd682df30f9b62b58aac0ad5bcec49e158dd",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.json",
+        "source_checksum": "sha256:beec9bf82334d2fa6de106cf3d3728e3181a1f19ee682129df332880964e79b6",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:beec9bf82334d2fa6de106cf3d3728e3181a1f19ee682129df332880964e79b6",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_probe.json",
+        "source_checksum": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:f3cc02959943f08b62f68056861f9918fe22112ec177fd4ad31dda762777c4b5",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json",
+        "source_checksum": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:4e5f08fa9c5f6f82b30083d8127c4b75523a503b4a614f3c8d5b9860215c480d",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+        "source_checksum": "sha256:1ce5827e6a53ccda3427b48071c25d3b88aad5c0fd44ba6b2404686421cfda5b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:1ce5827e6a53ccda3427b48071c25d3b88aad5c0fd44ba6b2404686421cfda5b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        "source_checksum": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:c1b31c863b692a6c70b5b4ae2c88a44b2feb6e135c551c60b272584fde2dbe64",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_probe.json",
+        "source_checksum": "sha256:1b2a275381732223fd4c12795f2a760f23cecd3a9441a349d5aa198d903fe64b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:1b2a275381732223fd4c12795f2a760f23cecd3a9441a349d5aa198d903fe64b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json",
+        "source_checksum": "sha256:af8b1d2f9c3fbc762042ce24312369f83ce56d61e1e26b6e1db56c87d3ee8eec",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:af8b1d2f9c3fbc762042ce24312369f83ce56d61e1e26b6e1db56c87d3ee8eec",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+        "source_checksum": "sha256:5bf144aab17c0193a51b72e2ad26f1339a62de8b14e4581e9c1e9a8fa9f20ddf",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:5bf144aab17c0193a51b72e2ad26f1339a62de8b14e4581e9c1e9a8fa9f20ddf",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_full_line_mesh_sparse_equilibrium.json",
+        "source_checksum": "sha256:0cf2dd2da6f48295e32d7c42e5dc9e61a27be2d997869686f352c31212b66b53",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0cf2dd2da6f48295e32d7c42e5dc9e61a27be2d997869686f352c31212b66b53",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_coupled_frame_surface_sparse_equilibrium.json",
+        "source_checksum": "sha256:44cb37f406819504d4d7a9fe0fee956095f388f4408b751c6baa9dd5d293d24f",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:44cb37f406819504d4d7a9fe0fee956095f388f4408b751c6baa9dd5d293d24f",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "source_checksum": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:fff3f1e0393a6dde86c0ea737f7e51fc95fd41c82f8513656378323c964f3376",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_native_modal_buckling_solver.json",
+        "source_checksum": "sha256:a9f0937e328b49a83365a6aa7b68f226b1c9ef1cfddb3ff7b6a8065ab43981e2",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:a9f0937e328b49a83365a6aa7b68f226b1c9ef1cfddb3ff7b6a8065ab43981e2",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+        "source_checksum": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+        "source_checksum": "sha256:5cd3ddec9aeb1ad545a1a6eb439321da75e680f00ec173fd8574cbfec040e628",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:5cd3ddec9aeb1ad545a1a6eb439321da75e680f00ec173fd8574cbfec040e628",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/load_stage_runtime_flow_receipt.json",
+        "source_checksum": "sha256:11cc92dad3525c698547d90f3939f50eb8065fd8692b18fe20d63019f99379d7",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:11cc92dad3525c698547d90f3939f50eb8065fd8692b18fe20d63019f99379d7",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
+        "source_checksum": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/material_element_tangent_support_matrix.json",
+        "source_checksum": "sha256:4a7cc89593ff6dfde20d766bd0db7d8f05af53857b8480efb0974153128ac5cf",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:4a7cc89593ff6dfde20d766bd0db7d8f05af53857b8480efb0974153128ac5cf",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_surface_membrane_tangent.json",
+        "source_checksum": "sha256:b2215e1f05eebee51c65001658a715898968e53a245cf1429352a416ac7991ca",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:b2215e1f05eebee51c65001658a715898968e53a245cf1429352a416ac7991ca",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json",
+        "source_checksum": "sha256:3a8ceea53ab55f5fc48d8acd6954770bf8a797300f024e17803e7379c5261730",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:3a8ceea53ab55f5fc48d8acd6954770bf8a797300f024e17803e7379c5261730",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_calibration_benchmarks.json",
+        "source_checksum": "sha256:f1bc0b6cc77a305b37d08905aae9db052ae39ab0ff02b8b490d308fb32962064",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:f1bc0b6cc77a305b37d08905aae9db052ae39ab0ff02b8b490d308fb32962064",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_sparse_equilibrium.json",
+        "source_checksum": "sha256:e4e22c6a5ebc5eb2951c0612fd1cfc53ad33708302d8e7b5a9ad8ad6bb8c2b0c",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:e4e22c6a5ebc5eb2951c0612fd1cfc53ad33708302d8e7b5a9ad8ad6bb8c2b0c",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json",
+        "source_checksum": "sha256:b34e09878305b0fec30c38fbac72a5ce7e6308eff0153134b277d09f33d40764",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:b34e09878305b0fec30c38fbac72a5ce7e6308eff0153134b277d09f33d40764",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_nonlinear_tangent.json",
+        "source_checksum": "sha256:d6b31202120010a121a577d606d9eeeb8caee211ebedbf3e552c1e0410f888dc",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:d6b31202120010a121a577d606d9eeeb8caee211ebedbf3e552c1e0410f888dc",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json",
+        "source_checksum": "sha256:b6d543992a13467955c6cf9354d8305dd5529d5d7fb4a902d6e302fbc962bd37",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:b6d543992a13467955c6cf9354d8305dd5529d5d7fb4a902d6e302fbc962bd37",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_code_reasoning_guard.json",
+        "source_checksum": "sha256:10fc706a62df9c42f07ca638939883541cc7567f30cf5d852f523a60f91cc2aa",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:10fc706a62df9c42f07ca638939883541cc7567f30cf5d852f523a60f91cc2aa",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+        "source_checksum": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/kds_rc_rule_engine.py",
+        "source_checksum": "sha256:42d99a4169a73880a9995fdbc796ac730a3ae10da1daa8f3cfdc20029822410c",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:42d99a4169a73880a9995fdbc796ac730a3ae10da1daa8f3cfdc20029822410c",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
+        "source_checksum": "sha256:0f733860f02feca80fb065ee4dd6b93285e6393d8aac87d5c1c6d233516160b7",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0f733860f02feca80fb065ee4dd6b93285e6393d8aac87d5c1c6d233516160b7",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
+        "source_checksum": "sha256:e2cb4218163856b88483f65c7b62db0aeb664ac3845103f7ae6e184916177607",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:e2cb4218163856b88483f65c7b62db0aeb664ac3845103f7ae6e184916177607",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+        "source_checksum": "sha256:5cdcf8b8a530777df0e427639b94985ff3f5538d7367a67646e8dfdcd12ea115",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:5cdcf8b8a530777df0e427639b94985ff3f5538d7367a67646e8dfdcd12ea115",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release/external_benchmark_submission_readiness.json",
+        "source_checksum": "missing",
+        "source_state": "missing",
+        "workspace_checksum": "missing",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/open_data/korea/korean_medium_large_ingest_receipt.json",
+        "source_checksum": "sha256:7519fa3d9ea7f8561bcf77ef9ae616849d30c6bf872a7542edfef8223b45c572",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7519fa3d9ea7f8561bcf77ef9ae616849d30c6bf872a7542edfef8223b45c572",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/open_data/korea/operator_attachment_manifest.queue.json",
+        "source_checksum": "sha256:c0fe5f06b0bded76f838b7ba2273c749e673b6b5866055c1d40d00a624d39246",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:c0fe5f06b0bded76f838b7ba2273c749e673b6b5866055c1d40d00a624d39246",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/open_data/korea/operator_attachment_manifest.queue.validation_report.json",
+        "source_checksum": "sha256:29384db06dd09b4a1fb39b774ebba0623397812af7418625da9b0f3e37fd8ede",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:29384db06dd09b4a1fb39b774ebba0623397812af7418625da9b0f3e37fd8ede",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/open_data/korea/operator_attachment_direct_download_review.json",
+        "source_checksum": "sha256:d71f5777ded0b380ab859cf4188bf7cb7d8f1a3e4cef94ad5d94703ceb2faded",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:d71f5777ded0b380ab859cf4188bf7cb7d8f1a3e4cef94ad5d94703ceb2faded",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/optimization_productization_audit.json",
+        "source_checksum": "sha256:4d18f81c2b0aab0bee3e84a1c748309010f39c1b6ac2c651120d9a2994fb9ea9",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:4d18f81c2b0aab0bee3e84a1c748309010f39c1b6ac2c651120d9a2994fb9ea9",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ml_multi_objective_status.json",
+        "source_checksum": "sha256:f5d5ba45e8975563d74d69d03b81cc979818499039255408ba8308fdd9c74312",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:f5d5ba45e8975563d74d69d03b81cc979818499039255408ba8308fdd9c74312",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "source_checksum": "sha256:7c78d9bfac3ea8895d074f3096a5cb85a5fd0acb0afe2a90b05c685464453a18",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7c78d9bfac3ea8895d074f3096a5cb85a5fd0acb0afe2a90b05c685464453a18",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "source_checksum": "sha256:df048c6ee28aa4237a3721534411fbfb333a16c7348fed55c8df8fd391f4917c",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:df048c6ee28aa4237a3721534411fbfb333a16c7348fed55c8df8fd391f4917c",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/independent_product_readiness.json",
+        "source_checksum": "sha256:613a5fb8cdde4ed20c87cfa4382a154bb3efa2e979fb4e5d944737fa995cf65c",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:613a5fb8cdde4ed20c87cfa4382a154bb3efa2e979fb4e5d944737fa995cf65c",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json",
+        "source_checksum": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/gpu_rocm_workstation_receipt.json",
+        "source_checksum": "sha256:816ac1c6ad55512f855d4865328e6aa1145e716c33b2eabbfe50ea1222d03faf",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:816ac1c6ad55512f855d4865328e6aa1145e716c33b2eabbfe50ea1222d03faf",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
+        "source_checksum": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/workstation_delivery_readiness.json",
+        "source_checksum": "sha256:3423dadc5da253046b1d41410bec9f9dc1f533d7cb84e346c3b1a6ec764f2322",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:3423dadc5da253046b1d41410bec9f9dc1f533d7cb84e346c3b1a6ec764f2322",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/solver_governance_support_contract.json",
+        "source_checksum": "sha256:28f64aca4783ecf7f4e5c19628445ff04deebb1b6ba5e96ed0d8a6a204395b84",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:28f64aca4783ecf7f4e5c19628445ff04deebb1b6ba5e96ed0d8a6a204395b84",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_input_semantic_normalization_receipt.json",
+        "source_checksum": "sha256:740d206e8df792ad99f4befada6031c8582b5789117ba84e4d53c9734c890974",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:740d206e8df792ad99f4befada6031c8582b5789117ba84e4d53c9734c890974",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ml_surrogate_checkpoint_manifest.json",
+        "source_checksum": "sha256:7982fd2fbfce52e17cb88d42a5c62cc8654196fc580af370a3062f989f58cd2b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7982fd2fbfce52e17cb88d42a5c62cc8654196fc580af370a3062f989f58cd2b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json",
+        "source_checksum": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_inference_runtime_receipt.json",
+        "source_checksum": "sha256:472e90a22e085f1f3ecbb9a07f65761cb856f313e06e42b17fe79b7a64d5d12a",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:472e90a22e085f1f3ecbb9a07f65761cb856f313e06e42b17fe79b7a64d5d12a",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json",
+        "source_checksum": "sha256:0dcb4f337ed8cb7c0aa0c2d793f0e78bcc31a141adc8c1ab833a6b8d39557b37",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0dcb4f337ed8cb7c0aa0c2d793f0e78bcc31a141adc8c1ab833a6b8d39557b37",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json",
+        "source_checksum": "sha256:7d657b10cfd375d191dad84cfa22940686052c7220bf4cca23560f08153a0697",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:7d657b10cfd375d191dad84cfa22940686052c7220bf4cca23560f08153a0697",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_physics_guard_contract.json",
+        "source_checksum": "sha256:e5fb71713dbabd8471745ad83edd03fe0b23d436425d3406ad4a77f0e1b9ad1b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:e5fb71713dbabd8471745ad83edd03fe0b23d436425d3406ad4a77f0e1b9ad1b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_physics_guard_execution.json",
+        "source_checksum": "sha256:15af19472837c8034be34eb9134a070456c12ae8e28b505d20df3150658b5491",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:15af19472837c8034be34eb9134a070456c12ae8e28b505d20df3150658b5491",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_decision_trace_contract.json",
+        "source_checksum": "sha256:486aa18b55e2a602a22e70ea3acb1afb995d402df5a11445ec54a76070bafd4b",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:486aa18b55e2a602a22e70ea3acb1afb995d402df5a11445ec54a76070bafd4b",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_model_registry.json",
+        "source_checksum": "sha256:ff9b9432ce2d1361cee2a83c660fe5d0fc56346f3fdec14d678a8c3f56a435ea",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:ff9b9432ce2d1361cee2a83c660fe5d0fc56346f3fdec14d678a8c3f56a435ea",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json",
+        "source_checksum": "sha256:208f7a05a7a53fa57d1dde4de4a5318c931afad067ca5e9680f87ade218a7806",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:208f7a05a7a53fa57d1dde4de4a5318c931afad067ca5e9680f87ade218a7806",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json",
+        "source_checksum": "sha256:beac139726ffe81622a7573db21abc3d2ef65f16df01c9399aafd40edfa03b8c",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:beac139726ffe81622a7573db21abc3d2ef65f16df01c9399aafd40edfa03b8c",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_review_queue_contract.json",
+        "source_checksum": "sha256:0057cf589f7ce758b69ab20c213eeeb35bf8db8ba86ec5fd4e3276823ec01ed4",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:0057cf589f7ce758b69ab20c213eeeb35bf8db8ba86ec5fd4e3276823ec01ed4",
+        "workspace_matches_source": true
+      },
+      {
+        "blocker": "",
+        "path": "implementation/phase1/release_evidence/productization/ai_review_queue.json",
+        "source_checksum": "sha256:dd06bba30ce85231c81b6a6d754010f2463f5967aad917279ba063d4a9e36423",
+        "source_state": "tracked",
+        "workspace_checksum": "sha256:dd06bba30ce85231c81b6a6d754010f2463f5967aad917279ba063d4a9e36423",
+        "workspace_matches_source": true
+      }
+    ],
+    "reason_code": "PASS",
+    "schema_version": "source-input-provenance.v1",
+    "source_commit_resolved": true,
+    "workspace_match_count": 67
+  },
   "source_receipt_path_coverage": {
     "claim_boundary": "This checks only explicit source_receipts and *_source_receipts paths that the ledger status advertises as evidence or guard inputs. Paths declared through unavailable_source_receipts remain visible without being treated as available evidence. Available paths that are missing and unavailable paths that exist are contract violations.",
     "source_receipt_absent_row_count": 0,
@@ -556,5 +1176,5 @@
     ]
   },
   "status": "ready",
-  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=16/16 | nonclosed_boundaries=4/4"
+  "summary_line": "Gap ledger evidence audit: READY | closed_evidence=17/17 | nonclosed_boundaries=3/3 | computed_without_provenance=READY"
 }

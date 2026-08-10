@@ -146,9 +146,7 @@ def _build_bounded_frame3d_direct_control_model_ir_v2(
 
     node_ids = tuple(str(row["id"]) for row in payload["nodes"])
     node_index = {node_id: index for index, node_id in enumerate(node_ids)}
-    material_rows = {
-        str(row["id"]): row for row in payload["materials"]
-    }
+    material_rows = {str(row["id"]): row for row in payload["materials"]}
     section_rows = {str(row["id"]): row for row in payload["sections"]}
     material_objects = {
         material_id: _material_from_row(row)
@@ -177,9 +175,7 @@ def _build_bounded_frame3d_direct_control_model_ir_v2(
                 node_i=node_index[node_i],
                 node_j=node_index[node_j],
                 section=section,
-                local_axis_roll_deg=math.degrees(
-                    float(row["local_axis_rotation_rad"])
-                ),
+                local_axis_roll_deg=math.degrees(float(row["local_axis_rotation_rad"])),
             )
         )
         member_materials.append(material)
@@ -207,7 +203,11 @@ def _build_bounded_frame3d_direct_control_model_ir_v2(
     try:
         elastic_model = CorotationalFrame3DGraphModel(
             node_coordinates_m=tuple(
-                tuple(float(value) for value in row["coordinates_m"])
+                (
+                    float(row["coordinates_m"][0]),
+                    float(row["coordinates_m"][1]),
+                    float(row["coordinates_m"][2]),
+                )
                 for row in payload["nodes"]
             ),
             members=tuple(members),
@@ -251,9 +251,7 @@ def _build_bounded_frame3d_direct_control_model_ir_v2(
         }
     )
     provisional = BoundedFrame3DDirectControlModelIRAdapter(
-        schema_version=(
-            BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_SCHEMA_VERSION
-        ),
+        schema_version=(BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_SCHEMA_VERSION),
         adapter_profile=BOUNDED_FRAME3D_DIRECT_CONTROL_MODEL_IR_ADAPTER_PROFILE,
         adapter_hash="sha256:" + "0" * 64,
         model_ir_content_hash=reparsed.content_hash,
@@ -456,9 +454,7 @@ def _validate_exact_binary64_projection_sources(payload: dict[str, Any]) -> None
                     parameters[field_name],
                     f"/sections/{section_index}/parameters/{field_name}",
                 )
-    for load_index, row in enumerate(
-        payload["load_patterns"][0]["nodal_loads"]
-    ):
+    for load_index, row in enumerate(payload["load_patterns"][0]["nodal_loads"]):
         for component, value in row["components_si"].items():
             _require_exact_binary64(
                 value,
@@ -477,10 +473,7 @@ def _require_exact_binary64(value: Any, path: str) -> float:
         converted = float(value)
     except (TypeError, ValueError, OverflowError):
         converted = math.inf
-    if (
-        not math.isfinite(converted)
-        or (type(value) is int and int(converted) != value)
-    ):
+    if not math.isfinite(converted) or (type(value) is int and int(converted) != value):
         _fail(
             "bounded_frame3d_model_ir_numeric_source_not_binary64",
             path,

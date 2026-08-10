@@ -20,9 +20,7 @@ assert SPEC is not None and SPEC.loader is not None
 matrix = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = matrix
 SPEC.loader.exec_module(matrix)
-SUPPLEMENTAL_RECEIPT = (
-    ROOT / matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
-)
+SUPPLEMENTAL_RECEIPT = ROOT / matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
 requires_local_supplemental = pytest.mark.skipif(
     not SUPPLEMENTAL_RECEIPT.is_file(),
     reason="optional same-operator replay bundle is not source-controlled",
@@ -95,12 +93,9 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
         "repository_path": (
             ".github/workflows/bounded-planar-negative-opensees-technical.yml"
         ),
-        "packaged_path": (
-            "workflow/bounded-planar-negative-opensees-technical.yml"
-        ),
+        "packaged_path": ("workflow/bounded-planar-negative-opensees-technical.yml"),
         "file_sha256": matrix._file_sha256(
-            ROOT
-            / ".github/workflows/bounded-planar-negative-opensees-technical.yml"
+            ROOT / ".github/workflows/bounded-planar-negative-opensees-technical.yml"
         ),
     }
     assert negative_binding["external_solver_execution"] is False
@@ -114,12 +109,9 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
         "repository_path": (
             ".github/workflows/bounded-planar-scaling-opensees-technical.yml"
         ),
-        "packaged_path": (
-            "workflow/bounded-planar-scaling-opensees-technical.yml"
-        ),
+        "packaged_path": ("workflow/bounded-planar-scaling-opensees-technical.yml"),
         "file_sha256": matrix._file_sha256(
-            ROOT
-            / ".github/workflows/bounded-planar-scaling-opensees-technical.yml"
+            ROOT / ".github/workflows/bounded-planar-scaling-opensees-technical.yml"
         ),
     }
     assert scaling_binding["external_solver_execution"] is False
@@ -134,12 +126,9 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
         "repository_path": (
             ".github/workflows/bounded-planar-modal-buckling-technical.yml"
         ),
-        "packaged_path": (
-            "workflow/bounded-planar-modal-buckling-technical.yml"
-        ),
+        "packaged_path": ("workflow/bounded-planar-modal-buckling-technical.yml"),
         "file_sha256": matrix._file_sha256(
-            ROOT
-            / ".github/workflows/bounded-planar-modal-buckling-technical.yml"
+            ROOT / ".github/workflows/bounded-planar-modal-buckling-technical.yml"
         ),
     }
     assert modal_buckling_binding["external_solver_execution"] is False
@@ -155,15 +144,13 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
     ]
     assert nonlinear_binding["execution_workflow"] == {
         "repository_path": (
-            ".github/workflows/"
-            "bounded-planar-nonlinear-material-recovery-technical.yml"
+            ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml"
         ),
         "packaged_path": (
             "workflow/bounded-planar-nonlinear-material-recovery-technical.yml"
         ),
         "file_sha256": matrix._file_sha256(
-            ROOT
-            / ".github/workflows/"
+            ROOT / ".github/workflows/"
             "bounded-planar-nonlinear-material-recovery-technical.yml"
         ),
     }
@@ -218,8 +205,7 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
     supplemental = payload["same_operator_supplemental_execution_binding"]
     assert supplemental["status"] == "attached_replay_only"
     assert supplemental["path"] == (
-        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/"
-        "receipt.json"
+        "artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json"
     )
     assert supplemental["technical_contract_pass"] is True
     assert supplemental["current_product_replay_pass"] is True
@@ -247,8 +233,7 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
     assert supplemental["product_legal_license_approval"] is False
     assert supplemental["verification_level_2"] is False
     assert [
-        binding["receipt_id"]
-        for binding in payload["supplemental_receipt_bindings"]
+        binding["receipt_id"] for binding in payload["supplemental_receipt_bindings"]
     ] == [
         "same_operator_supplemental_linear",
         "same_operator_supplemental_negative",
@@ -462,9 +447,7 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
     assert rows["scaling.characteristic_length_invariance"]["status"] == "missing"
     assert rows["scaling.unit_invariance"]["execution_package_available"] is True
     assert (
-        rows["scaling.characteristic_length_invariance"][
-            "execution_package_available"
-        ]
+        rows["scaling.characteristic_length_invariance"]["execution_package_available"]
         is True
     )
     assert all(
@@ -534,7 +517,7 @@ def test_forged_summary_or_level2_row_fails_closed() -> None:
     row = forged_level2["requirements"][0]
     row["level2_eligible"] = True
     row["status"] = "promotion_eligible"
-    forged_level2["summary"]["fresh_external_technical_count"] -= 1
+    forged_level2["summary"]["current_product_replay_only_count"] -= 1
     forged_level2["summary"]["promotion_eligible_count"] += 1
     forged_level2["artifact_hash"] = matrix._artifact_hash(forged_level2)
     with pytest.raises(
@@ -560,9 +543,7 @@ def test_forged_current_source_workflow_hash_fails_closed() -> None:
 def test_forged_core_receipt_freshness_fails_exact_revalidation() -> None:
     payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
     forged = deepcopy(payload)
-    forged["receipt_bindings"][0][
-        "fresh_current_source_external_execution"
-    ] = True
+    forged["receipt_bindings"][0]["fresh_current_source_external_execution"] = True
     forged["artifact_hash"] = matrix._artifact_hash(forged)
 
     with pytest.raises(
@@ -588,9 +569,7 @@ def test_forged_current_source_workflow_coverage_fails_closed() -> None:
 def test_forged_unavailable_same_operator_binding_fails_closed() -> None:
     payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
     forged = deepcopy(payload)
-    forged["same_operator_execution_binding"][
-        "actual_external_solver_execution"
-    ] = True
+    forged["same_operator_execution_binding"]["actual_external_solver_execution"] = True
     forged["artifact_hash"] = matrix._artifact_hash(forged)
 
     with pytest.raises(
@@ -611,9 +590,7 @@ def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
 
     with pytest.raises(
         matrix.BoundedPlanarVVMatrixError,
-        match=(
-            "matrix_status_same_operator_supplemental_execution_binding_invalid"
-        ),
+        match=("matrix_status_same_operator_supplemental_execution_binding_invalid"),
     ):
         matrix._validate_status(forged, ROOT)
 
@@ -622,9 +599,7 @@ def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
 def test_forged_supplemental_child_receipt_binding_fails_closed() -> None:
     payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
     forged = deepcopy(payload)
-    forged["supplemental_receipt_bindings"][0]["file_sha256"] = (
-        "sha256:" + "0" * 64
-    )
+    forged["supplemental_receipt_bindings"][0]["file_sha256"] = "sha256:" + "0" * 64
     forged["artifact_hash"] = matrix._artifact_hash(forged)
 
     with pytest.raises(
@@ -723,9 +698,7 @@ def test_tampered_negative_execution_package_fails_closed(tmp_path: Path) -> Non
     ):
         matrix.build_bounded_planar_external_vv_matrix(
             repo_root=ROOT,
-            negative_case_package_path=(
-                target / matrix.negative_package.MANIFEST_NAME
-            ),
+            negative_case_package_path=(target / matrix.negative_package.MANIFEST_NAME),
         )
 
 
