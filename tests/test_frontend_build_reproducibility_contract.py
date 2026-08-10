@@ -45,7 +45,7 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "@types/react": "18.2.15",
         "@types/react-dom": "18.2.7",
         "@vitejs/plugin-react": "6.0.1",
-        "postcss": "8.5.22",
+        "postcss": "8.5.26",
         "typescript": "5.0.2",
         "vite": "8.0.16",
     }
