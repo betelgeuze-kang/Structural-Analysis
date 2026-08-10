@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
+import subprocess
 import sys
 
 
@@ -18,9 +21,79 @@ sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
 
-def test_committed_material_family_adequacy_audit_is_current() -> None:
+def _git_object(commit: str, path: str) -> bytes:
+    return subprocess.check_output(
+        ["git", "show", f"{commit}:{path}"],
+        cwd=ROOT,
+        stderr=subprocess.STDOUT,
+    )
+
+
+def _raw_object_is_ancestor(ancestor: str, descendant: str) -> bool:
+    pending = [descendant]
+    visited: set[str] = set()
+    while pending:
+        commit = pending.pop()
+        if commit in visited:
+            continue
+        visited.add(commit)
+        raw = subprocess.check_output(
+            ["git", "cat-file", "-p", commit],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.STDOUT,
+        )
+        header, separator, _ = raw.partition("\n\n")
+        assert separator, f"commit object has no header terminator: {commit}"
+        lines = header.splitlines()
+        assert lines and re.fullmatch(r"tree [0-9a-f]{40}", lines[0])
+        if commit == ancestor:
+            return True
+        for line in lines[1:]:
+            if not line.startswith("parent "):
+                continue
+            parent = line.removeprefix("parent ")
+            assert re.fullmatch(r"[0-9a-f]{40}", parent)
+            pending.append(parent)
+    return False
+
+
+def test_committed_material_family_audit_preserves_its_recorded_epoch() -> None:
+    payload = json.loads((ROOT / module.DEFAULT_OUT).read_text(encoding="utf-8"))
+    module.validate(payload, root=ROOT, current=False)
+
+    recorded_commit = payload["source"]["repository_commit_sha"]
+    assert re.fullmatch(r"[0-9a-f]{40}", recorded_commit)
+    head = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    assert _raw_object_is_ancestor(recorded_commit, head)
+
+    lfs_pointer = re.compile(
+        rb"version https://git-lfs.github.com/spec/v1\n"
+        rb"oid sha256:([0-9a-f]{64})\n"
+        rb"size ([1-9][0-9]*)\n?"
+    )
+    for path, expected in payload["source"]["input_checksums"].items():
+        recorded = _git_object(recorded_commit, path)
+        pointer = lfs_pointer.fullmatch(recorded)
+        if pointer is None:
+            actual = "sha256:" + hashlib.sha256(recorded).hexdigest()
+        else:
+            actual = "sha256:" + pointer.group(1).decode("ascii")
+            hydrated = ROOT / path
+            assert hydrated.stat().st_size == int(pointer.group(2))
+            assert "sha256:" + hashlib.sha256(hydrated.read_bytes()).hexdigest() == (
+                actual
+            )
+        assert actual == expected, path
+
     passed, reason = module.check(root=ROOT)
-    assert passed, reason
+    assert passed is False
+    assert reason == (
+        "g1_mgt_material_family_adequacy_audit_invalid:"
+        "material_family_audit_sources_stale"
+    )
 
 
 def test_material_family_audit_keeps_nonlinear_source_gap_visible() -> None:
