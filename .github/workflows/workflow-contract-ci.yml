@@ -44,7 +44,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Hydrate only direct-parent ancestry for provenance tests
+      - name: Hydrate direct and nested merge-parent ancestry for provenance tests
         shell: bash
         run: |
           mapfile -t parents < <(
@@ -57,6 +57,15 @@ jobs:
           for parent in "${parents[@]}"; do
             git fetch --no-tags --depth=512 origin "$parent"
             git cat-file -e "${parent}^{commit}"
+          done
+          mapfile -t nested_parents < <(
+            for parent in "${parents[@]}"; do
+              git cat-file -p "$parent" | awk '$1 == "parent" { print $2 }'
+            done | sort -u
+          )
+          for nested_parent in "${nested_parents[@]}"; do
+            git fetch --no-tags --depth=512 origin "$nested_parent"
+            git cat-file -e "${nested_parent}^{commit}"
           done
           git cat-file -e "${GITHUB_SHA}^{commit}"
 
