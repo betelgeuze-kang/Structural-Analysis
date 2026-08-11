@@ -1,0 +1,257 @@
+# Native Workspace and C ABI v1 Contract
+
+Status: normative design baseline
+
+Baseline commit: 14c25f4ddb72eb64cab689e6d0183b056025dca3
+
+Related decisions: ADR-002, ADR-003, ADR-004, ADR-008, ADR-009
+
+이 문서는 첫 native implementation PR이 따라야 하는 package, build target와 binary
+interface를 고정한다. 문서 자체는 구현 완료나 hardware/readiness 증거가 아니다.
+
+## 1. Target repository layout
+
+~~~text
+native/
+  Cargo.toml
+  crates/
+    structural-contracts/
+    structural-ffi-sys/
+    structural-ffi/
+    structural-runtime/
+    structural-report/
+    structural-cli/
+  cpp/
+    CMakeLists.txt
+    include/structural/
+      abi_v1.h
+      model_ir.hpp
+    src/
+      model_ir/
+      units/
+      validation/
+      elements/
+      materials/
+      assembly/
+      solvers/
+      result_recovery/
+      abi/
+    hip/
+      operators/
+      reductions/
+      sparse/
+      nonlinear/
+  cmake/
+    StructuralOptions.cmake
+    StructuralWarnings.cmake
+    StructuralHip.cmake
+  tests/
+    abi/
+    fixtures/
+    integration/
+~~~
+
+기존 implementation/phase1 native source는 처음부터 이동하지 않는다. 새 target에
+link 가능한 unit부터 하나씩 가져오고, 기존 probe path가 새 library를 consumer로
+사용하도록 바꾼 뒤 parity gate를 통과한 source만 제거한다.
+
+## 2. Rust crate graph
+
+| Crate | 책임 | 허용 dependency | 금지 |
+| --- | --- | --- | --- |
+| structural-contracts | strict JSON decode, canonical serialization, ModelIR/ResultIR/ReportIR wire types, hash | serde 계열과 pure Rust utility | solver, filesystem runtime, FFI 호출 |
+| structural-ffi-sys | abi_v1.h의 raw bindgen 또는 checked handwritten mirror | build metadata | safe policy, allocation owner 변경 |
+| structural-ffi | opaque handle RAII, slice validation, error mapping, safe C++ core client | contracts, ffi-sys | product CLI, database, global mutable last-error |
+| structural-runtime | durable jobs, artifacts, checkpoint/resume, cancellation, worker lifecycle | contracts, ffi | solver truth 재정의 |
+| structural-report | ResultIR/ReportIR projection과 deterministic document source | contracts | solver convergence 추론 |
+| structural-cli | CLI/API composition과 process exit contract | contracts, runtime, report | element/material implementation |
+
+structural-contracts와 structural-ffi-sys는 서로 의존하지 않는다. structural-ffi가
+두 crate를 조합한다. runtime과 report는 병렬 consumer이며 CLI가 최상위 composition
+owner다.
+
+## 3. C++ and HIP target graph
+
+| CMake target | 종류 | 책임 | HIP 필요 |
+| --- | --- | --- | --- |
+| structural_model_ir | static | ModelIR domain types, units, semantic validation | 아니오 |
+| structural_elements | static | element kinematics와 recovery source | 아니오 |
+| structural_materials | static | accepted/trial/commit/rollback constitutive source | 아니오 |
+| structural_assembly | static | DOF graph, residual/tangent/JVP assembly | 아니오 |
+| structural_solver_cpu | static | reference/optimized CPU solver | 아니오 |
+| structural_solver_hip | static | resident HIP operators와 solver | 예 |
+| structural_c_abi_v1 | shared/static | sa_get_api_v1 table과 exception boundary | 선택 |
+| structural_native_tests | executable set | C++ unit, C ABI와 parity test | 기본 아니오 |
+
+dependency 방향은 model_ir <- elements/materials <- assembly <- solver다.
+structural_c_abi_v1은 필요한 lower target을 composition하지만 lower target은 ABI나
+Rust를 알지 못한다. structural_solver_hip는 CPU target에 fallback하지 않고 동일
+operator contract만 공유한다.
+
+## 4. Build ownership
+
+- root native/Cargo.toml은 resolver 2 workspace와 단일 lockfile을 소유한다.
+- native/cpp/CMakeLists.txt는 C++20을 baseline으로 사용한다.
+- hosted default는 STRUCTURAL_ENABLE_HIP=OFF, STRUCTURAL_BUILD_TESTS=ON이다.
+- HIP enable은 발견된 ROCm compiler와 required capability를 configure 단계에서
+  검증한다. architecture를 source에 하드코딩하지 않는다.
+- Cargo build script는 CMake를 여러 crate에서 중복 실행하지 않는다. 한 integration
+  crate 또는 top-level build driver만 native library location을 결정한다.
+- production package는 exact ABI version, compiler/runtime identity와 enabled backend
+  metadata를 포함한다.
+
+## 5. Public C ABI
+
+### 5.1 Entry table
+
+public shared library가 반드시 노출하는 symbol은 다음 하나다.
+
+~~~c
+sa_status_code_v1 sa_get_api_v1(
+    const sa_api_request_v1* request,
+    sa_api_v1* out_api,
+    sa_error_buffer_v1* error);
+~~~
+
+sa_api_request_v1과 sa_api_v1의 첫 필드는 abi_version과 struct_size다. function
+table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail은 struct_size로
+무시한다. symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
+
+### 5.2 Version encoding
+
+- uint32 abi_version의 상위 16 bit는 major, 하위 16 bit는 minor다.
+- v1.0은 0x00010000이다.
+- minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
+- field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
+- library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
+
+### 5.3 Required base descriptors
+
+~~~c
+typedef struct {
+    uint32_t abi_version;
+    uint32_t struct_size;
+} sa_header_v1;
+
+typedef struct {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    const void* data;
+    uint64_t length;
+    uint64_t stride_bytes;
+    uint32_t element_type;
+    uint32_t memory_space;
+    int32_t device_id;
+    uint32_t flags;
+} sa_buffer_view_v1;
+
+typedef struct {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    char* data;
+    uint64_t capacity;
+    uint64_t required;
+} sa_error_buffer_v1;
+~~~
+
+ModelIR first slice는 별도 typed descriptors와 opaque sa_model_ir_handle_v1을 사용한다.
+serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
+
+### 5.4 Stable status taxonomy
+
+| Code | Symbol | 의미 |
+| ---: | --- | --- |
+| 0 | SA_OK | 성공 |
+| 1000 | SA_ERR_INVALID_ARGUMENT | null, length, enum 또는 range 오류 |
+| 1001 | SA_ERR_ABI_VERSION_MISMATCH | 지원하지 않는 ABI major/minor |
+| 1002 | SA_ERR_STRUCT_SIZE | descriptor가 required prefix보다 작음 |
+| 1003 | SA_ERR_BUFFER_TOO_SMALL | required size를 반환했고 출력은 미완료 |
+| 1100 | SA_ERR_SCHEMA_INVALID | wire/schema contract 실패 |
+| 1101 | SA_ERR_SEMANTIC_INVALID | reference, units, cycle 등 의미 실패 |
+| 1102 | SA_ERR_ANALYSIS_NOT_READY | contract-valid지만 blocking unsupported 존재 |
+| 1200 | SA_ERR_UNSUPPORTED | 알려졌으나 구현되지 않은 capability |
+| 1300 | SA_ERR_STATE_CONFLICT | epoch, trial/commit 또는 concurrent mutation 충돌 |
+| 1301 | SA_ERR_CHECKPOINT_MISMATCH | model/state/execution context 불일치 |
+| 1400 | SA_ERR_BACKEND_UNAVAILABLE | 요청 backend를 사용할 수 없음 |
+| 1401 | SA_ERR_DEVICE_MISMATCH | device/architecture/capability 불일치 |
+| 1402 | SA_ERR_FALLBACK_FORBIDDEN | explicit policy가 fallback을 거부 |
+| 1500 | SA_ERR_CANCELLED | cooperative cancellation |
+| 1900 | SA_ERR_INTERNAL | exception/panic을 log-safe detail로 변환 |
+
+새 오류는 기존 numeric 의미를 재사용하지 않는다. 상세 메시지는 diagnostic이며
+program control flow는 code와 typed report만 사용한다.
+
+## 6. Memory and lifetime contract
+
+1. Caller-owned input
+   - data는 함수가 return할 때까지만 유효하면 된다.
+   - callee가 handle에 보존할 값은 return 전에 deep copy한다.
+2. Caller-owned output
+   - capacity 0/data null 호출로 required를 조회할 수 있다.
+   - capacity가 부족하면 SA_ERR_BUFFER_TOO_SMALL과 required를 반환한다.
+   - 부분 serialization이나 부분 array를 성공으로 반환하지 않는다.
+3. Library-owned opaque handle
+   - 생성한 table major와 library instance에서만 사용한다.
+   - type별 destroy function을 정확히 한 번 호출한다.
+   - destroy 후 pointer와 이전 borrowed view는 모두 invalid다.
+4. Allocator
+   - Rust가 C++ allocation을 free하거나 반대 방향으로 free하지 않는다.
+   - ABI v1은 arbitrary allocator callback을 받지 않는다.
+5. Failure atomicity
+   - create 실패 시 output handle은 null이다.
+   - mutation 실패 시 accepted state와 output checksum은 호출 전과 동일해야 한다.
+
+## 7. Array and scalar layout
+
+- 모든 count, length, index와 stride는 uint64_t다.
+- length > 0이면 data는 non-null이고 stride_bytes는 element size 이상이다.
+- length * stride와 offset 계산은 overflow 검사 후 수행한다.
+- scalar baseline은 little-endian host IEEE-754 binary64다. wire serialization은
+  UTF-8 JSON이고 process ABI byte order를 artifact format으로 사용하지 않는다.
+- dense vector는 packed 1D, dense matrix는 explicit row/column stride descriptor를
+  사용한다. 암묵적 column-major default를 두지 않는다.
+- CSR은 zero-based row_ptr/col_idx, monotonic row_ptr, row_ptr[0]=0,
+  row_ptr[nrow]=nnz, in-range sorted column과 duplicate-free row를 요구한다.
+- DOF order는 UX, UY, UZ, RX, RY, RZ다.
+- canonical units는 m, N, kg, s, rad다. source unit과 scale은 provenance에 남긴다.
+- host와 device pointer는 memory_space로 구분한다. device view에는 device_id와
+  owning execution context가 필요하다.
+
+## 8. Thread-safety contract
+
+| 객체 | 동시 read | 동시 mutation | thread 이동 |
+| --- | --- | --- | --- |
+| API table | 허용 | 해당 없음 | 허용 |
+| immutable ModelIR handle | 허용 | 해당 없음 | 허용 |
+| material/state handle | read만 허용 | exclusive | 명시적 synchronization 후 허용 |
+| execution/solver handle | status read만 허용 | 한 owner thread/lane | 실행 중 금지 |
+| HIP context/stream binding | query만 허용 | serialized lane | owning device 안에서만 |
+
+- global mutable last-error, singleton current model과 implicit current device를 금지한다.
+- 각 호출은 caller-owned error buffer를 사용한다.
+- independent handles는 병렬 실행 가능해야 한다.
+- destroy는 in-flight call count가 0일 때만 성공한다. 아니면
+  SA_ERR_STATE_CONFLICT를 반환한다.
+- cancellation은 atomic token을 관찰하는 cooperative protocol이며 accepted state를
+  중간 commit하지 않는다.
+
+## 9. Security and fail-closed rules
+
+- Rust panic과 C++ exception은 catch boundary에서 SA_ERR_INTERNAL로 변환한다.
+- error text에 pointer, credential, arbitrary platform message와 source file의 민감한
+  path를 포함하지 않는다.
+- untrusted count로 allocation하기 전에 configured product limit를 검사한다.
+- unknown enum/flag bit, nonzero reserved field와 incompatible struct_size를 거부한다.
+- FFI 호출 성공이 engineering/result authority를 자동 부여하지 않는다.
+
+## 10. Definition of done for the foundation implementation
+
+- 하나의 Cargo.lock과 workspace-wide fmt/clippy/test
+- CPU-only CMake configure/build/CTest
+- C와 C++ header consumer compile
+- Rust/C layout assertion과 error taxonomy test
+- invalid pointer/length/stride/overflow와 failure atomicity test
+- concurrent immutable ModelIR reads와 mutable exclusion test
+- 기존 두 Rust crate가 compatibility consumer이거나 명시적 migration owner를 가짐
+- HIP disabled build에 ROCm runtime dependency가 없음
+- protected evidence와 Python production path는 변경되지 않음
