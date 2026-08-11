@@ -41,6 +41,22 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
 
 
+def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration() -> None:
+    workflow = _read("workflow-contract-ci.yml")
+
+    assert 'git fetch --no-tags --depth=512 origin "$parent"' in workflow
+    assert (
+        "tests/test_external_vv_clean_runner_contract.py::"
+        "test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary"
+        in workflow
+    )
+    assert (
+        "tests/test_external_vv_clean_runner_contract.py::"
+        "test_git_ancestry_probe_preserves_git_errors"
+        in workflow
+    )
+
+
 def test_python_and_frontend_source_triggers_are_disjoint() -> None:
     canonical = _read("ci.yml")
     frontend = _read("frontend-web-ci.yml")
