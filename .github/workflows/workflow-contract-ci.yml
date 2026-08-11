@@ -12,11 +12,18 @@ on:
     paths:
       - ".github/workflows/**"
       - "scripts/check_github_actions_runner_policy.py"
+      - "scripts/check_native_ci_contract.py"
+      - "scripts/check_native_dependency_boundary.py"
+      - "scripts/check_native_dependency_licenses.py"
+      - "scripts/classify_native_ci_scope.py"
       - "scripts/check_product_ci_boundaries.py"
       - "scripts/run_product_ci_lane.py"
       - "scripts/build_github_actions_ci_streak_evidence.py"
       - "scripts/verify_quality_gate.py"
       - "tests/test_check_github_actions_runner_policy.py"
+      - "tests/test_native_ci_scope.py"
+      - "tests/test_native_ci_workflow_contract.py"
+      - "tests/test_native_dependency_license.py"
       - "tests/test_check_product_ci_boundaries.py"
       - "tests/test_external_vv_clean_runner_contract.py"
       - "tests/test_external_vv_receipt_ancestry_contract.py"
@@ -128,6 +135,9 @@ jobs:
           set +e
           python -m pytest -q \
             tests/test_check_github_actions_runner_policy.py \
+            tests/test_native_ci_scope.py \
+            tests/test_native_ci_workflow_contract.py \
+            tests/test_native_dependency_license.py \
             tests/test_check_product_ci_boundaries.py \
             tests/test_external_vv_receipt_ancestry_contract.py \
             tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary \

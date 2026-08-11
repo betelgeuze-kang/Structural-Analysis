@@ -1,0 +1,128 @@
+name: Native Nightly Quality
+
+# Broader hosted CPU checks. This workflow never runs HIP hardware and cannot
+# substitute for native-pr-fast, native-merge-product, or device receipts.
+
+on:
+  schedule:
+    - cron: "23 17 * * 1-5"
+  push:
+    branches: ["main"]
+    paths:
+      - "native/**"
+      - ".github/workflows/native-nightly-quality.yml"
+      - "scripts/check_native_dependency_licenses.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-nightly-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CTEST_OUTPUT_ON_FAILURE: "1"
+
+jobs:
+  sanitizer:
+    name: sanitizer
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Run address and undefined behavior sanitizers
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f native/cpp/CMakeLists.txt ]]; then
+            echo "Native C++ workspace not introduced; sanitizer lane is not applicable"
+            exit 0
+          fi
+          cmake -S native/cpp -B build/native-sanitizer -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DSTRUCTURAL_BUILD_TESTS=ON \
+            -DSTRUCTURAL_ENABLE_HIP=OFF \
+            -DSTRUCTURAL_ENABLE_SANITIZERS=ON \
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          grep -q '^STRUCTURAL_ENABLE_SANITIZERS:BOOL=ON$' \
+            build/native-sanitizer/CMakeCache.txt
+          cmake --build build/native-sanitizer --parallel 2
+          ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 \
+          UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 \
+            ctest --test-dir build/native-sanitizer --output-on-failure
+
+  fuzz-smoke:
+    name: fuzz-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Build and run bounded native fuzz harnesses
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f native/cpp/CMakeLists.txt ]]; then
+            echo "Native C++ workspace not introduced; fuzz lane is not applicable"
+            exit 0
+          fi
+          cmake -S native/cpp -B build/native-fuzz -G Ninja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DSTRUCTURAL_BUILD_TESTS=ON \
+            -DSTRUCTURAL_BUILD_FUZZERS=ON \
+            -DSTRUCTURAL_ENABLE_HIP=OFF \
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          grep -q '^STRUCTURAL_BUILD_FUZZERS:BOOL=ON$' build/native-fuzz/CMakeCache.txt
+          cmake --build build/native-fuzz --target structural_native_fuzzers --parallel 2
+          ctest --test-dir build/native-fuzz --output-on-failure -L fuzz-smoke
+
+  dependency-license:
+    name: dependency-license
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Check locked dependency sources and SPDX policy
+        run: >-
+          python3 scripts/check_native_dependency_licenses.py
+          --json
+          --fail-blocked
+
+  native-nightly-quality:
+    name: native-nightly-quality
+    if: always()
+    needs: [sanitizer, fuzz-smoke, dependency-license]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every declared nightly child lane
+        env:
+          SANITIZER_RESULT: ${{ needs.sanitizer.result }}
+          FUZZ_RESULT: ${{ needs.fuzz-smoke.result }}
+          DEPENDENCY_RESULT: ${{ needs.dependency-license.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in "$SANITIZER_RESULT" "$FUZZ_RESULT" "$DEPENDENCY_RESULT"; do
+            if [[ "$result" != "success" ]]; then
+              echo "required native-nightly-quality child result: $result" >&2
+              exit 1
+            fi
+          done

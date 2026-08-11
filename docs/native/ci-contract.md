@@ -16,7 +16,9 @@ Scope: Rust, C++, C ABI and optional ROCm/HIP migration
 
 ### pr-fast
 
-Trigger: pull_request and push to main for native/workflow contract changes
+Trigger: every pull_request, merge_group and push to main. The scope classifier marks
+non-native changes not applicable so the two required contexts are still reported instead
+of remaining Pending because a path-filter skipped the whole workflow.
 
 Budget: each job 10 minutes, required aggregate within 15 minutes
 
@@ -181,3 +183,22 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
 
 문서와 workflow skeleton 준비는 병렬 가능하지만 ruleset 변경과 required context 적용은
 현재 chain 종료 후 수행한다.
+
+## 10. Gate-bootstrap implementation mapping
+
+- `.github/workflows/native-pr-fast.yml` owns both direct aggregate jobs named
+  `native-pr-fast` and `native-merge-product`. Keeping both jobs direct preserves the exact
+  ruleset context names; a reusable workflow would expose a compound check name.
+- merge-product children depend on the successful pr-fast aggregate and execute on the same
+  checked-out `github.sha`. Pull-request runs verify the exact base/head parents; merge-queue
+  runs verify the merge-group SHA and base ancestry.
+- `scripts/classify_native_ci_scope.py` computes language/domain applicability and rejects any
+  protected-evidence path included in a native change set.
+- `.github/workflows/native-nightly-quality.yml` owns ASan/UBSan, bounded libFuzzer smoke and
+  locked dependency/SPDX policy checks. Once `native/Cargo.toml` exists, missing sanitizer,
+  fuzz or dependency-policy ownership fails closed.
+- no hosted workflow invokes HIP/ROCm. `hip-dedicated` remains deferred until the first actual
+  HIP product slice can name its execution target and receipt schema.
+
+이 mapping은 workflow topology 구현만 뜻한다. workspace, ABI, ModelIR, sanitizer/fuzzer
+실행 성공 또는 hardware evidence를 주장하지 않는다.
