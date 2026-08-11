@@ -51,13 +51,16 @@ jobs:
       - name: Collect complete repository test suite
         run: python -m pytest --collect-only -q
 
-  full:
-    name: pytest-full
+  full_shards:
+    name: pytest-full-shard-${{ matrix.shard }}
     runs-on: ubuntu-latest
-    # The complete suite includes several source-bound engineering evidence
-    # replays.  A clean hosted runner currently needs more than three hours;
-    # keep enough budget for pytest to print its final failure summary instead
-    # of turning a deterministic test result into an Actions timeout.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    # Each shard retains the full hosted-job ceiling.  Deterministic module
+    # partitioning keeps normal wall time below that ceiling while every test
+    # remains covered exactly once by the required aggregate context.
     timeout-minutes: 360
     steps:
       - name: Checkout
@@ -112,10 +115,26 @@ jobs:
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
 
-      - name: Run materialized repository test suite
+      - name: Run materialized repository test suite shard
         run: >-
-          python -m pytest -q
+          python scripts/run_pytest_shard.py
+          --shard-index "${{ matrix.shard }}"
+          --shard-count 4
+          --
+          -q
           --deselect
           tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
           --deselect
           tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
+
+  full:
+    name: pytest-full
+    if: ${{ always() }}
+    needs: full_shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require every deterministic repository test shard
+        env:
+          FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}
+        run: test "$FULL_SHARDS_RESULT" = "success"
