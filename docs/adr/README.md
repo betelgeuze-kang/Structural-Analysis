@@ -31,6 +31,7 @@ evidence는 각각의 후속 PR gate를 통과하기 전까지 구현 완료로 
 6. [ADR-006: Complexity and Benchmark Contract](006-complexity-and-benchmark-contract.md)
 7. [ADR-007: V&V and Promotion Policy](007-vv-and-promotion-policy.md)
 8. [ADR-008: Repository Package Boundaries](008-repository-package-boundaries.md)
+9. [ADR-009: Native Workspace and C ABI v1](009-native-workspace-and-c-abi-v1.md)
 
 ## 변경 규칙
 
