@@ -227,6 +227,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_pdf_report.py",
         "check_native_reference_elements.py",
         "check_native_sparse_linear.py",
+        "check_native_sparse_linear_hip.py",
         "check_structural_runtime_ffi_r3.py",
         "native/target/release/libstructural_runtime_ffi.so",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
@@ -255,7 +256,10 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "runs-on: [self-hosted, linux, x64, rocm, structural-approved]",
         "STRUCTURAL_ENABLE_HIP=ON",
         "structural_reference_elements_hip_parity_tests",
+        "structural_sparse_linear_hip_parity_tests",
         "check_native_reference_elements_hip.py",
+        "check_native_sparse_linear_hip.py",
+        "native-sparse-linear-hip-receipt.json",
         "--require-approved-runner",
     ):
         if required not in hip_text:

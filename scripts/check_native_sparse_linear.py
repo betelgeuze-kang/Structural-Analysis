@@ -112,7 +112,15 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
     if row.get("owner") != "structural_solver_cpu":
         blockers.append("sparse_linear_capability_owner_invalid")
     claim = str(row.get("claim", ""))
-    for token in ("canonical CSR", "NumPy", "ABI v1.8", "HIP C2", "C6"):
+    for token in (
+        "canonical CSR",
+        "NumPy",
+        "ABI v1.8",
+        "HIP C2",
+        "iteration control resident",
+        "native-hip-approved",
+        "C6",
+    ):
         if token not in claim:
             blockers.append(f"sparse_linear_capability_scope_token_missing:{token}")
 
@@ -137,9 +145,9 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
         "blockers": blockers,
         "claim_boundary": (
             "This proves one bounded CPU canonical-CSR PCG family through C1. It does "
-            "include an ABI v1.8/Rust C3 implementation candidate, but does not promote "
-            "HIP C2 or subsequent C3, and does not close general sparse solvers, restart "
-            "C4, product C5, or C6."
+            "include local live HIP C2 and ABI v1.8/Rust C3 implementation candidates, "
+            "but does not promote protected C2 or subsequent C3, and does not close "
+            "general sparse solvers, restart C4, product C5, or C6."
         ),
     }
 

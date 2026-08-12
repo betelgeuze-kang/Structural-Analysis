@@ -97,11 +97,13 @@ hardware를 실행하지 않는다.
 ### hip-dedicated
 
 `.github/workflows/native-hip-dedicated.yml` is manual-only and cannot run on hosted CI. Its
-`reference-elements-c2` job requires the protected `native-hip-approved` environment and the
+existing `reference-elements-c2` job id (displayed as `bounded-native-c2`) requires the protected
+`native-hip-approved` environment and the
 complete `self-hosted, linux, x64, rocm, structural-approved` label set. It verifies the requested
 `gfx` target against `rocminfo`, builds only with `STRUCTURAL_ENABLE_HIP=ON`, executes the
-no-fallback reference-element/assembly C2 parity test, validates source/device-library binding and
-uploads the raw device receipt. A local execution is a candidate, not authoritative C2 evidence.
+no-fallback reference-element/assembly and device-resident sparse-PCG C2 parity tests, validates
+both source/device-library bindings and uploads the raw receipts. A local execution is a
+candidate, not authoritative C2 evidence.
 
 ## 3. merge-product
 
@@ -170,7 +172,7 @@ fixture의 LFS object가 없으면 fail closed하며 pointer text를 data로 읽
 
 ### hip-dedicated
 
-Trigger: workflow_dispatch or approved PR label after hosted gates are green
+Trigger: manual `workflow_dispatch` after hosted gates are green
 
 Runner: exact preconfigured labels and verified device target only
 
@@ -180,7 +182,7 @@ Required preflight:
 
 - exact commit and merge-ref identity
 - ROCm runtime/compiler and device architecture
-- fp64/sparse/device reduction capability
+- FP64 device execution and fixed-tree reduction capability
 - clean worktree and required LFS materialization
 - workflow target allowlist
 
@@ -266,8 +268,9 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
 - `.github/workflows/native-nightly-quality.yml` owns ASan/UBSan, bounded libFuzzer smoke and
   locked dependency/SPDX policy checks. Once `native/Cargo.toml` exists, missing sanitizer,
   fuzz or dependency-policy ownership fails closed.
-- no hosted workflow invokes HIP/ROCm. `hip-dedicated` remains deferred until the first actual
-  HIP product slice can name its execution target and receipt schema.
+- no hosted workflow invokes HIP/ROCm. `hip-dedicated` owns the product reference-element and
+  sparse-PCG live targets and source-bound receipt schemas, while protected execution remains a
+  manual external gate.
 
 이 mapping은 workflow topology 구현만 뜻한다. workspace, ABI, ModelIR, sanitizer/fuzzer
 실행 성공 또는 hardware evidence를 주장하지 않는다.

@@ -184,6 +184,7 @@ jobs:
           ctest --test-dir build/native-pr-fast --output-on-failure
           python3 scripts/check_native_reference_elements.py
           python3 scripts/check_native_sparse_linear.py
+          python3 scripts/check_native_sparse_linear_hip.py --json
 
   abi-contract:
     name: abi-contract

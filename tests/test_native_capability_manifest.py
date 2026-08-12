@@ -71,6 +71,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "safe reentrant Rust wrapper" in sparse["claim"]
     assert "sequential gate remains C1" in sparse["claim"]
     assert "HIP C2" in sparse["claim"]
+    assert "iteration control resident" in sparse["claim"]
+    assert "fallback 0" in sparse["claim"]
+    assert "native-hip-approved" in sparse["claim"]
     assert "C6" in sparse["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"

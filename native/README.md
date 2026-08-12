@@ -84,9 +84,11 @@ authoritative receipt. See `docs/native/reference-elements-hip-c2.md`.
 `structural_solver_cpu` also owns a bounded canonical-CSR FP64 PCG reference path. It validates
 strict row/column structure and symmetry, uses a Jacobi preconditioner, reports fixed numerical
 status values, performs a true-residual convergence postcheck and never falls back. Four profiles
-match an independent NumPy direct-solve oracle through C1. ABI v1.8 and a safe Rust wrapper
-implement the C3 boundary, but promotion remains C1 until HIP C2 closes; restart C4, product C5
-and C6 remain open. See `docs/native/sparse-linear-cpu-v1.md`.
+match an independent NumPy direct-solve oracle through C1. A product-owned fixed-tree FP64 HIP C2
+candidate keeps the complete PCG state resident and has bitwise local live parity with fallback
+zero. ABI v1.8 and a safe Rust wrapper implement the C3 boundary, but promotion remains C1 until
+the protected HIP receipt closes C2; restart C4, product C5 and C6 remain open. See
+`docs/native/sparse-linear-cpu-v1.md` and `docs/native/sparse-linear-hip-c2.md`.
 
 ## Rust
 

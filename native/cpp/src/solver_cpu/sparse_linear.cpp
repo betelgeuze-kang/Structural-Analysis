@@ -191,7 +191,7 @@ void csr_matvec(
     matvec_unchecked(matrix, input, output);
 }
 
-SparseLinearResult solve_sparse_spd_pcg(
+void validate_sparse_spd_problem(
     const CsrMatrixView matrix,
     const std::span<const double> right_hand_side,
     const std::span<const double> initial_guess,
@@ -213,6 +213,14 @@ SparseLinearResult solve_sparse_spd_pcg(
     }
     require_finite_vector(right_hand_side, "sparse PCG right-hand side");
     require_finite_vector(initial_guess, "sparse PCG initial guess");
+}
+
+SparseLinearResult solve_sparse_spd_pcg(
+    const CsrMatrixView matrix,
+    const std::span<const double> right_hand_side,
+    const std::span<const double> initial_guess,
+    const SparseLinearConfig& config) {
+    validate_sparse_spd_problem(matrix, right_hand_side, initial_guess, config);
 
     std::vector<double> solution(matrix.order, 0.0);
     if (!initial_guess.empty()) {

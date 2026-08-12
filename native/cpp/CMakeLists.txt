@@ -111,13 +111,17 @@ structural_enable_sanitizers(structural_assembly)
 
 if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_REFERENCE_HIP_SOURCE src/hip/reference_elements_hip.hip.cpp)
+  set(STRUCTURAL_SPARSE_HIP_SOURCE src/hip/sparse_linear_hip.hip.cpp)
   set_source_files_properties(${STRUCTURAL_REFERENCE_HIP_SOURCE} PROPERTIES LANGUAGE HIP)
+  set_source_files_properties(${STRUCTURAL_SPARSE_HIP_SOURCE} PROPERTIES LANGUAGE HIP)
   set_property(
     DIRECTORY
     APPEND
     PROPERTY CMAKE_CONFIGURE_DEPENDS
       ${STRUCTURAL_REFERENCE_HIP_SOURCE}
       src/hip/reference_elements_hip.hpp
+      ${STRUCTURAL_SPARSE_HIP_SOURCE}
+      src/hip/sparse_linear_hip.hpp
   )
   file(READ ${STRUCTURAL_REFERENCE_HIP_SOURCE} STRUCTURAL_REFERENCE_HIP_SOURCE_TEXT)
   file(READ src/hip/reference_elements_hip.hpp STRUCTURAL_REFERENCE_HIP_HEADER_TEXT)
@@ -125,6 +129,13 @@ if(STRUCTURAL_ENABLE_HIP)
     SHA256
     STRUCTURAL_REFERENCE_HIP_SOURCE_SHA256
     "${STRUCTURAL_REFERENCE_HIP_HEADER_TEXT}${STRUCTURAL_REFERENCE_HIP_SOURCE_TEXT}"
+  )
+  file(READ ${STRUCTURAL_SPARSE_HIP_SOURCE} STRUCTURAL_SPARSE_HIP_SOURCE_TEXT)
+  file(READ src/hip/sparse_linear_hip.hpp STRUCTURAL_SPARSE_HIP_HEADER_TEXT)
+  string(
+    SHA256
+    STRUCTURAL_SPARSE_HIP_SOURCE_SHA256
+    "${STRUCTURAL_SPARSE_HIP_HEADER_TEXT}${STRUCTURAL_SPARSE_HIP_SOURCE_TEXT}"
   )
   list(GET CMAKE_HIP_ARCHITECTURES 0 STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH)
   string(REGEX REPLACE "^gfx" "" STRUCTURAL_REFERENCE_HIP_ISA_SUFFIX "${STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH}")
@@ -207,6 +218,41 @@ target_include_directories(
 )
 structural_set_warnings(structural_solver_cpu)
 structural_enable_sanitizers(structural_solver_cpu)
+
+if(STRUCTURAL_ENABLE_HIP)
+  add_library(structural_solver_hip STATIC ${STRUCTURAL_SPARSE_HIP_SOURCE})
+  add_library(Structural::solver_hip ALIAS structural_solver_hip)
+  set_target_properties(
+    structural_solver_hip
+    PROPERTIES
+      EXPORT_NAME solver_hip
+      HIP_STANDARD 20
+      HIP_STANDARD_REQUIRED ON
+      HIP_EXTENSIONS OFF
+      CXX_VISIBILITY_PRESET hidden
+      VISIBILITY_INLINES_HIDDEN YES
+  )
+  target_include_directories(
+    structural_solver_hip
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/hip
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/solver_cpu
+  )
+  target_link_libraries(structural_solver_hip PUBLIC structural_solver_cpu)
+  target_compile_definitions(
+    structural_solver_hip
+    PRIVATE
+      STRUCTURAL_SPARSE_HIP_SOURCE_SHA256="${STRUCTURAL_SPARSE_HIP_SOURCE_SHA256}"
+      STRUCTURAL_SPARSE_HIP_DEVICE_LIB_SHA256="${STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256}"
+      STRUCTURAL_SPARSE_HIP_COMPILED_ARCHITECTURES="${CMAKE_HIP_ARCHITECTURES}"
+  )
+  target_compile_options(
+    structural_solver_hip
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-ffp-contract=off>
+  )
+  structural_set_warnings(structural_solver_hip)
+endif()
 
 add_library(structural_c_abi_v1 src/abi/abi_v1.cpp)
 add_library(Structural::c_abi_v1 ALIAS structural_c_abi_v1)

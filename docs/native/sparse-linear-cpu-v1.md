@@ -1,7 +1,7 @@
 # Bounded Sparse Linear CPU v1
 
-Status: C0 and C1 complete; ABI/Rust C3 implementation complete but sequential promotion remains
-at C1 until protected-runner C2 closes.
+Status: C0 and C1 complete; live local HIP C2 candidate and ABI/Rust C3 implementation complete,
+but sequential promotion remains at C1 until protected-runner C2 closes.
 
 ## Native owner
 
@@ -40,7 +40,9 @@ and profile coverage are independently checked with NumPy eigenvalues.
 
 ## Remaining sequential gates
 
-- C2: implement and execute source-bound CPU/HIP sparse parity on the protected ROCm lane.
+- C2 candidate: the source-bound fixed-tree FP64 HIP execution is locally live with resident PCG
+  state, bitwise repeats, exact status/iteration parity and fallback zero. Promotion still requires
+  the protected ROCm receipt described in `sparse-linear-hip-c2.md`.
 - C3 implementation: ABI v1.8 appends one capability/operation, validates caller-owned packed
   U64/U32/F64 views and overlap/overflow, and crosses a safe reentrant Rust wrapper. It becomes
   the promotable sequential gate only after authoritative C2 evidence exists.

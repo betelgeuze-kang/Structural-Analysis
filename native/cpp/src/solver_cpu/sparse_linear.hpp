@@ -61,6 +61,16 @@ void csr_matvec(
     std::span<const double> input,
     std::span<double> output);
 
+/// Validate the complete SPD/PCG problem without performing a numerical solve.
+///
+/// CPU and accelerator backends call this shared source so canonical CSR, symmetry, finite
+/// values, vector lengths and convergence configuration cannot drift between implementations.
+void validate_sparse_spd_problem(
+    CsrMatrixView matrix,
+    std::span<const double> right_hand_side,
+    std::span<const double> initial_guess,
+    const SparseLinearConfig& config);
+
 /// Solve a symmetric positive-definite canonical CSR system using Jacobi-preconditioned CG.
 ///
 /// The operation has no fallback path. `initial_guess` may be empty (all-zero) or exactly `order`
