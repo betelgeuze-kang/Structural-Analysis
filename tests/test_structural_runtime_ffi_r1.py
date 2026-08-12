@@ -36,7 +36,7 @@ def test_r1_lower_gate_keeps_layout_golden_and_claim_boundaries() -> None:
         (ROOT / r1.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
 
-    assert inventory["transition_step"] in {"R1", "R2"}
+    assert inventory["transition_step"] in {"R1", "R2", "R3"}
     assert inventory["abi_version"] == 3
     assert len(inventory["layouts"]) == 7
     assert set(inventory["golden_cases"]) == {

@@ -78,7 +78,7 @@ owner다.
 | structural_elements | static | element kinematics와 recovery source | 아니오 |
 | structural_materials | static | accepted/trial/commit/rollback constitutive source | 아니오 |
 | structural_assembly | static | DOF graph, residual/tangent/JVP assembly | 아니오 |
-| structural_solver_cpu | static | reference/optimized CPU solver | 아니오 |
+| structural_solver_cpu | static | bounded track point-load reference kernel; later CPU solvers | 아니오 |
 | structural_solver_hip | static | resident HIP operators와 solver | 예 |
 | structural_c_abi_v1 | shared/static | sa_get_api_v1 table과 exception boundary | 선택 |
 | structural_native_tests | executable set | C++ unit, C ABI와 parity test | 기본 아니오 |
@@ -122,6 +122,7 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - uint32 abi_version의 상위 16 bit는 major, 하위 16 bit는 minor다.
 - v1.0은 0x00010000이다.
 - v1.1은 0x00010001이며 typed ModelIR descriptor/report/snapshot table slots를 추가한다.
+- v1.2는 0x00010002이며 caller-owned track point-load CPU operation 한 slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -197,6 +198,7 @@ unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. �
 | 1401 | SA_ERR_DEVICE_MISMATCH | device/architecture/capability 불일치 |
 | 1402 | SA_ERR_FALLBACK_FORBIDDEN | explicit policy가 fallback을 거부 |
 | 1500 | SA_ERR_CANCELLED | cooperative cancellation |
+| 1600 | SA_ERR_NONCONVERGENCE | bounded numerical iteration이 허용 횟수 안에 수렴하지 않음 |
 | 1900 | SA_ERR_INTERNAL | exception/panic을 log-safe detail로 변환 |
 
 새 오류는 기존 numeric 의미를 재사용하지 않는다. 상세 메시지는 diagnostic이며
@@ -384,4 +386,29 @@ duplicate/unknown/non-finite/length rejection을 CI에서 함께 검사한다.
 
 R2는 `sa_get_api_v1` operation, C++ solver, checkpoint/restart 또는 product E2E를 만들지 않는다.
 따라서 capabilities와 C0-C6 원장은 변경하지 않는다. 다음 R3 gate는 한 family의 C++ native
-unit(C0), frozen Rust oracle CPU parity(C1), 기존 ABI adapter를 분리해서 증명해야 한다.
+unit, frozen Rust compatibility parity와 기존 ABI adapter를 분리해서 증명해야 한다. Python
+oracle parity가 별도로 닫히기 전에는 C1을 주장하지 않는다.
+
+## 16. Bounded track point-load R3 boundary
+
+R3의 첫 family는 `track_point_load`다.
+
+- `structural_solver_cpu`가 기존 serial FP64 matrix-free Euler CG와 reduced Timoshenko
+  correction을 C++20 reference kernel로 소유한다.
+- ABI v1.2는 `sa_mut_buffer_view_v1`, versioned config/result와
+  `track_point_load_solve` table slot을 추가한다. v1.0/v1.1에서 이 slot은 기존 reserved
+  pointer와 같은 offset 72에서 null이며 128-byte prefix는 유지된다.
+- 입력의 finite/range/enum/reserved field와 출력 pointer/length/stride/alignment/overlap을
+  검사한다. invalid, undersized와 nonconverged call은 caller-owned output을 변경하지 않는다.
+- `structural-ffi`는 caller-owned `Vec<f64>` 두 개를 할당하고 ABI table을 통해 호출하며
+  CPU backend와 fallback count 0을 검증한다. C++ exception과 allocation failure는 기존
+  containment boundary 밖으로 나가지 않는다.
+- C++ unit, C ABI negative/atomicity, Rust layout 및 concurrent safe-wrapper test가 실행된다.
+  release shared product library의 public symbol은 계속 `sa_get_api_v1` 하나다.
+
+neutral 9-node fixture의 displacement, residual, iteration과 interior rotation은 C++, legacy
+Rust, Python에서 일치한다. Python은 endpoint rotation을 one-sided gradient로 계산하지만
+R2/Rust/C++ contract는 adjacent central gradient를 복제해 양 끝에서
+`3.436580346133486e-5 rad` 차이가 남는다. 따라서 `track_point_load_cpu`는 C0만 통과하며 C1은
+명시적으로 blocked다. HIP C2, legacy symbol cutover, checkpoint/restart, ResultIR/ReportIR와
+product E2E도 열려 있다.

@@ -751,6 +751,7 @@ dependencies = [
  "serde_json",
  "structural-contracts",
  "structural-ffi-sys",
+ "structural_runtime_ffi",
 ]
 
 [[package]]

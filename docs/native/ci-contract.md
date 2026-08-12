@@ -35,7 +35,8 @@ Jobs:
    - cargo clippy --workspace --all-targets with warnings denied
    - cargo test --workspace for pure Rust/unit targets
    - locked dependency graph compiles with the declared Rust 1.77 minimum toolchain
-   - R2 `structural_runtime_ffi` raw/wire/adapter ownership and neutral fixture SHA-256 checks
+   - R3 bounded track CPU ownership, ABI v1.2/safe-wrapper compatibility and C0 claim check
+   - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
    - CPU-only CMake configure
@@ -45,8 +46,10 @@ Jobs:
    - public header compile as C11 and C++20
    - Rust/C layout, constants and struct_size compatibility
    - invalid pointer/length/stride/overflow and failure atomicity
-   - R2 legacy-runtime changes are classified as ABI/runtime scope; their frozen binary export
+   - R3 legacy-runtime changes are classified as ABI/runtime scope; their frozen binary export
      check remains in rust-quality because the compatibility library is a Rust cdylib
+   - track config/output pointer, length, stride, alignment, overlap and nonconvergence atomicity
+     run in the ABI CTest; v1.0/v1.1 table tails remain null
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded
@@ -77,9 +80,11 @@ Required jobs:
    - shared/static link smoke와 package metadata/ABI identity
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
+   - bounded track C++/legacy Rust neutral-fixture parity and fallback count 0
 3. python-oracle-parity
    - focused existing Python oracle only
    - canonical bytes/hash, error taxonomy와 bounded numerical vectors
+   - track endpoint-rotation mismatch remains an explicit C1 blocker until conventions agree
 4. checkpoint-restart
    - exact model/state/execution hash binding
    - cancel/crash/restart and mismatch rejection

@@ -103,7 +103,7 @@ def check_r2(
         blockers.append(f"r2_inventory_invalid:{exc}")
         return _report(blockers, lower_gate, {}, {})
 
-    if inventory.get("transition_step") != "R2":
+    if inventory.get("transition_step") not in {"R2", "R3"}:
         blockers.append("r2_inventory_transition_step_invalid")
 
     ownership = inventory.get("ownership")

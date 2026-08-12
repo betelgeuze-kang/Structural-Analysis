@@ -8,6 +8,7 @@ use core::mem::size_of;
 use core::ptr::{self, NonNull};
 
 use serde::{Deserialize, Serialize};
+use structural_contracts::legacy_runtime::{TrackConfigV3, TrackSupportType, TrackTheory};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_ffi_sys as sys;
 
@@ -92,6 +93,19 @@ pub struct ModelIrValidation {
     pub snapshot: ModelIrV2Document,
 }
 
+/// Caller-owned deterministic result from the bounded C++ track point-load CPU kernel.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TrackPointLoadSolution {
+    pub iterations: u32,
+    pub residual_inf: f64,
+    pub max_abs_displacement_m: f64,
+    pub mid_displacement_m: f64,
+    pub displacement_m: Vec<f64>,
+    pub rotation_rad: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Immutable, process-lifetime C ABI v1 function table.
 #[derive(Clone, Copy)]
 pub struct Api {
@@ -116,13 +130,22 @@ impl Api {
         Self::load_version(sys::SA_ABI_V1_0)
     }
 
-    /// Load the current ABI v1.1 table with typed `ModelIR` and snapshot support.
+    /// Load the ABI v1.1 table with typed `ModelIR` and snapshot support.
     ///
     /// # Errors
     ///
     /// Returns a stable ABI error if any required v1.1 capability or operation is absent.
     pub fn load_model_ir() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_1)
+    }
+
+    /// Load the ABI v1.2 table with the deterministic track point-load CPU operation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the v1.2 capability or operation is absent.
+    pub fn load_track_point_load() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_2)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -248,6 +271,124 @@ impl Api {
             report,
             report_json,
             snapshot,
+        })
+    }
+
+    /// Solve one bounded point-load track case in the C++ serial FP64 CPU backend.
+    ///
+    /// The operation owns no input or output memory after it returns and rejects any backend
+    /// fallback. Numerical nonconvergence is returned as `SA_ERR_NONCONVERGENCE` without partial
+    /// output mutation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error for invalid inputs, allocation failure, output invariants or
+    /// numerical nonconvergence.
+    pub fn solve_track_point_load(
+        self,
+        config: &TrackConfigV3,
+    ) -> Result<TrackPointLoadSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_2 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "track point-load CPU solve requires ABI v1.2".to_owned(),
+            });
+        }
+        let count = usize::try_from(config.node_count).map_err(|_| Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "track node_count exceeds the Rust address space".to_owned(),
+        })?;
+        if count < 7 || config.node_count > sys::SA_TRACK_POINT_LOAD_MAX_NODE_COUNT {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: "track node_count is outside the bounded product range".to_owned(),
+            });
+        }
+        let mut displacement_m = allocate_f64_output(count)?;
+        let mut rotation_rad = allocate_f64_output(count)?;
+        let raw_config = sys::SaTrackPointLoadConfigV1 {
+            abi_version: sys::SA_ABI_V1_2,
+            struct_size: abi_size::<sys::SaTrackPointLoadConfigV1>(),
+            length_m: config.length_m,
+            node_count: config.node_count,
+            support_type: match config.support_type {
+                TrackSupportType::Pinned => sys::SA_TRACK_SUPPORT_PINNED,
+                TrackSupportType::Fixed => sys::SA_TRACK_SUPPORT_FIXED,
+            },
+            theory: match config.theory {
+                TrackTheory::Euler => sys::SA_TRACK_THEORY_EULER,
+                TrackTheory::Timoshenko => sys::SA_TRACK_THEORY_TIMOSHENKO_REDUCED,
+            },
+            flags: 0,
+            bending_stiffness_n_m2: config.bending_stiffness_n_m2,
+            shear_stiffness_n: config.shear_stiffness_n,
+            winkler_k_n_per_m2: config.winkler_k_n_per_m2,
+            pasternak_g_n: config.pasternak_g_n,
+            tolerance: config.tolerance,
+            cg_max_iter: config.cg_max_iter,
+            reserved_u32: 0,
+            point_force_n: config.point_force_n,
+            point_position_m: config.point_position_m,
+            reserved: [0; 2],
+        };
+        let displacement_view = mutable_f64_view(&mut displacement_m)?;
+        let rotation_view = mutable_f64_view(&mut rotation_rad)?;
+        let mut raw_result = sys::SaTrackPointLoadResultV1 {
+            abi_version: sys::SA_ABI_V1_2,
+            struct_size: abi_size::<sys::SaTrackPointLoadResultV1>(),
+            converged: 0,
+            iterations: 0,
+            residual_inf: 0.0,
+            max_abs_displacement_m: 0.0,
+            mid_displacement_m: 0.0,
+            output_length: 0,
+            execution_backend: 0,
+            fallback_count: u32::MAX,
+            reserved: u64::MAX,
+        };
+        let solve = self
+            .table
+            .track_point_load_solve
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all descriptors and caller-owned vectors are live, correctly aligned and
+        // non-overlapping for the complete synchronous call. The C++ operation retains none.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &displacement_view,
+                &rotation_view,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let expected_length = usize_to_u64(count)?;
+        if raw_result.abi_version != sys::SA_ABI_V1_2
+            || raw_result.struct_size != abi_size::<sys::SaTrackPointLoadResultV1>()
+            || raw_result.converged != 1
+            || raw_result.output_length != expected_length
+            || raw_result.execution_backend != sys::SA_EXECUTION_BACKEND_CPU
+            || raw_result.fallback_count != 0
+            || raw_result.reserved != 0
+        {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native track result violated the v1.2 output contract".to_owned(),
+            });
+        }
+        Ok(TrackPointLoadSolution {
+            iterations: raw_result.iterations,
+            residual_inf: raw_result.residual_inf,
+            max_abs_displacement_m: raw_result.max_abs_displacement_m,
+            mid_displacement_m: raw_result.mid_displacement_m,
+            displacement_m,
+            rotation_rad,
+            execution_backend: raw_result.execution_backend,
+            fallback_count: raw_result.fallback_count,
         })
     }
 }
@@ -389,13 +530,23 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         table.model_ir_snapshot_size.is_some(),
         table.model_ir_snapshot_write.is_some(),
     ];
+    let track_slot = table.track_point_load_solve.is_some();
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
+            && !track_slot
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
+            && !track_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU == 0
+    } else if requested == sys::SA_ABI_V1_2 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
     } else {
         false
     };
@@ -404,6 +555,30 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     } else {
         Err(invalid_table())
     }
+}
+
+fn allocate_f64_output(length: usize) -> Result<Vec<f64>, Error> {
+    let mut output = Vec::new();
+    output.try_reserve_exact(length).map_err(|_| Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "track output allocation failed".to_owned(),
+    })?;
+    output.resize(length, 0.0);
+    Ok(output)
+}
+
+fn mutable_f64_view(values: &mut [f64]) -> Result<sys::SaMutBufferViewV1, Error> {
+    Ok(sys::SaMutBufferViewV1 {
+        abi_version: sys::SA_ABI_V1_2,
+        struct_size: abi_size::<sys::SaMutBufferViewV1>(),
+        data: values.as_mut_ptr().cast::<c_void>(),
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<f64>())?,
+        element_type: sys::SA_ELEMENT_TYPE_F64,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
 }
 
 fn verify_round_trip(
@@ -492,8 +667,9 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
-        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
+        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -539,6 +715,19 @@ mod tests {
         assert_eq!(
             validated.snapshot.canonical_bytes(),
             document.canonical_bytes()
+        );
+    }
+
+    #[test]
+    fn v1_2_table_adds_only_the_bounded_track_cpu_capability() {
+        let api = Api::load_track_point_load().expect("v1.2 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_2);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
         );
     }
 

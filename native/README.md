@@ -11,8 +11,10 @@ unimplemented; `capabilities.json` records that boundary. The existing `structur
 package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
 `structural-contracts`, and keeps the original crate as the numerical oracle plus adapter. Its
-ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen without
-transferring solver authority to C++ or the product API.
+ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 moves
+only the `track_point_load` reference kernel into `structural_solver_cpu`, exposes it through the
+ABI v1.2 table and adds a safe Rust caller. That bounded capability remains C0: the legacy Rust
+fixture matches, but the Python endpoint-rotation convention still blocks full C1 parity.
 
 ## Rust
 
@@ -68,12 +70,14 @@ or links ROCm.
 
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
-library symbol remains `sa_get_api_v1`; ABI v1.1 operations are negotiated through its table.
+library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1 and the bounded track CPU
+operation occupies the ABI v1.2 extension slot. v1.0/v1.1 table prefixes remain byte-compatible.
 
-`structural_runtime_ffi` is the R2 temporary workspace member while retaining the existing
+`structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen
 inventory is `compatibility/structural_runtime_ffi_v3.json`; workspace tests, neutral fixture
 hashes and the release binary-symbol checker fail closed on drift. The language-neutral wire
 contract serializes shared-storage identity as a boolean and never serializes process pointer
-addresses. `mgt_hip_full_residual_ffi` remains outside the workspace at H0. No legacy symbol is
-removed or exposed through `sa_get_api_v1` by R2; R3 is the first one-family C++ CPU migration.
+addresses. The C++ shared product library still exports only `sa_get_api_v1`, while all five
+legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` remains
+outside the workspace at H0; no compatibility cutover or removal is claimed.

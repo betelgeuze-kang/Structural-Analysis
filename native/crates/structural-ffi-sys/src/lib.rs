@@ -8,6 +8,8 @@ use core::ffi::{c_char, c_void};
 pub mod legacy_runtime_v3;
 mod model_ir;
 pub use model_ir::*;
+mod track;
+pub use track::*;
 
 pub type SaStatusCodeV1 = u32;
 
@@ -27,6 +29,7 @@ pub const SA_ERR_BACKEND_UNAVAILABLE: SaStatusCodeV1 = 1400;
 pub const SA_ERR_DEVICE_MISMATCH: SaStatusCodeV1 = 1401;
 pub const SA_ERR_FALLBACK_FORBIDDEN: SaStatusCodeV1 = 1402;
 pub const SA_ERR_CANCELLED: SaStatusCodeV1 = 1500;
+pub const SA_ERR_NONCONVERGENCE: SaStatusCodeV1 = 1600;
 pub const SA_ERR_INTERNAL: SaStatusCodeV1 = 1900;
 
 pub const SA_ELEMENT_TYPE_F64: u32 = 1;
@@ -95,7 +98,8 @@ pub struct SaApiV1 {
     pub model_ir_validation_report_write: Option<SaModelIrValidationReportWriteFnV1>,
     pub model_ir_snapshot_size: Option<SaModelIrSnapshotSizeFnV1>,
     pub model_ir_snapshot_write: Option<SaModelIrSnapshotWriteFnV1>,
-    pub reserved: [*const c_void; 7],
+    pub track_point_load_solve: Option<SaTrackPointLoadSolveFnV1>,
+    pub reserved: [*const c_void; 6],
 }
 
 impl Default for SaApiV1 {
@@ -111,7 +115,8 @@ impl Default for SaApiV1 {
             model_ir_validation_report_write: None,
             model_ir_snapshot_size: None,
             model_ir_snapshot_write: None,
-            reserved: [core::ptr::null(); 7],
+            track_point_load_solve: None,
+            reserved: [core::ptr::null(); 6],
         }
     }
 }
@@ -126,7 +131,9 @@ extern "C" {
 
 #[cfg(test)]
 mod tests {
-    use super::{SaApiRequestV1, SaApiV1, SaBufferViewV1, SaErrorBufferV1, SaHeaderV1};
+    use super::{
+        SaApiRequestV1, SaApiV1, SaBufferViewV1, SaErrorBufferV1, SaHeaderV1, SA_ERR_NONCONVERGENCE,
+    };
     use core::mem::{align_of, offset_of, size_of};
 
     #[test]
@@ -145,6 +152,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
-        assert_eq!(offset_of!(SaApiV1, reserved), 72);
+        assert_eq!(offset_of!(SaApiV1, track_point_load_solve), 72);
+        assert_eq!(offset_of!(SaApiV1, reserved), 80);
+        assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

@@ -137,8 +137,8 @@ jobs:
           cargo test --manifest-path native/Cargo.toml --workspace --locked
           cargo build --manifest-path native/Cargo.toml \
             -p structural_runtime_ffi --release --locked
-          python3 scripts/check_structural_runtime_ffi_r2.py \
-            --library native/target/release/libstructural_runtime_ffi.so \
+          python3 scripts/check_structural_runtime_ffi_r3.py \
+            --legacy-library native/target/release/libstructural_runtime_ffi.so \
             --json --fail-blocked
           rustup toolchain install 1.77.0 --profile minimal
           cargo +1.77.0 check --manifest-path native/Cargo.toml \
@@ -224,7 +224,8 @@ jobs:
           cmake --build build/native-abi --target \
             structural_abi_header_c11_smoke \
             structural_abi_header_cpp20_smoke \
-            structural_abi_contract_tests
+            structural_abi_contract_tests \
+            structural_track_point_load_abi_tests
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
@@ -414,7 +415,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x00010001"
+          assert payload["abi_version"] == "0x00010002"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY
@@ -431,6 +432,10 @@ jobs:
                 echo "CPU-only package links a ROCm/HIP runtime" >&2
                 exit 1
               fi
+              python3 scripts/check_structural_runtime_ffi_r3.py \
+                --legacy-library native/target/release/libstructural_runtime_ffi.so \
+                --product-library "$shared_library" \
+                --json --fail-blocked
             fi
             cmake \
               -S native/cpp/tests/package_consumer \
@@ -530,7 +535,8 @@ jobs:
           python -m pip install -e .[dev]
           python -m pytest -q \
             tests/test_model_ir_v2_contract.py \
-            tests/test_native_model_ir_rust_parity.py
+            tests/test_native_model_ir_rust_parity.py \
+            tests/test_native_track_point_load_python_parity.py
           cargo test --manifest-path native/Cargo.toml --locked \
             -p structural-contracts -p structural-ffi -p structural-cli
 

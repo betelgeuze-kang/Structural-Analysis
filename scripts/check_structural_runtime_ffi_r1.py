@@ -97,7 +97,7 @@ def check_r1(
     if inventory.get("schema_version") != "structural-runtime-ffi-compatibility.v1":
         blockers.append("r1_inventory_schema_version_invalid")
     transition_step = inventory.get("transition_step")
-    if transition_step not in {"R1", "R2"}:
+    if transition_step not in {"R1", "R2", "R3"}:
         blockers.append("r1_inventory_transition_step_invalid")
     if inventory.get("abi_version") != 3:
         blockers.append("r1_inventory_abi_version_invalid")

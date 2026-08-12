@@ -24,7 +24,8 @@ extern "C" {
 
 #define SA_ABI_V1_0 UINT32_C(0x00010000)
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_1
+#define SA_ABI_V1_2 UINT32_C(0x00010002)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_2
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -46,6 +47,7 @@ enum {
     SA_ERR_DEVICE_MISMATCH = 1401,
     SA_ERR_FALLBACK_FORBIDDEN = 1402,
     SA_ERR_CANCELLED = 1500,
+    SA_ERR_NONCONVERGENCE = 1600,
     SA_ERR_INTERNAL = 1900
 };
 
@@ -64,6 +66,23 @@ enum {
 #define SA_CAPABILITY_BUFFER_VALIDATION UINT64_C(1)
 #define SA_CAPABILITY_MODEL_IR_V2_TYPED UINT64_C(2)
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
+#define SA_CAPABILITY_TRACK_POINT_LOAD_CPU UINT64_C(8)
+#define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
+
+enum {
+    SA_TRACK_SUPPORT_PINNED = 0,
+    SA_TRACK_SUPPORT_FIXED = 1
+};
+
+enum {
+    SA_TRACK_THEORY_EULER = 0,
+    SA_TRACK_THEORY_TIMOSHENKO_REDUCED = 1
+};
+
+enum {
+    SA_EXECUTION_BACKEND_CPU = 1,
+    SA_EXECUTION_BACKEND_HIP = 2
+};
 
 typedef struct sa_header_v1 {
     uint32_t abi_version;
@@ -82,6 +101,18 @@ typedef struct sa_buffer_view_v1 {
     uint32_t flags;
 } sa_buffer_view_v1;
 
+typedef struct sa_mut_buffer_view_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    void* data;
+    uint64_t length;
+    uint64_t stride_bytes;
+    uint32_t element_type;
+    uint32_t memory_space;
+    int32_t device_id;
+    uint32_t flags;
+} sa_mut_buffer_view_v1;
+
 typedef struct sa_error_buffer_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -96,6 +127,40 @@ typedef struct sa_api_request_v1 {
     uint64_t flags;
     uint64_t reserved[3];
 } sa_api_request_v1;
+
+typedef struct sa_track_point_load_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    double length_m;
+    uint32_t node_count;
+    uint32_t support_type;
+    uint32_t theory;
+    uint32_t flags;
+    double bending_stiffness_n_m2;
+    double shear_stiffness_n;
+    double winkler_k_n_per_m2;
+    double pasternak_g_n;
+    double tolerance;
+    uint32_t cg_max_iter;
+    uint32_t reserved_u32;
+    double point_force_n;
+    double point_position_m;
+    uint64_t reserved[2];
+} sa_track_point_load_config_v1;
+
+typedef struct sa_track_point_load_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t converged;
+    uint32_t iterations;
+    double residual_inf;
+    double max_abs_displacement_m;
+    double mid_displacement_m;
+    uint64_t output_length;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved;
+} sa_track_point_load_result_v1;
 
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
@@ -134,6 +199,13 @@ typedef sa_status_code_v1 (*sa_model_ir_snapshot_write_fn_v1)(
     uint64_t* out_written,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_track_point_load_solve_fn_v1)(
+    const sa_track_point_load_config_v1* config,
+    const sa_mut_buffer_view_v1* displacement_m,
+    const sa_mut_buffer_view_v1* rotation_rad,
+    sa_track_point_load_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -145,12 +217,14 @@ typedef struct sa_api_v1 {
     sa_model_ir_validation_report_write_fn_v1 model_ir_validation_report_write;
     sa_model_ir_snapshot_size_fn_v1 model_ir_snapshot_size;
     sa_model_ir_snapshot_write_fn_v1 model_ir_snapshot_write;
-    const void* reserved[7];
+    sa_track_point_load_solve_fn_v1 track_point_load_solve;
+    const void* reserved[6];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
 #define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
-#define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, track_point_load_solve))
+#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

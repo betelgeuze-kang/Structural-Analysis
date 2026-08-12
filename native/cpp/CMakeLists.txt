@@ -56,9 +56,26 @@ target_include_directories(
 structural_set_warnings(structural_model_ir)
 structural_enable_sanitizers(structural_model_ir)
 
+add_library(structural_solver_cpu STATIC src/solver_cpu/track_point_load.cpp)
+add_library(Structural::solver_cpu ALIAS structural_solver_cpu)
+set_target_properties(
+  structural_solver_cpu
+  PROPERTIES
+    EXPORT_NAME solver_cpu
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
+target_include_directories(
+  structural_solver_cpu
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/solver_cpu
+)
+structural_set_warnings(structural_solver_cpu)
+structural_enable_sanitizers(structural_solver_cpu)
+
 add_library(structural_c_abi_v1 src/abi/abi_v1.cpp)
 add_library(Structural::c_abi_v1 ALIAS structural_c_abi_v1)
-target_link_libraries(structural_c_abi_v1 PUBLIC structural_model_ir)
+target_link_libraries(structural_c_abi_v1 PUBLIC structural_model_ir structural_solver_cpu)
 target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_C_ABI_V1_BUILD=1)
 set_target_properties(
   structural_c_abi_v1
@@ -97,7 +114,7 @@ if(STRUCTURAL_BUILD_FUZZERS)
 endif()
 
 install(
-  TARGETS structural_model_ir structural_c_abi_v1
+  TARGETS structural_model_ir structural_solver_cpu structural_c_abi_v1
   EXPORT StructuralNativeTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

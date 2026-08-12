@@ -97,6 +97,20 @@ implementation은 C1 oracle parity가 확정될 때까지 유지한다.
 - Rust implementation은 oracle parity 기간에만 유지한다.
 - each family는 native unit, CPU parity와 FFI integration을 독립 통과한다.
 
+Implementation status: first bounded family complete; R3 remains open for the other families.
+
+- `track_point_load`의 serial FP64 kernel은 `structural_solver_cpu`가 소유한다.
+- `sa_get_api_v1` ABI v1.2 optional slot과 `structural-ffi` safe wrapper가 caller-owned
+  displacement/rotation output을 연결한다.
+- C++ unit, C ABI invalid/undersized/overlap/nonconvergence atomicity, Rust layout 및 concurrent
+  integration test가 legacy Rust neutral fixture와 `1e-15` 절대 오차 내에서 일치한다.
+- legacy `structural_runtime_ffi`의 5개 export와 numerical implementation은 그대로 유지한다.
+- Python oracle은 displacement/residual/interior rotation은 일치하지만 양 endpoint rotation의
+  gradient convention이 달라 C1은 blocked다. 이 family capability는 C0이며 HIP C2도 open이다.
+
+Current next gate: Python endpoint rotation contract를 합의·일치시켜 track C1을 닫거나, 같은
+fail-closed 방식으로 다음 R3 numerical family를 이전한다. R4 cutover는 아직 시작하지 않는다.
+
 ### Step R4: runtime cutover
 
 - structural-runtime이 job/checkpoint/cancel owner가 된다.

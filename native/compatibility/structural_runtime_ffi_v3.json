@@ -1,6 +1,6 @@
 {
   "schema_version": "structural-runtime-ffi-compatibility.v1",
-  "transition_step": "R2",
+  "transition_step": "R3",
   "package": {
     "manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
     "name": "structural_runtime_ffi",
@@ -106,5 +106,36 @@
     "legacy_adapter": "implementation/phase1/structural_runtime_ffi/src/contracts.rs",
     "numerical_oracle": "implementation/phase1/structural_runtime_ffi/src/lib.rs"
   },
-  "claim_boundary": "R2 extracts language-neutral wire contracts and the raw ABI mirror while preserving the existing Rust numerical oracle and five exports. It does not move numerical authority to C++, expose these operations through sa_get_api_v1, provide checkpoint/restart, or promote product E2E."
+  "r3_track_point_load": {
+    "family": "track_point_load",
+    "capability_gate": "C0",
+    "cpp_target": "structural_solver_cpu",
+    "abi_version": "0x00010002",
+    "api_entry": "sa_get_api_v1",
+    "api_slot": "track_point_load_solve",
+    "legacy_exports_preserved": true,
+    "fallback_count": 0,
+    "owners": {
+      "cpp_cpu_kernel": "native/cpp/src/solver_cpu/track_point_load.cpp",
+      "c_abi": "native/cpp/include/structural/abi_v1.h",
+      "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs"
+    },
+    "verification": {
+      "cpp_unit": "native/cpp/tests/solver_cpu/track_point_load_test.cpp",
+      "c_abi_contract": "native/cpp/tests/abi/track_point_load_contract_test.cpp",
+      "rust_ffi_parity": "native/crates/structural-ffi/tests/track_point_load_parity.rs",
+      "python_boundary": "tests/test_native_track_point_load_python_parity.py",
+      "checker": "scripts/check_structural_runtime_ffi_r3.py"
+    },
+    "parity": {
+      "legacy_rust": "pass",
+      "python_displacement_residual": "pass",
+      "python_rotation_interior": "pass",
+      "python_rotation_endpoints": "blocked",
+      "python_endpoint_max_abs_delta": 0.00003436580346133486,
+      "c1_promoted": false,
+      "c2_hip": "open"
+    }
+  },
+  "claim_boundary": "R3 moves only the bounded track point-load reference kernel into the C++ CPU product library and exposes it through the sa_get_api_v1 ABI v1.2 table plus a safe Rust wrapper. The five legacy exports remain unchanged. The capability stays at C0 because the Python endpoint-rotation convention blocks full C1 parity; HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
 }

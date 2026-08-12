@@ -14,5 +14,8 @@ serde_json = { version = "1.0", features = ["float_roundtrip"] }
 structural-contracts = { path = "../structural-contracts" }
 structural-ffi-sys = { path = "../structural-ffi-sys" }
 
+[dev-dependencies]
+structural_runtime_ffi = { path = "../../../implementation/phase1/structural_runtime_ffi" }
+
 [lints]
 workspace = true

@@ -26,6 +26,16 @@ structural_enable_sanitizers(structural_abi_contract_tests)
 add_test(NAME structural_abi_contract_tests COMMAND structural_abi_contract_tests)
 set_tests_properties(structural_abi_contract_tests PROPERTIES LABELS "abi")
 
+add_executable(
+  structural_track_point_load_abi_tests
+  abi/track_point_load_contract_test.cpp
+)
+target_link_libraries(structural_track_point_load_abi_tests PRIVATE structural_c_abi_v1)
+structural_set_warnings(structural_track_point_load_abi_tests)
+structural_enable_sanitizers(structural_track_point_load_abi_tests)
+add_test(NAME structural_track_point_load_abi_tests COMMAND structural_track_point_load_abi_tests)
+set_tests_properties(structural_track_point_load_abi_tests PROPERTIES LABELS "abi;solver_cpu;track")
+
 add_executable(structural_abi_link_smoke_c abi/link_smoke.c)
 target_link_libraries(structural_abi_link_smoke_c PRIVATE structural_c_abi_v1)
 structural_set_warnings(structural_abi_link_smoke_c)
@@ -44,3 +54,15 @@ structural_set_warnings(structural_model_ir_contract_tests)
 structural_enable_sanitizers(structural_model_ir_contract_tests)
 add_test(NAME structural_model_ir_contract_tests COMMAND structural_model_ir_contract_tests)
 set_tests_properties(structural_model_ir_contract_tests PROPERTIES LABELS "abi;modelir")
+
+add_executable(structural_track_point_load_cpu_tests solver_cpu/track_point_load_test.cpp)
+target_include_directories(
+  structural_track_point_load_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/solver_cpu
+)
+target_link_libraries(structural_track_point_load_cpu_tests PRIVATE structural_solver_cpu)
+structural_set_warnings(structural_track_point_load_cpu_tests)
+structural_enable_sanitizers(structural_track_point_load_cpu_tests)
+add_test(NAME structural_track_point_load_cpu_tests COMMAND structural_track_point_load_cpu_tests)
+set_tests_properties(structural_track_point_load_cpu_tests PROPERTIES LABELS "solver_cpu;track")

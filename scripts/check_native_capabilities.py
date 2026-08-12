@@ -17,6 +17,7 @@ EXPECTED_OWNERS = {
     "modelir_v2_rust_wire": "structural-contracts",
     "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",
+    "track_point_load_cpu": "structural_solver_cpu",
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",
     "hip_backend": "structural_c_abi_v1",

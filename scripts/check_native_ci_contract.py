@@ -217,8 +217,10 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "merge-ref head parent mismatch",
         "git rev-parse HEAD^{tree}",
         "check_native_capabilities.py --fail-invalid",
-        "check_structural_runtime_ffi_r2.py",
+        "check_structural_runtime_ffi_r3.py",
         "native/target/release/libstructural_runtime_ffi.so",
+        "tests/test_native_track_point_load_python_parity.py",
+        'payload["abi_version"] == "0x00010002"',
     ):
         if required not in pr_text:
             blockers.append(f"native_pr_fast_contract_token_missing:{required}")

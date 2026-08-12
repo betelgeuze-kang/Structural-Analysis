@@ -4,11 +4,11 @@
     {
       "legacy_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
       "migration_owner": "structural-runtime",
-      "transition_step": "R2",
+      "transition_step": "R3",
       "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "R3 move one numerical family to the C++ CPU product library under oracle parity"
+      "next_gate": "R3 reconcile track Python endpoint rotation for C1, then migrate the next numerical family"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

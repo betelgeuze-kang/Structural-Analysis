@@ -73,6 +73,17 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_track_python_parity_boundary_routes_through_the_oracle_gate() -> None:
+    payload = scope.classify_paths(
+        ["tests/test_native_track_point_load_python_parity.py"]
+    )
+
+    assert payload["modelir"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

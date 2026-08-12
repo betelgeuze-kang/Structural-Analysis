@@ -25,6 +25,12 @@
       "owner": "structural-contracts",
       "claim": "strict Rust wire identity, typed C++ semantic validation, safe ABI v1.1 RAII round-trip and structural-cli model validate only; no solver, restart, ResultIR or backend readiness"
     },
+    "track_point_load_cpu": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural_solver_cpu",
+      "claim": "bounded serial FP64 C++ track point-load kernel, ABI v1.2 caller-owned output and safe Rust compatibility parity only; Python endpoint-rotation convention blocks C1, and HIP C2, restart and product E2E remain open"
+    },
     "checkpoint_restart": {
       "status": "planned",
       "cutover_gate": null,

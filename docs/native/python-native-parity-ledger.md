@@ -120,7 +120,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence/status taxonomy, residual/increment gate, singularity
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
-- State: bounded Rust routines and HIP probes exist; unified product path does not.
+- State: D4 remains C0. The bounded 9-node `track_point_load` family now has a deterministic
+  `structural_solver_cpu` reference kernel, ABI v1.2 caller-owned operation and safe Rust wrapper;
+  the legacy five-symbol Rust cdylib is unchanged. C++ and legacy Rust match the neutral fixture
+  within `1e-15`, with CPU backend and fallback count 0. Python matches iteration, residual,
+  displacement and interior rotation, but its one-sided endpoint gradient differs by
+  `3.436580346133486e-5 rad`, so C1 is explicitly blocked. HIP C2, the remaining solver families,
+  checkpoint/restart and product E2E remain open.
 
 ### D5. Durable Job API and process lifecycle
 
