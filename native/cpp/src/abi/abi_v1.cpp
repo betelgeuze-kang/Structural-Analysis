@@ -1,6 +1,7 @@
 #include "structural/abi_v1.h"
 
 #include "../model_ir/model_ir.hpp"
+#include "../solver_cpu/nonlinear_static.hpp"
 #include "../solver_cpu/track_point_load.hpp"
 
 #include <algorithm>
@@ -14,6 +15,7 @@
 #include <memory>
 #include <mutex>
 #include <new>
+#include <span>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -38,7 +40,8 @@ static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
 static_assert(offsetof(sa_api_v1, track_point_load_solve) == 72U);
-static_assert(offsetof(sa_api_v1, reserved) == 80U);
+static_assert(offsetof(sa_api_v1, nonlinear_static_solve) == 80U);
+static_assert(offsetof(sa_api_v1, reserved) == 88U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -48,6 +51,16 @@ static_assert(sizeof(sa_track_point_load_result_v1) == 64U);
 static_assert(offsetof(sa_track_point_load_result_v1, residual_inf) == 16U);
 static_assert(offsetof(sa_track_point_load_result_v1, output_length) == 40U);
 static_assert(offsetof(sa_track_point_load_result_v1, execution_backend) == 48U);
+static_assert(sizeof(sa_nonlinear_static_config_v1) == 80U);
+static_assert(offsetof(sa_nonlinear_static_config_v1, story_count) == 8U);
+static_assert(offsetof(sa_nonlinear_static_config_v1, tolerance) == 16U);
+static_assert(offsetof(sa_nonlinear_static_config_v1, pdelta_factor) == 48U);
+static_assert(offsetof(sa_nonlinear_static_config_v1, reserved) == 64U);
+static_assert(sizeof(sa_nonlinear_static_result_v1) == 88U);
+static_assert(offsetof(sa_nonlinear_static_result_v1, residual_inf) == 16U);
+static_assert(offsetof(sa_nonlinear_static_result_v1, base_shear_kn) == 48U);
+static_assert(offsetof(sa_nonlinear_static_result_v1, output_length) == 64U);
+static_assert(offsetof(sa_nonlinear_static_result_v1, execution_backend) == 72U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -416,6 +429,69 @@ template <typename Value>
         : left_start - right_start < static_cast<std::uintptr_t>(right_extent);
 }
 
+[[nodiscard]] sa_status_code_v1 validate_nonlinear_input(
+    const sa_buffer_view_v1* const view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(view)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static input descriptor is null or misaligned");
+    }
+    if (view->abi_version != SA_ABI_V1_3) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static input ABI is not v1.3");
+    }
+    if (view->struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear static input struct_size is too small");
+    }
+    if (view->data == nullptr || view->stride_bytes != sizeof(double)
+        || view->element_type != SA_ELEMENT_TYPE_F64
+        || view->memory_space != SA_MEMORY_SPACE_HOST || view->device_id != -1
+        || view->flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (view->length < expected_length) {
+        return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "nonlinear static input buffer is too small");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view->data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_nonlinear_output(
+    const sa_mut_buffer_view_v1* const view,
+    const std::uint64_t expected_length,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(view)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output descriptor is null or misaligned");
+    }
+    if (view->abi_version != SA_ABI_V1_3) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static output ABI is not v1.3");
+    }
+    if (view->struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear static output struct_size is too small");
+    }
+    if (view->data == nullptr || view->stride_bytes != sizeof(double)
+        || view->element_type != SA_ELEMENT_TYPE_F64
+        || view->memory_space != SA_MEMORY_SPACE_HOST || view->device_id != -1
+        || view->flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output metadata is invalid");
+    }
+    if (view->length < expected_length) {
+        return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "nonlinear static output buffer is too small");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view->data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
 [[nodiscard]] sa_status_code_v1 track_point_load_boundary(
     const sa_track_point_load_config_v1* const config,
     const sa_mut_buffer_view_v1* const displacement_m,
@@ -548,6 +624,191 @@ template <typename Value>
         });
 }
 
+[[nodiscard]] sa_status_code_v1 nonlinear_static_boundary(
+    const sa_nonlinear_static_config_v1* const config,
+    const sa_buffer_view_v1* const story_stiffness_n_per_m,
+    const sa_buffer_view_v1* const story_height_m,
+    const sa_buffer_view_v1* const story_axial_n,
+    const sa_buffer_view_v1* const story_yield_drift_m,
+    const sa_buffer_view_v1* const floor_load_n,
+    const sa_mut_buffer_view_v1* const displacement_m,
+    sa_nonlinear_static_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config,
+         story_stiffness_n_per_m,
+         story_height_m,
+         story_axial_n,
+         story_yield_drift_m,
+         floor_load_n,
+         displacement_m,
+         result,
+         error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config) || !pointer_is_aligned(result)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static config or result is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_3 || result->abi_version != SA_ABI_V1_3) {
+            return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static descriptors require ABI v1.3");
+        }
+        if (config->struct_size < sizeof(sa_nonlinear_static_config_v1)
+            || result->struct_size < sizeof(sa_nonlinear_static_result_v1)) {
+            return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear static descriptor struct_size is too small");
+        }
+        if (config->flags != 0U || config->reserved_u32 != 0U
+            || std::any_of(std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                   return value != 0U;
+               })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static config reserved fields are not zero");
+        }
+        const std::array scalar_values {
+            config->tolerance,
+            config->hardening_ratio,
+            config->line_search_decay,
+            config->line_search_min,
+            config->pdelta_factor,
+        };
+        if (std::any_of(scalar_values.begin(), scalar_values.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static config contains a non-finite scalar");
+        }
+        if (config->story_count == 0U
+            || config->story_count > SA_NONLINEAR_STATIC_MAX_STORY_COUNT
+            || config->max_iter == 0U || config->tolerance <= 0.0
+            || config->hardening_ratio < 0.0 || config->hardening_ratio > 1.0
+            || config->line_search_decay <= 0.0 || config->line_search_decay >= 1.0
+            || config->line_search_min <= 0.0 || config->line_search_min > 1.0
+            || config->pdelta_factor < 0.0) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static config value is outside the v1.3 domain");
+        }
+
+        const auto expected_length = static_cast<std::uint64_t>(config->story_count);
+        const std::array input_views {
+            story_stiffness_n_per_m,
+            story_height_m,
+            story_axial_n,
+            story_yield_drift_m,
+            floor_load_n,
+        };
+        const std::array input_labels {
+            std::string_view {"nonlinear static stiffness input metadata is invalid"},
+            std::string_view {"nonlinear static height input metadata is invalid"},
+            std::string_view {"nonlinear static axial input metadata is invalid"},
+            std::string_view {"nonlinear static yield-drift input metadata is invalid"},
+            std::string_view {"nonlinear static floor-load input metadata is invalid"},
+        };
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            const auto status = validate_nonlinear_input(
+                input_views[index], expected_length, input_labels[index], error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+        const auto output_status =
+            validate_nonlinear_output(displacement_m, expected_length, error);
+        if (output_status != SA_OK) {
+            return output_status;
+        }
+
+        const auto extent = expected_length * sizeof(double);
+        for (const auto* const input_view : input_views) {
+            if (ranges_overlap(displacement_m->data, extent, input_view->data, extent)) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output overlaps input data");
+            }
+            if (ranges_overlap(displacement_m->data, extent, input_view, sizeof(*input_view))) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output overlaps an input descriptor");
+            }
+            if (ranges_overlap(result, sizeof(*result), input_view->data, extent)
+                || ranges_overlap(result, sizeof(*result), input_view, sizeof(*input_view))) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static result overlaps input storage");
+            }
+        }
+        if (ranges_overlap(displacement_m->data, extent, config, sizeof(*config))
+            || ranges_overlap(displacement_m->data, extent, displacement_m, sizeof(*displacement_m))
+            || ranges_overlap(displacement_m->data, extent, result, sizeof(*result))
+            || ranges_overlap(result, sizeof(*result), config, sizeof(*config))
+            || ranges_overlap(result, sizeof(*result), displacement_m, sizeof(*displacement_m))) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output descriptors overlap");
+        }
+
+        const auto count = static_cast<std::size_t>(expected_length);
+        const auto values = [count](const sa_buffer_view_v1* const view) {
+            return std::span<const double> {
+                static_cast<const double*>(view->data),
+                count,
+            };
+        };
+        const auto stiffness = values(story_stiffness_n_per_m);
+        const auto height = values(story_height_m);
+        const auto axial = values(story_axial_n);
+        const auto yield_drift = values(story_yield_drift_m);
+        const auto load = values(floor_load_n);
+        const auto all_finite = [](const std::span<const double> input) {
+            return std::all_of(input.begin(), input.end(), [](const auto value) {
+                return std::isfinite(value);
+            });
+        };
+        if (!all_finite(stiffness) || !all_finite(height) || !all_finite(axial)
+            || !all_finite(yield_drift) || !all_finite(load)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static inputs contain a non-finite value");
+        }
+        if (std::any_of(stiffness.begin(), stiffness.end(), [](const auto value) {
+                return value <= 0.0;
+            })
+            || std::any_of(height.begin(), height.end(), [](const auto value) {
+                   return value <= 0.0;
+               })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static stiffness and height must be positive");
+        }
+
+        const structural::solver_cpu::NonlinearStaticConfig native_config {
+            config->story_count,
+            config->tolerance,
+            config->max_iter,
+            config->hardening_ratio,
+            config->line_search_decay,
+            config->line_search_min,
+            config->pdelta_factor,
+        };
+        const structural::solver_cpu::NonlinearStaticInputs native_inputs {
+            stiffness,
+            height,
+            axial,
+            yield_drift,
+            load,
+        };
+        const auto native_result =
+            structural::solver_cpu::solve_nonlinear_static(native_config, native_inputs);
+        if (!native_result.converged) {
+            return report_error(error, SA_ERR_NONCONVERGENCE, "nonlinear static CPU Newton solve did not converge");
+        }
+        if (native_result.displacement_m.size() != expected_length) {
+            return report_error(error, SA_ERR_INTERNAL, "nonlinear static CPU result length invariant failed");
+        }
+
+        std::memcpy(displacement_m->data, native_result.displacement_m.data(), extent);
+        *result = {
+            SA_ABI_V1_3,
+            static_cast<std::uint32_t>(sizeof(sa_nonlinear_static_result_v1)),
+            1U,
+            native_result.iterations,
+            native_result.residual_inf,
+            native_result.residual_l2,
+            native_result.max_abs_displacement_m,
+            native_result.top_displacement_m,
+            native_result.base_shear_kn,
+            native_result.plastic_story_count,
+            native_result.line_search_backtracks,
+            expected_length,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            0U,
+        };
+        return SA_OK;
+        });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -561,7 +822,11 @@ template <typename Value>
     }
     const auto api_min_size = request->abi_version == SA_ABI_V1_0
         ? SA_API_V1_0_MIN_SIZE
-        : (request->abi_version == SA_ABI_V1_1 ? SA_API_V1_1_MIN_SIZE : SA_API_V1_2_MIN_SIZE);
+        : (request->abi_version == SA_ABI_V1_1
+                ? SA_API_V1_1_MIN_SIZE
+                : (request->abi_version == SA_ABI_V1_2
+                        ? SA_API_V1_2_MIN_SIZE
+                        : SA_API_V1_3_MIN_SIZE));
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -581,6 +846,7 @@ template <typename Value>
 
     const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
     const bool track_enabled = request->abi_version >= SA_ABI_V1_2;
+    const bool nonlinear_static_enabled = request->abi_version >= SA_ABI_V1_3;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -588,7 +854,8 @@ template <typename Value>
             | (model_ir_enabled
                     ? SA_CAPABILITY_MODEL_IR_V2_TYPED | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                     : UINT64_C(0))
-            | (track_enabled ? SA_CAPABILITY_TRACK_POINT_LOAD_CPU : UINT64_C(0)),
+            | (track_enabled ? SA_CAPABILITY_TRACK_POINT_LOAD_CPU : UINT64_C(0))
+            | (nonlinear_static_enabled ? SA_CAPABILITY_NONLINEAR_STATIC_CPU : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -597,7 +864,8 @@ template <typename Value>
         model_ir_enabled ? &model_ir_snapshot_size_boundary : nullptr,
         model_ir_enabled ? &model_ir_snapshot_write_boundary : nullptr,
         track_enabled ? &track_point_load_boundary : nullptr,
-        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr},
+        nonlinear_static_enabled ? &nonlinear_static_boundary : nullptr,
+        {nullptr, nullptr, nullptr, nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

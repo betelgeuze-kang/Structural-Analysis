@@ -123,6 +123,8 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - v1.0은 0x00010000이다.
 - v1.1은 0x00010001이며 typed ModelIR descriptor/report/snapshot table slots를 추가한다.
 - v1.2는 0x00010002이며 caller-owned track point-load CPU operation 한 slot을 추가한다.
+- v1.3은 0x00010003이며 다섯 caller-owned input view와 한 output view를 사용하는 nonlinear
+  static CPU operation 한 slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -389,7 +391,7 @@ R2는 `sa_get_api_v1` operation, C++ solver, checkpoint/restart 또는 product E
 unit, frozen Rust compatibility parity와 기존 ABI adapter를 분리해서 증명해야 한다. Python
 oracle parity가 별도로 닫히기 전에는 C1을 주장하지 않는다.
 
-## 16. Bounded track point-load R3 boundary
+## 16. Bounded solver R3 boundaries
 
 R3의 첫 family는 `track_point_load`다.
 
@@ -415,3 +417,21 @@ adjacent-interior convention 때문에 `3.436580346133486e-5 rad` 차이가 난�
 intentional compatibility divergence로 inventory에 남긴다. 따라서 `track_point_load_cpu`는
 이 명시된 profile에서 C1을 통과한다. broader node/load-position parity, HIP C2, legacy symbol
 cutover, checkpoint/restart, ResultIR/ReportIR와 product E2E는 열려 있다.
+
+R3의 두 번째 family는 `nonlinear_static`이다.
+
+- `structural_solver_cpu`가 bilinear story spring, P-delta tangent, tridiagonal Newton solve와
+  line search를 사용하는 serial FP64 reference kernel을 소유한다.
+- ABI v1.3은 offset 80의 `nonlinear_static_solve` optional slot을 추가하고 reserved tail을
+  줄여 전체 table 크기 128 bytes를 유지한다. v1.0-v1.2 요청에서는 이 slot과 capability bit가
+  null/0이다.
+- stiffness/height/axial/yield/load의 packed FP64 host view와 displacement output의
+  pointer/length/stride/alignment/finite/overlap을 검사한다. invalid와 nonconverged call은
+  output/result를 변경하지 않는다.
+- safe Rust wrapper는 모든 입력 길이를 story count와 맞추고 CPU backend와 fallback count 0을
+  확인한다. C++ unit, C ABI negative/atomicity, Rust layout/concurrency test가 frozen 3-story
+  legacy Rust fixture의 전체 result와 `1e-15` 절대 오차 내에서 일치한다.
+
+이 증거는 legacy compatibility case 하나의 C0만 닫는다. 독립 Python oracle matrix가 아직
+없으므로 `nonlinear_static_cpu` C1, broader story/material/load/nonconvergence domain, HIP C2,
+checkpoint/restart와 product E2E는 모두 open이다. 기존 Rust 5-symbol ABI는 변경하지 않는다.

@@ -96,7 +96,8 @@ def test_native_rust_gate_freezes_r3_product_and_legacy_runtime_exports() -> Non
     assert "check_structural_runtime_ffi_r3.py" in workflow
     assert "native/target/release/libstructural_runtime_ffi.so" in workflow
     assert "structural_track_point_load_abi_tests" in workflow
-    assert 'payload["abi_version"] == "0x00010002"' in workflow
+    assert "structural_nonlinear_static_abi_tests" in workflow
+    assert 'payload["abi_version"] == "0x00010003"' in workflow
 
 
 def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> None:
@@ -111,7 +112,7 @@ def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> No
     assert "--no-tests=error -L modelir" in workflow
 
 
-def test_merge_oracle_gate_keeps_the_track_rotation_blocker_visible() -> None:
+def test_merge_oracle_gate_runs_the_track_python_c1_matrix() -> None:
     workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
     )

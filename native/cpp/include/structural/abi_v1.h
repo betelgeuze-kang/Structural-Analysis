@@ -25,7 +25,8 @@ extern "C" {
 #define SA_ABI_V1_0 UINT32_C(0x00010000)
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_2
+#define SA_ABI_V1_3 UINT32_C(0x00010003)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_3
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -67,7 +68,9 @@ enum {
 #define SA_CAPABILITY_MODEL_IR_V2_TYPED UINT64_C(2)
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
 #define SA_CAPABILITY_TRACK_POINT_LOAD_CPU UINT64_C(8)
+#define SA_CAPABILITY_NONLINEAR_STATIC_CPU UINT64_C(16)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
+#define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 
 enum {
     SA_TRACK_SUPPORT_PINNED = 0,
@@ -168,6 +171,39 @@ typedef struct sa_track_point_load_result_v1 {
     uint64_t reserved;
 } sa_track_point_load_result_v1;
 
+typedef struct sa_nonlinear_static_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t story_count;
+    uint32_t max_iter;
+    double tolerance;
+    double hardening_ratio;
+    double line_search_decay;
+    double line_search_min;
+    double pdelta_factor;
+    uint32_t flags;
+    uint32_t reserved_u32;
+    uint64_t reserved[2];
+} sa_nonlinear_static_config_v1;
+
+typedef struct sa_nonlinear_static_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t converged;
+    uint32_t iterations;
+    double residual_inf;
+    double residual_l2;
+    double max_abs_displacement_m;
+    double top_displacement_m;
+    double base_shear_kn;
+    uint32_t plastic_story_count;
+    uint32_t line_search_backtracks;
+    uint64_t output_length;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved;
+} sa_nonlinear_static_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -212,6 +248,17 @@ typedef sa_status_code_v1 (*sa_track_point_load_solve_fn_v1)(
     sa_track_point_load_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_nonlinear_static_solve_fn_v1)(
+    const sa_nonlinear_static_config_v1* config,
+    const sa_buffer_view_v1* story_stiffness_n_per_m,
+    const sa_buffer_view_v1* story_height_m,
+    const sa_buffer_view_v1* story_axial_n,
+    const sa_buffer_view_v1* story_yield_drift_m,
+    const sa_buffer_view_v1* floor_load_n,
+    const sa_mut_buffer_view_v1* displacement_m,
+    sa_nonlinear_static_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -224,13 +271,15 @@ typedef struct sa_api_v1 {
     sa_model_ir_snapshot_size_fn_v1 model_ir_snapshot_size;
     sa_model_ir_snapshot_write_fn_v1 model_ir_snapshot_write;
     sa_track_point_load_solve_fn_v1 track_point_load_solve;
-    const void* reserved[6];
+    sa_nonlinear_static_solve_fn_v1 nonlinear_static_solve;
+    const void* reserved[5];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
 #define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
 #define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, track_point_load_solve))
-#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_solve))
+#define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

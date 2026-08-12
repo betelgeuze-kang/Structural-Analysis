@@ -5,7 +5,6 @@ use core::ffi::c_void;
 use crate::{SaErrorBufferV1, SaStatusCodeV1};
 
 pub const SA_ABI_V1_2: u32 = 0x0001_0002;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_2;
 
 pub const SA_CAPABILITY_TRACK_POINT_LOAD_CPU: u64 = 1 << 3;
 pub const SA_TRACK_POINT_LOAD_MAX_NODE_COUNT: u32 = 1_000_000;

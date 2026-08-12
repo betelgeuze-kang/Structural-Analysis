@@ -98,7 +98,8 @@ gate가 닫힐 때까지 유지한다.
 - Rust implementation은 oracle parity 기간에만 유지한다.
 - each family는 native unit, CPU parity와 FFI integration을 독립 통과한다.
 
-Implementation status: first bounded family complete; R3 remains open for the other families.
+Implementation status: two bounded CPU families are integrated; R3 remains open for the other
+families and later gates.
 
 - `track_point_load`의 serial FP64 kernel은 `structural_solver_cpu`가 소유한다.
 - `sa_get_api_v1` ABI v1.2 optional slot과 `structural-ffi` safe wrapper가 caller-owned
@@ -111,9 +112,16 @@ Implementation status: first bounded family complete; R3 remains open for the ot
   compatibility divergence로 고정한다. displacement/residual/interior rotation은 계속 같다.
 - 9-node midpoint-load의 pinned/fixed × Euler/reduced-Timoshenko 4-case matrix만 C1이다.
   broader node/load-position input-space parity와 HIP C2는 open이다.
+- `nonlinear_static` serial FP64 story-frame Newton kernel은 ABI v1.3 optional slot과 safe Rust
+  wrapper까지 연결됐다. five packed input views, caller-owned displacement, invalid/overlap/
+  nonconvergence atomicity와 CPU fallback 0을 검증한다.
+- frozen 3-story legacy Rust fixture의 전체 displacement/result만 `1e-15` 내에서 일치하므로
+  이 slice는 C0다. 독립 Python support/material/load matrix가 없고 broader nonlinear domain과
+  HIP C2가 open이므로 C1을 주장하지 않는다.
 
-Current next gate: 승인된 전용 ROCm runner에서 track HIP C2를 구현하거나, 같은 fail-closed
-방식으로 다음 R3 CPU numerical family를 이전한다. R4 cutover는 아직 시작하지 않는다.
+Current next gate: nonlinear static의 독립 Python C1 matrix를 고정하거나, 승인된 전용 ROCm
+runner에서 track HIP C2를 구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU family를
+이전한다. R4 cutover는 아직 시작하지 않는다.
 
 ### Step R4: runtime cutover
 

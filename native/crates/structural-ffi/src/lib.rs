@@ -8,7 +8,9 @@ use core::mem::size_of;
 use core::ptr::{self, NonNull};
 
 use serde::{Deserialize, Serialize};
-use structural_contracts::legacy_runtime::{TrackConfigV3, TrackSupportType, TrackTheory};
+use structural_contracts::legacy_runtime::{
+    NonlinearStaticConfigV3, StaticStoryInputsV3, TrackConfigV3, TrackSupportType, TrackTheory,
+};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_ffi_sys as sys;
 
@@ -106,6 +108,22 @@ pub struct TrackPointLoadSolution {
     pub fallback_count: u32,
 }
 
+/// Caller-owned deterministic result from the bounded C++ nonlinear static CPU kernel.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NonlinearStaticSolution {
+    pub iterations: u32,
+    pub residual_inf: f64,
+    pub residual_l2: f64,
+    pub max_abs_displacement_m: f64,
+    pub top_displacement_m: f64,
+    pub base_shear_kn: f64,
+    pub plastic_story_count: u32,
+    pub line_search_backtracks: u32,
+    pub displacement_m: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Immutable, process-lifetime C ABI v1 function table.
 #[derive(Clone, Copy)]
 pub struct Api {
@@ -146,6 +164,15 @@ impl Api {
     /// Returns a stable ABI error if the v1.2 capability or operation is absent.
     pub fn load_track_point_load() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_2)
+    }
+
+    /// Load the ABI v1.3 table with the deterministic nonlinear static CPU operation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the v1.3 capability or operation is absent.
+    pub fn load_nonlinear_static() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_3)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -331,8 +358,8 @@ impl Api {
             point_position_m: config.point_position_m,
             reserved: [0; 2],
         };
-        let displacement_view = mutable_f64_view(&mut displacement_m)?;
-        let rotation_view = mutable_f64_view(&mut rotation_rad)?;
+        let displacement_view = mutable_f64_view(&mut displacement_m, sys::SA_ABI_V1_2)?;
+        let rotation_view = mutable_f64_view(&mut rotation_rad, sys::SA_ABI_V1_2)?;
         let mut raw_result = sys::SaTrackPointLoadResultV1 {
             abi_version: sys::SA_ABI_V1_2,
             struct_size: abi_size::<sys::SaTrackPointLoadResultV1>(),
@@ -387,6 +414,120 @@ impl Api {
             mid_displacement_m: raw_result.mid_displacement_m,
             displacement_m,
             rotation_rad,
+            execution_backend: raw_result.execution_backend,
+            fallback_count: raw_result.fallback_count,
+        })
+    }
+
+    /// Solve one bounded nonlinear static story-frame case in the C++ serial FP64 CPU backend.
+    ///
+    /// The operation borrows five packed input slices and writes one caller-owned displacement
+    /// vector only after convergence. It retains no pointer and permits no backend fallback.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error for invalid inputs, allocation failure, output invariants or
+    /// numerical nonconvergence.
+    pub fn solve_nonlinear_static(
+        self,
+        config: &NonlinearStaticConfigV3,
+        inputs: &StaticStoryInputsV3,
+    ) -> Result<NonlinearStaticSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_3 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "nonlinear static CPU solve requires ABI v1.3".to_owned(),
+            });
+        }
+        let count = nonlinear_static_count(config, inputs)?;
+
+        let mut displacement_m = allocate_f64_output(count)?;
+        let raw_config = sys::SaNonlinearStaticConfigV1 {
+            abi_version: sys::SA_ABI_V1_3,
+            struct_size: abi_size::<sys::SaNonlinearStaticConfigV1>(),
+            story_count: config.story_count,
+            max_iter: config.max_iter,
+            tolerance: config.tolerance,
+            hardening_ratio: config.hardening_ratio,
+            line_search_decay: config.line_search_decay,
+            line_search_min: config.line_search_min,
+            pdelta_factor: config.pdelta_factor,
+            flags: 0,
+            reserved_u32: 0,
+            reserved: [0; 2],
+        };
+        let stiffness_view = input_f64_view(&inputs.story_k_n_per_m, sys::SA_ABI_V1_3)?;
+        let height_view = input_f64_view(&inputs.story_h_m, sys::SA_ABI_V1_3)?;
+        let axial_view = input_f64_view(&inputs.story_axial_n, sys::SA_ABI_V1_3)?;
+        let yield_drift_view = input_f64_view(&inputs.story_yield_drift_m, sys::SA_ABI_V1_3)?;
+        let load_view = input_f64_view(&inputs.floor_load_n, sys::SA_ABI_V1_3)?;
+        let displacement_view = mutable_f64_view(&mut displacement_m, sys::SA_ABI_V1_3)?;
+        let mut raw_result = sys::SaNonlinearStaticResultV1 {
+            abi_version: sys::SA_ABI_V1_3,
+            struct_size: abi_size::<sys::SaNonlinearStaticResultV1>(),
+            converged: 0,
+            iterations: 0,
+            residual_inf: 0.0,
+            residual_l2: 0.0,
+            max_abs_displacement_m: 0.0,
+            top_displacement_m: 0.0,
+            base_shear_kn: 0.0,
+            plastic_story_count: 0,
+            line_search_backtracks: 0,
+            output_length: 0,
+            execution_backend: 0,
+            fallback_count: u32::MAX,
+            reserved: u64::MAX,
+        };
+        let solve = self
+            .table
+            .nonlinear_static_solve
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: every descriptor and borrowed slice is live, packed, aligned and disjoint from
+        // the caller-owned output for the complete synchronous call. C++ retains none.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &stiffness_view,
+                &height_view,
+                &axial_view,
+                &yield_drift_view,
+                &load_view,
+                &displacement_view,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let expected_length = usize_to_u64(count)?;
+        if raw_result.abi_version != sys::SA_ABI_V1_3
+            || raw_result.struct_size != abi_size::<sys::SaNonlinearStaticResultV1>()
+            || raw_result.converged != 1
+            || raw_result.output_length != expected_length
+            || raw_result.execution_backend != sys::SA_EXECUTION_BACKEND_CPU
+            || raw_result.fallback_count != 0
+            || raw_result.reserved != 0
+        {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native nonlinear static result violated the v1.3 output contract"
+                    .to_owned(),
+            });
+        }
+        Ok(NonlinearStaticSolution {
+            iterations: raw_result.iterations,
+            residual_inf: raw_result.residual_inf,
+            residual_l2: raw_result.residual_l2,
+            max_abs_displacement_m: raw_result.max_abs_displacement_m,
+            top_displacement_m: raw_result.top_displacement_m,
+            base_shear_kn: raw_result.base_shear_kn,
+            plastic_story_count: raw_result.plastic_story_count,
+            line_search_backtracks: raw_result.line_search_backtracks,
+            displacement_m,
             execution_backend: raw_result.execution_backend,
             fallback_count: raw_result.fallback_count,
         })
@@ -531,22 +672,36 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         table.model_ir_snapshot_write.is_some(),
     ];
     let track_slot = table.track_point_load_solve.is_some();
+    let nonlinear_static_slot = table.nonlinear_static_solve.is_some();
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
+            && !nonlinear_static_slot
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
             && !track_slot
+            && !nonlinear_static_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU == 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU == 0
     } else if requested == sys::SA_ABI_V1_2 {
         model_slots.iter().all(|present| *present)
             && track_slot
+            && !nonlinear_static_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU == 0
+    } else if requested == sys::SA_ABI_V1_3 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
     } else {
         false
     };
@@ -561,15 +716,59 @@ fn allocate_f64_output(length: usize) -> Result<Vec<f64>, Error> {
     let mut output = Vec::new();
     output.try_reserve_exact(length).map_err(|_| Error {
         code: sys::SA_ERR_INTERNAL,
-        message: "track output allocation failed".to_owned(),
+        message: "native FP64 output allocation failed".to_owned(),
     })?;
     output.resize(length, 0.0);
     Ok(output)
 }
 
-fn mutable_f64_view(values: &mut [f64]) -> Result<sys::SaMutBufferViewV1, Error> {
+fn nonlinear_static_count(
+    config: &NonlinearStaticConfigV3,
+    inputs: &StaticStoryInputsV3,
+) -> Result<usize, Error> {
+    let count = usize::try_from(config.story_count).map_err(|_| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "nonlinear static story_count exceeds the Rust address space".to_owned(),
+    })?;
+    if count == 0 || config.story_count > sys::SA_NONLINEAR_STATIC_MAX_STORY_COUNT {
+        return Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear static story_count is outside the bounded product range".to_owned(),
+        });
+    }
+    let input_lengths = [
+        inputs.story_k_n_per_m.len(),
+        inputs.story_h_m.len(),
+        inputs.story_axial_n.len(),
+        inputs.story_yield_drift_m.len(),
+        inputs.floor_load_n.len(),
+    ];
+    if input_lengths.iter().any(|length| *length != count) {
+        return Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear static input lengths do not match story_count".to_owned(),
+        });
+    }
+    Ok(count)
+}
+
+fn input_f64_view(values: &[f64], abi_version: u32) -> Result<sys::SaBufferViewV1, Error> {
+    Ok(sys::SaBufferViewV1 {
+        abi_version,
+        struct_size: abi_size::<sys::SaBufferViewV1>(),
+        data: values.as_ptr().cast::<c_void>(),
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<f64>())?,
+        element_type: sys::SA_ELEMENT_TYPE_F64,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
+}
+
+fn mutable_f64_view(values: &mut [f64], abi_version: u32) -> Result<sys::SaMutBufferViewV1, Error> {
     Ok(sys::SaMutBufferViewV1 {
-        abi_version: sys::SA_ABI_V1_2,
+        abi_version,
         struct_size: abi_size::<sys::SaMutBufferViewV1>(),
         data: values.as_mut_ptr().cast::<c_void>(),
         length: usize_to_u64(values.len())?,
@@ -667,9 +866,10 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_CAPABILITY_BUFFER_VALIDATION,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
-        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
+        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -728,6 +928,20 @@ mod tests {
                 | SA_CAPABILITY_MODEL_IR_V2_TYPED
                 | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                 | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+        );
+    }
+
+    #[test]
+    fn v1_3_table_adds_only_the_bounded_nonlinear_static_cpu_capability() {
+        let api = Api::load_nonlinear_static().expect("v1.3 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_3);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
         );
     }
 

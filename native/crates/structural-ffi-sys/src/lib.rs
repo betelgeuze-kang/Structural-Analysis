@@ -8,12 +8,15 @@ use core::ffi::{c_char, c_void};
 pub mod legacy_runtime_v3;
 mod model_ir;
 pub use model_ir::*;
+mod nonlinear_static;
+pub use nonlinear_static::*;
 mod track;
 pub use track::*;
 
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_3;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -99,7 +102,8 @@ pub struct SaApiV1 {
     pub model_ir_snapshot_size: Option<SaModelIrSnapshotSizeFnV1>,
     pub model_ir_snapshot_write: Option<SaModelIrSnapshotWriteFnV1>,
     pub track_point_load_solve: Option<SaTrackPointLoadSolveFnV1>,
-    pub reserved: [*const c_void; 6],
+    pub nonlinear_static_solve: Option<SaNonlinearStaticSolveFnV1>,
+    pub reserved: [*const c_void; 5],
 }
 
 impl Default for SaApiV1 {
@@ -116,7 +120,8 @@ impl Default for SaApiV1 {
             model_ir_snapshot_size: None,
             model_ir_snapshot_write: None,
             track_point_load_solve: None,
-            reserved: [core::ptr::null(); 6],
+            nonlinear_static_solve: None,
+            reserved: [core::ptr::null(); 5],
         }
     }
 }
@@ -153,7 +158,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
         assert_eq!(offset_of!(SaApiV1, track_point_load_solve), 72);
-        assert_eq!(offset_of!(SaApiV1, reserved), 80);
+        assert_eq!(offset_of!(SaApiV1, nonlinear_static_solve), 80);
+        assert_eq!(offset_of!(SaApiV1, reserved), 88);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

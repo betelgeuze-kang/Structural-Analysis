@@ -14,7 +14,7 @@ sys.modules[SPEC.name] = capabilities
 SPEC.loader.exec_module(capabilities)
 
 
-def test_slice_d_promotes_modelir_only_through_safe_ffi_c3() -> None:
+def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
 
     assert capabilities.validate_capabilities(payload) == []
@@ -30,6 +30,12 @@ def test_slice_d_promotes_modelir_only_through_safe_ffi_c3() -> None:
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
     assert "broader input-space parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
+    assert capabilities.capability_is_enabled(payload, "nonlinear_static_cpu") is True
+    nonlinear = payload["capabilities"]["nonlinear_static_cpu"]
+    assert nonlinear["cutover_gate"] == "C0"
+    assert "frozen legacy Rust parity" in nonlinear["claim"]
+    assert "Python C1" in nonlinear["claim"]
+    assert "broader nonlinear input-space parity" in nonlinear["claim"]
     for capability in (
         "checkpoint_restart",
         "product_e2e",

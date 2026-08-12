@@ -11,13 +11,13 @@ unimplemented; `capabilities.json` records that boundary. The existing `structur
 package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
 `structural-contracts`, and keeps the original crate as the numerical oracle plus adapter. Its
-ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 moves
-only the `track_point_load` reference kernel into `structural_solver_cpu`, exposes it through the
-ABI v1.2 table and adds a safe Rust caller. A separate language-neutral product golden follows
-the Python endpoint conventions and promotes the 9-node midpoint-load support/theory matrix to
-C1. The legacy Rust ABI, its five exports and its endpoint convention remain frozen as an
-explicit compatibility boundary; broader input-space parity, HIP C2 and runtime cutover remain
-open.
+ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 first
+moves `track_point_load` into `structural_solver_cpu`, exposes it through ABI v1.2 and promotes
+only the 9-node midpoint-load support/theory matrix to Python C1. The next slice moves the
+nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller, but remains C0:
+only one frozen 3-story legacy Rust case is matched. Independent nonlinear Python C1, broader
+input-space parity, HIP C2 and runtime cutover remain open; the legacy five-symbol ABI is
+unchanged.
 
 ## Rust
 
@@ -73,8 +73,9 @@ or links ROCm.
 
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
-library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1 and the bounded track CPU
-operation occupies the ABI v1.2 extension slot. v1.0/v1.1 table prefixes remain byte-compatible.
+library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
+slot and nonlinear static CPU occupies the ABI v1.3 slot. v1.0-v1.2 table prefixes remain
+byte-compatible.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

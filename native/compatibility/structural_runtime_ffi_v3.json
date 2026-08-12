@@ -150,5 +150,38 @@
       "c2_hip": "open"
     }
   },
-  "claim_boundary": "R3 moves only the bounded track point-load reference kernel into the C++ CPU product library and exposes it through the sa_get_api_v1 ABI v1.2 table plus a safe Rust wrapper. A four-case language-neutral 9-node midpoint-load product-golden matrix records full Python C1 oracle parity across both support and theory values, while the five-symbol legacy Rust ABI and its endpoint convention remain frozen as an explicit endpoint-only divergence. Broader input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
+  "r3_nonlinear_static": {
+    "family": "nonlinear_static",
+    "capability_gate": "C0",
+    "cpp_target": "structural_solver_cpu",
+    "abi_version": "0x00010003",
+    "api_entry": "sa_get_api_v1",
+    "api_slot": "nonlinear_static_solve",
+    "legacy_exports_preserved": true,
+    "fallback_count": 0,
+    "c0_profile": {
+      "story_count": 3,
+      "absolute_tolerance": 1e-15,
+      "fixture": "native/tests/fixtures/legacy_runtime_v3/nonlinear_static.json",
+      "fixture_sha256": "57df412800943da8fdd2214a88cadd314b1620c7b2c707a15f56f4828a3a9ab0"
+    },
+    "owners": {
+      "cpp_cpu_kernel": "native/cpp/src/solver_cpu/nonlinear_static.cpp",
+      "c_abi": "native/cpp/include/structural/abi_v1.h",
+      "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs"
+    },
+    "verification": {
+      "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_static_test.cpp",
+      "c_abi_contract": "native/cpp/tests/abi/nonlinear_static_contract_test.cpp",
+      "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_static_parity.rs",
+      "checker": "scripts/check_structural_runtime_ffi_r3.py"
+    },
+    "parity": {
+      "legacy_rust_full_result": "pass",
+      "python_oracle": "open",
+      "c1_promoted": false,
+      "c2_hip": "open"
+    }
+  },
+  "claim_boundary": "R3 owns two bounded C++ CPU product slices through the single sa_get_api_v1 table. Track point-load is C1 only for the four-case 9-node midpoint-load Python product-golden matrix exposed by ABI v1.2; the legacy endpoint convention remains frozen separately. Nonlinear static is C0 only for one frozen 3-story legacy Rust compatibility case exposed by ABI v1.3; independent Python C1 matrix parity is open. Both legacy five-symbol exports remain unchanged, and broader input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
 }

@@ -92,6 +92,7 @@ namespace {
     CHECK(api.validate_buffer_view != nullptr);
     CHECK(api.model_ir_create != nullptr);
     CHECK(api.track_point_load_solve != nullptr);
+    CHECK(api.nonlinear_static_solve == nullptr);
     for (const auto* reserved : api.reserved) {
         CHECK(reserved == nullptr);
     }
@@ -107,6 +108,7 @@ namespace {
     old_api.struct_size = static_cast<std::uint32_t>(sizeof(sa_api_v1));
     CHECK(sa_get_api_v1(&old_request, &old_api, nullptr) == SA_OK);
     CHECK(old_api.track_point_load_solve == nullptr);
+    CHECK(old_api.nonlinear_static_solve == nullptr);
     CHECK((old_api.capabilities & SA_CAPABILITY_TRACK_POINT_LOAD_CPU) == 0U);
 
     alignas(sa_api_v1) std::array<std::byte, 128> legacy_storage {};

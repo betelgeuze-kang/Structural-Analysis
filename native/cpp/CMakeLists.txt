@@ -56,7 +56,11 @@ target_include_directories(
 structural_set_warnings(structural_model_ir)
 structural_enable_sanitizers(structural_model_ir)
 
-add_library(structural_solver_cpu STATIC src/solver_cpu/track_point_load.cpp)
+add_library(
+  structural_solver_cpu STATIC
+  src/solver_cpu/nonlinear_static.cpp
+  src/solver_cpu/track_point_load.cpp
+)
 add_library(Structural::solver_cpu ALIAS structural_solver_cpu)
 set_target_properties(
   structural_solver_cpu

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the bounded R3 track CPU product path and its fail-closed claim boundary."""
+"""Validate bounded R3 CPU product slices and their fail-closed claim boundaries."""
 
 from __future__ import annotations
 
@@ -69,6 +69,42 @@ EXPECTED_R3 = {
     },
 }
 
+EXPECTED_NONLINEAR_STATIC_R3 = {
+    "family": "nonlinear_static",
+    "capability_gate": "C0",
+    "cpp_target": "structural_solver_cpu",
+    "abi_version": "0x00010003",
+    "api_entry": "sa_get_api_v1",
+    "api_slot": "nonlinear_static_solve",
+    "legacy_exports_preserved": True,
+    "fallback_count": 0,
+    "c0_profile": {
+        "story_count": 3,
+        "absolute_tolerance": 1.0e-15,
+        "fixture": "native/tests/fixtures/legacy_runtime_v3/nonlinear_static.json",
+        "fixture_sha256": (
+            "57df412800943da8fdd2214a88cadd314b1620c7b2c707a15f56f4828a3a9ab0"
+        ),
+    },
+    "owners": {
+        "cpp_cpu_kernel": "native/cpp/src/solver_cpu/nonlinear_static.cpp",
+        "c_abi": "native/cpp/include/structural/abi_v1.h",
+        "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs",
+    },
+    "verification": {
+        "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_static_test.cpp",
+        "c_abi_contract": "native/cpp/tests/abi/nonlinear_static_contract_test.cpp",
+        "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_static_parity.rs",
+        "checker": "scripts/check_structural_runtime_ffi_r3.py",
+    },
+    "parity": {
+        "legacy_rust_full_result": "pass",
+        "python_oracle": "open",
+        "c1_promoted": False,
+        "c2_hip": "open",
+    },
+}
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -116,11 +152,18 @@ def check_r3(
     r3_inventory = inventory.get("r3_track_point_load")
     if r3_inventory != EXPECTED_R3:
         blockers.append("r3_track_inventory_invalid")
+    nonlinear_inventory = inventory.get("r3_nonlinear_static")
+    if nonlinear_inventory != EXPECTED_NONLINEAR_STATIC_R3:
+        blockers.append("r3_nonlinear_static_inventory_invalid")
 
-    for group in (EXPECTED_R3["owners"], EXPECTED_R3["verification"]):
-        for role, relative_path in group.items():
-            if not (repo_root / relative_path).is_file():
-                blockers.append(f"r3_owned_file_missing:{role}")
+    for family, expected in (
+        ("track", EXPECTED_R3),
+        ("nonlinear_static", EXPECTED_NONLINEAR_STATIC_R3),
+    ):
+        for group in (expected["owners"], expected["verification"]):
+            for role, relative_path in group.items():
+                if not (repo_root / relative_path).is_file():
+                    blockers.append(f"r3_owned_file_missing:{family}:{role}")
 
     for relative_path, expected_hash in EXPECTED_R3["product_goldens"].items():
         product_golden_path = repo_root / relative_path
@@ -144,6 +187,38 @@ def check_r3(
         ):
             blockers.append(f"r3_product_golden_contract_invalid:{relative_path}")
 
+    nonlinear_profile = EXPECTED_NONLINEAR_STATIC_R3["c0_profile"]
+    nonlinear_fixture_relative = nonlinear_profile["fixture"]
+    nonlinear_fixture_path = repo_root / nonlinear_fixture_relative
+    try:
+        nonlinear_fixture_bytes = nonlinear_fixture_path.read_bytes()
+    except OSError as exc:
+        blockers.append(f"r3_nonlinear_static_fixture_unreadable:{exc}")
+    else:
+        nonlinear_fixture_hash = hashlib.sha256(nonlinear_fixture_bytes).hexdigest()
+        if nonlinear_fixture_hash != nonlinear_profile["fixture_sha256"]:
+            blockers.append("r3_nonlinear_static_fixture_sha256_mismatch")
+        try:
+            nonlinear_case = json.loads(nonlinear_fixture_bytes)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            blockers.append(f"r3_nonlinear_static_fixture_invalid:{exc}")
+        else:
+            nonlinear_config = (
+                nonlinear_case.get("config")
+                if isinstance(nonlinear_case, dict)
+                else None
+            )
+            if (
+                not isinstance(nonlinear_case, dict)
+                or nonlinear_case.get("schema_version")
+                != "structural-runtime-compat.v3"
+                or nonlinear_case.get("operation") != "nonlinear_static"
+                or not isinstance(nonlinear_config, dict)
+                or nonlinear_config.get("story_count")
+                != nonlinear_profile["story_count"]
+            ):
+                blockers.append("r3_nonlinear_static_fixture_contract_invalid")
+
     sources = {
         "cmake": repo_root / "native/cpp/CMakeLists.txt",
         "header": repo_root / "native/cpp/include/structural/abi_v1.h",
@@ -159,7 +234,7 @@ def check_r3(
             blockers.append(f"r3_source_unreadable:{role}:{exc}")
             source_text[role] = ""
     required_tokens = {
-        "cmake": ("add_library(structural_solver_cpu", "structural_solver_cpu structural_c_abi_v1"),
+        "cmake": ("structural_solver_cpu STATIC", "structural_solver_cpu structural_c_abi_v1"),
         "header": (
             "#define SA_ABI_V1_2 UINT32_C(0x00010002)",
             "sa_track_point_load_solve_fn_v1 track_point_load_solve",
@@ -173,6 +248,37 @@ def check_r3(
         for token in tokens:
             if token not in source_text[role]:
                 blockers.append(f"r3_source_token_missing:{role}:{token}")
+
+    nonlinear_sources = {
+        "cmake": sources["cmake"],
+        "header": sources["header"],
+        "abi": sources["abi"],
+        "kernel": repo_root
+        / EXPECTED_NONLINEAR_STATIC_R3["owners"]["cpp_cpu_kernel"],
+        "rust": sources["rust"],
+    }
+    nonlinear_required_tokens = {
+        "cmake": ("src/solver_cpu/nonlinear_static.cpp",),
+        "header": (
+            "#define SA_ABI_V1_3 UINT32_C(0x00010003)",
+            "sa_nonlinear_static_solve_fn_v1 nonlinear_static_solve",
+            "SA_CAPABILITY_NONLINEAR_STATIC_CPU",
+        ),
+        "abi": ("nonlinear_static_boundary", "SA_ERR_NONCONVERGENCE"),
+        "kernel": ("solve_nonlinear_static", "solve_tridiagonal"),
+        "rust": ("pub fn load_nonlinear_static", "pub fn solve_nonlinear_static"),
+    }
+    for role, path in nonlinear_sources.items():
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            blockers.append(f"r3_source_unreadable:nonlinear_static:{role}:{exc}")
+            continue
+        for token in nonlinear_required_tokens[role]:
+            if token not in text:
+                blockers.append(
+                    f"r3_source_token_missing:nonlinear_static:{role}:{token}"
+                )
 
     try:
         capabilities = _load_json(repo_root / "native/capabilities.json")
@@ -197,6 +303,33 @@ def check_r3(
         ):
             if boundary not in claim:
                 blockers.append(f"r3_track_claim_boundary_missing:{boundary}")
+
+    nonlinear_capability = capabilities.get("capabilities", {}).get(
+        "nonlinear_static_cpu", {}
+    )
+    if (
+        not isinstance(nonlinear_capability, dict)
+        or nonlinear_capability.get("status") != "implemented"
+    ):
+        blockers.append("r3_nonlinear_static_capability_not_implemented")
+    else:
+        if nonlinear_capability.get("cutover_gate") != "C0":
+            blockers.append("r3_nonlinear_static_capability_gate_invalid")
+        nonlinear_claim = str(nonlinear_capability.get("claim", ""))
+        for boundary in (
+            "ABI v1.3",
+            "frozen legacy Rust parity",
+            "3-story compatibility case only",
+            "Python C1",
+            "broader nonlinear input-space",
+            "HIP C2",
+            "restart",
+            "product E2E",
+        ):
+            if boundary not in nonlinear_claim:
+                blockers.append(
+                    f"r3_nonlinear_static_claim_boundary_missing:{boundary}"
+                )
 
     product_exports: list[str] | None = None
     if product_library is not None:
@@ -226,12 +359,16 @@ def _report(
         "legacy_exports": lower_gate.get("expected_exports", []),
         "product_exports": product_exports,
         "capability_gate": "C1",
+        "capability_gates": {
+            "track_point_load_cpu": "C1",
+            "nonlinear_static_cpu": "C0",
+        },
         "blockers": blockers,
         "claim_boundary": (
-            "R3 proves Python C1 full-vector parity for the four-case 9-node midpoint-load "
-            "support/theory matrix, ABI v1.2 and safe Rust integration. The legacy endpoint "
-            "convention remains frozen separately; broader input-space parity, HIP C2 and "
-            "runtime cutover remain open."
+            "R3 proves track Python C1 full-vector parity only for the four-case 9-node "
+            "midpoint-load matrix, plus nonlinear static C0 parity only for one frozen "
+            "3-story legacy Rust case through ABI v1.3. Independent nonlinear Python C1, "
+            "broader input-space parity, HIP C2 and runtime cutover remain open."
         ),
     }
 

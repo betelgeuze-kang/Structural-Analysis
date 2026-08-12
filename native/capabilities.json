@@ -31,6 +31,12 @@
       "owner": "structural_solver_cpu",
       "claim": "bounded serial FP64 C++ track point-load kernel with Python C1 oracle parity for the 9-node midpoint-load support/theory matrix, ABI v1.2 caller-owned output and safe Rust integration; the frozen legacy Rust endpoint-only divergence is retained, while broader input-space parity, HIP C2, restart and product E2E remain open"
     },
+    "nonlinear_static_cpu": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural_solver_cpu",
+      "claim": "bounded serial FP64 C++ story-frame Newton kernel, ABI v1.3 caller-owned inputs/output and safe Rust integration with full frozen legacy Rust parity for one 3-story compatibility case only; independent Python C1 matrix parity, broader nonlinear input-space parity, HIP C2, restart and product E2E remain open"
+    },
     "checkpoint_restart": {
       "status": "planned",
       "cutover_gate": null,
