@@ -3,6 +3,7 @@ use std::fmt;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::path::{Component, Path, PathBuf};
+use std::process::Command;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use fs2::FileExt;
@@ -25,6 +26,13 @@ const MAX_MANIFEST_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_FILE_COUNT: usize = 16_384;
 const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024 * 1024;
 const MAX_TOTAL_BYTES: u64 = 8 * 1024 * 1024 * 1024;
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v1";
+const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
+const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
+const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
+const ROOTFS_RUNTIME_UID: u32 = 65_532;
+const ROOTFS_RUNTIME_GID: u32 = 65_532;
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -99,6 +107,64 @@ pub struct BundleCreateRequest<'a> {
     pub backend_profile: BackendProfileV1,
     pub linkage: LinkageV1,
     pub source_sha256: &'a str,
+}
+
+#[derive(Clone, Debug)]
+pub struct RootfsIsolationProbeRequest<'a> {
+    pub bundle: &'a Path,
+    pub payload_root: &'a Path,
+    pub workspace: &'a Path,
+    pub workbench_root: &'a Path,
+    pub mgt_workbench_root: &'a Path,
+    pub receipt: &'a Path,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV1 {
+    pub authority: String,
+    pub claim_boundary: String,
+    pub isolation_technology: String,
+    pub release_id: String,
+    pub source_sha256: String,
+    pub bundle_manifest_hash: String,
+    pub bundle_manifest_file_sha256: String,
+    pub installer_sha256: String,
+    pub workbench_sha256: String,
+    pub runtime_uid: u32,
+    pub runtime_gid: u32,
+    pub network_interfaces: Vec<String>,
+    pub ipv4_route_count: u64,
+    pub rootfs_write_errno: i32,
+    pub payload_write_errno: i32,
+    pub workspace_write_passed: bool,
+    pub path: String,
+    pub python_lookup_count: u64,
+    pub node_lookup_count: u64,
+    pub workbench_version: String,
+    pub workbench_stage: String,
+    pub workbench_terminal_status: String,
+    pub workbench_comparison_passed: bool,
+    pub result_ir_sha256: String,
+    pub report_pdf_sha256: String,
+    pub mgt_workbench_stage: String,
+    pub mgt_workbench_terminal_status: String,
+    pub mgt_workbench_comparison_passed: bool,
+    pub mgt_source_sha256: String,
+    pub mgt_import_health_sha256: String,
+    pub mgt_result_ir_sha256: String,
+    pub mgt_report_pdf_sha256: String,
+    pub container_image_built: bool,
+    pub customer_image_receipt: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV1 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV1,
+    pub receipt_hash: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -372,6 +438,246 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
         &manifest.files,
     )?;
     Ok(manifest)
+}
+
+/// Emits a hash-bound diagnostic receipt from inside the isolated Linux root filesystem.
+///
+/// # Errors
+///
+/// Returns an error unless the process is the fixed non-root runtime identity, the verified
+/// bundle and executing payload are identical, the root and payload reject writes with `EROFS`,
+/// the operator workspace accepts writes, only loopback networking is visible, and both native
+/// Workbench sessions reached their reported terminal state.
+#[allow(clippy::too_many_lines)]
+pub fn create_rootfs_isolation_receipt(
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<RootfsIsolationReceiptV1, DistributionError> {
+    #[cfg(not(target_os = "linux"))]
+    return Err(DistributionError::new(
+        "rootfs_platform_unsupported",
+        "rootfs isolation receipts require Linux",
+    ));
+
+    let process_identity = linux_effective_ids();
+    if process_identity.user_id != ROOTFS_RUNTIME_UID
+        || process_identity.group_id != ROOTFS_RUNTIME_GID
+    {
+        return Err(DistributionError::new(
+            "rootfs_runtime_identity_invalid",
+            "rootfs diagnostic must execute as UID/GID 65532",
+        ));
+    }
+    if std::env::var_os("PATH").as_deref() != Some(std::ffi::OsStr::new(ROOTFS_EMPTY_PATH)) {
+        return Err(DistributionError::new(
+            "rootfs_runtime_path_invalid",
+            "rootfs diagnostic requires the exact empty lookup PATH",
+        ));
+    }
+
+    let workspace = resolve_real_directory(request.workspace, "rootfs workspace")?;
+    let receipt_parent = request.receipt.parent().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_receipt_path_invalid",
+            "rootfs receipt must have a parent directory",
+        )
+    })?;
+    if resolve_real_directory(receipt_parent, "rootfs receipt parent")? != workspace {
+        return Err(DistributionError::new(
+            "rootfs_receipt_path_invalid",
+            "rootfs receipt must be created directly in the operator workspace",
+        ));
+    }
+    if path_entry_exists(request.receipt)? {
+        return Err(DistributionError::new(
+            "rootfs_receipt_exists",
+            "rootfs receipt output must not already exist",
+        ));
+    }
+
+    let bundle_root = resolve_real_directory(request.bundle, "rootfs bundle")?;
+    let payload_root = resolve_real_directory(request.payload_root, "rootfs payload")?;
+    let expected_payload = resolve_real_directory(
+        &bundle_root.join(PAYLOAD_DIRECTORY),
+        "verified rootfs bundle payload",
+    )?;
+    if payload_root != expected_payload {
+        return Err(DistributionError::new(
+            "rootfs_payload_bundle_mismatch",
+            "executing payload must be the supplied verified bundle payload",
+        ));
+    }
+    let manifest = verify_bundle(&bundle_root)?;
+    if manifest.backend_profile != BackendProfileV1::CpuOnly {
+        return Err(DistributionError::new(
+            "rootfs_backend_invalid",
+            "local rootfs diagnostic accepts only the CPU-only bundle",
+        ));
+    }
+
+    let installer = payload_root.join("bin/structural-installer");
+    let workbench = payload_root.join("bin/structural-workbench");
+    let current_executable = std::env::current_exe()
+        .and_then(|path| path.canonicalize())
+        .map_err(|error| io_error("rootfs_current_executable_failed", error))?;
+    let expected_installer = installer
+        .canonicalize()
+        .map_err(|error| io_error("rootfs_installer_resolve_failed", error))?;
+    if current_executable != expected_installer {
+        return Err(DistributionError::new(
+            "rootfs_installer_identity_mismatch",
+            "runtime probe must execute from the verified bundle payload",
+        ));
+    }
+    let installer_sha256 = sha256_file(&installer)?;
+    let workbench_sha256 = sha256_file(&workbench)?;
+    require_manifest_entry_hash(&manifest, "bin/structural-installer", &installer_sha256)?;
+    require_manifest_entry_hash(&manifest, "bin/structural-workbench", &workbench_sha256)?;
+
+    let rootfs_write_errno = require_read_only_mount(Path::new("/etc"), "root filesystem")?;
+    let payload_write_errno = require_read_only_mount(&payload_root, "payload filesystem")?;
+    verify_workspace_write(&workspace)?;
+    let network_interfaces = linux_network_interfaces()?;
+    let ipv4_route_count = linux_ipv4_route_count()?;
+    if network_interfaces.len() != 1 || network_interfaces[0] != "lo" || ipv4_route_count != 0 {
+        return Err(DistributionError::new(
+            "rootfs_network_isolation_failed",
+            "isolated runtime must expose only loopback and no IPv4 routes",
+        ));
+    }
+
+    let version_output = Command::new(&workbench)
+        .arg("--version")
+        .env_clear()
+        .env("PATH", ROOTFS_EMPTY_PATH)
+        .output()
+        .map_err(|error| io_error("rootfs_workbench_version_failed", error))?;
+    if !version_output.status.success() || !version_output.stderr.is_empty() {
+        return Err(DistributionError::new(
+            "rootfs_workbench_version_failed",
+            "native Workbench version command failed in the isolated runtime",
+        ));
+    }
+    let workbench_version = String::from_utf8(version_output.stdout)
+        .map_err(|_| {
+            DistributionError::new(
+                "rootfs_workbench_version_invalid",
+                "native Workbench version output must be UTF-8",
+            )
+        })?
+        .trim()
+        .to_owned();
+    if workbench_version != format!("structural-workbench {}", manifest.package_version) {
+        return Err(DistributionError::new(
+            "rootfs_workbench_version_invalid",
+            "native Workbench version does not match the verified bundle",
+        ));
+    }
+
+    let workbench_summary = inspect_reported_workbench(&workspace, request.workbench_root)?;
+    let mgt_summary = inspect_reported_workbench(&workspace, request.mgt_workbench_root)?;
+    let mgt_root =
+        resolve_workspace_child(&workspace, request.mgt_workbench_root, "MGT Workbench")?;
+    let evidence = RootfsIsolationEvidenceV1 {
+        authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
+        claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY.to_owned(),
+        isolation_technology: ROOTFS_ISOLATION_TECHNOLOGY.to_owned(),
+        release_id: manifest.release_id.clone(),
+        source_sha256: manifest.source_sha256.clone(),
+        bundle_manifest_hash: manifest.manifest_hash.clone(),
+        bundle_manifest_file_sha256: sha256_file(&bundle_root.join(MANIFEST_NAME))?,
+        installer_sha256,
+        workbench_sha256,
+        runtime_uid: process_identity.user_id,
+        runtime_gid: process_identity.group_id,
+        network_interfaces,
+        ipv4_route_count,
+        rootfs_write_errno,
+        payload_write_errno,
+        workspace_write_passed: true,
+        path: ROOTFS_EMPTY_PATH.to_owned(),
+        python_lookup_count: 0,
+        node_lookup_count: 0,
+        workbench_version,
+        workbench_stage: workbench_summary.stage,
+        workbench_terminal_status: workbench_summary.terminal_status,
+        workbench_comparison_passed: workbench_summary.comparison_passed,
+        result_ir_sha256: workbench_summary.result_ir_sha256,
+        report_pdf_sha256: workbench_summary.report_pdf_sha256,
+        mgt_workbench_stage: mgt_summary.stage,
+        mgt_workbench_terminal_status: mgt_summary.terminal_status,
+        mgt_workbench_comparison_passed: mgt_summary.comparison_passed,
+        mgt_source_sha256: sha256_file(&mgt_root.join("01-import/source.mgt"))?,
+        mgt_import_health_sha256: sha256_file(&mgt_root.join("01-import/import-health.json"))?,
+        mgt_result_ir_sha256: mgt_summary.result_ir_sha256,
+        mgt_report_pdf_sha256: mgt_summary.report_pdf_sha256,
+        container_image_built: false,
+        customer_image_receipt: false,
+    };
+    validate_rootfs_isolation_evidence(&evidence)?;
+    let receipt = seal_rootfs_isolation_evidence(evidence)?;
+    write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
+    sync_directory(&workspace)?;
+    Ok(receipt)
+}
+
+/// Validates an exact rootfs isolation receipt against its complete native bundle.
+///
+/// # Errors
+///
+/// Returns an error for noncanonical bytes, unknown or weakened evidence, hash drift, or a bundle
+/// identity mismatch. This remains diagnostic C5 evidence and never promotes an OCI/customer C6
+/// claim.
+pub fn verify_rootfs_isolation_receipt(
+    receipt_path: &Path,
+    bundle: &Path,
+) -> Result<RootfsIsolationReceiptV1, DistributionError> {
+    let receipt: RootfsIsolationReceiptV1 = read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+    if receipt.schema_version != ROOTFS_RECEIPT_SCHEMA_VERSION {
+        return Err(DistributionError::new(
+            "rootfs_receipt_schema_invalid",
+            "rootfs receipt schema is unsupported",
+        ));
+    }
+    validate_rootfs_isolation_evidence(&receipt.evidence)?;
+    let expected_hash = sha256_identity(&canonical_json(&receipt.evidence)?);
+    if receipt.receipt_hash != expected_hash {
+        return Err(DistributionError::new(
+            "rootfs_receipt_hash_mismatch",
+            "rootfs receipt self-hash does not match",
+        ));
+    }
+
+    let manifest = verify_bundle(bundle)?;
+    if manifest.backend_profile != BackendProfileV1::CpuOnly
+        || receipt.evidence.release_id != manifest.release_id
+        || receipt.evidence.source_sha256 != manifest.source_sha256
+        || receipt.evidence.bundle_manifest_hash != manifest.manifest_hash
+        || receipt.evidence.bundle_manifest_file_sha256 != sha256_file(&bundle.join(MANIFEST_NAME))?
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_bundle_mismatch",
+            "rootfs receipt does not identify the supplied CPU bundle",
+        ));
+    }
+    require_manifest_entry_hash(
+        &manifest,
+        "bin/structural-installer",
+        &receipt.evidence.installer_sha256,
+    )?;
+    require_manifest_entry_hash(
+        &manifest,
+        "bin/structural-workbench",
+        &receipt.evidence.workbench_sha256,
+    )?;
+    if receipt.evidence.workbench_version
+        != format!("structural-workbench {}", manifest.package_version)
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_bundle_mismatch",
+            "rootfs Workbench version does not match the supplied bundle",
+        ));
+    }
+    Ok(receipt)
 }
 
 /// Installs or updates to a verified release through an atomic, recoverable transaction.
@@ -926,6 +1232,275 @@ fn collect_strict_regular_files(
                 "bundle contains a socket, device, FIFO, or other unsupported entry",
             ));
         }
+    }
+    Ok(())
+}
+
+#[derive(Debug)]
+struct ReportedWorkbenchSummary {
+    stage: String,
+    terminal_status: String,
+    comparison_passed: bool,
+    result_ir_sha256: String,
+    report_pdf_sha256: String,
+}
+
+fn resolve_real_directory(path: &Path, label: &str) -> Result<PathBuf, DistributionError> {
+    ensure_directory(path, label)?;
+    path.canonicalize()
+        .map_err(|error| io_error("directory_resolve_failed", error))
+}
+
+fn resolve_workspace_child(
+    workspace: &Path,
+    child: &Path,
+    label: &str,
+) -> Result<PathBuf, DistributionError> {
+    let resolved = resolve_real_directory(child, label)?;
+    if resolved == workspace || !resolved.starts_with(workspace) {
+        return Err(DistributionError::new(
+            "rootfs_workbench_path_invalid",
+            format!("{label} must be a real child directory of the operator workspace"),
+        ));
+    }
+    Ok(resolved)
+}
+
+fn inspect_reported_workbench(
+    workspace: &Path,
+    workbench_root: &Path,
+) -> Result<ReportedWorkbenchSummary, DistributionError> {
+    let root = resolve_workspace_child(workspace, workbench_root, "native Workbench")?;
+    let session_bytes =
+        read_bounded_regular_file(&root.join("workbench-session.json"), MAX_MANIFEST_BYTES)?;
+    let session: serde_json::Value = serde_json::from_slice(&session_bytes).map_err(|error| {
+        DistributionError::new(
+            "rootfs_workbench_session_invalid",
+            format!("native Workbench session is invalid JSON: {error}"),
+        )
+    })?;
+    let stage = session
+        .get("stage")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default();
+    let terminal_status = session
+        .get("terminal_status")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_default();
+    let comparison_passed = session
+        .get("comparison_passed")
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false);
+    if stage != "reported" || terminal_status != "completed" || !comparison_passed {
+        return Err(DistributionError::new(
+            "rootfs_workbench_incomplete",
+            "native Workbench session must be reported, completed and comparison-passing",
+        ));
+    }
+    Ok(ReportedWorkbenchSummary {
+        stage: stage.to_owned(),
+        terminal_status: terminal_status.to_owned(),
+        comparison_passed,
+        result_ir_sha256: sha256_file(&root.join("04-resume/result-ir.json"))?,
+        report_pdf_sha256: sha256_file(&root.join("06-report/report.pdf"))?,
+    })
+}
+
+fn require_manifest_entry_hash(
+    manifest: &DistributionManifestV1,
+    path: &str,
+    actual_hash: &str,
+) -> Result<(), DistributionError> {
+    let expected = manifest
+        .files
+        .iter()
+        .find(|entry| entry.path == path)
+        .map(|entry| entry.sha256.as_str())
+        .ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_manifest_entry_missing",
+                format!("verified bundle does not contain {path}"),
+            )
+        })?;
+    if expected != actual_hash {
+        return Err(DistributionError::new(
+            "rootfs_executable_hash_mismatch",
+            format!("executing payload hash differs from the bundle for {path}"),
+        ));
+    }
+    Ok(())
+}
+
+fn require_read_only_mount(directory: &Path, label: &str) -> Result<i32, DistributionError> {
+    ensure_directory(directory, label)?;
+    let probe = unique_path(directory, ".structural-read-only-probe");
+    match OpenOptions::new().create_new(true).write(true).open(&probe) {
+        Ok(file) => {
+            drop(file);
+            let _ = fs::remove_file(&probe);
+            Err(DistributionError::new(
+                "rootfs_write_allowed",
+                format!("{label} unexpectedly accepted a write"),
+            ))
+        }
+        Err(error) if error.raw_os_error() == Some(libc::EROFS) => Ok(libc::EROFS),
+        Err(error) => Err(DistributionError::new(
+            "rootfs_read_only_mount_unproven",
+            format!("{label} write failed without EROFS: {error}"),
+        )),
+    }
+}
+
+fn verify_workspace_write(workspace: &Path) -> Result<(), DistributionError> {
+    let probe = unique_path(workspace, ".structural-workspace-probe");
+    write_new_file(&probe, b"structural-native-workspace-probe\n", 0o600)?;
+    fs::remove_file(&probe)
+        .map_err(|error| io_error("rootfs_workspace_probe_remove_failed", error))?;
+    sync_directory(workspace)
+}
+
+struct LinuxProcessIdentity {
+    user_id: u32,
+    group_id: u32,
+}
+
+#[cfg(target_os = "linux")]
+fn linux_effective_ids() -> LinuxProcessIdentity {
+    // SAFETY: `geteuid` and `getegid` take no pointers and have no preconditions.
+    let (uid, gid) = unsafe { (libc::geteuid(), libc::getegid()) };
+    LinuxProcessIdentity {
+        user_id: uid,
+        group_id: gid,
+    }
+}
+
+#[cfg(not(target_os = "linux"))]
+fn linux_effective_ids() -> LinuxProcessIdentity {
+    LinuxProcessIdentity {
+        user_id: 0,
+        group_id: 0,
+    }
+}
+
+fn read_linux_virtual_file(path: &Path) -> Result<String, DistributionError> {
+    let file = File::open(path).map_err(|error| io_error("rootfs_proc_open_failed", error))?;
+    let mut bytes = Vec::new();
+    file.take(1024 * 1024)
+        .read_to_end(&mut bytes)
+        .map_err(|error| io_error("rootfs_proc_read_failed", error))?;
+    if bytes.len() == 1024 * 1024 {
+        return Err(DistributionError::new(
+            "rootfs_proc_size_exceeded",
+            "Linux network inventory exceeded the diagnostic limit",
+        ));
+    }
+    String::from_utf8(bytes).map_err(|_| {
+        DistributionError::new(
+            "rootfs_proc_encoding_invalid",
+            "Linux network inventory must be UTF-8",
+        )
+    })
+}
+
+fn linux_network_interfaces() -> Result<Vec<String>, DistributionError> {
+    let text = read_linux_virtual_file(Path::new("/proc/net/dev"))?;
+    let mut interfaces = text
+        .lines()
+        .skip(2)
+        .filter_map(|line| line.split_once(':').map(|(name, _)| name.trim().to_owned()))
+        .filter(|name| !name.is_empty())
+        .collect::<Vec<_>>();
+    interfaces.sort();
+    interfaces.dedup();
+    Ok(interfaces)
+}
+
+fn linux_ipv4_route_count() -> Result<u64, DistributionError> {
+    let text = read_linux_virtual_file(Path::new("/proc/net/route"))?;
+    let count = text
+        .lines()
+        .filter(|line| {
+            let trimmed = line.trim();
+            !trimmed.is_empty() && !trimmed.starts_with("Iface")
+        })
+        .count();
+    u64::try_from(count).map_err(|_| {
+        DistributionError::new(
+            "rootfs_network_inventory_overflow",
+            "IPv4 route count overflowed",
+        )
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV1,
+) -> Result<RootfsIsolationReceiptV1, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV1 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn validate_rootfs_isolation_evidence(
+    evidence: &RootfsIsolationEvidenceV1,
+) -> Result<(), DistributionError> {
+    let exact_contract = evidence.authority == ROOTFS_RECEIPT_AUTHORITY
+        && evidence.claim_boundary == ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        && evidence.isolation_technology == ROOTFS_ISOLATION_TECHNOLOGY
+        && evidence.runtime_uid == ROOTFS_RUNTIME_UID
+        && evidence.runtime_gid == ROOTFS_RUNTIME_GID
+        && evidence.network_interfaces.len() == 1
+        && evidence.network_interfaces[0] == "lo"
+        && evidence.ipv4_route_count == 0
+        && evidence.rootfs_write_errno == libc::EROFS
+        && evidence.payload_write_errno == libc::EROFS
+        && evidence.workspace_write_passed
+        && evidence.path == ROOTFS_EMPTY_PATH
+        && evidence.python_lookup_count == 0
+        && evidence.node_lookup_count == 0
+        && evidence
+            .workbench_version
+            .starts_with("structural-workbench ")
+        && evidence.workbench_stage == "reported"
+        && evidence.workbench_terminal_status == "completed"
+        && evidence.workbench_comparison_passed
+        && evidence.mgt_workbench_stage == "reported"
+        && evidence.mgt_workbench_terminal_status == "completed"
+        && evidence.mgt_workbench_comparison_passed
+        && !evidence.container_image_built
+        && !evidence.customer_image_receipt;
+    if !exact_contract {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs receipt weakens or exceeds the exact local diagnostic contract",
+        ));
+    }
+    validate_release_id(&evidence.release_id)?;
+    for (value, label) in [
+        (&evidence.source_sha256, "rootfs source SHA-256"),
+        (&evidence.bundle_manifest_hash, "rootfs manifest hash"),
+        (
+            &evidence.bundle_manifest_file_sha256,
+            "rootfs manifest file SHA-256",
+        ),
+        (&evidence.installer_sha256, "rootfs installer SHA-256"),
+        (&evidence.workbench_sha256, "rootfs Workbench SHA-256"),
+        (&evidence.result_ir_sha256, "rootfs ResultIR SHA-256"),
+        (&evidence.report_pdf_sha256, "rootfs report SHA-256"),
+        (&evidence.mgt_source_sha256, "rootfs MGT source SHA-256"),
+        (
+            &evidence.mgt_import_health_sha256,
+            "rootfs MGT import health SHA-256",
+        ),
+        (
+            &evidence.mgt_result_ir_sha256,
+            "rootfs MGT ResultIR SHA-256",
+        ),
+        (&evidence.mgt_report_pdf_sha256, "rootfs MGT report SHA-256"),
+    ] {
+        validate_sha256_identity(value, label)?;
     }
     Ok(())
 }
@@ -1636,6 +2211,46 @@ mod tests {
         bundle
     }
 
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV1 {
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV1 {
+            authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
+            claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY.to_owned(),
+            isolation_technology: ROOTFS_ISOLATION_TECHNOLOGY.to_owned(),
+            release_id: "rootfs-release-1".to_owned(),
+            source_sha256: identity(1),
+            bundle_manifest_hash: identity(2),
+            bundle_manifest_file_sha256: identity(3),
+            installer_sha256: identity(4),
+            workbench_sha256: identity(5),
+            runtime_uid: ROOTFS_RUNTIME_UID,
+            runtime_gid: ROOTFS_RUNTIME_GID,
+            network_interfaces: vec!["lo".to_owned()],
+            ipv4_route_count: 0,
+            rootfs_write_errno: libc::EROFS,
+            payload_write_errno: libc::EROFS,
+            workspace_write_passed: true,
+            path: ROOTFS_EMPTY_PATH.to_owned(),
+            python_lookup_count: 0,
+            node_lookup_count: 0,
+            workbench_version: "structural-workbench 0.1.0".to_owned(),
+            workbench_stage: "reported".to_owned(),
+            workbench_terminal_status: "completed".to_owned(),
+            workbench_comparison_passed: true,
+            result_ir_sha256: identity(6),
+            report_pdf_sha256: identity(7),
+            mgt_workbench_stage: "reported".to_owned(),
+            mgt_workbench_terminal_status: "completed".to_owned(),
+            mgt_workbench_comparison_passed: true,
+            mgt_source_sha256: identity(8),
+            mgt_import_health_sha256: identity(9),
+            mgt_result_ir_sha256: identity(10),
+            mgt_report_pdf_sha256: identity(11),
+            container_image_built: false,
+            customer_image_receipt: false,
+        }
+    }
+
     #[test]
     fn bundle_is_deterministic_and_tamper_evident() {
         let temporary = TestDirectory::create("bundle");
@@ -1783,6 +2398,29 @@ mod tests {
                 .expect_err("generation overflow must fail")
                 .code,
             "activation_generation_overflow"
+        );
+    }
+
+    #[test]
+    fn rootfs_receipt_is_exact_hash_bound_and_non_promoting() {
+        let evidence = rootfs_evidence();
+        validate_rootfs_isolation_evidence(&evidence).expect("valid bounded evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
+        assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
+        assert_eq!(
+            receipt.receipt_hash,
+            sha256_identity(&canonical_json(&evidence).expect("canonical evidence"))
+        );
+        assert!(!receipt.evidence.container_image_built);
+        assert!(!receipt.evidence.customer_image_receipt);
+
+        let mut weakened = evidence;
+        weakened.network_interfaces.push("eth0".to_owned());
+        assert_eq!(
+            validate_rootfs_isolation_evidence(&weakened)
+                .expect_err("external interface must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
         );
     }
 

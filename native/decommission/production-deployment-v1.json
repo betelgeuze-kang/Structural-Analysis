@@ -7,6 +7,9 @@
   "active_runtime": "rust_cpp_cpu_only",
   "active_runtime_interpreters": [],
   "active_network_listener": false,
+  "local_rootfs_isolation_harness": true,
+  "local_rootfs_receipt_authority": "local_rootfs_diagnostic_c5",
+  "customer_image_receipt": false,
   "retired_entrypoints": [
     {
       "path": "deployment/legacy-react-pages/deploy-pages.yml",

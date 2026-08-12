@@ -31,6 +31,8 @@ def test_native_deployment_cutover_is_fail_closed_and_c5_bounded() -> None:
     assert report["active_entrypoint"] == "deployment/onprem/Containerfile"
     assert report["active_pages_deployment_authority"] is False
     assert report["active_runtime_interpreters"] == []
+    assert report["local_rootfs_isolation_harness"] is True
+    assert report["local_rootfs_receipt_authority"] == "local_rootfs_diagnostic_c5"
     assert report["customer_image_receipt"] is False
     assert report["c6_complete"] is False
     assert "global Python/Node removal" in report["claim_boundary"]

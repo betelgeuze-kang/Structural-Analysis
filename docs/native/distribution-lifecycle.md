@@ -76,7 +76,16 @@ scripts/run_native_distribution_e2e.sh --bundle <BUNDLE> --release-id <ID> \
   --package-version 0.1.0 --backend cpu-only --linkage shared \
   --source-sha256 sha256:<HEX> --installed-backend-receipt <BACKEND.json> \
   --receipt <E2E.json>
+scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> \
+  --receipt <ROOTFS-E2E.json>
 ```
+
+On Linux hosts that permit unprivileged namespaces, the rootfs harness executes both Workbench
+profiles from the verified CPU bundle as UID/GID 65532 with an empty lookup path, a read-only root
+and payload, a writable operator workspace, and only loopback networking. `structural-installer`
+creates and validates the canonical self-hashed receipt. Its authority is deliberately
+`local_rootfs_diagnostic_c5`; it records that neither an OCI image nor a customer image receipt was
+created.
 
 The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to-NDTHA Workbench
 profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver

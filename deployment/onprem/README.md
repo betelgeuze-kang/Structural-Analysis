@@ -15,6 +15,10 @@ absent from the runtime image.
   distribution build candidate.
 - Native bundle install, update, crash recovery, and rollback remain owned and tested by
   `structural-installer` and `scripts/run_native_distribution_e2e.sh`.
+- When Docker is unavailable, `scripts/run_native_rootfs_isolation_e2e.sh` uses unprivileged Linux
+  user, mount, and network namespaces to execute both ModelIR and MGT workflows as UID/GID 65532.
+  The Rust installer emits and re-verifies a source-bound `local_rootfs_diagnostic_c5` receipt for
+  empty-PATH execution, read-only root/payload, writable workspace, and loopback-only networking.
 
 ## Build
 
@@ -61,7 +65,8 @@ docker compose -f deployment/onprem/compose.example.yml run --rm workbench \
 ## Claim Boundary
 
 The checked-in definition proves a Python/Node-free active deployment entrypoint and a fail-closed
-offline runtime shape. A customer-approved image build, vulnerability scan, signature, SBOM
+offline runtime shape. The local rootfs diagnostic is not an OCI image receipt. A
+customer-approved image build, vulnerability scan, signature, SBOM
 attestation, registry transfer, and site import drill require environment receipts. The archived
 React Pages and Python control-plane definitions remain rollback-only until their deprecation
 windows close; this cutover alone is not final C6 source or test deletion.

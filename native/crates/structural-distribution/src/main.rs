@@ -5,9 +5,10 @@ use std::process::ExitCode;
 
 use serde::Serialize;
 use structural_distribution::{
-    active_payload_path, create_bundle, install_bundle, installation_status, recover_install,
-    rollback_install, verify_bundle, BackendProfileV1, BundleCreateRequest, DistributionError,
-    LinkageV1,
+    active_payload_path, create_bundle, create_rootfs_isolation_receipt, install_bundle,
+    installation_status, recover_install, rollback_install, verify_bundle,
+    verify_rootfs_isolation_receipt, BackendProfileV1, BundleCreateRequest, DistributionError,
+    LinkageV1, RootfsIsolationProbeRequest,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -105,6 +106,8 @@ fn run(arguments: &[OsString]) -> Result<serde_json::Value, CliError> {
             let manifest = verify_bundle(&required_path(&options, "--bundle")?)?;
             json_result("bundle_verify", manifest)?
         }
+        "runtime-probe" => run_runtime_probe(&options)?,
+        "runtime-receipt-verify" => run_runtime_receipt_verify(&options)?,
         "install" | "update" => {
             require_exact_options(&options, &["--bundle", "--root"])?;
             let state = install_bundle(
@@ -143,6 +146,46 @@ fn run(arguments: &[OsString]) -> Result<serde_json::Value, CliError> {
         _ => return Err(usage_error("unknown command")),
     };
     Ok(value)
+}
+
+fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::Value, CliError> {
+    require_exact_options(
+        options,
+        &[
+            "--bundle",
+            "--payload-root",
+            "--workspace",
+            "--workbench-root",
+            "--mgt-workbench-root",
+            "--receipt",
+        ],
+    )?;
+    let bundle = required_path(options, "--bundle")?;
+    let payload_root = required_path(options, "--payload-root")?;
+    let workspace = required_path(options, "--workspace")?;
+    let workbench_root = required_path(options, "--workbench-root")?;
+    let mgt_workbench_root = required_path(options, "--mgt-workbench-root")?;
+    let receipt = required_path(options, "--receipt")?;
+    let result = create_rootfs_isolation_receipt(&RootfsIsolationProbeRequest {
+        bundle: &bundle,
+        payload_root: &payload_root,
+        workspace: &workspace,
+        workbench_root: &workbench_root,
+        mgt_workbench_root: &mgt_workbench_root,
+        receipt: &receipt,
+    })?;
+    json_result("runtime_probe", result)
+}
+
+fn run_runtime_receipt_verify(
+    options: &BTreeMap<String, String>,
+) -> Result<serde_json::Value, CliError> {
+    require_exact_options(options, &["--receipt", "--bundle"])?;
+    let receipt = verify_rootfs_isolation_receipt(
+        &required_path(options, "--receipt")?,
+        &required_path(options, "--bundle")?,
+    )?;
+    json_result("runtime_receipt_verify", receipt)
 }
 
 fn json_result<T: Serialize>(
@@ -220,7 +263,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
+    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
 }
 
 #[cfg(test)]

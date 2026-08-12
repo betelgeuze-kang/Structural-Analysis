@@ -39,6 +39,7 @@ REQUIRED_FILES = (
     Path("deployment/legacy-python-onprem/signed-update-package.example.json"),
     Path("scripts/build_native_distribution.sh"),
     Path("scripts/run_native_distribution_e2e.sh"),
+    Path("scripts/run_native_rootfs_isolation_e2e.sh"),
     Path("scripts/build_onprem_deployment_packaging_manifest.py"),
     Path("native/capabilities.json"),
     Path("docs/native/deployment-cutover-v1.md"),
@@ -276,6 +277,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     distribution_e2e = _text(
         root, Path("scripts/run_native_distribution_e2e.sh"), blockers
     )
+    rootfs_e2e = _text(
+        root, Path("scripts/run_native_rootfs_isolation_e2e.sh"), blockers
+    )
     for token in ("structural-workbench", "structural-installer", "cpu-only", "static"):
         if token not in build_distribution:
             blockers.append(f"native_distribution_build_token_missing:{token}")
@@ -288,6 +292,19 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     ):
         if token not in distribution_e2e:
             blockers.append(f"native_distribution_e2e_token_missing:{token}")
+    for token in (
+        "unshare -Urn bwrap",
+        "--ro-bind / /",
+        "--unshare-user",
+        "--uid 65532",
+        "--gid 65532",
+        "--setenv PATH /nonexistent",
+        "workflow-mgt",
+        "runtime-probe",
+        "runtime-receipt-verify",
+    ):
+        if token not in rootfs_e2e:
+            blockers.append(f"native_rootfs_e2e_token_missing:{token}")
 
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
@@ -298,6 +315,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "active_entrypoint": ACTIVE_CONTAINER.as_posix(),
         "active_runtime": "rust_cpp_cpu_only",
         "active_network_listener": False,
+        "local_rootfs_isolation_harness": True,
+        "local_rootfs_receipt_authority": "local_rootfs_diagnostic_c5",
+        "customer_image_receipt": False,
         "c6_complete": False,
     }
     for field, expected in expected_manifest.items():
@@ -364,6 +384,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         "active_runtime_interpreters": manifest.get("active_runtime_interpreters"),
         "customer_image_receipt": False,
+        "local_rootfs_isolation_harness": manifest.get(
+            "local_rootfs_isolation_harness"
+        ),
+        "local_rootfs_receipt_authority": manifest.get(
+            "local_rootfs_receipt_authority"
+        ),
         "c6_complete": False,
         "blockers": blockers,
         "claim_boundary": (

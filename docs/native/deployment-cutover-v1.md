@@ -33,7 +33,16 @@ python3 scripts/check_native_deployment_cutover.py --json --fail-blocked
 python3 -m pytest -q tests/test_native_deployment_cutover.py
 scripts/build_native_distribution.sh --backend cpu-only --linkage static ...
 scripts/run_native_distribution_e2e.sh ...
+scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> --receipt <RECEIPT.json>
 ```
+
+The last command is a Docker-independent Linux diagnostic harness. It places the verified bundle
+under a read-only bind mount, unshares user/mount/network namespaces, maps the runtime to UID/GID
+65532, clears `PATH`, runs the ModelIR and MGT Workbench workflows, and asks the Rust installer to
+emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact receipt requires
+`EROFS` from both root and payload write probes, a writable operator workspace, only `lo`, zero
+IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
+artifacts. Its contract fixes `container_image_built=false` and `customer_image_receipt=false`.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.
