@@ -15,7 +15,7 @@ sys.modules[SPEC.name] = r1
 SPEC.loader.exec_module(r1)
 
 
-def test_r1_workspace_membership_and_source_exports_are_frozen() -> None:
+def test_r1_compatibility_package_and_source_exports_are_frozen() -> None:
     payload = r1.check_r1(ROOT)
 
     assert payload["contract_pass"] is True, payload["blockers"]
@@ -36,7 +36,7 @@ def test_r1_lower_gate_keeps_layout_golden_and_claim_boundaries() -> None:
         (ROOT / r1.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
 
-    assert inventory["transition_step"] in {"R1", "R2", "R3"}
+    assert inventory["transition_step"] in {"R1", "R2", "R3", "R4"}
     assert inventory["abi_version"] == 3
     assert len(inventory["layouts"]) == 7
     assert set(inventory["golden_cases"]) == {

@@ -420,8 +420,10 @@ product gate 승격은 아니다.
 `nonlinear_ndtha`의 한정 product matrix는 각각 별도 Python C1 golden이 수치 truth를 소유한다.
 track은 legacy endpoint 차이를 명시적으로 보존하고, nonlinear static은 legacy 3-story case를
 byte-identical product golden으로 포함하며, nonlinear NDTHA는 legacy 2-story config/input을 새
-strict product wire에서도 보존한다. Python production consumer도 그대로 유지되며 HIP C2와 R4
-restart/product integration 전에는 decommission 대상이 아니다.
+strict product wire에서도 보존한다. R4에서 product Cargo graph와 product Rust test의 live legacy
+crate 의존은 제거됐다. 기존 Python bridge/hook은 native product package 밖의 deprecated
+rollback consumer로 남으며, HIP C2·해당 기능의 bounded replacement·deprecation window·rollback
+release와 최종 C6가 닫히기 전에는 삭제하지 않는다.
 
 `inplace_scale_f32`는 이 domain gate 표의 numerical product family가 아니다. 기존 Python
 producer hook의 pointer alias/checksum 계측을 보존하는 compatibility-only probe이며 C0-C6로

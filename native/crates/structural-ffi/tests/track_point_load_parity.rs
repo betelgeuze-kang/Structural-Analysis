@@ -1,16 +1,11 @@
 use std::path::{Path, PathBuf};
 use std::thread;
 
-use structural_contracts::legacy_runtime::{
-    parse_legacy_runtime_case_v3, LegacyRuntimeCaseV3, TrackConfigV3, TrackSupportType, TrackTheory,
-};
+use structural_contracts::legacy_runtime::{parse_legacy_runtime_case_v3, LegacyRuntimeCaseV3};
 use structural_ffi::Api;
 use structural_ffi_sys::{
     SA_ERR_INVALID_ARGUMENT, SA_ERR_NONCONVERGENCE, SA_ERR_UNSUPPORTED, SA_EXECUTION_BACKEND_CPU,
     SA_TRACK_POINT_LOAD_MAX_NODE_COUNT,
-};
-use structural_runtime_ffi::{
-    phase1_rust_track_lf_solve_point_load, TrackSolveConfig, TrackSolveResult,
 };
 
 const PRODUCT_GOLDENS: [&str; 4] = [
@@ -42,29 +37,6 @@ fn product_golden_case() -> structural_contracts::legacy_runtime::TrackCaseV3 {
 
 fn legacy_golden_case() -> structural_contracts::legacy_runtime::TrackCaseV3 {
     track_case("native/tests/fixtures/legacy_runtime_v3/track_point_load.json")
-}
-
-fn legacy_config(config: &TrackConfigV3) -> TrackSolveConfig {
-    TrackSolveConfig {
-        length_m: config.length_m,
-        node_count: config.node_count,
-        support_type: match config.support_type {
-            TrackSupportType::Pinned => 0,
-            TrackSupportType::Fixed => 1,
-        },
-        theory: match config.theory {
-            TrackTheory::Euler => 0,
-            TrackTheory::Timoshenko => 1,
-        },
-        bending_stiffness_n_m2: config.bending_stiffness_n_m2,
-        shear_stiffness_n: config.shear_stiffness_n,
-        winkler_k_n_per_m2: config.winkler_k_n_per_m2,
-        pasternak_g_n: config.pasternak_g_n,
-        tolerance: config.tolerance,
-        cg_max_iter: config.cg_max_iter,
-        point_force_n: config.point_force_n,
-        point_position_m: config.point_position_m,
-    }
 }
 
 fn assert_close(actual: f64, expected: f64) {
@@ -110,7 +82,7 @@ fn safe_v1_2_cpp_path_matches_the_complete_python_c1_support_theory_matrix() {
 }
 
 #[test]
-fn safe_v1_2_cpp_path_matches_python_c1_and_preserves_the_legacy_boundary() {
+fn safe_v1_2_cpp_path_matches_python_c1_and_the_frozen_neutral_legacy_boundary() {
     let case = product_golden_case();
     let legacy_case = legacy_golden_case();
     assert_eq!(case.config, legacy_case.config);
@@ -119,65 +91,41 @@ fn safe_v1_2_cpp_path_matches_python_c1_and_preserves_the_legacy_boundary() {
         .solve_track_point_load(&case.config)
         .expect("C++ CPU solve");
 
-    let count = usize::try_from(case.config.node_count).expect("node count");
-    let mut rust_displacement = vec![0.0; count];
-    let mut rust_rotation = vec![0.0; count];
-    let mut rust_result = TrackSolveResult {
-        converged: 0,
-        iterations: 0,
-        residual_inf: 0.0,
-        max_abs_displacement_m: 0.0,
-        mid_displacement_m: 0.0,
-        status_code: 0,
-    };
-    let status = phase1_rust_track_lf_solve_point_load(
-        &legacy_config(&case.config),
-        rust_displacement.as_mut_ptr(),
-        rust_rotation.as_mut_ptr(),
-        case.config.node_count,
-        &mut rust_result,
-    );
-
-    assert_eq!(status, 0);
-    assert_eq!(rust_result.converged, 1);
-    assert_eq!(cpp.iterations, rust_result.iterations);
     assert_eq!(cpp.iterations, case.result.iterations);
-    assert_eq!(rust_result.iterations, legacy_case.result.iterations);
+    assert_eq!(cpp.iterations, legacy_case.result.iterations);
     assert_eq!(cpp.execution_backend, SA_EXECUTION_BACKEND_CPU);
     assert_eq!(cpp.fallback_count, 0);
-    assert_close(cpp.residual_inf, rust_result.residual_inf);
     assert_close(cpp.residual_inf, case.result.residual_inf);
-    assert_close(rust_result.residual_inf, legacy_case.result.residual_inf);
+    assert_close(cpp.residual_inf, legacy_case.result.residual_inf);
     assert_close(
         cpp.max_abs_displacement_m,
-        rust_result.max_abs_displacement_m,
+        legacy_case.result.max_abs_displacement_m,
     );
-    assert_close(cpp.mid_displacement_m, rust_result.mid_displacement_m);
-    for (((cpp_value, rust_value), golden_value), legacy_value) in cpp
+    assert_close(
+        cpp.mid_displacement_m,
+        legacy_case.result.mid_displacement_m,
+    );
+    for ((cpp_value, golden_value), legacy_value) in cpp
         .displacement_m
         .iter()
-        .zip(&rust_displacement)
         .zip(&case.result.displacement_m)
         .zip(&legacy_case.result.displacement_m)
     {
-        assert_close(*cpp_value, *rust_value);
         assert_close(*cpp_value, *golden_value);
-        assert_close(*rust_value, *legacy_value);
+        assert_close(*cpp_value, *legacy_value);
     }
-    for (index, (((cpp_value, rust_value), golden_value), legacy_value)) in cpp
+    for (index, ((cpp_value, golden_value), legacy_value)) in cpp
         .rotation_rad
         .iter()
-        .zip(&rust_rotation)
         .zip(&case.result.rotation_rad)
         .zip(&legacy_case.result.rotation_rad)
         .enumerate()
     {
         assert_close(*cpp_value, *golden_value);
-        assert_close(*rust_value, *legacy_value);
         if index == 0 || index + 1 == cpp.rotation_rad.len() {
-            assert_close((*cpp_value - *rust_value).abs(), 3.436_580_346_133_486e-5);
+            assert_close((*cpp_value - *legacy_value).abs(), 3.436_580_346_133_486e-5);
         } else {
-            assert_close(*cpp_value, *rust_value);
+            assert_close(*cpp_value, *legacy_value);
         }
     }
 }

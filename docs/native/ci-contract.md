@@ -41,6 +41,8 @@ Jobs:
    - R3 nonlinear static CPU ownership, ABI v1.3/safe-wrapper integration and C1 claim check
    - R3 nonlinear NDTHA shared constitutive ownership, ABI v1.4/safe-wrapper integration and C1
      claim check
+   - compatibility-transition R4 product metadata/lock/dependency detachment, neutral-golden-only
+     product parity tests, separately locked legacy rollback build and exact five-symbol check
    - R4 ABI v1.5 caller-owned NDTHA restart-state layout, safe-wrapper split-execution bitwise
      identity, tamper rejection and failure atomicity
    - ABI v1.6 bounded ModelIR-to-NDTHA layout, safe-wrapper closed-form parity, exact profile

@@ -509,8 +509,20 @@ line search와 collapse의 5-case matrix를 계산한다. strict Rust product-go
 unknown, non-finite, vector-length 및 terminal-state mismatch를 거부한다. C++ safe path는
 displacement `1e-12 m`, drift `1e-10 %`, force `1e-8 kN`, residual `1e-6 N` 이내에서 11 response
 channel과 전체 summary를 재현하고 integer/boolean taxonomy는 exact match한다. 따라서 이 한정
-profile은 C1이다. Broader story/record/material domain, HIP C2, checkpoint/restart와 product E2E는
-open이고 legacy 5-symbol ABI는 변경하지 않는다.
+profile은 C1이다. 이 R3 시점에는 broader story/record/material domain, HIP C2,
+checkpoint/restart와 product E2E가 open이었고 legacy 5-symbol ABI는 변경하지 않았다.
+
+Compatibility transition R4는 numerical gate를 올리지 않고 product graph 권한만 이전한다.
+
+- `structural_runtime_ffi`를 native workspace member, root lock과 모든 product crate dependency에서
+  제거했다.
+- product Rust parity test는 pointer-free neutral fixture만 읽고 legacy crate를 import하지 않는다.
+- 기존 ABI v3 crate는 독립 workspace/lock을 가진 rollback/deprecation package로 남으며 CI가
+  standalone test, release build와 exact 5-symbol export를 검사한다.
+- `structural-runtime`의 durable job store가 checkpoint publish/restart와 cooperative cancel을
+  소유한다.
+- Python bridge/hook과 다섯 legacy symbol 제거는 C6, deprecation window와 rollback release 뒤의
+  R5로 남는다. 따라서 이 R4는 global Python decommission이나 HIP C2를 주장하지 않는다.
 
 R4의 첫 restart transport slice는 ABI v1.5다.
 

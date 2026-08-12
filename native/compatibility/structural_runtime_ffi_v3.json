@@ -1,6 +1,6 @@
 {
   "schema_version": "structural-runtime-ffi-compatibility.v1",
-  "transition_step": "R3",
+  "transition_step": "R4",
   "package": {
     "manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
     "name": "structural_runtime_ffi",
@@ -10,7 +10,8 @@
       "cdylib",
       "rlib"
     ],
-    "workspace": "native/Cargo.toml",
+    "workspace": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+    "product_workspace_member": false,
     "standalone_output_name_preserved": true,
     "legacy_lock_retained_for_rollback": true
   },
@@ -266,5 +267,45 @@
     "replacement": "backend execution receipts own transfer, residency and fallback telemetry; no product scale operation is introduced",
     "removal_gate": "remove with the deprecated Python producer hook after rollback coverage; do not promote through C0-C6"
   },
-  "claim_boundary": "R3 owns three bounded C++ CPU product slices through the single sa_get_api_v1 table. Track point-load is C1 only for the four-case 9-node midpoint-load Python product-golden matrix exposed by ABI v1.2; the legacy endpoint convention remains frozen separately. Nonlinear static is C1 only for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking Python product-golden matrix exposed by ABI v1.3; its legacy 3-story case remains frozen and byte-identical to one product golden. Nonlinear NDTHA is C1 only for the five-case 1/2/3-story Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping-cap, adaptive-retry, line-search and collapse Python product-golden matrix exposed by ABI v1.4; the frozen 2-story, 3-step legacy Rust case remains a shared config/input boundary. inplace_scale_f32 is explicitly a compatibility-only alias/checksum probe, not a product capability and receives no C0-C6 promotion. All legacy five-symbol exports remain unchanged, and broader dynamic input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
+  "r4_runtime_cutover": {
+    "product_workspace": "native/Cargo.toml",
+    "product_lockfile": "native/Cargo.lock",
+    "standalone_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+    "standalone_lockfile": "implementation/phase1/structural_runtime_ffi/Cargo.lock",
+    "product_api_entry": "sa_get_api_v1",
+    "product_workspace_member": false,
+    "product_dependency": false,
+    "product_parity_authority": "language_neutral_goldens",
+    "legacy_exports_preserved": true,
+    "legacy_package_disposition": "rollback_deprecation_only",
+    "runtime_owners": {
+      "job_checkpoint_cancel": "native/crates/structural-runtime/src/job.rs",
+      "ndtha_checkpoint": "native/crates/structural-runtime/src/checkpoint.rs",
+      "runtime_dispatch": "native/crates/structural-runtime/src/lib.rs"
+    },
+    "product_parity_tests": [
+      "native/crates/structural-ffi/tests/track_point_load_parity.rs",
+      "native/crates/structural-ffi/tests/nonlinear_static_parity.rs",
+      "native/crates/structural-ffi/tests/nonlinear_ndtha_parity.rs"
+    ],
+    "deprecated_consumers": [
+      "implementation/phase1/rust_track_lf_bridge.py",
+      "implementation/phase1/rust_nonlinear_frame_bridge.py",
+      "implementation/phase1/structural_runtime_hook.py"
+    ],
+    "deprecation": {
+      "started": true,
+      "removal_allowed": false,
+      "removal_gate": "C6",
+      "rollback_lock_retained": true,
+      "consumer_removal_required": true
+    },
+    "verification": {
+      "checker": "scripts/check_structural_runtime_ffi_r4.py",
+      "contract_test": "tests/test_structural_runtime_ffi_r4.py",
+      "legacy_abi_test": "implementation/phase1/structural_runtime_ffi/tests/abi_v3_contract.rs",
+      "legacy_adapter_test": "implementation/phase1/structural_runtime_ffi/tests/contracts_adapter.rs"
+    }
+  },
+  "claim_boundary": "R3 moved three bounded CPU product slices behind the single C++ sa_get_api_v1 table and their language-neutral Python C1 goldens remain frozen. R4 removes structural_runtime_ffi from the native product workspace and dependency graph; structural-runtime owns bounded job, checkpoint/restart and cancel lifecycle, while product parity tests consume only neutral golden data. The unchanged five-symbol Rust ABI, its standalone lockfile, deprecated Python bridge consumers and numerical source remain only for rollback and deprecation compatibility until C6. This cutover does not promote broader input-space parity, HIP C2, unrelated product E2E, global Python decommission or legacy symbol removal."
 }

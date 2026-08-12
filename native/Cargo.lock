@@ -781,7 +781,6 @@ dependencies = [
  "serde_json",
  "structural-contracts",
  "structural-ffi-sys",
- "structural_runtime_ffi",
 ]
 
 [[package]]
@@ -819,14 +818,6 @@ dependencies = [
  "structural-cli",
  "structural-contracts",
  "structural-report",
-]
-
-[[package]]
-name = "structural_runtime_ffi"
-version = "0.1.0"
-dependencies = [
- "structural-contracts",
- "structural-ffi-sys",
 ]
 
 [[package]]

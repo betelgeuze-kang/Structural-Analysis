@@ -1,6 +1,6 @@
 # Existing Native Probe to Product Library Transition Plan
 
-Status: active migration; R3 compatibility decomposition complete, R4 cutover pending
+Status: active migration; R4 product-workspace cutover complete, R5 removal pending
 
 Historical baseline: exact main 14c25f4ddb72eb64cab689e6d0183b056025dca3
 
@@ -130,11 +130,11 @@ families and later gates.
   P-delta, damping cap, adaptive retry, line search와 collapse의 five-case full-result matrix를
   검증하므로 이 한정 profile은 C1이다.
 
-Current next gate: 승인된 전용 ROCm runner에서 bounded CPU family의 HIP C2를 구현하거나,
-R4 checkpoint/runtime cutover를 시작한다. `inplace_scale_f32`는 structural operation이 아닌
+R3 다음 gate였던 R4 product-workspace cutover는 아래와 같이 완료됐다. 승인된 전용 ROCm
+runner의 HIP C2는 이 cutover와 독립된 open gate다. `inplace_scale_f32`는 structural operation이 아닌
 alias/checksum instrumentation이므로 compatibility-only probe로 고정했고 C0-C6 product gate를
 부여하지 않는다. backend receipt가 transfer/residency/fallback 계측을 대체한 뒤 Python producer
-hook과 함께 제거한다. R4 cutover는 아직 시작하지 않았다.
+hook과 함께 제거한다.
 
 R3 compatibility decomposition도 완료됐다. `contracts.rs`는 neutral wire adapter,
 `runtime.rs`는 frozen Rust numerical implementation, `ffi.rs`는 raw pointer/length와 5개 C export,
@@ -147,6 +147,19 @@ pointer 또는 `std::slice`가 다시 들어오거나 수치 helper가 FFI로 �
 - structural-runtime이 job/checkpoint/cancel owner가 된다.
 - old exported solve symbol은 compatibility feature에서만 유지한다.
 - C4/C5 후 deprecation을 시작한다.
+
+Implementation status: product-workspace cutover complete; removal is not claimed.
+
+- `structural_runtime_ffi`는 `native/Cargo.toml`, product metadata/dependency graph와
+  `native/Cargo.lock`에서 제거됐다.
+- 세 product Rust parity test는 live legacy crate 호출 대신 frozen language-neutral fixture만
+  읽는다. 별도 compatibility ABI/adapter test가 기존 수치 결과와 5개 export를 계속 고정한다.
+- legacy manifest는 독립 workspace root와 자체 `Cargo.lock`을 소유하며 CI가 별도 target에
+  release cdylib을 빌드해 exact symbol set을 검사한다.
+- `structural-runtime`이 bounded durable job, checkpoint/restart와 cooperative cancel lifecycle을
+  소유한다.
+- 기존 Python bridge/hook은 rollback/deprecation consumer로 명시되어 있고 C6, deprecation
+  window와 rollback release 전에는 삭제할 수 없다.
 
 ### Step R5: removal
 
@@ -239,7 +252,7 @@ hosted CTest는 같은 consumer의 CPU self-test를, dedicated lane은 HIP self-
 1. native workspace/C ABI base
 2. ModelIR Rust contract
 3. ModelIR C++ core and round-trip
-4. structural_runtime_ffi compatibility member
+4. structural_runtime_ffi compatibility member (historical R1, detached at R4)
 5. mgt HIP table compatibility adapter
 6. first element/material/assembly parity slice
 7. CPU solver and restart slice

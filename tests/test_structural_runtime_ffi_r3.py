@@ -38,7 +38,7 @@ def test_r3_inventory_keeps_family_specific_parity_boundaries_explicit() -> None
         (ROOT / r3.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
 
-    assert inventory["transition_step"] == "R3"
+    assert inventory["transition_step"] in {"R3", "R4"}
     assert inventory["r3_track_point_load"] == r3.EXPECTED_R3
     parity = inventory["r3_track_point_load"]["parity"]
     assert parity["python_full_vector"] == "pass"

@@ -16,7 +16,6 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent
 CRATE_DIR = ROOT / "structural_runtime_ffi"
 TARGET_DIR = CRATE_DIR / "target" / "release"
-WORKSPACE_DIR = ROOT.parents[1] / "native"
 
 
 def _shared_lib_name() -> str:
@@ -33,8 +32,7 @@ def _latest_source_mtime() -> float:
         latest = max(latest, p.stat().st_mtime)
     for manifest in (
         CRATE_DIR / "Cargo.toml",
-        WORKSPACE_DIR / "Cargo.toml",
-        WORKSPACE_DIR / "Cargo.lock",
+        CRATE_DIR / "Cargo.lock",
     ):
         if manifest.exists():
             latest = max(latest, manifest.stat().st_mtime)

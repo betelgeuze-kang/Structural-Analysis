@@ -58,6 +58,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_structural_runtime_ffi_r1.py",
         "scripts/check_structural_runtime_ffi_r2.py",
         "scripts/check_structural_runtime_ffi_r3.py",
+        "scripts/check_structural_runtime_ffi_r4.py",
         "scripts/classify_native_ci_scope.py",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
@@ -90,6 +91,8 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_structural_runtime_ffi_r1.py",
         "tests/test_structural_runtime_ffi_r2.py",
         "tests/test_structural_runtime_ffi_r3.py",
+        "tests/test_structural_runtime_ffi_r4.py",
+        "tests/test_structural_runtime_bridge_paths.py",
     }
 )
 

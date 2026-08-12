@@ -8,8 +8,9 @@ deterministic validation report and caller-owned canonical snapshot. The safe Ru
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
 bounded ModelIR domain to C3. Later bounded slices add CPU ResultIR/ReportIR product composition,
 restart, durable jobs and external comparison plus opt-in source-bound HIP C2 candidates;
-`capabilities.json` records each separate boundary. The existing `structural_runtime_ffi`
-package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
+`capabilities.json` records each separate boundary. The legacy `structural_runtime_ffi`
+package is now an R4 standalone rollback/deprecation package outside the product workspace.
+R2 moved its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
 `structural-contracts`, and keeps the original crate as the numerical oracle plus adapter. Its
 ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 first
@@ -17,8 +18,9 @@ moves `track_point_load` into `structural_solver_cpu`, exposes it through ABI v1
 only the 9-node midpoint-load support/theory matrix to Python C1. The next slice moves the
 nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller. An independent
 NumPy dense-matrix oracle promotes only a five-case 1/3-story topology, elastic/plastic,
-mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity, HIP C2 and
-sequential runtime cutover remain open. ABI v1.11 separately adds complete real-iteration
+mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity and HIP C2
+remain open. The R4 product-graph cutover removes every direct legacy-crate dependency from
+native Rust tests while neutral goldens retain the frozen boundary. ABI v1.11 separately adds complete real-iteration
 caller-owned Newton begin/advance state. The pointer-free `SASTAC01` checkpoint and public
 `static-run`/`static-resume` ResultIR/ReportIR flow provide bounded CPU C4/C5 implementation
 evidence without promoting the numerical family past C1; protected HIP C2, arbitrary ModelIR
@@ -303,15 +305,18 @@ slot at offset 176; the current table is 184 bytes. The selected CPU/HIP table o
 full-residual context, telemetry, and no-fallback device choice. Existing callers may continue to provide
 their older struct size, and every request exposes later-minor slots as null.
 
-`structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
-package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen
-inventory is `compatibility/structural_runtime_ffi_v3.json`; workspace tests, neutral fixture
+`structural_runtime_ffi` is the R4 standalone compatibility package retaining the existing
+package name, cdylib name, deprecated Python bridge output location and rollback lockfile. It is
+absent from `native/Cargo.toml`, `native/Cargo.lock` and all product-crate dependencies. Its frozen
+inventory is `compatibility/structural_runtime_ffi_v3.json`; standalone tests, neutral fixture
 hashes and the release binary-symbol checker fail closed on drift. The language-neutral wire
 contract serializes shared-storage identity as a boolean and never serializes process pointer
 addresses. Its compatibility implementation is physically split into the neutral `contracts`
 adapter, frozen numerical `runtime`, raw-pointer/export `ffi`, and public `lib` façade; ownership
 checks reject boundary regression. The C++ shared product library still exports only `sa_get_api_v1`, while all five
-legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` is now the
+legacy Rust symbols remain in the separately built compatibility cdylib. Removal stays fail-closed
+until deprecated consumers, C6 evidence, a deprecation window and rollback release are complete.
+`mgt_hip_full_residual_ffi` is now the
 H3 workspace compatibility adapter: it resolves only `sa_get_api_v1`, converts the frozen
 positional ABI to v1.12 descriptors, and delegates context ownership to the product library.
 The four retained frame/shell/full-residual replay and resident-worker executables are also

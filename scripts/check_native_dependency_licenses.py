@@ -25,6 +25,10 @@ ALLOWED_REGISTRY_SOURCES = frozenset(
         "sparse+https://index.crates.io/",
     }
 )
+CHECKED_MANIFESTS = (
+    Path("native/Cargo.toml"),
+    Path("implementation/phase1/structural_runtime_ffi/Cargo.toml"),
+)
 
 
 def _load_policy(path: Path) -> dict[str, Any]:
@@ -207,9 +211,11 @@ def check_dependency_licenses(
     policy_path: Path = DEFAULT_POLICY,
 ) -> dict[str, object]:
     repo_root = repo_root.resolve()
-    workspace = repo_root / "native" / "Cargo.toml"
+    workspace = repo_root / CHECKED_MANIFESTS[0]
     if not workspace.exists():
-        return _report(rows=[], blockers=[], workspace_present=False)
+        return _report(
+            rows=[], blockers=[], workspace_present=False, checked_manifests=[]
+        )
 
     resolved_policy = policy_path if policy_path.is_absolute() else repo_root / policy_path
     if not resolved_policy.is_file():
@@ -217,6 +223,7 @@ def check_dependency_licenses(
             rows=[],
             blockers=["native_dependency_policy_missing:native/dependency-policy.json"],
             workspace_present=True,
+            checked_manifests=[],
         )
     try:
         policy = _load_policy(resolved_policy)
@@ -225,6 +232,7 @@ def check_dependency_licenses(
             rows=[],
             blockers=[f"native_dependency_policy_invalid:{exc}"],
             workspace_present=True,
+            checked_manifests=[],
         )
     policy_blockers = _validate_policy(policy)
     if policy_blockers:
@@ -232,42 +240,63 @@ def check_dependency_licenses(
             rows=[],
             blockers=policy_blockers,
             workspace_present=True,
+            checked_manifests=[],
         )
 
-    completed = subprocess.run(
-        [
-            "cargo",
-            "metadata",
-            "--manifest-path",
-            str(workspace),
-            "--format-version",
-            "1",
-            "--locked",
-        ],
-        cwd=repo_root,
-        check=False,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
+    checked_manifests: list[str] = []
+    packages_by_id: dict[str, dict[str, Any]] = {}
+    metadata_blockers: list[str] = []
+    for relative_manifest in CHECKED_MANIFESTS:
+        manifest = repo_root / relative_manifest
+        if not manifest.is_file():
+            metadata_blockers.append(
+                f"locked_manifest_missing:{relative_manifest.as_posix()}"
+            )
+            continue
+        completed = subprocess.run(
+            [
+                "cargo",
+                "metadata",
+                "--manifest-path",
+                str(manifest),
+                "--format-version",
+                "1",
+                "--locked",
+            ],
+            cwd=repo_root,
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        if completed.returncode != 0:
+            detail = completed.stderr.strip().splitlines()
+            summary = detail[-1] if detail else f"exit_{completed.returncode}"
+            metadata_blockers.append(
+                f"cargo_metadata_failed:{relative_manifest.as_posix()}:{summary}"
+            )
+            continue
+        try:
+            metadata = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            metadata_blockers.append(
+                f"cargo_metadata_invalid_json:{relative_manifest.as_posix()}:{exc}"
+            )
+            continue
+        checked_manifests.append(relative_manifest.as_posix())
+        for package in metadata.get("packages", []):
+            package_id = str(package.get("id", ""))
+            packages_by_id[package_id] = package
+
+    rows, policy_result = evaluate_metadata(
+        {"packages": list(packages_by_id.values())}, policy
     )
-    if completed.returncode != 0:
-        detail = completed.stderr.strip().splitlines()
-        summary = detail[-1] if detail else f"exit_{completed.returncode}"
-        return _report(
-            rows=[],
-            blockers=[f"cargo_metadata_failed:{summary}"],
-            workspace_present=True,
-        )
-    try:
-        metadata = json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
-        return _report(
-            rows=[],
-            blockers=[f"cargo_metadata_invalid_json:{exc}"],
-            workspace_present=True,
-        )
-    rows, blockers = evaluate_metadata(metadata, policy)
-    return _report(rows=rows, blockers=blockers, workspace_present=True)
+    return _report(
+        rows=rows,
+        blockers=sorted(dict.fromkeys(metadata_blockers + policy_result)),
+        workspace_present=True,
+        checked_manifests=checked_manifests,
+    )
 
 
 def _report(
@@ -275,19 +304,21 @@ def _report(
     rows: list[dict[str, object]],
     blockers: list[str],
     workspace_present: bool,
+    checked_manifests: list[str],
 ) -> dict[str, object]:
     return {
         "schema_version": "native-dependency-license-report.v1",
         "status": "pass" if not blockers else "blocked",
         "contract_pass": not blockers,
         "workspace_present": workspace_present,
+        "checked_manifests": checked_manifests,
         "package_count": len(rows),
         "packages": rows,
         "blockers": blockers,
         "claim_boundary": (
-            "This report checks the locked Cargo graph against repository source and "
-            "SPDX allowlists. It is not legal advice and does not replace dependency "
-            "vulnerability scanning."
+            "This report checks the product and standalone rollback locked Cargo graphs "
+            "against repository source and SPDX allowlists. It is not legal advice and "
+            "does not replace dependency vulnerability scanning."
         ),
     }
 

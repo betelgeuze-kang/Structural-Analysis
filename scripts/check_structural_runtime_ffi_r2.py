@@ -123,7 +123,8 @@ def check_r2(
         blockers.append(f"r2_inventory_invalid:{exc}")
         return _report(blockers, lower_gate, {}, {})
 
-    if inventory.get("transition_step") not in {"R2", "R3"}:
+    transition_step = inventory.get("transition_step")
+    if transition_step not in {"R2", "R3", "R4"}:
         blockers.append("r2_inventory_transition_step_invalid")
 
     ownership = inventory.get("ownership")
@@ -227,7 +228,12 @@ def check_r2(
         if digest != expected_hash:
             blockers.append(f"r2_wire_golden_hash_mismatch:{relative_path}")
 
-    metadata, metadata_error = r1._cargo_metadata(repo_root)
+    package = inventory.get("package", {})
+    manifest = str(package.get("manifest", "")) if isinstance(package, dict) else ""
+    if transition_step == "R4":
+        metadata, metadata_error = r1._legacy_cargo_metadata(repo_root, manifest)
+    else:
+        metadata, metadata_error = r1._cargo_metadata(repo_root)
     if metadata_error is not None or metadata is None:
         blockers.append(f"r2_cargo_metadata_failed:{metadata_error}")
     else:
@@ -237,7 +243,7 @@ def check_r2(
             if package.get("name") == "structural_runtime_ffi"
         ]
         if len(packages) != 1:
-            blockers.append("r2_workspace_package_count_mismatch")
+            blockers.append("r2_compatibility_package_count_mismatch")
         else:
             dependency_names = {
                 dependency.get("name")

@@ -4,11 +4,11 @@
     {
       "legacy_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
       "migration_owner": "structural-runtime",
-      "transition_step": "R3",
-      "workspace_member": true,
+      "transition_step": "R4",
+      "workspace_member": false,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "run a bounded CPU family HIP C2 on the approved ROCm runner or begin the R4 checkpoint/runtime cutover; inplace_scale_f32 is compatibility-only"
+      "next_gate": "remove deprecated Python bridge consumers only after their bounded product replacements, C6 evidence, deprecation window and rollback package are complete; approved-device HIP C2 remains separate"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

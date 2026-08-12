@@ -10,6 +10,7 @@ on:
     branches: ["main"]
     paths:
       - "native/**"
+      - "implementation/phase1/structural_runtime_ffi/**"
       - ".github/workflows/native-nightly-quality.yml"
       - "scripts/check_native_dependency_licenses.py"
   workflow_dispatch:

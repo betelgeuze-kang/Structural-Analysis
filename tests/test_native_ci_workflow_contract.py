@@ -87,14 +87,14 @@ def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
     assert "--workspace --all-targets --locked" in workflow
 
 
-def test_native_rust_gate_freezes_r3_product_and_legacy_runtime_exports() -> None:
+def test_native_rust_gate_separates_r4_product_and_legacy_runtime_exports() -> None:
     workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
     )
 
-    assert "-p structural_runtime_ffi --release --locked" in workflow
-    assert "check_structural_runtime_ffi_r3.py" in workflow
-    assert "native/target/release/libstructural_runtime_ffi.so" in workflow
+    assert "implementation/phase1/structural_runtime_ffi/Cargo.toml" in workflow
+    assert "check_structural_runtime_ffi_r4.py" in workflow
+    assert "build/native-legacy-runtime-r4/release/libstructural_runtime_ffi.so" in workflow
     assert "structural_track_point_load_abi_tests" in workflow
     assert "structural_nonlinear_static_abi_tests" in workflow
     assert "structural_backend_selector_abi_tests" in workflow

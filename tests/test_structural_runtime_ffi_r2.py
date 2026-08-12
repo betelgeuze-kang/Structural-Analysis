@@ -32,7 +32,7 @@ def test_r2_inventory_maps_each_compatibility_role_to_one_owner() -> None:
         (ROOT / r2.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
 
-    assert inventory["transition_step"] in {"R2", "R3"}
+    assert inventory["transition_step"] in {"R2", "R3", "R4"}
     assert inventory["ownership"] == r2.EXPECTED_OWNERSHIP
     assert inventory["verification"] == r2.EXPECTED_VERIFICATION
     assert set(inventory["wire_golden_sha256"]) == {

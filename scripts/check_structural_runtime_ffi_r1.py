@@ -29,12 +29,19 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _cargo_metadata(repo_root: Path) -> tuple[dict[str, Any] | None, str | None]:
+    return _cargo_metadata_for_manifest(repo_root, Path("native/Cargo.toml"))
+
+
+def _cargo_metadata_for_manifest(
+    repo_root: Path,
+    manifest: Path,
+) -> tuple[dict[str, Any] | None, str | None]:
     completed = subprocess.run(
         [
             "cargo",
             "metadata",
             "--manifest-path",
-            str(repo_root / "native" / "Cargo.toml"),
+            str(repo_root / manifest),
             "--format-version",
             "1",
             "--locked",
@@ -54,6 +61,13 @@ def _cargo_metadata(repo_root: Path) -> tuple[dict[str, Any] | None, str | None]
     except json.JSONDecodeError as exc:
         return None, f"invalid_json:{exc}"
     return payload, None
+
+
+def _legacy_cargo_metadata(
+    repo_root: Path,
+    manifest: str,
+) -> tuple[dict[str, Any] | None, str | None]:
+    return _cargo_metadata_for_manifest(repo_root, Path(manifest))
 
 
 def _library_exports(path: Path) -> tuple[list[str] | None, str | None]:
@@ -97,7 +111,7 @@ def check_r1(
     if inventory.get("schema_version") != "structural-runtime-ffi-compatibility.v1":
         blockers.append("r1_inventory_schema_version_invalid")
     transition_step = inventory.get("transition_step")
-    if transition_step not in {"R1", "R2", "R3"}:
+    if transition_step not in {"R1", "R2", "R3", "R4"}:
         blockers.append("r1_inventory_transition_step_invalid")
     if inventory.get("abi_version") != 3:
         blockers.append("r1_inventory_abi_version_invalid")
@@ -203,8 +217,9 @@ def check_r1(
             blockers.append("r1_compatibility_owner_invalid")
         if owner.get("transition_step") != transition_step:
             blockers.append("r1_compatibility_transition_step_invalid")
-        if owner.get("workspace_member") is not True:
-            blockers.append("r1_compatibility_workspace_member_false")
+        expected_workspace_member = transition_step != "R4"
+        if owner.get("workspace_member") is not expected_workspace_member:
+            blockers.append("r1_compatibility_workspace_member_disposition_invalid")
         if owner.get("legacy_abi_preserved") is not True:
             blockers.append("r1_compatibility_abi_not_preserved")
         if owner.get("removal_allowed") is not False:
@@ -223,7 +238,10 @@ def check_r1(
             for row in metadata.get("packages", [])
             if Path(str(row.get("manifest_path", ""))).resolve() == resolved_manifest
         ]
-        if len(matches) != 1:
+        if transition_step == "R4":
+            if matches:
+                blockers.append("r1_legacy_package_still_in_product_workspace")
+        elif len(matches) != 1:
             blockers.append("r1_workspace_package_count_mismatch")
         else:
             row = matches[0]
@@ -247,6 +265,46 @@ def check_r1(
                 blockers.append("r1_package_not_in_workspace_members")
         if Path(str(metadata.get("workspace_root", ""))).resolve() != (repo_root / "native").resolve():
             blockers.append("r1_workspace_root_mismatch")
+
+    if transition_step == "R4":
+        standalone, standalone_error = _legacy_cargo_metadata(
+            repo_root, expected_manifest
+        )
+        if standalone_error is not None or standalone is None:
+            blockers.append(f"r1_standalone_cargo_metadata_failed:{standalone_error}")
+        else:
+            resolved_manifest = (repo_root / expected_manifest).resolve()
+            matches = [
+                row
+                for row in standalone.get("packages", [])
+                if Path(str(row.get("manifest_path", ""))).resolve()
+                == resolved_manifest
+            ]
+            if len(matches) != 1:
+                blockers.append("r1_standalone_package_count_mismatch")
+            else:
+                row = matches[0]
+                if row.get("name") != package.get("name"):
+                    blockers.append("r1_standalone_package_name_mismatch")
+                if row.get("version") != package.get("version"):
+                    blockers.append("r1_standalone_package_version_mismatch")
+                if row.get("rust_version") != package.get("rust_version"):
+                    blockers.append("r1_standalone_package_msrv_mismatch")
+                targets = row.get("targets", [])
+                matching_targets = [
+                    target
+                    for target in targets
+                    if target.get("name") == package.get("name")
+                    and sorted(target.get("crate_types", []))
+                    == sorted(package.get("crate_types", []))
+                ]
+                if len(matching_targets) != 1:
+                    blockers.append("r1_standalone_crate_types_mismatch")
+                if row.get("id") not in standalone.get("workspace_members", []):
+                    blockers.append("r1_standalone_package_not_workspace_member")
+            expected_root = (repo_root / expected_manifest).resolve().parent
+            if Path(str(standalone.get("workspace_root", ""))).resolve() != expected_root:
+                blockers.append("r1_standalone_workspace_root_mismatch")
 
     binary_exports: list[str] | None = None
     if library_path is not None:

@@ -272,7 +272,7 @@ def check_r3(
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         blockers.append(f"r3_inventory_invalid:{exc}")
         return _report(blockers, lower_gate, None)
-    if inventory.get("transition_step") != "R3":
+    if inventory.get("transition_step") not in {"R3", "R4"}:
         blockers.append("r3_inventory_transition_step_invalid")
     r3_inventory = inventory.get("r3_track_point_load")
     if r3_inventory != EXPECTED_R3:
@@ -893,7 +893,7 @@ def _report(
             "full-result parity only for the five-case 1/2/3-story Newmark, elastic/plastic, "
             "mixed-sign acceleration, P-delta, damping-cap, adaptive-retry, line-search and "
             "collapse matrix through ABI v1.4. Broader dynamic input-space parity, HIP C2 and "
-            "runtime cutover remain open."
+            "later compatibility cutover/removal are outside this R3 lower gate."
         ),
     }
 

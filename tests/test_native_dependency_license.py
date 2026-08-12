@@ -151,3 +151,18 @@ def test_dependency_license_check_is_not_applicable_before_workspace(
     assert payload["workspace_present"] is False
     assert payload["contract_pass"] is True
     assert payload["package_count"] == 0
+    assert payload["checked_manifests"] == []
+
+
+def test_repository_policy_checks_product_and_standalone_rollback_locks() -> None:
+    payload = licenses.check_dependency_licenses(ROOT)
+
+    assert payload["contract_pass"] is True, payload["blockers"]
+    assert payload["checked_manifests"] == [
+        "native/Cargo.toml",
+        "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+    ]
+    assert any(
+        row["package"] == "structural_runtime_ffi@0.1.0"
+        for row in payload["packages"]
+    )

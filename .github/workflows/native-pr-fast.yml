@@ -135,14 +135,25 @@ jobs:
           cargo fmt --manifest-path native/Cargo.toml --all -- --check
           cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets --locked -- -D warnings
           cargo test --manifest-path native/Cargo.toml --workspace --locked
-          cargo build --manifest-path native/Cargo.toml \
-            -p structural_runtime_ffi --release --locked
-          python3 scripts/check_structural_runtime_ffi_r3.py \
-            --legacy-library native/target/release/libstructural_runtime_ffi.so \
+          cargo fmt --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml -- --check
+          cargo clippy \
+            --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml \
+            --all-targets --locked -- -D warnings
+          cargo test \
+            --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml \
+            --locked
+          cargo build \
+            --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml \
+            --release --locked --target-dir build/native-legacy-runtime-r4
+          python3 scripts/check_structural_runtime_ffi_r4.py \
+            --legacy-library build/native-legacy-runtime-r4/release/libstructural_runtime_ffi.so \
             --json --fail-blocked
           rustup toolchain install 1.77.0 --profile minimal
           cargo +1.77.0 check --manifest-path native/Cargo.toml \
             --workspace --all-targets --locked
+          cargo +1.77.0 check \
+            --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml \
+            --all-targets --locked
 
   cpp-quality:
     name: cpp-quality
@@ -419,6 +430,9 @@ jobs:
             exit 0
           fi
           cargo build --manifest-path native/Cargo.toml --workspace --release --locked
+          cargo build \
+            --manifest-path implementation/phase1/structural_runtime_ffi/Cargo.toml \
+            --release --locked --target-dir build/native-legacy-runtime-r4
           for linkage in static shared; do
             if [[ "$linkage" == "shared" ]]; then
               build_shared=ON
@@ -458,8 +472,8 @@ jobs:
                 echo "CPU-only package links a ROCm/HIP runtime" >&2
                 exit 1
               fi
-              python3 scripts/check_structural_runtime_ffi_r3.py \
-                --legacy-library native/target/release/libstructural_runtime_ffi.so \
+              python3 scripts/check_structural_runtime_ffi_r4.py \
+                --legacy-library build/native-legacy-runtime-r4/release/libstructural_runtime_ffi.so \
                 --product-library "$shared_library" \
                 --json --fail-blocked
               python3 scripts/check_native_backend_selector.py \
