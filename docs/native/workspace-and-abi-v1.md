@@ -127,6 +127,8 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
   static CPU operation 한 slot을 추가한다.
 - v1.4는 0x00010004이며 versioned nested descriptor로 여덟 caller-owned input view와 열한
   caller-owned output view를 전달하는 nonlinear NDTHA CPU operation 한 slot을 추가한다.
+- v1.5는 0x00010005이며 pointer-free로 직렬화 가능한 caller-owned inter-step state를
+  private-copy에서 제한된 step만큼 진행하는 nonlinear NDTHA restart operation 한 slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -463,3 +465,20 @@ displacement `1e-12 m`, drift `1e-10 %`, force `1e-8 kN`, residual `1e-6 N` 이�
 channel과 전체 summary를 재현하고 integer/boolean taxonomy는 exact match한다. 따라서 이 한정
 profile은 C1이다. Broader story/record/material domain, HIP C2, checkpoint/restart와 product E2E는
 open이고 legacy 5-symbol ABI는 변경하지 않는다.
+
+R4의 첫 restart transport slice는 ABI v1.5다.
+
+- offset 96의 `nonlinear_ndtha_advance` optional slot이 기존 reserved pointer 하나를 사용하며
+  table은 128 bytes를 유지한다. v1.0-v1.4 요청에서는 slot/capability가 null/0이다.
+- state는 next-step/terminal/envelope/iteration scalar와 displacement/velocity/acceleration,
+  열한 response channel을 모두 caller-owned buffer로 전달한다. process pointer는 상태 identity에
+  포함되지 않으며 serialization owner는 Rust다.
+- C++는 입력 state 전체를 검증하고 private copy에서만 진행한 뒤 성공 시 한 번에 publish한다.
+  길이/stride/type/alignment/overflow, state buffer 상호 alias, input alias, 잘못된 tail/status와
+  nonconvergence는 caller state를 변경하지 않고 fail closed한다.
+- C++ unit, C ABI, sanitizer, fuzz와 safe Rust test는 one-shot, 1+remaining, step-by-step 결과가
+  completion/collapse에서 bitwise identical이고 terminal resume이 idempotent임을 증명한다.
+
+이 slice는 ABI/Rust C3 transport foundation이다. model/state/execution hash가 결합된 canonical
+checkpoint artifact, filesystem durability, crash/restart job recovery와 product E2E가 추가되기 전에는
+C4 checkpoint gate 또는 제품 restart 완료를 주장하지 않는다.

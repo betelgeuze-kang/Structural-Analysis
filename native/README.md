@@ -23,7 +23,11 @@ caller-owned response channels through ABI v1.4, and preserves the complete froz
 3-step legacy Rust fixture. A separate NumPy dense-matrix oracle and strict product-golden wire
 promote a five-case 1/2/3-story Newmark, elastic/plastic, mixed-sign acceleration, P-delta,
 damping-cap, adaptive-retry, line-search and collapse matrix to C1. Broader dynamic input-space
-parity, HIP C2 and runtime cutover remain open. The legacy five-symbol ABI is unchanged.
+parity and HIP C2 remain open. R4 begins with an ABI v1.5 caller-owned inter-step restart state:
+the C++ kernel advances a validated private copy, the C boundary publishes only complete success,
+and the safe Rust owner proves bitwise one-shot/split identity for completion and collapse. This
+is a C3 transport foundation only; durable hash-bound checkpoint artifacts, crash recovery and
+product E2E remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -87,7 +91,8 @@ or links ROCm.
 library, CMake package targets and `structural-native-build.json`. The only public shared
 library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
 slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
-v1.4 slot. v1.0-v1.3 table prefixes remain byte-compatible.
+v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement while keeping
+the table at 128 bytes. v1.0-v1.4 table prefixes remain byte-compatible.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

@@ -27,7 +27,8 @@ extern "C" {
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
 #define SA_ABI_V1_3 UINT32_C(0x00010003)
 #define SA_ABI_V1_4 UINT32_C(0x00010004)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_4
+#define SA_ABI_V1_5 UINT32_C(0x00010005)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_5
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -72,6 +73,7 @@ enum {
 #define SA_CAPABILITY_TRACK_POINT_LOAD_CPU UINT64_C(8)
 #define SA_CAPABILITY_NONLINEAR_STATIC_CPU UINT64_C(16)
 #define SA_CAPABILITY_NONLINEAR_NDTHA_CPU UINT64_C(32)
+#define SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU UINT64_C(64)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
@@ -96,6 +98,13 @@ enum {
 enum {
     SA_EXECUTION_BACKEND_CPU = 1,
     SA_EXECUTION_BACKEND_HIP = 2
+};
+
+enum {
+    SA_NONLINEAR_NDTHA_EXECUTION_ACTIVE = 0,
+    SA_NONLINEAR_NDTHA_EXECUTION_COMPLETED = 1,
+    SA_NONLINEAR_NDTHA_EXECUTION_COLLAPSED = 2,
+    SA_NONLINEAR_NDTHA_EXECUTION_NONCONVERGED = 3
 };
 
 typedef struct sa_header_v1 {
@@ -288,6 +297,35 @@ typedef struct sa_nonlinear_ndtha_result_v1 {
     uint64_t reserved[2];
 } sa_nonlinear_ndtha_result_v1;
 
+/*
+ * v1.5 restart state is fully caller-owned. Every nested mutable view is both input and output:
+ * the library validates and deep-copies the complete state, advances a private copy, and only
+ * publishes it after successful execution. Inter-step boundaries are deterministic; callers
+ * must serialize values rather than the process-local pointer fields in these descriptors.
+ */
+typedef struct sa_nonlinear_ndtha_state_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t next_step;
+    uint32_t status;
+    int32_t collapse_step;
+    uint32_t max_plastic_story_count;
+    uint32_t total_line_search_backtracks;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint32_t reserved_u32;
+    uint64_t adaptive_iteration_sum;
+    double collapse_time_s;
+    double collapse_drift_ratio_pct;
+    double collapse_top_displacement_m;
+    double max_drift_ratio_pct;
+    sa_mut_buffer_view_v1 displacement_m;
+    sa_mut_buffer_view_v1 velocity_m_per_s;
+    sa_mut_buffer_view_v1 acceleration_m_per_s2;
+    sa_nonlinear_ndtha_outputs_v1 response;
+    uint64_t reserved[2];
+} sa_nonlinear_ndtha_state_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -350,6 +388,13 @@ typedef sa_status_code_v1 (*sa_nonlinear_ndtha_solve_fn_v1)(
     sa_nonlinear_ndtha_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_nonlinear_ndtha_advance_fn_v1)(
+    const sa_nonlinear_ndtha_config_v1* config,
+    const sa_nonlinear_ndtha_inputs_v1* inputs,
+    uint32_t step_budget,
+    sa_nonlinear_ndtha_state_v1* state,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -364,7 +409,8 @@ typedef struct sa_api_v1 {
     sa_track_point_load_solve_fn_v1 track_point_load_solve;
     sa_nonlinear_static_solve_fn_v1 nonlinear_static_solve;
     sa_nonlinear_ndtha_solve_fn_v1 nonlinear_ndtha_solve;
-    const void* reserved[4];
+    sa_nonlinear_ndtha_advance_fn_v1 nonlinear_ndtha_advance;
+    const void* reserved[3];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -372,7 +418,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, track_point_load_solve))
 #define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_solve))
 #define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_solve))
-#define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_advance))
+#define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

@@ -3,9 +3,15 @@
 use crate::{SaBufferViewV1, SaErrorBufferV1, SaMutBufferViewV1, SaStatusCodeV1};
 
 pub const SA_ABI_V1_4: u32 = 0x0001_0004;
+pub const SA_ABI_V1_5: u32 = 0x0001_0005;
 pub const SA_CAPABILITY_NONLINEAR_NDTHA_CPU: u64 = 1 << 5;
+pub const SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU: u64 = 1 << 6;
 pub const SA_NONLINEAR_NDTHA_MAX_STORY_COUNT: u32 = 1_000_000;
 pub const SA_NONLINEAR_NDTHA_MAX_STEP_COUNT: u32 = 1_000_000;
+pub const SA_NONLINEAR_NDTHA_EXECUTION_ACTIVE: u32 = 0;
+pub const SA_NONLINEAR_NDTHA_EXECUTION_COMPLETED: u32 = 1;
+pub const SA_NONLINEAR_NDTHA_EXECUTION_COLLAPSED: u32 = 2;
+pub const SA_NONLINEAR_NDTHA_EXECUTION_NONCONVERGED: u32 = 3;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -94,6 +100,31 @@ pub struct SaNonlinearNdthaResultV1 {
     pub reserved: [u64; 2],
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct SaNonlinearNdthaStateV1 {
+    pub abi_version: u32,
+    pub struct_size: u32,
+    pub next_step: u32,
+    pub status: u32,
+    pub collapse_step: i32,
+    pub max_plastic_story_count: u32,
+    pub total_line_search_backtracks: u32,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+    pub reserved_u32: u32,
+    pub adaptive_iteration_sum: u64,
+    pub collapse_time_s: f64,
+    pub collapse_drift_ratio_pct: f64,
+    pub collapse_top_displacement_m: f64,
+    pub max_drift_ratio_pct: f64,
+    pub displacement_m: SaMutBufferViewV1,
+    pub velocity_m_per_s: SaMutBufferViewV1,
+    pub acceleration_m_per_s2: SaMutBufferViewV1,
+    pub response: SaNonlinearNdthaOutputsV1,
+    pub reserved: [u64; 2],
+}
+
 pub type SaNonlinearNdthaSolveFnV1 = unsafe extern "C" fn(
     config: *const SaNonlinearNdthaConfigV1,
     inputs: *const SaNonlinearNdthaInputsV1,
@@ -102,11 +133,19 @@ pub type SaNonlinearNdthaSolveFnV1 = unsafe extern "C" fn(
     error: *mut SaErrorBufferV1,
 ) -> SaStatusCodeV1;
 
+pub type SaNonlinearNdthaAdvanceFnV1 = unsafe extern "C" fn(
+    config: *const SaNonlinearNdthaConfigV1,
+    inputs: *const SaNonlinearNdthaInputsV1,
+    step_budget: u32,
+    state: *mut SaNonlinearNdthaStateV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
 #[cfg(test)]
 mod tests {
     use super::{
         SaNonlinearNdthaConfigV1, SaNonlinearNdthaInputsV1, SaNonlinearNdthaOutputsV1,
-        SaNonlinearNdthaResultV1,
+        SaNonlinearNdthaResultV1, SaNonlinearNdthaStateV1,
     };
     use core::mem::{align_of, offset_of, size_of};
 
@@ -161,5 +200,17 @@ mod tests {
         assert_eq!(offset_of!(SaNonlinearNdthaResultV1, output_story_count), 88);
         assert_eq!(offset_of!(SaNonlinearNdthaResultV1, execution_backend), 104);
         assert_eq!(offset_of!(SaNonlinearNdthaResultV1, reserved), 112);
+
+        assert_eq!(size_of::<SaNonlinearNdthaStateV1>(), 792);
+        assert_eq!(align_of::<SaNonlinearNdthaStateV1>(), 8);
+        assert_eq!(offset_of!(SaNonlinearNdthaStateV1, next_step), 8);
+        assert_eq!(
+            offset_of!(SaNonlinearNdthaStateV1, adaptive_iteration_sum),
+            40
+        );
+        assert_eq!(offset_of!(SaNonlinearNdthaStateV1, collapse_time_s), 48);
+        assert_eq!(offset_of!(SaNonlinearNdthaStateV1, displacement_m), 80);
+        assert_eq!(offset_of!(SaNonlinearNdthaStateV1, response), 224);
+        assert_eq!(offset_of!(SaNonlinearNdthaStateV1, reserved), 776);
     }
 }

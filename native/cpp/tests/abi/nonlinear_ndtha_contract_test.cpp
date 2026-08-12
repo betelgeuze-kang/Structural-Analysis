@@ -38,9 +38,10 @@ namespace {
     return api;
 }
 
-[[nodiscard]] sa_nonlinear_ndtha_config_v1 config() {
+[[nodiscard]] sa_nonlinear_ndtha_config_v1 config(
+    const std::uint32_t abi_version = SA_ABI_V1_4) {
     sa_nonlinear_ndtha_config_v1 value {};
-    value.abi_version = SA_ABI_V1_4;
+    value.abi_version = abi_version;
     value.struct_size = static_cast<std::uint32_t>(sizeof(value));
     value.story_count = 2U;
     value.step_count = 3U;
@@ -62,9 +63,10 @@ namespace {
 
 [[nodiscard]] sa_buffer_view_v1 input_view(
     const double* const data,
-    const std::uint64_t length) {
+    const std::uint64_t length,
+    const std::uint32_t abi_version = SA_ABI_V1_4) {
     return {
-        SA_ABI_V1_4,
+        abi_version,
         static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
         data,
         length,
@@ -79,9 +81,10 @@ namespace {
 template <typename Value, std::size_t Length>
 [[nodiscard]] sa_mut_buffer_view_v1 output_view(
     std::array<Value, Length>& values,
-    const std::uint32_t element_type) {
+    const std::uint32_t element_type,
+    const std::uint32_t abi_version = SA_ABI_V1_4) {
     return {
-        SA_ABI_V1_4,
+        abi_version,
         static_cast<std::uint32_t>(sizeof(sa_mut_buffer_view_v1)),
         values.data(),
         values.size(),
@@ -104,18 +107,20 @@ struct InputStorage {
     std::array<double, 3> acceleration {0.0, 0.01, -0.005};
 };
 
-[[nodiscard]] sa_nonlinear_ndtha_inputs_v1 inputs(InputStorage& storage) {
+[[nodiscard]] sa_nonlinear_ndtha_inputs_v1 inputs(
+    InputStorage& storage,
+    const std::uint32_t abi_version = SA_ABI_V1_4) {
     sa_nonlinear_ndtha_inputs_v1 value {};
-    value.abi_version = SA_ABI_V1_4;
+    value.abi_version = abi_version;
     value.struct_size = static_cast<std::uint32_t>(sizeof(value));
-    value.story_stiffness_n_per_m = input_view(storage.stiffness.data(), 2U);
-    value.story_height_m = input_view(storage.height.data(), 2U);
-    value.story_axial_n = input_view(storage.axial.data(), 2U);
-    value.story_yield_drift_m = input_view(storage.yield_drift.data(), 2U);
-    value.story_mass_kg = input_view(storage.mass.data(), 2U);
-    value.story_damping_n_s_per_m = input_view(storage.damping.data(), 2U);
-    value.floor_load_base_n = input_view(storage.floor_load.data(), 2U);
-    value.acceleration_g = input_view(storage.acceleration.data(), 3U);
+    value.story_stiffness_n_per_m = input_view(storage.stiffness.data(), 2U, abi_version);
+    value.story_height_m = input_view(storage.height.data(), 2U, abi_version);
+    value.story_axial_n = input_view(storage.axial.data(), 2U, abi_version);
+    value.story_yield_drift_m = input_view(storage.yield_drift.data(), 2U, abi_version);
+    value.story_mass_kg = input_view(storage.mass.data(), 2U, abi_version);
+    value.story_damping_n_s_per_m = input_view(storage.damping.data(), 2U, abi_version);
+    value.floor_load_base_n = input_view(storage.floor_load.data(), 2U, abi_version);
+    value.acceleration_g = input_view(storage.acceleration.data(), 3U, abi_version);
     return value;
 }
 
@@ -135,25 +140,127 @@ struct OutputStorage {
     [[nodiscard]] bool operator==(const OutputStorage&) const = default;
 };
 
-[[nodiscard]] sa_nonlinear_ndtha_outputs_v1 outputs(OutputStorage& storage) {
+template <typename Storage>
+[[nodiscard]] sa_nonlinear_ndtha_outputs_v1 outputs(
+    Storage& storage,
+    const std::uint32_t abi_version = SA_ABI_V1_4) {
     sa_nonlinear_ndtha_outputs_v1 value {};
-    value.abi_version = SA_ABI_V1_4;
+    value.abi_version = abi_version;
     value.struct_size = static_cast<std::uint32_t>(sizeof(value));
-    value.top_displacement_m = output_view(storage.top_displacement_m, SA_ELEMENT_TYPE_F64);
-    value.drift_ratio_pct = output_view(storage.drift_ratio_pct, SA_ELEMENT_TYPE_F64);
-    value.base_shear_kn = output_view(storage.base_shear_kn, SA_ELEMENT_TYPE_F64);
-    value.core_drift_pct = output_view(storage.core_drift_pct, SA_ELEMENT_TYPE_F64);
-    value.core_shear_kn = output_view(storage.core_shear_kn, SA_ELEMENT_TYPE_F64);
-    value.step_converged = output_view(storage.step_converged, SA_ELEMENT_TYPE_U8);
-    value.step_iterations = output_view(storage.step_iterations, SA_ELEMENT_TYPE_U32);
+    value.top_displacement_m =
+        output_view(storage.top_displacement_m, SA_ELEMENT_TYPE_F64, abi_version);
+    value.drift_ratio_pct =
+        output_view(storage.drift_ratio_pct, SA_ELEMENT_TYPE_F64, abi_version);
+    value.base_shear_kn =
+        output_view(storage.base_shear_kn, SA_ELEMENT_TYPE_F64, abi_version);
+    value.core_drift_pct =
+        output_view(storage.core_drift_pct, SA_ELEMENT_TYPE_F64, abi_version);
+    value.core_shear_kn =
+        output_view(storage.core_shear_kn, SA_ELEMENT_TYPE_F64, abi_version);
+    value.step_converged =
+        output_view(storage.step_converged, SA_ELEMENT_TYPE_U8, abi_version);
+    value.step_iterations =
+        output_view(storage.step_iterations, SA_ELEMENT_TYPE_U32, abi_version);
     value.step_plastic_story_count =
-        output_view(storage.step_plastic_story_count, SA_ELEMENT_TYPE_U32);
-    value.step_residual_inf = output_view(storage.step_residual_inf, SA_ELEMENT_TYPE_F64);
+        output_view(storage.step_plastic_story_count, SA_ELEMENT_TYPE_U32, abi_version);
+    value.step_residual_inf =
+        output_view(storage.step_residual_inf, SA_ELEMENT_TYPE_F64, abi_version);
     value.story_drift_envelope_pct =
-        output_view(storage.story_drift_envelope_pct, SA_ELEMENT_TYPE_F64);
+        output_view(storage.story_drift_envelope_pct, SA_ELEMENT_TYPE_F64, abi_version);
     value.final_story_drift_pct =
-        output_view(storage.final_story_drift_pct, SA_ELEMENT_TYPE_F64);
+        output_view(storage.final_story_drift_pct, SA_ELEMENT_TYPE_F64, abi_version);
     return value;
+}
+
+struct RestartStorage {
+    std::array<double, 2> displacement_m {};
+    std::array<double, 2> velocity_m_per_s {};
+    std::array<double, 2> acceleration_m_per_s2 {};
+    std::array<double, 3> top_displacement_m {};
+    std::array<double, 3> drift_ratio_pct {};
+    std::array<double, 3> base_shear_kn {};
+    std::array<double, 3> core_drift_pct {};
+    std::array<double, 3> core_shear_kn {};
+    std::array<std::uint8_t, 3> step_converged {};
+    std::array<std::uint32_t, 3> step_iterations {};
+    std::array<std::uint32_t, 3> step_plastic_story_count {};
+    std::array<double, 3> step_residual_inf {};
+    std::array<double, 2> story_drift_envelope_pct {};
+    std::array<double, 2> final_story_drift_pct {};
+};
+
+[[nodiscard]] sa_nonlinear_ndtha_state_v1 restart_state(RestartStorage& storage) {
+    sa_nonlinear_ndtha_state_v1 value {};
+    value.abi_version = SA_ABI_V1_5;
+    value.struct_size = static_cast<std::uint32_t>(sizeof(value));
+    value.status = SA_NONLINEAR_NDTHA_EXECUTION_ACTIVE;
+    value.collapse_step = -1;
+    value.execution_backend = SA_EXECUTION_BACKEND_CPU;
+    value.displacement_m =
+        output_view(storage.displacement_m, SA_ELEMENT_TYPE_F64, SA_ABI_V1_5);
+    value.velocity_m_per_s =
+        output_view(storage.velocity_m_per_s, SA_ELEMENT_TYPE_F64, SA_ABI_V1_5);
+    value.acceleration_m_per_s2 =
+        output_view(storage.acceleration_m_per_s2, SA_ELEMENT_TYPE_F64, SA_ABI_V1_5);
+    value.response = outputs(storage, SA_ABI_V1_5);
+    return value;
+}
+
+template <typename Value, std::size_t Length>
+[[nodiscard]] bool exact_array(
+    const std::array<Value, Length>& left,
+    const std::array<Value, Length>& right) {
+    return std::memcmp(left.data(), right.data(), sizeof(Value) * Length) == 0;
+}
+
+[[nodiscard]] bool exact_restart_storage(
+    const RestartStorage& left,
+    const RestartStorage& right) {
+    return exact_array(left.displacement_m, right.displacement_m)
+        && exact_array(left.velocity_m_per_s, right.velocity_m_per_s)
+        && exact_array(left.acceleration_m_per_s2, right.acceleration_m_per_s2)
+        && exact_array(left.top_displacement_m, right.top_displacement_m)
+        && exact_array(left.drift_ratio_pct, right.drift_ratio_pct)
+        && exact_array(left.base_shear_kn, right.base_shear_kn)
+        && exact_array(left.core_drift_pct, right.core_drift_pct)
+        && exact_array(left.core_shear_kn, right.core_shear_kn)
+        && exact_array(left.step_converged, right.step_converged)
+        && exact_array(left.step_iterations, right.step_iterations)
+        && exact_array(
+            left.step_plastic_story_count, right.step_plastic_story_count)
+        && exact_array(left.step_residual_inf, right.step_residual_inf)
+        && exact_array(
+            left.story_drift_envelope_pct, right.story_drift_envelope_pct)
+        && exact_array(left.final_story_drift_pct, right.final_story_drift_pct);
+}
+
+[[nodiscard]] bool exact_restart_scalars(
+    const sa_nonlinear_ndtha_state_v1& left,
+    const sa_nonlinear_ndtha_state_v1& right) {
+    return left.abi_version == right.abi_version && left.struct_size == right.struct_size
+        && left.next_step == right.next_step && left.status == right.status
+        && left.collapse_step == right.collapse_step
+        && left.max_plastic_story_count == right.max_plastic_story_count
+        && left.total_line_search_backtracks == right.total_line_search_backtracks
+        && left.execution_backend == right.execution_backend
+        && left.fallback_count == right.fallback_count
+        && left.reserved_u32 == right.reserved_u32
+        && left.adaptive_iteration_sum == right.adaptive_iteration_sum
+        && std::memcmp(&left.collapse_time_s, &right.collapse_time_s, sizeof(double)) == 0
+        && std::memcmp(
+               &left.collapse_drift_ratio_pct,
+               &right.collapse_drift_ratio_pct,
+               sizeof(double))
+            == 0
+        && std::memcmp(
+               &left.collapse_top_displacement_m,
+               &right.collapse_top_displacement_m,
+               sizeof(double))
+            == 0
+        && std::memcmp(
+               &left.max_drift_ratio_pct, &right.max_drift_ratio_pct, sizeof(double))
+            == 0
+        && left.reserved[0] == right.reserved[0] && left.reserved[1] == right.reserved[1];
 }
 
 [[nodiscard]] sa_nonlinear_ndtha_result_v1 result_descriptor() {
@@ -178,6 +285,7 @@ struct OutputStorage {
     CHECK(api.track_point_load_solve != nullptr);
     CHECK(api.nonlinear_static_solve != nullptr);
     CHECK(api.nonlinear_ndtha_solve != nullptr);
+    CHECK(api.nonlinear_ndtha_advance == nullptr);
     for (const auto* reserved : api.reserved) {
         CHECK(reserved == nullptr);
     }
@@ -381,6 +489,196 @@ struct OutputStorage {
     return true;
 }
 
+[[nodiscard]] bool v1_5_table_adds_only_the_restart_operation() {
+    const auto api = load_api(SA_ABI_V1_5);
+    CHECK(api.abi_version == SA_ABI_V1_5);
+    CHECK(api.struct_size == sizeof(sa_api_v1));
+    CHECK(api.capabilities
+          == (SA_CAPABILITY_BUFFER_VALIDATION | SA_CAPABILITY_MODEL_IR_V2_TYPED
+              | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+              | SA_CAPABILITY_NONLINEAR_STATIC_CPU | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+              | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU));
+    CHECK(api.nonlinear_ndtha_solve != nullptr);
+    CHECK(api.nonlinear_ndtha_advance != nullptr);
+    for (const auto* reserved : api.reserved) {
+        CHECK(reserved == nullptr);
+    }
+
+    const auto old = load_api(SA_ABI_V1_4);
+    CHECK(old.nonlinear_ndtha_solve != nullptr);
+    CHECK(old.nonlinear_ndtha_advance == nullptr);
+    CHECK((old.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU) == 0U);
+
+    const sa_api_request_v1 request {
+        SA_ABI_V1_5,
+        SA_API_REQUEST_V1_MIN_SIZE,
+        0U,
+        {0U, 0U, 0U},
+    };
+    alignas(sa_api_v1) std::array<std::byte, SA_API_V1_5_MIN_SIZE> prefix {};
+    auto* prefix_api = reinterpret_cast<sa_api_v1*>(prefix.data());
+    prefix_api->abi_version = SA_ABI_V1_5;
+    prefix_api->struct_size = SA_API_V1_5_MIN_SIZE;
+    CHECK(sa_get_api_v1(&request, prefix_api, nullptr) == SA_OK);
+    CHECK(prefix_api->nonlinear_ndtha_advance != nullptr);
+
+    alignas(sa_api_v1) std::array<std::byte, SA_API_V1_4_MIN_SIZE> undersized {};
+    auto* undersized_api = reinterpret_cast<sa_api_v1*>(undersized.data());
+    undersized_api->abi_version = SA_ABI_V1_5;
+    undersized_api->struct_size = SA_API_V1_4_MIN_SIZE;
+    CHECK(sa_get_api_v1(&request, undersized_api, nullptr) == SA_ERR_STRUCT_SIZE);
+    return true;
+}
+
+[[nodiscard]] bool caller_owned_restart_is_bitwise_deterministic() {
+    const auto legacy_api = load_api();
+    const auto restart_api = load_api(SA_ABI_V1_5);
+    const auto legacy_config = config();
+    const auto restart_config = config(SA_ABI_V1_5);
+    InputStorage input_storage;
+    const auto legacy_inputs = inputs(input_storage);
+    const auto restart_inputs = inputs(input_storage, SA_ABI_V1_5);
+
+    OutputStorage expected_output;
+    const auto expected_descriptors = outputs(expected_output);
+    auto expected_result = result_descriptor();
+    CHECK(legacy_api.nonlinear_ndtha_solve(
+              &legacy_config,
+              &legacy_inputs,
+              &expected_descriptors,
+              &expected_result,
+              nullptr)
+          == SA_OK);
+
+    RestartStorage segmented_storage;
+    auto segmented_state = restart_state(segmented_storage);
+    CHECK(restart_api.nonlinear_ndtha_advance(
+              &restart_config, &restart_inputs, 1U, &segmented_state, nullptr)
+          == SA_OK);
+    CHECK(segmented_state.next_step == 1U);
+    CHECK(segmented_state.status == SA_NONLINEAR_NDTHA_EXECUTION_ACTIVE);
+    CHECK(segmented_storage.step_converged[0] == 1U);
+    CHECK(segmented_storage.step_converged[1] == 0U);
+    CHECK(restart_api.nonlinear_ndtha_advance(
+              &restart_config, &restart_inputs, 100U, &segmented_state, nullptr)
+          == SA_OK);
+
+    RestartStorage bulk_storage;
+    auto bulk_state = restart_state(bulk_storage);
+    CHECK(restart_api.nonlinear_ndtha_advance(
+              &restart_config, &restart_inputs, 3U, &bulk_state, nullptr)
+          == SA_OK);
+    CHECK(exact_restart_storage(segmented_storage, bulk_storage));
+    CHECK(exact_restart_scalars(segmented_state, bulk_state));
+    CHECK(segmented_state.status == SA_NONLINEAR_NDTHA_EXECUTION_COMPLETED);
+    CHECK(segmented_state.next_step == expected_result.step_count_completed);
+    CHECK(segmented_state.max_plastic_story_count
+        == expected_result.max_plastic_story_count);
+    CHECK(segmented_state.total_line_search_backtracks
+        == expected_result.total_line_search_backtracks);
+    CHECK(segmented_state.adaptive_iteration_sum == 3U);
+    CHECK(segmented_state.execution_backend == SA_EXECUTION_BACKEND_CPU);
+    CHECK(segmented_state.fallback_count == 0U);
+    CHECK(exact_array(segmented_storage.top_displacement_m, expected_output.top_displacement_m));
+    CHECK(exact_array(segmented_storage.drift_ratio_pct, expected_output.drift_ratio_pct));
+    CHECK(exact_array(segmented_storage.base_shear_kn, expected_output.base_shear_kn));
+    CHECK(exact_array(segmented_storage.core_drift_pct, expected_output.core_drift_pct));
+    CHECK(exact_array(segmented_storage.core_shear_kn, expected_output.core_shear_kn));
+    CHECK(exact_array(segmented_storage.step_converged, expected_output.step_converged));
+    CHECK(exact_array(segmented_storage.step_iterations, expected_output.step_iterations));
+    CHECK(exact_array(
+        segmented_storage.step_plastic_story_count,
+        expected_output.step_plastic_story_count));
+    CHECK(exact_array(segmented_storage.step_residual_inf, expected_output.step_residual_inf));
+    CHECK(exact_array(
+        segmented_storage.story_drift_envelope_pct,
+        expected_output.story_drift_envelope_pct));
+    CHECK(exact_array(
+        segmented_storage.final_story_drift_pct, expected_output.final_story_drift_pct));
+
+    const auto terminal_storage = segmented_storage;
+    const auto terminal_state = segmented_state;
+    CHECK(restart_api.nonlinear_ndtha_advance(
+              &restart_config, &restart_inputs, 100U, &segmented_state, nullptr)
+          == SA_OK);
+    CHECK(exact_restart_storage(segmented_storage, terminal_storage));
+    CHECK(exact_restart_scalars(segmented_state, terminal_state));
+    return true;
+}
+
+[[nodiscard]] bool restart_failure_paths_are_atomic_and_fail_closed() {
+    const auto api = load_api(SA_ABI_V1_5);
+    const auto valid_config = config(SA_ABI_V1_5);
+    InputStorage input_storage;
+    auto input_descriptors = inputs(input_storage, SA_ABI_V1_5);
+    RestartStorage storage;
+    auto state = restart_state(storage);
+    CHECK(api.nonlinear_ndtha_advance(
+              &valid_config, &input_descriptors, 1U, &state, nullptr)
+          == SA_OK);
+
+    storage.step_iterations[2] = 1U;
+    const auto corrupt_storage = storage;
+    const auto corrupt_state = state;
+    CHECK(api.nonlinear_ndtha_advance(
+              &valid_config, &input_descriptors, 1U, &state, nullptr)
+          == SA_ERR_CHECKPOINT_MISMATCH);
+    CHECK(exact_restart_storage(storage, corrupt_storage));
+    CHECK(exact_restart_scalars(state, corrupt_state));
+    storage.step_iterations[2] = 0U;
+
+    const auto valid_storage = storage;
+    auto aliased_state = state;
+    aliased_state.velocity_m_per_s.data = aliased_state.displacement_m.data;
+    CHECK(api.nonlinear_ndtha_advance(
+              &valid_config, &input_descriptors, 1U, &aliased_state, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(exact_restart_storage(storage, valid_storage));
+
+    RestartStorage failed_storage;
+    auto failed_state = restart_state(failed_storage);
+    const auto original_failed_storage = failed_storage;
+    const auto original_failed_state = failed_state;
+    auto nonconverged = valid_config;
+    nonconverged.max_step_iterations = 1U;
+    nonconverged.newton_max_iter = 1U;
+    nonconverged.tolerance = 1.0e-30;
+    CHECK(api.nonlinear_ndtha_advance(
+              &nonconverged, &input_descriptors, 1U, &failed_state, nullptr)
+          == SA_ERR_NONCONVERGENCE);
+    CHECK(exact_restart_storage(failed_storage, original_failed_storage));
+    CHECK(exact_restart_scalars(failed_state, original_failed_state));
+
+    input_storage.stiffness[1] = std::numeric_limits<double>::quiet_NaN();
+    CHECK(api.nonlinear_ndtha_advance(
+              &valid_config, &input_descriptors, 1U, &failed_state, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(exact_restart_storage(failed_storage, original_failed_storage));
+    CHECK(exact_restart_scalars(failed_state, original_failed_state));
+    return true;
+}
+
+[[nodiscard]] bool restarted_collapse_is_a_complete_terminal_checkpoint() {
+    const auto api = load_api(SA_ABI_V1_5);
+    auto collapse = config(SA_ABI_V1_5);
+    collapse.collapse_drift_threshold_pct = 1.0e-6;
+    InputStorage input_storage;
+    const auto input_descriptors = inputs(input_storage, SA_ABI_V1_5);
+    RestartStorage storage;
+    auto state = restart_state(storage);
+    CHECK(api.nonlinear_ndtha_advance(
+              &collapse, &input_descriptors, 100U, &state, nullptr)
+          == SA_OK);
+    CHECK(state.status == SA_NONLINEAR_NDTHA_EXECUTION_COLLAPSED);
+    CHECK(state.next_step == 1U);
+    CHECK(state.collapse_step == 0);
+    CHECK(near(state.collapse_drift_ratio_pct, 1.1677310711126211e-5));
+    CHECK(near(state.collapse_top_displacement_m, 4.084273705964167e-7));
+    CHECK(storage.step_converged[0] == 1U);
+    CHECK(storage.step_converged[1] == 0U);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -390,6 +688,10 @@ int main() {
         invalid_and_nonconverged_calls_are_failure_atomic,
         output_metadata_and_aliasing_fail_closed,
         physical_collapse_returns_a_complete_terminal_result,
+        v1_5_table_adds_only_the_restart_operation,
+        caller_owned_restart_is_bitwise_deterministic,
+        restart_failure_paths_are_atomic_and_fail_closed,
+        restarted_collapse_is_a_complete_terminal_checkpoint,
     };
     for (const auto test : tests) {
         if (!test()) {

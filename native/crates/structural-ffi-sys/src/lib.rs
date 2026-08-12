@@ -18,7 +18,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_4;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_5;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -107,7 +107,8 @@ pub struct SaApiV1 {
     pub track_point_load_solve: Option<SaTrackPointLoadSolveFnV1>,
     pub nonlinear_static_solve: Option<SaNonlinearStaticSolveFnV1>,
     pub nonlinear_ndtha_solve: Option<SaNonlinearNdthaSolveFnV1>,
-    pub reserved: [*const c_void; 4],
+    pub nonlinear_ndtha_advance: Option<SaNonlinearNdthaAdvanceFnV1>,
+    pub reserved: [*const c_void; 3],
 }
 
 impl Default for SaApiV1 {
@@ -126,7 +127,8 @@ impl Default for SaApiV1 {
             track_point_load_solve: None,
             nonlinear_static_solve: None,
             nonlinear_ndtha_solve: None,
-            reserved: [core::ptr::null(); 4],
+            nonlinear_ndtha_advance: None,
+            reserved: [core::ptr::null(); 3],
         }
     }
 }
@@ -165,7 +167,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, track_point_load_solve), 72);
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_solve), 80);
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_solve), 88);
-        assert_eq!(offset_of!(SaApiV1, reserved), 96);
+        assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_advance), 96);
+        assert_eq!(offset_of!(SaApiV1, reserved), 104);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

@@ -17,6 +17,7 @@
 #include <mutex>
 #include <new>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -43,7 +44,8 @@ static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
 static_assert(offsetof(sa_api_v1, track_point_load_solve) == 72U);
 static_assert(offsetof(sa_api_v1, nonlinear_static_solve) == 80U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_solve) == 88U);
-static_assert(offsetof(sa_api_v1, reserved) == 96U);
+static_assert(offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U);
+static_assert(offsetof(sa_api_v1, reserved) == 104U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -88,6 +90,13 @@ static_assert(offsetof(sa_nonlinear_ndtha_result_v1, max_plastic_story_count) ==
 static_assert(offsetof(sa_nonlinear_ndtha_result_v1, output_story_count) == 88U);
 static_assert(offsetof(sa_nonlinear_ndtha_result_v1, execution_backend) == 104U);
 static_assert(offsetof(sa_nonlinear_ndtha_result_v1, reserved) == 112U);
+static_assert(sizeof(sa_nonlinear_ndtha_state_v1) == 792U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, next_step) == 8U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, adaptive_iteration_sum) == 40U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, collapse_time_s) == 48U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, displacement_m) == 80U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, response) == 224U);
+static_assert(offsetof(sa_nonlinear_ndtha_state_v1, reserved) == 776U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -840,10 +849,11 @@ template <typename Value>
 [[nodiscard]] sa_status_code_v1 validate_ndtha_input_view(
     const sa_buffer_view_v1& view,
     const std::uint64_t expected_length,
+    const std::uint32_t expected_abi,
     const std::string_view label,
     sa_error_buffer_v1* const error) {
-    if (view.abi_version != SA_ABI_V1_4) {
-        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA input ABI is not v1.4");
+    if (view.abi_version != expected_abi) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA input ABI does not match its operation");
     }
     if (view.struct_size < sizeof(sa_buffer_view_v1)) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear NDTHA input struct_size is too small");
@@ -871,10 +881,11 @@ template <typename Value>
     const std::uint64_t expected_length,
     const std::uint32_t expected_type,
     const std::uint64_t expected_width,
+    const std::uint32_t expected_abi,
     const std::string_view label,
     sa_error_buffer_v1* const error) {
-    if (view.abi_version != SA_ABI_V1_4) {
-        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA output ABI is not v1.4");
+    if (view.abi_version != expected_abi) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA output ABI does not match its operation");
     }
     if (view.struct_size < sizeof(sa_mut_buffer_view_v1)) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear NDTHA output struct_size is too small");
@@ -1007,7 +1018,11 @@ struct MemoryRegion {
         };
         for (std::size_t index = 0U; index < input_views.size(); ++index) {
             const auto status = validate_ndtha_input_view(
-                *input_views[index], input_lengths[index], input_labels[index], error);
+                *input_views[index],
+                input_lengths[index],
+                SA_ABI_V1_4,
+                input_labels[index],
+                error);
             if (status != SA_OK) {
                 return status;
             }
@@ -1071,6 +1086,7 @@ struct MemoryRegion {
                 output_lengths[index],
                 output_types[index],
                 output_widths[index],
+                SA_ABI_V1_4,
                 "nonlinear NDTHA output metadata is invalid",
                 error);
             if (status != SA_OK) {
@@ -1290,6 +1306,575 @@ struct MemoryRegion {
     });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_ndtha_restart_problem(
+    const sa_nonlinear_ndtha_config_v1* const config,
+    const sa_nonlinear_ndtha_inputs_v1* const inputs,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(config) || !pointer_is_aligned(inputs)) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA restart config or inputs are null or misaligned");
+    }
+    if (config->abi_version != SA_ABI_V1_5 || inputs->abi_version != SA_ABI_V1_5) {
+        return report_error(
+            error,
+            SA_ERR_ABI_VERSION_MISMATCH,
+            "nonlinear NDTHA restart descriptors require ABI v1.5");
+    }
+    if (config->struct_size < sizeof(sa_nonlinear_ndtha_config_v1)
+        || inputs->struct_size < sizeof(sa_nonlinear_ndtha_inputs_v1)) {
+        return report_error(
+            error,
+            SA_ERR_STRUCT_SIZE,
+            "nonlinear NDTHA restart descriptor struct_size is too small");
+    }
+    const bool reserved_nonzero = config->reserved_iteration_u32 != 0U
+        || config->reserved_newton_u32 != 0U || config->flags != 0U
+        || config->reserved_u32 != 0U
+        || std::any_of(
+            std::begin(config->reserved),
+            std::end(config->reserved),
+            [](const auto value) { return value != 0U; })
+        || std::any_of(
+            std::begin(inputs->reserved),
+            std::end(inputs->reserved),
+            [](const auto value) { return value != 0U; });
+    if (reserved_nonzero) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA restart reserved fields are not zero");
+    }
+
+    const std::array scalar_values {
+        config->dt_s,
+        config->newmark_beta,
+        config->newmark_gamma,
+        config->tolerance,
+        config->adaptive_load_decay,
+        config->damping_force_cap_ratio,
+        config->line_search_decay,
+        config->line_search_min,
+        config->hardening_ratio,
+        config->pdelta_factor,
+        config->collapse_drift_threshold_pct,
+    };
+    if (std::any_of(scalar_values.begin(), scalar_values.end(), [](const auto value) {
+            return !std::isfinite(value);
+        })) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA restart config contains a non-finite scalar");
+    }
+    if (config->story_count == 0U
+        || config->story_count > SA_NONLINEAR_NDTHA_MAX_STORY_COUNT
+        || config->step_count == 0U
+        || config->step_count > SA_NONLINEAR_NDTHA_MAX_STEP_COUNT
+        || config->dt_s <= 0.0 || config->newmark_beta <= 0.0
+        || config->newmark_gamma <= 0.0 || config->tolerance <= 0.0
+        || config->max_step_iterations == 0U || config->newton_max_iter == 0U
+        || config->adaptive_load_decay <= 0.0 || config->adaptive_load_decay > 1.0
+        || config->damping_force_cap_ratio <= 0.0
+        || config->line_search_decay <= 0.0 || config->line_search_decay >= 1.0
+        || config->line_search_min <= 0.0 || config->line_search_min > 1.0
+        || config->hardening_ratio < 0.0 || config->hardening_ratio > 1.0
+        || config->pdelta_factor < 0.0 || config->collapse_drift_threshold_pct <= 0.0) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA config value is outside the v1.5 restart domain");
+    }
+
+    const auto story_count = static_cast<std::uint64_t>(config->story_count);
+    const auto step_count = static_cast<std::uint64_t>(config->step_count);
+    const std::array input_views {
+        &inputs->story_stiffness_n_per_m,
+        &inputs->story_height_m,
+        &inputs->story_axial_n,
+        &inputs->story_yield_drift_m,
+        &inputs->story_mass_kg,
+        &inputs->story_damping_n_s_per_m,
+        &inputs->floor_load_base_n,
+        &inputs->acceleration_g,
+    };
+    const std::array input_lengths {
+        story_count,
+        story_count,
+        story_count,
+        story_count,
+        story_count,
+        story_count,
+        story_count,
+        step_count,
+    };
+    for (std::size_t index = 0U; index < input_views.size(); ++index) {
+        const auto status = validate_ndtha_input_view(
+            *input_views[index],
+            input_lengths[index],
+            SA_ABI_V1_5,
+            "nonlinear NDTHA restart input metadata is invalid",
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+    }
+
+    const auto story_size = static_cast<std::size_t>(story_count);
+    const auto step_size = static_cast<std::size_t>(step_count);
+    const auto story_values = [story_size](const sa_buffer_view_v1& view) {
+        return std::span<const double> {static_cast<const double*>(view.data), story_size};
+    };
+    const auto step_values = [step_size](const sa_buffer_view_v1& view) {
+        return std::span<const double> {static_cast<const double*>(view.data), step_size};
+    };
+    const auto stiffness = story_values(inputs->story_stiffness_n_per_m);
+    const auto height = story_values(inputs->story_height_m);
+    const auto axial = story_values(inputs->story_axial_n);
+    const auto yield_drift = story_values(inputs->story_yield_drift_m);
+    const auto mass = story_values(inputs->story_mass_kg);
+    const auto damping = story_values(inputs->story_damping_n_s_per_m);
+    const auto floor_load = story_values(inputs->floor_load_base_n);
+    const auto acceleration = step_values(inputs->acceleration_g);
+    const auto all_finite = [](const std::span<const double> values) {
+        return std::all_of(values.begin(), values.end(), [](const auto value) {
+            return std::isfinite(value);
+        });
+    };
+    if (!all_finite(stiffness) || !all_finite(height) || !all_finite(axial)
+        || !all_finite(yield_drift) || !all_finite(mass) || !all_finite(damping)
+        || !all_finite(floor_load) || !all_finite(acceleration)) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA restart inputs contain a non-finite value");
+    }
+    if (std::any_of(stiffness.begin(), stiffness.end(), [](const auto value) {
+            return value <= 0.0;
+        })
+        || std::any_of(height.begin(), height.end(), [](const auto value) {
+               return value <= 0.0;
+           })
+        || std::any_of(mass.begin(), mass.end(), [](const auto value) {
+               return value <= 0.0;
+           })
+        || std::any_of(damping.begin(), damping.end(), [](const auto value) {
+               return value < 0.0;
+           })) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear NDTHA restart physical input domain is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 nonlinear_ndtha_advance_boundary(
+    const sa_nonlinear_ndtha_config_v1* const config,
+    const sa_nonlinear_ndtha_inputs_v1* const inputs,
+    const std::uint32_t step_budget,
+    sa_nonlinear_ndtha_state_v1* const state,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config, inputs, step_budget, state, error]() -> sa_status_code_v1 {
+        const auto problem_status = validate_ndtha_restart_problem(config, inputs, error);
+        if (problem_status != SA_OK) {
+            return problem_status;
+        }
+        if (!pointer_is_aligned(state)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "nonlinear NDTHA restart state is null or misaligned");
+        }
+        if (state->abi_version != SA_ABI_V1_5
+            || state->response.abi_version != SA_ABI_V1_5) {
+            return report_error(
+                error,
+                SA_ERR_ABI_VERSION_MISMATCH,
+                "nonlinear NDTHA restart state requires ABI v1.5");
+        }
+        if (state->struct_size < sizeof(sa_nonlinear_ndtha_state_v1)
+            || state->response.struct_size < sizeof(sa_nonlinear_ndtha_outputs_v1)) {
+            return report_error(
+                error,
+                SA_ERR_STRUCT_SIZE,
+                "nonlinear NDTHA restart state struct_size is too small");
+        }
+        const bool response_reserved_nonzero = std::any_of(
+            std::begin(state->response.reserved),
+            std::end(state->response.reserved),
+            [](const auto value) { return value != 0U; });
+        const bool state_reserved_nonzero = state->reserved_u32 != 0U
+            || std::any_of(
+                std::begin(state->reserved),
+                std::end(state->reserved),
+                [](const auto value) { return value != 0U; });
+        if (response_reserved_nonzero) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "nonlinear NDTHA restart response reserved fields are not zero");
+        }
+        if (state_reserved_nonzero || state->execution_backend != SA_EXECUTION_BACKEND_CPU
+            || state->fallback_count != 0U
+            || state->status > SA_NONLINEAR_NDTHA_EXECUTION_NONCONVERGED) {
+            return report_error(
+                error,
+                SA_ERR_CHECKPOINT_MISMATCH,
+                "nonlinear NDTHA restart state metadata is invalid");
+        }
+
+        const auto story_count = static_cast<std::uint64_t>(config->story_count);
+        const auto step_count = static_cast<std::uint64_t>(config->step_count);
+        const std::array state_views {
+            &state->displacement_m,
+            &state->velocity_m_per_s,
+            &state->acceleration_m_per_s2,
+            &state->response.top_displacement_m,
+            &state->response.drift_ratio_pct,
+            &state->response.base_shear_kn,
+            &state->response.core_drift_pct,
+            &state->response.core_shear_kn,
+            &state->response.step_converged,
+            &state->response.step_iterations,
+            &state->response.step_plastic_story_count,
+            &state->response.step_residual_inf,
+            &state->response.story_drift_envelope_pct,
+            &state->response.final_story_drift_pct,
+        };
+        const std::array state_lengths {
+            story_count,
+            story_count,
+            story_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            story_count,
+            story_count,
+        };
+        const std::array state_types {
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_U8},
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+        };
+        const std::array state_widths {
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(std::uint8_t)},
+            std::uint64_t {sizeof(std::uint32_t)},
+            std::uint64_t {sizeof(std::uint32_t)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+        };
+        for (std::size_t index = 0U; index < state_views.size(); ++index) {
+            const auto status = validate_ndtha_output_view(
+                *state_views[index],
+                state_lengths[index],
+                state_types[index],
+                state_widths[index],
+                SA_ABI_V1_5,
+                "nonlinear NDTHA restart state buffer metadata is invalid",
+                error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+
+        const std::array descriptor_regions {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {inputs, sizeof(*inputs)},
+            MemoryRegion {state, sizeof(*state)},
+        };
+        for (std::size_t left = 0U; left < descriptor_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < descriptor_regions.size(); ++right) {
+                if (ranges_overlap(
+                        descriptor_regions[left].data,
+                        descriptor_regions[left].extent,
+                        descriptor_regions[right].data,
+                        descriptor_regions[right].extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "nonlinear NDTHA restart descriptors overlap");
+                }
+            }
+        }
+
+        const std::array input_views {
+            &inputs->story_stiffness_n_per_m,
+            &inputs->story_height_m,
+            &inputs->story_axial_n,
+            &inputs->story_yield_drift_m,
+            &inputs->story_mass_kg,
+            &inputs->story_damping_n_s_per_m,
+            &inputs->floor_load_base_n,
+            &inputs->acceleration_g,
+        };
+        const std::array input_lengths {
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            step_count,
+        };
+        std::array<MemoryRegion, 8> input_regions {};
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            input_regions[index] = {
+                input_views[index]->data,
+                input_lengths[index] * sizeof(double),
+            };
+            if (ranges_overlap(
+                    state,
+                    sizeof(*state),
+                    input_regions[index].data,
+                    input_regions[index].extent)) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "nonlinear NDTHA restart state descriptor overlaps input data");
+            }
+        }
+        std::array<MemoryRegion, 14> state_regions {};
+        for (std::size_t index = 0U; index < state_views.size(); ++index) {
+            state_regions[index] = {
+                state_views[index]->data,
+                state_lengths[index] * state_widths[index],
+            };
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        state_regions[index].data,
+                        state_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "nonlinear NDTHA restart state buffer overlaps descriptor storage");
+                }
+            }
+            for (const auto& input_region : input_regions) {
+                if (ranges_overlap(
+                        state_regions[index].data,
+                        state_regions[index].extent,
+                        input_region.data,
+                        input_region.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "nonlinear NDTHA restart state buffer overlaps input data");
+                }
+            }
+        }
+        for (std::size_t left = 0U; left < state_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < state_regions.size(); ++right) {
+                if (ranges_overlap(
+                        state_regions[left].data,
+                        state_regions[left].extent,
+                        state_regions[right].data,
+                        state_regions[right].extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "nonlinear NDTHA restart state buffers overlap");
+                }
+            }
+        }
+
+        const auto story_size = static_cast<std::size_t>(story_count);
+        const auto step_size = static_cast<std::size_t>(step_count);
+        const auto input_story_values = [story_size](const sa_buffer_view_v1& view) {
+            return std::span<const double> {
+                static_cast<const double*>(view.data), story_size};
+        };
+        const auto input_step_values = [step_size](const sa_buffer_view_v1& view) {
+            return std::span<const double> {
+                static_cast<const double*>(view.data), step_size};
+        };
+        const structural::solver_cpu::NonlinearNdthaConfig native_config {
+            config->story_count,
+            config->step_count,
+            config->dt_s,
+            config->newmark_beta,
+            config->newmark_gamma,
+            config->tolerance,
+            config->max_step_iterations,
+            config->adaptive_load_decay,
+            config->damping_force_cap_ratio,
+            config->newton_max_iter,
+            config->line_search_decay,
+            config->line_search_min,
+            config->hardening_ratio,
+            config->pdelta_factor,
+            config->collapse_drift_threshold_pct,
+        };
+        const structural::solver_cpu::NonlinearNdthaInputs native_inputs {
+            input_story_values(inputs->story_stiffness_n_per_m),
+            input_story_values(inputs->story_height_m),
+            input_story_values(inputs->story_axial_n),
+            input_story_values(inputs->story_yield_drift_m),
+            input_story_values(inputs->story_mass_kg),
+            input_story_values(inputs->story_damping_n_s_per_m),
+            input_story_values(inputs->floor_load_base_n),
+            input_step_values(inputs->acceleration_g),
+        };
+        const auto copy_f64 = [](const sa_mut_buffer_view_v1& view, const std::size_t length) {
+            const auto* const begin = static_cast<const double*>(view.data);
+            return std::vector<double>(begin, begin + length);
+        };
+        const auto copy_u8 = [](const sa_mut_buffer_view_v1& view, const std::size_t length) {
+            const auto* const begin = static_cast<const std::uint8_t*>(view.data);
+            return std::vector<std::uint8_t>(begin, begin + length);
+        };
+        const auto copy_u32 = [](const sa_mut_buffer_view_v1& view, const std::size_t length) {
+            const auto* const begin = static_cast<const std::uint32_t*>(view.data);
+            return std::vector<std::uint32_t>(begin, begin + length);
+        };
+        structural::solver_cpu::NonlinearNdthaExecutionState native_state {
+            state->next_step,
+            static_cast<structural::solver_cpu::NonlinearNdthaExecutionStatus>(state->status),
+            state->collapse_step,
+            state->collapse_time_s,
+            state->collapse_drift_ratio_pct,
+            state->collapse_top_displacement_m,
+            state->max_plastic_story_count,
+            state->max_drift_ratio_pct,
+            state->adaptive_iteration_sum,
+            state->total_line_search_backtracks,
+            copy_f64(state->displacement_m, story_size),
+            copy_f64(state->velocity_m_per_s, story_size),
+            copy_f64(state->acceleration_m_per_s2, story_size),
+            {
+                copy_f64(state->response.top_displacement_m, step_size),
+                copy_f64(state->response.drift_ratio_pct, step_size),
+                copy_f64(state->response.base_shear_kn, step_size),
+                copy_f64(state->response.core_drift_pct, step_size),
+                copy_f64(state->response.core_shear_kn, step_size),
+                copy_u8(state->response.step_converged, step_size),
+                copy_u32(state->response.step_iterations, step_size),
+                copy_u32(state->response.step_plastic_story_count, step_size),
+                copy_f64(state->response.step_residual_inf, step_size),
+                copy_f64(state->response.story_drift_envelope_pct, story_size),
+                copy_f64(state->response.final_story_drift_pct, story_size),
+            },
+        };
+        try {
+            structural::solver_cpu::advance_nonlinear_ndtha(
+                native_config, native_inputs, step_budget, native_state);
+        } catch (const std::invalid_argument&) {
+            return report_error(
+                error,
+                SA_ERR_CHECKPOINT_MISMATCH,
+                "nonlinear NDTHA restart state failed deterministic validation");
+        }
+        if (native_state.status
+            == structural::solver_cpu::NonlinearNdthaExecutionStatus::nonconverged) {
+            return report_error(
+                error,
+                SA_ERR_NONCONVERGENCE,
+                "nonlinear NDTHA restarted CPU Newmark/Newton step did not converge");
+        }
+
+        const auto& response = native_state.response;
+        std::memcpy(
+            state->displacement_m.data,
+            native_state.displacement_m.data(),
+            story_count * sizeof(double));
+        std::memcpy(
+            state->velocity_m_per_s.data,
+            native_state.velocity_m_per_s.data(),
+            story_count * sizeof(double));
+        std::memcpy(
+            state->acceleration_m_per_s2.data,
+            native_state.acceleration_m_per_s2.data(),
+            story_count * sizeof(double));
+        std::memcpy(
+            state->response.top_displacement_m.data,
+            response.top_displacement_m.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.drift_ratio_pct.data,
+            response.drift_ratio_pct.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.base_shear_kn.data,
+            response.base_shear_kn.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.core_drift_pct.data,
+            response.core_drift_pct.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.core_shear_kn.data,
+            response.core_shear_kn.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.step_converged.data,
+            response.step_converged.data(),
+            step_count * sizeof(std::uint8_t));
+        std::memcpy(
+            state->response.step_iterations.data,
+            response.step_iterations.data(),
+            step_count * sizeof(std::uint32_t));
+        std::memcpy(
+            state->response.step_plastic_story_count.data,
+            response.step_plastic_story_count.data(),
+            step_count * sizeof(std::uint32_t));
+        std::memcpy(
+            state->response.step_residual_inf.data,
+            response.step_residual_inf.data(),
+            step_count * sizeof(double));
+        std::memcpy(
+            state->response.story_drift_envelope_pct.data,
+            response.story_drift_envelope_pct.data(),
+            story_count * sizeof(double));
+        std::memcpy(
+            state->response.final_story_drift_pct.data,
+            response.final_story_drift_pct.data(),
+            story_count * sizeof(double));
+        state->next_step = native_state.next_step;
+        state->status = static_cast<std::uint32_t>(native_state.status);
+        state->collapse_step = native_state.collapse_step;
+        state->max_plastic_story_count = native_state.max_plastic_story_count;
+        state->total_line_search_backtracks = native_state.total_line_search_backtracks;
+        state->adaptive_iteration_sum = native_state.adaptive_iteration_sum;
+        state->collapse_time_s = native_state.collapse_time_s;
+        state->collapse_drift_ratio_pct = native_state.collapse_drift_ratio_pct;
+        state->collapse_top_displacement_m = native_state.collapse_top_displacement_m;
+        state->max_drift_ratio_pct = native_state.max_drift_ratio_pct;
+        return SA_OK;
+        });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -1301,15 +1886,30 @@ struct MemoryRegion {
         || request->abi_version != out_api->abi_version) {
         return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
     }
-    const auto api_min_size = request->abi_version == SA_ABI_V1_0
-        ? SA_API_V1_0_MIN_SIZE
-        : (request->abi_version == SA_ABI_V1_1
-                ? SA_API_V1_1_MIN_SIZE
-                : (request->abi_version == SA_ABI_V1_2
-                        ? SA_API_V1_2_MIN_SIZE
-                        : (request->abi_version == SA_ABI_V1_3
-                                ? SA_API_V1_3_MIN_SIZE
-                                : SA_API_V1_4_MIN_SIZE)));
+    std::uint32_t api_min_size = 0U;
+    switch (request->abi_version) {
+    case SA_ABI_V1_0:
+        api_min_size = SA_API_V1_0_MIN_SIZE;
+        break;
+    case SA_ABI_V1_1:
+        api_min_size = SA_API_V1_1_MIN_SIZE;
+        break;
+    case SA_ABI_V1_2:
+        api_min_size = SA_API_V1_2_MIN_SIZE;
+        break;
+    case SA_ABI_V1_3:
+        api_min_size = SA_API_V1_3_MIN_SIZE;
+        break;
+    case SA_ABI_V1_4:
+        api_min_size = SA_API_V1_4_MIN_SIZE;
+        break;
+    case SA_ABI_V1_5:
+        api_min_size = SA_API_V1_5_MIN_SIZE;
+        break;
+    default:
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
+    }
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -1331,6 +1931,7 @@ struct MemoryRegion {
     const bool track_enabled = request->abi_version >= SA_ABI_V1_2;
     const bool nonlinear_static_enabled = request->abi_version >= SA_ABI_V1_3;
     const bool nonlinear_ndtha_enabled = request->abi_version >= SA_ABI_V1_4;
+    const bool nonlinear_ndtha_restart_enabled = request->abi_version >= SA_ABI_V1_5;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -1340,7 +1941,10 @@ struct MemoryRegion {
                     : UINT64_C(0))
             | (track_enabled ? SA_CAPABILITY_TRACK_POINT_LOAD_CPU : UINT64_C(0))
             | (nonlinear_static_enabled ? SA_CAPABILITY_NONLINEAR_STATIC_CPU : UINT64_C(0))
-            | (nonlinear_ndtha_enabled ? SA_CAPABILITY_NONLINEAR_NDTHA_CPU : UINT64_C(0)),
+            | (nonlinear_ndtha_enabled ? SA_CAPABILITY_NONLINEAR_NDTHA_CPU : UINT64_C(0))
+            | (nonlinear_ndtha_restart_enabled
+                    ? SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                    : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -1351,7 +1955,8 @@ struct MemoryRegion {
         track_enabled ? &track_point_load_boundary : nullptr,
         nonlinear_static_enabled ? &nonlinear_static_boundary : nullptr,
         nonlinear_ndtha_enabled ? &nonlinear_ndtha_boundary : nullptr,
-        {nullptr, nullptr, nullptr, nullptr},
+        nonlinear_ndtha_restart_enabled ? &nonlinear_ndtha_advance_boundary : nullptr,
+        {nullptr, nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);
