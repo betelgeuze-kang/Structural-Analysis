@@ -25,7 +25,44 @@
         "dropped_row_count": 0,
         "unsupported_row_count": 0,
         "blocker_count": 0,
-        "diagnostic_codes": []
+        "diagnostic_codes": [],
+        "normalized_model": {
+          "content_hash": "sha256:37740f33001eeae02a616a4f7c368ea2f6796d3db1e8a637bdd9c164430d2851",
+          "semantic_hash": "sha256:19a5c8c1f0a6c8d4652269d98eafd7f503a0c82a97687aea88c0334cd1653de7",
+          "provenance_hash": "sha256:552d250190b73a3e532a447b1beace2aa5e5dbdd869eb26b92e45a8961722aba"
+        }
+      }
+    },
+    {
+      "case_id": "workbench-fixed-guided-frame3d-x",
+      "model_id": "workbench-mgt-fixed-guided-v1",
+      "source_path": "native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt",
+      "source_hash": "sha256:d541e384cc592a2a619475c6e7524b38b5668a1287ae26c03576fb35a2244861",
+      "line_count": 28,
+      "section_counts": {
+        "CONLOAD": 1,
+        "CONSTRAINT": 2,
+        "ELEMENT": 1,
+        "MATERIAL": 1,
+        "NODE": 2,
+        "SECTION": 1,
+        "STLDCASE": 1,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "normalized",
+        "mapped_row_count": 10,
+        "preserved_only_row_count": 1,
+        "dropped_row_count": 0,
+        "unsupported_row_count": 0,
+        "blocker_count": 0,
+        "diagnostic_codes": [],
+        "normalized_model": {
+          "content_hash": "sha256:38425cc9a614ddceb7c73c59af238cc922c838cfb52cc4ed6e452bdb3984ae9c",
+          "semantic_hash": "sha256:40bce9c672e193af089c4d6fe458ee4d04840993c62a7208b55a2fa8b79db694",
+          "provenance_hash": "sha256:7208b17fd46085c391ae535996d8670094705252ffc5067d104403e271877f2b"
+        }
       }
     },
     {

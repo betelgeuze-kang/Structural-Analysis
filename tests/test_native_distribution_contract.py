@@ -103,8 +103,33 @@ def valid_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v2_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v2",
+            "mgt_workbench_restart_passed": True,
+            "mgt_workbench_direct_parity_passed": True,
+            "mgt_source_sha256": "sha256:" + "1" * 64,
+            "mgt_import_health_sha256": "sha256:" + "2" * 64,
+            "mgt_result_ir_sha256": "sha256:" + "3" * 64,
+            "mgt_report_pdf_sha256": "sha256:" + "4" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_accepts_mgt_workbench_v2_contract(tmp_path: Path):
+    receipt, manifest = valid_v2_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
     validation = json.loads(completed.stdout)
@@ -154,6 +179,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "cargo build --manifest-path native/Cargo.toml --release --locked" in build
     assert "PATH=\"$empty_path\"" in e2e
     assert "diff -r \"$restarted\" \"$direct\"" in e2e
+    assert "workflow-mgt" in e2e
+    assert "diff -r \"$mgt_restarted\" \"$mgt_direct\"" in e2e
+    assert "mgt_workbench_direct_parity_passed" in e2e
     assert "update --bundle" in e2e
     assert "rollback --root" in e2e
     assert "single_product_abi" in e2e
@@ -162,4 +190,6 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "rustc-link-lib=dylib=structural_c_abi_v1" in ffi
     assert "native-hip-approved" in rocm_e2e
     assert "structural_native_backend_package_consumer\" hip" in rocm_e2e
+    assert "workflow-mgt" in rocm_e2e
+    assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert '"approved_device_runner\\\":true' in rocm_e2e

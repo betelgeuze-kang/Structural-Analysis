@@ -126,6 +126,31 @@ env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow "$model" "
 grep -Fq '"stage":"reported"' "$e2e_root/workflow.json"
 diff -r "$restarted" "$direct" > "$e2e_root/workbench-diff.txt"
 
+mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
+mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
+mgt_restarted="$e2e_root/mgt-workbench-restarted"
+mgt_direct="$e2e_root/mgt-workbench-direct"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" import-mgt \
+  "$mgt_source" "$mgt_request" --model-id workbench-mgt-fixed-guided-v1 \
+  --external-result "$external" --source-artifact "$source_artifact" \
+  --workspace "$mgt_restarted" > "$e2e_root/mgt-import.json"
+for stage in validate run resume compare report; do
+  stage_arguments=("$stage" --workspace "$mgt_restarted")
+  if [[ "$stage" == "run" ]]; then
+    stage_arguments+=(--step-budget 1)
+  elif [[ "$stage" == "compare" ]]; then
+    stage_arguments+=(--require-pass)
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" "${stage_arguments[@]}" \
+    > "$e2e_root/mgt-$stage.json"
+done
+env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-mgt \
+  "$mgt_source" "$mgt_request" --model-id workbench-mgt-fixed-guided-v1 \
+  --external-result "$external" --source-artifact "$source_artifact" \
+  --workspace "$mgt_direct" --step-budget 1 > "$e2e_root/mgt-workflow.json"
+grep -Fq '"stage":"reported"' "$e2e_root/mgt-workflow.json"
+diff -r "$mgt_restarted" "$mgt_direct" > "$e2e_root/mgt-workbench-diff.txt"
+
 consumer_build="$e2e_root/package-consumer"
 cmake -S "$repository_root/native/cpp/tests/package_consumer" -B "$consumer_build" \
   -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$active" > "$e2e_root/consumer-configure.txt"
@@ -159,9 +184,13 @@ grep -Fq "\"current_release\":\"$release_id\"" "$e2e_root/rollback.json"
 manifest_hash="$(sha256sum "$bundle/structural-distribution.json" | awk '{print $1}')"
 result_hash="$(sha256sum "$direct/04-resume/result-ir.json" | awk '{print $1}')"
 report_hash="$(sha256sum "$direct/06-report/report.pdf" | awk '{print $1}')"
+mgt_source_hash="$(sha256sum "$mgt_direct/01-import/source.mgt" | awk '{print $1}')"
+mgt_health_hash="$(sha256sum "$mgt_direct/01-import/import-health.json" | awk '{print $1}')"
+mgt_result_hash="$(sha256sum "$mgt_direct/04-resume/result-ir.json" | awk '{print $1}')"
+mgt_report_hash="$(sha256sum "$mgt_direct/06-report/report.pdf" | awk '{print $1}')"
 installed_backend_hash="$(sha256sum "$e2e_root/installed-backend-receipt.json" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
-printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v1\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
+printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v2\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
 cp "$e2e_root/installed-backend-receipt.json" "$backend_output_stage"

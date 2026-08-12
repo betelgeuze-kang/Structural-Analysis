@@ -1,0 +1,36 @@
+{
+  "schema_version": "structural-model-ir-ndtha-analysis-request.v1",
+  "operation": "model_ir_nonlinear_ndtha",
+  "case_id": "ndtha-one-story-elastic",
+  "backend": "cpu",
+  "profile": "fixed_guided_frame3d_x",
+  "model_identity": {
+    "content_hash": "sha256:38425cc9a614ddceb7c73c59af238cc922c838cfb52cc4ed6e452bdb3984ae9c",
+    "semantic_hash": "sha256:40bce9c672e193af089c4d6fe458ee4d04840993c62a7208b55a2fa8b79db694",
+    "provenance_hash": "sha256:7208b17fd46085c391ae535996d8670094705252ffc5067d104403e271877f2b"
+  },
+  "element_id": "E_1",
+  "base_node_id": "N_1",
+  "floor_node_id": "N_2",
+  "load_pattern_id": "LP_PUSH",
+  "damping_ratio": 0.00025,
+  "elastic_guard_yield_drift_m": 0.01,
+  "config": {
+    "story_count": 1,
+    "step_count": 5,
+    "dt_s": 0.02,
+    "newmark_beta": 0.3025,
+    "newmark_gamma": 0.6,
+    "tolerance": 1e-07,
+    "max_step_iterations": 16,
+    "adaptive_load_decay": 0.82,
+    "damping_force_cap_ratio": 0.2,
+    "newton_max_iter": 120,
+    "line_search_decay": 0.5,
+    "line_search_min": 0.03125,
+    "hardening_ratio": 0.2,
+    "pdelta_factor": 0.0,
+    "collapse_drift_threshold_pct": 20.0
+  },
+  "acceleration_g": [0.0, 0.05, -0.03, 0.08, -0.02]
+}

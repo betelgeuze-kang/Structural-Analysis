@@ -270,6 +270,29 @@ fn all_tracked_mgt_fixtures_match_the_language_neutral_python_oracle() {
             .map(|code| code.as_str().expect("diagnostic code"))
             .collect::<BTreeSet<_>>();
         assert_eq!(codes, expected_codes, "diagnostic drift: {source_path}");
+        if expected["status"] == "normalized" {
+            let model = document.model().expect("normalized oracle model");
+            let identity = expected["normalized_model"]
+                .as_object()
+                .expect("normalized model identity");
+            assert_eq!(
+                model.content_hash(),
+                identity["content_hash"].as_str().expect("content hash")
+            );
+            assert_eq!(
+                model.semantic_hash(),
+                identity["semantic_hash"].as_str().expect("semantic hash")
+            );
+            assert_eq!(
+                model.provenance_hash(),
+                identity["provenance_hash"]
+                    .as_str()
+                    .expect("provenance hash")
+            );
+        } else {
+            assert!(expected.get("normalized_model").is_none());
+            assert!(document.model().is_none());
+        }
         verify_health_self_hash(&document);
     }
 }

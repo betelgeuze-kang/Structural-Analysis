@@ -15,8 +15,11 @@ original minimum prefix sizes and capability masks. The only public library symb
   floor;
 - one linear-elastic material and one frame3d section, with zero rotation, offsets and releases;
 - one all-DOF fixed base constraint and one floor constraint fixing every DOF except global UX;
+  absent prescribed values and explicit zero values are equivalent, while any nonzero value is
+  rejected;
 - one linear-static load pattern containing one finite nonzero floor FX load and no self-weight;
-- no combinations, time functions, construction stages, roundtrip rows or unsupported features.
+- no combinations, time functions, construction stages or unsupported features. Validated
+  roundtrip rows are provenance-only and may be retained by the bounded MGT normalizer.
 
 Selectors are bounded ASCII stable IDs. A structural, selector or readiness mismatch fails closed;
 the adapter never chooses a nearby element or invents a property.
@@ -57,6 +60,8 @@ product slice now closes C4/C5 for the same profile by binding all three ModelIR
 explicit adapter request, the generated native request and the inner native state in one canonical
 checkpoint envelope. Its public `analysis model-run` and `analysis model-resume` paths are
 documented in [ModelIR NDTHA Product E2E v1](modelir-ndtha-product-e2e-v1.md).
+The exact MGT-normalized variant reaches the same adapter and restart path through the native
+Workbench while preserving the original MGT/import-health artifacts.
 
 Neither promotion expands the accepted topology. Arbitrary topology, nonlinear material
 reduction and P-delta derivation are unsupported. HIP CPU/device parity is C2 work and C6

@@ -60,9 +60,12 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 2. executes the three Rust binaries with an empty `PATH`;
 3. validates ModelIR and consumes the installed CMake package;
 4. selects and executes the installed ABI backend;
-5. runs stage-by-stage and one-shot Workbench flows and byte-compares every artifact;
+5. runs stage-by-stage and one-shot Workbench flows from both strict ModelIR and the bounded MGT
+   source, then byte-compares every artifact and preserves MGT import-health evidence;
 6. installs an immutable update, rolls back and re-verifies activation;
-7. emits a hash-bound receipt with Python/Node lookup count 0 and fallback count 0.
+7. emits an append-only v2 hash-bound receipt with ModelIR/MGT result, report, MGT source and
+   import-health identities, Python/Node lookup count 0 and fallback count 0. The receipt checker
+   continues to accept frozen v1 receipts without treating them as MGT evidence.
 
 The reference command is:
 
@@ -75,6 +78,7 @@ scripts/run_native_distribution_e2e.sh --bundle <BUNDLE> --release-id <ID> \
   --receipt <E2E.json>
 ```
 
-The installed flow remains the exact bounded ModelIR/NDTHA Workbench profile. General native UI
-coverage, React/TypeScript deletion, live external-solver execution, signing, cross-platform
-installers, remote update transport, release retention and final C6 removal remain open.
+The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to-NDTHA Workbench
+profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver
+execution, signing, cross-platform installers, remote update transport, release retention and
+final C6 removal remain open.

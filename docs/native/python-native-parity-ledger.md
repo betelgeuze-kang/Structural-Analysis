@@ -305,11 +305,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   and row inventory, and `mapped`/`preserved_only`/`dropped`/`unsupported` diagnostics. The exact
   numeric frame/truss grammar alone emits canonical ModelIR and crosses the existing C++ semantic
   validator/snapshot with three-hash identity. A language-neutral golden and Python raw parser
-  freeze five sources: one complete exact profile and all four existing `foundation_realish` MGT
+  freeze six sources: two complete exact profiles and all four existing `foundation_realish` MGT
   fixtures. The latter remain blocked where material/section/support/load data or shell support is
-  absent; native code does not invent values. Aggregate D7 is still partial: CP949, repeated
-  `USE-STLD`, self-weight/load combinations, shells, offsets/links/thickness, general writeback,
-  downstream CPU/HIP consumption and C6 remain open.
+  absent; native code does not invent values. One exact fixed-guided profile now continues through
+  the Rust-native Workbench to C++ derivation, real checkpoint/resume, ResultIR/ReportIR,
+  comparison and native PDF while retaining original MGT bytes, health, receipt and C++ snapshot;
+  direct and restarted clean-environment artifacts are byte-identical. Aggregate D7 is still
+  partial: CP949, repeated `USE-STLD`, self-weight/load combinations, shells,
+  offsets/links/thickness, general writeback, broader downstream CPU/HIP consumption and C6 remain
+  open.
 
 ### D8. ReportIR, external comparison and PDF
 
@@ -355,13 +359,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
 - State: the public Rust CLI now owns a bounded CPU nonlinear-NDTHA run/checkpoint/resume to
   ResultIR/ReportIR flow at C5. The exact fixed-guided frame3d ModelIR profile also reaches that
-  flow through public model-run/model-resume with provenance-bound restart and frozen artifacts.
+  flow through public model-run/model-resume with provenance-bound restart and frozen artifacts;
+  the matching exact MGT profile reaches the same flow through `import-mgt`/`workflow-mgt` with
+  original source and import-health evidence bound into the durable session.
   Rust also owns bounded single-host durable submit/poll/cancel,
   expired-lease recovery, checkpoint continuation and export at C5. A separate loopback,
   single-tenant HTTP slice exposes submit/poll/cancel/work-once and immutable artifact retrieval
   at C5 with distinct static client/worker credentials and clean-process restart evidence. TLS,
   non-loopback deployment, tenant isolation, distributed claims, broader solver API composition
-  and the TypeScript-to-native Workbench replacement remain open.
+  and the general TypeScript-to-native Workbench replacement remain open.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

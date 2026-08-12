@@ -2598,8 +2598,7 @@ NdthaAdapterProperties Model::adapt_fixed_guided_frame3d_x(
         && model.sections.size() == 1U && model.elements.size() == 1U
         && model.constraints.size() == 2U && model.load_patterns.size() == 1U
         && model.load_combinations.empty() && model.time_functions.empty()
-        && model.construction_stages.empty() && model.roundtrip_rows.empty()
-        && model.unsupported_features.empty();
+        && model.construction_stages.empty() && model.unsupported_features.empty();
     if (!exact_family_shape) {
         fail(
             SA_ERR_ANALYSIS_NOT_READY,
@@ -2662,11 +2661,17 @@ NdthaAdapterProperties Model::adapt_fixed_guided_frame3d_x(
         SA_DOF_UX, SA_DOF_UY, SA_DOF_UZ, SA_DOF_RX, SA_DOF_RY, SA_DOF_RZ};
     const std::vector<std::uint32_t> guided_dofs {
         SA_DOF_UY, SA_DOF_UZ, SA_DOF_RX, SA_DOF_RY, SA_DOF_RZ};
+    const auto has_only_zero_prescribed_values = [](const Constraint& constraint) {
+        return std::all_of(
+            constraint.prescribed_values.begin(),
+            constraint.prescribed_values.end(),
+            [](const PrescribedValue& value) { return value.value == 0.0; });
+    };
     if (base_constraint == nullptr || floor_constraint == nullptr
         || base_constraint == floor_constraint
         || base_constraint->dofs != fixed_dofs || floor_constraint->dofs != guided_dofs
-        || !base_constraint->prescribed_values.empty()
-        || !floor_constraint->prescribed_values.empty()) {
+        || !has_only_zero_prescribed_values(*base_constraint)
+        || !has_only_zero_prescribed_values(*floor_constraint)) {
         fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR constraints do not match fixed-guided global-X motion");
     }
 

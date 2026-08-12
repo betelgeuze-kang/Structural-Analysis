@@ -36,9 +36,21 @@ REQUIRED_TOKENS = {
         "--require-normalized",
         "source symlink",
     ),
+    "native/crates/structural-workbench/src/lib.rs": (
+        "initialize_from_mgt_paths",
+        "execute_native_mgt_import",
+        "workbench_mgt_import_binding_mismatch",
+        "mgt-native-snapshot.json",
+    ),
+    "native/crates/structural-workbench/tests/native_workbench_e2e.rs": (
+        "mgt_import_restart_workflow_preserves_health_and_is_bitwise_deterministic",
+        "blocked_mgt_health_cannot_create_an_analysis_workspace",
+        "assert_eq!(files.len(), 34)",
+    ),
     "tests/test_native_mgt_import_health_python_parity.py": (
         "test_python_raw_parser_owns_the_frozen_native_mgt_input_matrix",
         "test_exact_numeric_fixture_has_independent_closed_form_properties",
+        "test_workbench_numeric_fixture_has_independent_solver_profile",
     ),
     "docs/native/mgt-import-health-v1.md": (
         "C5",
@@ -73,6 +85,7 @@ def check_native_mgt_import(repo_root: Path = ROOT) -> dict[str, object]:
         "mapped/preserved_only/dropped/unsupported",
         "C++ semantic validator",
         "Python C1",
+        "Workbench",
         "CP949",
         "C6",
     ):
@@ -99,9 +112,9 @@ def check_native_mgt_import(repo_root: Path = ROOT) -> dict[str, object]:
         cases = golden["cases"]
         if golden.get("schema_version") != "structural-native-mgt-python-oracle.v1":
             blockers.append("mgt_import_oracle_schema_invalid")
-        if not isinstance(cases, list) or len(cases) != 5:
+        if not isinstance(cases, list) or len(cases) != 6:
             blockers.append("mgt_import_oracle_case_count_invalid")
-        elif sum(case["native_expected"]["status"] == "normalized" for case in cases) != 1:
+        elif sum(case["native_expected"]["status"] == "normalized" for case in cases) != 2:
             blockers.append("mgt_import_oracle_normalized_profile_count_invalid")
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
         blockers.append("mgt_import_oracle_golden_invalid")

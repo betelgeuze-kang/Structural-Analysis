@@ -567,6 +567,25 @@ void configure_adapter_model(Fixture& fixture) {
     const auto api = load_api(SA_ABI_V1_6);
     Fixture fixture;
     configure_adapter_model(fixture);
+    std::array<sa_prescribed_value_v1, 6> fixed_zeros {};
+    for (std::size_t index = 0U; index < fixed_zeros.size(); ++index) {
+        fixed_zeros[index].dof = fixture.fixed_dofs[index];
+    }
+    std::array<sa_prescribed_value_v1, 5> guided_zeros {};
+    for (std::size_t index = 0U; index < guided_zeros.size(); ++index) {
+        guided_zeros[index].dof = fixture.guided_dofs[index];
+    }
+    fixture.constraints[0].prescribed_values = fixed_zeros.data();
+    fixture.constraints[0].prescribed_value_count = fixed_zeros.size();
+    fixture.constraints[1].prescribed_values = guided_zeros.data();
+    fixture.constraints[1].prescribed_value_count = guided_zeros.size();
+    std::array<sa_roundtrip_row_descriptor_v1, 1> provenance_roundtrip {{
+        {SA_ABI_V1_1, sizeof(sa_roundtrip_row_descriptor_v1), text("NODE:1"),
+            SA_MODEL_IR_ENTITY_NODE, 0U, text("n0"), SA_ROUNDTRIP_CANONICALIZED, 0U,
+            text("{}")},
+    }};
+    fixture.descriptor.roundtrip_rows = provenance_roundtrip.data();
+    fixture.descriptor.roundtrip_row_count = provenance_roundtrip.size();
     sa_model_ir_handle_v1* handle = nullptr;
     CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
     CHECK(report(api, handle).find("\"analysis_ready\":true") != std::string::npos);
@@ -635,6 +654,19 @@ void configure_adapter_model(Fixture& fixture) {
         worker.join();
     }
     CHECK(passed.load(std::memory_order_relaxed));
+    CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
+
+    fixed_zeros[0].value_si = 0.001;
+    handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
+    AdapterOutputStorage prescribed_storage;
+    auto prescribed_outputs = adapter_outputs(prescribed_storage);
+    sa_model_ir_ndtha_adapter_result_v1 prescribed_result {};
+    prescribed_result.abi_version = SA_ABI_V1_6;
+    prescribed_result.struct_size = static_cast<std::uint32_t>(sizeof(prescribed_result));
+    CHECK(api.model_ir_ndtha_adapt(
+              handle, &request, &prescribed_outputs, &prescribed_result, nullptr)
+          == SA_ERR_ANALYSIS_NOT_READY);
     CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
     return true;
 }

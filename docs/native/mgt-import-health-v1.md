@@ -56,14 +56,21 @@ data rather than a parser crash.
 
 ## Evidence and authority boundary
 
-The language-neutral oracle covers the exact profile and all four existing
+The language-neutral oracle covers two exact profiles and all four existing
 `foundation_realish/*.mgt` fixtures. Python independently freezes original byte hashes, line counts,
-section counts and the exact profile's closed-form structural inputs. Rust consumes that golden,
+section counts and the original exact profile's closed-form structural inputs. Rust consumes that golden,
 checks every disposition/count/diagnostic, rejects duplicate and dangling identities, and binds
 source mutation into health and ModelIR hashes. A clean-environment Rust CLI test proves C++
 validation/snapshot equality, frozen artifact hashes, policy behavior, symlink rejection and
 non-overwrite publication without Python or Node lookup.
 
+The second exact profile uses the same independently frozen stiffness, mass and loading as the
+bounded NDTHA product fixture. `structural-workbench import-mgt` retains the original MGT bytes,
+health JSON, MGT receipt and C++ snapshot in its immutable import stage, then executes
+Import -> Validate -> Run -> Resume -> Compare -> Report. Separate-process restart and one-shot
+flows are byte-identical, and reopening the workspace deterministically reproduces the import and
+C++ snapshot before trusting any later stage.
+
 This is not general MGT authority. CP949 and other encodings, repeated `USE-STLD` association,
 self-weight, load combinations, shell/wall/solid elements, offsets, links, thickness, writeback,
-solver execution and C6 Python decommission remain open.
+broader solver execution and C6 Python decommission remain open.

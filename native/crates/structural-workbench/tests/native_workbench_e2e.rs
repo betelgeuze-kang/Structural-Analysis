@@ -69,6 +69,18 @@ fn inputs() -> (PathBuf, PathBuf, PathBuf, PathBuf) {
     )
 }
 
+fn mgt_inputs() -> (PathBuf, PathBuf, PathBuf, PathBuf) {
+    let root = repository_root();
+    (
+        root.join("native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"),
+        root.join("native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"),
+        root.join("native/tests/fixtures/external_comparison/reference_oracle_ndtha_v1.json"),
+        root.join(
+            "native/tests/fixtures/solver_cpu/nonlinear_ndtha_one_story_elastic_python_c1.json",
+        ),
+    )
+}
+
 fn import_arguments<'a>(
     command: &'a str,
     model: &'a Path,
@@ -81,6 +93,31 @@ fn import_arguments<'a>(
         text(command),
         model.as_os_str(),
         request.as_os_str(),
+        text("--external-result"),
+        external.as_os_str(),
+        text("--source-artifact"),
+        source.as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]
+}
+
+fn mgt_import_arguments<'a>(
+    command: &'a str,
+    source_mgt: &'a Path,
+    request: &'a Path,
+    external: &'a Path,
+    source: &'a Path,
+    workspace: &'a Path,
+) -> Vec<&'a OsStr> {
+    vec![
+        text(command),
+        source_mgt.as_os_str(),
+        request.as_os_str(),
+        text("--model-id"),
+        text("workbench-mgt-fixed-guided-v1"),
         text("--external-result"),
         external.as_os_str(),
         text("--source-artifact"),
@@ -224,4 +261,107 @@ fn invalid_transition_and_import_tamper_fail_closed() {
     assert_eq!(rejected.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_imported_model_invalid"));
     assert!(!workspace.join("02-validate").exists());
+}
+
+#[test]
+fn mgt_import_restart_workflow_preserves_health_and_is_bitwise_deterministic() {
+    let (source_mgt, request, external, source) = mgt_inputs();
+    let temporary = TestDirectory::create();
+    let restarted = temporary.0.join("mgt-restarted");
+    let direct = temporary.0.join("mgt-direct");
+
+    let mut import = mgt_import_arguments(
+        "import-mgt",
+        &source_mgt,
+        &request,
+        &external,
+        &source,
+        &restarted,
+    );
+    import.truncate(11);
+    assert_success(&run_workbench(&import));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    let validated_session =
+        std::fs::read(restarted.join("workbench-session.json")).expect("validated MGT session");
+    let mut run = stage_arguments("run", &restarted).to_vec();
+    run.extend([text("--step-budget"), text("1")]);
+    assert_success(&run_workbench(&run));
+    std::fs::write(restarted.join("workbench-session.json"), validated_session)
+        .expect("restore MGT pre-run durable session");
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    let mut compare = stage_arguments("compare", &restarted).to_vec();
+    compare.push(text("--require-pass"));
+    assert_success(&run_workbench(&compare));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    let direct_arguments = mgt_import_arguments(
+        "workflow-mgt",
+        &source_mgt,
+        &request,
+        &external,
+        &source,
+        &direct,
+    );
+    assert_success(&run_workbench(&direct_arguments));
+
+    let session = verify_session(&restarted);
+    assert_eq!(session["stage"], "reported");
+    assert_eq!(session["comparison_passed"], true);
+    assert_eq!(
+        session["mgt_source_hash"],
+        "sha256:d541e384cc592a2a619475c6e7524b38b5668a1287ae26c03576fb35a2244861"
+    );
+    assert_eq!(session, verify_session(&direct));
+    let files = collect_files(&restarted);
+    assert_eq!(files, collect_files(&direct));
+    assert_eq!(files.len(), 34);
+    for relative in files {
+        assert_eq!(
+            std::fs::read(restarted.join(&relative)).expect("restarted MGT artifact"),
+            std::fs::read(direct.join(&relative)).expect("direct MGT artifact"),
+            "MGT Workbench artifact drift: {}",
+            relative.display()
+        );
+    }
+    assert_eq!(
+        std::fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT bytes"),
+        std::fs::read(&source_mgt).expect("source MGT bytes")
+    );
+    assert_eq!(
+        std::fs::read(restarted.join("01-import/mgt-native-snapshot.json"))
+            .expect("MGT C++ snapshot"),
+        std::fs::read(restarted.join("01-import/model-ir.json")).expect("normalized ModelIR")
+    );
+
+    let mut tampered =
+        std::fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT bytes");
+    tampered[0] ^= 1;
+    std::fs::write(restarted.join("01-import/source.mgt"), tampered).expect("tamper MGT source");
+    let rejected = run_workbench(&stage_arguments("status", &restarted));
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_binding_mismatch")
+    );
+}
+
+#[test]
+fn blocked_mgt_health_cannot_create_an_analysis_workspace() {
+    let root = repository_root();
+    let blocked = root.join("tests/fixtures/foundation_realish/foundation_small.mgt");
+    let (_, request, external, source) = mgt_inputs();
+    let temporary = TestDirectory::create();
+    let workspace = temporary.0.join("blocked");
+    let mut arguments = mgt_import_arguments(
+        "import-mgt",
+        &blocked,
+        &request,
+        &external,
+        &source,
+        &workspace,
+    );
+    arguments.truncate(11);
+    let rejected = run_workbench(&arguments);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_blocked"));
+    assert!(!workspace.exists());
 }

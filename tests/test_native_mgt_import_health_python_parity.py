@@ -74,3 +74,38 @@ def test_exact_numeric_fixture_has_independent_closed_form_properties() -> None:
         0.0,
         0.0,
     ]
+
+
+def test_workbench_numeric_fixture_has_independent_solver_profile() -> None:
+    case = next(
+        row
+        for row in _golden_cases()
+        if row["case_id"] == "workbench-fixed-guided-frame3d-x"
+    )
+    parsed = parse_midas_mgt(ROOT / str(case["source_path"]))
+    nodes = [split_csv_like(row) for row in parsed.section("NODE")]
+    material = split_csv_like(parsed.section("MATERIAL")[0])
+    section = split_csv_like(parsed.section("SECTION")[0])
+    height_m = parse_float_token(nodes[1][3]) - parse_float_token(nodes[0][3])
+    elastic_modulus_pa = parse_float_token(material[2])
+    density_kg_m3 = parse_float_token(material[4])
+    area_m2 = parse_float_token(section[2])
+    iy_m4 = parse_float_token(section[3])
+    assert height_m == 3.2
+    assert density_kg_m3 == 2_500.0
+    assert 12.0 * elastic_modulus_pa * iy_m4 / height_m**3 == pytest.approx(
+        50_000_000.0, rel=0.0, abs=1.0e-8
+    )
+    assert density_kg_m3 * area_m2 * height_m / 2.0 == 5_000.0
+
+    request = json.loads(
+        (
+            ROOT
+            / "native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert request["model_identity"] == case["native_expected"]["normalized_model"]
+    assert request["element_id"] == "E_1"
+    assert request["base_node_id"] == "N_1"
+    assert request["floor_node_id"] == "N_2"
+    assert request["load_pattern_id"] == "LP_PUSH"

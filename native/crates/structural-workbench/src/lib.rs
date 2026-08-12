@@ -11,9 +11,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use structural_cli::{
-    execute_external_comparison, execute_model_ir_native_analysis, execute_pdf_report,
-    publish_external_comparison, publish_model_ir_native_analysis, publish_pdf_report,
-    validate_model_bytes,
+    execute_external_comparison, execute_model_ir_native_analysis, execute_native_mgt_import,
+    execute_pdf_report, publish_external_comparison, publish_model_ir_native_analysis,
+    publish_pdf_report, validate_model_bytes,
 };
 use structural_contracts::external_comparison::parse_external_result_v1;
 use structural_contracts::model_ir::{
@@ -104,6 +104,12 @@ pub struct WorkbenchSessionV1 {
     external_result_hash: String,
     source_artifact_hash: String,
     executable_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mgt_source_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mgt_import_health_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mgt_import_receipt_artifact_hash: Option<String>,
     terminal_status: Option<String>,
     comparison_passed: Option<bool>,
     claim_boundary: String,
@@ -137,6 +143,15 @@ impl WorkbenchSessionV1 {
 pub struct NativeWorkbench {
     root: PathBuf,
     session: WorkbenchSessionV1,
+}
+
+#[derive(Clone, Copy, Debug)]
+struct MgtImportEvidence<'a> {
+    source: &'a [u8],
+    health: &'a str,
+    validation: &'a str,
+    snapshot: &'a str,
+    receipt: &'a str,
 }
 
 impl NativeWorkbench {
@@ -173,6 +188,96 @@ impl NativeWorkbench {
         )
     }
 
+    /// Read an original MGT source, retain its import-health evidence, and initialize a new
+    /// Workbench from the exact normalized `ModelIR`.
+    ///
+    /// # Errors
+    ///
+    /// Rejects a blocked/unsupported MGT import, an identity-mismatched analysis request, unsafe
+    /// input paths, or any durable publication failure.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initialize_from_mgt_paths(
+        root: &Path,
+        source_mgt_path: &Path,
+        model_id: &str,
+        analysis_request_path: &Path,
+        external_result_path: &Path,
+        source_artifact_path: &Path,
+        executable_artifact_path: Option<&Path>,
+    ) -> Result<Self, WorkbenchError> {
+        let source_mgt = read_bounded_regular_file(source_mgt_path, MAX_MODEL_BYTES)?;
+        let analysis_request = read_bounded_regular_file(analysis_request_path, MAX_REQUEST_BYTES)?;
+        let external_result =
+            read_bounded_regular_file(external_result_path, MAX_EXTERNAL_RESULT_BYTES)?;
+        let source_artifact =
+            read_bounded_regular_file(source_artifact_path, MAX_EXTERNAL_ARTIFACT_BYTES)?;
+        let executable_artifact = executable_artifact_path
+            .map(|path| read_bounded_regular_file(path, MAX_EXTERNAL_ARTIFACT_BYTES))
+            .transpose()?;
+        Self::initialize_from_mgt(
+            root,
+            &source_mgt,
+            model_id,
+            &analysis_request,
+            &external_result,
+            &source_artifact,
+            executable_artifact.as_deref(),
+        )
+    }
+
+    /// Normalize one bounded MGT source through Rust/C++ product owners and create a durable
+    /// Workbench import stage containing the original bytes and complete import evidence.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable Workbench error for blocked import health, missing normalized artifacts,
+    /// identity mismatch, or publication failure.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initialize_from_mgt(
+        root: &Path,
+        source_mgt: &[u8],
+        model_id: &str,
+        analysis_request: &[u8],
+        external_result: &[u8],
+        source_artifact: &[u8],
+        executable_artifact: Option<&[u8]>,
+    ) -> Result<Self, WorkbenchError> {
+        verify_slice_bound(source_mgt, MAX_MODEL_BYTES, "MGT source")?;
+        let imported = execute_native_mgt_import(source_mgt, model_id)
+            .map_err(|error| input_error("workbench_mgt_import_failed", &error))?;
+        if !imported.is_normalized() {
+            return Err(WorkbenchError::new(
+                "workbench_mgt_import_blocked",
+                "MGT import health is blocked and cannot start an analysis Workbench",
+            ));
+        }
+        let (Some(model), Some(validation), Some(snapshot)) = (
+            imported.model_ir_json(),
+            imported.validation_json(),
+            imported.snapshot_json(),
+        ) else {
+            return Err(WorkbenchError::new(
+                "workbench_mgt_import_incomplete",
+                "normalized MGT import did not publish ModelIR and C++ validation artifacts",
+            ));
+        };
+        Self::initialize_with_mgt_evidence(
+            root,
+            model.as_bytes(),
+            analysis_request,
+            external_result,
+            source_artifact,
+            executable_artifact,
+            Some(MgtImportEvidence {
+                source: imported.source_bytes(),
+                health: imported.health_json(),
+                validation,
+                snapshot,
+                receipt: imported.receipt_json(),
+            }),
+        )
+    }
+
     /// Create a new immutable input set and publish its first durable session atomically.
     ///
     /// # Errors
@@ -187,6 +292,27 @@ impl NativeWorkbench {
         external_result: &[u8],
         source_artifact: &[u8],
         executable_artifact: Option<&[u8]>,
+    ) -> Result<Self, WorkbenchError> {
+        Self::initialize_with_mgt_evidence(
+            root,
+            source_model_ir,
+            analysis_request,
+            external_result,
+            source_artifact,
+            executable_artifact,
+            None,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
+    fn initialize_with_mgt_evidence(
+        root: &Path,
+        source_model_ir: &[u8],
+        analysis_request: &[u8],
+        external_result: &[u8],
+        source_artifact: &[u8],
+        executable_artifact: Option<&[u8]>,
+        mgt: Option<MgtImportEvidence<'_>>,
     ) -> Result<Self, WorkbenchError> {
         if root.exists() {
             return Err(WorkbenchError::new(
@@ -217,6 +343,29 @@ impl NativeWorkbench {
                 "external executable artifact",
             )?;
         }
+        if let Some(evidence) = mgt {
+            verify_slice_bound(evidence.source, MAX_MODEL_BYTES, "MGT source")?;
+            verify_slice_bound(
+                evidence.health.as_bytes(),
+                MAX_MODEL_BYTES,
+                "MGT import health",
+            )?;
+            verify_slice_bound(
+                evidence.validation.as_bytes(),
+                MAX_MODEL_BYTES,
+                "MGT native validation",
+            )?;
+            verify_slice_bound(
+                evidence.snapshot.as_bytes(),
+                MAX_MODEL_BYTES,
+                "MGT native snapshot",
+            )?;
+            verify_slice_bound(
+                evidence.receipt.as_bytes(),
+                MAX_MODEL_BYTES,
+                "MGT import receipt",
+            )?;
+        }
         let parent = output_parent(root);
         verify_directory(parent, "workbench_output_parent_invalid")?;
 
@@ -241,7 +390,12 @@ impl NativeWorkbench {
         let source_model_ir_hash = sha256_identity(source_model_ir);
         let source_artifact_hash = sha256_identity(source_artifact);
         let executable_artifact_hash = executable_artifact.map(sha256_identity);
-        let binding = json!({
+        let mgt_source_hash = mgt.map(|evidence| sha256_identity(evidence.source));
+        let mgt_import_health_artifact_hash =
+            mgt.map(|evidence| sha256_identity(evidence.health.as_bytes()));
+        let mgt_import_receipt_artifact_hash =
+            mgt.map(|evidence| sha256_identity(evidence.receipt.as_bytes()));
+        let mut binding = json!({
             "source_model_ir_hash": source_model_ir_hash,
             "model_content_hash": model.content_hash(),
             "model_semantic_hash": model.semantic_hash(),
@@ -251,6 +405,23 @@ impl NativeWorkbench {
             "source_artifact_hash": source_artifact_hash,
             "executable_artifact_hash": executable_artifact_hash,
         });
+        if let (Some(source_hash), Some(health_hash), Some(receipt_hash)) = (
+            mgt_source_hash.as_deref(),
+            mgt_import_health_artifact_hash.as_deref(),
+            mgt_import_receipt_artifact_hash.as_deref(),
+        ) {
+            binding
+                .as_object_mut()
+                .expect("Workbench binding is an object")
+                .insert(
+                    "mgt_import".to_owned(),
+                    json!({
+                        "source_hash": source_hash,
+                        "health_artifact_hash": health_hash,
+                        "receipt_artifact_hash": receipt_hash,
+                    }),
+                );
+        }
         let binding_json = canonical_json(&binding, "workbench_session_identity_failed")?;
         let session_id = sha256_identity(binding_json.as_bytes());
         let session = WorkbenchSessionV1 {
@@ -265,6 +436,9 @@ impl NativeWorkbench {
             external_result_hash: external.external_result_hash().to_owned(),
             source_artifact_hash,
             executable_artifact_hash,
+            mgt_source_hash,
+            mgt_import_health_artifact_hash,
+            mgt_import_receipt_artifact_hash,
             terminal_status: None,
             comparison_passed: None,
             claim_boundary: CLAIM_BOUNDARY.to_owned(),
@@ -273,7 +447,11 @@ impl NativeWorkbench {
         let session_json = canonical_session(&session)?;
         let mut inventory = vec![
             artifact_entry(
-                "original_model_ir",
+                if mgt.is_some() {
+                    "normalized_source_model_ir"
+                } else {
+                    "original_model_ir"
+                },
                 "source-model-ir.json",
                 "application/json",
                 source_model_ir,
@@ -311,22 +489,70 @@ impl NativeWorkbench {
                 bytes,
             )?);
         }
+        if let Some(evidence) = mgt {
+            inventory.extend([
+                artifact_entry(
+                    "original_mgt_source",
+                    "source.mgt",
+                    "application/octet-stream",
+                    evidence.source,
+                )?,
+                artifact_entry(
+                    "mgt_import_health",
+                    "import-health.json",
+                    "application/json",
+                    evidence.health.as_bytes(),
+                )?,
+                artifact_entry(
+                    "mgt_cpp_validation_report",
+                    "mgt-native-validation.json",
+                    "application/json",
+                    evidence.validation.as_bytes(),
+                )?,
+                artifact_entry(
+                    "mgt_cpp_canonical_snapshot",
+                    "mgt-native-snapshot.json",
+                    "application/json",
+                    evidence.snapshot.as_bytes(),
+                )?,
+                artifact_entry(
+                    "mgt_import_receipt",
+                    "mgt-import-receipt.json",
+                    "application/json",
+                    evidence.receipt.as_bytes(),
+                )?,
+            ]);
+        }
         let import_receipt = canonical_self_hashed(json!({
             "schema_version": IMPORT_RECEIPT_SCHEMA_V1,
             "session_id": session_id,
             "status": "imported",
             "artifacts": inventory,
-            "claim_boundary": "strict_language_neutral_input_ingestion_only_not_cpp_validation_or_solver_execution",
+            "claim_boundary": if mgt.is_some() {
+                "bounded_original_mgt_import_health_normalized_modelir_and_cpp_snapshot_bound_to_one_native_workbench_profile"
+            } else {
+                "strict_language_neutral_input_ingestion_only_not_cpp_validation_or_solver_execution"
+            },
         }))?;
+        let mut artifacts = vec![
+            ("source-model-ir.json", source_model_ir),
+            ("model-ir.json", model.canonical_bytes()),
+            ("model-analysis-request.json", request.canonical_bytes()),
+            ("external-result.json", external.canonical_bytes()),
+            ("external-source.artifact", source_artifact),
+        ];
+        if let Some(evidence) = mgt {
+            artifacts.extend([
+                ("source.mgt", evidence.source),
+                ("import-health.json", evidence.health.as_bytes()),
+                ("mgt-native-validation.json", evidence.validation.as_bytes()),
+                ("mgt-native-snapshot.json", evidence.snapshot.as_bytes()),
+                ("mgt-import-receipt.json", evidence.receipt.as_bytes()),
+            ]);
+        }
         publish_initial_workspace(
             root,
-            &[
-                ("source-model-ir.json", source_model_ir),
-                ("model-ir.json", model.canonical_bytes()),
-                ("model-analysis-request.json", request.canonical_bytes()),
-                ("external-result.json", external.canonical_bytes()),
-                ("external-source.artifact", source_artifact),
-            ],
+            &artifacts,
             executable_artifact,
             import_receipt.as_bytes(),
             session_json.as_bytes(),
@@ -666,6 +892,7 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
         }
         None
     };
+    let mgt_binding = verify_mgt_import_bindings(&imported, session, &parsed_model, &model)?;
     let valid = session.source_model_ir_hash == sha256_identity(&source_model)
         && session.model_content_hash == parsed_model.content_hash()
         && session.model_semantic_hash == parsed_model.semantic_hash()
@@ -680,7 +907,7 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
             "one or more immutable imported artifacts differ from the durable session",
         ));
     }
-    let binding = json!({
+    let mut binding = json!({
         "source_model_ir_hash": session.source_model_ir_hash,
         "model_content_hash": session.model_content_hash,
         "model_semantic_hash": session.model_semantic_hash,
@@ -690,6 +917,12 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
         "source_artifact_hash": session.source_artifact_hash,
         "executable_artifact_hash": session.executable_artifact_hash,
     });
+    if let Some(mgt_import) = mgt_binding {
+        binding
+            .as_object_mut()
+            .expect("Workbench binding is an object")
+            .insert("mgt_import".to_owned(), mgt_import);
+    }
     let binding_json = canonical_json(&binding, "workbench_session_identity_failed")?;
     if session.session_id != sha256_identity(binding_json.as_bytes()) {
         return Err(WorkbenchError::new(
@@ -700,6 +933,89 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
     verify_external_artifact_bindings(&parsed_external, &source, executable.as_deref())?;
     verify_receipt_directory(&imported, "import-receipt.json")?;
     Ok(())
+}
+
+fn verify_mgt_import_bindings(
+    imported: &Path,
+    session: &WorkbenchSessionV1,
+    parsed_model: &structural_contracts::model_ir::ModelIrV2Document,
+    model: &[u8],
+) -> Result<Option<Value>, WorkbenchError> {
+    let field_count = [
+        session.mgt_source_hash.as_ref(),
+        session.mgt_import_health_artifact_hash.as_ref(),
+        session.mgt_import_receipt_artifact_hash.as_ref(),
+    ]
+    .into_iter()
+    .flatten()
+    .count();
+    let names = [
+        "source.mgt",
+        "import-health.json",
+        "mgt-native-validation.json",
+        "mgt-native-snapshot.json",
+        "mgt-import-receipt.json",
+    ];
+    if field_count == 0 {
+        if names.iter().any(|name| imported.join(name).exists()) {
+            return Err(WorkbenchError::new(
+                "workbench_import_binding_mismatch",
+                "unbound MGT evidence appeared in a ModelIR-only import set",
+            ));
+        }
+        return Ok(None);
+    }
+    if field_count != 3 {
+        return Err(WorkbenchError::new(
+            "workbench_mgt_import_binding_incomplete",
+            "MGT import session identities must be absent or complete",
+        ));
+    }
+
+    let mgt_source = read_bounded_regular_file(&imported.join("source.mgt"), MAX_MODEL_BYTES)?;
+    let mgt_health =
+        read_bounded_regular_file(&imported.join("import-health.json"), MAX_MODEL_BYTES)?;
+    let mgt_validation = read_bounded_regular_file(
+        &imported.join("mgt-native-validation.json"),
+        MAX_MODEL_BYTES,
+    )?;
+    let mgt_snapshot =
+        read_bounded_regular_file(&imported.join("mgt-native-snapshot.json"), MAX_MODEL_BYTES)?;
+    let mgt_receipt =
+        read_bounded_regular_file(&imported.join("mgt-import-receipt.json"), MAX_MODEL_BYTES)?;
+    let reproduced = execute_native_mgt_import(&mgt_source, parsed_model.model_id())
+        .map_err(|error| input_error("workbench_mgt_revalidation_failed", &error))?;
+    let reproduced_exact = reproduced.is_normalized()
+        && reproduced.source_bytes() == mgt_source
+        && reproduced
+            .model_ir_json()
+            .is_some_and(|value| value.as_bytes() == model)
+        && reproduced.health_json().as_bytes() == mgt_health
+        && reproduced
+            .validation_json()
+            .is_some_and(|value| value.as_bytes() == mgt_validation)
+        && reproduced
+            .snapshot_json()
+            .is_some_and(|value| value.as_bytes() == mgt_snapshot)
+        && reproduced.receipt_json().as_bytes() == mgt_receipt;
+    let source_hash = sha256_identity(&mgt_source);
+    let health_hash = sha256_identity(&mgt_health);
+    let receipt_hash = sha256_identity(&mgt_receipt);
+    if !reproduced_exact
+        || session.mgt_source_hash.as_deref() != Some(source_hash.as_str())
+        || session.mgt_import_health_artifact_hash.as_deref() != Some(health_hash.as_str())
+        || session.mgt_import_receipt_artifact_hash.as_deref() != Some(receipt_hash.as_str())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_mgt_import_binding_mismatch",
+            "original MGT bytes or deterministic import/C++ validation evidence changed",
+        ));
+    }
+    Ok(Some(json!({
+        "source_hash": source_hash,
+        "health_artifact_hash": health_hash,
+        "receipt_artifact_hash": receipt_hash,
+    })))
 }
 
 fn verify_stage_chain(
@@ -1279,6 +1595,9 @@ mod tests {
             source_artifact_hash:
                 "sha256:2222222222222222222222222222222222222222222222222222222222222222".to_owned(),
             executable_artifact_hash: None,
+            mgt_source_hash: None,
+            mgt_import_health_artifact_hash: None,
+            mgt_import_receipt_artifact_hash: None,
             terminal_status: None,
             comparison_passed: None,
             claim_boundary: super::CLAIM_BOUNDARY.to_owned(),

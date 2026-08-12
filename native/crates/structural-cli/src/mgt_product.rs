@@ -85,6 +85,31 @@ impl NativeMgtImportOutcomeV1 {
     pub fn receipt_json(&self) -> &str {
         &self.receipt_json
     }
+
+    #[must_use]
+    pub fn source_bytes(&self) -> &[u8] {
+        &self.source_bytes
+    }
+
+    #[must_use]
+    pub fn health_json(&self) -> &str {
+        &self.health_json
+    }
+
+    #[must_use]
+    pub fn model_ir_json(&self) -> Option<&str> {
+        self.model_ir_json.as_deref()
+    }
+
+    #[must_use]
+    pub fn validation_json(&self) -> Option<&str> {
+        self.validation_json.as_deref()
+    }
+
+    #[must_use]
+    pub fn snapshot_json(&self) -> Option<&str> {
+        self.snapshot_json.as_deref()
+    }
 }
 
 /// Import MGT bytes and validate any complete exact-profile `ModelIR` through the C++ owner.

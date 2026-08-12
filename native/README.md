@@ -45,7 +45,7 @@ store through strict HTTP/1.1 with distinct static client/worker credentials and
 evidence. Another bounded C5 slice strictly ingests hash-bound external result/source artifacts
 and compares three global NDTHA quantities; its tracked source is a language-neutral Python C1
 golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
-distributed API authority, live same-mesh external validation, HIP C2, Workbench, broader PDF/A/
+distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A/
 accessibility/report output and C6 remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
@@ -66,8 +66,11 @@ ownership rules and authority boundaries are documented in
 A separate bounded MGT C5 slice makes Rust the owner of original bytes, strict encoding
 disposition, source hash, section/row inventory and loss diagnostics. Only the exact numeric
 frame/truss subset is normalized to ModelIR and validated/snapshotted by the existing C++ owner;
-the four tracked incomplete foundation fixtures remain blocked without invented properties. This
-does not claim general MGT grammar, shell/load-combination/writeback or solver authority. See
+the four tracked incomplete foundation fixtures remain blocked without invented properties. A
+second exact fixture now reaches the Rust-native Workbench, preserving original MGT bytes, import
+health and the C++ snapshot through real checkpoint/resume, comparison and native PDF generation.
+This does not claim general MGT grammar, shell/load-combination/writeback or broader solver
+authority. See
 `docs/native/mgt-import-health-v1.md`.
 
 ABI v1.7 adds a bounded CPU reference slice for explicit elastic/bilinear material state,
@@ -167,6 +170,21 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Blocked inputs still publish their original bytes and complete loss/disposition report; the
 optional policy flag then exits 2. A complete exact-profile input additionally publishes canonical
 ModelIR, the C++ validation report and byte-identical C++ snapshot.
+
+The exact normalized MGT profile can enter the native Workbench without a Python/Node bridge:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  workflow-mgt native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt \
+  native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json \
+  --model-id workbench-mgt-fixed-guided-v1 \
+  --external-result native/tests/fixtures/external_comparison/reference_oracle_ndtha_v1.json \
+  --source-artifact native/tests/fixtures/solver_cpu/nonlinear_ndtha_one_story_elastic_python_c1.json \
+  --workspace workbench-mgt --step-budget 1
+~~~
+
+The durable session revalidates the original MGT import and C++ snapshot on every reopen. This is
+the bounded exact profile, not general MGT-to-analysis authority.
 
 The bounded analysis product commands are:
 

@@ -12,6 +12,7 @@ const EXIT_USAGE_OR_POLICY: u8 = 2;
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ImportCommand {
     model: PathBuf,
+    mgt_model_id: Option<String>,
     request: PathBuf,
     external_result: PathBuf,
     source_artifact: PathBuf,
@@ -31,9 +32,17 @@ fn run(arguments: &[OsString]) -> ExitCode {
         return ExitCode::SUCCESS;
     }
     let result = match arguments.first().and_then(|argument| argument.to_str()) {
-        Some("import") => parse_import(arguments, false).and_then(|command| run_import(&command)),
+        Some("import") => {
+            parse_import(arguments, false, false).and_then(|command| run_import(&command))
+        }
+        Some("import-mgt") => {
+            parse_import(arguments, false, true).and_then(|command| run_import(&command))
+        }
         Some("workflow") => {
-            parse_import(arguments, true).and_then(|command| run_workflow(&command))
+            parse_import(arguments, true, false).and_then(|command| run_workflow(&command))
+        }
+        Some("workflow-mgt") => {
+            parse_import(arguments, true, true).and_then(|command| run_workflow(&command))
         }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
@@ -119,14 +128,26 @@ fn run_workflow(command: &ImportCommand) -> Result<(), WorkbenchError> {
 }
 
 fn initialize(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError> {
-    NativeWorkbench::initialize_from_paths(
-        &command.workspace,
-        &command.model,
-        &command.request,
-        &command.external_result,
-        &command.source_artifact,
-        command.executable_artifact.as_deref(),
-    )
+    if let Some(model_id) = command.mgt_model_id.as_deref() {
+        NativeWorkbench::initialize_from_mgt_paths(
+            &command.workspace,
+            &command.model,
+            model_id,
+            &command.request,
+            &command.external_result,
+            &command.source_artifact,
+            command.executable_artifact.as_deref(),
+        )
+    } else {
+        NativeWorkbench::initialize_from_paths(
+            &command.workspace,
+            &command.model,
+            &command.request,
+            &command.external_result,
+            &command.source_artifact,
+            command.executable_artifact.as_deref(),
+        )
+    }
 }
 
 fn run_status(workspace: &Path) -> Result<(), WorkbenchError> {
@@ -183,7 +204,11 @@ fn print_session(workbench: &NativeWorkbench) -> Result<(), WorkbenchError> {
     Ok(())
 }
 
-fn parse_import(arguments: &[OsString], workflow: bool) -> Result<ImportCommand, WorkbenchError> {
+fn parse_import(
+    arguments: &[OsString],
+    workflow: bool,
+    mgt: bool,
+) -> Result<ImportCommand, WorkbenchError> {
     if arguments.len() < 3 {
         return Err(usage_error(
             "import/workflow requires MODEL and MODEL-REQUEST",
@@ -195,6 +220,7 @@ fn parse_import(arguments: &[OsString], workflow: bool) -> Result<ImportCommand,
     let mut source_artifact = None;
     let mut executable_artifact = None;
     let mut workspace = None;
+    let mut mgt_model_id = None;
     let mut step_budget = 1_u32;
     let mut step_budget_seen = false;
     let mut index = 3;
@@ -217,6 +243,13 @@ fn parse_import(arguments: &[OsString], workflow: bool) -> Result<ImportCommand,
                 executable_artifact = Some(PathBuf::from(value));
             }
             "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--model-id" if mgt && mgt_model_id.is_none() => {
+                let value = value
+                    .to_str()
+                    .filter(|text| !text.is_empty())
+                    .ok_or_else(|| usage_error("MGT model ID must be non-empty UTF-8"))?;
+                mgt_model_id = Some(value.to_owned());
+            }
             "--step-budget" if workflow && !step_budget_seen => {
                 step_budget = parse_u32(value, "step budget")?;
                 step_budget_seen = true;
@@ -227,6 +260,11 @@ fn parse_import(arguments: &[OsString], workflow: bool) -> Result<ImportCommand,
     }
     Ok(ImportCommand {
         model,
+        mgt_model_id: if mgt {
+            Some(mgt_model_id.ok_or_else(|| usage_error("--model-id is required for MGT"))?)
+        } else {
+            None
+        },
         request,
         external_result: external_result
             .ok_or_else(|| usage_error("--external-result is required"))?,
@@ -301,7 +339,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
+    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
 }
 
 #[cfg(test)]
@@ -324,9 +362,31 @@ mod tests {
             OsString::from("--workspace"),
             OsString::from("session"),
         ];
-        let parsed = parse_import(&arguments, false).expect("valid import command");
+        let parsed = parse_import(&arguments, false, false).expect("valid import command");
         assert_eq!(parsed.workspace, PathBuf::from("session"));
         assert_eq!(parsed.step_budget, 1);
+        assert_eq!(parsed.mgt_model_id, None);
+    }
+
+    #[test]
+    fn mgt_parser_requires_an_explicit_model_identity() {
+        let arguments = [
+            OsString::from("import-mgt"),
+            OsString::from("source.mgt"),
+            OsString::from("request.json"),
+            OsString::from("--model-id"),
+            OsString::from("bounded-mgt-model-v1"),
+            OsString::from("--external-result"),
+            OsString::from("external.json"),
+            OsString::from("--source-artifact"),
+            OsString::from("source.json"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_import(&arguments, false, true).expect("valid MGT import command");
+        assert_eq!(parsed.mgt_model_id.as_deref(), Some("bounded-mgt-model-v1"));
+        let missing = &arguments[2..];
+        assert!(parse_import(missing, false, true).is_err());
     }
 
     #[test]
