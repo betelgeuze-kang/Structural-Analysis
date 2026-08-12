@@ -243,8 +243,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   Markdown document source bound to the bounded CPU nonlinear-NDTHA ResultIR. A separate bounded
   C5 Rust comparison contract verifies exact source/executable bytes and three global NDTHA
   quantities against a Python C1 golden without promoting that fixture to live external-solver
-  evidence. Live MIDAS/OpenSees/CalculiX execution, same-mesh node/member mapping, PDF rendering
-  and broader report/comparison profiles remain open.
+  evidence. A separate bounded C5 Rust renderer now byte-verifies the exact ResultIR/ReportIR/
+  Markdown projection and emits a deterministic single-page A4 PDF plus self-hashed receipt with
+  no product dependency on Python/Node/external renderers. Live MIDAS/OpenSees/CalculiX execution,
+  same-mesh node/member mapping, PDF/A/accessibility/localization/multipage output and broader
+  report/comparison profiles remain open.
 
 ### D9. CLI/API and Workbench composition
 

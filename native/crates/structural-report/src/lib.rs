@@ -4,6 +4,13 @@
 
 use std::fmt::Write as _;
 
+mod pdf;
+
+pub use pdf::{
+    render_nonlinear_ndtha_pdf_v1, validate_deterministic_pdf_v1, NonlinearNdthaPdfDocumentV1,
+    PdfRenderError,
+};
+
 use structural_contracts::product_ir::{
     build_nonlinear_ndtha_report_ir_v1, NonlinearNdthaReportIrDocumentV1,
     NonlinearNdthaResultIrDocumentV1, ProductIrContractError,

@@ -5,6 +5,7 @@
 mod comparison;
 mod job;
 mod product;
+mod report;
 
 use std::fmt;
 
@@ -20,6 +21,9 @@ pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandErr
 pub use product::{
     execute_native_analysis, publish_native_analysis, NativeAnalysisProductError,
     NativeAnalysisRunOutcomeV1,
+};
+pub use report::{
+    execute_pdf_report, publish_pdf_report, NativePdfReportError, NativePdfReportOutcomeV1,
 };
 
 /// Failure boundary for a complete native `ModelIR` validation request.

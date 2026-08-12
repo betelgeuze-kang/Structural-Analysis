@@ -39,8 +39,8 @@ single-host C5 durable-job slice owns submit/poll/cancel, expired-lease recovery
 continuation and deterministic export. Another bounded C5 slice strictly ingests hash-bound
 external result/source artifacts and compares three global NDTHA quantities; its tracked source
 is a language-neutral Python C1 golden, not live solver evidence. Broader solver coverage,
-distributed API/authorization, live same-mesh external validation, HIP C2, Workbench/PDF and C6
-remain open. The legacy five-symbol ABI is unchanged.
+distributed API/authorization, live same-mesh external validation, HIP C2, Workbench, broader
+PDF/A/accessibility/report output and C6 remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -112,6 +112,18 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Live external evidence additionally requires `--executable-artifact`. Exact source and executable
 bytes are verified before comparison; see `docs/native/external-comparison-v1.md` for the
 non-promoting authority boundary.
+
+The bounded native PDF command is:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  report render-pdf result-ir.json report-ir.json report.md \
+  --output-dir pdf-report
+~~~
+
+The renderer re-projects and verifies all three inputs before emitting a deterministic A4 PDF and
+self-hashed receipt. It invokes no external renderer; see `docs/native/pdf-report-v1.md` for the
+PDF/A, accessibility and broader-report boundary.
 
 ## CPU-only C++
 

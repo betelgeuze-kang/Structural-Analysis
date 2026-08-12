@@ -509,8 +509,8 @@ R5의 첫 product composition slice는 bounded CPU nonlinear-NDTHA C5다.
   artifact가 byte-identical하며 frozen SHA-256를 만족한다.
 
 이 synchronous C5는 tracked request 하나의 CPU 경로만 닫는다. broader solver, HIP C2,
-ModelIR analysis adapter, distributed API, PDF render, Workbench와 C6는 open이다. external
-comparison은 아래 별도 bounded capability로만 승격한다. 상세 계약은
+ModelIR analysis adapter, distributed API, Workbench와 C6는 open이다. external comparison과
+PDF render는 아래 별도 bounded capability로만 승격한다. 상세 계약은
 `docs/native/bounded-product-e2e-v1.md`에 고정한다.
 
 R6의 local durable-job slice도 같은 bounded CPU request에 한해 C5에 도달한다.
@@ -545,3 +545,19 @@ C5에 도달한다.
 현재 tracked C1 source는 language-neutral Python golden이며 live MIDAS/OpenSees/CalculiX 실행,
 same-mesh proof, node/member/local-axis mapping, broader quantity, HIP C2와 C6를 닫지 않는다.
 상세 계약은 `docs/native/external-comparison-v1.md`에 고정한다.
+
+R8의 PDF slice는 같은 bounded ResultIR/ReportIR의 single-page A4 summary에 한해 C5에
+도달한다.
+
+- Rust renderer는 supplied ResultIR에서 ReportIR와 Markdown을 다시 투영하고 exact byte
+  identity를 확인하므로, 독립적으로 self-consistent한 forged report도 거부한다.
+- PDF 1.7 object/xref/trailer와 표준 ASCII font를 고정하고 wall-clock/compression 변동을
+  배제한다. Result/report/document/request/model/state/execution/checkpoint provenance를 페이지에
+  보존한다.
+- 내부 validator가 header, 8개 object offset, trailer와 `startxref`를 재검증하고 CLI는 PDF와
+  self-hashed receipt를 create-new directory에 publish한다.
+- environment-cleared E2E가 external renderer 없이 bitwise repeatability를 증명한다. Poppler
+  render/text inspection은 개발 검증이며 product dependency가 아니다.
+
+PDF/A, tagged accessibility, Unicode/localized font, multipage table/chart, broader report profile,
+HIP C2와 C6는 open이다. 상세 계약은 `docs/native/pdf-report-v1.md`에 고정한다.

@@ -75,6 +75,17 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "node/member mapping" in comparison["claim"]
     assert "HIP C2" in comparison["claim"]
     assert "C6" in comparison["claim"]
+    assert capabilities.capability_is_enabled(payload, "pdf_report") is True
+    pdf = payload["capabilities"]["pdf_report"]
+    assert pdf["cutover_gate"] == "C5"
+    assert pdf["owner"] == "structural-report"
+    assert "deterministic A4 PDF 1.7" in pdf["claim"]
+    assert "validates its own xref/object/trailer" in pdf["claim"]
+    assert "no Python, Node or external renderer lookup" in pdf["claim"]
+    assert "PDF/A" in pdf["claim"]
+    assert "tagged accessibility" in pdf["claim"]
+    assert "HIP C2" in pdf["claim"]
+    assert "C6" in pdf["claim"]
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 

@@ -24,6 +24,7 @@ EXPECTED_OWNERS = {
     "product_e2e": "structural-cli",
     "durable_jobs": "structural-runtime",
     "external_comparison": "structural-cli",
+    "pdf_report": "structural-report",
     "hip_backend": "structural_c_abi_v1",
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})

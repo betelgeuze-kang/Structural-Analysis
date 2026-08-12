@@ -53,7 +53,7 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench, PDF rendering and C6 remain open; external comparison is promoted only as a separate bounded C5 capability"
+      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench and C6 remain open; external comparison and PDF rendering are promoted only as separate bounded C5 capabilities"
     },
     "durable_jobs": {
       "status": "implemented",
@@ -66,6 +66,12 @@
       "cutover_gate": "C5",
       "owner": "structural-cli",
       "claim": "bounded global nonlinear-NDTHA external comparison C5 only: Rust strictly ingests one hash-bound language-neutral external-result contract, verifies source artifact bytes and any declared executable bytes, requires exact model/case/frame/unit/location/ResultIR mapping, emits self-hashed comparison and receipt artifacts, preserves divergence, and runs through a clean-environment CLI with no Python or Node lookup; Python C1 golden parity covers three global quantities, while live MIDAS/OpenSees/CalculiX execution, same-mesh proof, node/member mapping, broader quantities, HIP C2 and C6 remain open"
+    },
+    "pdf_report": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-report",
+      "claim": "bounded single-page nonlinear-NDTHA PDF report C5 only: Rust re-projects and byte-verifies exact ResultIR, ReportIR and Markdown bindings, emits a deterministic A4 PDF 1.7 with fixed ASCII standard fonts, validates its own xref/object/trailer structure, publishes a self-hashed receipt, and repeats bitwise-identically through a clean-environment CLI with no Python, Node or external renderer lookup; PDF/A, tagged accessibility, Unicode/localized fonts, multipage tables/charts, broader report profiles, HIP C2 and C6 remain open"
     },
     "hip_backend": {
       "status": "planned",

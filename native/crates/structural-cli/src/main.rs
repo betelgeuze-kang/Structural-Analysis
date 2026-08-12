@@ -7,8 +7,8 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_cli::{
     contract_error_report, execute_external_comparison, execute_native_analysis,
-    publish_external_comparison, publish_native_analysis, validate_model_bytes,
-    validation_succeeds,
+    execute_pdf_report, publish_external_comparison, publish_native_analysis, publish_pdf_report,
+    validate_model_bytes, validation_succeeds,
 };
 
 mod job_cli;
@@ -35,6 +35,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     if let Some(command) = parse_analysis_arguments(arguments) {
         return run_native_analysis(&command);
     }
+    if let Some(command) = parse_pdf_report_arguments(arguments) {
+        return run_pdf_report(&command);
+    }
     if let Some(command) = parse_comparison_arguments(arguments) {
         return run_external_comparison(&command);
     }
@@ -44,7 +47,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
@@ -183,6 +186,81 @@ fn run_native_analysis(command: &AnalysisCommand) -> ExitCode {
     }
     println!("{}", outcome.run_receipt_json());
     ExitCode::SUCCESS
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct PdfReportCommand {
+    result_ir_path: PathBuf,
+    report_ir_path: PathBuf,
+    document_source_path: PathBuf,
+    output_directory: PathBuf,
+}
+
+fn run_pdf_report(command: &PdfReportCommand) -> ExitCode {
+    let result_ir = match read_bounded_regular_file(&command.result_ir_path, MAX_RESULT_IR_BYTES) {
+        Ok(bytes) => bytes,
+        Err(detail) => return pdf_input_failure("result_ir_read_error", "/result_ir", &detail),
+    };
+    let report_ir = match read_bounded_regular_file(&command.report_ir_path, MAX_RESULT_IR_BYTES) {
+        Ok(bytes) => bytes,
+        Err(detail) => return pdf_input_failure("report_ir_read_error", "/report_ir", &detail),
+    };
+    let document_source =
+        match read_bounded_regular_file(&command.document_source_path, MAX_RESULT_IR_BYTES) {
+            Ok(bytes) => bytes,
+            Err(detail) => {
+                return pdf_input_failure(
+                    "document_source_read_error",
+                    "/document_source",
+                    &detail,
+                );
+            }
+        };
+    let outcome = match execute_pdf_report(&result_ir, &report_ir, &document_source) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if error.is_contract_error() {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-native-pdf-report-failure.v1",
+                    "code": "pdf_report_failed",
+                    "detail": error.to_string()
+                })
+            );
+            return ExitCode::from(exit);
+        }
+    };
+    if let Err(error) = publish_pdf_report(&command.output_directory, &outcome) {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-native-pdf-report-failure.v1",
+                "code": "pdf_report_publish_failed",
+                "detail": error.to_string()
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    }
+    println!("{}", outcome.receipt_json());
+    ExitCode::SUCCESS
+}
+
+fn pdf_input_failure(code: &str, path: &str, detail: &str) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-native-pdf-report-failure.v1",
+            "code": code,
+            "path": path,
+            "detail": detail
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -354,6 +432,25 @@ fn parse_validate_arguments(arguments: &[OsString]) -> Option<(PathBuf, bool)> {
     path.map(|path| (path, require_analysis_ready))
 }
 
+fn parse_pdf_report_arguments(arguments: &[OsString]) -> Option<PdfReportCommand> {
+    if arguments.len() != 7 || arguments[0] != "report" || arguments[1] != "render-pdf" {
+        return None;
+    }
+    if [&arguments[2], &arguments[3], &arguments[4], &arguments[6]]
+        .iter()
+        .any(|value| value.to_string_lossy().starts_with('-'))
+        || arguments[5] != "--output-dir"
+    {
+        return None;
+    }
+    Some(PdfReportCommand {
+        result_ir_path: PathBuf::from(&arguments[2]),
+        report_ir_path: PathBuf::from(&arguments[3]),
+        document_source_path: PathBuf::from(&arguments[4]),
+        output_directory: PathBuf::from(&arguments[6]),
+    })
+}
+
 fn parse_comparison_arguments(arguments: &[OsString]) -> Option<ComparisonCommand> {
     if arguments.len() < 7 || arguments[0] != "comparison" || arguments[1] != "run" {
         return None;
@@ -463,8 +560,8 @@ fn parse_analysis_arguments(arguments: &[OsString]) -> Option<AnalysisCommand> {
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analysis_arguments, parse_comparison_arguments, parse_validate_arguments,
-        AnalysisCommand, ComparisonCommand,
+        parse_analysis_arguments, parse_comparison_arguments, parse_pdf_report_arguments,
+        parse_validate_arguments, AnalysisCommand, ComparisonCommand, PdfReportCommand,
     };
     use std::ffi::OsString;
 
@@ -583,6 +680,36 @@ mod tests {
             "a",
             "--output-dir",
             "b"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn pdf_report_arguments_have_no_implicit_input_or_output() {
+        assert_eq!(
+            parse_pdf_report_arguments(&args(&[
+                "report",
+                "render-pdf",
+                "result.json",
+                "report.json",
+                "report.md",
+                "--output-dir",
+                "pdf"
+            ])),
+            Some(PdfReportCommand {
+                result_ir_path: "result.json".into(),
+                report_ir_path: "report.json".into(),
+                document_source_path: "report.md".into(),
+                output_directory: "pdf".into(),
+            })
+        );
+        assert!(parse_pdf_report_arguments(&args(&[
+            "report",
+            "render-pdf",
+            "result.json",
+            "report.json",
+            "report.md",
+            "pdf"
         ]))
         .is_none());
     }
