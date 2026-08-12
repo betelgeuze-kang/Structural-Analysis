@@ -9,7 +9,8 @@ use core::ptr::{self, NonNull};
 
 use serde::{Deserialize, Serialize};
 use structural_contracts::legacy_runtime::{
-    NonlinearStaticConfigV3, StaticStoryInputsV3, TrackConfigV3, TrackSupportType, TrackTheory,
+    NdthaStoryInputsV3, NonlinearNdthaConfigV3, NonlinearStaticConfigV3, StaticStoryInputsV3,
+    TrackConfigV3, TrackSupportType, TrackTheory,
 };
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_ffi_sys as sys;
@@ -124,6 +125,145 @@ pub struct NonlinearStaticSolution {
     pub fallback_count: u32,
 }
 
+/// Caller-owned deterministic response channels from the C++ nonlinear NDTHA CPU kernel.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NonlinearNdthaResponse {
+    pub top_displacement_m: Vec<f64>,
+    pub drift_ratio_pct: Vec<f64>,
+    pub base_shear_kn: Vec<f64>,
+    pub core_drift_pct: Vec<f64>,
+    pub core_shear_kn: Vec<f64>,
+    pub step_converged: Vec<bool>,
+    pub step_iterations: Vec<u32>,
+    pub step_plastic_story_count: Vec<u32>,
+    pub step_residual_inf: Vec<f64>,
+    pub story_drift_envelope_pct: Vec<f64>,
+    pub final_story_drift_pct: Vec<f64>,
+}
+
+/// Caller-owned deterministic result from the bounded C++ nonlinear NDTHA CPU kernel.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NonlinearNdthaSolution {
+    pub converged_all_steps: bool,
+    pub collapsed: bool,
+    pub collapse_step: i32,
+    pub collapse_time_s: f64,
+    pub collapse_drift_ratio_pct: f64,
+    pub collapse_top_displacement_m: f64,
+    pub step_count_completed: u32,
+    pub max_plastic_story_count: u32,
+    pub max_drift_ratio_pct: f64,
+    pub avg_step_iterations: f64,
+    pub residual_top_displacement_m: f64,
+    pub residual_drift_ratio_pct: f64,
+    pub total_line_search_backtracks: u32,
+    pub response: NonlinearNdthaResponse,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
+struct NdthaOutputArena {
+    top_displacement_m: Vec<f64>,
+    drift_ratio_pct: Vec<f64>,
+    base_shear_kn: Vec<f64>,
+    core_drift_pct: Vec<f64>,
+    core_shear_kn: Vec<f64>,
+    step_converged: Vec<u8>,
+    step_iterations: Vec<u32>,
+    step_plastic_story_count: Vec<u32>,
+    step_residual_inf: Vec<f64>,
+    story_drift_envelope_pct: Vec<f64>,
+    final_story_drift_pct: Vec<f64>,
+}
+
+impl NdthaOutputArena {
+    fn allocate(story_count: usize, step_count: usize) -> Result<Self, Error> {
+        Ok(Self {
+            top_displacement_m: allocate_f64_output(step_count)?,
+            drift_ratio_pct: allocate_f64_output(step_count)?,
+            base_shear_kn: allocate_f64_output(step_count)?,
+            core_drift_pct: allocate_f64_output(step_count)?,
+            core_shear_kn: allocate_f64_output(step_count)?,
+            step_converged: allocate_u8_output(step_count)?,
+            step_iterations: allocate_u32_output(step_count)?,
+            step_plastic_story_count: allocate_u32_output(step_count)?,
+            step_residual_inf: allocate_f64_output(step_count)?,
+            story_drift_envelope_pct: allocate_f64_output(story_count)?,
+            final_story_drift_pct: allocate_f64_output(story_count)?,
+        })
+    }
+
+    fn descriptor(&mut self) -> Result<sys::SaNonlinearNdthaOutputsV1, Error> {
+        Ok(sys::SaNonlinearNdthaOutputsV1 {
+            abi_version: sys::SA_ABI_V1_4,
+            struct_size: abi_size::<sys::SaNonlinearNdthaOutputsV1>(),
+            top_displacement_m: mutable_f64_view(&mut self.top_displacement_m, sys::SA_ABI_V1_4)?,
+            drift_ratio_pct: mutable_f64_view(&mut self.drift_ratio_pct, sys::SA_ABI_V1_4)?,
+            base_shear_kn: mutable_f64_view(&mut self.base_shear_kn, sys::SA_ABI_V1_4)?,
+            core_drift_pct: mutable_f64_view(&mut self.core_drift_pct, sys::SA_ABI_V1_4)?,
+            core_shear_kn: mutable_f64_view(&mut self.core_shear_kn, sys::SA_ABI_V1_4)?,
+            step_converged: mutable_u8_view(&mut self.step_converged, sys::SA_ABI_V1_4)?,
+            step_iterations: mutable_u32_view(&mut self.step_iterations, sys::SA_ABI_V1_4)?,
+            step_plastic_story_count: mutable_u32_view(
+                &mut self.step_plastic_story_count,
+                sys::SA_ABI_V1_4,
+            )?,
+            step_residual_inf: mutable_f64_view(&mut self.step_residual_inf, sys::SA_ABI_V1_4)?,
+            story_drift_envelope_pct: mutable_f64_view(
+                &mut self.story_drift_envelope_pct,
+                sys::SA_ABI_V1_4,
+            )?,
+            final_story_drift_pct: mutable_f64_view(
+                &mut self.final_story_drift_pct,
+                sys::SA_ABI_V1_4,
+            )?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn finish(
+        self,
+        raw: sys::SaNonlinearNdthaResultV1,
+        config: &NonlinearNdthaConfigV3,
+    ) -> Result<NonlinearNdthaSolution, Error> {
+        validate_ndtha_result(&raw, config, &self.step_converged)?;
+        Ok(NonlinearNdthaSolution {
+            converged_all_steps: raw.converged_all_steps == 1,
+            collapsed: raw.collapsed == 1,
+            collapse_step: raw.collapse_step,
+            collapse_time_s: raw.collapse_time_s,
+            collapse_drift_ratio_pct: raw.collapse_drift_ratio_pct,
+            collapse_top_displacement_m: raw.collapse_top_displacement_m,
+            step_count_completed: raw.step_count_completed,
+            max_plastic_story_count: raw.max_plastic_story_count,
+            max_drift_ratio_pct: raw.max_drift_ratio_pct,
+            avg_step_iterations: raw.avg_step_iterations,
+            residual_top_displacement_m: raw.residual_top_displacement_m,
+            residual_drift_ratio_pct: raw.residual_drift_ratio_pct,
+            total_line_search_backtracks: raw.total_line_search_backtracks,
+            response: NonlinearNdthaResponse {
+                top_displacement_m: self.top_displacement_m,
+                drift_ratio_pct: self.drift_ratio_pct,
+                base_shear_kn: self.base_shear_kn,
+                core_drift_pct: self.core_drift_pct,
+                core_shear_kn: self.core_shear_kn,
+                step_converged: self
+                    .step_converged
+                    .into_iter()
+                    .map(|value| value == 1)
+                    .collect(),
+                step_iterations: self.step_iterations,
+                step_plastic_story_count: self.step_plastic_story_count,
+                step_residual_inf: self.step_residual_inf,
+                story_drift_envelope_pct: self.story_drift_envelope_pct,
+                final_story_drift_pct: self.final_story_drift_pct,
+            },
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        })
+    }
+}
+
 /// Immutable, process-lifetime C ABI v1 function table.
 #[derive(Clone, Copy)]
 pub struct Api {
@@ -173,6 +313,15 @@ impl Api {
     /// Returns a stable ABI error if the v1.3 capability or operation is absent.
     pub fn load_nonlinear_static() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_3)
+    }
+
+    /// Load the ABI v1.4 table with the deterministic nonlinear NDTHA CPU operation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the v1.4 capability or operation is absent.
+    pub fn load_nonlinear_ndtha() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_4)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -532,6 +681,54 @@ impl Api {
             fallback_count: raw_result.fallback_count,
         })
     }
+
+    /// Solve one bounded nonlinear Newmark time-history story-frame case on the serial FP64 CPU.
+    ///
+    /// Eight packed inputs and eleven caller-owned output vectors remain borrowed only for the
+    /// synchronous call. Numerical nonconvergence returns an error without exposing partial
+    /// vectors. A deterministic physical collapse is a successful terminal result with
+    /// `collapsed == true` and all response channels available through the collapse step.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error for invalid inputs, allocation failure, output invariants or
+    /// numerical nonconvergence.
+    pub fn solve_nonlinear_ndtha(
+        self,
+        config: &NonlinearNdthaConfigV3,
+        inputs: &NdthaStoryInputsV3,
+    ) -> Result<NonlinearNdthaSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_4 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "nonlinear NDTHA CPU solve requires ABI v1.4".to_owned(),
+            });
+        }
+        let (story_count, step_count) = nonlinear_ndtha_counts(config, inputs)?;
+        let raw_config = ndtha_config_descriptor(config);
+        let raw_inputs = ndtha_input_descriptor(inputs)?;
+        let mut arena = NdthaOutputArena::allocate(story_count, step_count)?;
+        let raw_outputs = arena.descriptor()?;
+        let mut raw_result = ndtha_result_descriptor();
+        let solve = self.table.nonlinear_ndtha_solve.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all descriptors, immutable inputs and disjoint caller-owned outputs remain live
+        // for this synchronous call. The C++ operation retains no pointer.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &raw_inputs,
+                &raw_outputs,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        arena.finish(raw_result, config)
+    }
 }
 
 /// RAII owner of one deep-copied immutable C++ `ModelIR` handle.
@@ -657,6 +854,112 @@ impl Drop for ModelIr {
     }
 }
 
+fn ndtha_config_descriptor(config: &NonlinearNdthaConfigV3) -> sys::SaNonlinearNdthaConfigV1 {
+    sys::SaNonlinearNdthaConfigV1 {
+        abi_version: sys::SA_ABI_V1_4,
+        struct_size: abi_size::<sys::SaNonlinearNdthaConfigV1>(),
+        story_count: config.story_count,
+        step_count: config.step_count,
+        dt_s: config.dt_s,
+        newmark_beta: config.newmark_beta,
+        newmark_gamma: config.newmark_gamma,
+        tolerance: config.tolerance,
+        max_step_iterations: config.max_step_iterations,
+        reserved_iteration_u32: 0,
+        adaptive_load_decay: config.adaptive_load_decay,
+        damping_force_cap_ratio: config.damping_force_cap_ratio,
+        newton_max_iter: config.newton_max_iter,
+        reserved_newton_u32: 0,
+        line_search_decay: config.line_search_decay,
+        line_search_min: config.line_search_min,
+        hardening_ratio: config.hardening_ratio,
+        pdelta_factor: config.pdelta_factor,
+        collapse_drift_threshold_pct: config.collapse_drift_threshold_pct,
+        flags: 0,
+        reserved_u32: 0,
+        reserved: [0; 2],
+    }
+}
+
+fn ndtha_input_descriptor(
+    inputs: &NdthaStoryInputsV3,
+) -> Result<sys::SaNonlinearNdthaInputsV1, Error> {
+    Ok(sys::SaNonlinearNdthaInputsV1 {
+        abi_version: sys::SA_ABI_V1_4,
+        struct_size: abi_size::<sys::SaNonlinearNdthaInputsV1>(),
+        story_stiffness_n_per_m: input_f64_view(&inputs.story_k_n_per_m, sys::SA_ABI_V1_4)?,
+        story_height_m: input_f64_view(&inputs.story_h_m, sys::SA_ABI_V1_4)?,
+        story_axial_n: input_f64_view(&inputs.story_axial_n, sys::SA_ABI_V1_4)?,
+        story_yield_drift_m: input_f64_view(&inputs.story_yield_drift_m, sys::SA_ABI_V1_4)?,
+        story_mass_kg: input_f64_view(&inputs.story_mass_kg, sys::SA_ABI_V1_4)?,
+        story_damping_n_s_per_m: input_f64_view(&inputs.story_damping_n_s_per_m, sys::SA_ABI_V1_4)?,
+        floor_load_base_n: input_f64_view(&inputs.floor_load_base_n, sys::SA_ABI_V1_4)?,
+        acceleration_g: input_f64_view(&inputs.ag_g, sys::SA_ABI_V1_4)?,
+        reserved: [0; 2],
+    })
+}
+
+fn ndtha_result_descriptor() -> sys::SaNonlinearNdthaResultV1 {
+    sys::SaNonlinearNdthaResultV1 {
+        abi_version: sys::SA_ABI_V1_4,
+        struct_size: abi_size::<sys::SaNonlinearNdthaResultV1>(),
+        converged_all_steps: 0,
+        collapsed: 0,
+        collapse_step: i32::MIN,
+        step_count_completed: 0,
+        collapse_time_s: f64::NAN,
+        collapse_drift_ratio_pct: f64::NAN,
+        collapse_top_displacement_m: f64::NAN,
+        max_drift_ratio_pct: f64::NAN,
+        avg_step_iterations: f64::NAN,
+        residual_top_displacement_m: f64::NAN,
+        residual_drift_ratio_pct: f64::NAN,
+        max_plastic_story_count: u32::MAX,
+        total_line_search_backtracks: u32::MAX,
+        output_story_count: 0,
+        output_step_count: 0,
+        execution_backend: 0,
+        fallback_count: u32::MAX,
+        reserved: [u64::MAX; 2],
+    }
+}
+
+fn validate_ndtha_result(
+    raw: &sys::SaNonlinearNdthaResultV1,
+    config: &NonlinearNdthaConfigV3,
+    step_converged: &[u8],
+) -> Result<(), Error> {
+    let terminal_flags_valid = raw.converged_all_steps <= 1
+        && raw.collapsed <= 1
+        && raw.converged_all_steps + raw.collapsed == 1;
+    let completion_valid = if raw.collapsed == 1 {
+        raw.collapse_step >= 0
+            && u32::try_from(raw.collapse_step).is_ok_and(|step| {
+                step < raw.step_count_completed && raw.step_count_completed <= config.step_count
+            })
+    } else {
+        raw.collapse_step == -1 && raw.step_count_completed == config.step_count
+    };
+    let result_valid = raw.abi_version == sys::SA_ABI_V1_4
+        && raw.struct_size == abi_size::<sys::SaNonlinearNdthaResultV1>()
+        && terminal_flags_valid
+        && completion_valid
+        && raw.output_story_count == u64::from(config.story_count)
+        && raw.output_step_count == u64::from(config.step_count)
+        && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+        && raw.fallback_count == 0
+        && raw.reserved == [0; 2]
+        && step_converged.iter().all(|value| *value <= 1);
+    if result_valid {
+        Ok(())
+    } else {
+        Err(Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native nonlinear NDTHA result violated the v1.4 output contract".to_owned(),
+        })
+    }
+}
+
 fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let base_valid = table.abi_version == requested
         && table.struct_size as usize >= size_of::<sys::SaApiV1>()
@@ -673,35 +976,53 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     ];
     let track_slot = table.track_point_load_solve.is_some();
     let nonlinear_static_slot = table.nonlinear_static_solve.is_some();
+    let nonlinear_ndtha_slot = table.nonlinear_ndtha_solve.is_some();
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
             && !nonlinear_static_slot
+            && !nonlinear_ndtha_slot
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
             && !track_slot
             && !nonlinear_static_slot
+            && !nonlinear_ndtha_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU == 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU == 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU == 0
     } else if requested == sys::SA_ABI_V1_2 {
         model_slots.iter().all(|present| *present)
             && track_slot
             && !nonlinear_static_slot
+            && !nonlinear_ndtha_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU == 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU == 0
     } else if requested == sys::SA_ABI_V1_3 {
         model_slots.iter().all(|present| *present)
             && track_slot
             && nonlinear_static_slot
+            && !nonlinear_ndtha_slot
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU == 0
+    } else if requested == sys::SA_ABI_V1_4 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
     } else {
         false
     };
@@ -719,6 +1040,26 @@ fn allocate_f64_output(length: usize) -> Result<Vec<f64>, Error> {
         message: "native FP64 output allocation failed".to_owned(),
     })?;
     output.resize(length, 0.0);
+    Ok(output)
+}
+
+fn allocate_u8_output(length: usize) -> Result<Vec<u8>, Error> {
+    let mut output = Vec::new();
+    output.try_reserve_exact(length).map_err(|_| Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "native U8 output allocation failed".to_owned(),
+    })?;
+    output.resize(length, 0);
+    Ok(output)
+}
+
+fn allocate_u32_output(length: usize) -> Result<Vec<u32>, Error> {
+    let mut output = Vec::new();
+    output.try_reserve_exact(length).map_err(|_| Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "native U32 output allocation failed".to_owned(),
+    })?;
+    output.resize(length, 0);
     Ok(output)
 }
 
@@ -752,6 +1093,49 @@ fn nonlinear_static_count(
     Ok(count)
 }
 
+fn nonlinear_ndtha_counts(
+    config: &NonlinearNdthaConfigV3,
+    inputs: &NdthaStoryInputsV3,
+) -> Result<(usize, usize), Error> {
+    let story_count = usize::try_from(config.story_count).map_err(|_| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "nonlinear NDTHA story_count exceeds the Rust address space".to_owned(),
+    })?;
+    let step_count = usize::try_from(config.step_count).map_err(|_| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "nonlinear NDTHA step_count exceeds the Rust address space".to_owned(),
+    })?;
+    if story_count == 0 || config.story_count > sys::SA_NONLINEAR_NDTHA_MAX_STORY_COUNT {
+        return Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear NDTHA story_count is outside the bounded product range".to_owned(),
+        });
+    }
+    if step_count == 0 || config.step_count > sys::SA_NONLINEAR_NDTHA_MAX_STEP_COUNT {
+        return Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear NDTHA step_count is outside the bounded product range".to_owned(),
+        });
+    }
+    let story_lengths = [
+        inputs.story_k_n_per_m.len(),
+        inputs.story_h_m.len(),
+        inputs.story_axial_n.len(),
+        inputs.story_yield_drift_m.len(),
+        inputs.story_mass_kg.len(),
+        inputs.story_damping_n_s_per_m.len(),
+        inputs.floor_load_base_n.len(),
+    ];
+    if story_lengths.iter().any(|length| *length != story_count) || inputs.ag_g.len() != step_count
+    {
+        return Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear NDTHA input lengths do not match config counts".to_owned(),
+        });
+    }
+    Ok((story_count, step_count))
+}
+
 fn input_f64_view(values: &[f64], abi_version: u32) -> Result<sys::SaBufferViewV1, Error> {
     Ok(sys::SaBufferViewV1 {
         abi_version,
@@ -774,6 +1158,34 @@ fn mutable_f64_view(values: &mut [f64], abi_version: u32) -> Result<sys::SaMutBu
         length: usize_to_u64(values.len())?,
         stride_bytes: usize_to_u64(size_of::<f64>())?,
         element_type: sys::SA_ELEMENT_TYPE_F64,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
+}
+
+fn mutable_u8_view(values: &mut [u8], abi_version: u32) -> Result<sys::SaMutBufferViewV1, Error> {
+    Ok(sys::SaMutBufferViewV1 {
+        abi_version,
+        struct_size: abi_size::<sys::SaMutBufferViewV1>(),
+        data: values.as_mut_ptr().cast::<c_void>(),
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<u8>())?,
+        element_type: sys::SA_ELEMENT_TYPE_U8,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
+}
+
+fn mutable_u32_view(values: &mut [u32], abi_version: u32) -> Result<sys::SaMutBufferViewV1, Error> {
+    Ok(sys::SaMutBufferViewV1 {
+        abi_version,
+        struct_size: abi_size::<sys::SaMutBufferViewV1>(),
+        data: values.as_mut_ptr().cast::<c_void>(),
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<u32>())?,
+        element_type: sys::SA_ELEMENT_TYPE_U32,
         memory_space: sys::SA_MEMORY_SPACE_HOST,
         device_id: -1,
         flags: 0,
@@ -866,10 +1278,10 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_CAPABILITY_BUFFER_VALIDATION,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
-        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
-        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_STATIC_CPU,
+        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -942,6 +1354,21 @@ mod tests {
                 | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                 | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
                 | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+        );
+    }
+
+    #[test]
+    fn v1_4_table_adds_only_the_bounded_nonlinear_ndtha_cpu_capability() {
+        let api = Api::load_nonlinear_ndtha().expect("v1.4 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_4);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
         );
     }
 

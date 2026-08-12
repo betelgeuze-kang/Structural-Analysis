@@ -1,6 +1,7 @@
 #include "structural/abi_v1.h"
 
 #include "../model_ir/model_ir.hpp"
+#include "../solver_cpu/nonlinear_ndtha.hpp"
 #include "../solver_cpu/nonlinear_static.hpp"
 #include "../solver_cpu/track_point_load.hpp"
 
@@ -41,7 +42,8 @@ static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
 static_assert(offsetof(sa_api_v1, track_point_load_solve) == 72U);
 static_assert(offsetof(sa_api_v1, nonlinear_static_solve) == 80U);
-static_assert(offsetof(sa_api_v1, reserved) == 88U);
+static_assert(offsetof(sa_api_v1, nonlinear_ndtha_solve) == 88U);
+static_assert(offsetof(sa_api_v1, reserved) == 96U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -61,6 +63,31 @@ static_assert(offsetof(sa_nonlinear_static_result_v1, residual_inf) == 16U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, base_shear_kn) == 48U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, output_length) == 64U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, execution_backend) == 72U);
+static_assert(sizeof(sa_nonlinear_ndtha_config_v1) == 144U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, story_count) == 8U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, dt_s) == 16U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, max_step_iterations) == 48U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, adaptive_load_decay) == 56U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, newton_max_iter) == 72U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, line_search_decay) == 80U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, collapse_drift_threshold_pct) == 112U);
+static_assert(offsetof(sa_nonlinear_ndtha_config_v1, reserved) == 128U);
+static_assert(sizeof(sa_nonlinear_ndtha_inputs_v1) == 408U);
+static_assert(offsetof(sa_nonlinear_ndtha_inputs_v1, story_stiffness_n_per_m) == 8U);
+static_assert(offsetof(sa_nonlinear_ndtha_inputs_v1, acceleration_g) == 344U);
+static_assert(offsetof(sa_nonlinear_ndtha_inputs_v1, reserved) == 392U);
+static_assert(sizeof(sa_nonlinear_ndtha_outputs_v1) == 552U);
+static_assert(offsetof(sa_nonlinear_ndtha_outputs_v1, top_displacement_m) == 8U);
+static_assert(offsetof(sa_nonlinear_ndtha_outputs_v1, step_converged) == 248U);
+static_assert(offsetof(sa_nonlinear_ndtha_outputs_v1, story_drift_envelope_pct) == 440U);
+static_assert(offsetof(sa_nonlinear_ndtha_outputs_v1, reserved) == 536U);
+static_assert(sizeof(sa_nonlinear_ndtha_result_v1) == 128U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, collapse_step) == 16U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, collapse_time_s) == 24U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, max_plastic_story_count) == 80U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, output_story_count) == 88U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, execution_backend) == 104U);
+static_assert(offsetof(sa_nonlinear_ndtha_result_v1, reserved) == 112U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -152,6 +179,7 @@ using ModelRegistry = std::unordered_map<
     case SA_ELEMENT_TYPE_U64:
         return 8U;
     case SA_ELEMENT_TYPE_I32:
+    case SA_ELEMENT_TYPE_U32:
         return 4U;
     case SA_ELEMENT_TYPE_U8:
         return 1U;
@@ -809,6 +837,459 @@ template <typename Value>
         });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_ndtha_input_view(
+    const sa_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_4) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA input ABI is not v1.4");
+    }
+    if (view.struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear NDTHA input struct_size is too small");
+    }
+    if (view.data == nullptr || view.stride_bytes != sizeof(double)
+        || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (view.length < expected_length) {
+        return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "nonlinear NDTHA input buffer is too small");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_ndtha_output_view(
+    const sa_mut_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::uint32_t expected_type,
+    const std::uint64_t expected_width,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_4) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA output ABI is not v1.4");
+    }
+    if (view.struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear NDTHA output struct_size is too small");
+    }
+    if (view.data == nullptr || view.stride_bytes != expected_width
+        || view.element_type != expected_type
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (view.length < expected_length) {
+        return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "nonlinear NDTHA output buffer is too small");
+    }
+    const auto extent = expected_length * expected_width;
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % expected_width != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+struct MemoryRegion {
+    const void* data;
+    std::uint64_t extent;
+};
+
+[[nodiscard]] sa_status_code_v1 nonlinear_ndtha_boundary(
+    const sa_nonlinear_ndtha_config_v1* const config,
+    const sa_nonlinear_ndtha_inputs_v1* const inputs,
+    const sa_nonlinear_ndtha_outputs_v1* const outputs,
+    sa_nonlinear_ndtha_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [config, inputs, outputs, result, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config) || !pointer_is_aligned(inputs)
+            || !pointer_is_aligned(outputs) || !pointer_is_aligned(result)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA descriptor is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_4 || inputs->abi_version != SA_ABI_V1_4
+            || outputs->abi_version != SA_ABI_V1_4 || result->abi_version != SA_ABI_V1_4) {
+            return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear NDTHA descriptors require ABI v1.4");
+        }
+        if (config->struct_size < sizeof(sa_nonlinear_ndtha_config_v1)
+            || inputs->struct_size < sizeof(sa_nonlinear_ndtha_inputs_v1)
+            || outputs->struct_size < sizeof(sa_nonlinear_ndtha_outputs_v1)
+            || result->struct_size < sizeof(sa_nonlinear_ndtha_result_v1)) {
+            return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear NDTHA descriptor struct_size is too small");
+        }
+        const bool reserved_nonzero = config->reserved_iteration_u32 != 0U
+            || config->reserved_newton_u32 != 0U || config->flags != 0U
+            || config->reserved_u32 != 0U
+            || std::any_of(std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                   return value != 0U;
+               })
+            || std::any_of(std::begin(inputs->reserved), std::end(inputs->reserved), [](const auto value) {
+                   return value != 0U;
+               })
+            || std::any_of(std::begin(outputs->reserved), std::end(outputs->reserved), [](const auto value) {
+                   return value != 0U;
+               });
+        if (reserved_nonzero) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA reserved fields are not zero");
+        }
+
+        const std::array scalar_values {
+            config->dt_s,
+            config->newmark_beta,
+            config->newmark_gamma,
+            config->tolerance,
+            config->adaptive_load_decay,
+            config->damping_force_cap_ratio,
+            config->line_search_decay,
+            config->line_search_min,
+            config->hardening_ratio,
+            config->pdelta_factor,
+            config->collapse_drift_threshold_pct,
+        };
+        if (std::any_of(scalar_values.begin(), scalar_values.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA config contains a non-finite scalar");
+        }
+        if (config->story_count == 0U
+            || config->story_count > SA_NONLINEAR_NDTHA_MAX_STORY_COUNT
+            || config->step_count == 0U
+            || config->step_count > SA_NONLINEAR_NDTHA_MAX_STEP_COUNT
+            || config->dt_s <= 0.0 || config->newmark_beta <= 0.0
+            || config->newmark_gamma <= 0.0 || config->tolerance <= 0.0
+            || config->max_step_iterations == 0U || config->newton_max_iter == 0U
+            || config->adaptive_load_decay <= 0.0 || config->adaptive_load_decay > 1.0
+            || config->damping_force_cap_ratio <= 0.0
+            || config->line_search_decay <= 0.0 || config->line_search_decay >= 1.0
+            || config->line_search_min <= 0.0 || config->line_search_min > 1.0
+            || config->hardening_ratio < 0.0 || config->hardening_ratio > 1.0
+            || config->pdelta_factor < 0.0 || config->collapse_drift_threshold_pct <= 0.0) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA config value is outside the v1.4 domain");
+        }
+
+        const auto story_count = static_cast<std::uint64_t>(config->story_count);
+        const auto step_count = static_cast<std::uint64_t>(config->step_count);
+        const std::array input_views {
+            &inputs->story_stiffness_n_per_m,
+            &inputs->story_height_m,
+            &inputs->story_axial_n,
+            &inputs->story_yield_drift_m,
+            &inputs->story_mass_kg,
+            &inputs->story_damping_n_s_per_m,
+            &inputs->floor_load_base_n,
+            &inputs->acceleration_g,
+        };
+        const std::array input_lengths {
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            story_count,
+            step_count,
+        };
+        const std::array input_labels {
+            std::string_view {"nonlinear NDTHA stiffness input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA height input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA axial input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA yield-drift input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA mass input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA damping input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA base-load input metadata is invalid"},
+            std::string_view {"nonlinear NDTHA acceleration input metadata is invalid"},
+        };
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            const auto status = validate_ndtha_input_view(
+                *input_views[index], input_lengths[index], input_labels[index], error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+
+        const std::array output_views {
+            &outputs->top_displacement_m,
+            &outputs->drift_ratio_pct,
+            &outputs->base_shear_kn,
+            &outputs->core_drift_pct,
+            &outputs->core_shear_kn,
+            &outputs->step_converged,
+            &outputs->step_iterations,
+            &outputs->step_plastic_story_count,
+            &outputs->step_residual_inf,
+            &outputs->story_drift_envelope_pct,
+            &outputs->final_story_drift_pct,
+        };
+        const std::array output_lengths {
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            step_count,
+            story_count,
+            story_count,
+        };
+        const std::array output_types {
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_U8},
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+        };
+        const std::array output_widths {
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(std::uint8_t)},
+            std::uint64_t {sizeof(std::uint32_t)},
+            std::uint64_t {sizeof(std::uint32_t)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+            std::uint64_t {sizeof(double)},
+        };
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            const auto status = validate_ndtha_output_view(
+                *output_views[index],
+                output_lengths[index],
+                output_types[index],
+                output_widths[index],
+                "nonlinear NDTHA output metadata is invalid",
+                error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+
+        const std::array descriptor_regions {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {inputs, sizeof(*inputs)},
+            MemoryRegion {outputs, sizeof(*outputs)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        for (std::size_t left = 0U; left < descriptor_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < descriptor_regions.size(); ++right) {
+                if (ranges_overlap(
+                        descriptor_regions[left].data,
+                        descriptor_regions[left].extent,
+                        descriptor_regions[right].data,
+                        descriptor_regions[right].extent)) {
+                    return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA top-level descriptors overlap");
+                }
+            }
+        }
+
+        std::array<MemoryRegion, 8> input_regions {};
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            input_regions[index] = {
+                input_views[index]->data,
+                input_lengths[index] * sizeof(double),
+            };
+            if (ranges_overlap(result, sizeof(*result), input_regions[index].data, input_regions[index].extent)) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA result overlaps input data");
+            }
+        }
+        std::array<MemoryRegion, 11> output_regions {};
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            output_regions[index] = {
+                output_views[index]->data,
+                output_lengths[index] * output_widths[index],
+            };
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA output overlaps descriptor storage");
+                }
+            }
+            for (const auto& input_region : input_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        input_region.data,
+                        input_region.extent)) {
+                    return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA output overlaps input data");
+                }
+            }
+        }
+        for (std::size_t left = 0U; left < output_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < output_regions.size(); ++right) {
+                if (ranges_overlap(
+                        output_regions[left].data,
+                        output_regions[left].extent,
+                        output_regions[right].data,
+                        output_regions[right].extent)) {
+                    return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA output buffers overlap");
+                }
+            }
+        }
+
+        const auto story_size = static_cast<std::size_t>(story_count);
+        const auto step_size = static_cast<std::size_t>(step_count);
+        const auto story_values = [story_size](const sa_buffer_view_v1& view) {
+            return std::span<const double> {static_cast<const double*>(view.data), story_size};
+        };
+        const auto step_values = [step_size](const sa_buffer_view_v1& view) {
+            return std::span<const double> {static_cast<const double*>(view.data), step_size};
+        };
+        const auto stiffness = story_values(inputs->story_stiffness_n_per_m);
+        const auto height = story_values(inputs->story_height_m);
+        const auto axial = story_values(inputs->story_axial_n);
+        const auto yield_drift = story_values(inputs->story_yield_drift_m);
+        const auto mass = story_values(inputs->story_mass_kg);
+        const auto damping = story_values(inputs->story_damping_n_s_per_m);
+        const auto floor_load = story_values(inputs->floor_load_base_n);
+        const auto acceleration = step_values(inputs->acceleration_g);
+        const auto all_finite = [](const std::span<const double> values) {
+            return std::all_of(values.begin(), values.end(), [](const auto value) {
+                return std::isfinite(value);
+            });
+        };
+        if (!all_finite(stiffness) || !all_finite(height) || !all_finite(axial)
+            || !all_finite(yield_drift) || !all_finite(mass) || !all_finite(damping)
+            || !all_finite(floor_load) || !all_finite(acceleration)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA inputs contain a non-finite value");
+        }
+        if (std::any_of(stiffness.begin(), stiffness.end(), [](const auto value) {
+                return value <= 0.0;
+            })
+            || std::any_of(height.begin(), height.end(), [](const auto value) {
+                   return value <= 0.0;
+               })
+            || std::any_of(mass.begin(), mass.end(), [](const auto value) {
+                   return value <= 0.0;
+               })
+            || std::any_of(damping.begin(), damping.end(), [](const auto value) {
+                   return value < 0.0;
+               })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear NDTHA stiffness, height, mass or damping is outside the physical domain");
+        }
+
+        const structural::solver_cpu::NonlinearNdthaConfig native_config {
+            config->story_count,
+            config->step_count,
+            config->dt_s,
+            config->newmark_beta,
+            config->newmark_gamma,
+            config->tolerance,
+            config->max_step_iterations,
+            config->adaptive_load_decay,
+            config->damping_force_cap_ratio,
+            config->newton_max_iter,
+            config->line_search_decay,
+            config->line_search_min,
+            config->hardening_ratio,
+            config->pdelta_factor,
+            config->collapse_drift_threshold_pct,
+        };
+        const structural::solver_cpu::NonlinearNdthaInputs native_inputs {
+            stiffness,
+            height,
+            axial,
+            yield_drift,
+            mass,
+            damping,
+            floor_load,
+            acceleration,
+        };
+        const auto native_result =
+            structural::solver_cpu::solve_nonlinear_ndtha(native_config, native_inputs);
+        if (!native_result.converged_all_steps && !native_result.collapsed) {
+            return report_error(error, SA_ERR_NONCONVERGENCE, "nonlinear NDTHA CPU Newmark/Newton solve did not converge");
+        }
+
+        const auto& response = native_result.response;
+        const bool response_sizes_valid = response.top_displacement_m.size() == step_size
+            && response.drift_ratio_pct.size() == step_size
+            && response.base_shear_kn.size() == step_size
+            && response.core_drift_pct.size() == step_size
+            && response.core_shear_kn.size() == step_size
+            && response.step_converged.size() == step_size
+            && response.step_iterations.size() == step_size
+            && response.step_plastic_story_count.size() == step_size
+            && response.step_residual_inf.size() == step_size
+            && response.story_drift_envelope_pct.size() == story_size
+            && response.final_story_drift_pct.size() == story_size;
+        const auto finite_vector = [](const std::vector<double>& values) {
+            return std::all_of(values.begin(), values.end(), [](const auto value) {
+                return std::isfinite(value);
+            });
+        };
+        const bool result_finite = std::isfinite(native_result.collapse_time_s)
+            && std::isfinite(native_result.collapse_drift_ratio_pct)
+            && std::isfinite(native_result.collapse_top_displacement_m)
+            && std::isfinite(native_result.max_drift_ratio_pct)
+            && std::isfinite(native_result.avg_step_iterations)
+            && std::isfinite(native_result.residual_top_displacement_m)
+            && std::isfinite(native_result.residual_drift_ratio_pct)
+            && finite_vector(response.top_displacement_m)
+            && finite_vector(response.drift_ratio_pct)
+            && finite_vector(response.base_shear_kn)
+            && finite_vector(response.core_drift_pct)
+            && finite_vector(response.core_shear_kn)
+            && finite_vector(response.step_residual_inf)
+            && finite_vector(response.story_drift_envelope_pct)
+            && finite_vector(response.final_story_drift_pct);
+        if (!response_sizes_valid || !result_finite) {
+            return report_error(error, SA_ERR_INTERNAL, "nonlinear NDTHA CPU result invariant failed");
+        }
+
+        std::memcpy(outputs->top_displacement_m.data, response.top_displacement_m.data(), step_count * sizeof(double));
+        std::memcpy(outputs->drift_ratio_pct.data, response.drift_ratio_pct.data(), step_count * sizeof(double));
+        std::memcpy(outputs->base_shear_kn.data, response.base_shear_kn.data(), step_count * sizeof(double));
+        std::memcpy(outputs->core_drift_pct.data, response.core_drift_pct.data(), step_count * sizeof(double));
+        std::memcpy(outputs->core_shear_kn.data, response.core_shear_kn.data(), step_count * sizeof(double));
+        std::memcpy(outputs->step_converged.data, response.step_converged.data(), step_count * sizeof(std::uint8_t));
+        std::memcpy(outputs->step_iterations.data, response.step_iterations.data(), step_count * sizeof(std::uint32_t));
+        std::memcpy(outputs->step_plastic_story_count.data, response.step_plastic_story_count.data(), step_count * sizeof(std::uint32_t));
+        std::memcpy(outputs->step_residual_inf.data, response.step_residual_inf.data(), step_count * sizeof(double));
+        std::memcpy(outputs->story_drift_envelope_pct.data, response.story_drift_envelope_pct.data(), story_count * sizeof(double));
+        std::memcpy(outputs->final_story_drift_pct.data, response.final_story_drift_pct.data(), story_count * sizeof(double));
+        *result = {
+            SA_ABI_V1_4,
+            static_cast<std::uint32_t>(sizeof(sa_nonlinear_ndtha_result_v1)),
+            native_result.converged_all_steps ? 1U : 0U,
+            native_result.collapsed ? 1U : 0U,
+            native_result.collapse_step,
+            native_result.step_count_completed,
+            native_result.collapse_time_s,
+            native_result.collapse_drift_ratio_pct,
+            native_result.collapse_top_displacement_m,
+            native_result.max_drift_ratio_pct,
+            native_result.avg_step_iterations,
+            native_result.residual_top_displacement_m,
+            native_result.residual_drift_ratio_pct,
+            native_result.max_plastic_story_count,
+            native_result.total_line_search_backtracks,
+            story_count,
+            step_count,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        return SA_OK;
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -826,7 +1307,9 @@ template <typename Value>
                 ? SA_API_V1_1_MIN_SIZE
                 : (request->abi_version == SA_ABI_V1_2
                         ? SA_API_V1_2_MIN_SIZE
-                        : SA_API_V1_3_MIN_SIZE));
+                        : (request->abi_version == SA_ABI_V1_3
+                                ? SA_API_V1_3_MIN_SIZE
+                                : SA_API_V1_4_MIN_SIZE)));
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -847,6 +1330,7 @@ template <typename Value>
     const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
     const bool track_enabled = request->abi_version >= SA_ABI_V1_2;
     const bool nonlinear_static_enabled = request->abi_version >= SA_ABI_V1_3;
+    const bool nonlinear_ndtha_enabled = request->abi_version >= SA_ABI_V1_4;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -855,7 +1339,8 @@ template <typename Value>
                     ? SA_CAPABILITY_MODEL_IR_V2_TYPED | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                     : UINT64_C(0))
             | (track_enabled ? SA_CAPABILITY_TRACK_POINT_LOAD_CPU : UINT64_C(0))
-            | (nonlinear_static_enabled ? SA_CAPABILITY_NONLINEAR_STATIC_CPU : UINT64_C(0)),
+            | (nonlinear_static_enabled ? SA_CAPABILITY_NONLINEAR_STATIC_CPU : UINT64_C(0))
+            | (nonlinear_ndtha_enabled ? SA_CAPABILITY_NONLINEAR_NDTHA_CPU : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -865,7 +1350,8 @@ template <typename Value>
         model_ir_enabled ? &model_ir_snapshot_write_boundary : nullptr,
         track_enabled ? &track_point_load_boundary : nullptr,
         nonlinear_static_enabled ? &nonlinear_static_boundary : nullptr,
-        {nullptr, nullptr, nullptr, nullptr, nullptr},
+        nonlinear_ndtha_enabled ? &nonlinear_ndtha_boundary : nullptr,
+        {nullptr, nullptr, nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

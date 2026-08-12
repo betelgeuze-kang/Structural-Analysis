@@ -39,6 +39,8 @@ Jobs:
    - four-case 9-node Python product-golden SHA-256 matrix and frozen legacy endpoint-only
      divergence check
    - R3 nonlinear static CPU ownership, ABI v1.3/safe-wrapper integration and C1 claim check
+   - R3 nonlinear NDTHA shared constitutive ownership, ABI v1.4/safe-wrapper integration and C0
+     claim check
    - independent dense-matrix Python oracle, five-case product-golden SHA-256 matrix, frozen
      byte-identical legacy 3-story copy and nonconvergence taxonomy check
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
@@ -56,7 +58,7 @@ Jobs:
    - track config/output pointer, length, stride, alignment, overlap and nonconvergence atomicity
    - nonlinear static five-input/output pointer, length, stride, alignment, finite, overlap and
      nonconvergence atomicity
-   - both solver operations run in ABI CTest; unavailable v1.0-v1.2 table tails remain null
+   - all three solver operations run in ABI CTest; unavailable v1.0-v1.3 table tails remain null
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded

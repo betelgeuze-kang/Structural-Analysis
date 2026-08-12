@@ -98,7 +98,7 @@ gate가 닫힐 때까지 유지한다.
 - Rust implementation은 oracle parity 기간에만 유지한다.
 - each family는 native unit, CPU parity와 FFI integration을 독립 통과한다.
 
-Implementation status: two bounded CPU families are integrated; R3 remains open for the other
+Implementation status: three bounded CPU families are integrated; R3 remains open for the other
 families and later gates.
 
 - `track_point_load`의 serial FP64 kernel은 `structural_solver_cpu`가 소유한다.
@@ -121,10 +121,15 @@ families and later gates.
   iteration/plastic/backtrack taxonomy도 일치하므로 이 한정 profile은 C1이다.
 - 기존 3-story legacy fixture는 product golden 하나와 byte-identical하게 유지한다. broader
   nonlinear input space와 HIP C2는 계속 open이다.
+- `nonlinear_ndtha` serial FP64 Newmark/Newton kernel은 static과 공통 story constitutive/
+  assembly/recovery source를 사용하고 ABI v1.4 nested caller-owned contract와 safe Rust wrapper로
+  연결됐다. frozen 2-story, 3-step legacy Rust fixture의 11 response channel, summary와
+  converged/nonconverged/collapsed 종료를 재현하며 invalid/nonconverged failure atomicity와 CPU
+  fallback 0을 검증한다. 독립 Python matrix가 아직 없으므로 C0이며 C1을 주장하지 않는다.
 
-Current next gate: 승인된 전용 ROCm runner에서 track 또는 nonlinear static HIP C2를
-구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU family를 이전한다. R4 cutover는 아직
-시작하지 않는다.
+Current next gate: nonlinear NDTHA의 독립 Python C1 matrix를 닫은 뒤 승인된 전용 ROCm
+runner에서 bounded CPU family의 HIP C2를 구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU
+family를 이전한다. R4 cutover는 아직 시작하지 않는다.
 
 ### Step R4: runtime cutover
 

@@ -109,6 +109,7 @@ struct Inputs {
               | SA_CAPABILITY_NONLINEAR_STATIC_CPU));
     CHECK(api.track_point_load_solve != nullptr);
     CHECK(api.nonlinear_static_solve != nullptr);
+    CHECK(api.nonlinear_ndtha_solve == nullptr);
     for (const auto* reserved : api.reserved) {
         CHECK(reserved == nullptr);
     }

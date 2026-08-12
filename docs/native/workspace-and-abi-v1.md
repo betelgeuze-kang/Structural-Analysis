@@ -125,6 +125,8 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - v1.2는 0x00010002이며 caller-owned track point-load CPU operation 한 slot을 추가한다.
 - v1.3은 0x00010003이며 다섯 caller-owned input view와 한 output view를 사용하는 nonlinear
   static CPU operation 한 slot을 추가한다.
+- v1.4는 0x00010004이며 versioned nested descriptor로 여덟 caller-owned input view와 열한
+  caller-owned output view를 전달하는 nonlinear NDTHA CPU operation 한 slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -439,3 +441,19 @@ golden과 일치하며 iteration/plastic/backtrack 및 nonconvergence taxonomy�
 한정 profile은 C1이다. frozen legacy 3-story fixture는 product golden 하나와 byte-identical하다.
 Broader story/material/load domain, HIP C2, checkpoint/restart와 product E2E는 open이고 기존 Rust
 5-symbol ABI는 변경하지 않는다.
+
+R3의 세 번째 family는 `nonlinear_ndtha`다.
+
+- static과 transient가 별도 bilinear law를 갖지 않도록 story constitutive, resisting-force/
+  tangent assembly, tridiagonal solve와 result recovery를 공통 C++ source로 추출했다.
+- ABI v1.4는 offset 88의 `nonlinear_ndtha_solve` optional slot을 추가하고 128-byte table과
+  v1.0-v1.3 prefix를 보존한다. 여덟 input과 열한 output은 versioned nested descriptor이며
+  packed host FP64/U8/U32, length, stride, alignment, finite, overflow와 모든 mutable alias를
+  검사한다.
+- invalid와 numerical nonconvergence는 caller output/result를 변경하지 않는다. 물리 collapse는
+  계산이 완료된 terminal result로 반환하며 `collapsed`, step/time/drift/displacement를 보존한다.
+- safe Rust wrapper와 C++ unit/C ABI/fuzz/reentrant test는 frozen 2-story, 3-step legacy Rust
+  fixture의 모든 11 response channel과 summary를 `1e-15` 절대 오차 내에서 재현한다.
+
+이 범위는 C0다. 독립 Python C1 matrix, broader story/record/material domain, HIP C2,
+checkpoint/restart와 product E2E는 open이고 legacy 5-symbol ABI는 변경하지 않는다.

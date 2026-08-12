@@ -36,6 +36,12 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "Python C1 oracle parity" in nonlinear["claim"]
     assert "five-case" in nonlinear["claim"]
     assert "broader nonlinear input-space parity" in nonlinear["claim"]
+    assert capabilities.capability_is_enabled(payload, "nonlinear_ndtha_cpu") is True
+    ndtha = payload["capabilities"]["nonlinear_ndtha_cpu"]
+    assert ndtha["cutover_gate"] == "C0"
+    assert "ABI v1.4" in ndtha["claim"]
+    assert "frozen legacy Rust fixture parity only" in ndtha["claim"]
+    assert "independent Python C1 matrix" in ndtha["claim"]
     for capability in (
         "checkpoint_restart",
         "product_e2e",

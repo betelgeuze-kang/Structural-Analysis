@@ -49,6 +49,19 @@ set_tests_properties(
   PROPERTIES LABELS "abi;solver_cpu;nonlinear_static"
 )
 
+add_executable(
+  structural_nonlinear_ndtha_abi_tests
+  abi/nonlinear_ndtha_contract_test.cpp
+)
+target_link_libraries(structural_nonlinear_ndtha_abi_tests PRIVATE structural_c_abi_v1)
+structural_set_warnings(structural_nonlinear_ndtha_abi_tests)
+structural_enable_sanitizers(structural_nonlinear_ndtha_abi_tests)
+add_test(NAME structural_nonlinear_ndtha_abi_tests COMMAND structural_nonlinear_ndtha_abi_tests)
+set_tests_properties(
+  structural_nonlinear_ndtha_abi_tests
+  PROPERTIES LABELS "abi;solver_cpu;nonlinear_ndtha"
+)
+
 add_executable(structural_abi_link_smoke_c abi/link_smoke.c)
 target_link_libraries(structural_abi_link_smoke_c PRIVATE structural_c_abi_v1)
 structural_set_warnings(structural_abi_link_smoke_c)
@@ -93,4 +106,19 @@ add_test(NAME structural_nonlinear_static_cpu_tests COMMAND structural_nonlinear
 set_tests_properties(
   structural_nonlinear_static_cpu_tests
   PROPERTIES LABELS "solver_cpu;nonlinear_static"
+)
+
+add_executable(structural_nonlinear_ndtha_cpu_tests solver_cpu/nonlinear_ndtha_test.cpp)
+target_include_directories(
+  structural_nonlinear_ndtha_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/solver_cpu
+)
+target_link_libraries(structural_nonlinear_ndtha_cpu_tests PRIVATE structural_solver_cpu)
+structural_set_warnings(structural_nonlinear_ndtha_cpu_tests)
+structural_enable_sanitizers(structural_nonlinear_ndtha_cpu_tests)
+add_test(NAME structural_nonlinear_ndtha_cpu_tests COMMAND structural_nonlinear_ndtha_cpu_tests)
+set_tests_properties(
+  structural_nonlinear_ndtha_cpu_tests
+  PROPERTIES LABELS "solver_cpu;nonlinear_ndtha"
 )

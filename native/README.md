@@ -17,7 +17,11 @@ only the 9-node midpoint-load support/theory matrix to Python C1. The next slice
 nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller. An independent
 NumPy dense-matrix oracle promotes only a five-case 1/3-story topology, elastic/plastic,
 mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity, HIP C2 and
-runtime cutover remain open; the legacy five-symbol ABI is unchanged.
+runtime cutover remain open. The third R3 slice moves nonlinear NDTHA to a serial FP64 C++
+Newmark/Newton kernel sharing the static constitutive/assembly source, exposes eleven disjoint
+caller-owned response channels through ABI v1.4, and closes C0 against the complete frozen
+2-story, 3-step legacy Rust fixture. Its independent Python C1 matrix is still open. The legacy
+five-symbol ABI is unchanged.
 
 ## Rust
 
@@ -74,8 +78,8 @@ or links ROCm.
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
 library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
-slot and nonlinear static CPU occupies the ABI v1.3 slot. v1.0-v1.2 table prefixes remain
-byte-compatible.
+slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
+v1.4 slot. v1.0-v1.3 table prefixes remain byte-compatible.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

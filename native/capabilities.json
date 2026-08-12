@@ -37,6 +37,12 @@
       "owner": "structural_solver_cpu",
       "claim": "bounded serial FP64 C++ story-frame Newton kernel with independent dense-matrix Python C1 oracle parity for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking matrix, ABI v1.3 caller-owned inputs/output and safe Rust integration; broader nonlinear input-space parity, HIP C2, restart and product E2E remain open"
     },
+    "nonlinear_ndtha_cpu": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural_solver_cpu",
+      "claim": "bounded serial FP64 C++ Newmark/Newton story-frame kernel with shared constitutive assembly, ABI v1.4 nested caller-owned inputs/outputs, safe Rust integration and complete frozen legacy Rust fixture parity only; independent Python C1 matrix, HIP C2, restart and product E2E remain open"
+    },
     "checkpoint_restart": {
       "status": "planned",
       "cutover_gate": null,

@@ -131,6 +131,45 @@ EXPECTED_NONLINEAR_STATIC_R3 = {
     },
 }
 
+EXPECTED_NONLINEAR_NDTHA_R3 = {
+    "family": "nonlinear_ndtha",
+    "capability_gate": "C0",
+    "cpp_target": "structural_solver_cpu",
+    "abi_version": "0x00010004",
+    "api_entry": "sa_get_api_v1",
+    "api_slot": "nonlinear_ndtha_solve",
+    "legacy_exports_preserved": True,
+    "fallback_count": 0,
+    "c0_profile": {
+        "story_count": 2,
+        "step_count": 3,
+        "response_channel_count": 11,
+        "absolute_tolerance": 1.0e-15,
+        "termination_axes": ["converged", "nonconverged", "collapsed"],
+    },
+    "owners": {
+        "cpp_cpu_kernel": "native/cpp/src/solver_cpu/nonlinear_ndtha.cpp",
+        "shared_constitutive_assembly": "native/cpp/src/solver_cpu/story_frame.cpp",
+        "c_abi": "native/cpp/include/structural/abi_v1.h",
+        "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs",
+    },
+    "verification": {
+        "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_ndtha_test.cpp",
+        "c_abi_contract": "native/cpp/tests/abi/nonlinear_ndtha_contract_test.cpp",
+        "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_ndtha_parity.rs",
+        "fuzz_target": "native/cpp/tests/fuzz/nonlinear_ndtha_fuzz.cpp",
+        "checker": "scripts/check_structural_runtime_ffi_r3.py",
+    },
+    "parity": {
+        "legacy_rust_full_result": "pass",
+        "failure_atomicity": "pass",
+        "collapse_terminal_mapping": "pass",
+        "c0_promoted": True,
+        "c1_python": "open",
+        "c2_hip": "open",
+    },
+}
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -181,10 +220,14 @@ def check_r3(
     nonlinear_inventory = inventory.get("r3_nonlinear_static")
     if nonlinear_inventory != EXPECTED_NONLINEAR_STATIC_R3:
         blockers.append("r3_nonlinear_static_inventory_invalid")
+    ndtha_inventory = inventory.get("r3_nonlinear_ndtha")
+    if ndtha_inventory != EXPECTED_NONLINEAR_NDTHA_R3:
+        blockers.append("r3_nonlinear_ndtha_inventory_invalid")
 
     for family, expected in (
         ("track", EXPECTED_R3),
         ("nonlinear_static", EXPECTED_NONLINEAR_STATIC_R3),
+        ("nonlinear_ndtha", EXPECTED_NONLINEAR_NDTHA_R3),
     ):
         for group in (expected["owners"], expected["verification"]):
             for role, relative_path in group.items():
@@ -412,6 +455,74 @@ def check_r3(
                 f"r3_nonlinear_static_python_oracle_native_dependency:{forbidden}"
             )
 
+    ndtha_sources = {
+        "cmake": sources["cmake"],
+        "header": sources["header"],
+        "abi": sources["abi"],
+        "kernel": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["owners"]["cpp_cpu_kernel"],
+        "constitutive": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["owners"]["shared_constitutive_assembly"],
+        "rust": sources["rust"],
+        "rust_parity": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["rust_ffi_parity"],
+        "abi_contract": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["c_abi_contract"],
+        "fuzz": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["fuzz_target"],
+    }
+    ndtha_required_tokens = {
+        "cmake": (
+            "src/solver_cpu/nonlinear_ndtha.cpp",
+            "src/solver_cpu/story_frame.cpp",
+        ),
+        "header": (
+            "#define SA_ABI_V1_4 UINT32_C(0x00010004)",
+            "sa_nonlinear_ndtha_solve_fn_v1 nonlinear_ndtha_solve",
+            "SA_CAPABILITY_NONLINEAR_NDTHA_CPU",
+        ),
+        "abi": (
+            "nonlinear_ndtha_boundary",
+            "SA_ERR_NONCONVERGENCE",
+            "nonlinear NDTHA output buffers overlap",
+        ),
+        "kernel": (
+            "solve_nonlinear_ndtha",
+            "solve_step",
+            "recover_story_response",
+        ),
+        "constitutive": (
+            "assemble_story_frame",
+            "solve_tridiagonal",
+        ),
+        "rust": (
+            "pub fn load_nonlinear_ndtha",
+            "pub fn solve_nonlinear_ndtha",
+        ),
+        "rust_parity": (
+            "safe_v1_4_cpp_path_matches_the_complete_frozen_legacy_rust_result",
+            "SA_ERR_NONCONVERGENCE",
+            "physical collapse is a complete terminal result",
+        ),
+        "abi_contract": (
+            "invalid_and_nonconverged_calls_are_failure_atomic",
+            "output_metadata_and_aliasing_fail_closed",
+            "physical_collapse_returns_a_complete_terminal_result",
+        ),
+        "fuzz": ("LLVMFuzzerTestOneInput", "nonlinear_ndtha_solve"),
+    }
+    for role, path in ndtha_sources.items():
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
+            blockers.append(f"r3_source_unreadable:nonlinear_ndtha:{role}:{exc}")
+            continue
+        for token in ndtha_required_tokens[role]:
+            if token not in text:
+                blockers.append(
+                    f"r3_source_token_missing:nonlinear_ndtha:{role}:{token}"
+                )
+
     try:
         capabilities = _load_json(repo_root / "native/capabilities.json")
     except (OSError, ValueError, json.JSONDecodeError) as exc:
@@ -466,6 +577,32 @@ def check_r3(
                     f"r3_nonlinear_static_claim_boundary_missing:{boundary}"
                 )
 
+    ndtha_capability = capabilities.get("capabilities", {}).get(
+        "nonlinear_ndtha_cpu", {}
+    )
+    if (
+        not isinstance(ndtha_capability, dict)
+        or ndtha_capability.get("status") != "implemented"
+    ):
+        blockers.append("r3_nonlinear_ndtha_capability_not_implemented")
+    else:
+        if ndtha_capability.get("cutover_gate") != "C0":
+            blockers.append("r3_nonlinear_ndtha_capability_gate_invalid")
+        ndtha_claim = str(ndtha_capability.get("claim", ""))
+        for boundary in (
+            "ABI v1.4",
+            "shared constitutive assembly",
+            "frozen legacy Rust fixture parity only",
+            "independent Python C1 matrix",
+            "HIP C2",
+            "restart",
+            "product E2E",
+        ):
+            if boundary not in ndtha_claim:
+                blockers.append(
+                    f"r3_nonlinear_ndtha_claim_boundary_missing:{boundary}"
+                )
+
     product_exports: list[str] | None = None
     if product_library is not None:
         resolved_library = (
@@ -497,14 +634,17 @@ def _report(
         "capability_gates": {
             "track_point_load_cpu": "C1",
             "nonlinear_static_cpu": "C1",
+            "nonlinear_ndtha_cpu": "C0",
         },
         "blockers": blockers,
         "claim_boundary": (
             "R3 proves track Python C1 full-vector parity only for the four-case 9-node "
             "midpoint-load matrix, plus nonlinear static Python C1 full-result parity only "
             "for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta "
-            "and backtracking matrix through ABI v1.3. Broader input-space parity, HIP C2 "
-            "and runtime cutover remain open."
+            "and backtracking matrix through ABI v1.3. Nonlinear NDTHA proves C0 frozen legacy "
+            "Rust full-result parity only for the 2-story, 3-step case through ABI v1.4. Its "
+            "independent Python C1 matrix, broader input-space parity, HIP C2 and runtime "
+            "cutover remain open."
         ),
     }
 

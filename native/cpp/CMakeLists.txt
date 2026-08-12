@@ -58,6 +58,8 @@ structural_enable_sanitizers(structural_model_ir)
 
 add_library(
   structural_solver_cpu STATIC
+  src/solver_cpu/story_frame.cpp
+  src/solver_cpu/nonlinear_ndtha.cpp
   src/solver_cpu/nonlinear_static.cpp
   src/solver_cpu/track_point_load.cpp
 )

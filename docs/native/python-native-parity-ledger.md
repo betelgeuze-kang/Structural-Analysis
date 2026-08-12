@@ -137,6 +137,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   nonconvergence taxonomy also match. The frozen legacy 3-story fixture remains byte-identical to
   one product golden. Broader nonlinear input-space parity and HIP C2 remain open, and the legacy
   Rust export is unchanged.
+- The bounded `nonlinear_ndtha` story-frame slice is C0. Its serial FP64 C++ Newmark/Newton kernel
+  shares constitutive assembly and recovery with nonlinear static, uses ABI v1.4 nested
+  caller-owned descriptors and a safe Rust wrapper, and matches all 11 response channels plus the
+  summary of the frozen 2-story, 3-step legacy Rust fixture within `1e-15`. Invalid and numerical
+  nonconvergence calls are failure-atomic; physical collapse is a complete terminal result. An
+  independent Python C1 matrix, broader record/material coverage, HIP C2, restart and product E2E
+  remain open.
 
 ### D5. Durable Job API and process lifecycle
 

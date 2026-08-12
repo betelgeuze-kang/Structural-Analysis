@@ -222,7 +222,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
         "structural_nonlinear_static_abi_tests",
-        'payload["abi_version"] == "0x00010003"',
+        "structural_nonlinear_ndtha_abi_tests",
+        'payload["abi_version"] == "0x00010004"',
     ):
         if required not in pr_text:
             blockers.append(f"native_pr_fast_contract_token_missing:{required}")

@@ -26,7 +26,8 @@ extern "C" {
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
 #define SA_ABI_V1_3 UINT32_C(0x00010003)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_3
+#define SA_ABI_V1_4 UINT32_C(0x00010004)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_4
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -56,7 +57,8 @@ enum {
     SA_ELEMENT_TYPE_F64 = 1,
     SA_ELEMENT_TYPE_U64 = 2,
     SA_ELEMENT_TYPE_I32 = 3,
-    SA_ELEMENT_TYPE_U8 = 4
+    SA_ELEMENT_TYPE_U8 = 4,
+    SA_ELEMENT_TYPE_U32 = 5
 };
 
 enum {
@@ -69,8 +71,11 @@ enum {
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
 #define SA_CAPABILITY_TRACK_POINT_LOAD_CPU UINT64_C(8)
 #define SA_CAPABILITY_NONLINEAR_STATIC_CPU UINT64_C(16)
+#define SA_CAPABILITY_NONLINEAR_NDTHA_CPU UINT64_C(32)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
+#define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
+#define SA_NONLINEAR_NDTHA_MAX_STEP_COUNT UINT32_C(1000000)
 
 enum {
     SA_TRACK_SUPPORT_PINNED = 0,
@@ -204,6 +209,85 @@ typedef struct sa_nonlinear_static_result_v1 {
     uint64_t reserved;
 } sa_nonlinear_static_result_v1;
 
+typedef struct sa_nonlinear_ndtha_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t story_count;
+    uint32_t step_count;
+    double dt_s;
+    double newmark_beta;
+    double newmark_gamma;
+    double tolerance;
+    uint32_t max_step_iterations;
+    uint32_t reserved_iteration_u32;
+    double adaptive_load_decay;
+    double damping_force_cap_ratio;
+    uint32_t newton_max_iter;
+    uint32_t reserved_newton_u32;
+    double line_search_decay;
+    double line_search_min;
+    double hardening_ratio;
+    double pdelta_factor;
+    double collapse_drift_threshold_pct;
+    uint32_t flags;
+    uint32_t reserved_u32;
+    uint64_t reserved[2];
+} sa_nonlinear_ndtha_config_v1;
+
+typedef struct sa_nonlinear_ndtha_inputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_buffer_view_v1 story_stiffness_n_per_m;
+    sa_buffer_view_v1 story_height_m;
+    sa_buffer_view_v1 story_axial_n;
+    sa_buffer_view_v1 story_yield_drift_m;
+    sa_buffer_view_v1 story_mass_kg;
+    sa_buffer_view_v1 story_damping_n_s_per_m;
+    sa_buffer_view_v1 floor_load_base_n;
+    sa_buffer_view_v1 acceleration_g;
+    uint64_t reserved[2];
+} sa_nonlinear_ndtha_inputs_v1;
+
+typedef struct sa_nonlinear_ndtha_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 top_displacement_m;
+    sa_mut_buffer_view_v1 drift_ratio_pct;
+    sa_mut_buffer_view_v1 base_shear_kn;
+    sa_mut_buffer_view_v1 core_drift_pct;
+    sa_mut_buffer_view_v1 core_shear_kn;
+    sa_mut_buffer_view_v1 step_converged;
+    sa_mut_buffer_view_v1 step_iterations;
+    sa_mut_buffer_view_v1 step_plastic_story_count;
+    sa_mut_buffer_view_v1 step_residual_inf;
+    sa_mut_buffer_view_v1 story_drift_envelope_pct;
+    sa_mut_buffer_view_v1 final_story_drift_pct;
+    uint64_t reserved[2];
+} sa_nonlinear_ndtha_outputs_v1;
+
+typedef struct sa_nonlinear_ndtha_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t converged_all_steps;
+    uint32_t collapsed;
+    int32_t collapse_step;
+    uint32_t step_count_completed;
+    double collapse_time_s;
+    double collapse_drift_ratio_pct;
+    double collapse_top_displacement_m;
+    double max_drift_ratio_pct;
+    double avg_step_iterations;
+    double residual_top_displacement_m;
+    double residual_drift_ratio_pct;
+    uint32_t max_plastic_story_count;
+    uint32_t total_line_search_backtracks;
+    uint64_t output_story_count;
+    uint64_t output_step_count;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_nonlinear_ndtha_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -259,6 +343,13 @@ typedef sa_status_code_v1 (*sa_nonlinear_static_solve_fn_v1)(
     sa_nonlinear_static_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_nonlinear_ndtha_solve_fn_v1)(
+    const sa_nonlinear_ndtha_config_v1* config,
+    const sa_nonlinear_ndtha_inputs_v1* inputs,
+    const sa_nonlinear_ndtha_outputs_v1* outputs,
+    sa_nonlinear_ndtha_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -272,14 +363,16 @@ typedef struct sa_api_v1 {
     sa_model_ir_snapshot_write_fn_v1 model_ir_snapshot_write;
     sa_track_point_load_solve_fn_v1 track_point_load_solve;
     sa_nonlinear_static_solve_fn_v1 nonlinear_static_solve;
-    const void* reserved[5];
+    sa_nonlinear_ndtha_solve_fn_v1 nonlinear_ndtha_solve;
+    const void* reserved[4];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
 #define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
 #define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, track_point_load_solve))
 #define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_solve))
-#define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_solve))
+#define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(
