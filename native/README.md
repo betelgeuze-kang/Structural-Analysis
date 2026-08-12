@@ -95,9 +95,12 @@ It covers modal and linear-buckling systems through C1 with deterministic cyclic
 decomposition, rigid/infinite-mode filtering, coordinate-axis canonical bases and independent
 SciPy parity. ABI v1.9 consumes the two former table-reserved slots for failure-atomic modal and
 buckling calls, with a checked safe reentrant Rust wrapper and installed-package coverage. This is
-a C3 implementation candidate only: without HIP C2, sequential promotion remains C1, and sparse
-extraction, restart and product E2E authority remain open. See
-`docs/native/generalized-eigen-cpu-v1.md`.
+a C3 implementation candidate. A product-owned bounded HIP implementation now keeps the cyclic
+Jacobi eigensolve, cluster canonicalization and result recovery resident, with a source-bound live
+local C2 candidate and fallback zero. Sequential promotion remains C1 until the protected
+`native-hip-approved` receipt exists; sparse extraction, restart and product E2E authority remain
+open. See `docs/native/generalized-eigen-cpu-v1.md` and
+`docs/native/generalized-eigen-hip-c2.md`.
 
 ## Rust
 

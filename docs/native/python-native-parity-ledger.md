@@ -202,9 +202,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   extraction or whole-model solver ownership. ABI v1.9 now exposes distinct failure-atomic modal
   and buckling calls through the last two table slots, and a safe reentrant Rust wrapper validates
   complete result metadata before publishing owned modes; this is C3 implementation evidence, not
-  sequential promotion. HIP C2 remains open, so the capability remains C1; checkpoint C4, product
-  C5 and C6 also remain open, and Python remains the broader modal/buckling oracle and rollback
-  owner.
+  sequential promotion. A product-owned bounded HIP cyclic-Jacobi kernel now provides a live local
+  C2 candidate: eight modal/buckling profiles repeat bitwise, numerical and contract failures
+  match, eigensolve/canonicalization/result recovery stay resident, maximum relative eigenvalue
+  error is `1.3706125276112035e-16`, and fallback remains zero. It is explicitly a single-thread
+  dense reference profile, not a sparse performance claim. Protected-runner C2 remains open, so
+  the capability remains C1; checkpoint C4, product C5 and C6 also remain open, and Python remains
+  the broader modal/buckling oracle and rollback owner.
 
 ### D5. Durable Job API and process lifecycle
 

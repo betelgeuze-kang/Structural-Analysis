@@ -144,4 +144,7 @@ def test_reference_hip_c2_is_manual_protected_and_self_hosted_only() -> None:
     assert "structural_sparse_linear_hip_parity_tests" in workflow
     assert "check_native_sparse_linear_hip.py" in workflow
     assert "native-sparse-linear-hip-receipt.json" in workflow
+    assert "structural_generalized_eigen_hip_parity_tests" in workflow
+    assert "check_native_generalized_eigen_hip.py" in workflow
+    assert "native-generalized-eigen-hip-receipt.json" in workflow
     assert "structural_reference_elements_hip_parity_tests" in workflow

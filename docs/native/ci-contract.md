@@ -68,8 +68,10 @@ Jobs:
      parity, including asymmetric/malformed input rejection and fallback zero
    - bounded dense modal/linear-buckling C0 taxonomy and six-profile independent SciPy
      generalized-eigen C1 parity, including rigid/infinite-mode filtering, canonical repeated
-     eigenspaces, coordinate recovery and fallback zero, plus ABI v1.9 and Rust C3-candidate
-     contract/fuzz coverage without sequential promotion past C1
+     eigenspaces, coordinate recovery and fallback zero, plus ABI v1.9/Rust C3-candidate coverage
+     and a product-owned bounded HIP C2 candidate with eight-profile CPU/HIP parity, bitwise
+     repeats, resident eigensolve/result recovery and fallback zero, without sequential promotion
+     past C1 before a protected-runner receipt
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
