@@ -65,7 +65,7 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded dense symmetric FP64 C++20 modal and linear-buckling C1 reference only: strict positive-definite/semidefinite matrix contracts, deterministic cyclic-Jacobi decomposition, rigid/infinite-mode filtering, complete-cluster selection, coordinate-axis canonical mode bases, mass/stiffness normalization, residual/orthogonality gates and fallback 0 cover six profiles against an independent SciPy generalized-eigen oracle; sparse/subspace extraction, HIP C2, ABI C3 and Rust integration, checkpoint C4, product E2E C5 and C6 remain open"
+      "claim": "bounded dense symmetric FP64 C++20 modal and linear-buckling C1 reference only: strict positive-definite/semidefinite matrix contracts, deterministic cyclic-Jacobi decomposition, rigid/infinite-mode filtering, complete-cluster selection, coordinate-axis canonical mode bases, mass/stiffness normalization, residual/orthogonality gates and fallback 0 cover six profiles against an independent SciPy generalized-eigen oracle; append-only ABI v1.9 consumes both former reserved slots for failure-atomic caller-owned modal/buckling operations and a safe reentrant Rust wrapper implements the ABI C3 integration candidate, but the sequential gate remains C1 because sparse/subspace extraction and HIP C2 are open; checkpoint C4, product E2E C5 and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",

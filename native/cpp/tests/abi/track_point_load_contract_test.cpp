@@ -93,9 +93,8 @@ namespace {
     CHECK(api.model_ir_create != nullptr);
     CHECK(api.track_point_load_solve != nullptr);
     CHECK(api.nonlinear_static_solve == nullptr);
-    for (const auto* reserved : api.reserved) {
-        CHECK(reserved == nullptr);
-    }
+    CHECK(api.modal_solve == nullptr);
+    CHECK(api.buckling_solve == nullptr);
 
     sa_api_request_v1 old_request {
         SA_ABI_V1_1,

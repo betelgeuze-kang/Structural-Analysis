@@ -286,9 +286,8 @@ template <typename Value, std::size_t Length>
     CHECK(api.nonlinear_static_solve != nullptr);
     CHECK(api.nonlinear_ndtha_solve != nullptr);
     CHECK(api.nonlinear_ndtha_advance == nullptr);
-    for (const auto* reserved : api.reserved) {
-        CHECK(reserved == nullptr);
-    }
+    CHECK(api.modal_solve == nullptr);
+    CHECK(api.buckling_solve == nullptr);
 
     const auto old = load_api(SA_ABI_V1_3);
     CHECK(old.abi_version == SA_ABI_V1_3);
@@ -500,9 +499,8 @@ template <typename Value, std::size_t Length>
               | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU));
     CHECK(api.nonlinear_ndtha_solve != nullptr);
     CHECK(api.nonlinear_ndtha_advance != nullptr);
-    for (const auto* reserved : api.reserved) {
-        CHECK(reserved == nullptr);
-    }
+    CHECK(api.modal_solve == nullptr);
+    CHECK(api.buckling_solve == nullptr);
 
     const auto old = load_api(SA_ABI_V1_4);
     CHECK(old.nonlinear_ndtha_solve != nullptr);

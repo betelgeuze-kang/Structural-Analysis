@@ -2,6 +2,7 @@
 
 #include "../elements/reference_elements.hpp"
 #include "../model_ir/model_ir.hpp"
+#include "../solver_cpu/generalized_eigen.hpp"
 #include "../solver_cpu/nonlinear_ndtha.hpp"
 #include "../solver_cpu/nonlinear_static.hpp"
 #include "../solver_cpu/sparse_linear.hpp"
@@ -25,6 +26,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
+#include <vector>
 
 static_assert(sizeof(void*) == 8U);
 static_assert(sizeof(double) == 8U);
@@ -51,7 +53,8 @@ static_assert(offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U);
 static_assert(offsetof(sa_api_v1, model_ir_ndtha_adapt) == 104U);
 static_assert(offsetof(sa_api_v1, reference_element_evaluate) == 112U);
 static_assert(offsetof(sa_api_v1, sparse_linear_solve) == 120U);
-static_assert(offsetof(sa_api_v1, reserved) == 128U);
+static_assert(offsetof(sa_api_v1, modal_solve) == 128U);
+static_assert(offsetof(sa_api_v1, buckling_solve) == 136U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -139,6 +142,28 @@ static_assert(sizeof(sa_sparse_linear_result_v1) == 80U);
 static_assert(offsetof(sa_sparse_linear_result_v1, initial_residual_inf) == 16U);
 static_assert(offsetof(sa_sparse_linear_result_v1, output_length) == 48U);
 static_assert(offsetof(sa_sparse_linear_result_v1, reserved) == 64U);
+static_assert(sizeof(sa_dense_symmetric_matrix_v1) == 80U);
+static_assert(offsetof(sa_dense_symmetric_matrix_v1, values) == 16U);
+static_assert(offsetof(sa_dense_symmetric_matrix_v1, reserved) == 64U);
+static_assert(sizeof(sa_generalized_eigen_config_v1) == 96U);
+static_assert(offsetof(sa_generalized_eigen_config_v1, symmetry_relative_tolerance) == 24U);
+static_assert(offsetof(sa_generalized_eigen_config_v1, reserved) == 80U);
+static_assert(sizeof(sa_modal_outputs_v1) == 408U);
+static_assert(offsetof(sa_modal_outputs_v1, eigenvalue_rad2_per_s2) == 8U);
+static_assert(offsetof(sa_modal_outputs_v1, mass_normalized_mode_shapes) == 200U);
+static_assert(offsetof(sa_modal_outputs_v1, reserved) == 392U);
+static_assert(sizeof(sa_modal_result_v1) == 112U);
+static_assert(offsetof(sa_modal_result_v1, mass_orthogonality_error_inf) == 24U);
+static_assert(offsetof(sa_modal_result_v1, output_mode_count) == 72U);
+static_assert(offsetof(sa_modal_result_v1, reserved) == 96U);
+static_assert(sizeof(sa_buckling_outputs_v1) == 264U);
+static_assert(offsetof(sa_buckling_outputs_v1, load_factor) == 8U);
+static_assert(offsetof(sa_buckling_outputs_v1, residual_relative_inf) == 200U);
+static_assert(offsetof(sa_buckling_outputs_v1, reserved) == 248U);
+static_assert(sizeof(sa_buckling_result_v1) == 120U);
+static_assert(offsetof(sa_buckling_result_v1, critical_load_factor) == 24U);
+static_assert(offsetof(sa_buckling_result_v1, output_mode_count) == 80U);
+static_assert(offsetof(sa_buckling_result_v1, reserved) == 104U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -2933,6 +2958,654 @@ struct MemoryRegion {
         });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_generalized_eigen_input_view(
+    const sa_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_9) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "generalized-eigen input ABI is not v1.9");
+    }
+    if (view.struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "generalized-eigen input struct_size is too small");
+    }
+    if (view.length != expected_length || view.stride_bytes != sizeof(double)
+        || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U
+        || (expected_length == 0U ? view.data != nullptr : view.data == nullptr)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (expected_length == 0U) {
+        return SA_OK;
+    }
+    if (expected_length > std::numeric_limits<std::uint64_t>::max() / sizeof(double)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen input extent overflows");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_generalized_eigen_output_view(
+    const sa_mut_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_9) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "generalized-eigen output ABI is not v1.9");
+    }
+    if (view.struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "generalized-eigen output struct_size is too small");
+    }
+    if (view.data == nullptr || view.length < expected_length
+        || view.stride_bytes != sizeof(double) || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(
+            error,
+            view.length < expected_length ? SA_ERR_BUFFER_TOO_SMALL : SA_ERR_INVALID_ARGUMENT,
+            label);
+    }
+    if (expected_length > std::numeric_limits<std::uint64_t>::max() / sizeof(double)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen output extent overflows");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 generalized_eigen_solver_error(
+    const structural::solver_cpu::SolverStatus status,
+    const std::string_view family,
+    sa_error_buffer_v1* const error) {
+    using structural::solver_cpu::SolverStatus;
+    switch (status) {
+    case SolverStatus::converged:
+        return SA_OK;
+    case SolverStatus::invalid_input:
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, family);
+    case SolverStatus::singularity:
+        return report_error(error, SA_ERR_SINGULARITY, family);
+    case SolverStatus::indefinite_operator:
+        return report_error(error, SA_ERR_INDEFINITE_OPERATOR, family);
+    case SolverStatus::nonconvergence:
+        return report_error(error, SA_ERR_NONCONVERGENCE, family);
+    case SolverStatus::increment_limit:
+        return report_error(error, SA_ERR_INCREMENT_LIMIT, family);
+    case SolverStatus::residual_limit:
+        return report_error(error, SA_ERR_RESIDUAL_LIMIT, family);
+    case SolverStatus::cancelled:
+        return report_error(error, SA_ERR_CANCELLED, family);
+    case SolverStatus::checkpoint_mismatch:
+        return report_error(error, SA_ERR_CHECKPOINT_MISMATCH, family);
+    case SolverStatus::backend_unavailable:
+        return report_error(error, SA_ERR_BACKEND_UNAVAILABLE, family);
+    }
+    return report_error(error, SA_ERR_INTERNAL, "generalized-eigen solver status is invalid");
+}
+
+[[nodiscard]] bool region_overlaps_any(
+    const MemoryRegion region,
+    const std::span<const MemoryRegion> others) noexcept {
+    return std::any_of(others.begin(), others.end(), [region](const MemoryRegion other) {
+        return region.extent > 0U && other.extent > 0U
+            && ranges_overlap(region.data, region.extent, other.data, other.extent);
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 validate_generalized_eigen_memory_contract(
+    const std::span<const MemoryRegion> descriptors,
+    const std::span<const MemoryRegion> inputs,
+    const std::span<const MemoryRegion> outputs,
+    sa_error_buffer_v1* const error) {
+    for (std::size_t left = 0U; left < descriptors.size(); ++left) {
+        for (std::size_t right = left + 1U; right < descriptors.size(); ++right) {
+            if (ranges_overlap(
+                    descriptors[left].data,
+                    descriptors[left].extent,
+                    descriptors[right].data,
+                    descriptors[right].extent)) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen descriptors overlap");
+            }
+        }
+    }
+    for (const auto input : inputs) {
+        if (region_overlaps_any(input, descriptors)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "generalized-eigen input overlaps descriptor storage");
+        }
+    }
+    for (std::size_t index = 0U; index < outputs.size(); ++index) {
+        if (region_overlaps_any(outputs[index], descriptors)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "generalized-eigen output overlaps descriptor storage");
+        }
+        if (region_overlaps_any(outputs[index], inputs)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen output overlaps input data");
+        }
+        const auto remaining = outputs.subspan(index + 1U);
+        if (region_overlaps_any(outputs[index], remaining)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen output buffers overlap");
+        }
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_generalized_eigen_common(
+    const sa_generalized_eigen_config_v1* const config,
+    const sa_dense_symmetric_matrix_v1* const left,
+    const sa_dense_symmetric_matrix_v1* const right,
+    const sa_buffer_view_v1* const coordinate_recovery_scale,
+    const void* const outputs,
+    const std::size_t outputs_size,
+    void* const result,
+    const std::size_t result_size,
+    std::uint64_t& matrix_length,
+    std::uint64_t& shape_length,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(config) || !pointer_is_aligned(left)
+        || !pointer_is_aligned(right) || !pointer_is_aligned(coordinate_recovery_scale)
+        || outputs == nullptr || result == nullptr
+        || reinterpret_cast<std::uintptr_t>(outputs) % alignof(std::uint64_t) != 0U
+        || reinterpret_cast<std::uintptr_t>(result) % alignof(std::uint64_t) != 0U) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen descriptor is null or misaligned");
+    }
+    if (config->abi_version != SA_ABI_V1_9 || left->abi_version != SA_ABI_V1_9
+        || right->abi_version != SA_ABI_V1_9) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "generalized-eigen descriptors require ABI v1.9");
+    }
+    if (config->struct_size < sizeof(sa_generalized_eigen_config_v1)
+        || left->struct_size < sizeof(sa_dense_symmetric_matrix_v1)
+        || right->struct_size < sizeof(sa_dense_symmetric_matrix_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "generalized-eigen descriptor struct_size is too small");
+    }
+    const auto* const outputs_header = static_cast<const sa_header_v1*>(outputs);
+    const auto* const result_header = static_cast<const sa_header_v1*>(result);
+    if (outputs_header->abi_version != SA_ABI_V1_9
+        || result_header->abi_version != SA_ABI_V1_9) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "generalized-eigen operation descriptors require ABI v1.9");
+    }
+    if (outputs_header->struct_size < outputs_size || result_header->struct_size < result_size) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "generalized-eigen operation struct_size is too small");
+    }
+    if (config->flags != 0U || config->reserved_u32 != 0U
+        || std::any_of(
+            std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                return value != 0U;
+            })
+        || std::any_of(
+            std::begin(left->reserved), std::end(left->reserved), [](const auto value) {
+                return value != 0U;
+            })
+        || std::any_of(
+            std::begin(right->reserved), std::end(right->reserved), [](const auto value) {
+                return value != 0U;
+            })) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen reserved fields are not zero");
+    }
+    if (left->order == 0U || left->order > SA_GENERALIZED_EIGEN_MAX_ORDER
+        || right->order != left->order || config->mode_count == 0U
+        || config->mode_count > left->order || config->maximum_sweeps == 0U
+        || config->maximum_sweeps > SA_GENERALIZED_EIGEN_MAX_SWEEPS) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "generalized-eigen dimensions are outside the bounded domain");
+    }
+    if (left->order > std::numeric_limits<std::uint64_t>::max() / left->order) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen matrix dimensions overflow");
+    }
+    matrix_length = left->order * left->order;
+    if (left->order > std::numeric_limits<std::uint64_t>::max() / config->mode_count) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "generalized-eigen output dimensions overflow");
+    }
+    shape_length = left->order * config->mode_count;
+    auto status = validate_generalized_eigen_input_view(
+        left->values,
+        matrix_length,
+        "generalized-eigen left-matrix metadata is invalid",
+        error);
+    if (status != SA_OK) {
+        return status;
+    }
+    status = validate_generalized_eigen_input_view(
+        right->values,
+        matrix_length,
+        "generalized-eigen right-matrix metadata is invalid",
+        error);
+    if (status != SA_OK) {
+        return status;
+    }
+    return validate_generalized_eigen_input_view(
+        *coordinate_recovery_scale,
+        coordinate_recovery_scale->length == 0U ? 0U : left->order,
+        "generalized-eigen coordinate-recovery metadata is invalid",
+        error);
+}
+
+[[nodiscard]] structural::solver_cpu::GeneralizedEigenConfig native_eigen_config(
+    const sa_generalized_eigen_config_v1& config) noexcept {
+    return {
+        config.mode_count,
+        config.symmetry_relative_tolerance,
+        config.positive_semidefinite_relative_tolerance,
+        config.mode_relative_tolerance,
+        config.cluster_relative_tolerance,
+        config.residual_relative_tolerance,
+        config.orthogonality_tolerance,
+        config.eigensolver_relative_tolerance,
+        config.maximum_sweeps,
+    };
+}
+
+[[nodiscard]] sa_status_code_v1 modal_solve_boundary(
+    const sa_generalized_eigen_config_v1* const config,
+    const sa_dense_symmetric_matrix_v1* const stiffness,
+    const sa_dense_symmetric_matrix_v1* const mass,
+    const sa_buffer_view_v1* const coordinate_recovery_scale,
+    const sa_modal_outputs_v1* const outputs,
+    sa_modal_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config, stiffness, mass, coordinate_recovery_scale, outputs, result, error]()
+            -> sa_status_code_v1 {
+        std::uint64_t matrix_length = 0U;
+        std::uint64_t shape_length = 0U;
+        auto status = validate_generalized_eigen_common(
+            config,
+            stiffness,
+            mass,
+            coordinate_recovery_scale,
+            outputs,
+            sizeof(sa_modal_outputs_v1),
+            result,
+            sizeof(sa_modal_result_v1),
+            matrix_length,
+            shape_length,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        if (std::any_of(
+                std::begin(outputs->reserved),
+                std::end(outputs->reserved),
+                [](const auto value) { return value != 0U; })) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "modal output reserved fields are not zero");
+        }
+        const std::array<std::pair<const sa_mut_buffer_view_v1*, std::uint64_t>, 8U> views {{
+            {&outputs->eigenvalue_rad2_per_s2, config->mode_count},
+            {&outputs->omega_rad_per_s, config->mode_count},
+            {&outputs->frequency_hz, config->mode_count},
+            {&outputs->period_s, config->mode_count},
+            {&outputs->mass_normalized_mode_shapes, shape_length},
+            {&outputs->generalized_mass, config->mode_count},
+            {&outputs->generalized_stiffness, config->mode_count},
+            {&outputs->residual_relative_inf, config->mode_count},
+        }};
+        for (const auto& [view, length] : views) {
+            status = validate_generalized_eigen_output_view(
+                *view, length, "modal output metadata is invalid", error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+        const std::array descriptors {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {stiffness, sizeof(*stiffness)},
+            MemoryRegion {mass, sizeof(*mass)},
+            MemoryRegion {coordinate_recovery_scale, sizeof(*coordinate_recovery_scale)},
+            MemoryRegion {outputs, sizeof(*outputs)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        const std::array inputs {
+            MemoryRegion {stiffness->values.data, matrix_length * sizeof(double)},
+            MemoryRegion {mass->values.data, matrix_length * sizeof(double)},
+            MemoryRegion {
+                coordinate_recovery_scale->data,
+                coordinate_recovery_scale->length * sizeof(double)},
+        };
+        std::array<MemoryRegion, 8U> output_regions {};
+        for (std::size_t index = 0U; index < views.size(); ++index) {
+            output_regions[index] = {views[index].first->data, views[index].second * sizeof(double)};
+        }
+        status = validate_generalized_eigen_memory_contract(
+            descriptors, inputs, output_regions, error);
+        if (status != SA_OK) {
+            return status;
+        }
+        structural::solver_cpu::ModalEigenResult native;
+        try {
+            native = structural::solver_cpu::solve_dense_modal_modes(
+                {
+                    static_cast<std::size_t>(stiffness->order),
+                    {static_cast<const double*>(stiffness->values.data),
+                     static_cast<std::size_t>(matrix_length)},
+                },
+                {
+                    static_cast<std::size_t>(mass->order),
+                    {static_cast<const double*>(mass->values.data),
+                     static_cast<std::size_t>(matrix_length)},
+                },
+                {static_cast<const double*>(coordinate_recovery_scale->data),
+                 static_cast<std::size_t>(coordinate_recovery_scale->length)},
+                native_eigen_config(*config));
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        status = generalized_eigen_solver_error(
+            native.status, "modal generalized-eigen numerical solve failed", error);
+        if (status != SA_OK) {
+            return status;
+        }
+        const std::array metrics {
+            native.mass_orthogonality_error_inf,
+            native.stiffness_diagonalization_error_inf,
+            native.stiffness_relative_symmetry_error,
+            native.mass_relative_symmetry_error,
+            native.stiffness_minimum_eigenvalue,
+            native.mass_minimum_eigenvalue,
+        };
+        if (native.modes.size() != config->mode_count || native.fallback_count != 0U
+            || std::any_of(metrics.begin(), metrics.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(error, SA_ERR_INTERNAL, "modal result invariant failed");
+        }
+        std::array<std::vector<double>, 8U> staged;
+        for (auto& values : staged) {
+            values.reserve(config->mode_count);
+        }
+        staged[4].reserve(static_cast<std::size_t>(shape_length));
+        for (const auto& mode : native.modes) {
+            const std::array mode_metrics {
+                mode.eigenvalue_rad2_per_s2,
+                mode.omega_rad_per_s,
+                mode.frequency_hz,
+                mode.period_s,
+                mode.generalized_mass,
+                mode.generalized_stiffness,
+                mode.residual_relative_inf,
+            };
+            if (mode.mass_normalized_shape.size() != stiffness->order
+                || std::any_of(mode_metrics.begin(), mode_metrics.end(), [](const auto value) {
+                    return !std::isfinite(value);
+                })
+                || std::any_of(
+                    mode.mass_normalized_shape.begin(),
+                    mode.mass_normalized_shape.end(),
+                    [](const auto value) { return !std::isfinite(value); })) {
+                return report_error(error, SA_ERR_INTERNAL, "modal mode invariant failed");
+            }
+            staged[0].push_back(mode.eigenvalue_rad2_per_s2);
+            staged[1].push_back(mode.omega_rad_per_s);
+            staged[2].push_back(mode.frequency_hz);
+            staged[3].push_back(mode.period_s);
+            staged[4].insert(
+                staged[4].end(),
+                mode.mass_normalized_shape.begin(),
+                mode.mass_normalized_shape.end());
+            staged[5].push_back(mode.generalized_mass);
+            staged[6].push_back(mode.generalized_stiffness);
+            staged[7].push_back(mode.residual_relative_inf);
+        }
+        for (std::size_t index = 0U; index < staged.size(); ++index) {
+            if (staged[index].size() != views[index].second) {
+                return report_error(error, SA_ERR_INTERNAL, "modal staged-output invariant failed");
+            }
+        }
+        const sa_modal_result_v1 staged_result {
+            SA_ABI_V1_9,
+            static_cast<std::uint32_t>(sizeof(sa_modal_result_v1)),
+            SA_SOLVER_CONVERGED,
+            native.rigid_mode_count,
+            native.eigensolver_sweeps,
+            0U,
+            native.mass_orthogonality_error_inf,
+            native.stiffness_diagonalization_error_inf,
+            native.stiffness_relative_symmetry_error,
+            native.mass_relative_symmetry_error,
+            native.stiffness_minimum_eigenvalue,
+            native.mass_minimum_eigenvalue,
+            config->mode_count,
+            shape_length,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        for (std::size_t index = 0U; index < staged.size(); ++index) {
+            std::memcpy(
+                views[index].first->data,
+                staged[index].data(),
+                staged[index].size() * sizeof(double));
+        }
+        *result = staged_result;
+        return SA_OK;
+        });
+}
+
+[[nodiscard]] sa_status_code_v1 buckling_solve_boundary(
+    const sa_generalized_eigen_config_v1* const config,
+    const sa_dense_symmetric_matrix_v1* const stiffness,
+    const sa_dense_symmetric_matrix_v1* const geometric_stiffness_per_unit_load,
+    const sa_buffer_view_v1* const coordinate_recovery_scale,
+    const sa_buckling_outputs_v1* const outputs,
+    sa_buckling_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config,
+         stiffness,
+         geometric_stiffness_per_unit_load,
+         coordinate_recovery_scale,
+         outputs,
+         result,
+         error]() -> sa_status_code_v1 {
+        std::uint64_t matrix_length = 0U;
+        std::uint64_t shape_length = 0U;
+        auto status = validate_generalized_eigen_common(
+            config,
+            stiffness,
+            geometric_stiffness_per_unit_load,
+            coordinate_recovery_scale,
+            outputs,
+            sizeof(sa_buckling_outputs_v1),
+            result,
+            sizeof(sa_buckling_result_v1),
+            matrix_length,
+            shape_length,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        if (std::any_of(
+                std::begin(outputs->reserved),
+                std::end(outputs->reserved),
+                [](const auto value) { return value != 0U; })) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "buckling output reserved fields are not zero");
+        }
+        const std::array<std::pair<const sa_mut_buffer_view_v1*, std::uint64_t>, 5U> views {{
+            {&outputs->load_factor, config->mode_count},
+            {&outputs->stiffness_normalized_mode_shapes, shape_length},
+            {&outputs->generalized_elastic_stiffness, config->mode_count},
+            {&outputs->generalized_geometric_stiffness, config->mode_count},
+            {&outputs->residual_relative_inf, config->mode_count},
+        }};
+        for (const auto& [view, length] : views) {
+            status = validate_generalized_eigen_output_view(
+                *view, length, "buckling output metadata is invalid", error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+        const std::array descriptors {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {stiffness, sizeof(*stiffness)},
+            MemoryRegion {
+                geometric_stiffness_per_unit_load,
+                sizeof(*geometric_stiffness_per_unit_load)},
+            MemoryRegion {coordinate_recovery_scale, sizeof(*coordinate_recovery_scale)},
+            MemoryRegion {outputs, sizeof(*outputs)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        const std::array inputs {
+            MemoryRegion {stiffness->values.data, matrix_length * sizeof(double)},
+            MemoryRegion {
+                geometric_stiffness_per_unit_load->values.data,
+                matrix_length * sizeof(double)},
+            MemoryRegion {
+                coordinate_recovery_scale->data,
+                coordinate_recovery_scale->length * sizeof(double)},
+        };
+        std::array<MemoryRegion, 5U> output_regions {};
+        for (std::size_t index = 0U; index < views.size(); ++index) {
+            output_regions[index] = {views[index].first->data, views[index].second * sizeof(double)};
+        }
+        status = validate_generalized_eigen_memory_contract(
+            descriptors, inputs, output_regions, error);
+        if (status != SA_OK) {
+            return status;
+        }
+        structural::solver_cpu::BucklingEigenResult native;
+        try {
+            native = structural::solver_cpu::solve_dense_linear_buckling(
+                {
+                    static_cast<std::size_t>(stiffness->order),
+                    {static_cast<const double*>(stiffness->values.data),
+                     static_cast<std::size_t>(matrix_length)},
+                },
+                {
+                    static_cast<std::size_t>(geometric_stiffness_per_unit_load->order),
+                    {static_cast<const double*>(geometric_stiffness_per_unit_load->values.data),
+                     static_cast<std::size_t>(matrix_length)},
+                },
+                {static_cast<const double*>(coordinate_recovery_scale->data),
+                 static_cast<std::size_t>(coordinate_recovery_scale->length)},
+                native_eigen_config(*config));
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        status = generalized_eigen_solver_error(
+            native.status, "buckling generalized-eigen numerical solve failed", error);
+        if (status != SA_OK) {
+            return status;
+        }
+        const std::array metrics {
+            native.critical_load_factor,
+            native.stiffness_orthogonality_error_inf,
+            native.geometric_diagonalization_error_inf,
+            native.stiffness_relative_symmetry_error,
+            native.geometric_stiffness_relative_symmetry_error,
+            native.stiffness_minimum_eigenvalue,
+            native.geometric_stiffness_minimum_eigenvalue,
+        };
+        if (native.modes.size() != config->mode_count || native.fallback_count != 0U
+            || std::any_of(metrics.begin(), metrics.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(error, SA_ERR_INTERNAL, "buckling result invariant failed");
+        }
+        std::array<std::vector<double>, 5U> staged;
+        for (auto& values : staged) {
+            values.reserve(config->mode_count);
+        }
+        staged[1].reserve(static_cast<std::size_t>(shape_length));
+        for (const auto& mode : native.modes) {
+            const std::array mode_metrics {
+                mode.load_factor,
+                mode.generalized_elastic_stiffness,
+                mode.generalized_geometric_stiffness,
+                mode.residual_relative_inf,
+            };
+            if (mode.stiffness_normalized_shape.size() != stiffness->order
+                || std::any_of(mode_metrics.begin(), mode_metrics.end(), [](const auto value) {
+                    return !std::isfinite(value);
+                })
+                || std::any_of(
+                    mode.stiffness_normalized_shape.begin(),
+                    mode.stiffness_normalized_shape.end(),
+                    [](const auto value) { return !std::isfinite(value); })) {
+                return report_error(error, SA_ERR_INTERNAL, "buckling mode invariant failed");
+            }
+            staged[0].push_back(mode.load_factor);
+            staged[1].insert(
+                staged[1].end(),
+                mode.stiffness_normalized_shape.begin(),
+                mode.stiffness_normalized_shape.end());
+            staged[2].push_back(mode.generalized_elastic_stiffness);
+            staged[3].push_back(mode.generalized_geometric_stiffness);
+            staged[4].push_back(mode.residual_relative_inf);
+        }
+        for (std::size_t index = 0U; index < staged.size(); ++index) {
+            if (staged[index].size() != views[index].second) {
+                return report_error(error, SA_ERR_INTERNAL, "buckling staged-output invariant failed");
+            }
+        }
+        const sa_buckling_result_v1 staged_result {
+            SA_ABI_V1_9,
+            static_cast<std::uint32_t>(sizeof(sa_buckling_result_v1)),
+            SA_SOLVER_CONVERGED,
+            native.finite_positive_eigenvalue_count,
+            native.geometric_stiffness_positive_rank,
+            native.eigensolver_sweeps,
+            native.critical_load_factor,
+            native.stiffness_orthogonality_error_inf,
+            native.geometric_diagonalization_error_inf,
+            native.stiffness_relative_symmetry_error,
+            native.geometric_stiffness_relative_symmetry_error,
+            native.stiffness_minimum_eigenvalue,
+            native.geometric_stiffness_minimum_eigenvalue,
+            config->mode_count,
+            shape_length,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        for (std::size_t index = 0U; index < staged.size(); ++index) {
+            std::memcpy(
+                views[index].first->data,
+                staged[index].data(),
+                staged[index].size() * sizeof(double));
+        }
+        *result = staged_result;
+        return SA_OK;
+        });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -2973,6 +3646,9 @@ struct MemoryRegion {
     case SA_ABI_V1_8:
         api_min_size = SA_API_V1_8_MIN_SIZE;
         break;
+    case SA_ABI_V1_9:
+        api_min_size = SA_API_V1_9_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -3002,6 +3678,7 @@ struct MemoryRegion {
     const bool model_ir_ndtha_adapter_enabled = request->abi_version >= SA_ABI_V1_6;
     const bool reference_elements_enabled = request->abi_version >= SA_ABI_V1_7;
     const bool sparse_linear_enabled = request->abi_version >= SA_ABI_V1_8;
+    const bool generalized_eigen_enabled = request->abi_version >= SA_ABI_V1_9;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -3023,6 +3700,9 @@ struct MemoryRegion {
                     : UINT64_C(0))
             | (sparse_linear_enabled
                     ? SA_CAPABILITY_SPARSE_LINEAR_CPU
+                    : UINT64_C(0))
+            | (generalized_eigen_enabled
+                    ? SA_CAPABILITY_GENERALIZED_EIGEN_CPU
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -3038,7 +3718,8 @@ struct MemoryRegion {
         model_ir_ndtha_adapter_enabled ? &model_ir_ndtha_adapt_boundary : nullptr,
         reference_elements_enabled ? &reference_element_evaluate_boundary : nullptr,
         sparse_linear_enabled ? &sparse_linear_solve_boundary : nullptr,
-        {nullptr, nullptr},
+        generalized_eigen_enabled ? &modal_solve_boundary : nullptr,
+        generalized_eigen_enabled ? &buckling_solve_boundary : nullptr,
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

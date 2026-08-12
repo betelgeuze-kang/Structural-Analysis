@@ -199,8 +199,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   gates, deterministic repetition and fallback zero. Six modal/buckling profiles—including
   non-identity coordinate recovery, a rigid mode, singular geometric stiffness and a `1e-15`
   finite reciprocal mode—match an independent SciPy generalized-eigen oracle. This is not sparse
-  extraction or whole-model solver ownership. HIP C2, ABI/Rust C3, checkpoint C4, product C5 and
-  C6 remain open, so Python remains the broader modal/buckling oracle and rollback owner.
+  extraction or whole-model solver ownership. ABI v1.9 now exposes distinct failure-atomic modal
+  and buckling calls through the last two table slots, and a safe reentrant Rust wrapper validates
+  complete result metadata before publishing owned modes; this is C3 implementation evidence, not
+  sequential promotion. HIP C2 remains open, so the capability remains C1; checkpoint C4, product
+  C5 and C6 also remain open, and Python remains the broader modal/buckling oracle and rollback
+  owner.
 
 ### D5. Durable Job API and process lifecycle
 

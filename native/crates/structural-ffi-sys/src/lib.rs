@@ -5,7 +5,9 @@ compile_error!("structural C ABI v1 requires a 64-bit little-endian target");
 
 use core::ffi::{c_char, c_void};
 
+mod generalized_eigen;
 pub mod legacy_runtime_v3;
+pub use generalized_eigen::*;
 mod model_ir;
 pub use model_ir::*;
 mod model_ir_ndtha_adapter;
@@ -24,7 +26,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_8;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_9;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -121,7 +123,8 @@ pub struct SaApiV1 {
     pub model_ir_ndtha_adapt: Option<SaModelIrNdthaAdaptFnV1>,
     pub reference_element_evaluate: Option<SaReferenceElementEvaluateFnV1>,
     pub sparse_linear_solve: Option<SaSparseLinearSolveFnV1>,
-    pub reserved: [*const c_void; 2],
+    pub modal_solve: Option<SaModalSolveFnV1>,
+    pub buckling_solve: Option<SaBucklingSolveFnV1>,
 }
 
 impl Default for SaApiV1 {
@@ -144,7 +147,8 @@ impl Default for SaApiV1 {
             model_ir_ndtha_adapt: None,
             reference_element_evaluate: None,
             sparse_linear_solve: None,
-            reserved: [core::ptr::null(); 2],
+            modal_solve: None,
+            buckling_solve: None,
         }
     }
 }
@@ -187,7 +191,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, model_ir_ndtha_adapt), 104);
         assert_eq!(offset_of!(SaApiV1, reference_element_evaluate), 112);
         assert_eq!(offset_of!(SaApiV1, sparse_linear_solve), 120);
-        assert_eq!(offset_of!(SaApiV1, reserved), 128);
+        assert_eq!(offset_of!(SaApiV1, modal_solve), 128);
+        assert_eq!(offset_of!(SaApiV1, buckling_solve), 136);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

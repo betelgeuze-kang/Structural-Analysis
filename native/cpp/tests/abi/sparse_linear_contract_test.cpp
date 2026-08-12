@@ -136,7 +136,7 @@ struct Case {
     CHECK((current.capabilities & SA_CAPABILITY_SPARSE_LINEAR_CPU) != 0U);
     CHECK(current.struct_size == sizeof(sa_api_v1));
     CHECK(SA_API_V1_7_MIN_SIZE == offsetof(sa_api_v1, sparse_linear_solve));
-    CHECK(SA_API_V1_8_MIN_SIZE == offsetof(sa_api_v1, reserved));
+    CHECK(SA_API_V1_8_MIN_SIZE == offsetof(sa_api_v1, modal_solve));
     return true;
 }
 

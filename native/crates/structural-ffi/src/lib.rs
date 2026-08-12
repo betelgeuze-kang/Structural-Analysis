@@ -303,6 +303,111 @@ pub struct SparseLinearSolution {
     pub fallback_count: u32,
 }
 
+/// Caller-owned row-major dense symmetric matrix for the bounded ABI v1.9 reference solve.
+#[derive(Clone, Debug, PartialEq)]
+pub struct DenseSymmetricMatrix {
+    pub order: usize,
+    pub values: Vec<f64>,
+}
+
+/// Shared deterministic gates for modal and linear-buckling generalized-eigen solves.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct GeneralizedEigenConfig {
+    pub mode_count: u32,
+    pub maximum_sweeps: u32,
+    pub symmetry_relative_tolerance: f64,
+    pub positive_semidefinite_relative_tolerance: f64,
+    pub mode_relative_tolerance: f64,
+    pub cluster_relative_tolerance: f64,
+    pub residual_relative_tolerance: f64,
+    pub orthogonality_tolerance: f64,
+    pub eigensolver_relative_tolerance: f64,
+}
+
+impl GeneralizedEigenConfig {
+    /// Strict defaults shared with the C++ modal reference kernel.
+    #[must_use]
+    pub const fn modal(mode_count: u32) -> Self {
+        Self {
+            mode_count,
+            maximum_sweeps: 128,
+            symmetry_relative_tolerance: 1.0e-12,
+            positive_semidefinite_relative_tolerance: 1.0e-12,
+            mode_relative_tolerance: 1.0e-12,
+            cluster_relative_tolerance: 1.0e-10,
+            residual_relative_tolerance: 1.0e-10,
+            orthogonality_tolerance: 1.0e-10,
+            eigensolver_relative_tolerance: 1.0e-14,
+        }
+    }
+
+    /// Strict defaults shared with the C++ linear-buckling reference kernel.
+    #[must_use]
+    pub const fn buckling(mode_count: u32) -> Self {
+        let mut config = Self::modal(mode_count);
+        config.residual_relative_tolerance = 1.0e-9;
+        config.orthogonality_tolerance = 1.0e-8;
+        config
+    }
+}
+
+/// One mass-normalized modal eigenpair and its independently verified recovery metrics.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModalMode {
+    pub eigenvalue_rad2_per_s2: f64,
+    pub omega_rad_per_s: f64,
+    pub frequency_hz: f64,
+    pub period_s: f64,
+    pub mass_normalized_shape: Vec<f64>,
+    pub generalized_mass: f64,
+    pub generalized_stiffness: f64,
+    pub residual_relative_inf: f64,
+}
+
+/// Complete caller-owned modal result from the bounded C++ CPU operation.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModalSolution {
+    pub modes: Vec<ModalMode>,
+    pub rigid_mode_count: u32,
+    pub eigensolver_sweeps: u32,
+    pub mass_orthogonality_error_inf: f64,
+    pub stiffness_diagonalization_error_inf: f64,
+    pub stiffness_relative_symmetry_error: f64,
+    pub mass_relative_symmetry_error: f64,
+    pub stiffness_minimum_eigenvalue: f64,
+    pub mass_minimum_eigenvalue: f64,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
+/// One stiffness-normalized linear-buckling eigenpair and recovery metrics.
+#[derive(Clone, Debug, PartialEq)]
+pub struct BucklingMode {
+    pub load_factor: f64,
+    pub stiffness_normalized_shape: Vec<f64>,
+    pub generalized_elastic_stiffness: f64,
+    pub generalized_geometric_stiffness: f64,
+    pub residual_relative_inf: f64,
+}
+
+/// Complete caller-owned linear-buckling result from the bounded C++ CPU operation.
+#[derive(Clone, Debug, PartialEq)]
+pub struct BucklingSolution {
+    pub modes: Vec<BucklingMode>,
+    pub finite_positive_eigenvalue_count: u32,
+    pub geometric_stiffness_positive_rank: u32,
+    pub eigensolver_sweeps: u32,
+    pub critical_load_factor: f64,
+    pub stiffness_orthogonality_error_inf: f64,
+    pub geometric_diagonalization_error_inf: f64,
+    pub stiffness_relative_symmetry_error: f64,
+    pub geometric_stiffness_relative_symmetry_error: f64,
+    pub stiffness_minimum_eigenvalue: f64,
+    pub geometric_stiffness_minimum_eigenvalue: f64,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Caller-owned deterministic result from the bounded C++ track point-load CPU kernel.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TrackPointLoadSolution {
@@ -732,6 +837,15 @@ impl Api {
     /// Returns a stable ABI error if the sparse capability or operation is absent.
     pub fn load_sparse_linear() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_8)
+    }
+
+    /// Load the ABI v1.9 table with bounded dense modal and buckling CPU operations.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if either generalized-eigen capability is absent.
+    pub fn load_generalized_eigen() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_9)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -1444,6 +1558,110 @@ impl Api {
         }
         sparse_solution_from_raw(raw_result, solution, order)
     }
+
+    /// Solve `K phi = omega^2 M phi` through caller-owned ABI v1.9 buffers.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable validation or numerical error without publishing a partial solution.
+    pub fn solve_modal_modes(
+        self,
+        stiffness: &DenseSymmetricMatrix,
+        mass: &DenseSymmetricMatrix,
+        coordinate_recovery_scale: Option<&[f64]>,
+        config: GeneralizedEigenConfig,
+    ) -> Result<ModalSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_9 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "modal generalized-eigen CPU solve requires ABI v1.9".to_owned(),
+            });
+        }
+        let scale = coordinate_recovery_scale.unwrap_or(&[]);
+        let (order, mode_count, shape_length) =
+            validate_generalized_eigen_dimensions(stiffness, mass, scale.len(), config)?;
+        let raw_config = generalized_eigen_config(config);
+        let raw_stiffness = dense_symmetric_matrix(stiffness)?;
+        let raw_mass = dense_symmetric_matrix(mass)?;
+        let scale_view = input_f64_view(scale, sys::SA_ABI_V1_9)?;
+        let mut output = ModalOutputArena::allocate(mode_count, shape_length)?;
+        let output_descriptor = output.descriptor()?;
+        let mut raw_result = modal_result_descriptor();
+        let solve = self.table.modal_solve.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: immutable input slices and every disjoint Rust-owned output remain live for
+        // this synchronous call. The C++ boundary retains no pointer and publishes outputs last.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &raw_stiffness,
+                &raw_mass,
+                &scale_view,
+                &output_descriptor,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        output.into_solution(raw_result, order, mode_count, shape_length)
+    }
+
+    /// Solve `K phi = lambda Kg phi` through caller-owned ABI v1.9 buffers.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable validation or numerical error without publishing a partial solution.
+    pub fn solve_linear_buckling(
+        self,
+        stiffness: &DenseSymmetricMatrix,
+        geometric_stiffness_per_unit_load: &DenseSymmetricMatrix,
+        coordinate_recovery_scale: Option<&[f64]>,
+        config: GeneralizedEigenConfig,
+    ) -> Result<BucklingSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_9 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "buckling generalized-eigen CPU solve requires ABI v1.9".to_owned(),
+            });
+        }
+        let scale = coordinate_recovery_scale.unwrap_or(&[]);
+        let (order, mode_count, shape_length) = validate_generalized_eigen_dimensions(
+            stiffness,
+            geometric_stiffness_per_unit_load,
+            scale.len(),
+            config,
+        )?;
+        let raw_config = generalized_eigen_config(config);
+        let raw_stiffness = dense_symmetric_matrix(stiffness)?;
+        let raw_geometric = dense_symmetric_matrix(geometric_stiffness_per_unit_load)?;
+        let scale_view = input_f64_view(scale, sys::SA_ABI_V1_9)?;
+        let mut output = BucklingOutputArena::allocate(mode_count, shape_length)?;
+        let output_descriptor = output.descriptor()?;
+        let mut raw_result = buckling_result_descriptor();
+        let solve = self.table.buckling_solve.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: immutable input slices and every disjoint Rust-owned output remain live for
+        // this synchronous call. The C++ boundary retains no pointer and publishes outputs last.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &raw_stiffness,
+                &raw_geometric,
+                &scale_view,
+                &output_descriptor,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        output.into_solution(raw_result, order, mode_count, shape_length)
+    }
 }
 
 fn validate_sparse_linear_dimensions(
@@ -1512,6 +1730,387 @@ fn sparse_solution_from_raw(
         execution_backend: raw.execution_backend,
         fallback_count: raw.fallback_count,
     })
+}
+
+fn validate_generalized_eigen_dimensions(
+    left: &DenseSymmetricMatrix,
+    right: &DenseSymmetricMatrix,
+    recovery_scale_length: usize,
+    config: GeneralizedEigenConfig,
+) -> Result<(usize, usize, usize), Error> {
+    let order = left.order;
+    let matrix_length = order.checked_mul(order).ok_or_else(|| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "generalized-eigen matrix dimensions overflow".to_owned(),
+    })?;
+    let mode_count = usize::try_from(config.mode_count).map_err(|_| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "generalized-eigen mode_count exceeds the Rust address space".to_owned(),
+    })?;
+    let shape_length = order.checked_mul(mode_count).ok_or_else(|| Error {
+        code: sys::SA_ERR_INVALID_ARGUMENT,
+        message: "generalized-eigen output dimensions overflow".to_owned(),
+    })?;
+    let tolerances = [
+        config.symmetry_relative_tolerance,
+        config.positive_semidefinite_relative_tolerance,
+        config.mode_relative_tolerance,
+        config.cluster_relative_tolerance,
+        config.residual_relative_tolerance,
+        config.orthogonality_tolerance,
+        config.eigensolver_relative_tolerance,
+    ];
+    let invalid = order == 0
+        || u64::try_from(order).map_or(true, |value| value > sys::SA_GENERALIZED_EIGEN_MAX_ORDER)
+        || right.order != order
+        || left.values.len() != matrix_length
+        || right.values.len() != matrix_length
+        || mode_count == 0
+        || mode_count > order
+        || config.maximum_sweeps == 0
+        || config.maximum_sweeps > sys::SA_GENERALIZED_EIGEN_MAX_SWEEPS
+        || (recovery_scale_length != 0 && recovery_scale_length != order)
+        || tolerances.iter().any(|value| !value.is_finite())
+        || tolerances[..6].iter().any(|value| *value < 0.0)
+        || config.eigensolver_relative_tolerance <= 0.0;
+    if invalid {
+        Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "generalized-eigen dimensions or configuration are invalid".to_owned(),
+        })
+    } else {
+        Ok((order, mode_count, shape_length))
+    }
+}
+
+fn generalized_eigen_config(config: GeneralizedEigenConfig) -> sys::SaGeneralizedEigenConfigV1 {
+    sys::SaGeneralizedEigenConfigV1 {
+        abi_version: sys::SA_ABI_V1_9,
+        struct_size: abi_size::<sys::SaGeneralizedEigenConfigV1>(),
+        mode_count: config.mode_count,
+        maximum_sweeps: config.maximum_sweeps,
+        flags: 0,
+        reserved_u32: 0,
+        symmetry_relative_tolerance: config.symmetry_relative_tolerance,
+        positive_semidefinite_relative_tolerance: config.positive_semidefinite_relative_tolerance,
+        mode_relative_tolerance: config.mode_relative_tolerance,
+        cluster_relative_tolerance: config.cluster_relative_tolerance,
+        residual_relative_tolerance: config.residual_relative_tolerance,
+        orthogonality_tolerance: config.orthogonality_tolerance,
+        eigensolver_relative_tolerance: config.eigensolver_relative_tolerance,
+        reserved: [0; 2],
+    }
+}
+
+fn dense_symmetric_matrix(
+    matrix: &DenseSymmetricMatrix,
+) -> Result<sys::SaDenseSymmetricMatrixV1, Error> {
+    Ok(sys::SaDenseSymmetricMatrixV1 {
+        abi_version: sys::SA_ABI_V1_9,
+        struct_size: abi_size::<sys::SaDenseSymmetricMatrixV1>(),
+        order: usize_to_u64(matrix.order)?,
+        values: input_f64_view(&matrix.values, sys::SA_ABI_V1_9)?,
+        reserved: [0; 2],
+    })
+}
+
+struct ModalOutputArena {
+    eigenvalue_rad2_per_s2: Vec<f64>,
+    omega_rad_per_s: Vec<f64>,
+    frequency_hz: Vec<f64>,
+    period_s: Vec<f64>,
+    mass_normalized_mode_shapes: Vec<f64>,
+    generalized_mass: Vec<f64>,
+    generalized_stiffness: Vec<f64>,
+    residual_relative_inf: Vec<f64>,
+}
+
+impl ModalOutputArena {
+    fn allocate(mode_count: usize, shape_length: usize) -> Result<Self, Error> {
+        Ok(Self {
+            eigenvalue_rad2_per_s2: allocate_f64_output(mode_count)?,
+            omega_rad_per_s: allocate_f64_output(mode_count)?,
+            frequency_hz: allocate_f64_output(mode_count)?,
+            period_s: allocate_f64_output(mode_count)?,
+            mass_normalized_mode_shapes: allocate_f64_output(shape_length)?,
+            generalized_mass: allocate_f64_output(mode_count)?,
+            generalized_stiffness: allocate_f64_output(mode_count)?,
+            residual_relative_inf: allocate_f64_output(mode_count)?,
+        })
+    }
+
+    fn descriptor(&mut self) -> Result<sys::SaModalOutputsV1, Error> {
+        Ok(sys::SaModalOutputsV1 {
+            abi_version: sys::SA_ABI_V1_9,
+            struct_size: abi_size::<sys::SaModalOutputsV1>(),
+            eigenvalue_rad2_per_s2: mutable_f64_view(
+                &mut self.eigenvalue_rad2_per_s2,
+                sys::SA_ABI_V1_9,
+            )?,
+            omega_rad_per_s: mutable_f64_view(&mut self.omega_rad_per_s, sys::SA_ABI_V1_9)?,
+            frequency_hz: mutable_f64_view(&mut self.frequency_hz, sys::SA_ABI_V1_9)?,
+            period_s: mutable_f64_view(&mut self.period_s, sys::SA_ABI_V1_9)?,
+            mass_normalized_mode_shapes: mutable_f64_view(
+                &mut self.mass_normalized_mode_shapes,
+                sys::SA_ABI_V1_9,
+            )?,
+            generalized_mass: mutable_f64_view(&mut self.generalized_mass, sys::SA_ABI_V1_9)?,
+            generalized_stiffness: mutable_f64_view(
+                &mut self.generalized_stiffness,
+                sys::SA_ABI_V1_9,
+            )?,
+            residual_relative_inf: mutable_f64_view(
+                &mut self.residual_relative_inf,
+                sys::SA_ABI_V1_9,
+            )?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn into_solution(
+        self,
+        raw: sys::SaModalResultV1,
+        order: usize,
+        mode_count: usize,
+        shape_length: usize,
+    ) -> Result<ModalSolution, Error> {
+        let metrics = [
+            raw.mass_orthogonality_error_inf,
+            raw.stiffness_diagonalization_error_inf,
+            raw.stiffness_relative_symmetry_error,
+            raw.mass_relative_symmetry_error,
+            raw.stiffness_minimum_eigenvalue,
+            raw.mass_minimum_eigenvalue,
+        ];
+        let arrays = [
+            self.eigenvalue_rad2_per_s2.as_slice(),
+            self.omega_rad_per_s.as_slice(),
+            self.frequency_hz.as_slice(),
+            self.period_s.as_slice(),
+            self.mass_normalized_mode_shapes.as_slice(),
+            self.generalized_mass.as_slice(),
+            self.generalized_stiffness.as_slice(),
+            self.residual_relative_inf.as_slice(),
+        ];
+        let valid = raw.abi_version == sys::SA_ABI_V1_9
+            && raw.struct_size == abi_size::<sys::SaModalResultV1>()
+            && raw.solver_status == sys::SA_SOLVER_CONVERGED
+            && raw.reserved_u32 == 0
+            && usize::try_from(raw.output_mode_count) == Ok(mode_count)
+            && usize::try_from(raw.output_shape_length) == Ok(shape_length)
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved == [0; 2]
+            && metrics.into_iter().all(f64::is_finite)
+            && arrays
+                .into_iter()
+                .all(|values| values.iter().all(|value| value.is_finite()));
+        if !valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native modal result violated the v1.9 output contract".to_owned(),
+            });
+        }
+        let mut modes = Vec::new();
+        modes
+            .try_reserve_exact(mode_count)
+            .map_err(|_| allocation_error("modal mode"))?;
+        for index in 0..mode_count {
+            let begin = index * order;
+            modes.push(ModalMode {
+                eigenvalue_rad2_per_s2: self.eigenvalue_rad2_per_s2[index],
+                omega_rad_per_s: self.omega_rad_per_s[index],
+                frequency_hz: self.frequency_hz[index],
+                period_s: self.period_s[index],
+                mass_normalized_shape: try_clone_slice(
+                    &self.mass_normalized_mode_shapes[begin..begin + order],
+                    "modal shape",
+                )?,
+                generalized_mass: self.generalized_mass[index],
+                generalized_stiffness: self.generalized_stiffness[index],
+                residual_relative_inf: self.residual_relative_inf[index],
+            });
+        }
+        Ok(ModalSolution {
+            modes,
+            rigid_mode_count: raw.rigid_mode_count,
+            eigensolver_sweeps: raw.eigensolver_sweeps,
+            mass_orthogonality_error_inf: raw.mass_orthogonality_error_inf,
+            stiffness_diagonalization_error_inf: raw.stiffness_diagonalization_error_inf,
+            stiffness_relative_symmetry_error: raw.stiffness_relative_symmetry_error,
+            mass_relative_symmetry_error: raw.mass_relative_symmetry_error,
+            stiffness_minimum_eigenvalue: raw.stiffness_minimum_eigenvalue,
+            mass_minimum_eigenvalue: raw.mass_minimum_eigenvalue,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        })
+    }
+}
+
+struct BucklingOutputArena {
+    load_factor: Vec<f64>,
+    stiffness_normalized_mode_shapes: Vec<f64>,
+    generalized_elastic_stiffness: Vec<f64>,
+    generalized_geometric_stiffness: Vec<f64>,
+    residual_relative_inf: Vec<f64>,
+}
+
+impl BucklingOutputArena {
+    fn allocate(mode_count: usize, shape_length: usize) -> Result<Self, Error> {
+        Ok(Self {
+            load_factor: allocate_f64_output(mode_count)?,
+            stiffness_normalized_mode_shapes: allocate_f64_output(shape_length)?,
+            generalized_elastic_stiffness: allocate_f64_output(mode_count)?,
+            generalized_geometric_stiffness: allocate_f64_output(mode_count)?,
+            residual_relative_inf: allocate_f64_output(mode_count)?,
+        })
+    }
+
+    fn descriptor(&mut self) -> Result<sys::SaBucklingOutputsV1, Error> {
+        Ok(sys::SaBucklingOutputsV1 {
+            abi_version: sys::SA_ABI_V1_9,
+            struct_size: abi_size::<sys::SaBucklingOutputsV1>(),
+            load_factor: mutable_f64_view(&mut self.load_factor, sys::SA_ABI_V1_9)?,
+            stiffness_normalized_mode_shapes: mutable_f64_view(
+                &mut self.stiffness_normalized_mode_shapes,
+                sys::SA_ABI_V1_9,
+            )?,
+            generalized_elastic_stiffness: mutable_f64_view(
+                &mut self.generalized_elastic_stiffness,
+                sys::SA_ABI_V1_9,
+            )?,
+            generalized_geometric_stiffness: mutable_f64_view(
+                &mut self.generalized_geometric_stiffness,
+                sys::SA_ABI_V1_9,
+            )?,
+            residual_relative_inf: mutable_f64_view(
+                &mut self.residual_relative_inf,
+                sys::SA_ABI_V1_9,
+            )?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn into_solution(
+        self,
+        raw: sys::SaBucklingResultV1,
+        order: usize,
+        mode_count: usize,
+        shape_length: usize,
+    ) -> Result<BucklingSolution, Error> {
+        let metrics = [
+            raw.critical_load_factor,
+            raw.stiffness_orthogonality_error_inf,
+            raw.geometric_diagonalization_error_inf,
+            raw.stiffness_relative_symmetry_error,
+            raw.geometric_stiffness_relative_symmetry_error,
+            raw.stiffness_minimum_eigenvalue,
+            raw.geometric_stiffness_minimum_eigenvalue,
+        ];
+        let arrays = [
+            self.load_factor.as_slice(),
+            self.stiffness_normalized_mode_shapes.as_slice(),
+            self.generalized_elastic_stiffness.as_slice(),
+            self.generalized_geometric_stiffness.as_slice(),
+            self.residual_relative_inf.as_slice(),
+        ];
+        let valid = raw.abi_version == sys::SA_ABI_V1_9
+            && raw.struct_size == abi_size::<sys::SaBucklingResultV1>()
+            && raw.solver_status == sys::SA_SOLVER_CONVERGED
+            && usize::try_from(raw.output_mode_count) == Ok(mode_count)
+            && usize::try_from(raw.output_shape_length) == Ok(shape_length)
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved == [0; 2]
+            && metrics.into_iter().all(f64::is_finite)
+            && arrays
+                .into_iter()
+                .all(|values| values.iter().all(|value| value.is_finite()));
+        if !valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native buckling result violated the v1.9 output contract".to_owned(),
+            });
+        }
+        let mut modes = Vec::new();
+        modes
+            .try_reserve_exact(mode_count)
+            .map_err(|_| allocation_error("buckling mode"))?;
+        for index in 0..mode_count {
+            let begin = index * order;
+            modes.push(BucklingMode {
+                load_factor: self.load_factor[index],
+                stiffness_normalized_shape: try_clone_slice(
+                    &self.stiffness_normalized_mode_shapes[begin..begin + order],
+                    "buckling shape",
+                )?,
+                generalized_elastic_stiffness: self.generalized_elastic_stiffness[index],
+                generalized_geometric_stiffness: self.generalized_geometric_stiffness[index],
+                residual_relative_inf: self.residual_relative_inf[index],
+            });
+        }
+        Ok(BucklingSolution {
+            modes,
+            finite_positive_eigenvalue_count: raw.finite_positive_eigenvalue_count,
+            geometric_stiffness_positive_rank: raw.geometric_stiffness_positive_rank,
+            eigensolver_sweeps: raw.eigensolver_sweeps,
+            critical_load_factor: raw.critical_load_factor,
+            stiffness_orthogonality_error_inf: raw.stiffness_orthogonality_error_inf,
+            geometric_diagonalization_error_inf: raw.geometric_diagonalization_error_inf,
+            stiffness_relative_symmetry_error: raw.stiffness_relative_symmetry_error,
+            geometric_stiffness_relative_symmetry_error: raw
+                .geometric_stiffness_relative_symmetry_error,
+            stiffness_minimum_eigenvalue: raw.stiffness_minimum_eigenvalue,
+            geometric_stiffness_minimum_eigenvalue: raw.geometric_stiffness_minimum_eigenvalue,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        })
+    }
+}
+
+fn modal_result_descriptor() -> sys::SaModalResultV1 {
+    sys::SaModalResultV1 {
+        abi_version: sys::SA_ABI_V1_9,
+        struct_size: abi_size::<sys::SaModalResultV1>(),
+        solver_status: u32::MAX,
+        rigid_mode_count: u32::MAX,
+        eigensolver_sweeps: u32::MAX,
+        reserved_u32: u32::MAX,
+        mass_orthogonality_error_inf: f64::NAN,
+        stiffness_diagonalization_error_inf: f64::NAN,
+        stiffness_relative_symmetry_error: f64::NAN,
+        mass_relative_symmetry_error: f64::NAN,
+        stiffness_minimum_eigenvalue: f64::NAN,
+        mass_minimum_eigenvalue: f64::NAN,
+        output_mode_count: 0,
+        output_shape_length: 0,
+        execution_backend: 0,
+        fallback_count: u32::MAX,
+        reserved: [u64::MAX; 2],
+    }
+}
+
+fn buckling_result_descriptor() -> sys::SaBucklingResultV1 {
+    sys::SaBucklingResultV1 {
+        abi_version: sys::SA_ABI_V1_9,
+        struct_size: abi_size::<sys::SaBucklingResultV1>(),
+        solver_status: u32::MAX,
+        finite_positive_eigenvalue_count: u32::MAX,
+        geometric_stiffness_positive_rank: u32::MAX,
+        eigensolver_sweeps: u32::MAX,
+        critical_load_factor: f64::NAN,
+        stiffness_orthogonality_error_inf: f64::NAN,
+        geometric_diagonalization_error_inf: f64::NAN,
+        stiffness_relative_symmetry_error: f64::NAN,
+        geometric_stiffness_relative_symmetry_error: f64::NAN,
+        stiffness_minimum_eigenvalue: f64::NAN,
+        geometric_stiffness_minimum_eigenvalue: f64::NAN,
+        output_mode_count: 0,
+        output_shape_length: 0,
+        execution_backend: 0,
+        fallback_count: u32::MAX,
+        reserved: [u64::MAX; 2],
+    }
 }
 
 /// RAII owner of one deep-copied immutable C++ `ModelIR` handle.
@@ -2027,8 +2626,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let base_valid = table.abi_version == requested
         && table.struct_size as usize >= size_of::<sys::SaApiV1>()
         && table.validate_buffer_view.is_some()
-        && table.capabilities & sys::SA_CAPABILITY_BUFFER_VALIDATION != 0
-        && table.reserved.iter().all(|value| value.is_null());
+        && table.capabilities & sys::SA_CAPABILITY_BUFFER_VALIDATION != 0;
     let model_slots = [
         table.model_ir_create.is_some(),
         table.model_ir_destroy.is_some(),
@@ -2048,10 +2646,19 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let reference_elements_absent = !reference_elements_slot
         && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU == 0;
     let sparse_linear_slot = table.sparse_linear_solve.is_some();
-    let sparse_linear_valid = if requested == sys::SA_ABI_V1_8 {
+    let sparse_linear_valid = if requested >= sys::SA_ABI_V1_8 {
         sparse_linear_slot && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
     } else {
         !sparse_linear_slot && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU == 0
+    };
+    let generalized_eigen_slots = table.modal_solve.is_some() && table.buckling_solve.is_some();
+    let generalized_eigen_valid = if requested >= sys::SA_ABI_V1_9 {
+        generalized_eigen_slots
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+    } else {
+        table.modal_solve.is_none()
+            && table.buckling_solve.is_none()
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU == 0
     };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
@@ -2178,10 +2785,30 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
             && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+    } else if requested == sys::SA_ABI_V1_9 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
     } else {
         false
     };
-    if base_valid && version_valid && sparse_linear_valid {
+    if base_valid && version_valid && sparse_linear_valid && generalized_eigen_valid {
         Ok(())
     } else {
         Err(invalid_table())
@@ -2481,7 +3108,8 @@ mod tests {
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
         SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7,
-        SA_ABI_V1_8, SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
+        SA_ABI_V1_8, SA_ABI_V1_9, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
         SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
         SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
@@ -2644,6 +3272,26 @@ mod tests {
                 | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
                 | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
                 | SA_CAPABILITY_SPARSE_LINEAR_CPU
+        );
+    }
+
+    #[test]
+    fn v1_9_table_consumes_both_generalized_eigen_slots() {
+        let api = Api::load_generalized_eigen().expect("v1.9 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_9);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_CPU
+                | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
         );
     }
 

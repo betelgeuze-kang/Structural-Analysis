@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the bounded native modal/buckling generalized-eigen C0/C1 chain."""
+"""Verify bounded generalized-eigen C0/C1 and ABI/Rust C3-candidate evidence."""
 
 from __future__ import annotations
 
@@ -42,6 +42,54 @@ REQUIRED_TOKENS = {
         "solve_dense_linear_buckling",
         "std::invalid_argument",
     ),
+    "native/cpp/include/structural/abi_v1.h": (
+        "SA_ABI_V1_9",
+        "SA_CAPABILITY_GENERALIZED_EIGEN_CPU",
+        "sa_modal_solve_fn_v1",
+        "sa_buckling_solve_fn_v1",
+    ),
+    "native/cpp/src/abi/abi_v1.cpp": (
+        "modal_solve_boundary",
+        "buckling_solve_boundary",
+        "validate_generalized_eigen_memory_contract",
+        "SA_CAPABILITY_GENERALIZED_EIGEN_CPU",
+    ),
+    "native/cpp/tests/abi/generalized_eigen_contract_test.cpp": (
+        "table_is_append_only",
+        "failures_are_atomic_and_taxonomized",
+        "omega_rad_per_s.data",
+        "immutable_operations_are_reentrant_and_bitwise_repeatable",
+    ),
+    "native/cpp/tests/fuzz/generalized_eigen_abi_fuzz.cpp": (
+        "LLVMFuzzerTestOneInput",
+        "modal_solve",
+        "buckling_solve",
+        "SA_ABI_V1_9",
+    ),
+    "native/crates/structural-ffi-sys/src/generalized_eigen.rs": (
+        "SaGeneralizedEigenConfigV1",
+        "SaModalSolveFnV1",
+        "SaBucklingSolveFnV1",
+        "rust_generalized_eigen_layout_matches_the_public_c_header_contract",
+    ),
+    "native/crates/structural-ffi/src/lib.rs": (
+        "load_generalized_eigen",
+        "solve_modal_modes",
+        "solve_linear_buckling",
+        "violated the v1.9 output contract",
+    ),
+    "native/crates/structural-ffi/tests/generalized_eigen_parity.rs": (
+        "v1_9_modal_and_buckling_results_cross_the_safe_boundary",
+        "stable_failure_taxonomy",
+        "bitwise_deterministic",
+        "SA_ERR_NONCONVERGENCE",
+    ),
+    "native/cpp/tests/package_consumer/main.c": (
+        "SA_ABI_V1_9",
+        "api.modal_solve",
+        "api.buckling_solve",
+        "SA_CAPABILITY_GENERALIZED_EIGEN_CPU",
+    ),
     "tests/test_native_generalized_eigen_python_parity.py": (
         "independent_scipy_oracle",
         "eigh",
@@ -78,7 +126,16 @@ def check_native_generalized_eigen(repo_root: Path = ROOT) -> dict[str, object]:
     if row.get("owner") != "structural_solver_cpu":
         blockers.append("generalized_eigen_capability_owner_invalid")
     claim = str(row.get("claim", ""))
-    for token in ("modal", "buckling", "SciPy", "HIP C2", "ABI C3", "C6"):
+    for token in (
+        "modal",
+        "buckling",
+        "SciPy",
+        "HIP C2",
+        "ABI v1.9",
+        "ABI C3",
+        "sequential gate remains C1",
+        "C6",
+    ):
         if token not in claim:
             blockers.append(f"generalized_eigen_capability_scope_token_missing:{token}")
 
@@ -103,8 +160,9 @@ def check_native_generalized_eigen(repo_root: Path = ROOT) -> dict[str, object]:
         "blockers": blockers,
         "claim_boundary": (
             "This proves one bounded dense symmetric modal/linear-buckling CPU family "
-            "through C1. Sparse extraction, HIP C2, ABI/Rust C3, restart C4, product "
-            "E2E C5 and C6 remain open."
+            "through C1 plus an append-only ABI v1.9 and safe Rust C3 implementation "
+            "candidate. Sparse extraction and HIP C2 remain open, so sequential promotion "
+            "remains C1; restart C4, product E2E C5 and C6 remain open."
         ),
     }
 

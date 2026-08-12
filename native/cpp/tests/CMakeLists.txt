@@ -93,6 +93,27 @@ set_tests_properties(
   PROPERTIES LABELS "abi;solver_cpu;sparse_linear"
 )
 
+add_executable(
+  structural_generalized_eigen_abi_tests
+  abi/generalized_eigen_contract_test.cpp
+)
+target_link_libraries(
+  structural_generalized_eigen_abi_tests
+  PRIVATE
+    structural_c_abi_v1
+    Threads::Threads
+)
+structural_set_warnings(structural_generalized_eigen_abi_tests)
+structural_enable_sanitizers(structural_generalized_eigen_abi_tests)
+add_test(
+  NAME structural_generalized_eigen_abi_tests
+  COMMAND structural_generalized_eigen_abi_tests
+)
+set_tests_properties(
+  structural_generalized_eigen_abi_tests
+  PROPERTIES LABELS "abi;solver_cpu;generalized_eigen;modal;buckling"
+)
+
 add_executable(structural_abi_link_smoke_c abi/link_smoke.c)
 target_link_libraries(structural_abi_link_smoke_c PRIVATE structural_c_abi_v1)
 structural_set_warnings(structural_abi_link_smoke_c)

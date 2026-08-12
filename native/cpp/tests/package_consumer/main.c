@@ -4,13 +4,13 @@
 
 int main(void) {
     const sa_api_request_v1 request = {
-        SA_ABI_V1_8,
+        SA_ABI_V1_9,
         (uint32_t)sizeof(sa_api_request_v1),
         0U,
         {0U, 0U, 0U},
     };
     sa_api_v1 api = {0};
-    api.abi_version = SA_ABI_V1_8;
+    api.abi_version = SA_ABI_V1_9;
     api.struct_size = (uint32_t)sizeof(sa_api_v1);
     if (sa_get_api_v1(&request, &api, NULL) != SA_OK
         || api.track_point_load_solve == NULL
@@ -18,11 +18,14 @@ int main(void) {
         || api.nonlinear_ndtha_solve == NULL
         || api.reference_element_evaluate == NULL
         || api.sparse_linear_solve == NULL
+        || api.modal_solve == NULL
+        || api.buckling_solve == NULL
         || (api.capabilities & SA_CAPABILITY_TRACK_POINT_LOAD_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_REFERENCE_ELEMENTS_CPU) == 0U
-        || (api.capabilities & SA_CAPABILITY_SPARSE_LINEAR_CPU) == 0U) {
+        || (api.capabilities & SA_CAPABILITY_SPARSE_LINEAR_CPU) == 0U
+        || (api.capabilities & SA_CAPABILITY_GENERALIZED_EIGEN_CPU) == 0U) {
         return 1;
     }
 
@@ -442,6 +445,178 @@ int main(void) {
         || sparse_result.fallback_count != 0U
         || sparse_solution[0] < 0.999999999999
         || sparse_solution[4] < 4.999999999999) {
+        return 1;
+    }
+
+    const double modal_stiffness_values[9] = {
+        0.0, 0.0, 0.0,
+        0.0, 4.0, 0.0,
+        0.0, 0.0, 9.0,
+    };
+    const double modal_mass_values[9] = {
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0,
+    };
+    const double buckling_stiffness_values[9] = {
+        6.0, 0.0, 0.0,
+        0.0, 8.0, 0.0,
+        0.0, 0.0, 10.0,
+    };
+    const double geometric_stiffness_values[9] = {
+        3.0, 0.0, 0.0,
+        0.0, 2.0, 0.0,
+        0.0, 0.0, 0.0,
+    };
+    const sa_buffer_view_v1 dense_input = {
+        SA_ABI_V1_9,
+        (uint32_t)sizeof(sa_buffer_view_v1),
+        modal_stiffness_values,
+        9U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_dense_symmetric_matrix_v1 modal_stiffness = {0};
+    modal_stiffness.abi_version = SA_ABI_V1_9;
+    modal_stiffness.struct_size = (uint32_t)sizeof(modal_stiffness);
+    modal_stiffness.order = 3U;
+    modal_stiffness.values = dense_input;
+    sa_dense_symmetric_matrix_v1 modal_mass = modal_stiffness;
+    modal_mass.values.data = modal_mass_values;
+    const sa_buffer_view_v1 no_recovery_scale = {
+        SA_ABI_V1_9,
+        (uint32_t)sizeof(sa_buffer_view_v1),
+        NULL,
+        0U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    const sa_generalized_eigen_config_v1 modal_config = {
+        SA_ABI_V1_9,
+        (uint32_t)sizeof(sa_generalized_eigen_config_v1),
+        2U,
+        128U,
+        0U,
+        0U,
+        1.0e-12,
+        1.0e-12,
+        1.0e-12,
+        1.0e-10,
+        1.0e-10,
+        1.0e-10,
+        1.0e-14,
+        {0U, 0U},
+    };
+    double modal_eigenvalue[2] = {0.0};
+    double modal_omega[2] = {0.0};
+    double modal_frequency[2] = {0.0};
+    double modal_period[2] = {0.0};
+    double modal_shapes[6] = {0.0};
+    double modal_generalized_mass[2] = {0.0};
+    double modal_generalized_stiffness[2] = {0.0};
+    double modal_residual[2] = {0.0};
+    const sa_mut_buffer_view_v1 modal_scalar_output = {
+        SA_ABI_V1_9,
+        (uint32_t)sizeof(sa_mut_buffer_view_v1),
+        modal_eigenvalue,
+        2U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_modal_outputs_v1 modal_outputs = {0};
+    modal_outputs.abi_version = SA_ABI_V1_9;
+    modal_outputs.struct_size = (uint32_t)sizeof(modal_outputs);
+    modal_outputs.eigenvalue_rad2_per_s2 = modal_scalar_output;
+    modal_outputs.omega_rad_per_s = modal_scalar_output;
+    modal_outputs.omega_rad_per_s.data = modal_omega;
+    modal_outputs.frequency_hz = modal_scalar_output;
+    modal_outputs.frequency_hz.data = modal_frequency;
+    modal_outputs.period_s = modal_scalar_output;
+    modal_outputs.period_s.data = modal_period;
+    modal_outputs.mass_normalized_mode_shapes = modal_scalar_output;
+    modal_outputs.mass_normalized_mode_shapes.data = modal_shapes;
+    modal_outputs.mass_normalized_mode_shapes.length = 6U;
+    modal_outputs.generalized_mass = modal_scalar_output;
+    modal_outputs.generalized_mass.data = modal_generalized_mass;
+    modal_outputs.generalized_stiffness = modal_scalar_output;
+    modal_outputs.generalized_stiffness.data = modal_generalized_stiffness;
+    modal_outputs.residual_relative_inf = modal_scalar_output;
+    modal_outputs.residual_relative_inf.data = modal_residual;
+    sa_modal_result_v1 modal_result = {0};
+    modal_result.abi_version = SA_ABI_V1_9;
+    modal_result.struct_size = (uint32_t)sizeof(modal_result);
+    if (api.modal_solve(
+            &modal_config,
+            &modal_stiffness,
+            &modal_mass,
+            &no_recovery_scale,
+            &modal_outputs,
+            &modal_result,
+            NULL)
+            != SA_OK
+        || modal_result.rigid_mode_count != 1U
+        || modal_result.output_mode_count != 2U
+        || modal_result.output_shape_length != 6U
+        || modal_result.execution_backend != SA_EXECUTION_BACKEND_CPU
+        || modal_result.fallback_count != 0U
+        || modal_eigenvalue[0] < 3.999999999999
+        || modal_eigenvalue[1] < 8.999999999999) {
+        return 1;
+    }
+
+    sa_dense_symmetric_matrix_v1 buckling_stiffness = modal_stiffness;
+    buckling_stiffness.values.data = buckling_stiffness_values;
+    sa_dense_symmetric_matrix_v1 geometric_stiffness = modal_stiffness;
+    geometric_stiffness.values.data = geometric_stiffness_values;
+    sa_generalized_eigen_config_v1 buckling_config = modal_config;
+    buckling_config.residual_relative_tolerance = 1.0e-9;
+    buckling_config.orthogonality_tolerance = 1.0e-8;
+    double buckling_load_factor[2] = {0.0};
+    double buckling_shapes[6] = {0.0};
+    double buckling_elastic[2] = {0.0};
+    double buckling_geometric[2] = {0.0};
+    double buckling_residual[2] = {0.0};
+    sa_buckling_outputs_v1 buckling_outputs = {0};
+    buckling_outputs.abi_version = SA_ABI_V1_9;
+    buckling_outputs.struct_size = (uint32_t)sizeof(buckling_outputs);
+    buckling_outputs.load_factor = modal_scalar_output;
+    buckling_outputs.load_factor.data = buckling_load_factor;
+    buckling_outputs.stiffness_normalized_mode_shapes = modal_scalar_output;
+    buckling_outputs.stiffness_normalized_mode_shapes.data = buckling_shapes;
+    buckling_outputs.stiffness_normalized_mode_shapes.length = 6U;
+    buckling_outputs.generalized_elastic_stiffness = modal_scalar_output;
+    buckling_outputs.generalized_elastic_stiffness.data = buckling_elastic;
+    buckling_outputs.generalized_geometric_stiffness = modal_scalar_output;
+    buckling_outputs.generalized_geometric_stiffness.data = buckling_geometric;
+    buckling_outputs.residual_relative_inf = modal_scalar_output;
+    buckling_outputs.residual_relative_inf.data = buckling_residual;
+    sa_buckling_result_v1 buckling_result = {0};
+    buckling_result.abi_version = SA_ABI_V1_9;
+    buckling_result.struct_size = (uint32_t)sizeof(buckling_result);
+    if (api.buckling_solve(
+            &buckling_config,
+            &buckling_stiffness,
+            &geometric_stiffness,
+            &no_recovery_scale,
+            &buckling_outputs,
+            &buckling_result,
+            NULL)
+            != SA_OK
+        || buckling_result.finite_positive_eigenvalue_count != 2U
+        || buckling_result.geometric_stiffness_positive_rank != 2U
+        || buckling_result.execution_backend != SA_EXECUTION_BACKEND_CPU
+        || buckling_result.fallback_count != 0U
+        || buckling_load_factor[0] < 1.999999999999
+        || buckling_load_factor[1] < 3.999999999999) {
         return 1;
     }
     return 0;

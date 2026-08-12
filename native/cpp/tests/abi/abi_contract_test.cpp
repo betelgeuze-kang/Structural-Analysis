@@ -85,9 +85,8 @@ struct ErrorStorage {
     CHECK(api.nonlinear_static_solve == nullptr);
     CHECK(api.nonlinear_ndtha_solve == nullptr);
     CHECK(api.sparse_linear_solve == nullptr);
-    for (const auto* reserved : api.reserved) {
-        CHECK(reserved == nullptr);
-    }
+    CHECK(api.modal_solve == nullptr);
+    CHECK(api.buckling_solve == nullptr);
 
     auto prefix_request = request();
     prefix_request.struct_size = SA_API_REQUEST_V1_MIN_SIZE;
@@ -106,7 +105,10 @@ struct ErrorStorage {
     auto invalid_request = request();
     invalid_request.abi_version = 0x0002'0000U;
     auto api = output_table();
-    std::memset(api.reserved, 0xA5, sizeof(api.reserved));
+    std::memset(
+        reinterpret_cast<std::byte*>(&api) + offsetof(sa_api_v1, modal_solve),
+        0xA5,
+        sizeof(api) - offsetof(sa_api_v1, modal_solve));
     std::array<std::byte, sizeof(sa_api_v1)> before {};
     std::memcpy(before.data(), &api, before.size());
     ErrorStorage error;

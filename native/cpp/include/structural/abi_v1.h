@@ -31,7 +31,8 @@ extern "C" {
 #define SA_ABI_V1_6 UINT32_C(0x00010006)
 #define SA_ABI_V1_7 UINT32_C(0x00010007)
 #define SA_ABI_V1_8 UINT32_C(0x00010008)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_8
+#define SA_ABI_V1_9 UINT32_C(0x00010009)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_9
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -84,12 +85,15 @@ enum {
 #define SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER UINT64_C(128)
 #define SA_CAPABILITY_REFERENCE_ELEMENTS_CPU UINT64_C(256)
 #define SA_CAPABILITY_SPARSE_LINEAR_CPU UINT64_C(512)
+#define SA_CAPABILITY_GENERALIZED_EIGEN_CPU UINT64_C(1024)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STEP_COUNT UINT32_C(1000000)
 #define SA_SPARSE_LINEAR_MAX_ORDER UINT64_C(1000000)
 #define SA_SPARSE_LINEAR_MAX_NONZEROS UINT64_C(100000000)
+#define SA_GENERALIZED_EIGEN_MAX_ORDER UINT64_C(128)
+#define SA_GENERALIZED_EIGEN_MAX_SWEEPS UINT32_C(4096)
 
 enum {
     SA_TRACK_SUPPORT_PINNED = 0,
@@ -503,6 +507,101 @@ typedef struct sa_sparse_linear_result_v1 {
     uint64_t reserved[2];
 } sa_sparse_linear_result_v1;
 
+/*
+ * v1.9 bounded dense symmetric modal and linear-buckling reference operations.
+ * Mode shapes are mode-major: mode k occupies [k * order, (k + 1) * order).
+ */
+typedef struct sa_dense_symmetric_matrix_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t order;
+    sa_buffer_view_v1 values;
+    uint64_t reserved[2];
+} sa_dense_symmetric_matrix_v1;
+
+typedef struct sa_generalized_eigen_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t mode_count;
+    uint32_t maximum_sweeps;
+    uint32_t flags;
+    uint32_t reserved_u32;
+    double symmetry_relative_tolerance;
+    double positive_semidefinite_relative_tolerance;
+    double mode_relative_tolerance;
+    double cluster_relative_tolerance;
+    double residual_relative_tolerance;
+    double orthogonality_tolerance;
+    double eigensolver_relative_tolerance;
+    uint64_t reserved[2];
+} sa_generalized_eigen_config_v1;
+
+typedef struct sa_modal_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 eigenvalue_rad2_per_s2;
+    sa_mut_buffer_view_v1 omega_rad_per_s;
+    sa_mut_buffer_view_v1 frequency_hz;
+    sa_mut_buffer_view_v1 period_s;
+    sa_mut_buffer_view_v1 mass_normalized_mode_shapes;
+    sa_mut_buffer_view_v1 generalized_mass;
+    sa_mut_buffer_view_v1 generalized_stiffness;
+    sa_mut_buffer_view_v1 residual_relative_inf;
+    uint64_t reserved[2];
+} sa_modal_outputs_v1;
+
+typedef struct sa_modal_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t solver_status;
+    uint32_t rigid_mode_count;
+    uint32_t eigensolver_sweeps;
+    uint32_t reserved_u32;
+    double mass_orthogonality_error_inf;
+    double stiffness_diagonalization_error_inf;
+    double stiffness_relative_symmetry_error;
+    double mass_relative_symmetry_error;
+    double stiffness_minimum_eigenvalue;
+    double mass_minimum_eigenvalue;
+    uint64_t output_mode_count;
+    uint64_t output_shape_length;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_modal_result_v1;
+
+typedef struct sa_buckling_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 load_factor;
+    sa_mut_buffer_view_v1 stiffness_normalized_mode_shapes;
+    sa_mut_buffer_view_v1 generalized_elastic_stiffness;
+    sa_mut_buffer_view_v1 generalized_geometric_stiffness;
+    sa_mut_buffer_view_v1 residual_relative_inf;
+    uint64_t reserved[2];
+} sa_buckling_outputs_v1;
+
+typedef struct sa_buckling_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t solver_status;
+    uint32_t finite_positive_eigenvalue_count;
+    uint32_t geometric_stiffness_positive_rank;
+    uint32_t eigensolver_sweeps;
+    double critical_load_factor;
+    double stiffness_orthogonality_error_inf;
+    double geometric_diagonalization_error_inf;
+    double stiffness_relative_symmetry_error;
+    double geometric_stiffness_relative_symmetry_error;
+    double stiffness_minimum_eigenvalue;
+    double geometric_stiffness_minimum_eigenvalue;
+    uint64_t output_mode_count;
+    uint64_t output_shape_length;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_buckling_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -594,6 +693,24 @@ typedef sa_status_code_v1 (*sa_sparse_linear_solve_fn_v1)(
     sa_sparse_linear_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_modal_solve_fn_v1)(
+    const sa_generalized_eigen_config_v1* config,
+    const sa_dense_symmetric_matrix_v1* stiffness,
+    const sa_dense_symmetric_matrix_v1* mass,
+    const sa_buffer_view_v1* coordinate_recovery_scale,
+    const sa_modal_outputs_v1* outputs,
+    sa_modal_result_v1* result,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_buckling_solve_fn_v1)(
+    const sa_generalized_eigen_config_v1* config,
+    const sa_dense_symmetric_matrix_v1* stiffness,
+    const sa_dense_symmetric_matrix_v1* geometric_stiffness_per_unit_load,
+    const sa_buffer_view_v1* coordinate_recovery_scale,
+    const sa_buckling_outputs_v1* outputs,
+    sa_buckling_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -612,7 +729,8 @@ typedef struct sa_api_v1 {
     sa_model_ir_ndtha_adapt_fn_v1 model_ir_ndtha_adapt;
     sa_reference_element_evaluate_fn_v1 reference_element_evaluate;
     sa_sparse_linear_solve_fn_v1 sparse_linear_solve;
-    const void* reserved[2];
+    sa_modal_solve_fn_v1 modal_solve;
+    sa_buckling_solve_fn_v1 buckling_solve;
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -624,7 +742,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_ndtha_adapt))
 #define SA_API_V1_6_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reference_element_evaluate))
 #define SA_API_V1_7_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_solve))
-#define SA_API_V1_8_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_8_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, modal_solve))
+#define SA_API_V1_9_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

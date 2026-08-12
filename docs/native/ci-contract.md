@@ -49,6 +49,9 @@ Jobs:
      response, failure atomicity and reentrant safe-wrapper execution
    - ABI v1.8 canonical-CSR U64/U32/F64 layouts, append-only table compatibility, fixed sparse
      numerical errors, failure atomicity and reentrant safe-wrapper execution
+   - ABI v1.9 dense modal/buckling layouts, append-only v1.8 null-slot compatibility, disjoint
+     failure-atomic caller-owned outputs, fixed numerical errors and reentrant safe-wrapper
+     execution
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -65,7 +68,8 @@ Jobs:
      parity, including asymmetric/malformed input rejection and fallback zero
    - bounded dense modal/linear-buckling C0 taxonomy and six-profile independent SciPy
      generalized-eigen C1 parity, including rigid/infinite-mode filtering, canonical repeated
-     eigenspaces, coordinate recovery and fallback zero
+     eigenspaces, coordinate recovery and fallback zero, plus ABI v1.9 and Rust C3-candidate
+     contract/fuzz coverage without sequential promotion past C1
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality

@@ -93,8 +93,11 @@ the protected HIP receipt closes C2; restart C4, product C5 and C6 remain open. 
 The same CPU library now also owns a bounded dense symmetric generalized-eigen reference path.
 It covers modal and linear-buckling systems through C1 with deterministic cyclic-Jacobi
 decomposition, rigid/infinite-mode filtering, coordinate-axis canonical bases and independent
-SciPy parity. It has no sparse/HIP implementation, ABI slot, Rust wrapper, restart or product
-E2E authority yet. See `docs/native/generalized-eigen-cpu-v1.md`.
+SciPy parity. ABI v1.9 consumes the two former table-reserved slots for failure-atomic modal and
+buckling calls, with a checked safe reentrant Rust wrapper and installed-package coverage. This is
+a C3 implementation candidate only: without HIP C2, sequential promotion remains C1, and sparse
+extraction, restart and product E2E authority remain open. See
+`docs/native/generalized-eigen-cpu-v1.md`.
 
 ## Rust
 
@@ -241,9 +244,10 @@ slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU oc
 v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
 uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter. ABI v1.7
 uses the next append-only slot at offset 112 for bounded CPU reference elements. ABI v1.8 adds
-canonical-CSR sparse PCG at offset 120; the current table is 144 bytes. Existing callers may
-continue to provide their older struct size, and v1.0-v1.7 requests expose every later slot as
-null.
+canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes the existing offsets 128 and 136 for
+bounded modal and linear-buckling CPU operations; the current table remains 144 bytes and has no
+reserved function-pointer slots left. Existing callers may continue to provide their older struct
+size, and v1.0-v1.8 requests expose every later slot as null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

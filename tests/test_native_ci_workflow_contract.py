@@ -99,7 +99,7 @@ def test_native_rust_gate_freezes_r3_product_and_legacy_runtime_exports() -> Non
     assert "structural_nonlinear_static_abi_tests" in workflow
     assert "structural_nonlinear_ndtha_abi_tests" in workflow
     assert "structural_reference_elements_abi_tests" in workflow
-    assert 'payload["abi_version"] == "0x00010008"' in workflow
+    assert 'payload["abi_version"] == "0x00010009"' in workflow
 
 
 def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> None:

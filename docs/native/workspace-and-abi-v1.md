@@ -115,8 +115,9 @@ sa_status_code_v1 sa_get_api_v1(
 ~~~
 
 sa_api_request_v1과 sa_api_v1의 첫 필드는 abi_version과 struct_size다. function
-table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail은 struct_size로
-무시한다. symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
+요청한 minor에 존재하지 않는 optional function slot은 null이어야 하며, future descriptor
+예약 필드는 0이어야 한다. caller가 모르는 tail은 struct_size로 무시한다.
+symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
 
 ### 5.2 Version encoding
 
@@ -135,6 +136,9 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
   recovery를 disjoint caller-owned buffer로 쓰는 bounded CPU reference element 한 slot을 추가한다.
 - v1.8은 0x00010008이며 canonical CSR, RHS/initial guess와 failure-atomic solution/result를
   전달하는 bounded sparse linear CPU operation 한 slot을 추가한다.
+- v1.9는 0x00010009이며 기존 144-byte table의 마지막 두 reserved slot을 bounded dense
+  modal과 linear-buckling CPU operation으로 소비한다. 이전 minor 요청에는 두 slot 모두
+  null이며 table 크기는 증가하지 않는다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -174,7 +178,7 @@ serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 ### 5.4 ModelIR v1.1 table extension
 
 과거 v1.0-v1.6 consumer가 제공하던 128-byte table, v1.7의 136-byte table과 첫 24-byte
-prefix는 계속 지원한다. 현재 header의 table은 v1.8 tail을 포함해 144 bytes이며 caller의
+prefix는 계속 지원한다. 현재 header의 table은 v1.9 modal/buckling tail을 포함해 144 bytes이며 caller의
 `struct_size`까지만 쓴다.
 v1.0 요청에는 이후 slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability
 bit를 제공한다.
