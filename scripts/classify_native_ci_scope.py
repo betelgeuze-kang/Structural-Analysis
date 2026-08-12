@@ -32,11 +32,16 @@ PROTECTED_EVIDENCE_PATHS = frozenset(
 
 NATIVE_CI_CONTROL_PATHS = frozenset(
     {
+        ".dockerignore",
+        ".github/workflows/deploy-pages.yml",
         ".github/workflows/native-pr-fast.yml",
         ".github/workflows/native-nightly-quality.yml",
+        "scripts/build_native_distribution.sh",
+        "scripts/build_onprem_deployment_packaging_manifest.py",
         "scripts/check_native_ci_contract.py",
         "scripts/check_native_capabilities.py",
         "scripts/check_native_checkpoint_restart.py",
+        "scripts/check_native_deployment_cutover.py",
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
         "scripts/check_native_external_comparison.py",
@@ -60,11 +65,13 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_structural_runtime_ffi_r3.py",
         "scripts/check_structural_runtime_ffi_r4.py",
         "scripts/classify_native_ci_scope.py",
+        "scripts/run_native_distribution_e2e.sh",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
         "tests/test_native_checkpoint_restart_contract.py",
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
+        "tests/test_native_deployment_cutover.py",
         "tests/test_native_external_comparison_contract.py",
         "tests/test_native_generalized_eigen_contract.py",
         "tests/test_native_generalized_eigen_hip_contract.py",
@@ -94,6 +101,12 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_structural_runtime_ffi_r4.py",
         "tests/test_structural_runtime_bridge_paths.py",
     }
+)
+
+NATIVE_DEPLOYMENT_PREFIXES = (
+    "deployment/onprem/",
+    "deployment/legacy-python-onprem/",
+    "deployment/legacy-react-pages/",
 )
 
 MODELIR_ORACLE_PREFIXES = (
@@ -195,8 +208,15 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         if path.startswith("native/")
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
         or path in LEGACY_REPLAY_COMPAT_PATHS
+        or _starts_with_any(path, NATIVE_DEPLOYMENT_PREFIXES)
+        or path in {".dockerignore", ".github/workflows/deploy-pages.yml"}
     ]
-    ci_control_paths = [path for path in paths if path in NATIVE_CI_CONTROL_PATHS]
+    ci_control_paths = [
+        path
+        for path in paths
+        if path in NATIVE_CI_CONTROL_PATHS
+        or _starts_with_any(path, NATIVE_DEPLOYMENT_PREFIXES)
+    ]
     protected_paths = [
         path
         for path in paths

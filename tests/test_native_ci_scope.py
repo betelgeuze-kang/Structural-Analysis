@@ -314,6 +314,26 @@ def test_legacy_replay_consumers_route_through_cpp_abi_runtime_and_hip_gates() -
     assert payload["applicable"] is True
 
 
+def test_native_deployment_cutover_routes_through_product_ci_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            ".github/workflows/deploy-pages.yml",
+            ".dockerignore",
+            "deployment/onprem/Containerfile",
+            "deployment/legacy-python-onprem/Containerfile",
+            "deployment/legacy-react-pages/deploy-pages.yml",
+            "native/decommission/production-deployment-v1.json",
+            "scripts/check_native_deployment_cutover.py",
+            "tests/test_native_deployment_cutover.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["protected_evidence"] is False
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [

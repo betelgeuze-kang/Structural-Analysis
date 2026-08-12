@@ -236,6 +236,18 @@ def test_native_distribution_capability_is_bounded_c5():
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 
+def test_native_deployment_capability_is_bounded_c5() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_deployment") is True
+    deployment = payload["capabilities"]["native_deployment"]
+    assert deployment["cutover_gate"] == "C5"
+    assert deployment["owner"] == "structural-workbench"
+    assert "cpu-only static native distribution" in deployment["claim"]
+    assert "no network namespace, listener, port, secret, Python, Node or React runtime" in deployment["claim"]
+    assert "outside .github/workflows" in deployment["claim"]
+    assert "final C6 remain open" in deployment["claim"]
+
+
 def test_implemented_capability_requires_a_cutover_gate() -> None:
     payload = {
         "schema_version": "native-capabilities.v1",

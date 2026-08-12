@@ -1,19 +1,19 @@
 {
-  "schema_version": "offline-license-file.example.v1",
-  "license_id": "OFFLINE-LICENSE-EXAMPLE",
+  "schema_version": "native-offline-license-file.example.v1",
+  "license_id": "NATIVE-OFFLINE-LICENSE-EXAMPLE",
   "tenant_id": "tenant-a",
-  "product": "structural-analysis-engineer-in-loop-assist",
-  "issued_at_utc": "2026-05-19T00:00:00Z",
-  "expires_at_utc": "2026-12-31T23:59:59Z",
+  "product": "structural-native-workbench",
+  "issued_at_utc": "2026-08-13T00:00:00Z",
+  "expires_at_utc": "2027-08-13T00:00:00Z",
   "features": [
-    "project_ops_api",
-    "runtime_packaging",
-    "viewer_report_export",
-    "support_bundle"
+    "native_workbench",
+    "native_distribution_lifecycle",
+    "native_report",
+    "mgt_import_health"
   ],
   "seat_limit": 5,
   "offline_grace_days": 30,
-  "public_key_id": "offline-license-public-key-placeholder",
+  "public_key_id": "native-offline-license-public-key-placeholder",
   "signature_alg": "ed25519-placeholder",
   "signature": "replace-with-production-signature"
 }

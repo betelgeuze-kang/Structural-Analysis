@@ -1,0 +1,19 @@
+{
+  "schema_version": "offline-license-file.example.v1",
+  "license_id": "OFFLINE-LICENSE-EXAMPLE",
+  "tenant_id": "tenant-a",
+  "product": "structural-analysis-engineer-in-loop-assist",
+  "issued_at_utc": "2026-05-19T00:00:00Z",
+  "expires_at_utc": "2026-12-31T23:59:59Z",
+  "features": [
+    "project_ops_api",
+    "runtime_packaging",
+    "viewer_report_export",
+    "support_bundle"
+  ],
+  "seat_limit": 5,
+  "offline_grace_days": 30,
+  "public_key_id": "offline-license-public-key-placeholder",
+  "signature_alg": "ed25519-placeholder",
+  "signature": "replace-with-production-signature"
+}

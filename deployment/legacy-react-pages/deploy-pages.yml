@@ -1,4 +1,4 @@
-name: Deploy Workbench (GitHub Pages)
+name: ARCHIVED - Deploy Workbench (GitHub Pages)
 
 # Builds the workbench (with the read-only evidence bundle and the structure
 # viewer) and deploys to GitHub Pages under the repository subpath.

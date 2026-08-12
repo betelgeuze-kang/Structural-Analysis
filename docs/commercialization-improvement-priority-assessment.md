@@ -86,7 +86,7 @@
 - `scripts/check_independent_product_readiness.py`가 auth/audit뿐 아니라 rate limit, request limit, audit digest, policy manifest, lifecycle policy를 production ops gate로 확인하도록 강화했다.
 - `scripts/build_project_ops_deployment_drill_manifest.py`를 추가해 secret rotation negative-start, gateway/rate policy, backup/restore, tenant delete, audit digest, incident response dry-run contract를 `project_ops_deployment_drill_manifest.json`으로 남기고 readiness/support bundle에 연결했다.
 - Runtime packaging manifest, runtime SBOM, native runtime artifact manifest, compatibility matrix, support bundle manifest를 생성하고 독립 제품 gate에 연결했다.
-- `deployment/onprem` packaging skeleton과 `scripts/build_onprem_deployment_packaging_manifest.py`를 추가해 Containerfile, compose example, offline license example, signed update package example을 on-prem/air-gapped skeleton contract로 검증한다.
+- 기존 Python packaging skeleton은 `deployment/legacy-python-onprem`으로 보존되고 `scripts/build_onprem_deployment_packaging_manifest.py`가 그 역사적 계약만 검증한다. 활성 `deployment/onprem`은 별도의 Rust/C++ CPU Workbench 컨테이너 계약이다.
 - `scripts/build_structure_viewer_performance_budget_manifest.py`를 추가해 wall/slab instancing, surface LOD, BVH picking, pick-candidate cap을 `static_contract` evidence로 남긴다.
 - `scripts/measure-structure-viewer-performance.mjs`와 `npm run verify:viewer-performance-probe`를 추가해 local browser canvas ready/FPS smoke를 full quality gate에 연결했다. 이 증거는 `live_performance_claim=false`이며 고객 하드웨어 FPS claim으로 쓰지 않는다.
 - `scripts/measure-structure-viewer-visual-regression.mjs`와 `npm run verify:viewer-visual-regression`을 추가해 render mode 및 plan/review/compare/evidence-ingest workflow-state local canvas signature baseline을 full quality gate에 연결했다. 이 증거는 `live_visual_claim=false`이며 pixel-perfect 고객 장비 렌더링 claim으로 쓰지 않는다.

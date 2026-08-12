@@ -1,7 +1,7 @@
 # Runtime Production Packaging Runbook
 
 - 기준일: 2026-05-18
-- 상태: runtime packaging gate ready, on-prem/air-gapped skeleton ready, live installer/container hardening still required
+- 상태: legacy packaging skeleton preserved, bounded native CPU container contract implemented, authorized image receipts still required
 - 목적: solver/runtime evidence를 독립 상용제품 배포 단위로 승격하기 위한 패키징, 호환성, 지원 번들 기준을 고정한다.
 
 ## Current Boundary
@@ -46,8 +46,8 @@ python3 scripts/check_independent_product_readiness.py --json
 | Mode | Current policy |
 | --- | --- |
 | SaaS | Requires production ops/security runbook and tenant isolation tests |
-| On-prem | Skeleton contract present in `deployment/onprem`; live image build/scan and site gateway evidence still required |
-| Air-gapped | Skeleton contract present with offline license and signed update package examples; production signing and import/export drill still required |
+| On-prem | Active native CPU Workbench contract is in `deployment/onprem`; authorized build/scan/sign/import evidence is still required |
+| Air-gapped | Native offline license/update examples are active; the prior Python skeleton is preserved in `deployment/legacy-python-onprem` for rollback evidence |
 
 ## Current Gate Status
 

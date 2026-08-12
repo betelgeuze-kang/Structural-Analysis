@@ -1,21 +1,24 @@
+name: structural-native-onprem
+
 services:
-  project-ops:
+  workbench:
     build:
       context: ../..
       dockerfile: deployment/onprem/Containerfile
-    image: structural-analysis/project-ops:0.1.0
+      args:
+        STRUCTURAL_RELEASE_ID: "${STRUCTURAL_RELEASE_ID:?set an immutable release ID}"
+        STRUCTURAL_SOURCE_SHA256: "${STRUCTURAL_SOURCE_SHA256:?set sha256:<64 lowercase hex>}"
+    image: "structural-analysis/native-workbench:${STRUCTURAL_RELEASE_ID:?set an immutable release ID}"
+    network_mode: none
     read_only: true
-    ports:
-      - "127.0.0.1:8080:8080"
-    environment:
-      PROJECT_OPS_AUTH_REQUIRED: "true"
-      PROJECT_OPS_JWT_HMAC_SECRET: "${PROJECT_OPS_JWT_HMAC_SECRET:?set from deployment secret store}"
-      PROJECT_OPS_TELEMETRY_ENABLED: "false"
+    stdin_open: true
+    tty: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
     volumes:
-      - project_ops_state:/opt/structural-analysis/implementation/phase1/release
-      - support_bundle:/opt/structural-analysis/implementation/phase1/release/support_bundle
-    restart: unless-stopped
-
-volumes:
-  project_ops_state:
-  support_bundle:
+      - "${STRUCTURAL_WORKSPACE_DIR:-./workspace}:/workspace"
+    command: ["--version"]

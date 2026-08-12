@@ -1,0 +1,14 @@
+.git
+.betelgeuze
+.env
+.env.*
+**/*.env
+**/*.env.*
+**/target
+build
+dist
+node_modules
+.venv
+venv
+implementation/phase1/release
+implementation/phase1/release_evidence

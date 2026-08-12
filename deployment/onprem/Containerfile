@@ -1,25 +1,54 @@
-FROM python:3.10-slim
+FROM rust:1.77-bookworm AS builder
 
-LABEL org.opencontainers.image.title="Structural Analysis On-Prem Control Plane"
-LABEL org.opencontainers.image.description="Reference on-prem packaging skeleton for project ops API and packaged evidence review."
+ARG STRUCTURAL_RELEASE_ID
+ARG STRUCTURAL_SOURCE_SHA256
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PROJECT_OPS_AUTH_REQUIRED=true
-ENV PROJECT_OPS_HOST=0.0.0.0
-ENV PROJECT_OPS_PORT=8080
+RUN test -n "$STRUCTURAL_RELEASE_ID" \
+    && printf '%s\n' "$STRUCTURAL_SOURCE_SHA256" \
+      | grep -Eq '^sha256:[0-9a-f]{64}$'
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates cmake g++ make \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /opt/structural-analysis
+WORKDIR /src
+COPY native ./native
+COPY implementation/phase1/mgt_hip_full_residual_ffi \
+  ./implementation/phase1/mgt_hip_full_residual_ffi
+COPY scripts/build_native_distribution.sh ./scripts/build_native_distribution.sh
 
-COPY pyproject.toml package.json ./
-COPY implementation ./implementation
-COPY scripts ./scripts
-COPY docs ./docs
-COPY src/structure-viewer ./src/structure-viewer
+RUN mkdir -p /tmp/structural-native-output \
+    && scripts/build_native_distribution.sh \
+      --backend cpu-only \
+      --linkage static \
+      --release-id "$STRUCTURAL_RELEASE_ID" \
+      --source-sha256 "$STRUCTURAL_SOURCE_SHA256" \
+      --output /tmp/structural-native-output/bundle
 
-RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir -e .
+FROM debian:bookworm-slim AS runtime
 
-EXPOSE 8080
+ARG STRUCTURAL_RELEASE_ID
+ARG STRUCTURAL_SOURCE_SHA256
 
-CMD ["python", "implementation/phase1/project_ops_api_service.py", "--serve", "--host", "0.0.0.0", "--port", "8080", "--auth-required"]
+LABEL org.opencontainers.image.title="Structural Native Workbench"
+LABEL org.opencontainers.image.description="CPU-only Rust/C++ structural Workbench batch runtime"
+LABEL org.opencontainers.image.version="$STRUCTURAL_RELEASE_ID"
+LABEL org.opencontainers.image.revision="$STRUCTURAL_SOURCE_SHA256"
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y ca-certificates libstdc++6 \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid 65532 structural \
+    && useradd --uid 65532 --gid 65532 --no-create-home \
+      --shell /usr/sbin/nologin structural \
+    && mkdir -p /opt/structural /workspace \
+    && chown 65532:65532 /workspace
+
+COPY --from=builder --chown=65532:65532 \
+  /tmp/structural-native-output/bundle/payload/ /opt/structural/
+
+ENV PATH="/opt/structural/bin:${PATH}"
+USER 65532:65532
+WORKDIR /workspace
+
+ENTRYPOINT ["/opt/structural/bin/structural-workbench"]
+CMD ["--version"]

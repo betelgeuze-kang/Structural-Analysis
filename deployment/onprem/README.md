@@ -1,31 +1,67 @@
-# On-Prem And Air-Gapped Packaging Contract
+# Native On-Prem And Air-Gapped Workbench
 
-This directory is a packaging skeleton for controlled on-prem and air-gapped product evaluation. It is not a live deployment claim.
+This directory is the active CPU-only on-prem container contract. The final image contains the
+installed Rust product binaries and statically linked C++20 core from the verified native
+distribution. Python, Node, React, package managers, compilers, and the legacy project-ops API are
+absent from the runtime image.
 
 ## Boundary
 
-- Container runtime is represented by `Containerfile` and `compose.example.yml`.
-- Offline entitlement is represented by `offline-license.example.json`.
-- Signed update transfer is represented by `signed-update-package.example.json`.
-- Runtime/package/support evidence is verified by `scripts/build_onprem_deployment_packaging_manifest.py`.
+- `structural-workbench` is the non-root image entrypoint.
+- The container has no listener, exposed port, secret, or network namespace.
+- `/workspace` is the only operator-mounted working directory; the root filesystem is read-only.
+- The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report terminal flow.
+- `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
+  distribution build candidate.
+- Native bundle install, update, crash recovery, and rollback remain owned and tested by
+  `structural-installer` and `scripts/run_native_distribution_e2e.sh`.
+
+## Build
+
+From the repository root, use an immutable release ID and a trusted lowercase source digest:
+
+```text
+docker build -f deployment/onprem/Containerfile \
+  --build-arg STRUCTURAL_RELEASE_ID=cpu-static-0.1.0 \
+  --build-arg STRUCTURAL_SOURCE_SHA256=sha256:<64-lowercase-hex> \
+  -t structural-analysis/native-workbench:cpu-static-0.1.0 .
+```
+
+The builder invokes `scripts/build_native_distribution.sh --backend cpu-only --linkage static`.
+ROCm packages are separate and require the approved dedicated device lane.
+For an air-gapped build, preload the Rust and Debian base images plus the configured Debian and
+Cargo dependency mirrors; the runtime image itself has no network dependency.
 
 ## Operator Flow
 
-1. Build or import the container image in a controlled build environment.
-2. Move the image, runtime artifacts, release manifest, offline license file, and signed update package through the approved artifact-transfer process.
-3. Set `PROJECT_OPS_JWT_HMAC_SECRET` from the deployment secret store before starting the service.
-4. Keep the deployment network isolated unless the site explicitly enables an outbound update mirror.
-5. Generate a support bundle after smoke testing and attach it to the deployment handoff packet.
+Mount input files and a writable session directory under `/workspace`, then execute either the
+stage-by-stage commands or the single bounded workflow:
 
-## Required Evidence
+```text
+structural-workbench import /workspace/model.json /workspace/request.json \
+  --external-result /workspace/external.json \
+  --source-artifact /workspace/source-artifact \
+  --workspace /workspace/session
+structural-workbench validate --workspace /workspace/session
+structural-workbench run --workspace /workspace/session --step-budget 1
+structural-workbench resume --workspace /workspace/session
+structural-workbench compare --workspace /workspace/session --require-pass
+structural-workbench report --workspace /workspace/session
+```
 
-- Container definition and compose example are present.
-- Offline license file has an explicit tenant, expiry, feature set, and signature placeholder.
-- Update package manifest has artifact hashes, signature placeholder, rollback policy, and no implicit network dependency.
-- Support bundle and runtime packaging manifests pass.
+With Compose, override the default `--version` command while retaining the entrypoint:
 
-## Remaining Live-Deployment Work
+```text
+STRUCTURAL_RELEASE_ID=cpu-static-0.1.0 \
+STRUCTURAL_SOURCE_SHA256=sha256:<64-lowercase-hex> \
+docker compose -f deployment/onprem/compose.example.yml run --rm workbench \
+  status --workspace /workspace/session
+```
 
-- Replace example license and update signatures with production signing keys.
-- Build and scan the image in the customer-approved environment.
-- Capture gateway/TLS/WAF, backup/restore, tenant-delete, and incident response drill evidence.
+## Claim Boundary
+
+The checked-in definition proves a Python/Node-free active deployment entrypoint and a fail-closed
+offline runtime shape. A customer-approved image build, vulnerability scan, signature, SBOM
+attestation, registry transfer, and site import drill require environment receipts. The archived
+React Pages and Python control-plane definitions remain rollback-only until their deprecation
+windows close; this cutover alone is not final C6 source or test deletion.

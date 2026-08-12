@@ -1,0 +1,32 @@
+{
+  "schema_version": "native-production-deployment-cutover.v1",
+  "status": "implemented",
+  "cutover_gate": "C5",
+  "owner": "structural-workbench",
+  "active_entrypoint": "deployment/onprem/Containerfile",
+  "active_runtime": "rust_cpp_cpu_only",
+  "active_runtime_interpreters": [],
+  "active_network_listener": false,
+  "retired_entrypoints": [
+    {
+      "path": "deployment/legacy-react-pages/deploy-pages.yml",
+      "kind": "react_node_pages",
+      "rollback_only": true,
+      "removal_allowed": false
+    },
+    {
+      "path": "deployment/legacy-python-onprem/Containerfile",
+      "kind": "python_project_ops_container",
+      "rollback_only": true,
+      "removal_allowed": false
+    }
+  ],
+  "c6_complete": false,
+  "remaining_c6_blockers": [
+    "legacy release publication and evidence workflows still execute Python or Node",
+    "React and TypeScript source remains as rollback and parity material",
+    "Python oracle and compatibility consumers remain",
+    "customer image build, scan, signing and offline import receipts are external"
+  ],
+  "claim_boundary": "This record cuts active Pages and Python on-prem runtime deployment authority over to the bounded native Workbench. It does not claim global Python/Node source deletion, general GUI parity, protected HIP C2, external publication, customer image receipts, or final C6."
+}

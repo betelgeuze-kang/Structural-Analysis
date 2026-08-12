@@ -82,3 +82,8 @@ The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to
 profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver
 execution, signing, cross-platform installers, remote update transport, release retention and
 final C6 removal remain open.
+
+The active on-prem image now consumes the CPU static bundle and exposes only the non-root native
+Workbench entrypoint. The prior Python image and React Pages workflow are archived outside their
+active deployment locations; see `docs/native/deployment-cutover-v1.md`. This is a deployment
+authority cutover, not a customer image receipt or global C6 decommission.

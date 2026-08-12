@@ -1,0 +1,25 @@
+{
+  "schema_version": "signed-update-package.example.v1",
+  "package_id": "structural-analysis-onprem-update-example",
+  "version": "0.1.0",
+  "created_at_utc": "2026-05-19T00:00:00Z",
+  "network_policy": "offline_transfer_only",
+  "artifacts": [
+    {
+      "label": "runtime_packaging_manifest",
+      "path": "implementation/phase1/production_runtime_packaging_manifest.json",
+      "sha256": "replace-with-built-artifact-sha256"
+    },
+    {
+      "label": "support_bundle_manifest",
+      "path": "implementation/phase1/support_bundle_manifest.json",
+      "sha256": "replace-with-built-artifact-sha256"
+    }
+  ],
+  "rollback": {
+    "policy": "restore_previous_signed_package_and_support_bundle_snapshot",
+    "requires_operator_approval": true
+  },
+  "signature_alg": "ed25519-placeholder",
+  "signature": "replace-with-production-signature"
+}

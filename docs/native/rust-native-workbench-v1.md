@@ -71,3 +71,7 @@ modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, 
 accessibility/localization, protected HIP C2 receipts, and final Python/Node C6 removal remain open.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
+
+The same terminal entrypoint now owns the active CPU-only on-prem container contract. React Pages
+and the Python project-ops image are rollback-only archives, but React/TypeScript source and broader
+GUI behavior remain open as stated above. See `docs/native/deployment-cutover-v1.md`.

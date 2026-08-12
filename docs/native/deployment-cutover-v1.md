@@ -1,0 +1,49 @@
+# Native deployment-authority cutover v1
+
+## Closed boundary
+
+The active on-prem product entrypoint is now `deployment/onprem/Containerfile`. Its builder creates
+the existing `cpu-only` + `static` distribution, and its final Debian runtime contains only the
+installed product payload plus required C/C++ runtime libraries. It executes
+`structural-workbench` as UID/GID 65532 with a read-only root and a single operator-mounted
+`/workspace`.
+
+The Compose contract adds no port, listener, secret, or network namespace. It drops every Linux
+capability, enables `no-new-privileges`, and mounts a no-exec temporary filesystem. The bounded
+Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no Python, Node,
+browser, React, package-manager, or external-renderer runtime lookup.
+
+The prior React Pages workflow moved out of `.github/workflows` to
+`deployment/legacy-react-pages`; it can no longer receive Pages write authority or be dispatched.
+The prior Python project-ops image moved to `deployment/legacy-python-onprem`. The old packaging
+manifest builder intentionally follows that archived path so historical skeleton evidence is not
+silently reinterpreted as native evidence.
+
+`scripts/check_native_deployment_cutover.py` fails if Pages deployment authority reappears, either
+archived entrypoint is missing, the active image acquires an interpreter or port, Compose loses its
+isolation, or the C5 cutover manifest promotes C6/removal prematurely. The check runs in the
+`native-pr-fast` dependency-boundary job.
+
+## Evidence and operator verification
+
+The repository-owned checks are:
+
+```text
+python3 scripts/check_native_deployment_cutover.py --json --fail-blocked
+python3 -m pytest -q tests/test_native_deployment_cutover.py
+scripts/build_native_distribution.sh --backend cpu-only --linkage static ...
+scripts/run_native_distribution_e2e.sh ...
+```
+
+Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
+its configured user/entrypoint/network contract, and execute `--version` without network access.
+An image build performed on an arbitrary development host is diagnostic evidence only. A customer
+or release-authorized build, vulnerability scan, SBOM attestation, signing, registry/offline
+transfer, import, and rollback drill must produce environment-bound receipts.
+
+## Open boundary
+
+This C5 cutover removes active React Pages and Python on-prem runtime deployment authority. It does
+not yet remove the active legacy release-publication workflow, Python oracle/test workflows,
+React/TypeScript source, Python compatibility consumers, or rollback packages. It also does not
+prove general GUI parity, live external-solver execution, approved-device HIP C2, or final C6.

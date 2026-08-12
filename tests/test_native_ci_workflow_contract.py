@@ -87,6 +87,17 @@ def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
     assert "--workspace --all-targets --locked" in workflow
 
 
+def test_native_dependency_boundary_requires_deployment_cutover_contract() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    dependency = workflow.split("  dependency-boundary:\n", 1)[1].split(
+        "  native-pr-fast:\n", 1
+    )[0]
+    assert "check_native_deployment_cutover.py --json --fail-blocked" in dependency
+
+
 def test_native_rust_gate_separates_r4_product_and_legacy_runtime_exports() -> None:
     workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"

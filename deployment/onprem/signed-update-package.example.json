@@ -1,23 +1,23 @@
 {
-  "schema_version": "signed-update-package.example.v1",
-  "package_id": "structural-analysis-onprem-update-example",
+  "schema_version": "native-signed-update-package.example.v1",
+  "package_id": "structural-native-cpu-static-update-example",
   "version": "0.1.0",
-  "created_at_utc": "2026-05-19T00:00:00Z",
+  "created_at_utc": "2026-08-13T00:00:00Z",
   "network_policy": "offline_transfer_only",
   "artifacts": [
     {
-      "label": "runtime_packaging_manifest",
-      "path": "implementation/phase1/production_runtime_packaging_manifest.json",
-      "sha256": "replace-with-built-artifact-sha256"
+      "label": "native_cpu_static_bundle",
+      "path": "bundles/structural-native-cpu-static",
+      "sha256": "replace-with-built-bundle-manifest-sha256"
     },
     {
-      "label": "support_bundle_manifest",
-      "path": "implementation/phase1/support_bundle_manifest.json",
-      "sha256": "replace-with-built-artifact-sha256"
+      "label": "native_distribution_e2e_receipt",
+      "path": "receipts/structural-native-cpu-static-e2e.json",
+      "sha256": "replace-with-verified-receipt-sha256"
     }
   ],
   "rollback": {
-    "policy": "restore_previous_signed_package_and_support_bundle_snapshot",
+    "policy": "structural-installer rollback to the verified previous immutable release",
     "requires_operator_approval": true
   },
   "signature_alg": "ed25519-placeholder",

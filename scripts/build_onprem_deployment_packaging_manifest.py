@@ -13,7 +13,7 @@ from typing import Any
 
 SCHEMA_VERSION = "onprem-deployment-packaging-manifest.v1"
 DEFAULT_MANIFEST_OUT = Path("implementation/phase1/onprem_deployment_packaging_manifest.json")
-DEFAULT_PACKAGING_DIR = Path("deployment/onprem")
+DEFAULT_PACKAGING_DIR = Path("deployment/legacy-python-onprem")
 DEFAULT_CONTAINERFILE = DEFAULT_PACKAGING_DIR / "Containerfile"
 DEFAULT_COMPOSE = DEFAULT_PACKAGING_DIR / "compose.example.yml"
 DEFAULT_OFFLINE_LICENSE = DEFAULT_PACKAGING_DIR / "offline-license.example.json"

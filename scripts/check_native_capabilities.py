@@ -42,6 +42,7 @@ EXPECTED_OWNERS = {
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
     "native_distribution": "structural-distribution",
+    "native_deployment": "structural-workbench",
     "hip_backend": "structural_c_abi_v1",
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})
