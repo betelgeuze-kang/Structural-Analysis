@@ -1,5 +1,9 @@
 # Commercialization Execution Roadmap
 
+> Historical Python/Node publication plan: its workflow and mutation helpers now live only under
+> `deployment/legacy-python-release-publication`. The commands in this section are rollback
+> documentation and no longer describe an active publication authority.
+
 이 문서는 이후 작업의 기준 순서표다.  
 상세 갭 정의는 `commercialization-gap-redteam-playbook.md`를 따르고, 본 문서는 실제 진행 순서와 개선 내용을 고정한다.
 

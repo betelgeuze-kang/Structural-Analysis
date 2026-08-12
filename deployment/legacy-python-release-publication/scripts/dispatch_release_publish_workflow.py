@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dispatch the GitHub release publication workflow safely.
+"""Archived rollback-only dispatcher for the retired release publication workflow.
 
 The command is intentionally dry-run friendly so operators can keep an
 automation-evidence JSON plan even on machines without a GitHub token.

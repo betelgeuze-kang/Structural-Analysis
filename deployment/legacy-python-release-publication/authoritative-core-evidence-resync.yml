@@ -1,4 +1,4 @@
-name: Authoritative Core Evidence Resync
+name: ARCHIVED - Authoritative Core Evidence Resync
 
 on:
   pull_request:

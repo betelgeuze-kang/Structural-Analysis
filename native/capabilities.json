@@ -179,7 +179,13 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-workbench",
-      "claim": "bounded CPU deployment-authority C5 cutover only: the active on-prem Containerfile builds the verified cpu-only static native distribution and runs structural-workbench as a non-root process with a read-only root, operator-mounted workspace, no network namespace, listener, port, secret, Python, Node or React runtime; a Docker-independent unprivileged Linux harness additionally runs the verified ModelIR/MGT flows as UID/GID 65532 with empty PATH, read-only root/payload, writable workspace and loopback-only networking, then the Rust installer emits and validates a self-hashed local_rootfs_diagnostic_c5 receipt that explicitly is not an OCI/customer image receipt; the former React Pages workflow is outside .github/workflows and the former Python project-ops container is rollback-only under deployment/legacy-python-onprem; customer image build/scan/sign/import receipts, legacy release publication, general GUI parity, approved HIP C2, deprecation completion, source/test deletion and final C6 remain open"
+      "claim": "bounded CPU deployment-authority C5 cutover only: the active on-prem Containerfile builds the verified cpu-only static native distribution and runs structural-workbench as a non-root process with a read-only root, operator-mounted workspace, no network namespace, listener, port, secret, Python, Node or React runtime; a Docker-independent unprivileged Linux harness additionally runs the verified ModelIR/MGT flows as UID/GID 65532 with empty PATH, read-only root/payload, writable workspace and loopback-only networking, then the Rust installer emits and validates a self-hashed local_rootfs_diagnostic_c5 receipt that explicitly is not an OCI/customer image receipt; the former React Pages workflow is outside .github/workflows and the former Python project-ops container is rollback-only under deployment/legacy-python-onprem; customer image build/scan/sign/import and native publication receipts, general GUI parity, approved HIP C2, deprecation completion, source/test deletion and final C6 remain open"
+    },
+    "native_automation_cutover": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-distribution",
+      "claim": "bounded production-automation C5 cutover only: the former Python evidence branch writer and Python/Node GitHub Release publisher are outside .github/workflows, their Python mutation helpers are outside scripts, and active contents:write and branch-push authority 0 is enforced fail-closed; the exact legacy workflows and helpers remain rollback-only deprecation material, while read-only Python oracle/technical receipt workflows, native signing/import publication, protected HIP C2, source/test deletion and final C6 remain open"
     },
     "hip_backend": {
       "status": "planned",

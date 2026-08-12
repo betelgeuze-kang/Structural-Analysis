@@ -248,6 +248,17 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "final C6 remain open" in deployment["claim"]
 
 
+def test_native_automation_cutover_is_bounded_c5() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_automation_cutover") is True
+    automation = payload["capabilities"]["native_automation_cutover"]
+    assert automation["cutover_gate"] == "C5"
+    assert automation["owner"] == "structural-distribution"
+    assert "contents:write and branch-push authority 0" in automation["claim"]
+    assert "rollback-only" in automation["claim"]
+    assert "final C6 remain open" in automation["claim"]
+
+
 def test_implemented_capability_requires_a_cutover_gate() -> None:
     payload = {
         "schema_version": "native-capabilities.v1",

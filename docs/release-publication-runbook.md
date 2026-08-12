@@ -1,5 +1,10 @@
 # Release Publication Runbook
 
+> Archived operational history: the Python/Node `Publish Release Assets` workflow, its dispatcher,
+> and its GitHub mutator moved to `deployment/legacy-python-release-publication`. They cannot be
+> dispatched from their archive and must not be executed in place. The commands below document the
+> former rollback process only; restoring it requires explicit human review and an approved commit.
+
 This runbook closes P0-1 release publication for `structural-analysis-artifacts-2026-04-26`.
 
 ## Current Published State

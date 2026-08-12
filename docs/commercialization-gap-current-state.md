@@ -1,5 +1,9 @@
 # 상용화 갭 현재상태 보고서
 
+> 기존 Python/Node GitHub Release writer는 `deployment/legacy-python-release-publication`으로
+> 보관됐으며 active dispatch나 repository-write 권한이 없다. 아래 publication 명령은 현재
+> 제품 경로가 아니라 rollback 이력이다.
+
 - 기준일: 2026-07-02
 - 목적: P0 hygiene inventory 이후, 상용 구조해석 툴(MIDAS/ETABS/SAP2000/OpenSees) 대비 현재 상태와 다음 작업 순서를 고정한다.
 

@@ -34,11 +34,14 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
     {
         ".dockerignore",
         ".github/workflows/deploy-pages.yml",
+        ".github/workflows/authoritative-core-evidence-resync.yml",
+        ".github/workflows/release-publish.yml",
         ".github/workflows/native-pr-fast.yml",
         ".github/workflows/native-nightly-quality.yml",
         "scripts/build_native_distribution.sh",
         "scripts/build_onprem_deployment_packaging_manifest.py",
         "scripts/check_native_ci_contract.py",
+        "scripts/check_native_automation_cutover.py",
         "scripts/check_native_capabilities.py",
         "scripts/check_native_checkpoint_restart.py",
         "scripts/check_native_deployment_cutover.py",
@@ -66,10 +69,13 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_structural_runtime_ffi_r4.py",
         "scripts/classify_native_ci_scope.py",
         "scripts/run_native_distribution_e2e.sh",
+        "scripts/dispatch_release_publish_workflow.py",
+        "scripts/publish_github_release_assets.py",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
         "tests/test_native_checkpoint_restart_contract.py",
         "tests/test_native_ci_workflow_contract.py",
+        "tests/test_native_automation_cutover.py",
         "tests/test_native_dependency_license.py",
         "tests/test_native_deployment_cutover.py",
         "tests/test_native_external_comparison_contract.py",
@@ -107,6 +113,7 @@ NATIVE_DEPLOYMENT_PREFIXES = (
     "deployment/onprem/",
     "deployment/legacy-python-onprem/",
     "deployment/legacy-react-pages/",
+    "deployment/legacy-python-release-publication/",
 )
 
 MODELIR_ORACLE_PREFIXES = (

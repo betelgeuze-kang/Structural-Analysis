@@ -189,7 +189,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
             "can no longer receive Pages write authority",
             "release-authorized build",
-            "not yet remove the active legacy release-publication workflow",
+            "legacy release publication and branch-writing workflows are archived",
             "final C6",
         ),
         blockers=blockers,

@@ -334,6 +334,26 @@ def test_native_deployment_cutover_routes_through_product_ci_gates() -> None:
     assert payload["protected_evidence"] is False
 
 
+def test_native_automation_cutover_routes_retired_and_archive_paths_through_ci() -> None:
+    payload = scope.classify_paths(
+        [
+            ".github/workflows/authoritative-core-evidence-resync.yml",
+            ".github/workflows/release-publish.yml",
+            "scripts/dispatch_release_publish_workflow.py",
+            "scripts/publish_github_release_assets.py",
+            "deployment/legacy-python-release-publication/release-publish.yml",
+            "native/decommission/production-automation-v1.json",
+            "scripts/check_native_automation_cutover.py",
+            "tests/test_native_automation_cutover.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["protected_evidence"] is False
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [

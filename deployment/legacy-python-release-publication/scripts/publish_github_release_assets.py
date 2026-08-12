@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Publish manifest-listed assets to a GitHub Release.
+"""Archived rollback-only publisher for manifest-listed GitHub Release assets.
 
 The script deliberately uploads only the assets accepted by
 prepare_release_upload_plan.py. It never wildcard-uploads a release directory.
@@ -17,9 +17,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen as urllib_urlopen
 
-SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+REPOSITORY_SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+if str(REPOSITORY_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_SCRIPTS))
 
 from prepare_release_upload_plan import DEFAULT_MANIFEST, prepare_release_upload_plan  # noqa: E402
 

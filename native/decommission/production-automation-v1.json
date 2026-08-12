@@ -1,0 +1,44 @@
+{
+  "schema_version": "native-production-automation-cutover.v1",
+  "status": "implemented",
+  "cutover_gate": "C5",
+  "owner": "structural-distribution",
+  "active_contents_write_workflows": [],
+  "active_branch_push_workflows": [],
+  "active_python_release_mutators": [],
+  "retired_entrypoints": [
+    {
+      "path": "deployment/legacy-python-release-publication/authoritative-core-evidence-resync.yml",
+      "kind": "python_branch_writer",
+      "rollback_only": true,
+      "removal_allowed": false
+    },
+    {
+      "path": "deployment/legacy-python-release-publication/release-publish.yml",
+      "kind": "python_node_release_publisher",
+      "rollback_only": true,
+      "removal_allowed": false
+    },
+    {
+      "path": "deployment/legacy-python-release-publication/scripts/dispatch_release_publish_workflow.py",
+      "kind": "python_workflow_dispatcher",
+      "rollback_only": true,
+      "removal_allowed": false
+    },
+    {
+      "path": "deployment/legacy-python-release-publication/scripts/publish_github_release_assets.py",
+      "kind": "python_release_mutator",
+      "rollback_only": true,
+      "removal_allowed": false
+    }
+  ],
+  "technical_receipt_workflows_retained": true,
+  "c6_complete": false,
+  "remaining_c6_blockers": [
+    "Python oracle and signed technical receipt workflows remain active without repository write authority",
+    "React and TypeScript source remains rollback and parity material",
+    "Python compatibility consumers remain",
+    "native publication signing and customer import receipts are external"
+  ],
+  "claim_boundary": "This C5 record removes active Python/Node GitHub Release mutation and Python evidence branch-writing authority. It does not claim that read-only oracle/technical workflows, Python/Node source, protected HIP C2, publication signing, customer import, or final C6 are complete."
+}

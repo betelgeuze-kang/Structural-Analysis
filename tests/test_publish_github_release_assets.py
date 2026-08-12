@@ -10,7 +10,10 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "publish_github_release_assets.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "deployment/legacy-python-release-publication/scripts/publish_github_release_assets.py"
+)
 SPEC = importlib.util.spec_from_file_location("publish_github_release_assets", SCRIPT_PATH)
 assert SPEC is not None
 publish_github_release_assets = importlib.util.module_from_spec(SPEC)

@@ -347,6 +347,7 @@ jobs:
           python3 scripts/check_native_capabilities.py --json --fail-invalid
           python3 scripts/check_native_dependency_boundary.py --json --fail-blocked
           python3 scripts/check_native_deployment_cutover.py --json --fail-blocked
+          python3 scripts/check_native_automation_cutover.py --json --fail-blocked
 
       - name: Check locked dependency sources and SPDX policy
         run: python3 scripts/check_native_dependency_licenses.py --json --fail-blocked

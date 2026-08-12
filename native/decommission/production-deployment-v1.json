@@ -26,7 +26,7 @@
   ],
   "c6_complete": false,
   "remaining_c6_blockers": [
-    "legacy release publication and evidence workflows still execute Python or Node",
+    "Python oracle and signed technical receipt workflows remain active without repository write authority",
     "React and TypeScript source remains as rollback and parity material",
     "Python oracle and compatibility consumers remain",
     "customer image build, scan, signing and offline import receipts are external"

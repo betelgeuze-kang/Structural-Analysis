@@ -52,7 +52,9 @@ transfer, import, and rollback drill must produce environment-bound receipts.
 
 ## Open boundary
 
-This C5 cutover removes active React Pages and Python on-prem runtime deployment authority. It does
-not yet remove the active legacy release-publication workflow, Python oracle/test workflows,
+This C5 cutover removes active React Pages and Python on-prem runtime deployment authority. The
+legacy release publication and branch-writing workflows are archived with their Python mutation
+helpers under `deployment/legacy-python-release-publication`; active `contents: write` and branch
+push authority are now zero. It does not yet remove Python oracle/technical receipt workflows,
 React/TypeScript source, Python compatibility consumers, or rollback packages. It also does not
 prove general GUI parity, live external-solver execution, approved-device HIP C2, or final C6.

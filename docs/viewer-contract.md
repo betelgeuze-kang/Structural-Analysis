@@ -1,5 +1,9 @@
 # Viewer Contract
 
+> The Python/Node release publisher described below is archived under
+> `deployment/legacy-python-release-publication`; it is retained only as rollback/deprecation
+> material and cannot be dispatched from the active workflow directory.
+
 This repository keeps two viewer surfaces intentionally separate: repo-local source viewers for development and QA, and generated release viewers for delivery.
 
 ## Source Viewers

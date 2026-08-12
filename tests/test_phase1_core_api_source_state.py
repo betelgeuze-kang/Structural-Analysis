@@ -131,7 +131,7 @@ def test_source_state_rejects_unrelated_history(tmp_path: Path) -> None:
 def test_resync_workflow_invokes_exact_head_verifier() -> None:
     workflow = (
         Path(__file__).resolve().parents[1]
-        / ".github/workflows/authoritative-core-evidence-resync.yml"
+        / "deployment/legacy-python-release-publication/authoritative-core-evidence-resync.yml"
     ).read_text(encoding="utf-8")
 
     assert "scripts/verify_phase1_evidence_source_state.py" in workflow

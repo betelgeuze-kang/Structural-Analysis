@@ -9,7 +9,10 @@ from urllib.error import HTTPError
 import pytest
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "dispatch_release_publish_workflow.py"
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "deployment/legacy-python-release-publication/scripts/dispatch_release_publish_workflow.py"
+)
 SPEC = importlib.util.spec_from_file_location("dispatch_release_publish_workflow", SCRIPT_PATH)
 assert SPEC is not None
 dispatch_release_publish_workflow = importlib.util.module_from_spec(SPEC)

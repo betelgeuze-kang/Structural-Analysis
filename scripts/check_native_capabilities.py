@@ -43,6 +43,7 @@ EXPECTED_OWNERS = {
     "native_workbench": "structural-workbench",
     "native_distribution": "structural-distribution",
     "native_deployment": "structural-workbench",
+    "native_automation_cutover": "structural-distribution",
     "hip_backend": "structural_c_abi_v1",
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})

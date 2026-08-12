@@ -4,12 +4,13 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-WORKFLOW = ROOT / ".github/workflows/authoritative-core-evidence-resync.yml"
+WORKFLOW = ROOT / "deployment/legacy-python-release-publication/authoritative-core-evidence-resync.yml"
 
 
 def test_authoritative_evidence_has_one_branch_writer() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
+    assert "ARCHIVED - Authoritative Core Evidence Resync" in text
     assert "pull_request:" in text
     assert "github.head_ref == 'evidence/authoritative-core-resync'" in text
     assert "push:" not in text

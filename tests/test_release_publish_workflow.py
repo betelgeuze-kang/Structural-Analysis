@@ -3,7 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 
-WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release-publish.yml"
+WORKFLOW = (
+    Path(__file__).resolve().parent.parent
+    / "deployment/legacy-python-release-publication/release-publish.yml"
+)
 WORKFLOWS_DIR = WORKFLOW.parent
 
 
