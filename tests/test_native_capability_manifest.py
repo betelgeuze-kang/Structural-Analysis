@@ -233,6 +233,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "static/shared" in distribution["claim"]
     assert "install/update/rollback" in distribution["claim"]
     assert "Python/Node lookup 0" in distribution["claim"]
+    assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False

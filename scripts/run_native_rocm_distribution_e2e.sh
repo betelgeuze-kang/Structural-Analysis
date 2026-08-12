@@ -85,6 +85,10 @@ if ldd "$active/bin/structural-cli" | grep -Eiq 'python|node'; then
   echo "installed ROCm CLI has a forbidden Python or Node runtime dependency" >&2
   exit 1
 fi
+if ldd "$active/lib/libstructural_c_abi_v1.so" | grep -Fq 'not found'; then
+  echo "ROCm product library has an unresolved runtime dependency" >&2
+  exit 1
+fi
 if ! ldd "$active/lib/libstructural_c_abi_v1.so" | grep -Eiq 'hip|hsa|rocm'; then
   echo "ROCm product package is not linked to a ROCm/HIP runtime" >&2
   exit 1

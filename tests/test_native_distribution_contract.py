@@ -175,6 +175,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     ffi = FFI_BUILD.read_text(encoding="utf-8")
     assert 'STRUCTURAL_ENABLE_HIP="$enable_hip"' in build
     assert "ROCm distribution currently requires shared linkage" in build
+    assert "rocm_runtime_rpath" in build
+    assert "libamdhip64.so" in build
+    assert '"-DCMAKE_INSTALL_RPATH=$install_rpath"' in build
     assert "STRUCTURAL_NATIVE_PREFIX" in build
     assert "cargo build --manifest-path native/Cargo.toml --release --locked" in build
     assert "PATH=\"$empty_path\"" in e2e
@@ -189,6 +192,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "STRUCTURAL_NATIVE_PREFIX" in ffi
     assert "rustc-link-lib=dylib=structural_c_abi_v1" in ffi
     assert "native-hip-approved" in rocm_e2e
+    assert "ROCm product library has an unresolved runtime dependency" in rocm_e2e
     assert "structural_native_backend_package_consumer\" hip" in rocm_e2e
     assert "workflow-mgt" in rocm_e2e
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e

@@ -17,6 +17,12 @@ The separate `rocm` + `shared` profile is a build candidate until it runs inside
 `native-hip-approved` lane. The lane must select HIP through ABI v1.12 from the installed product
 library, prove CPU/HIP FP64 parity, resident operator buffers, deterministic repeat and fallback 0,
 and bind the installed-backend receipt to the source/device-library-bound full-residual C2 receipt.
+The ROCm runtime itself is a declared host prerequisite rather than copied into the bundle. The
+product ABI records `$ORIGIN` plus the configured `STRUCTURAL_ROCM_ROOT/lib` directory in its
+install RUNPATH, so the three installed Rust binaries remain executable under the lane's empty
+environment. Bundle construction fails if that root has no `libamdhip64.so`; the approved E2E also
+fails on any unresolved runtime dependency. This runtime binding is build/package evidence only,
+not device execution or C2 authority.
 
 ## Bundle contract
 

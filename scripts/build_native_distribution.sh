@@ -78,6 +78,7 @@ if [[ "$linkage" == "shared" ]]; then
 else
   build_shared=OFF
 fi
+install_rpath='$ORIGIN'
 if [[ "$backend" == "rocm" ]]; then
   enable_hip=ON
   for required_name in CMAKE_HIP_COMPILER CMAKE_HIP_ARCHITECTURES STRUCTURAL_ROCM_ROOT STRUCTURAL_HIP_DEVICE_LIB_PATH; do
@@ -86,6 +87,25 @@ if [[ "$backend" == "rocm" ]]; then
       exit 1
     fi
   done
+  if [[ "$STRUCTURAL_ROCM_ROOT" == *';'* || "$STRUCTURAL_ROCM_ROOT" == *$'\n'* ]]; then
+    echo "STRUCTURAL_ROCM_ROOT cannot contain CMake list or newline separators" >&2
+    exit 1
+  fi
+  rocm_runtime_rpath=""
+  for candidate in "$STRUCTURAL_ROCM_ROOT/lib" "$STRUCTURAL_ROCM_ROOT/lib64"; do
+    if [[ -d "$candidate" && -f "$candidate/libamdhip64.so" ]]; then
+      if [[ -z "$rocm_runtime_rpath" ]]; then
+        rocm_runtime_rpath="$candidate"
+      else
+        rocm_runtime_rpath="$rocm_runtime_rpath;$candidate"
+      fi
+    fi
+  done
+  if [[ -z "$rocm_runtime_rpath" ]]; then
+    echo "STRUCTURAL_ROCM_ROOT has no runtime library directory containing libamdhip64.so" >&2
+    exit 1
+  fi
+  install_rpath="$install_rpath;$rocm_runtime_rpath"
 else
   enable_hip=OFF
 fi
@@ -95,7 +115,7 @@ cmake_arguments=(
   -B "$cmake_build"
   -DCMAKE_BUILD_TYPE=Release
   -DBUILD_SHARED_LIBS="$build_shared"
-  '-DCMAKE_INSTALL_RPATH=$ORIGIN'
+  "-DCMAKE_INSTALL_RPATH=$install_rpath"
   -DSTRUCTURAL_BUILD_TESTS=OFF
   -DSTRUCTURAL_BUILD_FUZZERS=OFF
   -DSTRUCTURAL_ENABLE_HIP="$enable_hip"

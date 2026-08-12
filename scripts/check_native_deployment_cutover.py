@@ -280,7 +280,15 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     rootfs_e2e = _text(
         root, Path("scripts/run_native_rootfs_isolation_e2e.sh"), blockers
     )
-    for token in ("structural-workbench", "structural-installer", "cpu-only", "static"):
+    for token in (
+        "structural-workbench",
+        "structural-installer",
+        "cpu-only",
+        "static",
+        "rocm_runtime_rpath",
+        "libamdhip64.so",
+        "-DCMAKE_INSTALL_RPATH=$install_rpath",
+    ):
         if token not in build_distribution:
             blockers.append(f"native_distribution_build_token_missing:{token}")
     for token in (
