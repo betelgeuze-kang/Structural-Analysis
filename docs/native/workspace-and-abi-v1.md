@@ -146,6 +146,10 @@ symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
   nonlinear-static begin/advance operation은 complete caller-owned Newton iteration state와
   displacement vector를 사용한다. v1.0-v1.10 요청에는 두 slot과 restart capability bit가
   모두 null/clear다.
+- v1.12는 0x0001000c이며 v1.11의 176-byte prefix를 보존하고 offset 176에 단일
+  `backend_get_api`를 append한다. CPU-only library는 CPU full-residual table을 제공하고 HIP
+  요청을 `SA_ERR_BACKEND_UNAVAILABLE`로 닫는다. HIP build는 explicit device 0만 선택하며
+  fallback 없이 resident operator/evaluation telemetry를 게시한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.

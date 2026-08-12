@@ -1,6 +1,12 @@
 //! Safe entry-table and immutable `ModelIR` ownership for C ABI v1.
 
+mod backend;
 mod descriptor;
+
+pub use backend::{
+    BackendApi, ExecutionBackend, FullResidualContext, FullResidualEvaluation,
+    FullResidualOperator, FullResidualStatus,
+};
 
 use core::ffi::{c_char, c_void};
 use core::fmt;
@@ -3534,6 +3540,12 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.nonlinear_static_advance.is_none()
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU == 0
     };
+    let backend_selector_slot = table.backend_get_api.is_some();
+    let backend_selector_valid = if requested >= sys::SA_ABI_V1_12 {
+        backend_selector_slot && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
+    } else {
+        !backend_selector_slot && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR == 0
+    };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
@@ -3725,6 +3737,32 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
+    } else if requested == sys::SA_ABI_V1_12 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && sparse_restart_slots
+            && nonlinear_static_restart_slots
+            && backend_selector_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
     } else {
         false
     };
@@ -3734,6 +3772,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         && generalized_eigen_valid
         && sparse_restart_valid
         && nonlinear_static_restart_valid
+        && backend_selector_valid
     {
         Ok(())
     } else {
@@ -4225,21 +4264,22 @@ fn error_from_buffer(code: sys::SaStatusCodeV1, storage: &[c_char]) -> Error {
 
 #[cfg(test)]
 mod tests {
-    use super::Api;
+    use super::{Api, ExecutionBackend, FullResidualOperator};
     use std::path::{Path, PathBuf};
     use std::sync::Arc;
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4,
-        SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9,
-        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_GENERALIZED_EIGEN_CPU,
-        SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
-        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_CAPABILITY_NONLINEAR_NDTHA_CPU,
-        SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU, SA_CAPABILITY_NONLINEAR_STATIC_CPU,
-        SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
-        SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU,
-        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_12, SA_ABI_V1_2, SA_ABI_V1_3,
+        SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9,
+        SA_CAPABILITY_BACKEND_SELECTOR, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
+        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
+        SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
+        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU,
+        SA_CAPABILITY_REFERENCE_ELEMENTS_CPU, SA_CAPABILITY_SPARSE_LINEAR_CPU,
+        SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
+        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -4461,6 +4501,87 @@ mod tests {
                 | SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
                 | SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
         );
+    }
+
+    #[test]
+    fn v1_12_selects_cpu_full_residual_and_rejects_hip_fallback() {
+        let api = Api::load_backend_selector().expect("v1.12 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_12);
+        assert_ne!(api.capabilities() & SA_CAPABILITY_BACKEND_SELECTOR, 0);
+        let hip_error = api
+            .select_backend(ExecutionBackend::Hip { device_id: 0 })
+            .err()
+            .expect("CPU-only product rejects HIP");
+        assert_eq!(
+            hip_error.code,
+            structural_ffi_sys::SA_ERR_BACKEND_UNAVAILABLE
+        );
+
+        let frame_dofs = [0_u64, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2];
+        let frame_stiffness = [0.0_f64; 144];
+        let row_offsets = [0_u64, 1, 2, 3];
+        let columns = [0_u64, 1, 2];
+        let shell_values = [2.0, 3.0, 4.0];
+        let spring_values = [1.0, 1.0, 1.0];
+        let external_force = [1.0, 2.0, 3.0];
+        let free_dofs = [0_u64, 2];
+        let operator = FullResidualOperator {
+            frame_element_count: 1,
+            order: 3,
+            shell_nonzeros: 3,
+            spring_nonzeros: 3,
+            free_dof_count: 2,
+            frame_dofs: &frame_dofs,
+            frame_stiffness: &frame_stiffness,
+            shell_row_offsets: &row_offsets,
+            shell_column_indices: &columns,
+            shell_values: &shell_values,
+            spring_row_offsets: &row_offsets,
+            spring_column_indices: &columns,
+            spring_values: &spring_values,
+            external_force: &external_force,
+            free_dofs: &free_dofs,
+        };
+        let backend = api
+            .select_backend(ExecutionBackend::Cpu)
+            .expect("CPU backend is available");
+        let (mut context, create_status) = backend
+            .create_full_residual(operator)
+            .expect("valid operator creates a context");
+        assert_eq!(create_status.execution_backend, 1);
+        assert_eq!(create_status.fallback_count, 0);
+        assert!(!create_status.operator_device_resident);
+        assert_eq!(
+            context.device_name().expect("device name"),
+            "deterministic-cpu-fp64"
+        );
+        thread::scope(|scope| {
+            for _ in 0..8 {
+                scope.spawn(|| {
+                    for _ in 0..100 {
+                        assert_eq!(
+                            context
+                                .device_name()
+                                .expect("concurrent immutable device name"),
+                            "deterministic-cpu-fp64"
+                        );
+                    }
+                });
+            }
+        });
+        let first = context
+            .evaluate(&[1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 2, 3)
+            .expect("first evaluation");
+        assert_eq!(first.residual, [2.0, 12.0, 11.0, 27.0]);
+        assert_eq!(first.status.output_abs_sum.to_bits(), 52.0_f64.to_bits());
+        assert_eq!(first.status.output_max_abs.to_bits(), 27.0_f64.to_bits());
+        assert!(!first.status.evaluation_buffers_reused);
+        assert_eq!(first.status.fallback_count, 0);
+        let second = context
+            .evaluate(&[1.0, 2.0, 3.0, 4.0, 5.0, 6.0], 2, 3)
+            .expect("second evaluation");
+        assert_eq!(second.residual, first.residual);
+        assert!(second.status.evaluation_buffers_reused);
     }
 
     #[test]

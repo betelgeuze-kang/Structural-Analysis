@@ -161,6 +161,9 @@ hook과 함께 제거한다. R4 cutover는 아직 시작하지 않았다.
 - existing create/eval operation을 table function으로 adapter한다.
 - legacy symbols remain unchanged.
 
+Status: ABI v1.12 `backend_get_api`와 CPU/HIP full-residual table로 구현됨. public product
+symbol은 계속 `sa_get_api_v1` 하나다.
+
 ### Step H2: safe Rust wrapper
 
 - manual symbol-by-symbol dlsym과 global last_error를 structural-ffi safe handle로
@@ -168,17 +171,25 @@ hook과 함께 제거한다. R4 cutover는 아직 시작하지 않았다.
 - dynamic package loading이 필요한 경우 libloading은 sa_get_api_v1 하나만 resolve한다.
 - linked production build가 default이고 dynamic loading은 explicit packaging mode다.
 
+Status: `structural-ffi` RAII wrapper와 single-symbol dynamic compatibility adapter로 구현됨.
+
 ### Step H3: descriptor conversion
 
 - long positional argument를 versioned ModelIR/operator/buffer descriptors로 바꾼다.
 - host/device memory space, stride, device와 state epoch를 명시한다.
 - C++ core deep copy 또는 execution-context ownership을 test한다.
 
+Status: workspace member와 단일 Cargo.lock 소유, v1.12 operator/buffer descriptor deep-copy,
+failure-atomic CPU contract test까지 구현됨.
+
 ### Step H4: resident execution
 
 - model/operator/state/Krylov buffer를 typed HIP execution handle이 소유한다.
 - eval은 caller state bytes를 매 iteration host에서 다시 전달하지 않는다.
 - transfer/sync/fallback instrumentation을 required receipt로 만든다.
+
+Status: deterministic no-atomic HIP candidate와 approved-runner receipt lane까지 구현됨.
+authoritative C2는 `native-hip-approved` live receipt 전까지 open이다.
 
 ### Step H5: legacy removal
 

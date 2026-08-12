@@ -13,11 +13,11 @@
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",
       "migration_owner": "structural-ffi",
-      "transition_step": "H0",
-      "workspace_member": false,
+      "transition_step": "H3",
+      "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "H1 sa_get_api_v1 compatibility table after CPU product path"
+      "next_gate": "H4 approved-device resident HIP execution receipt through the product table; legacy symbols remain adapter-only"
     }
   ]
 }

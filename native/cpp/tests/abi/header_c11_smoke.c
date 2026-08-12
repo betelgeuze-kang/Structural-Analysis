@@ -7,7 +7,12 @@ _Static_assert(offsetof(sa_buffer_view_v1, data) == 8U, "buffer data offset chan
 _Static_assert(offsetof(sa_buffer_view_v1, flags) == 44U, "buffer flags offset changed");
 _Static_assert(sizeof(sa_error_buffer_v1) == 32U, "sa_error_buffer_v1 layout changed");
 _Static_assert(sizeof(sa_api_request_v1) == 40U, "sa_api_request_v1 layout changed");
-_Static_assert(sizeof(sa_api_v1) == 176U, "sa_api_v1 layout changed");
+_Static_assert(sizeof(sa_api_v1) == 184U, "sa_api_v1 layout changed");
+_Static_assert(sizeof(sa_backend_request_v1) == 40U, "backend request layout changed");
+_Static_assert(sizeof(sa_full_residual_operator_v1) == 544U, "full residual operator layout changed");
+_Static_assert(sizeof(sa_full_residual_eval_config_v1) == 40U, "full residual config layout changed");
+_Static_assert(sizeof(sa_full_residual_status_v1) == 216U, "full residual status layout changed");
+_Static_assert(sizeof(sa_backend_api_v1) == 80U, "backend API layout changed");
 _Static_assert(sizeof(sa_track_point_load_config_v1) == 112U, "track config layout changed");
 _Static_assert(sizeof(sa_track_point_load_result_v1) == 64U, "track result layout changed");
 _Static_assert(sizeof(sa_nonlinear_static_config_v1) == 80U, "nonlinear config layout changed");
@@ -55,6 +60,7 @@ _Static_assert(offsetof(sa_api_v1, sparse_linear_begin) == 144U, "sparse begin s
 _Static_assert(offsetof(sa_api_v1, sparse_linear_advance) == 152U, "sparse advance slot offset changed");
 _Static_assert(offsetof(sa_api_v1, nonlinear_static_begin) == 160U, "static begin slot offset changed");
 _Static_assert(offsetof(sa_api_v1, nonlinear_static_advance) == 168U, "static advance slot offset changed");
+_Static_assert(offsetof(sa_api_v1, backend_get_api) == 176U, "backend selector slot offset changed");
 _Static_assert(sizeof(sa_sparse_linear_state_v1) == 280U, "sparse restart state layout changed");
 _Static_assert(sizeof(sa_string_view_v1) == 16U, "sa_string_view_v1 layout changed");
 _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor layout changed");

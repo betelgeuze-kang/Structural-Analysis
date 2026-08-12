@@ -34,7 +34,8 @@ extern "C" {
 #define SA_ABI_V1_9 UINT32_C(0x00010009)
 #define SA_ABI_V1_10 UINT32_C(0x0001000a)
 #define SA_ABI_V1_11 UINT32_C(0x0001000b)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_11
+#define SA_ABI_V1_12 UINT32_C(0x0001000c)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_12
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -90,6 +91,8 @@ enum {
 #define SA_CAPABILITY_GENERALIZED_EIGEN_CPU UINT64_C(1024)
 #define SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU UINT64_C(2048)
 #define SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU UINT64_C(4096)
+#define SA_CAPABILITY_BACKEND_SELECTOR UINT64_C(8192)
+#define SA_BACKEND_CAPABILITY_FULL_RESIDUAL UINT64_C(1)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
@@ -118,6 +121,13 @@ enum {
 enum {
     SA_EXECUTION_BACKEND_CPU = 1,
     SA_EXECUTION_BACKEND_HIP = 2
+};
+
+enum {
+    SA_FULL_RESIDUAL_EVAL_BUFFERS_REUSED = 1,
+    SA_FULL_RESIDUAL_OPERATOR_DEVICE_RESIDENT = 2,
+    SA_FULL_RESIDUAL_FP64 = 4,
+    SA_FULL_RESIDUAL_DETERMINISTIC = 8
 };
 
 enum {
@@ -193,6 +203,86 @@ typedef struct sa_api_request_v1 {
     uint64_t flags;
     uint64_t reserved[3];
 } sa_api_request_v1;
+
+/*
+ * v1.12 selects one product-owned execution backend through the single sa_get_api_v1 symbol.
+ * A backend request never enables fallback: unavailable or mismatched devices fail closed.
+ */
+typedef struct sa_backend_request_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t execution_backend;
+    int32_t device_id;
+    uint64_t flags;
+    uint64_t reserved[2];
+} sa_backend_request_v1;
+
+/* v1.12 bounded frame + shell-CSR + spring-CSR full-residual operator. */
+typedef struct sa_full_residual_operator_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_buffer_view_v1 frame_dofs;
+    sa_buffer_view_v1 frame_stiffness;
+    sa_buffer_view_v1 shell_row_offsets;
+    sa_buffer_view_v1 shell_column_indices;
+    sa_buffer_view_v1 shell_values;
+    sa_buffer_view_v1 spring_row_offsets;
+    sa_buffer_view_v1 spring_column_indices;
+    sa_buffer_view_v1 spring_values;
+    sa_buffer_view_v1 external_force;
+    sa_buffer_view_v1 free_dofs;
+    uint64_t frame_element_count;
+    uint64_t order;
+    uint64_t shell_nonzeros;
+    uint64_t spring_nonzeros;
+    uint64_t free_dof_count;
+    uint64_t reserved[2];
+} sa_full_residual_operator_v1;
+
+typedef struct sa_full_residual_eval_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t batch_size;
+    uint32_t repetitions;
+    uint32_t flags;
+    uint64_t reserved[2];
+} sa_full_residual_eval_config_v1;
+
+typedef struct sa_full_residual_status_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t solver_status;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint32_t flags;
+    int32_t device_id;
+    uint32_t reserved_u32;
+    uint64_t frame_element_count;
+    uint64_t order;
+    uint64_t free_dof_count;
+    uint64_t shell_nonzeros;
+    uint64_t spring_nonzeros;
+    uint64_t batch_size;
+    uint32_t repetitions;
+    uint32_t reserved_repetitions;
+    uint64_t h2d_bytes;
+    uint64_t d2h_bytes;
+    uint64_t h2d_transfer_count;
+    uint64_t d2h_transfer_count;
+    uint64_t synchronization_count;
+    uint64_t kernel_launch_count;
+    uint64_t device_buffer_bytes;
+    uint64_t vram_total_bytes;
+    uint64_t vram_free_before_bytes;
+    uint64_t vram_free_after_bytes;
+    double kernel_elapsed_ms_total;
+    double kernel_elapsed_ms_mean;
+    double output_abs_sum;
+    double output_max_abs;
+    uint64_t reserved[2];
+} sa_full_residual_status_v1;
+
+typedef struct sa_full_residual_context_v1 sa_full_residual_context_v1;
 
 typedef struct sa_track_point_load_config_v1 {
     uint32_t abi_version;
@@ -806,6 +896,58 @@ typedef sa_status_code_v1 (*sa_buckling_solve_fn_v1)(
     sa_buckling_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_full_residual_create_fn_v1)(
+    const sa_full_residual_operator_v1* operator_descriptor,
+    sa_full_residual_context_v1** out_context,
+    sa_full_residual_status_v1* status,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_full_residual_evaluate_fn_v1)(
+    sa_full_residual_context_v1* context,
+    const sa_full_residual_eval_config_v1* config,
+    const sa_buffer_view_v1* states,
+    const sa_mut_buffer_view_v1* residual,
+    sa_full_residual_status_v1* status,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_full_residual_destroy_fn_v1)(
+    sa_full_residual_context_v1* context,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_full_residual_device_name_size_fn_v1)(
+    const sa_full_residual_context_v1* context,
+    uint64_t* out_size,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_full_residual_device_name_write_fn_v1)(
+    const sa_full_residual_context_v1* context,
+    char* output,
+    uint64_t capacity,
+    sa_error_buffer_v1* error);
+
+/*
+ * Immutable device-name calls may run concurrently. evaluate is exclusive per context and
+ * returns SA_ERR_STATE_CONFLICT on overlap; destroy requires no in-flight call.
+ */
+typedef struct sa_backend_api_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t execution_backend;
+    int32_t device_id;
+    uint64_t capabilities;
+    sa_full_residual_create_fn_v1 full_residual_create;
+    sa_full_residual_evaluate_fn_v1 full_residual_evaluate;
+    sa_full_residual_destroy_fn_v1 full_residual_destroy;
+    sa_full_residual_device_name_size_fn_v1 full_residual_device_name_size;
+    sa_full_residual_device_name_write_fn_v1 full_residual_device_name_write;
+    uint64_t reserved[2];
+} sa_backend_api_v1;
+
+typedef sa_status_code_v1 (*sa_backend_get_api_fn_v1)(
+    const sa_backend_request_v1* request,
+    sa_backend_api_v1* out_api,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -830,6 +972,7 @@ typedef struct sa_api_v1 {
     sa_sparse_linear_advance_fn_v1 sparse_linear_advance;
     sa_nonlinear_static_begin_fn_v1 nonlinear_static_begin;
     sa_nonlinear_static_advance_fn_v1 nonlinear_static_advance;
+    sa_backend_get_api_fn_v1 backend_get_api;
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -844,7 +987,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_8_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, modal_solve))
 #define SA_API_V1_9_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_begin))
 #define SA_API_V1_10_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_begin))
-#define SA_API_V1_11_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
+#define SA_API_V1_11_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, backend_get_api))
+#define SA_API_V1_12_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

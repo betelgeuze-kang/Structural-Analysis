@@ -280,7 +280,9 @@ uses the next append-only slot at offset 112 for bounded CPU reference elements.
 canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes offsets 128 and 136 for bounded modal
 and linear-buckling CPU operations. ABI v1.10 appends sparse PCG begin and advance operations at
 offsets 144 and 152. ABI v1.11 appends nonlinear-static Newton begin and advance operations at
-offsets 160 and 168; the current table is 176 bytes. Existing callers may continue to provide
+offsets 160 and 168. ABI v1.12 preserves that 176-byte prefix and appends one backend-selector
+slot at offset 176; the current table is 184 bytes. The selected CPU/HIP table owns the bounded
+full-residual context, telemetry, and no-fallback device choice. Existing callers may continue to provide
 their older struct size, and every request exposes later-minor slots as null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
@@ -289,5 +291,7 @@ inventory is `compatibility/structural_runtime_ffi_v3.json`; workspace tests, ne
 hashes and the release binary-symbol checker fail closed on drift. The language-neutral wire
 contract serializes shared-storage identity as a boolean and never serializes process pointer
 addresses. The C++ shared product library still exports only `sa_get_api_v1`, while all five
-legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` remains
-outside the workspace at H0; no compatibility cutover or removal is claimed.
+legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` is now the
+H3 workspace compatibility adapter: it resolves only `sa_get_api_v1`, converts the frozen
+positional ABI to v1.12 descriptors, and delegates context ownership to the product library.
+H4 remains a C2 candidate until an approved-device receipt; no legacy removal is claimed.

@@ -19,6 +19,13 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
 
     assert capabilities.validate_capabilities(payload) == []
     assert capabilities.capability_is_enabled(payload, "abi_v1_base") is True
+    assert capabilities.capability_is_enabled(payload, "backend_selector") is True
+    backend_selector = payload["capabilities"]["backend_selector"]
+    assert backend_selector["cutover_gate"] == "C3"
+    assert "ABI v1.12" in backend_selector["claim"]
+    assert "sa_get_api_v1" in backend_selector["claim"]
+    assert "fails closed" in backend_selector["claim"]
+    assert "C6" in backend_selector["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "modelir_v2_rust_wire") is True
     )

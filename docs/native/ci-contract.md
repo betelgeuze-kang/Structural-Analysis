@@ -57,6 +57,8 @@ Jobs:
    - ABI v1.11 complete nonlinear-static Newton state layout, append-only v1.10 null-slot
      compatibility, failure-atomic begin/advance, real-iteration serialization and terminal-state
      idempotence
+   - ABI v1.12 append-only backend selector, CPU deterministic full-residual context, CPU-only HIP
+     rejection, safe Rust RAII ownership and the frozen adapter's single `sa_get_api_v1` lookup
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -97,6 +99,8 @@ Jobs:
    - nonlinear static five-input/output pointer, length, stride, alignment, finite, overlap and
      nonconvergence atomicity
    - all solver operations run in ABI CTest; unavailable v1.0-v1.5 table tails remain null
+   - the v1.12 backend table has fixed layouts, caller-owned failure atomicity, opaque-context
+     lifetime checks, exclusive mutable execution and concurrent immutable device-name reads
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded
@@ -137,6 +141,8 @@ Required jobs:
 1. build-package
    - clean Cargo/CMake release build
    - shared/static link smoke와 package metadata/ABI identity
+   - shared product export is exactly `sa_get_api_v1`; the H3 adapter export inventory is frozen,
+     performs one symbol lookup and fails closed when HIP is requested from the CPU-only package
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
    - bounded track/nonlinear-static C++/Python product-golden parity and fallback count 0

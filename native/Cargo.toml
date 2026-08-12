@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "../implementation/phase1/mgt_hip_full_residual_ffi",
   "../implementation/phase1/structural_runtime_ffi",
   "crates/structural-contracts",
   "crates/structural-ffi-sys",

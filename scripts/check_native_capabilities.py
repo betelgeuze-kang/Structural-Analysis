@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = Path("native/capabilities.json")
 EXPECTED_OWNERS = {
     "abi_v1_base": "structural-ffi",
+    "backend_selector": "structural-ffi",
     "modelir_v2_rust_wire": "structural-contracts",
     "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",

@@ -189,6 +189,8 @@ jobs:
           python3 scripts/check_native_generalized_eigen_hip.py --json
           python3 scripts/check_native_nonlinear_static_hip.py --json
           python3 scripts/check_native_nonlinear_ndtha_hip.py --json
+          python3 scripts/check_native_full_residual_backend_hip.py --json
+          python3 scripts/check_native_backend_selector.py --json --fail-blocked
 
   abi-contract:
     name: abi-contract
@@ -232,6 +234,7 @@ jobs:
             structural_abi_header_c11_smoke \
             structural_abi_header_cpp20_smoke \
             structural_abi_contract_tests \
+            structural_backend_selector_abi_tests \
             structural_track_point_load_abi_tests \
             structural_nonlinear_static_abi_tests \
             structural_nonlinear_ndtha_abi_tests \
@@ -427,7 +430,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x0001000b"
+          assert payload["abi_version"] == "0x0001000c"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY
@@ -447,6 +450,10 @@ jobs:
               python3 scripts/check_structural_runtime_ffi_r3.py \
                 --legacy-library native/target/release/libstructural_runtime_ffi.so \
                 --product-library "$shared_library" \
+                --json --fail-blocked
+              python3 scripts/check_native_backend_selector.py \
+                --product-library "$shared_library" \
+                --adapter-library native/target/release/libmgt_hip_full_residual_rust_ffi.so \
                 --json --fail-blocked
             fi
             cmake \

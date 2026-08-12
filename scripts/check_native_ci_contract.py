@@ -235,6 +235,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_nonlinear_static_hip.py",
         "check_native_nonlinear_ndtha_hip.py",
         "check_native_sparse_linear_hip.py",
+        "check_native_full_residual_backend_hip.py",
+        "check_native_backend_selector.py",
         "check_structural_runtime_ffi_r3.py",
         "native/target/release/libstructural_runtime_ffi.so",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
@@ -245,10 +247,11 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
         "structural_nonlinear_static_abi_tests",
+        "structural_backend_selector_abi_tests",
         "structural_nonlinear_ndtha_abi_tests",
         "structural_reference_elements_abi_tests",
         "structural_sparse_linear_abi_tests",
-        'payload["abi_version"] == "0x0001000b"',
+        'payload["abi_version"] == "0x0001000c"',
     ):
         if required not in pr_text:
             blockers.append(f"native_pr_fast_contract_token_missing:{required}")
@@ -267,13 +270,16 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "structural_sparse_linear_hip_parity_tests",
         "structural_nonlinear_static_hip_parity_tests",
         "structural_nonlinear_ndtha_hip_parity_tests",
+        "structural_full_residual_backend_hip_parity_tests",
         "check_native_reference_elements_hip.py",
         "check_native_sparse_linear_hip.py",
         "check_native_nonlinear_static_hip.py",
         "check_native_nonlinear_ndtha_hip.py",
+        "check_native_full_residual_backend_hip.py",
         "native-sparse-linear-hip-receipt.json",
         "native-nonlinear-static-hip-receipt.json",
         "native-nonlinear-ndtha-hip-receipt.json",
+        "native-full-residual-backend-hip-receipt.json",
         "--require-approved-runner",
     ):
         if required not in hip_text:

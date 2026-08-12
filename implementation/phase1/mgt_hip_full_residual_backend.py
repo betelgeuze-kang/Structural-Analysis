@@ -17,13 +17,16 @@ from typing import Any
 import numpy as np
 
 PHASE1 = Path(__file__).resolve().parent
+REPO_ROOT = PHASE1.parents[1]
+NATIVE_WORKSPACE = REPO_ROOT / "native"
+NATIVE_CPP = NATIVE_WORKSPACE / "cpp"
 PRODUCTIZATION = PHASE1 / "release_evidence" / "productization"
 HIP_SOURCE = PHASE1 / "hip_full_residual_batch_replay.cpp"
 HIP_BINARY = PRODUCTIZATION / "bin/hip_full_residual_batch_replay"
 HIP_WORKER_SOURCE = PHASE1 / "hip_full_residual_resident_worker.cpp"
 HIP_WORKER_BINARY = PRODUCTIZATION / "bin/hip_full_residual_resident_worker"
-HIP_FFI_SOURCE = PHASE1 / "hip_full_residual_ffi.cpp"
-HIP_FFI_LIBRARY = PRODUCTIZATION / "bin/libmgt_hip_full_residual_ffi.so"
+HIP_FFI_LIBRARY = PRODUCTIZATION / "bin/libstructural_c_abi_v1.so"
+HIP_FFI_BUILD = PHASE1 / "build/native-full-residual-product"
 RUST_HIP_FFI_CRATE = PHASE1 / "mgt_hip_full_residual_ffi"
 RUST_HIP_FFI_LIBRARY = PRODUCTIZATION / "bin/libmgt_hip_full_residual_rust_ffi.so"
 ROCM_DEVICE_LIB_PATH = (
@@ -121,40 +124,97 @@ def build_hip_full_residual_ffi_library(
     force_rebuild: bool = False,
 ) -> dict[str, Any]:
     HIP_FFI_LIBRARY.parent.mkdir(parents=True, exist_ok=True)
-    needs_build = bool(force_rebuild) or not HIP_FFI_LIBRARY.exists()
-    if HIP_FFI_LIBRARY.exists() and HIP_FFI_SOURCE.exists():
-        needs_build = needs_build or HIP_FFI_SOURCE.stat().st_mtime > HIP_FFI_LIBRARY.stat().st_mtime
-    command = [
-        str(hipcc),
-        "-O3",
-        "-std=c++17",
-        "-fPIC",
-        "-shared",
-        "--offload-arch=gfx1030",
+    rocm_root = hipcc.parent.parent
+    hip_compiler = rocm_root / "llvm/bin/clang++"
+    architecture = os.environ.get("STRUCTURAL_HIP_ARCHITECTURE", "gfx1030")
+    configured_library = HIP_FFI_BUILD / "lib/libstructural_c_abi_v1.so"
+    configure_command = [
+        "cmake",
+        "-S",
+        str(NATIVE_CPP),
+        "-B",
+        str(HIP_FFI_BUILD),
+        "-DCMAKE_BUILD_TYPE=Release",
+        f"-DCMAKE_HIP_COMPILER={hip_compiler}",
+        f"-DCMAKE_HIP_ARCHITECTURES={architecture}",
+        f"-DSTRUCTURAL_ROCM_ROOT={rocm_root}",
+        f"-DSTRUCTURAL_HIP_DEVICE_LIB_PATH={ROCM_DEVICE_LIB_PATH}",
+        "-DSTRUCTURAL_ENABLE_HIP=ON",
+        "-DSTRUCTURAL_BUILD_TESTS=OFF",
+        "-DSTRUCTURAL_WARNINGS_AS_ERRORS=ON",
+        "-DBUILD_SHARED_LIBS=ON",
     ]
-    if ROCM_DEVICE_LIB_PATH.exists():
-        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
-    command.extend([str(HIP_FFI_SOURCE), "-o", str(HIP_FFI_LIBRARY)])
+    build_command = [
+        "cmake",
+        "--build",
+        str(HIP_FFI_BUILD),
+        "--target",
+        "structural_c_abi_v1",
+        "--parallel",
+        "2",
+    ]
+    source_paths = [
+        NATIVE_CPP / "CMakeLists.txt",
+        NATIVE_CPP / "include/structural/abi_v1.h",
+        NATIVE_CPP / "src/abi/abi_v1.cpp",
+        NATIVE_CPP / "src/hip/full_residual_hip.hpp",
+        NATIVE_CPP / "src/hip/full_residual_hip.hip.cpp",
+        NATIVE_CPP / "src/solver_cpu/full_residual.hpp",
+        NATIVE_CPP / "src/solver_cpu/full_residual.cpp",
+    ]
+    needs_build = (
+        bool(force_rebuild)
+        or not HIP_FFI_LIBRARY.exists()
+        or not configured_library.exists()
+        or any(
+            source.exists()
+            and HIP_FFI_LIBRARY.exists()
+            and source.stat().st_mtime > HIP_FFI_LIBRARY.stat().st_mtime
+            for source in source_paths
+        )
+    )
     if not needs_build:
         return {
             "attempted": False,
             "ok": True,
             "library": str(HIP_FFI_LIBRARY),
-            "source": str(HIP_FFI_SOURCE),
-            "command": command,
+            "source": str(NATIVE_CPP),
+            "configure_command": configure_command,
+            "build_command": build_command,
             "reason": "library_current",
         }
     started = time.perf_counter()
-    proc = subprocess.run(command, capture_output=True, text=True, check=False)
+    configure = subprocess.run(
+        configure_command, capture_output=True, text=True, check=False
+    )
+    build = None
+    copied = False
+    if configure.returncode == 0:
+        build = subprocess.run(
+            build_command, capture_output=True, text=True, check=False
+        )
+        if build.returncode == 0 and configured_library.exists():
+            shutil.copy2(configured_library, HIP_FFI_LIBRARY)
+            copied = True
     return {
         "attempted": True,
-        "ok": proc.returncode == 0,
+        "ok": bool(
+            configure.returncode == 0
+            and build is not None
+            and build.returncode == 0
+            and copied
+            and HIP_FFI_LIBRARY.exists()
+        ),
         "library": str(HIP_FFI_LIBRARY),
-        "source": str(HIP_FFI_SOURCE),
-        "command": command,
-        "returncode": int(proc.returncode),
-        "stdout": proc.stdout[-4000:],
-        "stderr": proc.stderr[-4000:],
+        "source": str(NATIVE_CPP),
+        "configured_library": str(configured_library),
+        "configure_command": configure_command,
+        "build_command": build_command,
+        "configure_returncode": int(configure.returncode),
+        "build_returncode": int(build.returncode) if build is not None else None,
+        "copied": copied,
+        "stdout": ((configure.stdout if configure else "") + (build.stdout if build else ""))[-4000:],
+        "stderr": ((configure.stderr if configure else "") + (build.stderr if build else ""))[-4000:],
         "seconds": float(time.perf_counter() - started),
     }
 
@@ -163,7 +223,7 @@ def build_rust_hip_full_residual_ffi_library(*, force_rebuild: bool = False) -> 
     RUST_HIP_FFI_LIBRARY.parent.mkdir(parents=True, exist_ok=True)
     manifest = RUST_HIP_FFI_CRATE / "Cargo.toml"
     rust_src = RUST_HIP_FFI_CRATE / "src/lib.rs"
-    built_library = RUST_HIP_FFI_CRATE / "target/release/libmgt_hip_full_residual_rust_ffi.so"
+    built_library = NATIVE_WORKSPACE / "target/release/libmgt_hip_full_residual_rust_ffi.so"
     needs_build = bool(force_rebuild) or not RUST_HIP_FFI_LIBRARY.exists() or not built_library.exists()
     for source in (manifest, rust_src):
         if source.exists() and RUST_HIP_FFI_LIBRARY.exists():
@@ -174,7 +234,9 @@ def build_rust_hip_full_residual_ffi_library(*, force_rebuild: bool = False) -> 
         "--release",
         "--offline",
         "--manifest-path",
-        str(manifest),
+        str(NATIVE_WORKSPACE / "Cargo.toml"),
+        "--package",
+        "mgt_hip_full_residual_rust_ffi",
     ]
     if not needs_build:
         return {

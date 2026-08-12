@@ -5,6 +5,8 @@ compile_error!("structural C ABI v1 requires a 64-bit little-endian target");
 
 use core::ffi::{c_char, c_void};
 
+mod backend;
+pub use backend::*;
 mod generalized_eigen;
 pub mod legacy_runtime_v3;
 pub use generalized_eigen::*;
@@ -26,7 +28,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_11;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_12;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -129,6 +131,7 @@ pub struct SaApiV1 {
     pub sparse_linear_advance: Option<SaSparseLinearAdvanceFnV1>,
     pub nonlinear_static_begin: Option<SaNonlinearStaticBeginFnV1>,
     pub nonlinear_static_advance: Option<SaNonlinearStaticAdvanceFnV1>,
+    pub backend_get_api: Option<SaBackendGetApiFnV1>,
 }
 
 impl Default for SaApiV1 {
@@ -157,6 +160,7 @@ impl Default for SaApiV1 {
             sparse_linear_advance: None,
             nonlinear_static_begin: None,
             nonlinear_static_advance: None,
+            backend_get_api: None,
         }
     }
 }
@@ -172,7 +176,9 @@ extern "C" {
 #[cfg(test)]
 mod tests {
     use super::{
-        SaApiRequestV1, SaApiV1, SaBufferViewV1, SaErrorBufferV1, SaHeaderV1, SA_ERR_NONCONVERGENCE,
+        SaApiRequestV1, SaApiV1, SaBackendApiV1, SaBackendRequestV1, SaBufferViewV1,
+        SaErrorBufferV1, SaFullResidualEvalConfigV1, SaFullResidualOperatorV1,
+        SaFullResidualStatusV1, SaHeaderV1, SA_ERR_NONCONVERGENCE,
     };
     use core::mem::{align_of, offset_of, size_of};
 
@@ -188,7 +194,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 176);
+        assert_eq!(size_of::<SaApiV1>(), 184);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -205,6 +211,20 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, sparse_linear_advance), 152);
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_begin), 160);
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_advance), 168);
+        assert_eq!(offset_of!(SaApiV1, backend_get_api), 176);
+        assert_eq!(size_of::<SaBackendRequestV1>(), 40);
+        assert_eq!(offset_of!(SaBackendRequestV1, flags), 16);
+        assert_eq!(size_of::<SaFullResidualOperatorV1>(), 544);
+        assert_eq!(
+            offset_of!(SaFullResidualOperatorV1, frame_element_count),
+            488
+        );
+        assert_eq!(size_of::<SaFullResidualEvalConfigV1>(), 40);
+        assert_eq!(size_of::<SaFullResidualStatusV1>(), 216);
+        assert_eq!(offset_of!(SaFullResidualStatusV1, h2d_bytes), 88);
+        assert_eq!(offset_of!(SaFullResidualStatusV1, vram_total_bytes), 144);
+        assert_eq!(size_of::<SaBackendApiV1>(), 80);
+        assert_eq!(offset_of!(SaBackendApiV1, full_residual_create), 24);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

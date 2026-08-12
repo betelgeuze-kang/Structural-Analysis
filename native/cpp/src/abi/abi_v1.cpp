@@ -2,11 +2,16 @@
 
 #include "../elements/reference_elements.hpp"
 #include "../model_ir/model_ir.hpp"
+#include "../solver_cpu/full_residual.hpp"
 #include "../solver_cpu/generalized_eigen.hpp"
 #include "../solver_cpu/nonlinear_ndtha.hpp"
 #include "../solver_cpu/nonlinear_static.hpp"
 #include "../solver_cpu/sparse_linear.hpp"
 #include "../solver_cpu/track_point_load.hpp"
+
+#if defined(STRUCTURAL_ENABLE_HIP_BACKEND)
+#include "../hip/full_residual_hip.hpp"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -24,6 +29,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -42,7 +48,24 @@ static_assert(offsetof(sa_mut_buffer_view_v1, flags) == 44U);
 static_assert(sizeof(sa_error_buffer_v1) == 32U);
 static_assert(offsetof(sa_error_buffer_v1, required) == 24U);
 static_assert(sizeof(sa_api_request_v1) == 40U);
-static_assert(sizeof(sa_api_v1) == 176U);
+static_assert(sizeof(sa_backend_request_v1) == 40U);
+static_assert(offsetof(sa_backend_request_v1, flags) == 16U);
+static_assert(sizeof(sa_full_residual_operator_v1) == 544U);
+static_assert(offsetof(sa_full_residual_operator_v1, frame_dofs) == 8U);
+static_assert(offsetof(sa_full_residual_operator_v1, frame_element_count) == 488U);
+static_assert(offsetof(sa_full_residual_operator_v1, reserved) == 528U);
+static_assert(sizeof(sa_full_residual_eval_config_v1) == 40U);
+static_assert(offsetof(sa_full_residual_eval_config_v1, batch_size) == 8U);
+static_assert(sizeof(sa_full_residual_status_v1) == 216U);
+static_assert(offsetof(sa_full_residual_status_v1, frame_element_count) == 32U);
+static_assert(offsetof(sa_full_residual_status_v1, h2d_bytes) == 88U);
+static_assert(offsetof(sa_full_residual_status_v1, vram_total_bytes) == 144U);
+static_assert(offsetof(sa_full_residual_status_v1, kernel_elapsed_ms_total) == 168U);
+static_assert(sizeof(sa_backend_api_v1) == 80U);
+static_assert(offsetof(sa_backend_api_v1, capabilities) == 16U);
+static_assert(offsetof(sa_backend_api_v1, full_residual_create) == 24U);
+static_assert(offsetof(sa_backend_api_v1, reserved) == 64U);
+static_assert(sizeof(sa_api_v1) == 184U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
@@ -59,6 +82,7 @@ static_assert(offsetof(sa_api_v1, sparse_linear_begin) == 144U);
 static_assert(offsetof(sa_api_v1, sparse_linear_advance) == 152U);
 static_assert(offsetof(sa_api_v1, nonlinear_static_begin) == 160U);
 static_assert(offsetof(sa_api_v1, nonlinear_static_advance) == 168U);
+static_assert(offsetof(sa_api_v1, backend_get_api) == 176U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -186,6 +210,10 @@ struct sa_model_ir_handle_v1 {
     std::uint64_t token;
 };
 
+struct sa_full_residual_context_v1 {
+    std::uint64_t token;
+};
+
 namespace {
 
 constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_CURRENT;
@@ -193,6 +221,15 @@ constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_CURRENT;
 using ModelRegistry = std::unordered_map<
     const sa_model_ir_handle_v1*,
     std::shared_ptr<const structural::model_ir::Model>>;
+
+struct FullResidualRecord {
+    std::unique_ptr<structural::solver_cpu::FullResidualContext> implementation;
+    std::mutex execution_mutex;
+};
+
+using FullResidualRegistry = std::unordered_map<
+    const sa_full_residual_context_v1*,
+    std::shared_ptr<FullResidualRecord>>;
 
 [[nodiscard]] ModelRegistry& model_registry() {
     static ModelRegistry registry;
@@ -202,6 +239,27 @@ using ModelRegistry = std::unordered_map<
 [[nodiscard]] std::mutex& model_registry_mutex() {
     static std::mutex mutex;
     return mutex;
+}
+
+[[nodiscard]] FullResidualRegistry& full_residual_registry() {
+    static FullResidualRegistry registry;
+    return registry;
+}
+
+[[nodiscard]] std::mutex& full_residual_registry_mutex() {
+    static std::mutex mutex;
+    return mutex;
+}
+
+[[nodiscard]] std::shared_ptr<FullResidualRecord> acquire_full_residual(
+    const sa_full_residual_context_v1* const context) {
+    if (context == nullptr) {
+        return {};
+    }
+    const std::lock_guard lock {full_residual_registry_mutex()};
+    const auto found = full_residual_registry().find(context);
+    return found == full_residual_registry().end() ? std::shared_ptr<FullResidualRecord> {}
+                                                   : found->second;
 }
 
 [[nodiscard]] std::shared_ptr<const structural::model_ir::Model> acquire_model(
@@ -4588,6 +4646,624 @@ void publish_sparse_restart_state(
         });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_full_residual_input(
+    const sa_buffer_view_v1* const view,
+    const std::uint32_t element_type,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(view)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual input is null or misaligned");
+    }
+    if (view->abi_version != SA_ABI_V1_12) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "full residual input ABI is not v1.12");
+    }
+    if (view->struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "full residual input struct_size is too small");
+    }
+    const auto width = element_size(element_type);
+    if (view->element_type != element_type || view->length != expected_length
+        || view->stride_bytes != width || view->memory_space != SA_MEMORY_SPACE_HOST
+        || view->device_id != -1 || view->flags != 0U
+        || (expected_length == 0U ? view->data != nullptr : view->data == nullptr)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (expected_length == 0U) {
+        return SA_OK;
+    }
+    if (expected_length > std::numeric_limits<std::uint64_t>::max() / width) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual input extent overflows");
+    }
+    const auto extent = expected_length * width;
+    const auto address = reinterpret_cast<std::uintptr_t>(view->data);
+    if (address % width != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_full_residual_output(
+    const sa_mut_buffer_view_v1* const view,
+    const std::uint64_t expected_length,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(view)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual output is null or misaligned");
+    }
+    if (view->abi_version != SA_ABI_V1_12) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "full residual output ABI is not v1.12");
+    }
+    if (view->struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "full residual output struct_size is too small");
+    }
+    if (view->data == nullptr || view->length < expected_length
+        || view->stride_bytes != sizeof(double) || view->element_type != SA_ELEMENT_TYPE_F64
+        || view->memory_space != SA_MEMORY_SPACE_HOST || view->device_id != -1
+        || view->flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual output metadata is invalid");
+    }
+    if (expected_length > std::numeric_limits<std::uint64_t>::max() / sizeof(double)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual output extent overflows");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view->data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_full_residual_status(
+    const sa_full_residual_status_v1* const status,
+    sa_error_buffer_v1* const error) {
+    if (status == nullptr) {
+        return SA_OK;
+    }
+    if (!pointer_is_aligned(status)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual status is misaligned");
+    }
+    if (status->abi_version != SA_ABI_V1_12) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "full residual status ABI is not v1.12");
+    }
+    if (status->struct_size < sizeof(sa_full_residual_status_v1)) {
+        return report_error(error, SA_ERR_STRUCT_SIZE, "full residual status struct_size is too small");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_full_residual_status_v1 full_residual_status(
+    const structural::solver_cpu::FullResidualContext& context,
+    const std::uint64_t batch_size,
+    const std::uint32_t repetitions,
+    const structural::solver_cpu::FullResidualMetrics& metrics) {
+    const auto& operator_data = context.operator_data();
+    return {
+        SA_ABI_V1_12,
+        static_cast<std::uint32_t>(sizeof(sa_full_residual_status_v1)),
+        SA_SOLVER_CONVERGED,
+        context.execution_backend(),
+        0U,
+        (metrics.evaluation_buffers_reused
+                ? static_cast<std::uint32_t>(SA_FULL_RESIDUAL_EVAL_BUFFERS_REUSED)
+                : 0U)
+            | (metrics.operator_device_resident
+                    ? static_cast<std::uint32_t>(SA_FULL_RESIDUAL_OPERATOR_DEVICE_RESIDENT)
+                    : 0U)
+            | static_cast<std::uint32_t>(SA_FULL_RESIDUAL_FP64)
+            | static_cast<std::uint32_t>(SA_FULL_RESIDUAL_DETERMINISTIC),
+        context.device_id(),
+        0U,
+        operator_data.frame_element_count,
+        operator_data.order,
+        operator_data.free_dof_count,
+        operator_data.shell_nonzeros,
+        operator_data.spring_nonzeros,
+        batch_size,
+        repetitions,
+        0U,
+        metrics.h2d_bytes,
+        metrics.d2h_bytes,
+        metrics.h2d_transfer_count,
+        metrics.d2h_transfer_count,
+        metrics.synchronization_count,
+        metrics.kernel_launch_count,
+        metrics.device_buffer_bytes,
+        metrics.vram_total_bytes,
+        metrics.vram_free_before_bytes,
+        metrics.vram_free_after_bytes,
+        metrics.kernel_elapsed_ms_total,
+        metrics.kernel_elapsed_ms_mean,
+        metrics.output_abs_sum,
+        metrics.output_max_abs,
+        {0U, 0U},
+    };
+}
+
+[[nodiscard]] sa_status_code_v1 full_residual_create_boundary_impl(
+    const sa_full_residual_operator_v1* const descriptor,
+    sa_full_residual_context_v1** const out_context,
+    sa_full_residual_status_v1* const status,
+    sa_error_buffer_v1* const error,
+    const std::uint32_t execution_backend) noexcept {
+    return contain_boundary(error, [descriptor, out_context, status, error, execution_backend]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(descriptor) || !pointer_is_aligned(out_context)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "full residual descriptor or context output is null or misaligned");
+        }
+        if (descriptor->abi_version != SA_ABI_V1_12) {
+            return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "full residual operator ABI is not v1.12");
+        }
+        if (descriptor->struct_size < sizeof(sa_full_residual_operator_v1)) {
+            return report_error(error, SA_ERR_STRUCT_SIZE, "full residual operator struct_size is too small");
+        }
+        if (std::any_of(
+                std::begin(descriptor->reserved),
+                std::end(descriptor->reserved),
+                [](const auto value) { return value != 0U; })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual operator reserved fields are not zero");
+        }
+        auto validation = validate_full_residual_status(status, error);
+        if (validation != SA_OK) {
+            return validation;
+        }
+        const auto maximum_size = static_cast<std::uint64_t>(
+            std::numeric_limits<std::size_t>::max());
+        if (descriptor->frame_element_count > maximum_size || descriptor->order > maximum_size
+            || descriptor->shell_nonzeros > maximum_size
+            || descriptor->spring_nonzeros > maximum_size
+            || descriptor->free_dof_count > maximum_size
+            || descriptor->frame_element_count
+                > std::numeric_limits<std::uint64_t>::max()
+                    / structural::solver_cpu::kFullResidualFrameMatrixCount
+            || descriptor->order == std::numeric_limits<std::uint64_t>::max()) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual dimensions overflow");
+        }
+        const auto frame_dof_count = descriptor->frame_element_count
+            * structural::solver_cpu::kFullResidualFrameDofCount;
+        const auto frame_matrix_count = descriptor->frame_element_count
+            * structural::solver_cpu::kFullResidualFrameMatrixCount;
+        const std::array input_contracts {
+            std::tuple {&descriptor->frame_dofs,
+                        SA_ELEMENT_TYPE_U64,
+                        frame_dof_count,
+                        std::string_view {"frame dof metadata is invalid"}},
+            std::tuple {&descriptor->frame_stiffness,
+                        SA_ELEMENT_TYPE_F64,
+                        frame_matrix_count,
+                        std::string_view {"frame stiffness metadata is invalid"}},
+            std::tuple {&descriptor->shell_row_offsets,
+                        SA_ELEMENT_TYPE_U64,
+                        descriptor->order + 1U,
+                        std::string_view {"shell row-offset metadata is invalid"}},
+            std::tuple {&descriptor->shell_column_indices,
+                        SA_ELEMENT_TYPE_U64,
+                        descriptor->shell_nonzeros,
+                        std::string_view {"shell column metadata is invalid"}},
+            std::tuple {&descriptor->shell_values,
+                        SA_ELEMENT_TYPE_F64,
+                        descriptor->shell_nonzeros,
+                        std::string_view {"shell value metadata is invalid"}},
+            std::tuple {&descriptor->spring_row_offsets,
+                        SA_ELEMENT_TYPE_U64,
+                        descriptor->order + 1U,
+                        std::string_view {"spring row-offset metadata is invalid"}},
+            std::tuple {&descriptor->spring_column_indices,
+                        SA_ELEMENT_TYPE_U64,
+                        descriptor->spring_nonzeros,
+                        std::string_view {"spring column metadata is invalid"}},
+            std::tuple {&descriptor->spring_values,
+                        SA_ELEMENT_TYPE_F64,
+                        descriptor->spring_nonzeros,
+                        std::string_view {"spring value metadata is invalid"}},
+            std::tuple {&descriptor->external_force,
+                        SA_ELEMENT_TYPE_F64,
+                        descriptor->order,
+                        std::string_view {"external force metadata is invalid"}},
+            std::tuple {&descriptor->free_dofs,
+                        SA_ELEMENT_TYPE_U64,
+                        descriptor->free_dof_count,
+                        std::string_view {"free dof metadata is invalid"}},
+        };
+        for (const auto& [view, type, length, label] : input_contracts) {
+            validation = validate_full_residual_input(view, type, length, label, error);
+            if (validation != SA_OK) {
+                return validation;
+            }
+        }
+        const MemoryRegion context_output {out_context, sizeof(*out_context)};
+        const MemoryRegion descriptor_region {descriptor, sizeof(*descriptor)};
+        if (ranges_overlap(
+                context_output.data,
+                context_output.extent,
+                descriptor_region.data,
+                descriptor_region.extent)
+            || (status != nullptr
+                && (ranges_overlap(out_context, sizeof(*out_context), status, sizeof(*status))
+                    || ranges_overlap(status, sizeof(*status), descriptor, sizeof(*descriptor))))) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "full residual create output overlaps a descriptor");
+        }
+        for (const auto& [view, type, length, label] : input_contracts) {
+            static_cast<void>(label);
+            const auto extent = length * element_size(type);
+            if (extent != 0U
+                && (ranges_overlap(out_context, sizeof(*out_context), view->data, extent)
+                    || (status != nullptr
+                        && ranges_overlap(status, sizeof(*status), view->data, extent)))) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "full residual create output overlaps operator data");
+            }
+        }
+
+        structural::solver_cpu::FullResidualOperator operator_data;
+        try {
+            operator_data = structural::solver_cpu::make_full_residual_operator({
+                static_cast<std::size_t>(descriptor->frame_element_count),
+                static_cast<std::size_t>(descriptor->order),
+                static_cast<std::size_t>(descriptor->shell_nonzeros),
+                static_cast<std::size_t>(descriptor->spring_nonzeros),
+                static_cast<std::size_t>(descriptor->free_dof_count),
+                {static_cast<const std::uint64_t*>(descriptor->frame_dofs.data),
+                 static_cast<std::size_t>(frame_dof_count)},
+                {static_cast<const double*>(descriptor->frame_stiffness.data),
+                 static_cast<std::size_t>(frame_matrix_count)},
+                {static_cast<const std::uint64_t*>(descriptor->shell_row_offsets.data),
+                 static_cast<std::size_t>(descriptor->order + 1U)},
+                {static_cast<const std::uint64_t*>(descriptor->shell_column_indices.data),
+                 static_cast<std::size_t>(descriptor->shell_nonzeros)},
+                {static_cast<const double*>(descriptor->shell_values.data),
+                 static_cast<std::size_t>(descriptor->shell_nonzeros)},
+                {static_cast<const std::uint64_t*>(descriptor->spring_row_offsets.data),
+                 static_cast<std::size_t>(descriptor->order + 1U)},
+                {static_cast<const std::uint64_t*>(descriptor->spring_column_indices.data),
+                 static_cast<std::size_t>(descriptor->spring_nonzeros)},
+                {static_cast<const double*>(descriptor->spring_values.data),
+                 static_cast<std::size_t>(descriptor->spring_nonzeros)},
+                {static_cast<const double*>(descriptor->external_force.data),
+                 static_cast<std::size_t>(descriptor->order)},
+                {static_cast<const std::uint64_t*>(descriptor->free_dofs.data),
+                 static_cast<std::size_t>(descriptor->free_dof_count)},
+            });
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        auto record = std::make_shared<FullResidualRecord>();
+        if (execution_backend == SA_EXECUTION_BACKEND_CPU) {
+            record->implementation = structural::solver_cpu::make_cpu_full_residual_context(
+                std::move(operator_data));
+#if defined(STRUCTURAL_ENABLE_HIP_BACKEND)
+        } else if (execution_backend == SA_EXECUTION_BACKEND_HIP) {
+            try {
+                record->implementation = structural::hip::make_hip_full_residual_context(
+                    std::move(operator_data), 0);
+            } catch (const std::invalid_argument& exception) {
+                return report_error(error, SA_ERR_DEVICE_MISMATCH, exception.what());
+            } catch (const std::runtime_error& exception) {
+                return report_error(error, SA_ERR_BACKEND_UNAVAILABLE, exception.what());
+            }
+#endif
+        } else {
+            return report_error(error, SA_ERR_INTERNAL, "full residual backend invariant failed");
+        }
+        auto handle = std::make_unique<sa_full_residual_context_v1>();
+        handle->token = reinterpret_cast<std::uintptr_t>(handle.get());
+        {
+            const std::lock_guard lock {full_residual_registry_mutex()};
+            full_residual_registry().emplace(handle.get(), record);
+        }
+        const auto metrics = record->implementation->creation_metrics();
+        const auto staged_status = full_residual_status(*record->implementation, 0U, 0U, metrics);
+        *out_context = handle.release();
+        if (status != nullptr) {
+            *status = staged_status;
+        }
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 full_residual_create_cpu_boundary(
+    const sa_full_residual_operator_v1* const descriptor,
+    sa_full_residual_context_v1** const out_context,
+    sa_full_residual_status_v1* const status,
+    sa_error_buffer_v1* const error) noexcept {
+    return full_residual_create_boundary_impl(
+        descriptor, out_context, status, error, SA_EXECUTION_BACKEND_CPU);
+}
+
+#if defined(STRUCTURAL_ENABLE_HIP_BACKEND)
+[[nodiscard]] sa_status_code_v1 full_residual_create_hip_boundary(
+    const sa_full_residual_operator_v1* const descriptor,
+    sa_full_residual_context_v1** const out_context,
+    sa_full_residual_status_v1* const status,
+    sa_error_buffer_v1* const error) noexcept {
+    return full_residual_create_boundary_impl(
+        descriptor, out_context, status, error, SA_EXECUTION_BACKEND_HIP);
+}
+#endif
+
+[[nodiscard]] sa_status_code_v1 full_residual_evaluate_boundary(
+    sa_full_residual_context_v1* const context,
+    const sa_full_residual_eval_config_v1* const config,
+    const sa_buffer_view_v1* const states,
+    const sa_mut_buffer_view_v1* const residual,
+    sa_full_residual_status_v1* const status,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [context, config, states, residual, status, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual eval config is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_12) {
+            return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "full residual eval config ABI is not v1.12");
+        }
+        if (config->struct_size < sizeof(sa_full_residual_eval_config_v1)) {
+            return report_error(error, SA_ERR_STRUCT_SIZE, "full residual eval config struct_size is too small");
+        }
+        if (config->batch_size == 0U
+            || config->batch_size > structural::solver_cpu::kFullResidualMaximumBatchSize
+            || config->repetitions == 0U
+            || config->repetitions
+                > structural::solver_cpu::kFullResidualMaximumRepetitions
+            || config->flags != 0U
+            || std::any_of(
+                std::begin(config->reserved),
+                std::end(config->reserved),
+                [](const auto value) { return value != 0U; })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual eval config is invalid");
+        }
+        auto record = acquire_full_residual(context);
+        if (!record) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual context is not live");
+        }
+        std::unique_lock execution_lock {record->execution_mutex, std::try_to_lock};
+        if (!execution_lock.owns_lock()) {
+            return report_error(error, SA_ERR_STATE_CONFLICT, "full residual context is already executing");
+        }
+        auto validation = validate_full_residual_status(status, error);
+        if (validation != SA_OK) {
+            return validation;
+        }
+        const auto& operator_data = record->implementation->operator_data();
+        if (config->batch_size > std::numeric_limits<std::uint64_t>::max() / operator_data.order
+            || config->batch_size
+                > std::numeric_limits<std::uint64_t>::max() / operator_data.free_dof_count) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual eval dimensions overflow");
+        }
+        const auto state_count = config->batch_size * operator_data.order;
+        const auto output_count = config->batch_size * operator_data.free_dof_count;
+        if (state_count > structural::solver_cpu::kFullResidualMaximumValueCount
+            || output_count > structural::solver_cpu::kFullResidualMaximumValueCount) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "full residual eval value count is too large");
+        }
+        validation = validate_full_residual_input(
+            states,
+            SA_ELEMENT_TYPE_F64,
+            state_count,
+            "full residual state metadata is invalid",
+            error);
+        if (validation != SA_OK) {
+            return validation;
+        }
+        validation = validate_full_residual_output(residual, output_count, error);
+        if (validation != SA_OK) {
+            return validation;
+        }
+        const auto output_extent = output_count * sizeof(double);
+        const auto state_extent = state_count * sizeof(double);
+        const std::array immutable_regions {
+            MemoryRegion {context, sizeof(*context)},
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {states, sizeof(*states)},
+            MemoryRegion {residual, sizeof(*residual)},
+            MemoryRegion {states->data, state_extent},
+        };
+        for (const auto& immutable : immutable_regions) {
+            if (ranges_overlap(residual->data, output_extent, immutable.data, immutable.extent)
+                || (status != nullptr
+                    && ranges_overlap(status, sizeof(*status), immutable.data, immutable.extent))) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "full residual eval output overlaps immutable input");
+            }
+        }
+        if (status != nullptr
+            && ranges_overlap(residual->data, output_extent, status, sizeof(*status))) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "full residual eval outputs overlap");
+        }
+        std::vector<double> staged(static_cast<std::size_t>(output_count));
+        structural::solver_cpu::FullResidualMetrics metrics;
+        try {
+            metrics = record->implementation->evaluate(
+                {static_cast<const double*>(states->data), static_cast<std::size_t>(state_count)},
+                static_cast<std::size_t>(config->batch_size),
+                config->repetitions,
+                staged);
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        } catch (const std::runtime_error& exception) {
+            const auto code = record->implementation->execution_backend()
+                    == SA_EXECUTION_BACKEND_HIP
+                ? SA_ERR_BACKEND_UNAVAILABLE
+                : SA_ERR_INTERNAL;
+            return report_error(error, code, exception.what());
+        }
+        const auto staged_status = full_residual_status(
+            *record->implementation, config->batch_size, config->repetitions, metrics);
+        std::memcpy(residual->data, staged.data(), static_cast<std::size_t>(output_extent));
+        if (status != nullptr) {
+            *status = staged_status;
+        }
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 full_residual_destroy_boundary(
+    sa_full_residual_context_v1* const context,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [context, error]() -> sa_status_code_v1 {
+        if (context == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual context is null");
+        }
+        std::unique_lock registry_lock {full_residual_registry_mutex()};
+        const auto found = full_residual_registry().find(context);
+        if (found == full_residual_registry().end()) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual context is not live");
+        }
+        auto record = found->second;
+        if (record.use_count() != 2L) {
+            return report_error(error, SA_ERR_STATE_CONFLICT, "full residual context has an in-flight call");
+        }
+        std::unique_lock execution_lock {record->execution_mutex, std::try_to_lock};
+        if (!execution_lock.owns_lock()) {
+            return report_error(error, SA_ERR_STATE_CONFLICT, "full residual context is executing");
+        }
+        full_residual_registry().erase(found);
+        registry_lock.unlock();
+        delete context;
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 full_residual_device_name_size_boundary(
+    const sa_full_residual_context_v1* const context,
+    std::uint64_t* const out_size,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [context, out_size, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(out_size)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "device-name size output is null or misaligned");
+        }
+        const auto record = acquire_full_residual(context);
+        if (!record) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual context is not live");
+        }
+        if (ranges_overlap(out_size, sizeof(*out_size), context, sizeof(*context))) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "device-name size output overlaps context");
+        }
+        *out_size = record->implementation->device_name().size() + 1U;
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 full_residual_device_name_write_boundary(
+    const sa_full_residual_context_v1* const context,
+    char* const output,
+    const std::uint64_t capacity,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [context, output, capacity, error]() -> sa_status_code_v1 {
+        const auto record = acquire_full_residual(context);
+        if (!record) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "full residual context is not live");
+        }
+        const auto name = record->implementation->device_name();
+        const auto required = static_cast<std::uint64_t>(name.size() + 1U);
+        if (output == nullptr || capacity < required) {
+            return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "device-name output buffer is too small");
+        }
+        if (capacity > static_cast<std::uint64_t>(std::numeric_limits<std::size_t>::max())
+            || reinterpret_cast<std::uintptr_t>(output)
+                > std::numeric_limits<std::uintptr_t>::max() - (required - 1U)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "device-name output extent is invalid");
+        }
+        if (ranges_overlap(output, required, context, sizeof(*context))) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "device-name output overlaps context");
+        }
+        std::memcpy(output, name.data(), name.size());
+        output[name.size()] = '\0';
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 backend_get_api_boundary(
+    const sa_backend_request_v1* const request,
+    sa_backend_api_v1* const out_api,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [request, out_api, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(request) || !pointer_is_aligned(out_api)) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "backend request or output is null or misaligned");
+        }
+        if (request->abi_version != SA_ABI_V1_12 || out_api->abi_version != SA_ABI_V1_12) {
+            return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "backend selector requires ABI v1.12");
+        }
+        if (request->struct_size < sizeof(sa_backend_request_v1)
+            || out_api->struct_size < sizeof(sa_backend_api_v1)) {
+            return report_error(error, SA_ERR_STRUCT_SIZE, "backend descriptor struct_size is too small");
+        }
+        if (ranges_overlap(request, sizeof(*request), out_api, sizeof(*out_api))) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "backend request and output overlap");
+        }
+        if (request->flags != 0U
+            || std::any_of(
+                std::begin(request->reserved),
+                std::end(request->reserved),
+                [](const auto value) { return value != 0U; })) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "backend request reserved fields are not zero");
+        }
+        if (request->execution_backend == SA_EXECUTION_BACKEND_HIP) {
+            if (request->device_id < 0) {
+                return report_error(error, SA_ERR_DEVICE_MISMATCH, "HIP backend requires a nonnegative device id");
+            }
+#if defined(STRUCTURAL_ENABLE_HIP_BACKEND)
+            if (request->device_id != 0) {
+                return report_error(error, SA_ERR_DEVICE_MISMATCH, "ABI v1.12 HIP backend is bounded to device 0");
+            }
+            const auto device_status = structural::hip::full_residual_hip_device_status(
+                request->device_id);
+            if (device_status == structural::hip::FullResidualHipDeviceStatus::device_mismatch) {
+                return report_error(error, SA_ERR_DEVICE_MISMATCH, "requested HIP device does not exist");
+            }
+            if (device_status != structural::hip::FullResidualHipDeviceStatus::available) {
+                return report_error(error, SA_ERR_BACKEND_UNAVAILABLE, "HIP runtime or device is unavailable");
+            }
+            const sa_backend_api_v1 staged {
+                SA_ABI_V1_12,
+                static_cast<std::uint32_t>(sizeof(sa_backend_api_v1)),
+                SA_EXECUTION_BACKEND_HIP,
+                0,
+                SA_BACKEND_CAPABILITY_FULL_RESIDUAL,
+                &full_residual_create_hip_boundary,
+                &full_residual_evaluate_boundary,
+                &full_residual_destroy_boundary,
+                &full_residual_device_name_size_boundary,
+                &full_residual_device_name_write_boundary,
+                {0U, 0U},
+            };
+            *out_api = staged;
+            return SA_OK;
+#else
+            return report_error(error, SA_ERR_BACKEND_UNAVAILABLE, "this product library was built without HIP");
+#endif
+        }
+        if (request->execution_backend != SA_EXECUTION_BACKEND_CPU || request->device_id != -1) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "CPU backend requires device id -1");
+        }
+        const sa_backend_api_v1 staged {
+            SA_ABI_V1_12,
+            static_cast<std::uint32_t>(sizeof(sa_backend_api_v1)),
+            SA_EXECUTION_BACKEND_CPU,
+            -1,
+            SA_BACKEND_CAPABILITY_FULL_RESIDUAL,
+            &full_residual_create_cpu_boundary,
+            &full_residual_evaluate_boundary,
+            &full_residual_destroy_boundary,
+            &full_residual_device_name_size_boundary,
+            &full_residual_device_name_write_boundary,
+            {0U, 0U},
+        };
+        *out_api = staged;
+        return SA_OK;
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -4637,6 +5313,9 @@ void publish_sparse_restart_state(
     case SA_ABI_V1_11:
         api_min_size = SA_API_V1_11_MIN_SIZE;
         break;
+    case SA_ABI_V1_12:
+        api_min_size = SA_API_V1_12_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -4669,6 +5348,7 @@ void publish_sparse_restart_state(
     const bool generalized_eigen_enabled = request->abi_version >= SA_ABI_V1_9;
     const bool sparse_linear_restart_enabled = request->abi_version >= SA_ABI_V1_10;
     const bool nonlinear_static_restart_enabled = request->abi_version >= SA_ABI_V1_11;
+    const bool backend_selector_enabled = request->abi_version >= SA_ABI_V1_12;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -4699,7 +5379,8 @@ void publish_sparse_restart_state(
                     : UINT64_C(0))
             | (nonlinear_static_restart_enabled
                     ? SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
-                    : UINT64_C(0)),
+                    : UINT64_C(0))
+            | (backend_selector_enabled ? SA_CAPABILITY_BACKEND_SELECTOR : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -4720,6 +5401,7 @@ void publish_sparse_restart_state(
         sparse_linear_restart_enabled ? &sparse_linear_advance_boundary : nullptr,
         nonlinear_static_restart_enabled ? &nonlinear_static_begin_boundary : nullptr,
         nonlinear_static_restart_enabled ? &nonlinear_static_advance_boundary : nullptr,
+        backend_selector_enabled ? &backend_get_api_boundary : nullptr,
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

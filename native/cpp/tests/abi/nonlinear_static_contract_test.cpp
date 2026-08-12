@@ -449,7 +449,7 @@ struct RestartState {
     CHECK(api.nonlinear_static_advance != nullptr);
     CHECK((api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU) != 0U);
     CHECK(SA_API_V1_10_MIN_SIZE == offsetof(sa_api_v1, nonlinear_static_begin));
-    CHECK(SA_API_V1_11_MIN_SIZE == sizeof(sa_api_v1));
+    CHECK(SA_API_V1_11_MIN_SIZE == offsetof(sa_api_v1, backend_get_api));
 
     const auto cfg = config(SA_ABI_V1_11);
     Inputs values;

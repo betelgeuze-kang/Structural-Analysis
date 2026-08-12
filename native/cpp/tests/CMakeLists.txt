@@ -27,6 +27,27 @@ add_test(NAME structural_abi_contract_tests COMMAND structural_abi_contract_test
 set_tests_properties(structural_abi_contract_tests PROPERTIES LABELS "abi")
 
 add_executable(
+  structural_backend_selector_abi_tests
+  abi/backend_selector_contract_test.cpp
+)
+target_link_libraries(
+  structural_backend_selector_abi_tests
+  PRIVATE
+    structural_c_abi_v1
+    Threads::Threads
+)
+structural_set_warnings(structural_backend_selector_abi_tests)
+structural_enable_sanitizers(structural_backend_selector_abi_tests)
+add_test(
+  NAME structural_backend_selector_abi_tests
+  COMMAND structural_backend_selector_abi_tests
+)
+set_tests_properties(
+  structural_backend_selector_abi_tests
+  PROPERTIES LABELS "abi;backend;solver_cpu;full_residual"
+)
+
+add_executable(
   structural_track_point_load_abi_tests
   abi/track_point_load_contract_test.cpp
 )
@@ -267,6 +288,7 @@ if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_SPARSE_HIP_TEST_SOURCE hip/sparse_linear_hip_parity_test.hip.cpp)
   set(STRUCTURAL_NONLINEAR_STATIC_HIP_TEST_SOURCE hip/nonlinear_static_hip_parity_test.hip.cpp)
   set(STRUCTURAL_NONLINEAR_NDTHA_HIP_TEST_SOURCE hip/nonlinear_ndtha_hip_parity_test.hip.cpp)
+  set(STRUCTURAL_FULL_RESIDUAL_HIP_TEST_SOURCE hip/full_residual_backend_hip_parity_test.hip.cpp)
   set(
     STRUCTURAL_GENERALIZED_EIGEN_HIP_TEST_SOURCE
     hip/generalized_eigen_hip_parity_test.hip.cpp
@@ -283,6 +305,10 @@ if(STRUCTURAL_ENABLE_HIP)
   )
   set_source_files_properties(
     ${STRUCTURAL_GENERALIZED_EIGEN_HIP_TEST_SOURCE}
+    PROPERTIES LANGUAGE HIP
+  )
+  set_source_files_properties(
+    ${STRUCTURAL_FULL_RESIDUAL_HIP_TEST_SOURCE}
     PROPERTIES LANGUAGE HIP
   )
   add_executable(
@@ -491,5 +517,47 @@ if(STRUCTURAL_ENABLE_HIP)
       LABELS "hip;hip-dedicated;solver_hip;generalized_eigen;modal;buckling"
       RESOURCE_LOCK "structural_rocm_device_0"
       TIMEOUT 180
+  )
+
+  add_executable(
+    structural_full_residual_backend_hip_parity_tests
+    ${STRUCTURAL_FULL_RESIDUAL_HIP_TEST_SOURCE}
+  )
+  set_target_properties(
+    structural_full_residual_backend_hip_parity_tests
+    PROPERTIES
+      HIP_STANDARD 20
+      HIP_STANDARD_REQUIRED ON
+      HIP_EXTENSIONS OFF
+  )
+  target_include_directories(
+    structural_full_residual_backend_hip_parity_tests
+    PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/hip
+      ${PROJECT_SOURCE_DIR}/src/solver_cpu
+  )
+  target_link_libraries(
+    structural_full_residual_backend_hip_parity_tests
+    PRIVATE
+      structural_c_abi_v1
+      structural_solver_hip
+      structural_solver_cpu
+  )
+  target_compile_options(
+    structural_full_residual_backend_hip_parity_tests
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-ffp-contract=off>
+  )
+  structural_set_warnings(structural_full_residual_backend_hip_parity_tests)
+  add_test(
+    NAME structural_full_residual_backend_hip_parity_tests
+    COMMAND structural_full_residual_backend_hip_parity_tests
+  )
+  set_tests_properties(
+    structural_full_residual_backend_hip_parity_tests
+    PROPERTIES
+      LABELS "hip;hip-dedicated;abi;backend;full_residual"
+      RESOURCE_LOCK "structural_rocm_device_0"
+      TIMEOUT 120
   )
 endif()

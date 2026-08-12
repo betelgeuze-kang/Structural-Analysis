@@ -1,10 +1,18 @@
 [package]
 name = "mgt_hip_full_residual_rust_ffi"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+workspace = "../../../native"
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
 
 [lib]
 name = "mgt_hip_full_residual_rust_ffi"
 crate-type = ["cdylib"]
 
 [dependencies]
+structural-ffi-sys = { path = "../../../native/crates/structural-ffi-sys" }
+
+[lints]
+workspace = true

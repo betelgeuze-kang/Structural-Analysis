@@ -115,6 +115,7 @@ if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_GENERALIZED_EIGEN_HIP_SOURCE src/hip/generalized_eigen_hip.hip.cpp)
   set(STRUCTURAL_NONLINEAR_STATIC_HIP_SOURCE src/hip/nonlinear_static_hip.hip.cpp)
   set(STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE src/hip/nonlinear_ndtha_hip.hip.cpp)
+  set(STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE src/hip/full_residual_hip.hip.cpp)
   set_source_files_properties(${STRUCTURAL_REFERENCE_HIP_SOURCE} PROPERTIES LANGUAGE HIP)
   set_source_files_properties(${STRUCTURAL_SPARSE_HIP_SOURCE} PROPERTIES LANGUAGE HIP)
   set_source_files_properties(
@@ -127,6 +128,10 @@ if(STRUCTURAL_ENABLE_HIP)
   )
   set_source_files_properties(
     ${STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE}
+    PROPERTIES LANGUAGE HIP
+  )
+  set_source_files_properties(
+    ${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE}
     PROPERTIES LANGUAGE HIP
   )
   set_property(
@@ -143,6 +148,8 @@ if(STRUCTURAL_ENABLE_HIP)
       src/hip/nonlinear_static_hip.hpp
       ${STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE}
       src/hip/nonlinear_ndtha_hip.hpp
+      ${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE}
+      src/hip/full_residual_hip.hpp
       src/hip/story_frame_hip_device.hpp
   )
   file(READ ${STRUCTURAL_REFERENCE_HIP_SOURCE} STRUCTURAL_REFERENCE_HIP_SOURCE_TEXT)
@@ -209,6 +216,21 @@ if(STRUCTURAL_ENABLE_HIP)
     STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE_SHA256
     "${STRUCTURAL_NONLINEAR_NDTHA_HIP_HEADER_TEXT}${STRUCTURAL_STORY_FRAME_HIP_DEVICE_HEADER_TEXT}${STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE_TEXT}"
   )
+  file(
+    READ
+    ${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE}
+    STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE_TEXT
+  )
+  file(
+    READ
+    src/hip/full_residual_hip.hpp
+    STRUCTURAL_FULL_RESIDUAL_HIP_HEADER_TEXT
+  )
+  string(
+    SHA256
+    STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE_SHA256
+    "${STRUCTURAL_FULL_RESIDUAL_HIP_HEADER_TEXT}${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE_TEXT}"
+  )
   list(GET CMAKE_HIP_ARCHITECTURES 0 STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH)
   string(REGEX REPLACE "^gfx" "" STRUCTURAL_REFERENCE_HIP_ISA_SUFFIX "${STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH}")
   set(
@@ -269,6 +291,7 @@ endif()
 
 add_library(
   structural_solver_cpu STATIC
+  src/solver_cpu/full_residual.cpp
   src/solver_cpu/generalized_eigen.cpp
   src/solver_cpu/story_frame.cpp
   src/solver_cpu/nonlinear_ndtha.cpp
@@ -299,6 +322,7 @@ if(STRUCTURAL_ENABLE_HIP)
     ${STRUCTURAL_GENERALIZED_EIGEN_HIP_SOURCE}
     ${STRUCTURAL_NONLINEAR_STATIC_HIP_SOURCE}
     ${STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE}
+    ${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE}
   )
   add_library(Structural::solver_hip ALIAS structural_solver_hip)
   set_target_properties(
@@ -333,6 +357,9 @@ if(STRUCTURAL_ENABLE_HIP)
       STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE_SHA256="${STRUCTURAL_NONLINEAR_NDTHA_HIP_SOURCE_SHA256}"
       STRUCTURAL_NONLINEAR_NDTHA_HIP_DEVICE_LIB_SHA256="${STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256}"
       STRUCTURAL_NONLINEAR_NDTHA_HIP_COMPILED_ARCHITECTURES="${CMAKE_HIP_ARCHITECTURES}"
+      STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE_SHA256="${STRUCTURAL_FULL_RESIDUAL_HIP_SOURCE_SHA256}"
+      STRUCTURAL_FULL_RESIDUAL_HIP_DEVICE_LIB_SHA256="${STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256}"
+      STRUCTURAL_FULL_RESIDUAL_HIP_COMPILED_ARCHITECTURES="${CMAKE_HIP_ARCHITECTURES}"
   )
   target_compile_options(
     structural_solver_hip
@@ -352,6 +379,10 @@ target_link_libraries(
     structural_solver_cpu
 )
 target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_C_ABI_V1_BUILD=1)
+if(STRUCTURAL_ENABLE_HIP)
+  target_link_libraries(structural_c_abi_v1 PUBLIC structural_solver_hip)
+  target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_ENABLE_HIP_BACKEND=1)
+endif()
 set_target_properties(
   structural_c_abi_v1
   PROPERTIES
@@ -397,6 +428,9 @@ set(
   structural_solver_cpu
   structural_c_abi_v1
 )
+if(STRUCTURAL_ENABLE_HIP)
+  list(APPEND STRUCTURAL_INSTALL_TARGETS structural_elements_hip structural_solver_hip)
+endif()
 install(
   TARGETS ${STRUCTURAL_INSTALL_TARGETS}
   EXPORT StructuralNativeTargets

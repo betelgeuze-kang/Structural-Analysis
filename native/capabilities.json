@@ -7,6 +7,12 @@
       "owner": "structural-ffi",
       "claim": "base descriptors, error buffers, layout, overflow and function table only"
     },
+    "backend_selector": {
+      "status": "implemented",
+      "cutover_gate": "C3",
+      "owner": "structural-ffi",
+      "claim": "ABI v1.12 appends one versioned backend_get_api slot to sa_get_api_v1; the CPU full-residual context owns validated CSR/operator state, deterministic FP64 execution, caller-owned results and lifecycle telemetry behind an opaque non-Send Rust RAII wrapper with concurrent immutable queries and exclusive mutable execution, while the frozen seven-symbol Rust compatibility adapter resolves only sa_get_api_v1 and delegates to the same table; HIP is explicit opt-in and fails closed in CPU-only builds, and protected-runner HIP C2, broader operator families, ROCm packaging and C6 remain open"
+    },
     "modelir_v2_rust_wire": {
       "status": "implemented",
       "cutover_gate": "C1",
@@ -167,7 +173,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural_c_abi_v1",
-      "claim": "the hosted and CPU-only packages contain no HIP dependency or selectable backend; product-owned reference-element/assembly, resident sparse-PCG, generalized-eigen, bounded resident nonlinear-static Newton and nonlinear-NDTHA Newmark/Newton local C2 candidates exist only behind STRUCTURAL_ENABLE_HIP=ON, while protected receipts, an ABI backend selector, ROCm packaging, parallel/general solver authority and C6 remain open"
+      "claim": "the hosted and CPU-only packages contain no HIP dependency and reject HIP selection through the ABI v1.12 backend table; an opt-in product-owned full-residual context plus reference-element/assembly, resident sparse-PCG, generalized-eigen, bounded resident nonlinear-static Newton and nonlinear-NDTHA Newmark/Newton C2 candidates exist only behind STRUCTURAL_ENABLE_HIP=ON, while protected native-hip-approved receipts, ROCm package authority, parallel/general solver authority and C6 remain open"
     }
   }
 }
