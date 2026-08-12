@@ -3,6 +3,7 @@
 #include "story_frame.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -369,6 +370,85 @@ void validate_execution_state(
 
 } // namespace
 
+void validate_nonlinear_ndtha_problem(
+    const NonlinearNdthaConfig& config,
+    const NonlinearNdthaInputs& inputs) {
+    constexpr std::uint32_t maximum_count = 1'000'000U;
+    const std::array scalar_values {
+        config.dt_s,
+        config.newmark_beta,
+        config.newmark_gamma,
+        config.tolerance,
+        config.adaptive_load_decay,
+        config.damping_force_cap_ratio,
+        config.line_search_decay,
+        config.line_search_min,
+        config.hardening_ratio,
+        config.pdelta_factor,
+        config.collapse_drift_threshold_pct,
+    };
+    if (!spans_match(config, inputs) || config.story_count > maximum_count
+        || config.step_count > maximum_count || config.max_step_iterations == 0U
+        || config.newton_max_iter == 0U
+        || std::any_of(scalar_values.begin(), scalar_values.end(), [](const double value) {
+               return !std::isfinite(value);
+           })
+        || config.dt_s <= 0.0 || config.newmark_beta <= 0.0
+        || config.newmark_gamma <= 0.0 || config.tolerance <= 0.0
+        || config.adaptive_load_decay <= 0.0 || config.adaptive_load_decay > 1.0
+        || config.damping_force_cap_ratio <= 0.0 || config.line_search_decay <= 0.0
+        || config.line_search_decay >= 1.0 || config.line_search_min <= 0.0
+        || config.line_search_min > 1.0 || config.hardening_ratio < 0.0
+        || config.hardening_ratio > 1.0 || config.pdelta_factor < 0.0
+        || config.collapse_drift_threshold_pct <= 0.0) {
+        throw std::invalid_argument("nonlinear NDTHA problem is outside the bounded domain");
+    }
+    const std::array story_values {
+        inputs.story_stiffness_n_per_m,
+        inputs.story_height_m,
+        inputs.story_axial_n,
+        inputs.story_yield_drift_m,
+        inputs.story_mass_kg,
+        inputs.story_damping_n_s_per_m,
+        inputs.floor_load_base_n,
+    };
+    for (const auto input : story_values) {
+        if (!std::all_of(input.begin(), input.end(), [](const double value) {
+                return std::isfinite(value);
+            })) {
+            throw std::invalid_argument("nonlinear NDTHA input contains a non-finite value");
+        }
+    }
+    if (!std::all_of(
+            inputs.acceleration_g.begin(), inputs.acceleration_g.end(), [](const double value) {
+                return std::isfinite(value);
+            })) {
+        throw std::invalid_argument("nonlinear NDTHA acceleration contains a non-finite value");
+    }
+    if (std::any_of(
+            inputs.story_stiffness_n_per_m.begin(),
+            inputs.story_stiffness_n_per_m.end(),
+            [](const double value) { return value <= 0.0; })
+        || std::any_of(
+            inputs.story_height_m.begin(),
+            inputs.story_height_m.end(),
+            [](const double value) { return value <= 0.0; })
+        || std::any_of(
+            inputs.story_mass_kg.begin(),
+            inputs.story_mass_kg.end(),
+            [](const double value) { return value <= 0.0; })
+        || std::any_of(
+            inputs.story_damping_n_s_per_m.begin(),
+            inputs.story_damping_n_s_per_m.end(),
+            [](const double value) { return value < 0.0; })) {
+        throw std::invalid_argument("nonlinear NDTHA physical input domain is invalid");
+    }
+}
+
+std::vector<double> nonlinear_ndtha_height_shape(const std::size_t story_count) {
+    return make_height_shape(story_count);
+}
+
 NonlinearNdthaExecutionState make_nonlinear_ndtha_initial_state(
     const NonlinearNdthaConfig& config) {
     const auto story_count = static_cast<std::size_t>(config.story_count);
@@ -399,9 +479,7 @@ void advance_nonlinear_ndtha(
     const NonlinearNdthaInputs& inputs,
     const std::uint32_t step_budget,
     NonlinearNdthaExecutionState& state) {
-    if (!spans_match(config, inputs)) {
-        throw std::invalid_argument("nonlinear NDTHA input lengths do not match config counts");
-    }
+    validate_nonlinear_ndtha_problem(config, inputs);
     validate_execution_state(config, state);
     if (step_budget == 0U || state.status != NonlinearNdthaExecutionStatus::active) {
         return;
@@ -426,7 +504,7 @@ void advance_nonlinear_ndtha(
     std::vector<double> external_force(story_count, 0.0);
     std::vector<double> story_drift_pct(story_count, 0.0);
     std::vector<double> story_shear_kn(story_count, 0.0);
-    const auto height_shape = make_height_shape(story_count);
+    const auto height_shape = nonlinear_ndtha_height_shape(story_count);
     const auto remaining_steps = step_count - static_cast<std::size_t>(working.next_step);
     const auto steps_to_execute = std::min(
         remaining_steps, static_cast<std::size_t>(step_budget));

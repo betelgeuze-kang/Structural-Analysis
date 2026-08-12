@@ -144,6 +144,11 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "independent dense-matrix Python C1" in ndtha["claim"]
     assert "five-case" in ndtha["claim"]
     assert "broader dynamic input-space parity" in ndtha["claim"]
+    assert "single-thread FP64 HIP C2 candidate" in ndtha["claim"]
+    assert "Newmark/Newton control" in ndtha["claim"]
+    assert "exact local CPU/HIP" in ndtha["claim"]
+    assert "native-hip-approved" in ndtha["claim"]
+    assert "fallback 0" in ndtha["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "checkpoint_restart") is True
     )

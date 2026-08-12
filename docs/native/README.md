@@ -15,6 +15,12 @@
 10. [Bounded Reference Elements and Assembly HIP C2](reference-elements-hip-c2.md)
 11. [Bounded Sparse Linear CPU v1](sparse-linear-cpu-v1.md)
 12. [Sparse Linear Product C4/C5 v1](sparse-linear-product-e2e-v1.md)
+13. [Bounded Generalized Eigen CPU v1](generalized-eigen-cpu-v1.md)
+14. [Bounded Generalized Eigen HIP C2](generalized-eigen-hip-c2.md)
+15. [Generalized Eigen Product C4/C5 v1](generalized-eigen-product-e2e-v1.md)
+16. [Bounded Nonlinear-Static HIP C2](nonlinear-static-hip-c2.md)
+17. [Nonlinear-Static Product C4/C5 v1](nonlinear-static-product-e2e-v1.md)
+18. [Bounded Nonlinear-NDTHA HIP C2](nonlinear-ndtha-hip-c2.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

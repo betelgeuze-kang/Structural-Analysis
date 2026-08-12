@@ -247,6 +247,24 @@ def test_nonlinear_static_hip_sources_route_through_protected_oracle_gates() -> 
     assert payload["applicable"] is True
 
 
+def test_nonlinear_ndtha_hip_sources_route_through_protected_oracle_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/cpp/src/hip/nonlinear_ndtha_hip.hip.cpp",
+            "native/cpp/tests/hip/nonlinear_ndtha_hip_parity_test.hip.cpp",
+            ".github/workflows/native-hip-dedicated.yml",
+            "scripts/check_native_nonlinear_ndtha_hip.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["hip"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_generalized_eigen_product_contract_routes_through_runtime_ci_gates() -> None:
     payload = scope.classify_paths(
         [

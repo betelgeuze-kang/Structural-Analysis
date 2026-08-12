@@ -188,6 +188,7 @@ jobs:
           python3 scripts/check_native_sparse_linear_hip.py --json
           python3 scripts/check_native_generalized_eigen_hip.py --json
           python3 scripts/check_native_nonlinear_static_hip.py --json
+          python3 scripts/check_native_nonlinear_ndtha_hip.py --json
 
   abi-contract:
     name: abi-contract

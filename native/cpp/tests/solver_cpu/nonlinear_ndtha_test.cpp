@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <vector>
@@ -344,6 +345,43 @@ struct InputStorage {
     return true;
 }
 
+[[nodiscard]] bool shared_problem_validation_rejects_invalid_domains() {
+    InputStorage nonfinite_storage;
+    nonfinite_storage.stiffness[0] = std::numeric_limits<double>::quiet_NaN();
+    bool nonfinite_rejected = false;
+    try {
+        structural::solver_cpu::validate_nonlinear_ndtha_problem(
+            config(), nonfinite_storage.views());
+    } catch (const std::invalid_argument&) {
+        nonfinite_rejected = true;
+    }
+    CHECK(nonfinite_rejected);
+
+    InputStorage negative_damping_storage;
+    negative_damping_storage.damping[1] = -1.0;
+    bool physical_domain_rejected = false;
+    try {
+        structural::solver_cpu::validate_nonlinear_ndtha_problem(
+            config(), negative_damping_storage.views());
+    } catch (const std::invalid_argument&) {
+        physical_domain_rejected = true;
+    }
+    CHECK(physical_domain_rejected);
+
+    const InputStorage storage;
+    auto invalid_config = config();
+    invalid_config.line_search_decay = 1.0;
+    bool config_rejected = false;
+    try {
+        structural::solver_cpu::validate_nonlinear_ndtha_problem(
+            invalid_config, storage.views());
+    } catch (const std::invalid_argument&) {
+        config_rejected = true;
+    }
+    CHECK(config_rejected);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -354,6 +392,7 @@ int main() {
         segmented_resume_is_bitwise_identical_to_one_shot,
         terminal_resume_is_idempotent_and_bitwise_identical,
         invalid_resume_state_is_rejected_without_mutation,
+        shared_problem_validation_rejects_invalid_domains,
     };
     for (const auto test : tests) {
         if (!test()) {

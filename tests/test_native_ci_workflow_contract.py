@@ -154,4 +154,7 @@ def test_reference_hip_c2_is_manual_protected_and_self_hosted_only() -> None:
     assert "structural_nonlinear_static_hip_parity_tests" in workflow
     assert "check_native_nonlinear_static_hip.py" in workflow
     assert "native-nonlinear-static-hip-receipt.json" in workflow
+    assert "structural_nonlinear_ndtha_hip_parity_tests" in workflow
+    assert "check_native_nonlinear_ndtha_hip.py" in workflow
+    assert "native-nonlinear-ndtha-hip-receipt.json" in workflow
     assert "structural_reference_elements_hip_parity_tests" in workflow

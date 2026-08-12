@@ -1,6 +1,7 @@
 #ifndef STRUCTURAL_SOLVER_CPU_NONLINEAR_NDTHA_HPP
 #define STRUCTURAL_SOLVER_CPU_NONLINEAR_NDTHA_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <span>
 #include <vector>
@@ -91,6 +92,14 @@ struct NonlinearNdthaExecutionState {
     std::vector<double> acceleration_m_per_s2;
     NonlinearNdthaResponse response;
 };
+
+/// Validate the shared CPU/accelerator nonlinear-NDTHA problem contract.
+void validate_nonlinear_ndtha_problem(
+    const NonlinearNdthaConfig& config,
+    const NonlinearNdthaInputs& inputs);
+
+/// Build the deterministic story-height participation shape consumed by both backends.
+[[nodiscard]] std::vector<double> nonlinear_ndtha_height_shape(std::size_t story_count);
 
 /// Allocate the deterministic zero initial state for one bounded NDTHA case.
 [[nodiscard]] NonlinearNdthaExecutionState make_nonlinear_ndtha_initial_state(

@@ -119,8 +119,9 @@ existing `reference-elements-c2` job id (displayed as `bounded-native-c2`) requi
 `native-hip-approved` environment and the
 complete `self-hosted, linux, x64, rocm, structural-approved` label set. It verifies the requested
 `gfx` target against `rocminfo`, builds only with `STRUCTURAL_ENABLE_HIP=ON`, executes the
-no-fallback reference-element/assembly, device-resident sparse-PCG, generalized-eigen and
-resident nonlinear-static Newton C2 parity tests, validates every source/device-library binding
+no-fallback reference-element/assembly, device-resident sparse-PCG, generalized-eigen,
+resident nonlinear-static Newton and resident nonlinear-NDTHA Newmark/Newton C2 parity tests,
+validates every source/device-library binding
 and uploads the raw receipts. A local execution is a candidate, not authoritative C2 evidence.
 
 ## 3. merge-product
@@ -298,8 +299,9 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
   locked dependency/SPDX policy checks. Once `native/Cargo.toml` exists, missing sanitizer,
   fuzz or dependency-policy ownership fails closed.
 - no hosted workflow invokes HIP/ROCm. `hip-dedicated` owns the product reference-element,
-  sparse-PCG, generalized-eigen and nonlinear-static Newton live targets and source-bound receipt
-  schemas, while protected execution remains a manual external gate.
+  sparse-PCG, generalized-eigen, nonlinear-static Newton and nonlinear-NDTHA Newmark/Newton live
+  targets and source-bound receipt schemas, while protected execution remains a manual external
+  gate.
 
 이 mapping은 workflow topology 구현만 뜻한다. workspace, ABI, ModelIR, sanitizer/fuzzer
 실행 성공 또는 hardware evidence를 주장하지 않는다.
