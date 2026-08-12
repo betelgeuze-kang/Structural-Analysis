@@ -104,7 +104,9 @@
     "wire_types": "native/crates/structural-contracts/src/legacy_runtime.rs",
     "raw_abi_mirror": "native/crates/structural-ffi-sys/src/legacy_runtime_v3.rs",
     "legacy_adapter": "implementation/phase1/structural_runtime_ffi/src/contracts.rs",
-    "numerical_oracle": "implementation/phase1/structural_runtime_ffi/src/lib.rs"
+    "legacy_runtime": "implementation/phase1/structural_runtime_ffi/src/runtime.rs",
+    "legacy_ffi": "implementation/phase1/structural_runtime_ffi/src/ffi.rs",
+    "public_facade": "implementation/phase1/structural_runtime_ffi/src/lib.rs"
   },
   "r3_track_point_load": {
     "family": "track_point_load",

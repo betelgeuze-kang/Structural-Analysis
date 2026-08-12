@@ -402,6 +402,9 @@ freshness는 별도 필드로 유지한다.
 
 `structural_runtime_ffi` R2 contract extraction은 migration topology, raw/wire ownership과 기존
 ABI/golden freeze다. 수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다.
+후속 R3 compatibility decomposition은 같은 authority를 `contracts.rs`, `runtime.rs`, `ffi.rs`,
+작은 `lib.rs` façade로 물리 분리했으며 5개 export와 golden bytes를 그대로 유지한다. 이 역시
+product gate 승격은 아니다.
 네 pointer-free neutral fixture는 향후 C++ parity 입력/결과 계약이지만 현재 numerical truth는
 기존 Rust compatibility owner에 있다. `track_point_load`, `nonlinear_static`,
 `nonlinear_ndtha`의 한정 product matrix는 각각 별도 Python C1 golden이 수치 truth를 소유한다.

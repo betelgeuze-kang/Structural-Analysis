@@ -1,16 +1,16 @@
 # Existing Native Probe to Product Library Transition Plan
 
-Status: migration plan
+Status: active migration; R3 compatibility decomposition complete, R4 cutover pending
 
-Baseline: exact main 14c25f4ddb72eb64cab689e6d0183b056025dca3
+Historical baseline: exact main 14c25f4ddb72eb64cab689e6d0183b056025dca3
 
-## 1. Current boundary
+## 1. Historical boundary
 
 현재 native source는 유용한 수치/장치 실험을 포함하지만 하나의 versioned product
 library를 구성하지 않는다.
 
-- implementation/phase1/structural_runtime_ffi/src/lib.rs
-  - 약 1,288 lines의 단일 Rust file
+- implementation/phase1/structural_runtime_ffi/src/lib.rs (historical baseline)
+  - 약 1,288 lines의 단일 Rust file였음
   - track, nonlinear frame, NDTHA와 utility ABI가 같은 crate에 결합
   - raw repr(C) 구조와 exported symbol이 product runtime/package graph 밖에 존재
 - implementation/phase1/mgt_hip_full_residual_ffi/src/lib.rs
@@ -135,6 +135,12 @@ R4 checkpoint/runtime cutover를 시작한다. `inplace_scale_f32`는 structural
 alias/checksum instrumentation이므로 compatibility-only probe로 고정했고 C0-C6 product gate를
 부여하지 않는다. backend receipt가 transfer/residency/fallback 계측을 대체한 뒤 Python producer
 hook과 함께 제거한다. R4 cutover는 아직 시작하지 않았다.
+
+R3 compatibility decomposition도 완료됐다. `contracts.rs`는 neutral wire adapter,
+`runtime.rs`는 frozen Rust numerical implementation, `ffi.rs`는 raw pointer/length와 5개 C export,
+`lib.rs`는 public re-export façade만 소유한다. checker는 runtime에 `no_mangle`, `extern C`, raw
+pointer 또는 `std::slice`가 다시 들어오거나 수치 helper가 FFI로 돌아가면 fail-closed한다. 이
+물리 분리는 legacy numerical authority, C0-C6 단계 또는 R4 cutover를 승격하지 않는다.
 
 ### Step R4: runtime cutover
 

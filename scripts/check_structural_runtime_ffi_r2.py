@@ -21,7 +21,9 @@ EXPECTED_OWNERSHIP = {
     "wire_types": "native/crates/structural-contracts/src/legacy_runtime.rs",
     "raw_abi_mirror": "native/crates/structural-ffi-sys/src/legacy_runtime_v3.rs",
     "legacy_adapter": "implementation/phase1/structural_runtime_ffi/src/contracts.rs",
-    "numerical_oracle": "implementation/phase1/structural_runtime_ffi/src/lib.rs",
+    "legacy_runtime": "implementation/phase1/structural_runtime_ffi/src/runtime.rs",
+    "legacy_ffi": "implementation/phase1/structural_runtime_ffi/src/ffi.rs",
+    "public_facade": "implementation/phase1/structural_runtime_ffi/src/lib.rs",
 }
 EXPECTED_VERIFICATION = {
     "rust_contract_test": "implementation/phase1/structural_runtime_ffi/tests/abi_v3_contract.rs",
@@ -50,6 +52,24 @@ WIRE_TYPES = {
     "NonlinearStaticCaseV3",
     "NonlinearNdthaCaseV3",
     "LegacyRuntimeCaseV3",
+}
+RUNTIME_FUNCTIONS = {
+    "apply_euler_operator",
+    "assemble_internal_and_tangent",
+    "cg_solve_euler",
+    "compute_story_response",
+    "displacement_gradient",
+    "dot",
+    "fill_point_load",
+    "ghost_at",
+    "max_abs",
+    "solve_ndtha_step",
+    "solve_tridiagonal",
+    "validate_cfg",
+    "validate_ndtha_cfg",
+    "validate_nl_cfg",
+    "vec_norm_inf",
+    "vec_norm_l2",
 }
 EXPECTED_GOLDEN_PATHS = frozenset(
     {
@@ -124,12 +144,36 @@ def check_r2(
     if not RAW_TYPES.issubset(raw_defined):
         blockers.append("r2_raw_abi_type_set_incomplete")
 
-    oracle_text = texts.get("numerical_oracle", "")
-    oracle_defined = set(re.findall(r"pub\s+struct\s+([A-Za-z0-9_]+)", oracle_text))
-    if RAW_TYPES & oracle_defined:
+    runtime_text = texts.get("legacy_runtime", "")
+    runtime_defined_types = set(
+        re.findall(r"pub\s+struct\s+([A-Za-z0-9_]+)", runtime_text)
+    )
+    if RAW_TYPES & runtime_defined_types:
         blockers.append("r2_raw_abi_types_still_owned_by_oracle")
-    if "pub use structural_ffi_sys::legacy_runtime_v3" not in oracle_text:
+    runtime_defined_functions = set(
+        re.findall(r"pub\(crate\)\s+fn\s+([A-Za-z0-9_]+)", runtime_text)
+    )
+    if not RUNTIME_FUNCTIONS.issubset(runtime_defined_functions):
+        blockers.append("r2_legacy_runtime_function_set_incomplete")
+    if any(
+        token in runtime_text
+        for token in ("#[no_mangle]", 'extern "C"', "*const ", "*mut ", "std::slice")
+    ):
+        blockers.append("r2_legacy_runtime_contains_ffi_boundary")
+
+    ffi_text = texts.get("legacy_ffi", "")
+    if "use crate::runtime" not in ffi_text:
+        blockers.append("r2_legacy_ffi_runtime_dependency_missing")
+    if RUNTIME_FUNCTIONS & set(
+        re.findall(r"(?:pub\(crate\)\s+)?fn\s+([A-Za-z0-9_]+)", ffi_text)
+    ):
+        blockers.append("r2_numerical_function_still_owned_by_ffi")
+
+    facade_text = texts.get("public_facade", "")
+    if "pub use structural_ffi_sys::legacy_runtime_v3" not in facade_text:
         blockers.append("r2_raw_abi_reexport_missing")
+    if "pub use ffi::" not in facade_text:
+        blockers.append("r2_legacy_export_reexport_missing")
 
     adapter_text = texts.get("legacy_adapter", "")
     adapter_defined = set(
@@ -226,7 +270,8 @@ def _report(
         "blockers": blockers,
         "claim_boundary": (
             "This check proves R2 raw ABI ownership, neutral wire contracts, adapters and "
-            "frozen R1 compatibility only. Numerical authority remains in the Rust oracle."
+            "frozen R1 compatibility only. The legacy Rust runtime and FFI are physically "
+            "separated, but numerical authority remains in the compatibility runtime."
         ),
     }
 

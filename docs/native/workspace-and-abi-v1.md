@@ -410,19 +410,24 @@ path가 생길 때까지 H0 상태를 유지한다.
 
 ## 15. Legacy structural runtime R2 contract boundary
 
-R2는 R1의 public ABI와 numerical oracle을 유지한 채 ownership만 세 층으로 분리한다.
+R2/R3 compatibility decomposition은 R1의 public ABI와 numerical oracle을 유지한 채 ownership을
+명시적으로 분리한다.
 
 - `structural-ffi-sys::legacy_runtime_v3`: 7개 raw C layout, ABI v3 constant와 고정 status code
 - `structural-contracts::legacy_runtime`: pointer-free typed wire case, strict JSON/schema와
   node/story/step exact-length validation
 - `structural_runtime_ffi::contracts`: raw invocation/result를 neutral wire type으로 옮기는
   compatibility adapter
-- `structural_runtime_ffi::lib`: 기존 5개 exported function과 Rust numerical oracle
+- `structural_runtime_ffi::runtime`: frozen Rust numerical implementation
+- `structural_runtime_ffi::ffi`: raw pointer/length boundary와 기존 5개 exported function
+- `structural_runtime_ffi::lib`: raw type/export를 유지하는 작은 public façade
 
 wire schema의 scalar/vector field는 SI unit suffix를 사용하고 enum/status set을 닫는다.
 in-place scale의 raw pointer 값은 fixture나 error에 포함하지 않으며 동일 저장소 여부만
 `shared_storage`로 기록한다. 네 fixture의 tracked bytes와 SHA-256, raw adapter equality,
 duplicate/unknown/non-finite/length rejection을 CI에서 함께 검사한다.
+CI는 runtime에 C ABI/raw pointer가 다시 섞이거나 numerical helper가 FFI module로 되돌아가는
+ownership drift도 거부한다.
 
 R2는 `sa_get_api_v1` operation, C++ solver, checkpoint/restart 또는 product E2E를 만들지 않는다.
 따라서 capabilities와 C0-C6 원장은 변경하지 않는다. 다음 R3 gate는 한 family의 C++ native

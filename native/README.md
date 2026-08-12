@@ -290,7 +290,9 @@ package name, cdylib name, Python bridge output location and rollback lockfile. 
 inventory is `compatibility/structural_runtime_ffi_v3.json`; workspace tests, neutral fixture
 hashes and the release binary-symbol checker fail closed on drift. The language-neutral wire
 contract serializes shared-storage identity as a boolean and never serializes process pointer
-addresses. The C++ shared product library still exports only `sa_get_api_v1`, while all five
+addresses. Its compatibility implementation is physically split into the neutral `contracts`
+adapter, frozen numerical `runtime`, raw-pointer/export `ffi`, and public `lib` façade; ownership
+checks reject boundary regression. The C++ shared product library still exports only `sa_get_api_v1`, while all five
 legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` is now the
 H3 workspace compatibility adapter: it resolves only `sa_get_api_v1`, converts the frozen
 positional ABI to v1.12 descriptors, and delegates context ownership to the product library.

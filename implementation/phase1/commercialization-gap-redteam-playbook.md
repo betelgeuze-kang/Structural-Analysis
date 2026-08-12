@@ -233,7 +233,8 @@ python3 implementation/phase1/phase1_ci_gate.py \
 ### P0-1 Rust/HIP 실엔진 연동
 - 상태: `In Progress` (Rust 실커널 경로 + zero-copy 증거 경로 구현)
 - 반영 파일:
-  - `implementation/phase1/structural_runtime_ffi/src/lib.rs` (Rust CG/Timoshenko 커널 + in-place scale 커널)
+  - `implementation/phase1/structural_runtime_ffi/src/runtime.rs` (Rust CG/Timoshenko 커널 + in-place scale 수치 helper)
+  - `implementation/phase1/structural_runtime_ffi/src/ffi.rs` (legacy raw pointer ABI와 5개 export)
   - `implementation/phase1/structural_runtime_ffi/Cargo.toml` (`cdylib` 타겟)
   - `implementation/phase1/rust_track_lf_bridge.py` (신규, ctypes FFI 브리지)
   - `implementation/phase1/structural_runtime_hook.py` (구조해석 런타임 action을 Rust FFI 실호출 경로로 연결)

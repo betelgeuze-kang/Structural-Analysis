@@ -157,7 +157,7 @@ def check_r1(
     }:
         blockers.append("r1_inventory_golden_case_set_invalid")
 
-    source_path = repo_root / "implementation/phase1/structural_runtime_ffi/src/lib.rs"
+    source_path = repo_root / "implementation/phase1/structural_runtime_ffi/src/ffi.rs"
     try:
         source_text = source_path.read_text(encoding="utf-8")
         source_exports = sorted(SOURCE_EXPORT_RE.findall(source_text))

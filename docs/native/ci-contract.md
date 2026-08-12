@@ -83,7 +83,8 @@ Jobs:
      matrix plus nonconvergence, with bitwise repeats, exact iteration/status/material/line-search
      parity, zero measured result error and fallback zero; sequential promotion remains C1 before
      the protected receipt
-   - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
+   - retained R2 raw/wire/adapter ownership, contracts/runtime/FFI physical separation and neutral
+     fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
    - CPU-only CMake configure
