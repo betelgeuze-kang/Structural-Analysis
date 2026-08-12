@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native-analysis-request-v1.schema.json",
+  "title": "Bounded native nonlinear NDTHA analysis request v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation", "case_id", "backend", "config", "inputs"],
+  "properties": {
+    "schema_version": { "const": "structural-native-analysis-request.v1" },
+    "operation": { "const": "nonlinear_ndtha" },
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+    },
+    "backend": { "const": "cpu" },
+    "config": { "$ref": "#/$defs/config" },
+    "inputs": { "$ref": "#/$defs/inputs" }
+  },
+  "$defs": {
+    "finiteNumber": { "type": "number" },
+    "positiveNumber": { "type": "number", "exclusiveMinimum": 0 },
+    "nonNegativeNumber": { "type": "number", "minimum": 0 },
+    "positiveCount": { "type": "integer", "minimum": 1, "maximum": 1000000 },
+    "f64Vector": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000000,
+      "items": { "$ref": "#/$defs/finiteNumber" }
+    },
+    "positiveVector": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000000,
+      "items": { "$ref": "#/$defs/positiveNumber" }
+    },
+    "nonNegativeVector": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000000,
+      "items": { "$ref": "#/$defs/nonNegativeNumber" }
+    },
+    "config": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_count",
+        "step_count",
+        "dt_s",
+        "newmark_beta",
+        "newmark_gamma",
+        "tolerance",
+        "max_step_iterations",
+        "adaptive_load_decay",
+        "damping_force_cap_ratio",
+        "newton_max_iter",
+        "line_search_decay",
+        "line_search_min",
+        "hardening_ratio",
+        "pdelta_factor",
+        "collapse_drift_threshold_pct"
+      ],
+      "properties": {
+        "story_count": { "$ref": "#/$defs/positiveCount" },
+        "step_count": { "$ref": "#/$defs/positiveCount" },
+        "dt_s": { "$ref": "#/$defs/positiveNumber" },
+        "newmark_beta": { "$ref": "#/$defs/positiveNumber" },
+        "newmark_gamma": { "$ref": "#/$defs/positiveNumber" },
+        "tolerance": { "$ref": "#/$defs/positiveNumber" },
+        "max_step_iterations": { "$ref": "#/$defs/positiveCount" },
+        "adaptive_load_decay": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "damping_force_cap_ratio": { "$ref": "#/$defs/positiveNumber" },
+        "newton_max_iter": { "$ref": "#/$defs/positiveCount" },
+        "line_search_decay": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "line_search_min": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "hardening_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "pdelta_factor": { "$ref": "#/$defs/nonNegativeNumber" },
+        "collapse_drift_threshold_pct": { "$ref": "#/$defs/positiveNumber" }
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_k_n_per_m",
+        "story_h_m",
+        "story_axial_n",
+        "story_yield_drift_m",
+        "story_mass_kg",
+        "story_damping_n_s_per_m",
+        "floor_load_base_n",
+        "ag_g"
+      ],
+      "properties": {
+        "story_k_n_per_m": { "$ref": "#/$defs/positiveVector" },
+        "story_h_m": { "$ref": "#/$defs/positiveVector" },
+        "story_axial_n": { "$ref": "#/$defs/f64Vector" },
+        "story_yield_drift_m": { "$ref": "#/$defs/f64Vector" },
+        "story_mass_kg": { "$ref": "#/$defs/positiveVector" },
+        "story_damping_n_s_per_m": { "$ref": "#/$defs/nonNegativeVector" },
+        "floor_load_base_n": { "$ref": "#/$defs/f64Vector" },
+        "ag_g": { "$ref": "#/$defs/f64Vector" }
+      }
+    }
+  }
+}

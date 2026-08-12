@@ -110,8 +110,9 @@ Required jobs:
    - same-directory write/sync/rename/directory-sync persistence and bitwise exact restart
    - cancel/job crash recovery is not claimed by this bounded checkpoint lane
 5. bounded-product-e2e
-   - CLI/API input -> C++ core -> ResultIR/ReportIR output
-   - no unsupported authority promotion
+   - strict request -> C++ core -> C4 checkpoint -> ResultIR/ReportIR/Markdown/receipt output
+   - environment-cleared Rust CLI direct/resume artifact byte identity and frozen SHA-256
+   - atomic create-new output publication and no unsupported authority promotion
 6. merge-product aggregate
    - latest exact-head and merge-ref only
 

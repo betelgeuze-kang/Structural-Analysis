@@ -51,11 +51,14 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "bounded CPU" in checkpoint["claim"]
     assert "model, state and execution SHA-256" in checkpoint["claim"]
     assert "job-state crash recovery" in checkpoint["claim"]
-    for capability in (
-        "product_e2e",
-        "hip_backend",
-    ):
-        assert capabilities.capability_is_enabled(payload, capability) is False
+    assert capabilities.capability_is_enabled(payload, "product_e2e") is True
+    product = payload["capabilities"]["product_e2e"]
+    assert product["cutover_gate"] == "C5"
+    assert "bounded CPU nonlinear-NDTHA" in product["claim"]
+    assert "ResultIR, ReportIR" in product["claim"]
+    assert "no Python or Node" in product["claim"]
+    assert "durable jobs/API" in product["claim"]
+    assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 
 def test_implemented_capability_requires_a_cutover_gate() -> None:

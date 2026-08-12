@@ -2,11 +2,18 @@
 
 #![forbid(unsafe_code)]
 
+mod product;
+
 use std::fmt;
 
 use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError};
 use structural_runtime::{ModelIrValidation, Runtime, RuntimeError};
+
+pub use product::{
+    execute_native_analysis, publish_native_analysis, NativeAnalysisProductError,
+    NativeAnalysisRunOutcomeV1,
+};
 
 /// Failure boundary for a complete native `ModelIR` validation request.
 #[derive(Clone, Debug, Eq, PartialEq)]

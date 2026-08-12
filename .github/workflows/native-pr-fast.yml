@@ -634,6 +634,7 @@ jobs:
             echo "Native product CLI not introduced; E2E lane is not applicable"
             exit 0
           fi
+          python3 scripts/check_native_product_e2e.py
           cargo test --manifest-path native/Cargo.toml -p structural-cli --locked
 
   native-merge-product:

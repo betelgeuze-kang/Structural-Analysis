@@ -146,7 +146,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   cases across Newmark parameters, elastic/plastic response, mixed-sign acceleration, P-delta,
   damping cap, adaptive retry, line search and collapse. C++/Rust matches displacement `1e-12 m`,
   drift `1e-10 %`, force `1e-8 kN` and residual `1e-6 N` tolerances with exact integer/boolean
-  taxonomy. Broader record/material coverage, HIP C2, restart and product E2E remain open.
+  taxonomy. Broader record/material coverage and HIP C2 remain open. A separate bounded CPU
+  checkpoint capability is C4 and one tracked request-to-ResultIR/ReportIR CLI profile is C5;
+  neither promotion expands this solver family's C1 numerical authority.
 
 ### D5. Durable Job API and process lifecycle
 
@@ -167,7 +169,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: orchestration 자체는 backend-independent이지만 같은 job contract가
   CPU와 HIP execution handle을 명시적으로 선택하고 fallback을 기록하는 E2E가 필요하다.
-- State: Python SQLite single-host authority; Rust migration not started.
+- State: Python SQLite single-host authority remains. Rust now owns the bounded NDTHA checkpoint
+  artifact and a synchronous run/resume CLI, but durable submit/poll/cancel, leases and startup
+  crash reconciliation are not started.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -188,7 +192,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence, backend, units/frame, model/state/checkpoint hashes
 - Required gates: C0 through C6. CPU/HIP parity includes UX/UY/UZ/RX/RY/RZ,
   reactions and member-local N/Vy/Vz/T/My/Mz when the scope supports them.
-- State: Python contract and partial native numerical result; no full cutover.
+- State: Python contracts remain authoritative overall. Rust now emits one canonical self-hashed
+  `bounded_candidate` ResultIR from the tracked CPU nonlinear-NDTHA terminal state with exact
+  model/state/execution/checkpoint provenance; broader recovery and HIP parity remain open.
 
 ### D7. MGT import health and bounded ModelIR conversion
 
@@ -230,7 +236,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C5, C6.
 - C2 disposition: report serialization은 backend-independent이다. ReportIR의 source
   ResultIR에는 CPU/HIP recovery parity와 exact backend provenance가 필요하다.
-- State: Python report generators dominate; native ReportIR not started.
+- State: Python report generators still dominate. Rust now emits one deterministic ReportIR and
+  Markdown document source bound to the bounded CPU nonlinear-NDTHA ResultIR. External comparison,
+  PDF rendering and broader report profiles remain open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -246,7 +254,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - submit/poll/cancel/resume, bounded authority and unsupported blocker display
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
-- State: Python/backend and TypeScript UI skeleton; native composition not started.
+- State: the public Rust CLI now owns a bounded CPU nonlinear-NDTHA run/checkpoint/resume to
+  ResultIR/ReportIR flow at C5. Durable job/API composition and the TypeScript-to-native Workbench
+  replacement remain open.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

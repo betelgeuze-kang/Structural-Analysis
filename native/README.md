@@ -30,8 +30,12 @@ state is serialized by `structural-runtime` into a bounded, canonical little-end
 independent model/state/execution SHA-256 bindings. Same-directory write, file sync, atomic rename
 and directory sync provide the bounded Linux CPU durability contract; corruption, truncation,
 trailing bytes, binding drift and impossible native state fail closed. Exact save/load/resume is
-promoted as the separate CPU checkpoint C4 capability. Durable job-state crash recovery, broader
-solver coverage, HIP C2 and product E2E remain open. The legacy five-symbol ABI is unchanged.
+promoted as the separate CPU checkpoint C4 capability. R5 adds a strict result-free native request,
+terminal `bounded_candidate` ResultIR, ReportIR, deterministic Markdown and a self-hashed artifact
+receipt. Public CLI run/resume produces bitwise-identical terminal bundles without a Python/Node
+runtime lookup, closing only the tracked CPU nonlinear-NDTHA product C5 profile. Durable job-state
+crash recovery, broader solver coverage, HIP C2, Workbench/PDF and C6 remain open. The legacy
+five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -73,6 +77,24 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Without `--require-analysis-ready`, a contract-valid document with explicit blockers exits zero
 while preserving `analysis_ready: false` in the report. Semantic or wire invalidity exits 2;
 runtime/input transfer failure exits 1.
+
+The bounded analysis product commands are:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis run native/tests/fixtures/product_e2e/nonlinear_ndtha_request.json \
+  --output-dir run
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis run native/tests/fixtures/product_e2e/nonlinear_ndtha_request.json \
+  --output-dir partial --step-budget 2
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis resume native/tests/fixtures/product_e2e/nonlinear_ndtha_request.json \
+  partial/checkpoint.ndcp --output-dir resumed
+~~~
+
+Output-directory publication is create-new and fail-closed; it never overwrites an existing path.
+The exact scope and remaining authority boundaries are in
+`docs/native/bounded-product-e2e-v1.md`.
 
 ## CPU-only C++
 

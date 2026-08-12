@@ -9,6 +9,7 @@
 
 pub mod legacy_runtime;
 pub mod model_ir;
+pub mod product_ir;
 pub mod solver_cpu;
 
 /// ABI family consumed by the wire-contract crates.

@@ -495,3 +495,19 @@ ABI/Rust C3 transport foundation 위에 `structural-runtime`이 한정된 CPU ch
 checkpoint에만 적용한다. durable job-state crash recovery, cancel lifecycle, broader solver coverage,
 HIP C2와 product E2E는 여전히 open이다. 상세 wire 계약은
 `docs/native/checkpoint-restart-v1.md`에 고정한다.
+
+R5의 첫 product composition slice는 bounded CPU nonlinear-NDTHA C5다.
+
+- result를 포함하지 않는 strict canonical request가 Rust contract에서 duplicate/unknown/
+  non-finite/count drift를 먼저 거부한다.
+- ABI v1.5 C++ terminal state의 response channel을 재계산하지 않고 C4 model/state/execution/
+  checkpoint identity와 함께 `bounded_candidate` ResultIR에 결합한다.
+- structural-report는 exact ResultIR에 묶인 ReportIR와 deterministic Markdown document source를
+  생성하고, CLI receipt는 모든 artifact의 byte length/content SHA-256와 self-hash를 보존한다.
+- `analysis run`, bounded step run과 `analysis resume`는 create-new output directory에 원자적으로
+  publish한다. environment를 완전히 지운 child process E2E에서 direct/resume의 다섯 terminal
+  artifact가 byte-identical하며 frozen SHA-256를 만족한다.
+
+이 C5는 tracked request 하나의 CPU 경로만 닫는다. broader solver, HIP C2, ModelIR analysis
+adapter, durable job submit/poll/cancel/crash recovery, API, external comparison, PDF render,
+Workbench와 C6는 open이다. 상세 계약은 `docs/native/bounded-product-e2e-v1.md`에 고정한다.
