@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -17,13 +18,34 @@ DEFAULT_INVENTORY = r2.DEFAULT_INVENTORY
 
 EXPECTED_R3 = {
     "family": "track_point_load",
-    "capability_gate": "C0",
+    "capability_gate": "C1",
     "cpp_target": "structural_solver_cpu",
     "abi_version": "0x00010002",
     "api_entry": "sa_get_api_v1",
     "api_slot": "track_point_load_solve",
     "legacy_exports_preserved": True,
     "fallback_count": 0,
+    "c1_profile": {
+        "node_count": 9,
+        "point_position_m": 5.0,
+        "support_types": ["pinned", "fixed"],
+        "theories": ["euler", "timoshenko"],
+        "absolute_tolerance": 1.0e-15,
+    },
+    "product_goldens": {
+        "native/tests/fixtures/solver_cpu/track_point_load_fixed_euler_python_c1.json": (
+            "30412b6fe9dc1cfbe5f86336a9d89b551d69538330dd07e7322ac655920eb85e"
+        ),
+        "native/tests/fixtures/solver_cpu/track_point_load_fixed_timoshenko_python_c1.json": (
+            "5baecde7cdc15f75433a312f0fae5565ec742544d09422808649dd1fb6b25337"
+        ),
+        "native/tests/fixtures/solver_cpu/track_point_load_pinned_timoshenko_python_c1.json": (
+            "5151e7d13fb5e8f3843d62d16303b7eed864653b165a952330bed9d92915c185"
+        ),
+        "native/tests/fixtures/solver_cpu/track_point_load_python_c1.json": (
+            "268ad1318cc90042ec598ebdc9ec1e15534bc8e5153c0efeccbc5faa43fad282"
+        ),
+    },
     "owners": {
         "cpp_cpu_kernel": "native/cpp/src/solver_cpu/track_point_load.cpp",
         "c_abi": "native/cpp/include/structural/abi_v1.h",
@@ -37,12 +59,12 @@ EXPECTED_R3 = {
         "checker": "scripts/check_structural_runtime_ffi_r3.py",
     },
     "parity": {
-        "legacy_rust": "pass",
-        "python_displacement_residual": "pass",
-        "python_rotation_interior": "pass",
-        "python_rotation_endpoints": "blocked",
-        "python_endpoint_max_abs_delta": 0.00003436580346133486,
-        "c1_promoted": False,
+        "legacy_displacement_residual": "pass",
+        "legacy_rotation_interior": "pass",
+        "legacy_rotation_endpoints": "intentional_product_divergence",
+        "legacy_endpoint_max_abs_delta": 0.00003436580346133486,
+        "python_full_vector": "pass",
+        "c1_promoted": True,
         "c2_hip": "open",
     },
 }
@@ -100,6 +122,28 @@ def check_r3(
             if not (repo_root / relative_path).is_file():
                 blockers.append(f"r3_owned_file_missing:{role}")
 
+    for relative_path, expected_hash in EXPECTED_R3["product_goldens"].items():
+        product_golden_path = repo_root / relative_path
+        try:
+            product_golden_bytes = product_golden_path.read_bytes()
+        except OSError as exc:
+            blockers.append(f"r3_product_golden_unreadable:{relative_path}:{exc}")
+            continue
+        actual_hash = hashlib.sha256(product_golden_bytes).hexdigest()
+        if actual_hash != expected_hash:
+            blockers.append(f"r3_product_golden_sha256_mismatch:{relative_path}")
+        try:
+            product_case = json.loads(product_golden_bytes)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            blockers.append(f"r3_product_golden_invalid:{relative_path}:{exc}")
+            continue
+        if (
+            not isinstance(product_case, dict)
+            or product_case.get("schema_version") != "structural-runtime-compat.v3"
+            or product_case.get("operation") != "track_point_load"
+        ):
+            blockers.append(f"r3_product_golden_contract_invalid:{relative_path}")
+
     sources = {
         "cmake": repo_root / "native/cpp/CMakeLists.txt",
         "header": repo_root / "native/cpp/include/structural/abi_v1.h",
@@ -139,10 +183,18 @@ def check_r3(
     if not isinstance(capability, dict) or capability.get("status") != "implemented":
         blockers.append("r3_track_capability_not_implemented")
     else:
-        if capability.get("cutover_gate") != "C0":
-            blockers.append("r3_track_capability_overpromoted")
+        if capability.get("cutover_gate") != "C1":
+            blockers.append("r3_track_capability_gate_invalid")
         claim = str(capability.get("claim", ""))
-        for boundary in ("blocks C1", "HIP C2", "restart", "product E2E"):
+        for boundary in (
+            "Python C1",
+            "9-node midpoint-load",
+            "legacy Rust",
+            "broader input-space",
+            "HIP C2",
+            "restart",
+            "product E2E",
+        ):
             if boundary not in claim:
                 blockers.append(f"r3_track_claim_boundary_missing:{boundary}")
 
@@ -173,11 +225,13 @@ def _report(
         "lower_gate_pass": lower_gate.get("contract_pass") is True,
         "legacy_exports": lower_gate.get("expected_exports", []),
         "product_exports": product_exports,
-        "capability_gate": "C0",
+        "capability_gate": "C1",
         "blockers": blockers,
         "claim_boundary": (
-            "R3 proves one C++ CPU track family, ABI v1.2 and safe Rust compatibility parity. "
-            "Python endpoint rotation still blocks C1 and no HIP C2 or runtime cutover is claimed."
+            "R3 proves Python C1 full-vector parity for the four-case 9-node midpoint-load "
+            "support/theory matrix, ABI v1.2 and safe Rust integration. The legacy endpoint "
+            "convention remains frozen separately; broader input-space parity, HIP C2 and "
+            "runtime cutover remain open."
         ),
     }
 

@@ -36,7 +36,7 @@ namespace {
     };
 }
 
-[[nodiscard]] bool euler_case_matches_the_frozen_rust_oracle() {
+[[nodiscard]] bool pinned_euler_case_matches_the_python_c1_product_golden() {
     const auto result = structural::solver_cpu::solve_track_point_load(config());
     constexpr std::array expected_displacement {
         0.0,
@@ -50,7 +50,7 @@ namespace {
         0.0,
     };
     constexpr std::array expected_rotation {
-        -0.0005286683506443204,
+        -0.0005630341541056552,
         -0.0005286683506443204,
         -0.0004248782730521244,
         -0.00024966971236260597,
@@ -58,7 +58,7 @@ namespace {
         0.0002496697123626058,
         0.00042487827305212465,
         0.0005286683506443206,
-        0.0005286683506443206,
+        0.0005630341541056552,
     };
 
     CHECK(result.converged);
@@ -86,6 +86,10 @@ namespace {
     CHECK(first.iterations == euler.iterations);
     CHECK(first.displacement_m == second.displacement_m);
     CHECK(first.rotation_rad == second.rotation_rad);
+    CHECK(first.rotation_rad.front() == first.rotation_rad[1]);
+    CHECK(first.rotation_rad.back() == first.rotation_rad[first.rotation_rad.size() - 2U]);
+    CHECK(euler.rotation_rad.front() != euler.rotation_rad[1]);
+    CHECK(euler.rotation_rad.back() != euler.rotation_rad[euler.rotation_rad.size() - 2U]);
     CHECK(std::abs(first.mid_displacement_m) > std::abs(euler.mid_displacement_m));
     return true;
 }
@@ -94,7 +98,7 @@ namespace {
 
 int main() {
     const std::array tests {
-        euler_case_matches_the_frozen_rust_oracle,
+        pinned_euler_case_matches_the_python_c1_product_golden,
         reduced_timoshenko_mode_is_deterministic_and_more_flexible,
     };
     for (const auto test : tests) {

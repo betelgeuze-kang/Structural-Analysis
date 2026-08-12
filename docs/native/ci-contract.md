@@ -35,7 +35,9 @@ Jobs:
    - cargo clippy --workspace --all-targets with warnings denied
    - cargo test --workspace for pure Rust/unit targets
    - locked dependency graph compiles with the declared Rust 1.77 minimum toolchain
-   - R3 bounded track CPU ownership, ABI v1.2/safe-wrapper compatibility and C0 claim check
+   - R3 bounded track CPU ownership, ABI v1.2/safe-wrapper integration and C1 claim check
+   - four-case 9-node Python product-golden SHA-256 matrix and frozen legacy endpoint-only
+     divergence check
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
@@ -80,11 +82,12 @@ Required jobs:
    - shared/static link smoke와 package metadata/ABI identity
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
-   - bounded track C++/legacy Rust neutral-fixture parity and fallback count 0
+   - bounded track C++/Python product-golden parity and fallback count 0
+   - legacy Rust displacement/residual/interior parity와 frozen endpoint-only divergence
 3. python-oracle-parity
    - focused existing Python oracle only
    - canonical bytes/hash, error taxonomy와 bounded numerical vectors
-   - track endpoint-rotation mismatch remains an explicit C1 blocker until conventions agree
+   - track full-vector product golden parity; legacy endpoint convention remains separately frozen
 4. checkpoint-restart
    - exact model/state/execution hash binding
    - cancel/crash/restart and mismatch rejection

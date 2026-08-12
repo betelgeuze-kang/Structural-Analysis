@@ -8,7 +8,7 @@
       "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "R3 reconcile track Python endpoint rotation for C1, then migrate the next numerical family"
+      "next_gate": "track_point_load HIP C2 on the approved dedicated ROCm runner, or migrate the next R3 CPU numerical family"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

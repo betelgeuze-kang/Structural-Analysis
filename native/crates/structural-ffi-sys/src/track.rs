@@ -14,6 +14,9 @@ pub const SA_TRACK_SUPPORT_PINNED: u32 = 0;
 pub const SA_TRACK_SUPPORT_FIXED: u32 = 1;
 pub const SA_TRACK_THEORY_EULER: u32 = 0;
 pub const SA_TRACK_THEORY_TIMOSHENKO_REDUCED: u32 = 1;
+
+// ABI v1.2 rotation recovery uses centered interior differences. Euler uses one-sided
+// endpoint differences; reduced Timoshenko copies each adjacent centered endpoint value.
 pub const SA_EXECUTION_BACKEND_CPU: u32 = 1;
 pub const SA_EXECUTION_BACKEND_HIP: u32 = 2;
 

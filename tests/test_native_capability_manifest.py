@@ -27,8 +27,9 @@ def test_slice_d_promotes_modelir_only_through_safe_ffi_c3() -> None:
     assert capabilities.capability_is_enabled(payload, "modelir_v2") is True
     assert payload["capabilities"]["modelir_v2"]["cutover_gate"] == "C3"
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
-    assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C0"
-    assert "blocks C1" in payload["capabilities"]["track_point_load_cpu"]["claim"]
+    assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
+    assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
+    assert "broader input-space parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
     for capability in (
         "checkpoint_restart",
         "product_e2e",

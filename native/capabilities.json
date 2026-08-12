@@ -27,9 +27,9 @@
     },
     "track_point_load_cpu": {
       "status": "implemented",
-      "cutover_gate": "C0",
+      "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++ track point-load kernel, ABI v1.2 caller-owned output and safe Rust compatibility parity only; Python endpoint-rotation convention blocks C1, and HIP C2, restart and product E2E remain open"
+      "claim": "bounded serial FP64 C++ track point-load kernel with Python C1 oracle parity for the 9-node midpoint-load support/theory matrix, ABI v1.2 caller-owned output and safe Rust integration; the frozen legacy Rust endpoint-only divergence is retained, while broader input-space parity, HIP C2, restart and product E2E remain open"
     },
     "checkpoint_restart": {
       "status": "planned",

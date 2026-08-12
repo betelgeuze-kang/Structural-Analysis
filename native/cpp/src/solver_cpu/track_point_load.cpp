@@ -166,7 +166,8 @@ struct ConjugateGradientResult {
 
 [[nodiscard]] std::vector<double> displacement_gradient(
     const std::vector<double>& displacement,
-    const double dx) {
+    const double dx,
+    const TrackTheory theory) {
     const auto count = displacement.size();
     std::vector<double> rotation(count, 0.0);
     for (std::size_t index = 1U; index < count - 1U; ++index) {
@@ -174,8 +175,17 @@ struct ConjugateGradientResult {
             (displacement[index + 1U] - displacement[index - 1U])
             / (2.0 * std::max(dx, kEpsilon));
     }
-    rotation[0] = rotation[1];
-    rotation[count - 1U] = rotation[count - 2U];
+    if (theory == TrackTheory::euler) {
+        // Python's C1 Euler oracle uses numpy.gradient's default one-sided endpoints.
+        rotation[0] = (displacement[1] - displacement[0]) / std::max(dx, kEpsilon);
+        rotation[count - 1U] =
+            (displacement[count - 1U] - displacement[count - 2U])
+            / std::max(dx, kEpsilon);
+    } else {
+        // The reduced Timoshenko oracle explicitly replaces both one-sided endpoints.
+        rotation[0] = rotation[1];
+        rotation[count - 1U] = rotation[count - 2U];
+    }
     return rotation;
 }
 
@@ -199,7 +209,7 @@ TrackPointLoadResult solve_track_point_load(const TrackPointLoadConfig& config) 
         }
     }
 
-    auto rotation = displacement_gradient(displacement, dx);
+    auto rotation = displacement_gradient(displacement, dx, config.theory);
     double maximum = 0.0;
     for (const auto value : displacement) {
         maximum = std::max(maximum, std::abs(value));

@@ -406,9 +406,12 @@ R3의 첫 family는 `track_point_load`다.
 - C++ unit, C ABI negative/atomicity, Rust layout 및 concurrent safe-wrapper test가 실행된다.
   release shared product library의 public symbol은 계속 `sa_get_api_v1` 하나다.
 
-neutral 9-node fixture의 displacement, residual, iteration과 interior rotation은 C++, legacy
-Rust, Python에서 일치한다. Python은 endpoint rotation을 one-sided gradient로 계산하지만
-R2/Rust/C++ contract는 adjacent central gradient를 복제해 양 끝에서
-`3.436580346133486e-5 rad` 차이가 남는다. 따라서 `track_point_load_cpu`는 C0만 통과하며 C1은
-명시적으로 blocked다. HIP C2, legacy symbol cutover, checkpoint/restart, ResultIR/ReportIR와
-product E2E도 열려 있다.
+별도 language-neutral 9-node midpoint-load 4-case product golden matrix는 pinned/fixed와
+Euler/reduced-Timoshenko 조합의 Python oracle full vector를 고정한다. 제품
+Euler rotation은 `np.gradient`와 같은 one-sided endpoint를 사용하고 C++/Rust safe-wrapper가
+golden과 `1e-15` 절대 오차 내에서 일치한다. legacy Rust ABI와 기존 fixture는 수정하지 않는다.
+그 fixture의 displacement, residual, iteration과 interior rotation은 계속 같고 양 endpoint만
+adjacent-interior convention 때문에 `3.436580346133486e-5 rad` 차이가 난다. 이 차이는
+intentional compatibility divergence로 inventory에 남긴다. 따라서 `track_point_load_cpu`는
+이 명시된 profile에서 C1을 통과한다. broader node/load-position parity, HIP C2, legacy symbol
+cutover, checkpoint/restart, ResultIR/ReportIR와 product E2E는 열려 있다.

@@ -152,7 +152,7 @@ namespace {
     return true;
 }
 
-[[nodiscard]] bool caller_owned_outputs_match_the_frozen_compatibility_case() {
+[[nodiscard]] bool caller_owned_outputs_match_the_python_c1_product_golden() {
     const auto api = load_track_api();
     auto input = config();
     std::array<double, 9> displacement {};
@@ -175,6 +175,17 @@ namespace {
         -0.0007037926926320691,
         0.0,
     };
+    constexpr std::array expected_rotation {
+        -0.0005630341541056552,
+        -0.0005286683506443204,
+        -0.0004248782730521244,
+        -0.00024966971236260597,
+        -2.6020852139652105e-19,
+        0.0002496697123626058,
+        0.00042487827305212465,
+        0.0005286683506443206,
+        0.0005630341541056552,
+    };
     CHECK(result.abi_version == SA_ABI_V1_2);
     CHECK(result.struct_size == sizeof(sa_track_point_load_result_v1));
     CHECK(result.converged == 1U);
@@ -188,6 +199,7 @@ namespace {
     CHECK(result.reserved == 0U);
     for (std::size_t index = 0U; index < displacement.size(); ++index) {
         CHECK(near(displacement[index], expected_displacement[index]));
+        CHECK(near(rotation[index], expected_rotation[index]));
     }
     return true;
 }
@@ -284,7 +296,7 @@ namespace {
 int main() {
     const std::array tests {
         v1_2_table_preserves_older_prefixes_and_exposes_one_cpu_operation,
-        caller_owned_outputs_match_the_frozen_compatibility_case,
+        caller_owned_outputs_match_the_python_c1_product_golden,
         invalid_and_nonconverged_calls_leave_all_outputs_unchanged,
         output_metadata_and_aliasing_fail_closed,
     };

@@ -79,6 +79,12 @@ enum {
     SA_TRACK_THEORY_TIMOSHENKO_REDUCED = 1
 };
 
+/*
+ * v1.2 rotation recovery uses centered differences at interior nodes. Euler uses
+ * first-order one-sided endpoint differences; reduced Timoshenko copies the adjacent
+ * centered value to each endpoint. This theory-specific convention is ABI semantics.
+ */
+
 enum {
     SA_EXECUTION_BACKEND_CPU = 1,
     SA_EXECUTION_BACKEND_HIP = 2

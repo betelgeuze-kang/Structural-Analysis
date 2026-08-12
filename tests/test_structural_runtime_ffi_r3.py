@@ -17,17 +17,17 @@ sys.modules[SPEC.name] = r3
 SPEC.loader.exec_module(r3)
 
 
-def test_r3_adds_one_cpu_family_without_overpromoting_cutover_gates() -> None:
+def test_r3_adds_one_cpu_family_at_python_c1_without_overpromoting_later_gates() -> None:
     payload = r3.check_r3(ROOT)
 
     assert payload["contract_pass"] is True, payload["blockers"]
     assert payload["lower_gate_pass"] is True
-    assert payload["capability_gate"] == "C0"
+    assert payload["capability_gate"] == "C1"
     assert payload["product_exports"] is None
     assert len(payload["legacy_exports"]) == 5
 
 
-def test_r3_inventory_keeps_python_and_hip_boundaries_explicit() -> None:
+def test_r3_inventory_keeps_legacy_divergence_and_hip_boundary_explicit() -> None:
     inventory = json.loads(
         (ROOT / r3.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
@@ -35,12 +35,13 @@ def test_r3_inventory_keeps_python_and_hip_boundaries_explicit() -> None:
     assert inventory["transition_step"] == "R3"
     assert inventory["r3_track_point_load"] == r3.EXPECTED_R3
     parity = inventory["r3_track_point_load"]["parity"]
-    assert parity["python_rotation_endpoints"] == "blocked"
-    assert parity["c1_promoted"] is False
+    assert parity["python_full_vector"] == "pass"
+    assert parity["legacy_rotation_endpoints"] == "intentional_product_divergence"
+    assert parity["c1_promoted"] is True
     assert parity["c2_hip"] == "open"
 
 
-def test_r3_checker_fails_closed_on_capability_overpromotion(tmp_path: Path) -> None:
+def test_r3_checker_fails_closed_on_inventory_gate_drift(tmp_path: Path) -> None:
     inventory = json.loads(
         (ROOT / r3.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )

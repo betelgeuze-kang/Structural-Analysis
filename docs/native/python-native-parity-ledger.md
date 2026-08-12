@@ -120,13 +120,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence/status taxonomy, residual/increment gate, singularity
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
-- State: D4 remains C0. The bounded 9-node `track_point_load` family now has a deterministic
+- State: D4 remains C0 overall. The bounded 9-node midpoint-load `track_point_load` support/theory
+  matrix is C1 with a deterministic
   `structural_solver_cpu` reference kernel, ABI v1.2 caller-owned operation and safe Rust wrapper;
-  the legacy five-symbol Rust cdylib is unchanged. C++ and legacy Rust match the neutral fixture
-  within `1e-15`, with CPU backend and fallback count 0. Python matches iteration, residual,
-  displacement and interior rotation, but its one-sided endpoint gradient differs by
-  `3.436580346133486e-5 rad`, so C1 is explicitly blocked. HIP C2, the remaining solver families,
-  checkpoint/restart and product E2E remain open.
+  the legacy five-symbol Rust cdylib is unchanged. C++ matches the separate language-neutral
+  Python product golden within `1e-15`, with CPU backend and fallback count 0. The frozen legacy
+  fixture still matches iteration, residual, displacement and interior rotation; its endpoint
+  convention differs by `3.436580346133486e-5 rad` and is recorded as an intentional endpoint-only
+  compatibility divergence. HIP C2, the remaining solver families, checkpoint/restart and product
+  E2E and broader node/load-position parity remain open.
 
 ### D5. Durable Job API and process lifecycle
 
@@ -268,5 +270,7 @@ freshness는 별도 필드로 유지한다.
 `structural_runtime_ffi` R2 contract extraction은 migration topology, raw/wire ownership과 기존
 ABI/golden freeze다. 수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다.
 네 pointer-free neutral fixture는 향후 C++ parity 입력/결과 계약이지만 현재 numerical truth는
-기존 Rust oracle에 있다. Python production consumer도 그대로 유지되며 R3 family별 C++ CPU
-parity와 R4 restart/product integration 전에는 decommission 대상이 아니다.
+기존 Rust compatibility owner에 있다. `track_point_load` 제품 결과만 별도 Python C1 golden이
+수치 truth를 소유하며 legacy endpoint 차이를 명시적으로 보존한다. Python production consumer도
+그대로 유지되며 나머지 R3 family의 C++ CPU parity와 R4 restart/product integration 전에는
+decommission 대상이 아니다.

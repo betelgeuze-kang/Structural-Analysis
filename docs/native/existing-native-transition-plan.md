@@ -87,8 +87,9 @@ Implementation status: complete on the R2 successor branch.
 - R1 ABI layout, status, numerical golden 및 release cdylib 5-symbol exact set은 하위 gate로
   계속 실행한다.
 
-Current next gate: R3. 한 numerical family를 C++ CPU product target으로 옮기되 legacy Rust
-implementation은 C1 oracle parity가 확정될 때까지 유지한다.
+Current next gate: R3. 각 numerical family를 C++ CPU product target으로 옮기고 Python C1
+oracle parity를 독립적으로 닫는다. legacy Rust implementation은 ABI rollback과 R4 cutover
+gate가 닫힐 때까지 유지한다.
 
 ### Step R3: move numerical kernels
 
@@ -103,13 +104,16 @@ Implementation status: first bounded family complete; R3 remains open for the ot
 - `sa_get_api_v1` ABI v1.2 optional slot과 `structural-ffi` safe wrapper가 caller-owned
   displacement/rotation output을 연결한다.
 - C++ unit, C ABI invalid/undersized/overlap/nonconvergence atomicity, Rust layout 및 concurrent
-  integration test가 legacy Rust neutral fixture와 `1e-15` 절대 오차 내에서 일치한다.
+  integration test가 별도 Python C1 product golden과 `1e-15` 절대 오차 내에서 일치한다.
 - legacy `structural_runtime_ffi`의 5개 export와 numerical implementation은 그대로 유지한다.
-- Python oracle은 displacement/residual/interior rotation은 일치하지만 양 endpoint rotation의
-  gradient convention이 달라 C1은 blocked다. 이 family capability는 C0이며 HIP C2도 open이다.
+- 제품 Euler endpoint는 Python `np.gradient`의 one-sided slope를 따른다. legacy Rust golden의
+  adjacent-interior endpoint는 바꾸지 않고 `3.436580346133486e-5 rad`의 의도적 endpoint-only
+  compatibility divergence로 고정한다. displacement/residual/interior rotation은 계속 같다.
+- 9-node midpoint-load의 pinned/fixed × Euler/reduced-Timoshenko 4-case matrix만 C1이다.
+  broader node/load-position input-space parity와 HIP C2는 open이다.
 
-Current next gate: Python endpoint rotation contract를 합의·일치시켜 track C1을 닫거나, 같은
-fail-closed 방식으로 다음 R3 numerical family를 이전한다. R4 cutover는 아직 시작하지 않는다.
+Current next gate: 승인된 전용 ROCm runner에서 track HIP C2를 구현하거나, 같은 fail-closed
+방식으로 다음 R3 CPU numerical family를 이전한다. R4 cutover는 아직 시작하지 않는다.
 
 ### Step R4: runtime cutover
 

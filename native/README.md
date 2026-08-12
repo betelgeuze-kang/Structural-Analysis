@@ -13,8 +13,11 @@ package is a temporary compatibility member. R2 moves its seven raw ABI declarat
 `structural-contracts`, and keeps the original crate as the numerical oracle plus adapter. Its
 ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 moves
 only the `track_point_load` reference kernel into `structural_solver_cpu`, exposes it through the
-ABI v1.2 table and adds a safe Rust caller. That bounded capability remains C0: the legacy Rust
-fixture matches, but the Python endpoint-rotation convention still blocks full C1 parity.
+ABI v1.2 table and adds a safe Rust caller. A separate language-neutral product golden follows
+the Python endpoint conventions and promotes the 9-node midpoint-load support/theory matrix to
+C1. The legacy Rust ABI, its five exports and its endpoint convention remain frozen as an
+explicit compatibility boundary; broader input-space parity, HIP C2 and runtime cutover remain
+open.
 
 ## Rust
 

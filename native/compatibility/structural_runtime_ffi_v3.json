@@ -108,13 +108,26 @@
   },
   "r3_track_point_load": {
     "family": "track_point_load",
-    "capability_gate": "C0",
+    "capability_gate": "C1",
     "cpp_target": "structural_solver_cpu",
     "abi_version": "0x00010002",
     "api_entry": "sa_get_api_v1",
     "api_slot": "track_point_load_solve",
     "legacy_exports_preserved": true,
     "fallback_count": 0,
+    "c1_profile": {
+      "node_count": 9,
+      "point_position_m": 5.0,
+      "support_types": ["pinned", "fixed"],
+      "theories": ["euler", "timoshenko"],
+      "absolute_tolerance": 1e-15
+    },
+    "product_goldens": {
+      "native/tests/fixtures/solver_cpu/track_point_load_fixed_euler_python_c1.json": "30412b6fe9dc1cfbe5f86336a9d89b551d69538330dd07e7322ac655920eb85e",
+      "native/tests/fixtures/solver_cpu/track_point_load_fixed_timoshenko_python_c1.json": "5baecde7cdc15f75433a312f0fae5565ec742544d09422808649dd1fb6b25337",
+      "native/tests/fixtures/solver_cpu/track_point_load_pinned_timoshenko_python_c1.json": "5151e7d13fb5e8f3843d62d16303b7eed864653b165a952330bed9d92915c185",
+      "native/tests/fixtures/solver_cpu/track_point_load_python_c1.json": "268ad1318cc90042ec598ebdc9ec1e15534bc8e5153c0efeccbc5faa43fad282"
+    },
     "owners": {
       "cpp_cpu_kernel": "native/cpp/src/solver_cpu/track_point_load.cpp",
       "c_abi": "native/cpp/include/structural/abi_v1.h",
@@ -128,14 +141,14 @@
       "checker": "scripts/check_structural_runtime_ffi_r3.py"
     },
     "parity": {
-      "legacy_rust": "pass",
-      "python_displacement_residual": "pass",
-      "python_rotation_interior": "pass",
-      "python_rotation_endpoints": "blocked",
-      "python_endpoint_max_abs_delta": 0.00003436580346133486,
-      "c1_promoted": false,
+      "legacy_displacement_residual": "pass",
+      "legacy_rotation_interior": "pass",
+      "legacy_rotation_endpoints": "intentional_product_divergence",
+      "legacy_endpoint_max_abs_delta": 0.00003436580346133486,
+      "python_full_vector": "pass",
+      "c1_promoted": true,
       "c2_hip": "open"
     }
   },
-  "claim_boundary": "R3 moves only the bounded track point-load reference kernel into the C++ CPU product library and exposes it through the sa_get_api_v1 ABI v1.2 table plus a safe Rust wrapper. The five legacy exports remain unchanged. The capability stays at C0 because the Python endpoint-rotation convention blocks full C1 parity; HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
+  "claim_boundary": "R3 moves only the bounded track point-load reference kernel into the C++ CPU product library and exposes it through the sa_get_api_v1 ABI v1.2 table plus a safe Rust wrapper. A four-case language-neutral 9-node midpoint-load product-golden matrix records full Python C1 oracle parity across both support and theory values, while the five-symbol legacy Rust ABI and its endpoint convention remain frozen as an explicit endpoint-only divergence. Broader input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
 }
