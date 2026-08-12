@@ -38,11 +38,13 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_capabilities.py",
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
+        "scripts/check_structural_runtime_ffi_r1.py",
         "scripts/classify_native_ci_scope.py",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
+        "tests/test_structural_runtime_ffi_r1.py",
     }
 )
 
@@ -57,6 +59,8 @@ MODELIR_ORACLE_PATHS = frozenset(
         "tests/test_native_model_ir_rust_parity.py",
     }
 )
+
+LEGACY_RUNTIME_R1_PREFIX = "implementation/phase1/structural_runtime_ffi/"
 
 
 def _normalize_path(raw: str) -> str:
@@ -80,7 +84,11 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
     """Return deterministic applicability flags for one changed-path set."""
 
     paths = sorted({_normalize_path(path) for path in raw_paths})
-    native_paths = [path for path in paths if path.startswith("native/")]
+    native_paths = [
+        path
+        for path in paths
+        if path.startswith("native/") or path.startswith(LEGACY_RUNTIME_R1_PREFIX)
+    ]
     ci_control_paths = [path for path in paths if path in NATIVE_CI_CONTROL_PATHS]
     protected_paths = [
         path
@@ -101,6 +109,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         for path in native_paths
         if path in {"native/Cargo.toml", "native/Cargo.lock"}
         or path.startswith("native/crates/")
+        or path.startswith(LEGACY_RUNTIME_R1_PREFIX)
     ]
     cpp_paths = [
         path
@@ -114,6 +123,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith("native/cpp/src/abi/")
         or path.startswith("native/tests/abi/")
         or path.startswith("native/crates/structural-ffi")
+        or path.startswith(LEGACY_RUNTIME_R1_PREFIX)
     ]
     modelir_paths = [
         path
@@ -131,6 +141,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith("native/crates/structural-report/")
         or path.startswith("native/crates/structural-cli/")
         or path.startswith("native/tests/integration/")
+        or path.startswith(LEGACY_RUNTIME_R1_PREFIX)
     ]
     hip_paths = [
         path

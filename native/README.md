@@ -7,7 +7,10 @@ identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic o
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
 bounded ModelIR domain to C3. Analysis, restart, ResultIR/ReportIR product E2E and HIP remain
-unimplemented; `capabilities.json` records that boundary.
+unimplemented; `capabilities.json` records that boundary. R1 additionally includes the existing
+`structural_runtime_ffi` package as a temporary compatibility member. Its ABI v3 layouts, five
+exports, status codes and bounded numerical vectors are frozen without transferring solver
+authority to the product crates.
 
 ## Rust
 
@@ -65,5 +68,8 @@ or links ROCm.
 library, CMake package targets and `structural-native-build.json`. The only public shared
 library symbol remains `sa_get_api_v1`; ABI v1.1 operations are negotiated through its table.
 
-The old probe crates remain outside this workspace. Their preservation and next migration
-owner are recorded in `compatibility-owners.json`; no legacy symbol is removed by Slice A.
+`structural_runtime_ffi` is now the R1 temporary workspace member while retaining the existing
+package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen
+inventory is `compatibility/structural_runtime_ffi_v3.json`; the workspace test and binary-symbol
+checker fail closed on drift. `mgt_hip_full_residual_ffi` remains outside the workspace at H0.
+No legacy symbol is removed or exposed through `sa_get_api_v1` by R1.

@@ -55,12 +55,25 @@ execution을 의미하지 않는다.
 - package name과 existing cdylib output을 유지한다.
 - workspace lint/test는 적용하지만 public ABI 의미는 바꾸지 않는다.
 
+Implementation status: complete on the Slice D successor branch.
+
+- `native/Cargo.toml`의 temporary member이며 native root lock과 Rust 1.77 gate를 사용한다.
+- package/cdylib 이름과 기존 Python bridge의 local output 위치를 유지한다.
+- ABI v3의 7개 repr(C) layout, 5개 export, error code와 track/scale/static/NDTHA
+  golden vector를 `native/compatibility/structural_runtime_ffi_v3.json` 및 Rust contract
+  test로 고정한다.
+- release cdylib export set을 `nm` 기반 checker로 검사한다.
+- numerical authority, public `sa_get_api_v1`, checkpoint 또는 product E2E 승격은 없다.
+
 ### Step R2: extract contracts
 
 - TrackSolveConfig/Result와 nonlinear result wire type을 structural-contracts로 옮길
   수 있는 language-neutral schema로 정의한다.
 - raw repr(C) mirror는 structural-ffi-sys가 소유한다.
 - original crate는 adapter로 새 type을 변환한다.
+
+Current next gate: R2. R1 inventory의 field order, units, status와 ownership을 먼저
+language-neutral schema로 옮기고 raw mirror owner를 분리해야 한다.
 
 ### Step R3: move numerical kernels
 

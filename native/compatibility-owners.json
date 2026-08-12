@@ -4,11 +4,11 @@
     {
       "legacy_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
       "migration_owner": "structural-runtime",
-      "transition_step": "R0",
-      "workspace_member": false,
+      "transition_step": "R1",
+      "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "R1 workspace compatibility member is next after completed ModelIR Slice D"
+      "next_gate": "R2 language-neutral contract extraction after ABI v3 freeze and compatibility parity"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

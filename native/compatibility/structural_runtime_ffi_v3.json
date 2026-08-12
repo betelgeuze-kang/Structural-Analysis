@@ -1,0 +1,95 @@
+{
+  "schema_version": "structural-runtime-ffi-compatibility.v1",
+  "transition_step": "R1",
+  "package": {
+    "manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+    "name": "structural_runtime_ffi",
+    "version": "0.1.0",
+    "rust_version": "1.77",
+    "crate_types": [
+      "cdylib",
+      "rlib"
+    ],
+    "workspace": "native/Cargo.toml",
+    "standalone_output_name_preserved": true,
+    "legacy_lock_retained_for_rollback": true
+  },
+  "abi_version": 3,
+  "exports": [
+    "phase1_rust_nonlinear_frame_ndtha_solve",
+    "phase1_rust_nonlinear_frame_solve",
+    "phase1_rust_scale_inplace_f32",
+    "phase1_rust_track_lf_solve_point_load",
+    "phase1_rust_version"
+  ],
+  "layouts": {
+    "TrackSolveConfig": {
+      "size": 88,
+      "align": 8,
+      "offsets": [0, 8, 12, 16, 24, 32, 40, 48, 56, 64, 72, 80]
+    },
+    "TrackSolveResult": {
+      "size": 40,
+      "align": 8,
+      "offsets": [0, 4, 8, 16, 24, 32]
+    },
+    "InplaceScaleStats": {
+      "size": 64,
+      "align": 8,
+      "offsets": [0, 8, 16, 20, 24, 32, 40, 48, 56]
+    },
+    "NlFrameSolveConfig": {
+      "size": 56,
+      "align": 8,
+      "offsets": [0, 8, 16, 24, 32, 40, 48]
+    },
+    "NlFrameSolveResult": {
+      "size": 64,
+      "align": 8,
+      "offsets": [0, 4, 8, 16, 24, 32, 40, 48, 52, 56]
+    },
+    "NlFrameNdthaConfig": {
+      "size": 112,
+      "align": 8,
+      "offsets": [0, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104]
+    },
+    "NlFrameNdthaResult": {
+      "size": 80,
+      "align": 8,
+      "offsets": [0, 1, 2, 4, 8, 16, 24, 32, 36, 40, 48, 56, 64, 72]
+    }
+  },
+  "status_codes": {
+    "track": [-16, -15, -14, -13, -12, -11, -2, -1, 0],
+    "inplace_scale": [-1, 0],
+    "nonlinear_static": [-37, -36, -35, -34, -33, -32, -31, -22, -21, 0],
+    "nonlinear_ndtha": [-62, -52, -51, -50, -49, -48, -47, -46, -45, -44, -43, -42, -41, -61, 0]
+  },
+  "golden_cases": {
+    "track_pinned_euler_9": {
+      "iterations": 4,
+      "residual_inf": 7.657748132248844e-10,
+      "mid_displacement_m": -0.001945845157517316
+    },
+    "scale_f32_4": {
+      "input": [1.0, -2.0, 0.5, 4.0],
+      "alpha": 1.25,
+      "output": [1.25, -2.5, 0.625, 5.0]
+    },
+    "nonlinear_static_3_story": {
+      "iterations": 6,
+      "residual_inf": 6.79574441164732e-9,
+      "top_displacement_m": 0.0004705555555556994
+    },
+    "nonlinear_ndtha_2_story_3_step": {
+      "step_iterations": [1, 1, 1],
+      "max_drift_ratio_pct": 8.560401406754784e-5,
+      "residual_top_displacement_m": 3.795754248884991e-6
+    }
+  },
+  "verification": {
+    "rust_contract_test": "implementation/phase1/structural_runtime_ffi/tests/abi_v3_contract.rs",
+    "symbol_checker": "scripts/check_structural_runtime_ffi_r1.py"
+  },
+  "claim_boundary": "R1 freezes and workspace-tests the existing Rust ABI v3. It does not move numerical authority to C++, expose these operations through sa_get_api_v1, provide checkpoint/restart, or promote product E2E."
+}

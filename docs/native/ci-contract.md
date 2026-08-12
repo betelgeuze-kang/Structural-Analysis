@@ -35,6 +35,7 @@ Jobs:
    - cargo clippy --workspace --all-targets with warnings denied
    - cargo test --workspace for pure Rust/unit targets
    - locked dependency graph compiles with the declared Rust 1.77 minimum toolchain
+   - R1 `structural_runtime_ffi` ABI v3 layout/golden tests and exact release cdylib export set
 3. cpp-quality
    - CPU-only CMake configure
    - build with warnings as errors
@@ -43,6 +44,8 @@ Jobs:
    - public header compile as C11 and C++20
    - Rust/C layout, constants and struct_size compatibility
    - invalid pointer/length/stride/overflow and failure atomicity
+   - R1 legacy-runtime changes are classified as ABI/runtime scope; their frozen binary export
+     check remains in rust-quality because the compatibility library is a Rust cdylib
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded

@@ -15,6 +15,7 @@ PRODUCT_SOURCE_ROOTS = (
     Path("native/cpp/include"),
     Path("native/cpp/src"),
     Path("native/cpp/hip"),
+    Path("implementation/phase1/structural_runtime_ffi/src"),
 )
 SOURCE_SUFFIXES = frozenset({".rs", ".c", ".cc", ".cpp", ".cxx", ".h", ".hpp"})
 PYTHON_RUNTIME_PATTERNS = (

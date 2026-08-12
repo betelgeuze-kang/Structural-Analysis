@@ -135,6 +135,11 @@ jobs:
           cargo fmt --manifest-path native/Cargo.toml --all -- --check
           cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets --locked -- -D warnings
           cargo test --manifest-path native/Cargo.toml --workspace --locked
+          cargo build --manifest-path native/Cargo.toml \
+            -p structural_runtime_ffi --release --locked
+          python3 scripts/check_structural_runtime_ffi_r1.py \
+            --library native/target/release/libstructural_runtime_ffi.so \
+            --json --fail-blocked
           rustup toolchain install 1.77.0 --profile minimal
           cargo +1.77.0 check --manifest-path native/Cargo.toml \
             --workspace --all-targets --locked

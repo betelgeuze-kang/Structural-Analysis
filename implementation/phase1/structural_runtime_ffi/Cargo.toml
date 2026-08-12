@@ -2,7 +2,33 @@
 name = "structural_runtime_ffi"
 version = "0.1.0"
 edition = "2021"
+workspace = "../../../native"
+rust-version = "1.77"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/betelgeuze-kang/structural-analysis"
 
 [lib]
 name = "structural_runtime_ffi"
 crate-type = ["cdylib", "rlib"]
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+# R1 is a byte/behavior-preserving compatibility freeze. These implementation-shape
+# lints stay explicit until each numerical family moves behind the product ABI in R2/R3.
+bool_to_int_with_if = "allow"
+cast_lossless = "allow"
+cast_possible_truncation = "allow"
+cast_possible_wrap = "allow"
+cast_precision_loss = "allow"
+cast_sign_loss = "allow"
+manual_clamp = "allow"
+manual_memcpy = "allow"
+needless_range_loop = "allow"
+not_unsafe_ptr_arg_deref = "allow"
+similar_names = "allow"
+too_many_arguments = "allow"
+too_many_lines = "allow"

@@ -345,3 +345,23 @@ Slice D는 backend-independent ModelIR validation domain을 D1=C3까지 연결�
 이 boundary는 parser/validation domain의 C2 대체 deterministic cross-language gate다. solver,
 element/material, assembly와 result recovery의 CPU/HIP C2를 대체하지 않는다. 또한 checkpoint,
 ResultIR/ReportIR analysis E2E, Python 제거 또는 legacy probe R1/H1 migration을 주장하지 않는다.
+
+## 14. Legacy structural runtime R1 boundary
+
+ModelIR Slice D 다음 PR은 `implementation/phase1/structural_runtime_ffi`만 temporary native
+workspace member로 편입한다.
+
+- package `structural_runtime_ffi`와 `cdylib`/`rlib` output name은 유지한다.
+- native root `Cargo.lock`, workspace fmt/clippy/test와 Rust 1.77 compile gate가 적용된다.
+- 기존 Python bridge는 explicit local target directory를 사용해 기존 shared-library path를
+  유지하지만 dependency resolution은 native workspace lock을 따른다.
+- ABI v3의 7개 `repr(C)` layout, 5개 legacy export, error taxonomy와 네 bounded golden case를
+  versioned compatibility inventory와 Rust test로 고정한다.
+- CI는 source export와 release cdylib dynamic export가 inventory와 exact-match인지 검사한다.
+- legacy standalone `Cargo.lock`은 rollback/deprecation 기간을 위해 보존하지만 native build
+  graph의 lock authority는 `native/Cargo.lock` 하나다.
+
+R1은 numerical source를 C++로 옮기지 않고 legacy function을 `sa_get_api_v1` table에 추가하지
+않는다. 따라서 solver, restart, ResultIR/ReportIR, product E2E 및 어떤 C0-C6 capability도 새로
+승격하지 않는다. 다음 gate는 R2 contract extraction이며 H1 HIP table adapter는 CPU product
+path가 생길 때까지 H0 상태를 유지한다.

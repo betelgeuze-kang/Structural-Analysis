@@ -73,6 +73,19 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_r1_legacy_runtime_member_routes_through_rust_runtime_gates() -> None:
+    payload = scope.classify_paths(
+        ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]
+    )
+
+    assert payload["native"] is True
+    assert payload["rust"] is True
+    assert payload["runtime"] is True
+    assert payload["applicable"] is True
+    assert payload["abi"] is True
+    assert payload["hip"] is False
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [

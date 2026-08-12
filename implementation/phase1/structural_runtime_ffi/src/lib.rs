@@ -149,10 +149,10 @@ fn apply_euler_operator(
 
     for i in 1..(n - 1) {
         let ii = i as isize;
-        let d2 = (ghost_at(w, ii + 1, support_type) - 2.0 * ghost_at(w, ii, support_type) + ghost_at(w, ii - 1, support_type))
+        let d2 = (ghost_at(w, ii + 1, support_type) - 2.0 * ghost_at(w, ii, support_type)
+            + ghost_at(w, ii - 1, support_type))
             * inv_dx2;
-        let d4 = (ghost_at(w, ii - 2, support_type)
-            - 4.0 * ghost_at(w, ii - 1, support_type)
+        let d4 = (ghost_at(w, ii - 2, support_type) - 4.0 * ghost_at(w, ii - 1, support_type)
             + 6.0 * ghost_at(w, ii, support_type)
             - 4.0 * ghost_at(w, ii + 1, support_type)
             + ghost_at(w, ii + 2, support_type))
@@ -359,9 +359,16 @@ fn vec_norm_inf(v: &[f64]) -> f64 {
     m
 }
 
-fn solve_tridiagonal(lower: &[f64], diag: &[f64], upper: &[f64], rhs: &[f64], x_out: &mut [f64]) -> bool {
+fn solve_tridiagonal(
+    lower: &[f64],
+    diag: &[f64],
+    upper: &[f64],
+    rhs: &[f64],
+    x_out: &mut [f64],
+) -> bool {
     let n = diag.len();
-    if n == 0 || lower.len() + 1 != n || upper.len() + 1 != n || rhs.len() != n || x_out.len() != n {
+    if n == 0 || lower.len() + 1 != n || upper.len() + 1 != n || rhs.len() != n || x_out.len() != n
+    {
         return false;
     }
     let mut c_prime = vec![0.0_f64; n];
@@ -454,7 +461,11 @@ fn assemble_internal_and_tangent(
 
     for i in 0..n {
         let kii = spring_tangent[i];
-        let kip1 = if i < n - 1 { spring_tangent[i + 1] } else { 0.0 };
+        let kip1 = if i < n - 1 {
+            spring_tangent[i + 1]
+        } else {
+            0.0
+        };
         diag[i] = kii + kip1;
         if i > 0 {
             lower[i - 1] = -kii;
@@ -479,7 +490,13 @@ fn assemble_internal_and_tangent(
     (base_shear_kn, plastic_count, spring_tangent[0])
 }
 
-fn compute_story_response(u: &[f64], story_h: &[f64], story_k: &[f64], out_drift_pct: &mut [f64], out_shear_kn: &mut [f64]) {
+fn compute_story_response(
+    u: &[f64],
+    story_h: &[f64],
+    story_k: &[f64],
+    out_drift_pct: &mut [f64],
+    out_shear_kn: &mut [f64],
+) {
     let n = u.len();
     if n == 0 {
         return;
@@ -640,7 +657,14 @@ fn solve_ndtha_step(
         }
 
         if success {
-            return (true, step_used, last_plastic, last_base_shear, last_residual_inf, total_backtracks);
+            return (
+                true,
+                step_used,
+                last_plastic,
+                last_base_shear,
+                last_residual_inf,
+                total_backtracks,
+            );
         }
 
         load_scale *= cfg.adaptive_load_decay;
@@ -670,7 +694,11 @@ pub extern "C" fn phase1_rust_track_lf_solve_point_load(
     out_len: u32,
     out_result_ptr: *mut TrackSolveResult,
 ) -> i32 {
-    if cfg_ptr.is_null() || out_w_ptr.is_null() || out_theta_ptr.is_null() || out_result_ptr.is_null() {
+    if cfg_ptr.is_null()
+        || out_w_ptr.is_null()
+        || out_theta_ptr.is_null()
+        || out_result_ptr.is_null()
+    {
         return -1;
     }
 
@@ -725,8 +753,8 @@ pub extern "C" fn phase1_rust_track_lf_solve_point_load(
     );
 
     if cfg.theory == 1 {
-        let eta_raw =
-            12.0 * cfg.bending_stiffness_n_m2 / (cfg.shear_stiffness_n * cfg.length_m * cfg.length_m).max(EPS);
+        let eta_raw = 12.0 * cfg.bending_stiffness_n_m2
+            / (cfg.shear_stiffness_n * cfg.length_m * cfg.length_m).max(EPS);
         let eta = eta_raw.max(0.0).min(0.75);
         let scale = 1.0 + eta;
         for i in 0..n {
@@ -1159,7 +1187,11 @@ pub extern "C" fn phase1_rust_nonlinear_frame_ndtha_solve(
 
     for s in 0..s_count {
         let ag_i = ag[s];
-        let sign = if ag_i.abs() > 1e-12 { ag_i.signum() } else { 1.0 };
+        let sign = if ag_i.abs() > 1e-12 {
+            ag_i.signum()
+        } else {
+            1.0
+        };
         let env = 1.0 + 0.50 * ((s as f64) / ((s_count.saturating_sub(1)).max(1) as f64));
         for i in 0..n {
             let p_static = floor_load_base[i] * height_shape[i] * env * (0.25 * ag_i + 0.02 * sign);
@@ -1221,7 +1253,13 @@ pub extern "C" fn phase1_rust_nonlinear_frame_ndtha_solve(
             a[i] = a_next[i];
         }
 
-        compute_story_response(&u, story_h, story_k, &mut story_drift_pct, &mut story_shear_kn);
+        compute_story_response(
+            &u,
+            story_h,
+            story_k,
+            &mut story_drift_pct,
+            &mut story_shear_kn,
+        );
         for i in 0..n {
             out_story_drift_final[i] = story_drift_pct[i];
             out_story_drift_env[i] = out_story_drift_env[i].max(story_drift_pct[i].abs());

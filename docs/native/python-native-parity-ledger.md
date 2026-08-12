@@ -58,7 +58,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
-  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains the authoritative oracle and
+  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains authoritative oracle and
   rollback owner; C5 and C6 remain open.
 
 ### D2. Elements and materials
@@ -258,3 +258,7 @@ truth나 result authority를 다시 계산하면 제거 gate를 통과한 것으
 진척도는 language file count가 아니라 domain별 마지막 통과 gate로 보고한다.
 예: D1=C3, D2=C1, D3=C0. partial, proxy, fallback, external-blocked와 hardware
 freshness는 별도 필드로 유지한다.
+
+`structural_runtime_ffi` R1 workspace 편입은 migration topology와 기존 ABI/golden freeze다.
+수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다. 기존 Rust 결과는 R2/R3
+CPU C++ 이전을 위한 compatibility oracle이고 Python production consumer도 그대로 유지된다.

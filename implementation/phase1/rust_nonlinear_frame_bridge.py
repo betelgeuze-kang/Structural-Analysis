@@ -16,6 +16,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent
 CRATE_DIR = ROOT / "structural_runtime_ffi"
 TARGET_DIR = CRATE_DIR / "target" / "release"
+WORKSPACE_DIR = ROOT.parents[1] / "native"
 
 
 def _shared_lib_name() -> str:
@@ -30,7 +31,11 @@ def _latest_source_mtime() -> float:
     latest = 0.0
     for p in (CRATE_DIR / "src").rglob("*.rs"):
         latest = max(latest, p.stat().st_mtime)
-    for manifest in (CRATE_DIR / "Cargo.toml", CRATE_DIR / "Cargo.lock"):
+    for manifest in (
+        CRATE_DIR / "Cargo.toml",
+        WORKSPACE_DIR / "Cargo.toml",
+        WORKSPACE_DIR / "Cargo.lock",
+    ):
         if manifest.exists():
             latest = max(latest, manifest.stat().st_mtime)
     return latest
@@ -40,7 +45,18 @@ def _build_if_needed() -> Path:
     lib_path = TARGET_DIR / _shared_lib_name()
     if lib_path.exists() and lib_path.stat().st_mtime >= _latest_source_mtime():
         return lib_path
-    subprocess.run(["cargo", "build", "--release"], cwd=CRATE_DIR, check=True)
+    subprocess.run(
+        [
+            "cargo",
+            "build",
+            "--release",
+            "--locked",
+            "--target-dir",
+            str(CRATE_DIR / "target"),
+        ],
+        cwd=CRATE_DIR,
+        check=True,
+    )
     if not lib_path.exists():
         raise RuntimeError(f"rust shared library not found after build: {lib_path}")
     return lib_path
