@@ -5,6 +5,7 @@ compile_error!("structural C ABI v1 requires a 64-bit little-endian target");
 
 use core::ffi::{c_char, c_void};
 
+pub mod legacy_runtime_v3;
 mod model_ir;
 pub use model_ir::*;
 

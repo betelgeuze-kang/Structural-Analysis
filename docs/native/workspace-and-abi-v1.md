@@ -365,3 +365,23 @@ R1은 numerical source를 C++로 옮기지 않고 legacy function을 `sa_get_api
 않는다. 따라서 solver, restart, ResultIR/ReportIR, product E2E 및 어떤 C0-C6 capability도 새로
 승격하지 않는다. 다음 gate는 R2 contract extraction이며 H1 HIP table adapter는 CPU product
 path가 생길 때까지 H0 상태를 유지한다.
+
+## 15. Legacy structural runtime R2 contract boundary
+
+R2는 R1의 public ABI와 numerical oracle을 유지한 채 ownership만 세 층으로 분리한다.
+
+- `structural-ffi-sys::legacy_runtime_v3`: 7개 raw C layout, ABI v3 constant와 고정 status code
+- `structural-contracts::legacy_runtime`: pointer-free typed wire case, strict JSON/schema와
+  node/story/step exact-length validation
+- `structural_runtime_ffi::contracts`: raw invocation/result를 neutral wire type으로 옮기는
+  compatibility adapter
+- `structural_runtime_ffi::lib`: 기존 5개 exported function과 Rust numerical oracle
+
+wire schema의 scalar/vector field는 SI unit suffix를 사용하고 enum/status set을 닫는다.
+in-place scale의 raw pointer 값은 fixture나 error에 포함하지 않으며 동일 저장소 여부만
+`shared_storage`로 기록한다. 네 fixture의 tracked bytes와 SHA-256, raw adapter equality,
+duplicate/unknown/non-finite/length rejection을 CI에서 함께 검사한다.
+
+R2는 `sa_get_api_v1` operation, C++ solver, checkpoint/restart 또는 product E2E를 만들지 않는다.
+따라서 capabilities와 C0-C6 원장은 변경하지 않는다. 다음 R3 gate는 한 family의 C++ native
+unit(C0), frozen Rust oracle CPU parity(C1), 기존 ABI adapter를 분리해서 증명해야 한다.

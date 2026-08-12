@@ -1,118 +1,31 @@
 use std::slice;
 
+pub mod contracts;
+
+pub use structural_ffi_sys::legacy_runtime_v3::{
+    InplaceScaleStats, NlFrameNdthaConfig, NlFrameNdthaResult, NlFrameSolveConfig,
+    NlFrameSolveResult, TrackSolveConfig, TrackSolveResult,
+};
+use structural_ffi_sys::legacy_runtime_v3::{
+    INPLACE_SCALE_STATUS_INVALID_ARGUMENT, NDTHA_STATUS_INVALID_ADAPTIVE_DECAY,
+    NDTHA_STATUS_INVALID_COLLAPSE_DRIFT, NDTHA_STATUS_INVALID_COUNTS,
+    NDTHA_STATUS_INVALID_DAMPING_CAP, NDTHA_STATUS_INVALID_HARDENING,
+    NDTHA_STATUS_INVALID_ITERATION_CONTROL, NDTHA_STATUS_INVALID_LINE_SEARCH_DECAY,
+    NDTHA_STATUS_INVALID_LINE_SEARCH_MIN, NDTHA_STATUS_INVALID_NEWMARK,
+    NDTHA_STATUS_INVALID_PDELTA, NDTHA_STATUS_INVALID_TIME_STEP, NDTHA_STATUS_INVALID_TOLERANCE,
+    NDTHA_STATUS_NONCONVERGENCE_OR_COLLAPSE, NDTHA_STATUS_NULL_ARGUMENT,
+    NONLINEAR_STATIC_STATUS_INVALID_HARDENING, NONLINEAR_STATIC_STATUS_INVALID_ITERATION_CONTROL,
+    NONLINEAR_STATIC_STATUS_INVALID_LINE_SEARCH_DECAY,
+    NONLINEAR_STATIC_STATUS_INVALID_LINE_SEARCH_MIN, NONLINEAR_STATIC_STATUS_INVALID_PDELTA,
+    NONLINEAR_STATIC_STATUS_INVALID_STORY_COUNT, NONLINEAR_STATIC_STATUS_NONCONVERGENCE,
+    NONLINEAR_STATIC_STATUS_NULL_ARGUMENT, NONLINEAR_STATIC_STATUS_OUTPUT_TOO_SMALL,
+    STRUCTURAL_RUNTIME_ABI_V3, TRACK_STATUS_INVALID_ENUM, TRACK_STATUS_INVALID_FOUNDATION,
+    TRACK_STATUS_INVALID_ITERATION_CONTROL, TRACK_STATUS_INVALID_LENGTH,
+    TRACK_STATUS_INVALID_NODE_COUNT, TRACK_STATUS_INVALID_STIFFNESS, TRACK_STATUS_NULL_ARGUMENT,
+    TRACK_STATUS_OUTPUT_TOO_SMALL,
+};
+
 const EPS: f64 = 1e-12;
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct TrackSolveConfig {
-    pub length_m: f64,
-    pub node_count: u32,
-    // 0: pinned, 1: fixed
-    pub support_type: u32,
-    // 0: euler, 1: timoshenko(reduced correction)
-    pub theory: u32,
-    pub bending_stiffness_n_m2: f64,
-    pub shear_stiffness_n: f64,
-    pub winkler_k_n_per_m2: f64,
-    pub pasternak_g_n: f64,
-    pub tolerance: f64,
-    pub cg_max_iter: u32,
-    pub point_force_n: f64,
-    pub point_position_m: f64,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct TrackSolveResult {
-    pub converged: u8,
-    pub iterations: u32,
-    pub residual_inf: f64,
-    pub max_abs_displacement_m: f64,
-    pub mid_displacement_m: f64,
-    pub status_code: i32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct InplaceScaleStats {
-    pub ptr_before: u64,
-    pub ptr_after: u64,
-    pub len: u32,
-    pub alpha: f32,
-    pub sum_before: f64,
-    pub sum_after: f64,
-    pub max_abs_before: f64,
-    pub max_abs_after: f64,
-    pub status_code: i32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct NlFrameSolveConfig {
-    pub story_count: u32,
-    pub tolerance: f64,
-    pub max_iter: u32,
-    pub hardening_ratio: f64,
-    pub line_search_decay: f64,
-    pub line_search_min: f64,
-    pub pdelta_factor: f64,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct NlFrameSolveResult {
-    pub converged: u8,
-    pub iterations: u32,
-    pub residual_inf: f64,
-    pub residual_l2: f64,
-    pub max_abs_displacement_m: f64,
-    pub top_displacement_m: f64,
-    pub base_shear_kn: f64,
-    pub plastic_story_count: u32,
-    pub line_search_backtracks: u32,
-    pub status_code: i32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct NlFrameNdthaConfig {
-    pub story_count: u32,
-    pub step_count: u32,
-    pub dt_s: f64,
-    pub newmark_beta: f64,
-    pub newmark_gamma: f64,
-    pub tolerance: f64,
-    // adaptive load-retry loop
-    pub max_step_iterations: u32,
-    pub adaptive_load_decay: f64,
-    pub damping_force_cap_ratio: f64,
-    // per-attempt Newton loop
-    pub newton_max_iter: u32,
-    pub line_search_decay: f64,
-    pub line_search_min: f64,
-    pub hardening_ratio: f64,
-    pub pdelta_factor: f64,
-    pub collapse_drift_threshold_pct: f64,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug)]
-pub struct NlFrameNdthaResult {
-    pub converged_all_steps: u8,
-    pub rust_backend_all_steps: u8,
-    pub collapsed: u8,
-    pub collapse_step: i32,
-    pub collapse_time_s: f64,
-    pub collapse_drift_ratio_pct: f64,
-    pub collapse_top_displacement_m: f64,
-    pub step_count_completed: u32,
-    pub max_plastic_story_count: u32,
-    pub max_drift_ratio_pct: f64,
-    pub avg_step_iterations: f64,
-    pub residual_top_displacement_m: f64,
-    pub residual_drift_ratio_pct: f64,
-    pub status_code: i32,
-}
 
 fn ghost_at(w: &[f64], idx: isize, support_type: u32) -> f64 {
     let n = w.len() as isize;
@@ -261,84 +174,84 @@ fn displacement_gradient(w: &[f64], dx: f64, out_theta: &mut [f64]) {
 
 fn validate_cfg(cfg: &TrackSolveConfig) -> i32 {
     if cfg.length_m <= 0.0 {
-        return -11;
+        return TRACK_STATUS_INVALID_LENGTH;
     }
     if cfg.node_count < 7 {
-        return -12;
+        return TRACK_STATUS_INVALID_NODE_COUNT;
     }
     if cfg.bending_stiffness_n_m2 <= 0.0 || cfg.shear_stiffness_n <= 0.0 {
-        return -13;
+        return TRACK_STATUS_INVALID_STIFFNESS;
     }
     if cfg.winkler_k_n_per_m2 < 0.0 || cfg.pasternak_g_n < 0.0 {
-        return -14;
+        return TRACK_STATUS_INVALID_FOUNDATION;
     }
     if cfg.tolerance <= 0.0 || cfg.cg_max_iter < 1 {
-        return -15;
+        return TRACK_STATUS_INVALID_ITERATION_CONTROL;
     }
     if cfg.support_type > 1 || cfg.theory > 1 {
-        return -16;
+        return TRACK_STATUS_INVALID_ENUM;
     }
     0
 }
 
 fn validate_nl_cfg(cfg: &NlFrameSolveConfig) -> i32 {
     if cfg.story_count < 1 {
-        return -31;
+        return NONLINEAR_STATIC_STATUS_INVALID_STORY_COUNT;
     }
     if cfg.tolerance <= 0.0 || cfg.max_iter < 1 {
-        return -32;
+        return NONLINEAR_STATIC_STATUS_INVALID_ITERATION_CONTROL;
     }
     if !(0.0..=1.0).contains(&cfg.hardening_ratio) {
-        return -33;
+        return NONLINEAR_STATIC_STATUS_INVALID_HARDENING;
     }
     if !(0.0 < cfg.line_search_decay && cfg.line_search_decay < 1.0) {
-        return -34;
+        return NONLINEAR_STATIC_STATUS_INVALID_LINE_SEARCH_DECAY;
     }
     if !(0.0 < cfg.line_search_min && cfg.line_search_min <= 1.0) {
-        return -35;
+        return NONLINEAR_STATIC_STATUS_INVALID_LINE_SEARCH_MIN;
     }
     if cfg.pdelta_factor < 0.0 {
-        return -36;
+        return NONLINEAR_STATIC_STATUS_INVALID_PDELTA;
     }
     0
 }
 
 fn validate_ndtha_cfg(cfg: &NlFrameNdthaConfig) -> i32 {
     if cfg.story_count < 1 || cfg.step_count < 1 {
-        return -41;
+        return NDTHA_STATUS_INVALID_COUNTS;
     }
     if cfg.dt_s <= 0.0 {
-        return -42;
+        return NDTHA_STATUS_INVALID_TIME_STEP;
     }
     if cfg.newmark_beta <= 0.0 || cfg.newmark_gamma <= 0.0 {
-        return -43;
+        return NDTHA_STATUS_INVALID_NEWMARK;
     }
     if cfg.tolerance <= 0.0 {
-        return -44;
+        return NDTHA_STATUS_INVALID_TOLERANCE;
     }
     if cfg.max_step_iterations < 1 || cfg.newton_max_iter < 1 {
-        return -45;
+        return NDTHA_STATUS_INVALID_ITERATION_CONTROL;
     }
     if !(0.0 < cfg.adaptive_load_decay && cfg.adaptive_load_decay <= 1.0) {
-        return -46;
+        return NDTHA_STATUS_INVALID_ADAPTIVE_DECAY;
     }
     if cfg.damping_force_cap_ratio <= 0.0 {
-        return -47;
+        return NDTHA_STATUS_INVALID_DAMPING_CAP;
     }
     if !(0.0..=1.0).contains(&cfg.hardening_ratio) {
-        return -48;
+        return NDTHA_STATUS_INVALID_HARDENING;
     }
     if cfg.pdelta_factor < 0.0 {
-        return -49;
+        return NDTHA_STATUS_INVALID_PDELTA;
     }
     if !(0.0 < cfg.line_search_decay && cfg.line_search_decay < 1.0) {
-        return -50;
+        return NDTHA_STATUS_INVALID_LINE_SEARCH_DECAY;
     }
     if !(0.0 < cfg.line_search_min && cfg.line_search_min <= 1.0) {
-        return -51;
+        return NDTHA_STATUS_INVALID_LINE_SEARCH_MIN;
     }
     if cfg.collapse_drift_threshold_pct <= 0.0 {
-        return -52;
+        return NDTHA_STATUS_INVALID_COLLAPSE_DRIFT;
     }
     0
 }
@@ -699,7 +612,7 @@ pub extern "C" fn phase1_rust_track_lf_solve_point_load(
         || out_theta_ptr.is_null()
         || out_result_ptr.is_null()
     {
-        return -1;
+        return TRACK_STATUS_NULL_ARGUMENT;
     }
 
     let cfg = unsafe { &*cfg_ptr };
@@ -720,7 +633,7 @@ pub extern "C" fn phase1_rust_track_lf_solve_point_load(
 
     let n = cfg.node_count as usize;
     if (out_len as usize) < n {
-        return -2;
+        return TRACK_STATUS_OUTPUT_TOO_SMALL;
     }
 
     let out_w = unsafe { slice::from_raw_parts_mut(out_w_ptr, n) };
@@ -791,7 +704,7 @@ pub extern "C" fn phase1_rust_scale_inplace_f32(
     out_stats_ptr: *mut InplaceScaleStats,
 ) -> i32 {
     if data_ptr.is_null() || out_stats_ptr.is_null() || len == 0 {
-        return -1;
+        return INPLACE_SCALE_STATUS_INVALID_ARGUMENT;
     }
     let n = len as usize;
     let data = unsafe { slice::from_raw_parts_mut(data_ptr, n) };
@@ -854,7 +767,7 @@ pub extern "C" fn phase1_rust_nonlinear_frame_solve(
         || out_u_ptr.is_null()
         || out_result_ptr.is_null()
     {
-        return -21;
+        return NONLINEAR_STATIC_STATUS_NULL_ARGUMENT;
     }
 
     let cfg = unsafe { &*cfg_ptr };
@@ -879,7 +792,7 @@ pub extern "C" fn phase1_rust_nonlinear_frame_solve(
 
     let n = cfg.story_count as usize;
     if (out_len as usize) < n {
-        return -22;
+        return NONLINEAR_STATIC_STATUS_OUTPUT_TOO_SMALL;
     }
 
     let story_k = unsafe { slice::from_raw_parts(story_k_ptr, n) };
@@ -1020,13 +933,17 @@ pub extern "C" fn phase1_rust_nonlinear_frame_solve(
             base_shear_kn,
             plastic_story_count: plastic_count,
             line_search_backtracks: backtracks_total,
-            status_code: if converged { 0 } else { -37 },
+            status_code: if converged {
+                0
+            } else {
+                NONLINEAR_STATIC_STATUS_NONCONVERGENCE
+            },
         };
     }
     if converged {
         0
     } else {
-        -37
+        NONLINEAR_STATIC_STATUS_NONCONVERGENCE
     }
 }
 
@@ -1076,7 +993,7 @@ pub extern "C" fn phase1_rust_nonlinear_frame_ndtha_solve(
         || out_story_drift_final_ptr.is_null()
         || out_result_ptr.is_null()
     {
-        return -61;
+        return NDTHA_STATUS_NULL_ARGUMENT;
     }
 
     let cfg = unsafe { &*cfg_ptr };
@@ -1294,7 +1211,11 @@ pub extern "C" fn phase1_rust_nonlinear_frame_ndtha_solve(
         0.0
     };
 
-    let final_status = if converged_all && !collapsed { 0 } else { -62 };
+    let final_status = if converged_all && !collapsed {
+        0
+    } else {
+        NDTHA_STATUS_NONCONVERGENCE_OR_COLLAPSE
+    };
     unsafe {
         (*out_result_ptr) = NlFrameNdthaResult {
             converged_all_steps: if converged_all { 1 } else { 0 },
@@ -1322,5 +1243,5 @@ pub extern "C" fn phase1_rust_nonlinear_frame_ndtha_solve(
 
 #[no_mangle]
 pub extern "C" fn phase1_rust_version() -> u32 {
-    3
+    STRUCTURAL_RUNTIME_ABI_V3
 }

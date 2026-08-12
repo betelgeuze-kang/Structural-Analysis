@@ -73,7 +73,7 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
-def test_r1_legacy_runtime_member_routes_through_rust_runtime_gates() -> None:
+def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]
     )

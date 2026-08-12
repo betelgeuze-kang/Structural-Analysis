@@ -31,12 +31,12 @@ def test_r1_workspace_membership_and_source_exports_are_frozen() -> None:
     ]
 
 
-def test_r1_inventory_keeps_layout_golden_and_claim_boundaries() -> None:
+def test_r1_lower_gate_keeps_layout_golden_and_claim_boundaries() -> None:
     inventory = json.loads(
         (ROOT / r1.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
 
-    assert inventory["transition_step"] == "R1"
+    assert inventory["transition_step"] in {"R1", "R2"}
     assert inventory["abi_version"] == 3
     assert len(inventory["layouts"]) == 7
     assert set(inventory["golden_cases"]) == {

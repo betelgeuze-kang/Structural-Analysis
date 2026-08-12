@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the R1 workspace membership and frozen legacy Rust ABI v3."""
+"""Validate the R1 lower gate for the frozen legacy Rust ABI v3."""
 
 from __future__ import annotations
 
@@ -16,8 +16,8 @@ DEFAULT_INVENTORY = Path("native/compatibility/structural_runtime_ffi_v3.json")
 SOURCE_EXPORT_RE = re.compile(
     r"#\[no_mangle\]\s*pub\s+(?:unsafe\s+)?extern\s+\"C\"\s+fn\s+([A-Za-z0-9_]+)"
 )
-SOURCE_NEGATIVE_STATUS_RE = re.compile(
-    r"(?<![A-Za-z0-9_.])-(\d+)(?![.\d])"
+RAW_STATUS_RE = re.compile(
+    r"pub\s+const\s+[A-Z0-9_]+:\s*i32\s*=\s*(-\d+)\s*;"
 )
 
 
@@ -96,7 +96,8 @@ def check_r1(
 
     if inventory.get("schema_version") != "structural-runtime-ffi-compatibility.v1":
         blockers.append("r1_inventory_schema_version_invalid")
-    if inventory.get("transition_step") != "R1":
+    transition_step = inventory.get("transition_step")
+    if transition_step not in {"R1", "R2"}:
         blockers.append("r1_inventory_transition_step_invalid")
     if inventory.get("abi_version") != 3:
         blockers.append("r1_inventory_abi_version_invalid")
@@ -160,12 +161,20 @@ def check_r1(
     try:
         source_text = source_path.read_text(encoding="utf-8")
         source_exports = sorted(SOURCE_EXPORT_RE.findall(source_text))
-        source_status_codes = sorted(
-            {-int(value) for value in SOURCE_NEGATIVE_STATUS_RE.findall(source_text)}
-        )
     except OSError as exc:
         blockers.append(f"r1_source_unreadable:{exc}")
         source_exports = []
+    raw_abi_path = (
+        repo_root
+        / "native/crates/structural-ffi-sys/src/legacy_runtime_v3.rs"
+    )
+    try:
+        raw_abi_text = raw_abi_path.read_text(encoding="utf-8")
+        source_status_codes = sorted(
+            {int(value) for value in RAW_STATUS_RE.findall(raw_abi_text)}
+        )
+    except OSError as exc:
+        blockers.append(f"r1_raw_abi_source_unreadable:{exc}")
         source_status_codes = []
     if source_exports != expected_exports:
         blockers.append("r1_source_export_set_mismatch")
@@ -192,7 +201,7 @@ def check_r1(
     else:
         if owner.get("migration_owner") != "structural-runtime":
             blockers.append("r1_compatibility_owner_invalid")
-        if owner.get("transition_step") != "R1":
+        if owner.get("transition_step") != transition_step:
             blockers.append("r1_compatibility_transition_step_invalid")
         if owner.get("workspace_member") is not True:
             blockers.append("r1_compatibility_workspace_member_false")

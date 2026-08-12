@@ -259,6 +259,8 @@ truth나 result authority를 다시 계산하면 제거 gate를 통과한 것으
 예: D1=C3, D2=C1, D3=C0. partial, proxy, fallback, external-blocked와 hardware
 freshness는 별도 필드로 유지한다.
 
-`structural_runtime_ffi` R1 workspace 편입은 migration topology와 기존 ABI/golden freeze다.
-수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다. 기존 Rust 결과는 R2/R3
-CPU C++ 이전을 위한 compatibility oracle이고 Python production consumer도 그대로 유지된다.
+`structural_runtime_ffi` R2 contract extraction은 migration topology, raw/wire ownership과 기존
+ABI/golden freeze다. 수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다.
+네 pointer-free neutral fixture는 향후 C++ parity 입력/결과 계약이지만 현재 numerical truth는
+기존 Rust oracle에 있다. Python production consumer도 그대로 유지되며 R3 family별 C++ CPU
+parity와 R4 restart/product integration 전에는 decommission 대상이 아니다.

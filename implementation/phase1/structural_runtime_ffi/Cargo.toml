@@ -11,6 +11,10 @@ repository = "https://github.com/betelgeuze-kang/structural-analysis"
 name = "structural_runtime_ffi"
 crate-type = ["cdylib", "rlib"]
 
+[dependencies]
+structural-contracts = { path = "../../../native/crates/structural-contracts" }
+structural-ffi-sys = { path = "../../../native/crates/structural-ffi-sys" }
+
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"
 

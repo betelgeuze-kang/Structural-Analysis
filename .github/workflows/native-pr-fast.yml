@@ -137,7 +137,7 @@ jobs:
           cargo test --manifest-path native/Cargo.toml --workspace --locked
           cargo build --manifest-path native/Cargo.toml \
             -p structural_runtime_ffi --release --locked
-          python3 scripts/check_structural_runtime_ffi_r1.py \
+          python3 scripts/check_structural_runtime_ffi_r2.py \
             --library native/target/release/libstructural_runtime_ffi.so \
             --json --fail-blocked
           rustup toolchain install 1.77.0 --profile minimal

@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/legacy-runtime-v3.schema.json",
+  "title": "Legacy structural runtime compatibility wire v3",
+  "oneOf": [
+    { "$ref": "#/$defs/trackCase" },
+    { "$ref": "#/$defs/inplaceScaleCase" },
+    { "$ref": "#/$defs/nonlinearStaticCase" },
+    { "$ref": "#/$defs/nonlinearNdthaCase" }
+  ],
+  "$defs": {
+    "finiteNumber": { "type": "number" },
+    "positiveNumber": { "type": "number", "exclusiveMinimum": 0 },
+    "nonNegativeNumber": { "type": "number", "minimum": 0 },
+    "positiveInteger": { "type": "integer", "minimum": 1, "maximum": 4294967295 },
+    "nonNegativeInteger": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+    "trackStatus": { "enum": [-16, -15, -14, -13, -12, -11, -2, -1, 0] },
+    "inplaceScaleStatus": { "enum": [-1, 0] },
+    "nonlinearStaticStatus": {
+      "enum": [-37, -36, -35, -34, -33, -32, -31, -22, -21, 0]
+    },
+    "nonlinearNdthaStatus": {
+      "enum": [-62, -61, -52, -51, -50, -49, -48, -47, -46, -45, -44, -43, -42, -41, 0]
+    },
+    "f64Vector": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/finiteNumber" }
+    },
+    "trackConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length_m",
+        "node_count",
+        "support_type",
+        "theory",
+        "bending_stiffness_n_m2",
+        "shear_stiffness_n",
+        "winkler_k_n_per_m2",
+        "pasternak_g_n",
+        "tolerance",
+        "cg_max_iter",
+        "point_force_n",
+        "point_position_m"
+      ],
+      "properties": {
+        "length_m": { "$ref": "#/$defs/positiveNumber" },
+        "node_count": { "type": "integer", "minimum": 7, "maximum": 4294967295 },
+        "support_type": { "enum": ["pinned", "fixed"] },
+        "theory": { "enum": ["euler", "timoshenko"] },
+        "bending_stiffness_n_m2": { "$ref": "#/$defs/positiveNumber" },
+        "shear_stiffness_n": { "$ref": "#/$defs/positiveNumber" },
+        "winkler_k_n_per_m2": { "$ref": "#/$defs/nonNegativeNumber" },
+        "pasternak_g_n": { "$ref": "#/$defs/nonNegativeNumber" },
+        "tolerance": { "$ref": "#/$defs/positiveNumber" },
+        "cg_max_iter": { "$ref": "#/$defs/positiveInteger" },
+        "point_force_n": { "$ref": "#/$defs/finiteNumber" },
+        "point_position_m": { "$ref": "#/$defs/finiteNumber" }
+      }
+    },
+    "trackResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "converged",
+        "iterations",
+        "residual_inf",
+        "max_abs_displacement_m",
+        "mid_displacement_m",
+        "status_code",
+        "displacement_m",
+        "rotation_rad"
+      ],
+      "properties": {
+        "converged": { "type": "boolean" },
+        "iterations": { "$ref": "#/$defs/nonNegativeInteger" },
+        "residual_inf": { "$ref": "#/$defs/nonNegativeNumber" },
+        "max_abs_displacement_m": { "$ref": "#/$defs/nonNegativeNumber" },
+        "mid_displacement_m": { "$ref": "#/$defs/finiteNumber" },
+        "status_code": { "$ref": "#/$defs/trackStatus" },
+        "displacement_m": { "$ref": "#/$defs/f64Vector" },
+        "rotation_rad": { "$ref": "#/$defs/f64Vector" }
+      }
+    },
+    "trackCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "config", "result"],
+      "properties": {
+        "schema_version": { "const": "structural-runtime-compat.v3" },
+        "operation": { "const": "track_point_load" },
+        "config": { "$ref": "#/$defs/trackConfig" },
+        "result": { "$ref": "#/$defs/trackResult" }
+      }
+    },
+    "inplaceScaleCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "input", "alpha", "output", "stats"],
+      "properties": {
+        "schema_version": { "const": "structural-runtime-compat.v3" },
+        "operation": { "const": "inplace_scale_f32" },
+        "input": { "$ref": "#/$defs/f64Vector" },
+        "alpha": { "$ref": "#/$defs/finiteNumber" },
+        "output": { "$ref": "#/$defs/f64Vector" },
+        "stats": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "length",
+            "alpha",
+            "sum_before",
+            "sum_after",
+            "max_abs_before",
+            "max_abs_after",
+            "status_code",
+            "shared_storage"
+          ],
+          "properties": {
+            "length": { "$ref": "#/$defs/positiveInteger" },
+            "alpha": { "$ref": "#/$defs/finiteNumber" },
+            "sum_before": { "$ref": "#/$defs/finiteNumber" },
+            "sum_after": { "$ref": "#/$defs/finiteNumber" },
+            "max_abs_before": { "$ref": "#/$defs/nonNegativeNumber" },
+            "max_abs_after": { "$ref": "#/$defs/nonNegativeNumber" },
+            "status_code": { "$ref": "#/$defs/inplaceScaleStatus" },
+            "shared_storage": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "nonlinearStaticConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_count",
+        "tolerance",
+        "max_iter",
+        "hardening_ratio",
+        "line_search_decay",
+        "line_search_min",
+        "pdelta_factor"
+      ],
+      "properties": {
+        "story_count": { "$ref": "#/$defs/positiveInteger" },
+        "tolerance": { "$ref": "#/$defs/positiveNumber" },
+        "max_iter": { "$ref": "#/$defs/positiveInteger" },
+        "hardening_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "line_search_decay": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+        "line_search_min": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "pdelta_factor": { "$ref": "#/$defs/nonNegativeNumber" }
+      }
+    },
+    "storyInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_k_n_per_m",
+        "story_h_m",
+        "story_axial_n",
+        "story_yield_drift_m",
+        "floor_load_n"
+      ],
+      "properties": {
+        "story_k_n_per_m": { "$ref": "#/$defs/f64Vector" },
+        "story_h_m": { "$ref": "#/$defs/f64Vector" },
+        "story_axial_n": { "$ref": "#/$defs/f64Vector" },
+        "story_yield_drift_m": { "$ref": "#/$defs/f64Vector" },
+        "floor_load_n": { "$ref": "#/$defs/f64Vector" }
+      }
+    },
+    "nonlinearStaticResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "converged",
+        "iterations",
+        "residual_inf",
+        "residual_l2",
+        "max_abs_displacement_m",
+        "top_displacement_m",
+        "base_shear_kn",
+        "plastic_story_count",
+        "line_search_backtracks",
+        "status_code",
+        "u_story_m"
+      ],
+      "properties": {
+        "converged": { "type": "boolean" },
+        "iterations": { "$ref": "#/$defs/nonNegativeInteger" },
+        "residual_inf": { "$ref": "#/$defs/nonNegativeNumber" },
+        "residual_l2": { "$ref": "#/$defs/nonNegativeNumber" },
+        "max_abs_displacement_m": { "$ref": "#/$defs/nonNegativeNumber" },
+        "top_displacement_m": { "$ref": "#/$defs/finiteNumber" },
+        "base_shear_kn": { "$ref": "#/$defs/finiteNumber" },
+        "plastic_story_count": { "$ref": "#/$defs/nonNegativeInteger" },
+        "line_search_backtracks": { "$ref": "#/$defs/nonNegativeInteger" },
+        "status_code": { "$ref": "#/$defs/nonlinearStaticStatus" },
+        "u_story_m": { "$ref": "#/$defs/f64Vector" }
+      }
+    },
+    "nonlinearStaticCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "config", "inputs", "result"],
+      "properties": {
+        "schema_version": { "const": "structural-runtime-compat.v3" },
+        "operation": { "const": "nonlinear_static" },
+        "config": { "$ref": "#/$defs/nonlinearStaticConfig" },
+        "inputs": { "$ref": "#/$defs/storyInputs" },
+        "result": { "$ref": "#/$defs/nonlinearStaticResult" }
+      }
+    },
+    "nonlinearNdthaConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_count",
+        "step_count",
+        "dt_s",
+        "newmark_beta",
+        "newmark_gamma",
+        "tolerance",
+        "max_step_iterations",
+        "adaptive_load_decay",
+        "damping_force_cap_ratio",
+        "newton_max_iter",
+        "line_search_decay",
+        "line_search_min",
+        "hardening_ratio",
+        "pdelta_factor",
+        "collapse_drift_threshold_pct"
+      ],
+      "properties": {
+        "story_count": { "$ref": "#/$defs/positiveInteger" },
+        "step_count": { "$ref": "#/$defs/positiveInteger" },
+        "dt_s": { "$ref": "#/$defs/positiveNumber" },
+        "newmark_beta": { "$ref": "#/$defs/positiveNumber" },
+        "newmark_gamma": { "$ref": "#/$defs/positiveNumber" },
+        "tolerance": { "$ref": "#/$defs/positiveNumber" },
+        "max_step_iterations": { "$ref": "#/$defs/positiveInteger" },
+        "adaptive_load_decay": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "damping_force_cap_ratio": { "$ref": "#/$defs/positiveNumber" },
+        "newton_max_iter": { "$ref": "#/$defs/positiveInteger" },
+        "line_search_decay": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 1 },
+        "line_search_min": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "hardening_ratio": { "type": "number", "minimum": 0, "maximum": 1 },
+        "pdelta_factor": { "$ref": "#/$defs/nonNegativeNumber" },
+        "collapse_drift_threshold_pct": { "$ref": "#/$defs/positiveNumber" }
+      }
+    },
+    "ndthaInputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "story_k_n_per_m",
+        "story_h_m",
+        "story_axial_n",
+        "story_yield_drift_m",
+        "story_mass_kg",
+        "story_damping_n_s_per_m",
+        "floor_load_base_n",
+        "ag_g"
+      ],
+      "properties": {
+        "story_k_n_per_m": { "$ref": "#/$defs/f64Vector" },
+        "story_h_m": { "$ref": "#/$defs/f64Vector" },
+        "story_axial_n": { "$ref": "#/$defs/f64Vector" },
+        "story_yield_drift_m": { "$ref": "#/$defs/f64Vector" },
+        "story_mass_kg": { "$ref": "#/$defs/f64Vector" },
+        "story_damping_n_s_per_m": { "$ref": "#/$defs/f64Vector" },
+        "floor_load_base_n": { "$ref": "#/$defs/f64Vector" },
+        "ag_g": { "$ref": "#/$defs/f64Vector" }
+      }
+    },
+    "ndthaResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "top_displacement_m",
+        "drift_ratio_pct",
+        "base_shear_kn",
+        "core_drift_pct",
+        "core_shear_kn",
+        "step_converged",
+        "step_iterations",
+        "step_plastic_story_count",
+        "step_residual_inf",
+        "story_drift_envelope_pct",
+        "final_story_drift_pct"
+      ],
+      "properties": {
+        "top_displacement_m": { "$ref": "#/$defs/f64Vector" },
+        "drift_ratio_pct": { "$ref": "#/$defs/f64Vector" },
+        "base_shear_kn": { "$ref": "#/$defs/f64Vector" },
+        "core_drift_pct": { "$ref": "#/$defs/f64Vector" },
+        "core_shear_kn": { "$ref": "#/$defs/f64Vector" },
+        "step_converged": { "type": "array", "minItems": 1, "items": { "type": "boolean" } },
+        "step_iterations": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonNegativeInteger" } },
+        "step_plastic_story_count": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/nonNegativeInteger" } },
+        "step_residual_inf": { "$ref": "#/$defs/f64Vector" },
+        "story_drift_envelope_pct": { "$ref": "#/$defs/f64Vector" },
+        "final_story_drift_pct": { "$ref": "#/$defs/f64Vector" }
+      }
+    },
+    "nonlinearNdthaResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "converged_all_steps",
+        "rust_backend_all_steps",
+        "collapsed",
+        "collapse_step",
+        "collapse_time_s",
+        "collapse_drift_ratio_pct",
+        "collapse_top_displacement_m",
+        "step_count_completed",
+        "max_plastic_story_count",
+        "max_drift_ratio_pct",
+        "avg_step_iterations",
+        "residual_top_displacement_m",
+        "residual_drift_ratio_pct",
+        "status_code",
+        "response"
+      ],
+      "properties": {
+        "converged_all_steps": { "type": "boolean" },
+        "rust_backend_all_steps": { "type": "boolean" },
+        "collapsed": { "type": "boolean" },
+        "collapse_step": { "type": "integer" },
+        "collapse_time_s": { "$ref": "#/$defs/nonNegativeNumber" },
+        "collapse_drift_ratio_pct": { "$ref": "#/$defs/nonNegativeNumber" },
+        "collapse_top_displacement_m": { "$ref": "#/$defs/finiteNumber" },
+        "step_count_completed": { "$ref": "#/$defs/nonNegativeInteger" },
+        "max_plastic_story_count": { "$ref": "#/$defs/nonNegativeInteger" },
+        "max_drift_ratio_pct": { "$ref": "#/$defs/nonNegativeNumber" },
+        "avg_step_iterations": { "$ref": "#/$defs/nonNegativeNumber" },
+        "residual_top_displacement_m": { "$ref": "#/$defs/finiteNumber" },
+        "residual_drift_ratio_pct": { "$ref": "#/$defs/nonNegativeNumber" },
+        "status_code": { "$ref": "#/$defs/nonlinearNdthaStatus" },
+        "response": { "$ref": "#/$defs/ndthaResponse" }
+      }
+    },
+    "nonlinearNdthaCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "config", "inputs", "result"],
+      "properties": {
+        "schema_version": { "const": "structural-runtime-compat.v3" },
+        "operation": { "const": "nonlinear_ndtha" },
+        "config": { "$ref": "#/$defs/nonlinearNdthaConfig" },
+        "inputs": { "$ref": "#/$defs/ndthaInputs" },
+        "result": { "$ref": "#/$defs/nonlinearNdthaResult" }
+      }
+    }
+  }
+}

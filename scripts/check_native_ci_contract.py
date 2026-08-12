@@ -217,7 +217,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "merge-ref head parent mismatch",
         "git rev-parse HEAD^{tree}",
         "check_native_capabilities.py --fail-invalid",
-        "check_structural_runtime_ffi_r1.py",
+        "check_structural_runtime_ffi_r2.py",
         "native/target/release/libstructural_runtime_ffi.so",
     ):
         if required not in pr_text:

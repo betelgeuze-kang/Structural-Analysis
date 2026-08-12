@@ -1,0 +1,17 @@
+{
+  "schema_version": "structural-runtime-compat.v3",
+  "operation": "inplace_scale_f32",
+  "input": [1.0, -2.0, 0.5, 4.0],
+  "alpha": 1.25,
+  "output": [1.25, -2.5, 0.625, 5.0],
+  "stats": {
+    "length": 4,
+    "alpha": 1.25,
+    "sum_before": 3.5,
+    "sum_after": 4.375,
+    "max_abs_before": 4.0,
+    "max_abs_after": 5.0,
+    "status_code": 0,
+    "shared_storage": true
+  }
+}

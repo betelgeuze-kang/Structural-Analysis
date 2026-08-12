@@ -6,6 +6,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod legacy_runtime;
 pub mod model_ir;
 
 /// ABI family consumed by the wire-contract crates.

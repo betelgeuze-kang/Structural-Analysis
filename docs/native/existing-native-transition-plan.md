@@ -72,8 +72,23 @@ Implementation status: complete on the Slice D successor branch.
 - raw repr(C) mirror는 structural-ffi-sys가 소유한다.
 - original crate는 adapter로 새 type을 변환한다.
 
-Current next gate: R2. R1 inventory의 field order, units, status와 ownership을 먼저
-language-neutral schema로 옮기고 raw mirror owner를 분리해야 한다.
+Implementation status: complete on the R2 successor branch.
+
+- `structural-ffi-sys::legacy_runtime_v3`가 7개 raw `repr(C)` type, ABI version과 고정
+  status constant를 소유하고 legacy crate는 같은 public type 이름을 re-export한다.
+- `structural-contracts::legacy_runtime`가 4개 operation의 strict typed wire contract를
+  소유한다. Draft 2020-12 schema는 unknown field/status를 거부하고 strict decoder는
+  duplicate key와 non-finite JSON token을 거부한다.
+- SI unit이 field name에 명시되고 story/node/step vector 길이는 typed post-schema
+  validation에서 exact-match한다.
+- in-place buffer의 process pointer는 wire에서 제외하며 `shared_storage` 의미만 보존한다.
+- 네 language-neutral golden fixture의 exact bytes는 SHA-256 inventory로 고정하고 raw-to-wire
+  adapter test가 R1 numerical 결과와 일치시킨다.
+- R1 ABI layout, status, numerical golden 및 release cdylib 5-symbol exact set은 하위 gate로
+  계속 실행한다.
+
+Current next gate: R3. 한 numerical family를 C++ CPU product target으로 옮기되 legacy Rust
+implementation은 C1 oracle parity가 확정될 때까지 유지한다.
 
 ### Step R3: move numerical kernels
 

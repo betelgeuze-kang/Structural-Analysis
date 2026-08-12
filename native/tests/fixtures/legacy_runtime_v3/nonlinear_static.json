@@ -1,0 +1,37 @@
+{
+  "schema_version": "structural-runtime-compat.v3",
+  "operation": "nonlinear_static",
+  "config": {
+    "story_count": 3,
+    "tolerance": 1e-7,
+    "max_iter": 60,
+    "hardening_ratio": 0.04,
+    "line_search_decay": 0.5,
+    "line_search_min": 0.03125,
+    "pdelta_factor": 1.0
+  },
+  "inputs": {
+    "story_k_n_per_m": [100000000.0, 90000000.0, 80000000.0],
+    "story_h_m": [3.0, 3.0, 3.0],
+    "story_axial_n": [1000000.0, 800000.0, 600000.0],
+    "story_yield_drift_m": [0.02, 0.02, 0.02],
+    "floor_load_n": [10000.0, 8000.0, 6000.0]
+  },
+  "result": {
+    "converged": true,
+    "iterations": 6,
+    "residual_inf": 6.79574441164732e-9,
+    "residual_l2": 7.31922742469327e-9,
+    "max_abs_displacement_m": 0.0004705555555556994,
+    "top_displacement_m": 0.0004705555555556994,
+    "base_shear_kn": 24.00000000001004,
+    "plastic_story_count": 0,
+    "line_search_backtracks": 0,
+    "status_code": 0,
+    "u_story_m": [
+      0.0002400000000001004,
+      0.000395555555555692,
+      0.0004705555555556994
+    ]
+  }
+}

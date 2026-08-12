@@ -4,11 +4,11 @@
     {
       "legacy_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
       "migration_owner": "structural-runtime",
-      "transition_step": "R1",
+      "transition_step": "R2",
       "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "R2 language-neutral contract extraction after ABI v3 freeze and compatibility parity"
+      "next_gate": "R3 move one numerical family to the C++ CPU product library under oracle parity"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

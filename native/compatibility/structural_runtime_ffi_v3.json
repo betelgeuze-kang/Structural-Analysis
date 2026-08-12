@@ -1,6 +1,6 @@
 {
   "schema_version": "structural-runtime-ffi-compatibility.v1",
-  "transition_step": "R1",
+  "transition_step": "R2",
   "package": {
     "manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
     "name": "structural_runtime_ffi",
@@ -87,9 +87,24 @@
       "residual_top_displacement_m": 3.795754248884991e-6
     }
   },
+  "wire_golden_sha256": {
+    "native/tests/fixtures/legacy_runtime_v3/inplace_scale_f32.json": "dc55e480b22c1f896ae604851d3a69b9f2b0cec385175c70fd6782eb43de8293",
+    "native/tests/fixtures/legacy_runtime_v3/nonlinear_ndtha.json": "9ef7a8dd0c7e347991105ad383ccbd409b509ea5187f1d91afcf1dab6d1c2535",
+    "native/tests/fixtures/legacy_runtime_v3/nonlinear_static.json": "57df412800943da8fdd2214a88cadd314b1620c7b2c707a15f56f4828a3a9ab0",
+    "native/tests/fixtures/legacy_runtime_v3/track_point_load.json": "23264beef35f7e4d70c4f030276ab7d5d9809a562f3d3c852493f9a9dbf95ec9"
+  },
   "verification": {
     "rust_contract_test": "implementation/phase1/structural_runtime_ffi/tests/abi_v3_contract.rs",
-    "symbol_checker": "scripts/check_structural_runtime_ffi_r1.py"
+    "adapter_contract_test": "implementation/phase1/structural_runtime_ffi/tests/contracts_adapter.rs",
+    "wire_contract_test": "native/crates/structural-contracts/tests/legacy_runtime_wire.rs",
+    "symbol_checker": "scripts/check_structural_runtime_ffi_r2.py"
   },
-  "claim_boundary": "R1 freezes and workspace-tests the existing Rust ABI v3. It does not move numerical authority to C++, expose these operations through sa_get_api_v1, provide checkpoint/restart, or promote product E2E."
+  "ownership": {
+    "wire_schema": "native/crates/structural-contracts/schemas/legacy_runtime_v3.schema.json",
+    "wire_types": "native/crates/structural-contracts/src/legacy_runtime.rs",
+    "raw_abi_mirror": "native/crates/structural-ffi-sys/src/legacy_runtime_v3.rs",
+    "legacy_adapter": "implementation/phase1/structural_runtime_ffi/src/contracts.rs",
+    "numerical_oracle": "implementation/phase1/structural_runtime_ffi/src/lib.rs"
+  },
+  "claim_boundary": "R2 extracts language-neutral wire contracts and the raw ABI mirror while preserving the existing Rust numerical oracle and five exports. It does not move numerical authority to C++, expose these operations through sa_get_api_v1, provide checkpoint/restart, or promote product E2E."
 }
