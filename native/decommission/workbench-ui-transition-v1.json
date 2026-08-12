@@ -1,0 +1,107 @@
+{
+  "schema_version": "native-workbench-ui-transition.v1",
+  "status": "transition_active",
+  "current_gate": "C5",
+  "owner": "structural-workbench",
+  "native_surface": {
+    "binary": "structural-workbench",
+    "core_flow": [
+      "import",
+      "validate",
+      "run",
+      "resume",
+      "compare",
+      "report"
+    ],
+    "operator_flow": [
+      "inspect",
+      "review",
+      "export"
+    ],
+    "runtime_python_required": false,
+    "runtime_node_required": false,
+    "runtime_browser_required": false,
+    "human_review_inferred": false,
+    "profile_scope": "exact_fixed_guided_modelir_or_normalized_mgt_ndtha"
+  },
+  "legacy_surface": {
+    "product_entrypoint": "src/main.tsx",
+    "package_manifest": "package.json",
+    "build_config": "vite.config.ts",
+    "source_roots": [
+      "src/workbench",
+      "src/workbench-v2",
+      "src/structure-viewer"
+    ],
+    "source_inventory": {
+      "src_ts_tsx_files": 43,
+      "src_js_mjs_files": 82,
+      "frontend_ts_tsx_test_files": 9,
+      "node_js_mjs_script_files": 26,
+      "js_mjs_test_files": 2
+    },
+    "active_node_workflows": [
+      ".github/workflows/ai-contract-verify.yml",
+      ".github/workflows/ci.yml",
+      ".github/workflows/frontend-web-ci.yml",
+      ".github/workflows/nightly-full-quality.yml",
+      ".github/workflows/nightly-heavy-solver.yml",
+      ".github/workflows/runtime-input-viewer-ci.yml",
+      ".github/workflows/viewer-browser-ci.yml"
+    ],
+    "production_deployment_authority": false,
+    "verification_authority_active": true,
+    "rollback_archive_complete": false,
+    "removal_allowed": false
+  },
+  "feature_matrix": [
+    {
+      "feature": "import_validate_run_resume_compare_report",
+      "native_status": "c5_implemented",
+      "legacy_status": "implemented",
+      "removal_blocker": false
+    },
+    {
+      "feature": "deterministic_result_inspect_human_review_export",
+      "native_status": "c5_implemented",
+      "legacy_status": "implemented",
+      "removal_blocker": false
+    },
+    {
+      "feature": "general_visual_model_editing_and_3d_result_exploration",
+      "native_status": "open",
+      "legacy_status": "prototype_and_evidence_surface",
+      "removal_blocker": true
+    },
+    {
+      "feature": "arbitrary_modelir_topology_and_solver_selection",
+      "native_status": "open",
+      "legacy_status": "display_only_or_partial",
+      "removal_blocker": true
+    },
+    {
+      "feature": "benchmark_and_evidence_catalog_browsing",
+      "native_status": "open",
+      "legacy_status": "implemented",
+      "removal_blocker": true
+    },
+    {
+      "feature": "accessibility_localization_and_unicode_report_ui",
+      "native_status": "open",
+      "legacy_status": "partial",
+      "removal_blocker": true
+    }
+  ],
+  "c6_prerequisites": {
+    "native_feature_parity_complete": false,
+    "active_node_verification_authority_zero": false,
+    "language_neutral_golden_ownership_complete": false,
+    "approved_hip_c2_receipts_complete": false,
+    "deprecation_window_complete": false,
+    "rollback_package_complete": false,
+    "clean_machine_product_e2e_complete": false,
+    "native_result_error_checksum_parity_complete": false
+  },
+  "c6_complete": false,
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review and export surface while keeping every active React/TypeScript/JavaScript and Node verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+}

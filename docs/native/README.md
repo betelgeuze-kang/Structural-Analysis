@@ -21,6 +21,10 @@
 16. [Bounded Nonlinear-Static HIP C2](nonlinear-static-hip-c2.md)
 17. [Nonlinear-Static Product C4/C5 v1](nonlinear-static-product-e2e-v1.md)
 18. [Bounded Nonlinear-NDTHA HIP C2](nonlinear-ndtha-hip-c2.md)
+19. [Rust-native Workbench v1](rust-native-workbench-v1.md)
+20. [Native Distribution Lifecycle](distribution-lifecycle.md)
+21. [Native Deployment Cutover v1](deployment-cutover-v1.md)
+22. [Native Workbench UI Transition v1](workbench-ui-transition-v1.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

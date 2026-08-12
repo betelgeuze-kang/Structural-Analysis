@@ -73,6 +73,22 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_legacy_workbench_ui_changes_route_through_native_transition_gate() -> None:
+    payload = scope.classify_paths(
+        [
+            "src/workbench-v2/WorkbenchPage.tsx",
+            "src/structure-viewer/viewer-shell.js",
+            "scripts/verify-workbench-v2-e2e.mjs",
+            ".github/workflows/frontend-web-ci.yml",
+            "package.json",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_track_python_parity_boundary_routes_through_the_oracle_gate() -> None:
     payload = scope.classify_paths(
         ["tests/test_native_track_point_load_python_parity.py"]

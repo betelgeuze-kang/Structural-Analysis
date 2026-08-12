@@ -4,7 +4,9 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use serde_json::json;
-use structural_workbench::{NativeWorkbench, WorkbenchError, WorkbenchStageV1};
+use structural_workbench::{
+    NativeWorkbench, WorkbenchError, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+};
 
 const EXIT_FAILURE: u8 = 1;
 const EXIT_USAGE_OR_POLICY: u8 = 2;
@@ -19,6 +21,14 @@ struct ImportCommand {
     executable_artifact: Option<PathBuf>,
     workspace: PathBuf,
     step_budget: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ReviewCommand {
+    workspace: PathBuf,
+    decision: WorkbenchReviewDecisionV1,
+    reviewer: String,
+    comment: String,
 }
 
 fn main() -> ExitCode {
@@ -46,6 +56,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
+        }
+        Some("inspect") => {
+            parse_workspace_only(arguments).and_then(|workspace| run_inspect(&workspace))
         }
         Some("validate") => parse_workspace_only(arguments).and_then(|workspace| {
             let mut workbench = NativeWorkbench::open(&workspace)?;
@@ -78,6 +91,13 @@ fn run(arguments: &[OsString]) -> ExitCode {
             workbench.report()?;
             print_session(&workbench)
         }),
+        Some("review") => parse_review(arguments).and_then(|command| run_review(&command)),
+        Some("review-show") => {
+            parse_workspace_only(arguments).and_then(|workspace| run_review_show(&workspace))
+        }
+        Some("export") => {
+            parse_workspace_only(arguments).and_then(|workspace| run_export(&workspace))
+        }
         Some("interactive") => {
             parse_workspace_only(arguments).and_then(|workspace| run_interactive(&workspace))
         }
@@ -153,6 +173,33 @@ fn initialize(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError
 fn run_status(workspace: &Path) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(workspace)?;
     print_session(&workbench)
+}
+
+fn run_inspect(workspace: &Path) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(workspace)?;
+    println!("{}", workbench.inspect_json()?);
+    Ok(())
+}
+
+fn run_review(command: &ReviewCommand) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    println!(
+        "{}",
+        workbench.publish_review(command.decision, &command.reviewer, &command.comment,)?
+    );
+    Ok(())
+}
+
+fn run_review_show(workspace: &Path) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(workspace)?;
+    println!("{}", workbench.review_json()?);
+    Ok(())
+}
+
+fn run_export(workspace: &Path) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(workspace)?;
+    println!("{}", workbench.export_json()?);
+    Ok(())
 }
 
 fn run_interactive(workspace: &Path) -> Result<(), WorkbenchError> {
@@ -331,6 +378,57 @@ fn parse_u32(value: &OsStr, label: &str) -> Result<u32, WorkbenchError> {
         .ok_or_else(|| usage_error(&format!("{label} must be an unsigned 32-bit integer")))
 }
 
+fn parse_review(arguments: &[OsString]) -> Result<ReviewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut decision = None;
+    let mut reviewer = None;
+    let mut comment = None;
+    let mut index = 1;
+    while index < arguments.len() {
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("review option names must be valid UTF-8"))?;
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("review option has no value"));
+        }
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--decision" if decision.is_none() => {
+                let parsed = value
+                    .to_str()
+                    .and_then(WorkbenchReviewDecisionV1::parse)
+                    .ok_or_else(|| usage_error("review decision must be pass, review or fail"))?;
+                decision = Some(parsed);
+            }
+            "--reviewer" if reviewer.is_none() => {
+                reviewer = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("reviewer must be valid UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--comment" if comment.is_none() => {
+                comment = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("review comment must be valid UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            _ => return Err(usage_error("duplicate or unknown review option")),
+        }
+        index += 2;
+    }
+    Ok(ReviewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        decision: decision.ok_or_else(|| usage_error("--decision is required"))?,
+        reviewer: reviewer.ok_or_else(|| usage_error("--reviewer is required"))?,
+        comment: comment.unwrap_or_default(),
+    })
+}
+
 fn usage_error(detail: &str) -> WorkbenchError {
     WorkbenchError {
         code: "workbench_usage_error",
@@ -339,7 +437,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
+    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
 }
 
 #[cfg(test)]
@@ -347,7 +445,7 @@ mod tests {
     use std::ffi::OsString;
     use std::path::PathBuf;
 
-    use super::{parse_import, parse_stage_command};
+    use super::{parse_import, parse_review, parse_stage_command};
 
     #[test]
     fn parser_requires_explicit_provenance_inputs() {
@@ -408,5 +506,28 @@ mod tests {
             OsString::from("--require-pass"),
         ];
         assert!(parse_stage_command(&invalid_run, "--step-budget", 1).is_err());
+    }
+
+    #[test]
+    fn review_parser_requires_an_explicit_human_disposition() {
+        let arguments = [
+            OsString::from("review"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+            OsString::from("--decision"),
+            OsString::from("review"),
+            OsString::from("--reviewer"),
+            OsString::from("Engineer A"),
+            OsString::from("--comment"),
+            OsString::from("Check connection assumptions."),
+        ];
+        let parsed = parse_review(&arguments).expect("valid explicit review");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.decision.label(), "review");
+        assert_eq!(parsed.reviewer, "Engineer A");
+
+        let mut invalid = arguments;
+        invalid[4] = OsString::from("inferred-pass");
+        assert!(parse_review(&invalid).is_err());
     }
 }

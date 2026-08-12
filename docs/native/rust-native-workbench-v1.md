@@ -25,6 +25,10 @@ ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
 5. `Compare` verifies the external source/executable hashes and publishes passed or diverged
    evidence without erasing divergence.
 6. `Report` re-verifies the terminal projections and renders the deterministic native PDF.
+7. `Inspect` projects a self-hashed operator view from the verified stage chain. `Review` records
+   one immutable explicit human `pass`/`review`/`fail` disposition that is hash-bound to the exact
+   session, ResultIR, comparison IR, and PDF; it is never inferred from a successful run or
+   comparison. `Export` emits a self-hashed handoff manifest for those exact relative artifacts.
 
 Every stage is an atomically renamed directory with a self-hashed receipt and complete artifact
 inventory. `workbench-session.json` contains no machine-specific paths. On open, the Workbench
@@ -47,6 +51,11 @@ structural-workbench resume --workspace SESSION
 structural-workbench compare --workspace SESSION --require-pass
 structural-workbench report --workspace SESSION
 structural-workbench status --workspace SESSION
+structural-workbench inspect --workspace SESSION
+structural-workbench review --workspace SESSION --decision review \
+  --reviewer "Engineer A" --comment "Check connection assumptions."
+structural-workbench review-show --workspace SESSION
+structural-workbench export --workspace SESSION
 ```
 
 `interactive` advances the same durable state machine one action at a time. `workflow` is the
@@ -54,19 +63,28 @@ headless clean-machine form and performs the complete sequence; `workflow-mgt` d
 original MGT bytes. Run must stop before the terminal step so Resume is a real checkpoint
 transition; the current fixtures use a budget of one.
 
+The review is deliberately immutable. Revising a disposition requires a new Workbench session
+instead of silently overwriting history. Reviewer and comment text are bounded and reject terminal
+control characters. The export is a manifest, not a signature or archive; the listed PDF and JSON
+files remain independently verifiable product artifacts.
+
 The integration test clears the child environment, executes each stage in a new process, restores
 the pre-Run session after the atomic checkpoint publication to model a crash window, resumes, and
 then compares all 29 ModelIR-flow files against a second one-shot workflow byte for byte. The MGT
 variant performs the same proof over 34 files and re-runs deterministic import plus C++ validation
 on every reopen; source or evidence tampering and blocked import health fail before a stage can
 advance. The tests also freeze the terminal ResultIR and PDF hashes and prove invalid ordering and
-imported-input tamper rejection.
+imported-input tamper rejection. A separate clean-process test publishes the same explicit review
+in two workspaces, proves byte-identical inspect/review/export JSON, verifies that a passed external
+comparison does not infer the human decision, blocks review overwrite, and rejects a one-byte
+review mutation on reopen.
 
 ## Claim boundary
 
-This is a terminal-native operator surface for one bounded product profile. It is not a general
-visual model editor or results viewer and does not yet replace all React/TypeScript UI behavior.
-General MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
+This is a terminal-native operator surface for one bounded product profile. It now owns a
+deterministic results summary, explicit human review and handoff export for that profile, but it is
+not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
+MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
 modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
 accessibility/localization, protected HIP C2 receipts, and final Python/Node C6 removal remain open.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback

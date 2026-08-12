@@ -133,6 +133,20 @@ fn stage_arguments<'a>(command: &'a str, workspace: &'a Path) -> [&'a OsStr; 3] 
     [text(command), text("--workspace"), workspace.as_os_str()]
 }
 
+fn review_arguments(workspace: &Path) -> Vec<&OsStr> {
+    vec![
+        text("review"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--decision"),
+        text("review"),
+        text("--reviewer"),
+        text("Engineer A"),
+        text("--comment"),
+        text("Check connection assumptions before acceptance."),
+    ]
+}
+
 fn collect_files(root: &Path) -> Vec<PathBuf> {
     fn visit(root: &Path, directory: &Path, output: &mut Vec<PathBuf>) {
         let mut entries = std::fs::read_dir(directory)
@@ -175,6 +189,11 @@ fn verify_session(workspace: &Path) -> Value {
     let unsigned = canonicalize_model_ir_v2(&value).expect("canonical unsigned session");
     assert_eq!(session_hash, sha256_identity(unsigned.as_bytes()));
     value
+}
+
+fn output_json(output: &Output) -> Value {
+    assert_success(output);
+    serde_json::from_slice(&output.stdout).expect("Workbench canonical JSON stdout")
 }
 
 #[test]
@@ -364,4 +383,82 @@ fn blocked_mgt_health_cannot_create_an_analysis_workspace() {
     assert_eq!(rejected.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_blocked"));
     assert!(!workspace.exists());
+}
+
+#[test]
+fn native_review_inspect_and_export_are_deterministic_and_tamper_evident() {
+    let (model, request, external, source) = inputs();
+    let temporary = TestDirectory::create();
+    let first = temporary.0.join("review-first");
+    let second = temporary.0.join("review-second");
+    for workspace in [&first, &second] {
+        assert_success(&run_workbench(&import_arguments(
+            "workflow", &model, &request, &external, &source, workspace,
+        )));
+    }
+
+    let before = output_json(&run_workbench(&stage_arguments("inspect", &first)));
+    assert_eq!(before["durable_stage"], "reported");
+    assert_eq!(before["next_action"], "review");
+    assert!(before["human_review"].is_null());
+    assert_eq!(before["comparison"]["status"], "passed");
+    assert_eq!(before["backend_receipt"]["fallback_count"], 0);
+
+    let first_review = run_workbench(&review_arguments(&first));
+    let second_review = run_workbench(&review_arguments(&second));
+    assert_success(&first_review);
+    assert_success(&second_review);
+    assert_eq!(first_review.stdout, second_review.stdout);
+
+    let review = output_json(&run_workbench(&stage_arguments("review-show", &first)));
+    assert_eq!(review["decision"], "review");
+    assert_eq!(review["reviewer"], "Engineer A");
+    assert_eq!(
+        review["claim_boundary"],
+        "explicit_human_review_bound_to_verified_native_result_comparison_and_pdf_not_an_automated_engineering_verdict_or_signature"
+    );
+    assert!(review["review_hash"]
+        .as_str()
+        .is_some_and(|value| value.starts_with("sha256:")));
+
+    let first_view = run_workbench(&stage_arguments("inspect", &first));
+    let second_view = run_workbench(&stage_arguments("inspect", &second));
+    assert_success(&first_view);
+    assert_success(&second_view);
+    assert_eq!(first_view.stdout, second_view.stdout);
+    let view: Value = serde_json::from_slice(&first_view.stdout).expect("native view JSON");
+    assert_eq!(view["next_action"], "export");
+    assert_eq!(view["human_review"]["decision"], "review");
+    assert_eq!(view["human_review"]["automatically_inferred"], false);
+
+    let first_export = run_workbench(&stage_arguments("export", &first));
+    let second_export = run_workbench(&stage_arguments("export", &second));
+    assert_success(&first_export);
+    assert_success(&second_export);
+    assert_eq!(first_export.stdout, second_export.stdout);
+    let export: Value = serde_json::from_slice(&first_export.stdout).expect("native export JSON");
+    assert_eq!(
+        export["schema_version"],
+        "structural-native-workbench-export.v1"
+    );
+    assert_eq!(export["decision"], "review");
+    assert_eq!(
+        export["artifacts"].as_array().expect("artifact list").len(),
+        6
+    );
+    assert!(export["export_hash"]
+        .as_str()
+        .is_some_and(|value| value.starts_with("sha256:")));
+
+    let duplicate = run_workbench(&review_arguments(&first));
+    assert_eq!(duplicate.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&duplicate.stdout).contains("workbench_review_exists"));
+
+    let review_path = first.join("07-review/review.json");
+    let mut tampered = std::fs::read(&review_path).expect("review bytes");
+    tampered[0] ^= 1;
+    std::fs::write(review_path, tampered).expect("tamper review");
+    let rejected = run_workbench(&stage_arguments("status", &first));
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_hashed_json"));
 }

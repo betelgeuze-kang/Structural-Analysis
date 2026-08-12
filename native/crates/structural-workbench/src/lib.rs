@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+use std::ffi::OsStr;
 use std::fmt;
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
@@ -32,6 +33,12 @@ const RUN_DIRECTORY: &str = "03-run";
 const RESUME_DIRECTORY: &str = "04-resume";
 const COMPARISON_DIRECTORY: &str = "05-compare";
 const REPORT_DIRECTORY: &str = "06-report";
+const REVIEW_DIRECTORY: &str = "07-review";
+const REVIEW_FILE: &str = "review.json";
+const REVIEW_SCHEMA_V1: &str = "structural-native-workbench-review.v1";
+const VIEW_SCHEMA_V1: &str = "structural-native-workbench-view.v1";
+const EXPORT_SCHEMA_V1: &str = "structural-native-workbench-export.v1";
+const REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_native_result_comparison_and_pdf_not_an_automated_engineering_verdict_or_signature";
 const MAX_MODEL_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
@@ -87,6 +94,52 @@ impl WorkbenchStageV1 {
             Self::Reported => "reported",
         }
     }
+}
+
+/// Explicit human disposition. It is never derived from solver or comparison status.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WorkbenchReviewDecisionV1 {
+    Pass,
+    Review,
+    Fail,
+}
+
+impl WorkbenchReviewDecisionV1 {
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::Pass => "pass",
+            Self::Review => "review",
+            Self::Fail => "fail",
+        }
+    }
+
+    #[must_use]
+    pub fn parse(value: &str) -> Option<Self> {
+        match value {
+            "pass" => Some(Self::Pass),
+            "review" => Some(Self::Review),
+            "fail" => Some(Self::Fail),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+struct WorkbenchReviewV1 {
+    schema_version: String,
+    session_id: String,
+    source_session_hash: String,
+    decision: WorkbenchReviewDecisionV1,
+    reviewer: String,
+    comment: String,
+    result_artifact_hash: String,
+    comparison_artifact_hash: String,
+    pdf_artifact_hash: String,
+    claim_boundary: String,
+    review_hash: String,
 }
 
 /// Self-hashed durable Workbench state. Paths are intentionally excluded.
@@ -584,6 +637,7 @@ impl NativeWorkbench {
         session.stage = discovered.stage;
         session.terminal_status = discovered.terminal_status;
         session.comparison_passed = discovered.comparison_passed;
+        verify_optional_review(root, &session)?;
         Ok(Self {
             root: root.to_path_buf(),
             session,
@@ -602,6 +656,252 @@ impl NativeWorkbench {
     /// Returns an invariant failure if the state cannot be canonically serialized.
     pub fn session_json(&self) -> Result<String, WorkbenchError> {
         canonical_session(&self.session)
+    }
+
+    /// Return a deterministic operator view over the verified durable stage chain.
+    ///
+    /// The view contains only product-owned identities, status, summaries and relative artifact
+    /// references. It never infers an engineering verdict from solver or comparison success.
+    ///
+    /// # Errors
+    ///
+    /// Returns an invariant error if a verified product artifact cannot be decoded or projected.
+    #[allow(clippy::too_many_lines)]
+    pub fn inspect_json(&self) -> Result<String, WorkbenchError> {
+        let stages = [
+            (WorkbenchStageV1::Imported, "import"),
+            (WorkbenchStageV1::Validated, "validate"),
+            (WorkbenchStageV1::Checkpointed, "run"),
+            (WorkbenchStageV1::Terminal, "resume"),
+            (WorkbenchStageV1::Compared, "compare"),
+            (WorkbenchStageV1::Reported, "report"),
+        ];
+        let workflow = stages
+            .iter()
+            .map(|(required, label)| {
+                json!({
+                    "stage": label,
+                    "state": if self.session.stage >= *required { "complete" } else { "pending" },
+                })
+            })
+            .collect::<Vec<_>>();
+
+        let (result_summary, backend_receipt) = if self.session.stage >= WorkbenchStageV1::Terminal
+        {
+            let value = strict_artifact_json(
+                &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+                "workbench_result_view_invalid",
+            )?;
+            (
+                value.get("summary").cloned().unwrap_or(Value::Null),
+                value.get("backend_receipt").cloned().unwrap_or(Value::Null),
+            )
+        } else {
+            (Value::Null, Value::Null)
+        };
+        let comparison = if self.session.stage >= WorkbenchStageV1::Compared {
+            let receipt = verified_receipt_json(
+                &self
+                    .root
+                    .join(COMPARISON_DIRECTORY)
+                    .join("comparison-receipt.json"),
+            )?;
+            json!({
+                "status": receipt.get("status").cloned().unwrap_or(Value::Null),
+                "comparison_hash": receipt.get("comparison_hash").cloned().unwrap_or(Value::Null),
+            })
+        } else {
+            Value::Null
+        };
+        let report = if self.session.stage >= WorkbenchStageV1::Reported {
+            let receipt =
+                verified_receipt_json(&self.root.join(REPORT_DIRECTORY).join("pdf-receipt.json"))?;
+            json!({
+                "pdf_hash": receipt.get("pdf_hash").cloned().unwrap_or(Value::Null),
+                "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
+                "source_report_hash": receipt.get("source_report_hash").cloned().unwrap_or(Value::Null),
+            })
+        } else {
+            Value::Null
+        };
+        let review = read_optional_review(&self.root, &self.session)?;
+        let review_view = review.as_ref().map_or(Value::Null, |review| {
+            json!({
+                "decision": review.decision,
+                "reviewer": review.reviewer,
+                "comment": review.comment,
+                "review_hash": review.review_hash,
+                "automatically_inferred": false,
+            })
+        });
+        let next_action = if review.is_some() {
+            "export"
+        } else {
+            match self.session.stage {
+                WorkbenchStageV1::Imported => "validate",
+                WorkbenchStageV1::Validated => "run",
+                WorkbenchStageV1::Checkpointed => "resume",
+                WorkbenchStageV1::Terminal => "compare",
+                WorkbenchStageV1::Compared => "report",
+                WorkbenchStageV1::Reported => "review",
+            }
+        };
+        canonical_hashed_json(
+            json!({
+                "schema_version": VIEW_SCHEMA_V1,
+                "session_id": self.session.session_id,
+                "durable_stage": self.session.stage,
+                "import_kind": if self.session.mgt_source_hash.is_some() { "mgt" } else { "model_ir" },
+                "model_identity": {
+                    "content_hash": self.session.model_content_hash,
+                    "semantic_hash": self.session.model_semantic_hash,
+                    "provenance_hash": self.session.model_provenance_hash,
+                },
+                "workflow": workflow,
+                "terminal_status": self.session.terminal_status,
+                "result_summary": result_summary,
+                "backend_receipt": backend_receipt,
+                "comparison": comparison,
+                "report": report,
+                "human_review": review_view,
+                "next_action": next_action,
+                "claim_boundary": "deterministic_verified_native_operator_view_not_visual_model_editing_or_an_engineering_verdict",
+            }),
+            "view_hash",
+            "workbench_view_serialization_failed",
+        )
+    }
+
+    /// Publish one immutable explicit human review bound to the reported native artifacts.
+    ///
+    /// # Errors
+    ///
+    /// Requires a reported session, a non-empty bounded reviewer, safe bounded comment text and no
+    /// pre-existing review. Review publication is atomic and cannot overwrite prior disposition.
+    pub fn publish_review(
+        &self,
+        decision: WorkbenchReviewDecisionV1,
+        reviewer: &str,
+        comment: &str,
+    ) -> Result<String, WorkbenchError> {
+        self.require_stage(WorkbenchStageV1::Reported)?;
+        validate_review_text(reviewer, comment)?;
+        if self.root.join(REVIEW_DIRECTORY).exists() {
+            return Err(WorkbenchError::new(
+                "workbench_review_exists",
+                "the immutable review already exists; create a new Workbench session to revise it",
+            ));
+        }
+        let session_json = canonical_session(&self.session)?;
+        let session_value = decode_json_strict(session_json.as_bytes())
+            .map_err(|error| input_error("workbench_review_session_invalid", &error))?;
+        let source_session_hash = session_value
+            .get("session_hash")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_review_session_invalid",
+                    "the canonical Workbench session has no session hash",
+                )
+            })?;
+        let result = read_bounded_regular_file(
+            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let comparison = read_bounded_regular_file(
+            &self
+                .root
+                .join(COMPARISON_DIRECTORY)
+                .join("external-comparison-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let pdf = read_bounded_regular_file(
+            &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let review = WorkbenchReviewV1 {
+            schema_version: REVIEW_SCHEMA_V1.to_owned(),
+            session_id: self.session.session_id.clone(),
+            source_session_hash: source_session_hash.to_owned(),
+            decision,
+            reviewer: reviewer.to_owned(),
+            comment: comment.to_owned(),
+            result_artifact_hash: sha256_identity(&result),
+            comparison_artifact_hash: sha256_identity(&comparison),
+            pdf_artifact_hash: sha256_identity(&pdf),
+            claim_boundary: REVIEW_CLAIM_BOUNDARY.to_owned(),
+            review_hash: String::new(),
+        };
+        let canonical = canonical_review(&review)?;
+        publish_new_directory(
+            &self.root.join(REVIEW_DIRECTORY),
+            &[(REVIEW_FILE, canonical.as_bytes())],
+        )?;
+        let verified = read_review(&self.root, &self.session)?;
+        canonical_review(&verified)
+    }
+
+    /// Return the verified immutable human review.
+    ///
+    /// # Errors
+    ///
+    /// Returns `workbench_review_missing` when no review was published and fails closed on drift.
+    pub fn review_json(&self) -> Result<String, WorkbenchError> {
+        canonical_review(&read_review(&self.root, &self.session)?)
+    }
+
+    /// Return a deterministic native handoff manifest for the reported and reviewed session.
+    ///
+    /// The PDF and JSON artifacts remain separate files; this manifest binds their exact relative
+    /// names, lengths and hashes without a browser or archive utility.
+    ///
+    /// # Errors
+    ///
+    /// Requires a reported session and a verified explicit human review.
+    pub fn export_json(&self) -> Result<String, WorkbenchError> {
+        self.require_stage(WorkbenchStageV1::Reported)?;
+        let review = read_review(&self.root, &self.session)?;
+        let session = canonical_session(&self.session)?;
+        let result = read_bounded_regular_file(
+            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report = read_bounded_regular_file(
+            &self.root.join(RESUME_DIRECTORY).join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let comparison = read_bounded_regular_file(
+            &self
+                .root
+                .join(COMPARISON_DIRECTORY)
+                .join("external-comparison-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let pdf = read_bounded_regular_file(
+            &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let review_json = canonical_review(&review)?;
+        canonical_hashed_json(
+            json!({
+                "schema_version": EXPORT_SCHEMA_V1,
+                "session_id": self.session.session_id,
+                "decision": review.decision,
+                "review_hash": review.review_hash,
+                "artifacts": [
+                    artifact_entry("workbench_session", SESSION_FILE, "application/json", session.as_bytes())?,
+                    artifact_entry("result_ir", "04-resume/result-ir.json", "application/json", &result)?,
+                    artifact_entry("report_ir", "04-resume/report-ir.json", "application/json", &report)?,
+                    artifact_entry("external_comparison_ir", "05-compare/external-comparison-ir.json", "application/json", &comparison)?,
+                    artifact_entry("pdf_report", "06-report/report.pdf", "application/pdf", &pdf)?,
+                    artifact_entry("human_review", "07-review/review.json", "application/json", review_json.as_bytes())?,
+                ],
+                "claim_boundary": "deterministic_native_handoff_manifest_not_an_archive_signature_or_engineering_acceptance",
+            }),
+            "export_hash",
+            "workbench_export_serialization_failed",
+        )
     }
 
     /// Cross the C ABI into C++ semantic validation and publish the exact snapshot/report.
@@ -823,6 +1123,171 @@ struct DiscoveredState {
     stage: WorkbenchStageV1,
     terminal_status: Option<String>,
     comparison_passed: Option<bool>,
+}
+
+fn validate_review_text(reviewer: &str, comment: &str) -> Result<(), WorkbenchError> {
+    if reviewer.is_empty()
+        || reviewer.trim() != reviewer
+        || reviewer.chars().count() > 256
+        || reviewer.chars().any(char::is_control)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_reviewer_invalid",
+            "reviewer must be 1..256 trimmed non-control Unicode characters",
+        ));
+    }
+    if comment.chars().count() > 20_000
+        || comment
+            .chars()
+            .any(|character| character.is_control() && character != '\n' && character != '\t')
+    {
+        return Err(WorkbenchError::new(
+            "workbench_review_comment_invalid",
+            "review comment exceeds 20000 characters or contains unsupported controls",
+        ));
+    }
+    Ok(())
+}
+
+fn canonical_review(review: &WorkbenchReviewV1) -> Result<String, WorkbenchError> {
+    let value = serde_json::to_value(review).map_err(|_| {
+        WorkbenchError::new(
+            "workbench_review_serialization_failed",
+            "review could not be projected to JSON",
+        )
+    })?;
+    canonical_hashed_json(
+        value,
+        "review_hash",
+        "workbench_review_serialization_failed",
+    )
+}
+
+fn read_optional_review(
+    root: &Path,
+    session: &WorkbenchSessionV1,
+) -> Result<Option<WorkbenchReviewV1>, WorkbenchError> {
+    let directory = root.join(REVIEW_DIRECTORY);
+    match fs::symlink_metadata(&directory) {
+        Ok(_) => {}
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => return Err(io_error("read Workbench review metadata", &error)),
+    }
+    verify_directory(&directory, "workbench_review_directory_invalid")?;
+    let mut entries = fs::read_dir(&directory)
+        .map_err(|error| io_error("read Workbench review directory", &error))?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|error| io_error("read Workbench review entry", &error))?;
+    entries.sort_by_key(fs::DirEntry::file_name);
+    if entries.len() != 1 || entries[0].file_name() != OsStr::new(REVIEW_FILE) {
+        return Err(WorkbenchError::new(
+            "workbench_review_inventory_invalid",
+            "review directory must contain exactly review.json",
+        ));
+    }
+    let bytes = read_bounded_regular_file(&directory.join(REVIEW_FILE), MAX_REQUEST_BYTES)?;
+    let value = verify_self_hashed_json(&bytes, "review_hash")?;
+    let review: WorkbenchReviewV1 = serde_json::from_value(value).map_err(|_| {
+        WorkbenchError::new(
+            "workbench_review_decode_failed",
+            "review fields are missing, mistyped or unknown",
+        )
+    })?;
+    verify_review_binding(root, session, &review)?;
+    Ok(Some(review))
+}
+
+fn read_review(
+    root: &Path,
+    session: &WorkbenchSessionV1,
+) -> Result<WorkbenchReviewV1, WorkbenchError> {
+    read_optional_review(root, session)?.ok_or_else(|| {
+        WorkbenchError::new(
+            "workbench_review_missing",
+            "an explicit human review has not been published",
+        )
+    })
+}
+
+fn verify_optional_review(root: &Path, session: &WorkbenchSessionV1) -> Result<(), WorkbenchError> {
+    read_optional_review(root, session).map(|_| ())
+}
+
+fn verify_review_binding(
+    root: &Path,
+    session: &WorkbenchSessionV1,
+    review: &WorkbenchReviewV1,
+) -> Result<(), WorkbenchError> {
+    if session.stage != WorkbenchStageV1::Reported
+        || review.schema_version != REVIEW_SCHEMA_V1
+        || review.session_id != session.session_id
+        || review.claim_boundary != REVIEW_CLAIM_BOUNDARY
+    {
+        return Err(WorkbenchError::new(
+            "workbench_review_contract_invalid",
+            "review schema, session, stage or claim boundary does not match",
+        ));
+    }
+    validate_review_text(&review.reviewer, &review.comment)?;
+    let session_json = canonical_session(session)?;
+    let session_value = decode_json_strict(session_json.as_bytes())
+        .map_err(|error| input_error("workbench_review_session_invalid", &error))?;
+    let expected_session_hash = session_value
+        .get("session_hash")
+        .and_then(Value::as_str)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_review_session_invalid",
+                "canonical Workbench session has no session hash",
+            )
+        })?;
+    let result = read_bounded_regular_file(
+        &root.join(RESUME_DIRECTORY).join("result-ir.json"),
+        MAX_PRODUCT_ARTIFACT_BYTES,
+    )?;
+    let comparison = read_bounded_regular_file(
+        &root
+            .join(COMPARISON_DIRECTORY)
+            .join("external-comparison-ir.json"),
+        MAX_PRODUCT_ARTIFACT_BYTES,
+    )?;
+    let pdf = read_bounded_regular_file(
+        &root.join(REPORT_DIRECTORY).join("report.pdf"),
+        MAX_PRODUCT_ARTIFACT_BYTES,
+    )?;
+    if review.source_session_hash != expected_session_hash
+        || review.result_artifact_hash != sha256_identity(&result)
+        || review.comparison_artifact_hash != sha256_identity(&comparison)
+        || review.pdf_artifact_hash != sha256_identity(&pdf)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_review_binding_mismatch",
+            "human review is not bound to the verified session, result, comparison and PDF",
+        ));
+    }
+    Ok(())
+}
+
+fn strict_artifact_json(
+    path: &Path,
+    maximum_bytes: u64,
+    code: &'static str,
+) -> Result<Value, WorkbenchError> {
+    let bytes = read_bounded_regular_file(path, maximum_bytes)?;
+    let value = decode_json_strict(&bytes).map_err(|error| input_error(code, &error))?;
+    let canonical = canonical_json(&value, code)?;
+    if canonical.as_bytes() != bytes {
+        return Err(WorkbenchError::new(
+            code,
+            "verified product JSON is not canonical",
+        ));
+    }
+    Ok(value)
+}
+
+fn verified_receipt_json(path: &Path) -> Result<Value, WorkbenchError> {
+    let bytes = read_bounded_regular_file(path, MAX_PRODUCT_ARTIFACT_BYTES)?;
+    verify_self_hashed_json(&bytes, "receipt_hash")
 }
 
 fn verify_external_artifact_bindings(
@@ -1261,23 +1726,32 @@ fn canonical_session(session: &WorkbenchSessionV1) -> Result<String, WorkbenchEr
     canonical_json(&value, "workbench_session_canonicalization_failed")
 }
 
-fn canonical_self_hashed(mut value: Value) -> Result<String, WorkbenchError> {
-    let object = value.as_object_mut().ok_or_else(|| {
-        WorkbenchError::new(
-            "workbench_receipt_serialization_failed",
-            "receipt projection is not an object",
-        )
-    })?;
-    object.remove("receipt_hash");
-    let unsigned = canonical_json(&value, "workbench_receipt_canonicalization_failed")?;
+fn canonical_self_hashed(value: Value) -> Result<String, WorkbenchError> {
+    canonical_hashed_json(
+        value,
+        "receipt_hash",
+        "workbench_receipt_serialization_failed",
+    )
+}
+
+fn canonical_hashed_json(
+    mut value: Value,
+    hash_field: &'static str,
+    code: &'static str,
+) -> Result<String, WorkbenchError> {
+    let object = value
+        .as_object_mut()
+        .ok_or_else(|| WorkbenchError::new(code, "hashed JSON projection is not an object"))?;
+    object.remove(hash_field);
+    let unsigned = canonical_json(&value, code)?;
     value
         .as_object_mut()
         .expect("checked receipt object")
         .insert(
-            "receipt_hash".to_owned(),
+            hash_field.to_owned(),
             Value::String(sha256_identity(unsigned.as_bytes())),
         );
-    canonical_json(&value, "workbench_receipt_canonicalization_failed")
+    canonical_json(&value, code)
 }
 
 fn verify_self_hashed_json(bytes: &[u8], hash_field: &str) -> Result<Value, WorkbenchError> {

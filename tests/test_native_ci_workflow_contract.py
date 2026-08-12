@@ -97,6 +97,7 @@ def test_native_dependency_boundary_requires_deployment_cutover_contract() -> No
     )[0]
     assert "check_native_deployment_cutover.py --json --fail-blocked" in dependency
     assert "check_native_automation_cutover.py --json --fail-blocked" in dependency
+    assert "check_native_workbench_ui_transition.py --json --fail-blocked" in dependency
 
 
 def test_native_rust_gate_separates_r4_product_and_legacy_runtime_exports() -> None:

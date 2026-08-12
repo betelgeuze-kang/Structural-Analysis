@@ -63,6 +63,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_sparse_linear.py",
         "scripts/check_native_sparse_linear_hip.py",
         "scripts/check_native_workbench.py",
+        "scripts/check_native_workbench_ui_transition.py",
         "scripts/check_structural_runtime_ffi_r1.py",
         "scripts/check_structural_runtime_ffi_r2.py",
         "scripts/check_structural_runtime_ffi_r3.py",
@@ -101,6 +102,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
         "tests/test_native_workbench_contract.py",
+        "tests/test_native_workbench_ui_transition.py",
         "tests/test_structural_runtime_ffi_r1.py",
         "tests/test_structural_runtime_ffi_r2.py",
         "tests/test_structural_runtime_ffi_r3.py",
@@ -114,6 +116,31 @@ NATIVE_DEPLOYMENT_PREFIXES = (
     "deployment/legacy-python-onprem/",
     "deployment/legacy-react-pages/",
     "deployment/legacy-python-release-publication/",
+)
+
+LEGACY_WORKBENCH_UI_PREFIXES = (
+    "src/workbench/",
+    "src/workbench-v2/",
+    "src/structure-viewer/",
+    "tests/frontend/",
+)
+LEGACY_WORKBENCH_UI_PATHS = frozenset(
+    {
+        "index.html",
+        "package.json",
+        "package-lock.json",
+        "vite.config.ts",
+        "src/App.tsx",
+        "src/index.css",
+        "src/main.tsx",
+        ".github/workflows/ai-contract-verify.yml",
+        ".github/workflows/ci.yml",
+        ".github/workflows/frontend-web-ci.yml",
+        ".github/workflows/nightly-full-quality.yml",
+        ".github/workflows/nightly-heavy-solver.yml",
+        ".github/workflows/runtime-input-viewer-ci.yml",
+        ".github/workflows/viewer-browser-ci.yml",
+    }
 )
 
 MODELIR_ORACLE_PREFIXES = (
@@ -216,6 +243,9 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
         or path in LEGACY_REPLAY_COMPAT_PATHS
         or _starts_with_any(path, NATIVE_DEPLOYMENT_PREFIXES)
+        or _starts_with_any(path, LEGACY_WORKBENCH_UI_PREFIXES)
+        or path in LEGACY_WORKBENCH_UI_PATHS
+        or (path.startswith("scripts/") and path.endswith((".js", ".mjs")))
         or path in {".dockerignore", ".github/workflows/deploy-pages.yml"}
     ]
     ci_control_paths = [
@@ -223,6 +253,9 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         for path in paths
         if path in NATIVE_CI_CONTROL_PATHS
         or _starts_with_any(path, NATIVE_DEPLOYMENT_PREFIXES)
+        or _starts_with_any(path, LEGACY_WORKBENCH_UI_PREFIXES)
+        or path in LEGACY_WORKBENCH_UI_PATHS
+        or (path.startswith("scripts/") and path.endswith((".js", ".mjs")))
     ]
     protected_paths = [
         path

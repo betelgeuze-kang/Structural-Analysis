@@ -239,6 +239,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_backend_selector.py",
         "check_native_deployment_cutover.py --json --fail-blocked",
         "check_native_automation_cutover.py --json --fail-blocked",
+        "check_native_workbench_ui_transition.py --json --fail-blocked",
         "check_native_replay_product_link.py",
         "check_structural_runtime_ffi_r4.py",
         "implementation/phase1/structural_runtime_ffi/Cargo.toml",
