@@ -255,3 +255,28 @@ program control flow는 code와 typed report만 사용한다.
 - 기존 두 Rust crate가 compatibility consumer이거나 명시적 migration owner를 가짐
 - HIP disabled build에 ROCm runtime dependency가 없음
 - protected evidence와 Python production path는 변경되지 않음
+
+## 11. Slice A implementation boundary
+
+Slice A는 다음 파일에 foundation contract를 구현한다.
+
+- `native/Cargo.toml`과 단일 `native/Cargo.lock`: 여섯 crate의 허용 dependency 방향
+- `native/cpp/CMakeLists.txt`: CPU-only 기본값, opt-in HIP/sanitizer/fuzzer 옵션,
+  static/shared install/export package
+- `native/cpp/include/structural/abi_v1.h`: status taxonomy, base descriptors와
+  `sa_get_api_v1` 단일 public symbol
+- `native/cpp/src/abi/abi_v1.cpp`: version/struct-size/reserved-field 검사, caller-owned
+  error buffer, pointer/length/stride/overflow 검사와 C++ exception containment
+- `structural-ffi-sys`와 `structural-ffi`: C layout mirror, immutable function-table safe
+  wrapper와 concurrent caller-owned read 검증
+- `native/capabilities.json`: ABI base만 C0 implemented로 표시하고 ModelIR, restart,
+  product E2E와 HIP는 planned로 fail closed
+- installed `structural-native-build.json`: package/ABI/compiler/build-type/backend identity
+- `native/compatibility-owners.json`: 기존 `structural_runtime_ffi`와
+  `mgt_hip_full_residual_ffi`를 아직 workspace member로 이동하지 않고 각각의 명시적
+  migration owner와 legacy-preservation 상태를 고정
+
+이 slice는 ModelIR handle, mutable execution handle, solver, ResultIR, checkpoint 또는 HIP
+backend를 구현했다고 주장하지 않는다. ModelIR opaque lifetime·concurrent immutable read와
+mutable execution exclusion은 Slice C/D에서 해당 handle이 존재할 때 닫는다. 기존 probe의
+compatibility member/table adapter 전환도 transition plan의 R1/H1 순서를 유지한다.

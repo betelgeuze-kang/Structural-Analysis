@@ -59,8 +59,10 @@ def test_dependency_license_policy_rejects_unapproved_license_and_git_source() -
     ]
 
 
-def test_dependency_license_check_is_not_applicable_before_workspace() -> None:
-    payload = licenses.check_dependency_licenses(ROOT)
+def test_dependency_license_check_is_not_applicable_before_workspace(
+    tmp_path: Path,
+) -> None:
+    payload = licenses.check_dependency_licenses(tmp_path)
 
     assert payload["workspace_present"] is False
     assert payload["contract_pass"] is True

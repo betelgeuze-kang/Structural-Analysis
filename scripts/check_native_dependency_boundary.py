@@ -25,6 +25,44 @@ PYTHON_RUNTIME_PATTERNS = (
     ),
     re.compile(r"\b(?:exec|spawn|system)\s*\([^\n]*[\"']python(?:3)?[\"']"),
 )
+EXPECTED_COMPATIBILITY_OWNERS = {
+    "implementation/phase1/structural_runtime_ffi/Cargo.toml": "structural-runtime",
+    "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml": "structural-ffi",
+}
+
+
+def _compatibility_owners(repo_root: Path, blockers: list[str]) -> list[dict[str, object]]:
+    path = repo_root / "native" / "compatibility-owners.json"
+    if not path.is_file():
+        blockers.append("native_compatibility_owners_missing")
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        blockers.append(f"native_compatibility_owners_invalid:{exc}")
+        return []
+    entries = payload.get("entries", []) if isinstance(payload, dict) else []
+    if not isinstance(entries, list):
+        blockers.append("native_compatibility_owners_entries_invalid")
+        return []
+    rows = [row for row in entries if isinstance(row, dict)]
+    indexed = {str(row.get("legacy_manifest", "")): row for row in rows}
+    for legacy_manifest, expected_owner in EXPECTED_COMPATIBILITY_OWNERS.items():
+        row = indexed.get(legacy_manifest)
+        if row is None:
+            blockers.append(f"legacy_native_migration_owner_missing:{legacy_manifest}")
+            continue
+        if not (repo_root / legacy_manifest).is_file():
+            blockers.append(f"legacy_native_manifest_missing:{legacy_manifest}")
+        if row.get("migration_owner") != expected_owner:
+            blockers.append(
+                f"legacy_native_migration_owner_mismatch:{legacy_manifest}:{expected_owner}"
+            )
+        if row.get("legacy_abi_preserved") is not True:
+            blockers.append(f"legacy_native_abi_not_preserved:{legacy_manifest}")
+        if row.get("removal_allowed") is not False:
+            blockers.append(f"legacy_native_removal_not_fail_closed:{legacy_manifest}")
+    return rows
 
 
 def check_boundary(repo_root: Path = ROOT) -> dict[str, object]:
@@ -42,6 +80,9 @@ def check_boundary(repo_root: Path = ROOT) -> dict[str, object]:
             "native_workspace_must_own_exactly_one_root_lockfile:"
             + (",".join(lockfiles) if lockfiles else "none")
         )
+    compatibility_owners = (
+        _compatibility_owners(repo_root, blockers) if cargo_workspace.exists() else []
+    )
 
     python_files = sorted(
         path.relative_to(repo_root).as_posix()
@@ -74,6 +115,7 @@ def check_boundary(repo_root: Path = ROOT) -> dict[str, object]:
         "contract_pass": not blockers,
         "cargo_workspace_present": cargo_workspace.exists(),
         "cargo_lockfiles": lockfiles,
+        "compatibility_owners": compatibility_owners,
         "scanned_product_source_files": scanned_files,
         "blockers": blockers,
         "claim_boundary": (

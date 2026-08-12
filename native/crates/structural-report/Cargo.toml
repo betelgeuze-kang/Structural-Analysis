@@ -1,0 +1,14 @@
+[package]
+name = "structural-report"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Deterministic report projection owner for the structural native product"
+
+[dependencies]
+structural-contracts = { path = "../structural-contracts" }
+
+[lints]
+workspace = true
