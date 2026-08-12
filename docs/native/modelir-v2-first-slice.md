@@ -1,11 +1,12 @@
 # First Native Slice: ModelIR v2 Contract and ABI Round-trip
 
-Status: implementation-ready design
+Status: Slices A-C implemented; Slice D pending
 
-Implementation status: Slice A and Slice B are implemented on the native PR stack. Slice B
-promotes only `modelir_v2_rust_wire` at C1; the aggregate `modelir_v2` capability remains
-planned until C++ semantic ownership, snapshot ABI, safe wrapper and CLI validation land in
-Slices C-D.
+Implementation status: Slice B promotes `modelir_v2_rust_wire` at C1. Slice C promotes the
+bounded `modelir_v2_cpp_core` at C0: exhaustive typed descriptor transport, deep-copy ownership,
+C++ semantic validation, report/snapshot ABI and native tests. The aggregate `modelir_v2`
+capability remains planned until Slice D supplies the safe Rust wrapper, cross-language oracle
+parity, round-trip hash verification and CLI validation.
 
 Depends on: ADR-002, ADR-009 and workspace-and-abi-v1.md
 

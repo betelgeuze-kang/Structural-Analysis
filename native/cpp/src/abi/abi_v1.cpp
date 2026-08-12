@@ -1,14 +1,20 @@
 #include "structural/abi_v1.h"
 
+#include "../model_ir/model_ir.hpp"
+
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <exception>
 #include <limits>
+#include <memory>
+#include <mutex>
 #include <new>
+#include <string>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 
 static_assert(sizeof(void*) == 8U);
 static_assert(sizeof(double) == 8U);
@@ -23,11 +29,46 @@ static_assert(offsetof(sa_error_buffer_v1, required) == 24U);
 static_assert(sizeof(sa_api_request_v1) == 40U);
 static_assert(sizeof(sa_api_v1) == 128U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
-static_assert(offsetof(sa_api_v1, reserved) == 24U);
+static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
+static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
+static_assert(offsetof(sa_api_v1, reserved) == 72U);
+static_assert(sizeof(sa_string_view_v1) == 16U);
+static_assert(sizeof(sa_optional_string_view_v1) == 24U);
+
+struct sa_model_ir_handle_v1 {
+    std::uint64_t token;
+};
 
 namespace {
 
-constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_0;
+constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_CURRENT;
+
+using ModelRegistry = std::unordered_map<
+    const sa_model_ir_handle_v1*,
+    std::shared_ptr<const structural::model_ir::Model>>;
+
+[[nodiscard]] ModelRegistry& model_registry() {
+    static ModelRegistry registry;
+    return registry;
+}
+
+[[nodiscard]] std::mutex& model_registry_mutex() {
+    static std::mutex mutex;
+    return mutex;
+}
+
+[[nodiscard]] std::shared_ptr<const structural::model_ir::Model> acquire_model(
+    const sa_model_ir_handle_v1* const handle) {
+    if (handle == nullptr) {
+        throw structural::model_ir::Error(SA_ERR_INVALID_ARGUMENT, "ModelIR handle is null");
+    }
+    const std::lock_guard lock {model_registry_mutex()};
+    const auto found = model_registry().find(handle);
+    if (found == model_registry().end()) {
+        throw structural::model_ir::Error(SA_ERR_INVALID_ARGUMENT, "ModelIR handle is not live");
+    }
+    return found->second;
+}
 
 [[nodiscard]] bool supported_version(const std::uint32_t version) noexcept {
     return SA_ABI_VERSION_MAJOR(version) == SA_ABI_VERSION_MAJOR(kCurrentAbi)
@@ -162,6 +203,153 @@ constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_0;
     }
 }
 
+template <typename Operation>
+[[nodiscard]] sa_status_code_v1 contain_boundary(
+    sa_error_buffer_v1* const error,
+    Operation operation) noexcept {
+    const auto error_status = prepare_error(error);
+    if (error_status != SA_OK) {
+        return error_status;
+    }
+    try {
+        return operation();
+    } catch (const structural::model_ir::Error& exception) {
+        return report_error(error, exception.status(), exception.what());
+    } catch (const std::bad_alloc&) {
+        return report_error(error, SA_ERR_INTERNAL, "native allocation failed");
+    } catch (const std::exception&) {
+        return report_error(error, SA_ERR_INTERNAL, "native exception was contained");
+    } catch (...) {
+        return report_error(error, SA_ERR_INTERNAL, "unknown native exception was contained");
+    }
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_create_boundary(
+    const sa_model_ir_descriptor_v1* const descriptor,
+    sa_model_ir_handle_v1** const out_handle,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [descriptor, out_handle, error]() -> sa_status_code_v1 {
+        if (descriptor == nullptr || out_handle == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR descriptor or output is null");
+        }
+        auto model = std::make_shared<structural::model_ir::Model>(*descriptor);
+        auto handle = std::make_unique<sa_model_ir_handle_v1>();
+        handle->token = reinterpret_cast<std::uintptr_t>(handle.get());
+        {
+            const std::lock_guard lock {model_registry_mutex()};
+            model_registry().emplace(handle.get(), std::move(model));
+        }
+        *out_handle = handle.release();
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_destroy_boundary(
+    sa_model_ir_handle_v1* const handle,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [handle, error]() -> sa_status_code_v1 {
+        if (handle == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR handle is null");
+        }
+        {
+            const std::lock_guard lock {model_registry_mutex()};
+            const auto found = model_registry().find(handle);
+            if (found == model_registry().end()) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR handle is not live");
+            }
+            if (found->second.use_count() != 1L) {
+                return report_error(
+                    error, SA_ERR_STATE_CONFLICT, "ModelIR handle has an in-flight immutable call");
+            }
+            model_registry().erase(found);
+        }
+        delete handle;
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 immutable_size_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint64_t* const out_size,
+    sa_error_buffer_v1* const error,
+    const bool report) noexcept {
+    return contain_boundary(error, [handle, out_size, error, report]() -> sa_status_code_v1 {
+        if (out_size == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR handle or size output is null");
+        }
+        const auto model = acquire_model(handle);
+        const auto value = report ? model->validation_report() : model->snapshot();
+        *out_size = static_cast<std::uint64_t>(value.size());
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 immutable_write_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint8_t* const output,
+    const std::uint64_t capacity,
+    std::uint64_t* const out_written,
+    sa_error_buffer_v1* const error,
+    const bool report) noexcept {
+    return contain_boundary(
+        error,
+        [handle, output, capacity, out_written, error, report]() -> sa_status_code_v1 {
+        if (out_written == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR handle or write output is null");
+        }
+        if ((capacity == 0U && output != nullptr) || (capacity > 0U && output == nullptr)
+            || capacity > static_cast<std::uint64_t>(std::numeric_limits<std::size_t>::max())) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR output pointer or capacity is invalid");
+        }
+        const auto model = acquire_model(handle);
+        const auto value = report ? model->validation_report() : model->snapshot();
+        if (capacity < static_cast<std::uint64_t>(value.size())) {
+            return report_error(error, SA_ERR_BUFFER_TOO_SMALL, "ModelIR output buffer is too small");
+        }
+        if (!value.empty()) {
+            const auto address = reinterpret_cast<std::uintptr_t>(output);
+            if (address > std::numeric_limits<std::uintptr_t>::max() - (value.size() - 1U)) {
+                return report_error(error, SA_ERR_INVALID_ARGUMENT, "ModelIR output pointer extent overflows");
+            }
+            std::memcpy(output, value.data(), value.size());
+        }
+        *out_written = static_cast<std::uint64_t>(value.size());
+        return SA_OK;
+        });
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_validation_report_size_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint64_t* const out_size,
+    sa_error_buffer_v1* const error) noexcept {
+    return immutable_size_boundary(handle, out_size, error, true);
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_validation_report_write_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint8_t* const output,
+    const std::uint64_t capacity,
+    std::uint64_t* const out_written,
+    sa_error_buffer_v1* const error) noexcept {
+    return immutable_write_boundary(handle, output, capacity, out_written, error, true);
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_snapshot_size_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint64_t* const out_size,
+    sa_error_buffer_v1* const error) noexcept {
+    return immutable_size_boundary(handle, out_size, error, false);
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_snapshot_write_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    std::uint8_t* const output,
+    const std::uint64_t capacity,
+    std::uint64_t* const out_written,
+    sa_error_buffer_v1* const error) noexcept {
+    return immutable_write_boundary(handle, output, capacity, out_written, error, false);
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -169,11 +357,13 @@ constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_0;
     if (request == nullptr || out_api == nullptr) {
         return report_error(error, SA_ERR_INVALID_ARGUMENT, "API request or output is null");
     }
-    if (!supported_version(request->abi_version) || !supported_version(out_api->abi_version)) {
+    if (!supported_version(request->abi_version) || !supported_version(out_api->abi_version)
+        || request->abi_version != out_api->abi_version) {
         return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
     }
-    if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE
-        || out_api->struct_size < SA_API_V1_MIN_SIZE) {
+    const auto api_min_size = request->abi_version == SA_ABI_V1_0 ? SA_API_V1_0_MIN_SIZE
+                                                                  : SA_API_V1_1_MIN_SIZE;
+    if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
     if (request->flags != 0U) {
@@ -190,13 +380,22 @@ constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_0;
         return report_error(error, SA_ERR_INVALID_ARGUMENT, "API request reserved fields are not zero");
     }
 
+    const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
     const sa_api_v1 table {
-        kCurrentAbi,
+        request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
-        SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_BUFFER_VALIDATION
+            | (model_ir_enabled
+                    ? SA_CAPABILITY_MODEL_IR_V2_TYPED | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                    : UINT64_C(0)),
         &validate_buffer_view_boundary,
-        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-         nullptr, nullptr, nullptr},
+        model_ir_enabled ? &model_ir_create_boundary : nullptr,
+        model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
+        model_ir_enabled ? &model_ir_validation_report_size_boundary : nullptr,
+        model_ir_enabled ? &model_ir_validation_report_write_boundary : nullptr,
+        model_ir_enabled ? &model_ir_snapshot_size_boundary : nullptr,
+        model_ir_enabled ? &model_ir_snapshot_write_boundary : nullptr,
+        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

@@ -13,11 +13,17 @@
       "owner": "structural-contracts",
       "claim": "strict UTF-8 JSON decode, duplicate-key and schema rejection, Python-compatible canonical bytes and content/semantic/provenance hashes only"
     },
+    "modelir_v2_cpp_core": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural_model_ir",
+      "claim": "ABI v1.1 typed descriptor deep copy, C++ semantic validation, deterministic validation report and caller-owned canonical snapshot only"
+    },
     "modelir_v2": {
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-contracts",
-      "claim": "C++ typed semantic validation, C ABI snapshot, safe Rust wrapper and product CLI remain Slice C-D work"
+      "claim": "Rust safe wrapper, cross-language round-trip parity and product CLI remain Slice D work"
     },
     "checkpoint_restart": {
       "status": "planned",
