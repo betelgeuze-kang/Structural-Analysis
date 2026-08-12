@@ -18,9 +18,21 @@ _Static_assert(sizeof(sa_nonlinear_ndtha_outputs_v1) == 552U, "NDTHA outputs lay
 _Static_assert(sizeof(sa_nonlinear_ndtha_result_v1) == 128U, "NDTHA result layout changed");
 _Static_assert(sizeof(sa_nonlinear_ndtha_state_v1) == 792U, "NDTHA state layout changed");
 _Static_assert(
+    sizeof(sa_model_ir_ndtha_adapter_request_v1) == 304U,
+    "ModelIR adapter request layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_ndtha_adapter_outputs_v1) == 360U,
+    "ModelIR adapter outputs layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_ndtha_adapter_result_v1) == 136U,
+    "ModelIR adapter result layout changed");
+_Static_assert(
     offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U,
     "NDTHA restart slot offset changed");
-_Static_assert(offsetof(sa_api_v1, reserved) == 104U, "API reserved tail offset changed");
+_Static_assert(
+    offsetof(sa_api_v1, model_ir_ndtha_adapt) == 104U,
+    "ModelIR adapter slot offset changed");
+_Static_assert(offsetof(sa_api_v1, reserved) == 112U, "API reserved tail offset changed");
 _Static_assert(sizeof(sa_string_view_v1) == 16U, "sa_string_view_v1 layout changed");
 _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor layout changed");
 _Static_assert(SA_ERR_INTERNAL == 1900, "status taxonomy changed");

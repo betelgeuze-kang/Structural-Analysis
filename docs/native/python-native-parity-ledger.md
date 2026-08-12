@@ -58,8 +58,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
-  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains authoritative oracle and
-  rollback owner; C5 and C6 remain open.
+  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. ABI v1.6 additionally connects one exact
+  fixed-guided one-story frame3d global-X reduction through C3: C++ owns structural derivation,
+  an independent Python closed-form oracle owns C1 parity, and the safe Rust wrapper proves a
+  zero-fallback elastic CPU solve. That narrow adapter is not arbitrary ModelIR solver readiness;
+  public ModelIR run/restart provenance, HIP C2 and C5/C6 remain open. Python remains the broader
+  ModelIR oracle and rollback owner.
 
 ### D2. Elements and materials
 

@@ -2575,4 +2575,154 @@ std::string_view Model::snapshot() const noexcept {
     return impl_->model.canonical_json;
 }
 
+NdthaAdapterProperties Model::adapt_fixed_guided_frame3d_x(
+    const std::string_view element_id,
+    const std::string_view base_node_id,
+    const std::string_view floor_node_id,
+    const std::string_view load_pattern_id,
+    const double damping_ratio) const {
+    if (!impl_->issues.empty()) {
+        fail(SA_ERR_SEMANTIC_INVALID, "ModelIR NDTHA adapter requires a semantically valid model");
+    }
+    if (!impl_->declared.empty() || !impl_->derived.empty()) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR NDTHA adapter requires an analysis-ready model");
+    }
+    if (!std::isfinite(damping_ratio) || damping_ratio < 0.0 || damping_ratio > 1.0) {
+        fail(SA_ERR_INVALID_ARGUMENT, "ModelIR NDTHA adapter damping ratio is outside [0, 1]");
+    }
+
+    const auto& model = impl_->model;
+    const bool exact_family_shape =
+        model.capability_profile == SA_MODEL_IR_PROFILE_ENGINE_V2_PHASE0_LINEAR_3D
+        && model.nodes.size() == 2U && model.materials.size() == 1U
+        && model.sections.size() == 1U && model.elements.size() == 1U
+        && model.constraints.size() == 2U && model.load_patterns.size() == 1U
+        && model.load_combinations.empty() && model.time_functions.empty()
+        && model.construction_stages.empty() && model.roundtrip_rows.empty()
+        && model.unsupported_features.empty();
+    if (!exact_family_shape) {
+        fail(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR does not match the fixed-guided one-story frame3d adapter profile");
+    }
+
+    const auto find_node = [&model](const std::string_view id) -> const Node* {
+        const auto found = std::find_if(model.nodes.begin(), model.nodes.end(), [id](const auto& row) {
+            return row.identity.id == id;
+        });
+        return found == model.nodes.end() ? nullptr : &*found;
+    };
+    const auto* const base = find_node(base_node_id);
+    const auto* const floor = find_node(floor_node_id);
+    const auto& element = model.elements.front();
+    const auto& material = model.materials.front();
+    const auto& section = model.sections.front();
+    const auto& pattern = model.load_patterns.front();
+    if (base == nullptr || floor == nullptr || base == floor
+        || element.identity.id != element_id || pattern.identity.id != load_pattern_id) {
+        fail(SA_ERR_INVALID_ARGUMENT, "ModelIR NDTHA adapter selector does not identify the bounded profile");
+    }
+    const auto all_zero = [](const auto& values) {
+        return std::all_of(values.begin(), values.end(), [](const double value) {
+            return value == 0.0;
+        });
+    };
+    const bool element_supported = element.type == SA_ELEMENT_FRAME_3D
+        && element.formulation == SA_FORMULATION_EULER_BERNOULLI_3D
+        && element.node_ids[0] == base_node_id && element.node_ids[1] == floor_node_id
+        && element.material_id.has_value() && *element.material_id == material.identity.id
+        && element.section_id == section.identity.id
+        && element.local_axis_rotation_rad.has_value()
+        && *element.local_axis_rotation_rad == 0.0 && all_zero(element.offset_i)
+        && all_zero(element.offset_j) && element.releases_i.empty()
+        && element.releases_j.empty() && !element.integration_order.has_value()
+        && !element.uniform_load.has_value();
+    if (!element_supported || material.law != SA_MATERIAL_LINEAR_ELASTIC_ISOTROPIC
+        || section.family != SA_SECTION_FRAME_3D) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR element, material, or section is outside the adapter profile");
+    }
+
+    const bool vertical_global_z = base->coordinates[0] == floor->coordinates[0]
+        && base->coordinates[1] == floor->coordinates[1]
+        && floor->coordinates[2] > base->coordinates[2];
+    if (!vertical_global_z) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR adapter element must be vertical in global Z");
+    }
+
+    const auto find_constraint = [&model](const std::string_view node_id) -> const Constraint* {
+        const auto found = std::find_if(
+            model.constraints.begin(), model.constraints.end(), [node_id](const auto& row) {
+                return row.node_id == node_id;
+            });
+        return found == model.constraints.end() ? nullptr : &*found;
+    };
+    const auto* const base_constraint = find_constraint(base_node_id);
+    const auto* const floor_constraint = find_constraint(floor_node_id);
+    const std::vector<std::uint32_t> fixed_dofs {
+        SA_DOF_UX, SA_DOF_UY, SA_DOF_UZ, SA_DOF_RX, SA_DOF_RY, SA_DOF_RZ};
+    const std::vector<std::uint32_t> guided_dofs {
+        SA_DOF_UY, SA_DOF_UZ, SA_DOF_RX, SA_DOF_RY, SA_DOF_RZ};
+    if (base_constraint == nullptr || floor_constraint == nullptr
+        || base_constraint == floor_constraint
+        || base_constraint->dofs != fixed_dofs || floor_constraint->dofs != guided_dofs
+        || !base_constraint->prescribed_values.empty()
+        || !floor_constraint->prescribed_values.empty()) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR constraints do not match fixed-guided global-X motion");
+    }
+
+    if (pattern.analysis_type != SA_ANALYSIS_LINEAR_STATIC || !all_zero(pattern.self_weight)
+        || pattern.nodal_loads.size() != 1U
+        || pattern.nodal_loads.front().node_id != floor_node_id) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR load pattern does not match one floor FX load");
+    }
+    const auto& load = pattern.nodal_loads.front();
+    if (load.components[0] == 0.0
+        || !std::all_of(load.components.begin(), load.components.end(), [](const double value) {
+               return std::isfinite(value);
+           })
+        || !std::all_of(load.components.begin() + 1, load.components.end(), [](const double value) {
+               return value == 0.0;
+           })) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR adapter floor load must be a finite nonzero FX load");
+    }
+
+    const auto& linear = std::get<sa_linear_material_parameters_v1>(material.parameters);
+    const auto& frame = std::get<sa_frame_section_parameters_v1>(section.parameters);
+    const double height = floor->coordinates[2] - base->coordinates[2];
+    const double stiffness = 12.0 * linear.elastic_modulus_pa * frame.iy_m4
+        / (height * height * height);
+    const double mass = 0.5 * linear.density_kg_m3 * frame.area_m2 * height;
+    const double damping = 2.0 * damping_ratio * std::sqrt(stiffness * mass);
+    const std::array derived {
+        height,
+        linear.elastic_modulus_pa,
+        frame.area_m2,
+        frame.iy_m4,
+        stiffness,
+        mass,
+        damping,
+        load.components[0],
+    };
+    if (!std::all_of(derived.begin(), derived.end(), [](const double value) {
+            return std::isfinite(value);
+        })
+        || height <= 0.0 || linear.elastic_modulus_pa <= 0.0 || frame.area_m2 <= 0.0
+        || frame.iy_m4 <= 0.0 || stiffness <= 0.0 || mass <= 0.0 || damping < 0.0) {
+        fail(SA_ERR_ANALYSIS_NOT_READY, "ModelIR adapter derived property is outside its physical domain");
+    }
+
+    return {
+        element.identity.index,
+        pattern.identity.index,
+        height,
+        linear.elastic_modulus_pa,
+        frame.area_m2,
+        frame.iy_m4,
+        stiffness,
+        mass,
+        damping,
+        load.components[0],
+    };
+}
+
 } // namespace structural::model_ir

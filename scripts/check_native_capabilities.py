@@ -17,6 +17,7 @@ EXPECTED_OWNERS = {
     "modelir_v2_rust_wire": "structural-contracts",
     "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",
+    "modelir_ndtha_adapter": "structural_model_ir",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",

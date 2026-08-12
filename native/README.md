@@ -47,6 +47,15 @@ accessibility/report output and C6 remain open. The legacy five-symbol ABI is un
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
 
+ABI v1.6 adds one bounded ModelIR-to-NDTHA adapter at C3. It accepts exactly one vertical
+fixed-guided Euler-Bernoulli frame3d element in global X, derives `12*E*Iy/L^3` stiffness,
+`rho*A*L/2` mass and one selected floor FX load, and keeps damping ratio, elastic guard, solver
+controls and acceleration explicit. C++ contract tests, an independent Python closed-form oracle
+and the safe Rust wrapper bind the result to the existing zero-fallback CPU solver. This is not an
+arbitrary topology reducer and does not yet provide a public ModelIR run/resume product path.
+The exact selectors, formulas, ownership rules and non-promoting boundary are documented in
+`docs/native/modelir-ndtha-adapter-v1.md`.
+
 ## Rust
 
 ~~~bash
@@ -161,8 +170,10 @@ or links ROCm.
 library, CMake package targets and `structural-native-build.json`. The only public shared
 library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
 slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
-v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement while keeping
-the table at 128 bytes. v1.0-v1.4 table prefixes remain byte-compatible.
+v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
+uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter while keeping
+the table at 128 bytes. v1.0-v1.5 table prefixes remain byte-compatible and expose that slot as
+null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

@@ -8,6 +8,8 @@ use core::ffi::{c_char, c_void};
 pub mod legacy_runtime_v3;
 mod model_ir;
 pub use model_ir::*;
+mod model_ir_ndtha_adapter;
+pub use model_ir_ndtha_adapter::*;
 mod nonlinear_static;
 pub use nonlinear_static::*;
 mod nonlinear_ndtha;
@@ -18,7 +20,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_5;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_6;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -108,7 +110,8 @@ pub struct SaApiV1 {
     pub nonlinear_static_solve: Option<SaNonlinearStaticSolveFnV1>,
     pub nonlinear_ndtha_solve: Option<SaNonlinearNdthaSolveFnV1>,
     pub nonlinear_ndtha_advance: Option<SaNonlinearNdthaAdvanceFnV1>,
-    pub reserved: [*const c_void; 3],
+    pub model_ir_ndtha_adapt: Option<SaModelIrNdthaAdaptFnV1>,
+    pub reserved: [*const c_void; 2],
 }
 
 impl Default for SaApiV1 {
@@ -128,7 +131,8 @@ impl Default for SaApiV1 {
             nonlinear_static_solve: None,
             nonlinear_ndtha_solve: None,
             nonlinear_ndtha_advance: None,
-            reserved: [core::ptr::null(); 3],
+            model_ir_ndtha_adapt: None,
+            reserved: [core::ptr::null(); 2],
         }
     }
 }
@@ -168,7 +172,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_solve), 80);
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_solve), 88);
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_advance), 96);
-        assert_eq!(offset_of!(SaApiV1, reserved), 104);
+        assert_eq!(offset_of!(SaApiV1, model_ir_ndtha_adapt), 104);
+        assert_eq!(offset_of!(SaApiV1, reserved), 112);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

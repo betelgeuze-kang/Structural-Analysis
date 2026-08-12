@@ -28,7 +28,8 @@ extern "C" {
 #define SA_ABI_V1_3 UINT32_C(0x00010003)
 #define SA_ABI_V1_4 UINT32_C(0x00010004)
 #define SA_ABI_V1_5 UINT32_C(0x00010005)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_5
+#define SA_ABI_V1_6 UINT32_C(0x00010006)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_6
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -74,6 +75,7 @@ enum {
 #define SA_CAPABILITY_NONLINEAR_STATIC_CPU UINT64_C(16)
 #define SA_CAPABILITY_NONLINEAR_NDTHA_CPU UINT64_C(32)
 #define SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU UINT64_C(64)
+#define SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER UINT64_C(128)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
@@ -105,6 +107,10 @@ enum {
     SA_NONLINEAR_NDTHA_EXECUTION_COMPLETED = 1,
     SA_NONLINEAR_NDTHA_EXECUTION_COLLAPSED = 2,
     SA_NONLINEAR_NDTHA_EXECUTION_NONCONVERGED = 3
+};
+
+enum {
+    SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1 = 1
 };
 
 typedef struct sa_header_v1 {
@@ -326,6 +332,62 @@ typedef struct sa_nonlinear_ndtha_state_v1 {
     uint64_t reserved[2];
 } sa_nonlinear_ndtha_state_v1;
 
+/*
+ * v1.6 exposes one deliberately narrow, backend-neutral ModelIR reduction profile.
+ * The model owns structural properties; damping and the elastic guard remain explicit
+ * analysis inputs. All output buffers are caller-owned and are published atomically.
+ */
+typedef struct sa_model_ir_ndtha_adapter_request_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t profile;
+    uint32_t flags;
+    sa_string_view_v1 element_id;
+    sa_string_view_v1 base_node_id;
+    sa_string_view_v1 floor_node_id;
+    sa_string_view_v1 load_pattern_id;
+    double damping_ratio;
+    double elastic_guard_yield_drift_m;
+    sa_nonlinear_ndtha_config_v1 config;
+    sa_buffer_view_v1 acceleration_g;
+    uint64_t reserved[2];
+} sa_model_ir_ndtha_adapter_request_v1;
+
+typedef struct sa_model_ir_ndtha_adapter_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 story_stiffness_n_per_m;
+    sa_mut_buffer_view_v1 story_height_m;
+    sa_mut_buffer_view_v1 story_axial_n;
+    sa_mut_buffer_view_v1 story_yield_drift_m;
+    sa_mut_buffer_view_v1 story_mass_kg;
+    sa_mut_buffer_view_v1 story_damping_n_s_per_m;
+    sa_mut_buffer_view_v1 floor_load_base_n;
+    uint64_t reserved[2];
+} sa_model_ir_ndtha_adapter_outputs_v1;
+
+typedef struct sa_model_ir_ndtha_adapter_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t profile;
+    uint32_t story_count;
+    uint64_t element_index;
+    uint64_t load_pattern_index;
+    double story_height_m;
+    double youngs_modulus_pa;
+    double section_area_m2;
+    double section_iy_m4;
+    double story_stiffness_n_per_m;
+    double story_mass_kg;
+    double story_damping_n_s_per_m;
+    double floor_load_base_n;
+    double damping_ratio;
+    double elastic_guard_yield_drift_m;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_model_ir_ndtha_adapter_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -395,6 +457,13 @@ typedef sa_status_code_v1 (*sa_nonlinear_ndtha_advance_fn_v1)(
     sa_nonlinear_ndtha_state_v1* state,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_model_ir_ndtha_adapt_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    const sa_model_ir_ndtha_adapter_request_v1* request,
+    const sa_model_ir_ndtha_adapter_outputs_v1* outputs,
+    sa_model_ir_ndtha_adapter_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -410,7 +479,8 @@ typedef struct sa_api_v1 {
     sa_nonlinear_static_solve_fn_v1 nonlinear_static_solve;
     sa_nonlinear_ndtha_solve_fn_v1 nonlinear_ndtha_solve;
     sa_nonlinear_ndtha_advance_fn_v1 nonlinear_ndtha_advance;
-    const void* reserved[3];
+    sa_model_ir_ndtha_adapt_fn_v1 model_ir_ndtha_adapt;
+    const void* reserved[2];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -419,7 +489,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_solve))
 #define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_solve))
 #define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_advance))
-#define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_ndtha_adapt))
+#define SA_API_V1_6_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

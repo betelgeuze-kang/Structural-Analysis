@@ -96,6 +96,50 @@ pub struct ModelIrValidation {
     pub snapshot: ModelIrV2Document,
 }
 
+/// Explicit analysis inputs for the bounded v1.6 ModelIR-to-NDTHA reduction.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModelIrNdthaAdapterRequest {
+    pub element_id: String,
+    pub base_node_id: String,
+    pub floor_node_id: String,
+    pub load_pattern_id: String,
+    pub damping_ratio: f64,
+    pub elastic_guard_yield_drift_m: f64,
+    pub config: NonlinearNdthaConfigV3,
+    pub acceleration_g: Vec<f64>,
+}
+
+/// Native derivation receipt for the exact fixed-guided frame3d profile.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModelIrNdthaAdapterReceipt {
+    pub profile: u32,
+    pub story_count: u32,
+    pub element_index: u64,
+    pub load_pattern_index: u64,
+    pub story_height_m: f64,
+    pub youngs_modulus_pa: f64,
+    pub section_area_m2: f64,
+    pub section_iy_m4: f64,
+    pub story_stiffness_n_per_m: f64,
+    pub story_mass_kg: f64,
+    pub story_damping_n_s_per_m: f64,
+    pub floor_load_base_n: f64,
+    pub damping_ratio: f64,
+    pub elastic_guard_yield_drift_m: f64,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
+/// Complete caller-owned NDTHA problem produced by the bounded native adapter.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModelIrNdthaAdaptedProblem {
+    pub config: NonlinearNdthaConfigV3,
+    pub inputs: NdthaStoryInputsV3,
+    pub receipt: ModelIrNdthaAdapterReceipt,
+}
+
 /// Caller-owned deterministic result from the bounded C++ track point-load CPU kernel.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TrackPointLoadSolution {
@@ -498,6 +542,15 @@ impl Api {
     /// Returns a stable ABI error if the restart capability or operation is absent.
     pub fn load_nonlinear_ndtha_restart() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_5)
+    }
+
+    /// Load the ABI v1.6 table with the bounded ModelIR-to-NDTHA adapter.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the adapter capability or operation is absent.
+    pub fn load_model_ir_ndtha_adapter() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_6)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -1050,6 +1103,189 @@ impl ModelIr {
         )
     }
 
+    /// Derive one fixed-guided global-X story problem from immutable typed `ModelIR` state.
+    ///
+    /// Structural stiffness, mass and floor load come only from the selected native model.
+    /// Damping ratio, elastic guard, solver controls and acceleration remain explicit analysis
+    /// inputs. The adapter writes seven disjoint caller-owned FP64 buffers atomically.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error if the selectors or model fall outside the bounded profile, if
+    /// analysis inputs are invalid, or if the native receipt violates the v1.6 contract.
+    // This method assigns every public C descriptor and receipt field in header order so ABI
+    // review remains mechanical; splitting it would hide the one-to-one ownership audit trail.
+    #[allow(clippy::too_many_lines)]
+    pub fn adapt_nonlinear_ndtha(
+        &self,
+        request: &ModelIrNdthaAdapterRequest,
+    ) -> Result<ModelIrNdthaAdaptedProblem, Error> {
+        if self.api.abi_version() < sys::SA_ABI_V1_6 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "ModelIR NDTHA adapter requires ABI v1.6".to_owned(),
+            });
+        }
+        let mut story_stiffness_n_per_m = allocate_f64_output(1)?;
+        let mut story_height_m = allocate_f64_output(1)?;
+        let mut story_axial_n = allocate_f64_output(1)?;
+        let mut story_yield_drift_m = allocate_f64_output(1)?;
+        let mut story_mass_kg = allocate_f64_output(1)?;
+        let mut story_damping_n_s_per_m = allocate_f64_output(1)?;
+        let mut floor_load_base_n = allocate_f64_output(1)?;
+        let raw_outputs = sys::SaModelIrNdthaAdapterOutputsV1 {
+            abi_version: sys::SA_ABI_V1_6,
+            struct_size: abi_size::<sys::SaModelIrNdthaAdapterOutputsV1>(),
+            story_stiffness_n_per_m: mutable_f64_view(
+                &mut story_stiffness_n_per_m,
+                sys::SA_ABI_V1_6,
+            )?,
+            story_height_m: mutable_f64_view(&mut story_height_m, sys::SA_ABI_V1_6)?,
+            story_axial_n: mutable_f64_view(&mut story_axial_n, sys::SA_ABI_V1_6)?,
+            story_yield_drift_m: mutable_f64_view(&mut story_yield_drift_m, sys::SA_ABI_V1_6)?,
+            story_mass_kg: mutable_f64_view(&mut story_mass_kg, sys::SA_ABI_V1_6)?,
+            story_damping_n_s_per_m: mutable_f64_view(
+                &mut story_damping_n_s_per_m,
+                sys::SA_ABI_V1_6,
+            )?,
+            floor_load_base_n: mutable_f64_view(&mut floor_load_base_n, sys::SA_ABI_V1_6)?,
+            reserved: [0; 2],
+        };
+        let raw_request = sys::SaModelIrNdthaAdapterRequestV1 {
+            abi_version: sys::SA_ABI_V1_6,
+            struct_size: abi_size::<sys::SaModelIrNdthaAdapterRequestV1>(),
+            profile: sys::SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1,
+            flags: 0,
+            element_id: input_string_view(&request.element_id)?,
+            base_node_id: input_string_view(&request.base_node_id)?,
+            floor_node_id: input_string_view(&request.floor_node_id)?,
+            load_pattern_id: input_string_view(&request.load_pattern_id)?,
+            damping_ratio: request.damping_ratio,
+            elastic_guard_yield_drift_m: request.elastic_guard_yield_drift_m,
+            config: ndtha_config_descriptor(&request.config, sys::SA_ABI_V1_6),
+            acceleration_g: input_f64_view(&request.acceleration_g, sys::SA_ABI_V1_6)?,
+            reserved: [0; 2],
+        };
+        let mut raw_result = sys::SaModelIrNdthaAdapterResultV1 {
+            abi_version: sys::SA_ABI_V1_6,
+            struct_size: abi_size::<sys::SaModelIrNdthaAdapterResultV1>(),
+            profile: 0,
+            story_count: 0,
+            element_index: 0,
+            load_pattern_index: 0,
+            story_height_m: 0.0,
+            youngs_modulus_pa: 0.0,
+            section_area_m2: 0.0,
+            section_iy_m4: 0.0,
+            story_stiffness_n_per_m: 0.0,
+            story_mass_kg: 0.0,
+            story_damping_n_s_per_m: 0.0,
+            floor_load_base_n: 0.0,
+            damping_ratio: 0.0,
+            elastic_guard_yield_drift_m: 0.0,
+            execution_backend: 0,
+            fallback_count: u32::MAX,
+            reserved: [0; 2],
+        };
+        let adapt = self
+            .api
+            .table
+            .model_ir_ndtha_adapt
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.api.abi_version(), &mut storage);
+        // SAFETY: the immutable RAII handle, request strings, acceleration slice and seven
+        // disjoint caller-owned vectors remain live for this synchronous call. C++ retains none.
+        let status = unsafe {
+            adapt(
+                self.handle.as_ptr(),
+                &raw_request,
+                &raw_outputs,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let derived = [
+            raw_result.story_height_m,
+            raw_result.youngs_modulus_pa,
+            raw_result.section_area_m2,
+            raw_result.section_iy_m4,
+            raw_result.story_stiffness_n_per_m,
+            raw_result.story_mass_kg,
+            raw_result.story_damping_n_s_per_m,
+            raw_result.floor_load_base_n,
+            raw_result.damping_ratio,
+            raw_result.elastic_guard_yield_drift_m,
+        ];
+        let receipt_valid = raw_result.abi_version == sys::SA_ABI_V1_6
+            && raw_result.struct_size == abi_size::<sys::SaModelIrNdthaAdapterResultV1>()
+            && raw_result.profile == sys::SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1
+            && raw_result.story_count == 1
+            && raw_result.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw_result.fallback_count == 0
+            && raw_result.reserved == [0; 2]
+            && derived.iter().all(|value| value.is_finite())
+            && raw_result.story_height_m > 0.0
+            && raw_result.youngs_modulus_pa > 0.0
+            && raw_result.section_area_m2 > 0.0
+            && raw_result.section_iy_m4 > 0.0
+            && raw_result.story_stiffness_n_per_m > 0.0
+            && raw_result.story_mass_kg > 0.0
+            && raw_result.story_damping_n_s_per_m >= 0.0
+            && raw_result.floor_load_base_n != 0.0
+            && raw_result.damping_ratio.to_bits() == request.damping_ratio.to_bits()
+            && raw_result.elastic_guard_yield_drift_m.to_bits()
+                == request.elastic_guard_yield_drift_m.to_bits()
+            && story_stiffness_n_per_m == [raw_result.story_stiffness_n_per_m]
+            && story_height_m == [raw_result.story_height_m]
+            && story_axial_n == [0.0]
+            && story_yield_drift_m == [raw_result.elastic_guard_yield_drift_m]
+            && story_mass_kg == [raw_result.story_mass_kg]
+            && story_damping_n_s_per_m == [raw_result.story_damping_n_s_per_m]
+            && floor_load_base_n == [raw_result.floor_load_base_n];
+        if !receipt_valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native ModelIR NDTHA adapter violated the v1.6 output contract"
+                    .to_owned(),
+            });
+        }
+        Ok(ModelIrNdthaAdaptedProblem {
+            config: request.config.clone(),
+            inputs: NdthaStoryInputsV3 {
+                story_k_n_per_m: story_stiffness_n_per_m,
+                story_h_m: story_height_m,
+                story_axial_n,
+                story_yield_drift_m,
+                story_mass_kg,
+                story_damping_n_s_per_m,
+                floor_load_base_n,
+                ag_g: request.acceleration_g.clone(),
+            },
+            receipt: ModelIrNdthaAdapterReceipt {
+                profile: raw_result.profile,
+                story_count: raw_result.story_count,
+                element_index: raw_result.element_index,
+                load_pattern_index: raw_result.load_pattern_index,
+                story_height_m: raw_result.story_height_m,
+                youngs_modulus_pa: raw_result.youngs_modulus_pa,
+                section_area_m2: raw_result.section_area_m2,
+                section_iy_m4: raw_result.section_iy_m4,
+                story_stiffness_n_per_m: raw_result.story_stiffness_n_per_m,
+                story_mass_kg: raw_result.story_mass_kg,
+                story_damping_n_s_per_m: raw_result.story_damping_n_s_per_m,
+                floor_load_base_n: raw_result.floor_load_base_n,
+                damping_ratio: raw_result.damping_ratio,
+                elastic_guard_yield_drift_m: raw_result.elastic_guard_yield_drift_m,
+                execution_backend: raw_result.execution_backend,
+                fallback_count: raw_result.fallback_count,
+            },
+        })
+    }
+
     fn read_bytes(
         &self,
         size_operation: unsafe extern "C" fn(
@@ -1320,6 +1556,9 @@ fn execution_status_from_raw(raw: u32) -> Result<NonlinearNdthaExecutionStatus, 
     }
 }
 
+// Every minor version is intentionally spelled out so an added slot cannot silently leak into
+// an older table. Keeping the compatibility matrix in one place is more auditable than helpers.
+#[allow(clippy::too_many_lines)]
 fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let base_valid = table.abi_version == requested
         && table.struct_size as usize >= size_of::<sys::SaApiV1>()
@@ -1338,12 +1577,16 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let nonlinear_static_slot = table.nonlinear_static_solve.is_some();
     let nonlinear_ndtha_slot = table.nonlinear_ndtha_solve.is_some();
     let nonlinear_ndtha_restart_slot = table.nonlinear_ndtha_advance.is_some();
+    let model_ir_ndtha_adapter_slot = table.model_ir_ndtha_adapt.is_some();
+    let model_ir_ndtha_adapter_absent = !model_ir_ndtha_adapter_slot
+        && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER == 0;
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
             && !nonlinear_static_slot
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
@@ -1351,6 +1594,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_static_slot
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU == 0
@@ -1362,6 +1606,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_static_slot
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1373,6 +1618,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_static_slot
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1384,6 +1630,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_static_slot
             && nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1396,12 +1643,27 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_static_slot
             && nonlinear_ndtha_slot
             && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+    } else if requested == sys::SA_ABI_V1_6 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
     } else {
         false
     };
@@ -1526,6 +1788,13 @@ fn input_f64_view(values: &[f64], abi_version: u32) -> Result<sys::SaBufferViewV
         memory_space: sys::SA_MEMORY_SPACE_HOST,
         device_id: -1,
         flags: 0,
+    })
+}
+
+fn input_string_view(value: &str) -> Result<sys::SaStringViewV1, Error> {
+    Ok(sys::SaStringViewV1 {
+        data: value.as_ptr().cast::<c_char>(),
+        length: usize_to_u64(value.len())?,
     })
 }
 
@@ -1657,11 +1926,12 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5,
-        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
-        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_CAPABILITY_NONLINEAR_NDTHA_CPU,
-        SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU, SA_CAPABILITY_NONLINEAR_STATIC_CPU,
-        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6,
+        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
+        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
+        SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
+        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
+        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -1765,6 +2035,23 @@ mod tests {
                 | SA_CAPABILITY_NONLINEAR_STATIC_CPU
                 | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
                 | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+        );
+    }
+
+    #[test]
+    fn v1_6_table_adds_only_the_bounded_model_ir_ndtha_adapter_capability() {
+        let api = Api::load_model_ir_ndtha_adapter().expect("v1.6 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_6);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
         );
     }
 

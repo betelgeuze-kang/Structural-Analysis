@@ -45,7 +45,8 @@ static_assert(offsetof(sa_api_v1, track_point_load_solve) == 72U);
 static_assert(offsetof(sa_api_v1, nonlinear_static_solve) == 80U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_solve) == 88U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U);
-static_assert(offsetof(sa_api_v1, reserved) == 104U);
+static_assert(offsetof(sa_api_v1, model_ir_ndtha_adapt) == 104U);
+static_assert(offsetof(sa_api_v1, reserved) == 112U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -97,6 +98,21 @@ static_assert(offsetof(sa_nonlinear_ndtha_state_v1, collapse_time_s) == 48U);
 static_assert(offsetof(sa_nonlinear_ndtha_state_v1, displacement_m) == 80U);
 static_assert(offsetof(sa_nonlinear_ndtha_state_v1, response) == 224U);
 static_assert(offsetof(sa_nonlinear_ndtha_state_v1, reserved) == 776U);
+static_assert(sizeof(sa_model_ir_ndtha_adapter_request_v1) == 304U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_request_v1, element_id) == 16U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_request_v1, damping_ratio) == 80U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_request_v1, config) == 96U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_request_v1, acceleration_g) == 240U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_request_v1, reserved) == 288U);
+static_assert(sizeof(sa_model_ir_ndtha_adapter_outputs_v1) == 360U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_outputs_v1, story_stiffness_n_per_m) == 8U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_outputs_v1, floor_load_base_n) == 296U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_outputs_v1, reserved) == 344U);
+static_assert(sizeof(sa_model_ir_ndtha_adapter_result_v1) == 136U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, element_index) == 16U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, story_height_m) == 32U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, execution_backend) == 112U);
+static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, reserved) == 120U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -1470,6 +1486,297 @@ struct MemoryRegion {
     return SA_OK;
 }
 
+[[nodiscard]] bool valid_adapter_selector(const sa_string_view_v1 value) noexcept {
+    if (value.data == nullptr || value.length == 0U || value.length > 128U) {
+        return false;
+    }
+    const auto address = reinterpret_cast<std::uintptr_t>(value.data);
+    if (address > std::numeric_limits<std::uintptr_t>::max() - (value.length - 1U)) {
+        return false;
+    }
+    const auto valid_alnum = [](const unsigned char byte) {
+        return (byte >= static_cast<unsigned char>('0') && byte <= static_cast<unsigned char>('9'))
+            || (byte >= static_cast<unsigned char>('A') && byte <= static_cast<unsigned char>('Z'))
+            || (byte >= static_cast<unsigned char>('a') && byte <= static_cast<unsigned char>('z'));
+    };
+    if (!valid_alnum(static_cast<unsigned char>(value.data[0]))) {
+        return false;
+    }
+    for (std::uint64_t index = 0U; index < value.length; ++index) {
+        const auto byte = static_cast<unsigned char>(value.data[index]);
+        if (!valid_alnum(byte) && byte != static_cast<unsigned char>('_')
+            && byte != static_cast<unsigned char>('-') && byte != static_cast<unsigned char>('.')
+            && byte != static_cast<unsigned char>(':')) {
+            return false;
+        }
+    }
+    return true;
+}
+
+[[nodiscard]] sa_status_code_v1 model_ir_ndtha_adapt_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    const sa_model_ir_ndtha_adapter_request_v1* const request,
+    const sa_model_ir_ndtha_adapter_outputs_v1* const outputs,
+    sa_model_ir_ndtha_adapter_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [handle, request, outputs, result, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(request) || !pointer_is_aligned(outputs)
+            || !pointer_is_aligned(result)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter descriptor is null or misaligned");
+        }
+        if (request->abi_version != SA_ABI_V1_6 || request->config.abi_version != SA_ABI_V1_6
+            || request->acceleration_g.abi_version != SA_ABI_V1_6
+            || outputs->abi_version != SA_ABI_V1_6 || result->abi_version != SA_ABI_V1_6) {
+            return report_error(
+                error,
+                SA_ERR_ABI_VERSION_MISMATCH,
+                "ModelIR NDTHA adapter descriptors require ABI v1.6");
+        }
+        if (request->struct_size < sizeof(sa_model_ir_ndtha_adapter_request_v1)
+            || request->config.struct_size < sizeof(sa_nonlinear_ndtha_config_v1)
+            || request->acceleration_g.struct_size < sizeof(sa_buffer_view_v1)
+            || outputs->struct_size < sizeof(sa_model_ir_ndtha_adapter_outputs_v1)
+            || result->struct_size < sizeof(sa_model_ir_ndtha_adapter_result_v1)) {
+            return report_error(
+                error,
+                SA_ERR_STRUCT_SIZE,
+                "ModelIR NDTHA adapter descriptor struct_size is too small");
+        }
+        const bool reserved_nonzero = request->flags != 0U
+            || std::any_of(
+                std::begin(request->reserved),
+                std::end(request->reserved),
+                [](const auto value) { return value != 0U; })
+            || std::any_of(
+                std::begin(outputs->reserved),
+                std::end(outputs->reserved),
+                [](const auto value) { return value != 0U; })
+            || std::any_of(
+                std::begin(result->reserved),
+                std::end(result->reserved),
+                [](const auto value) { return value != 0U; });
+        if (reserved_nonzero) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter reserved fields are not zero");
+        }
+        if (request->profile != SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1) {
+            return report_error(
+                error, SA_ERR_UNSUPPORTED, "ModelIR NDTHA adapter profile is unsupported");
+        }
+        if (request->config.story_count != 1U || request->config.pdelta_factor != 0.0) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter requires story_count one and pdelta_factor zero");
+        }
+        if (!std::isfinite(request->damping_ratio) || request->damping_ratio < 0.0
+            || request->damping_ratio > 1.0
+            || !std::isfinite(request->elastic_guard_yield_drift_m)
+            || request->elastic_guard_yield_drift_m <= 0.0) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter analysis scalar is outside its domain");
+        }
+        const std::array selectors {
+            request->element_id,
+            request->base_node_id,
+            request->floor_node_id,
+            request->load_pattern_id,
+        };
+        if (!std::all_of(selectors.begin(), selectors.end(), valid_adapter_selector)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter selector violates the bounded stable-id contract");
+        }
+
+        const std::array output_views {
+            &outputs->story_stiffness_n_per_m,
+            &outputs->story_height_m,
+            &outputs->story_axial_n,
+            &outputs->story_yield_drift_m,
+            &outputs->story_mass_kg,
+            &outputs->story_damping_n_s_per_m,
+            &outputs->floor_load_base_n,
+        };
+        for (const auto* const view : output_views) {
+            const auto status = validate_ndtha_output_view(
+                *view,
+                1U,
+                SA_ELEMENT_TYPE_F64,
+                sizeof(double),
+                SA_ABI_V1_6,
+                "ModelIR NDTHA adapter output metadata is invalid",
+                error);
+            if (status != SA_OK) {
+                return status;
+            }
+            if (view->length != 1U) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "ModelIR NDTHA adapter output length must equal one");
+            }
+        }
+        if (request->acceleration_g.length != request->config.step_count) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter acceleration length must equal step_count");
+        }
+
+        if (ranges_overlap(request, sizeof(*request), outputs, sizeof(*outputs))
+            || ranges_overlap(request, sizeof(*request), result, sizeof(*result))
+            || ranges_overlap(outputs, sizeof(*outputs), result, sizeof(*result))) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter descriptors overlap");
+        }
+        const std::uint64_t acceleration_extent =
+            request->acceleration_g.length * sizeof(double);
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            const auto* const view = output_views[index];
+            if (ranges_overlap(view->data, sizeof(double), request, sizeof(*request))
+                || ranges_overlap(view->data, sizeof(double), outputs, sizeof(*outputs))
+                || ranges_overlap(view->data, sizeof(double), result, sizeof(*result))
+                || ranges_overlap(
+                    view->data,
+                    sizeof(double),
+                    request->acceleration_g.data,
+                    acceleration_extent)) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "ModelIR NDTHA adapter mutable output aliases descriptor or input memory");
+            }
+            for (const auto selector : selectors) {
+                if (ranges_overlap(view->data, sizeof(double), selector.data, selector.length)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR NDTHA adapter mutable output aliases selector memory");
+                }
+            }
+            for (std::size_t other = index + 1U; other < output_views.size(); ++other) {
+                if (ranges_overlap(
+                        view->data,
+                        sizeof(double),
+                        output_views[other]->data,
+                        sizeof(double))) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR NDTHA adapter mutable outputs overlap");
+                }
+            }
+        }
+        if (ranges_overlap(result, sizeof(*result), request->acceleration_g.data, acceleration_extent)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR NDTHA adapter result aliases acceleration input memory");
+        }
+        for (const auto selector : selectors) {
+            if (ranges_overlap(result, sizeof(*result), selector.data, selector.length)) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "ModelIR NDTHA adapter result aliases selector memory");
+            }
+        }
+
+        const auto model = acquire_model(handle);
+        const auto as_text = [](const sa_string_view_v1 value) {
+            return std::string_view {value.data, static_cast<std::size_t>(value.length)};
+        };
+        const auto properties = model->adapt_fixed_guided_frame3d_x(
+            as_text(request->element_id),
+            as_text(request->base_node_id),
+            as_text(request->floor_node_id),
+            as_text(request->load_pattern_id),
+            request->damping_ratio);
+
+        std::array<double, 1> stiffness {properties.story_stiffness_n_per_m};
+        std::array<double, 1> height {properties.story_height_m};
+        std::array<double, 1> axial {0.0};
+        std::array<double, 1> yield_drift {request->elastic_guard_yield_drift_m};
+        std::array<double, 1> mass {properties.story_mass_kg};
+        std::array<double, 1> damping {properties.story_damping_n_s_per_m};
+        std::array<double, 1> floor_load {properties.floor_load_base_n};
+        const auto input_view = [](const double* const data, const std::uint64_t length) {
+            return sa_buffer_view_v1 {
+                SA_ABI_V1_5,
+                static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
+                data,
+                length,
+                sizeof(double),
+                SA_ELEMENT_TYPE_F64,
+                SA_MEMORY_SPACE_HOST,
+                -1,
+                0U,
+            };
+        };
+        auto acceleration_v15 = request->acceleration_g;
+        acceleration_v15.abi_version = SA_ABI_V1_5;
+        auto config_v15 = request->config;
+        config_v15.abi_version = SA_ABI_V1_5;
+        const sa_nonlinear_ndtha_inputs_v1 problem {
+            SA_ABI_V1_5,
+            static_cast<std::uint32_t>(sizeof(sa_nonlinear_ndtha_inputs_v1)),
+            input_view(stiffness.data(), 1U),
+            input_view(height.data(), 1U),
+            input_view(axial.data(), 1U),
+            input_view(yield_drift.data(), 1U),
+            input_view(mass.data(), 1U),
+            input_view(damping.data(), 1U),
+            input_view(floor_load.data(), 1U),
+            acceleration_v15,
+            {0U, 0U},
+        };
+        const auto problem_status = validate_ndtha_restart_problem(&config_v15, &problem, error);
+        if (problem_status != SA_OK) {
+            return problem_status;
+        }
+
+        *static_cast<double*>(outputs->story_stiffness_n_per_m.data) = stiffness.front();
+        *static_cast<double*>(outputs->story_height_m.data) = height.front();
+        *static_cast<double*>(outputs->story_axial_n.data) = axial.front();
+        *static_cast<double*>(outputs->story_yield_drift_m.data) = yield_drift.front();
+        *static_cast<double*>(outputs->story_mass_kg.data) = mass.front();
+        *static_cast<double*>(outputs->story_damping_n_s_per_m.data) = damping.front();
+        *static_cast<double*>(outputs->floor_load_base_n.data) = floor_load.front();
+        *result = {
+            SA_ABI_V1_6,
+            static_cast<std::uint32_t>(sizeof(sa_model_ir_ndtha_adapter_result_v1)),
+            SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1,
+            1U,
+            properties.element_index,
+            properties.load_pattern_index,
+            properties.story_height_m,
+            properties.youngs_modulus_pa,
+            properties.section_area_m2,
+            properties.section_iy_m4,
+            properties.story_stiffness_n_per_m,
+            properties.story_mass_kg,
+            properties.story_damping_n_s_per_m,
+            properties.floor_load_base_n,
+            request->damping_ratio,
+            request->elastic_guard_yield_drift_m,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        return SA_OK;
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 nonlinear_ndtha_advance_boundary(
     const sa_nonlinear_ndtha_config_v1* const config,
     const sa_nonlinear_ndtha_inputs_v1* const inputs,
@@ -1906,6 +2213,9 @@ struct MemoryRegion {
     case SA_ABI_V1_5:
         api_min_size = SA_API_V1_5_MIN_SIZE;
         break;
+    case SA_ABI_V1_6:
+        api_min_size = SA_API_V1_6_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -1932,6 +2242,7 @@ struct MemoryRegion {
     const bool nonlinear_static_enabled = request->abi_version >= SA_ABI_V1_3;
     const bool nonlinear_ndtha_enabled = request->abi_version >= SA_ABI_V1_4;
     const bool nonlinear_ndtha_restart_enabled = request->abi_version >= SA_ABI_V1_5;
+    const bool model_ir_ndtha_adapter_enabled = request->abi_version >= SA_ABI_V1_6;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -1944,6 +2255,9 @@ struct MemoryRegion {
             | (nonlinear_ndtha_enabled ? SA_CAPABILITY_NONLINEAR_NDTHA_CPU : UINT64_C(0))
             | (nonlinear_ndtha_restart_enabled
                     ? SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                    : UINT64_C(0))
+            | (model_ir_ndtha_adapter_enabled
+                    ? SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -1956,7 +2270,8 @@ struct MemoryRegion {
         nonlinear_static_enabled ? &nonlinear_static_boundary : nullptr,
         nonlinear_ndtha_enabled ? &nonlinear_ndtha_boundary : nullptr,
         nonlinear_ndtha_restart_enabled ? &nonlinear_ndtha_advance_boundary : nullptr,
-        {nullptr, nullptr, nullptr},
+        model_ir_ndtha_adapter_enabled ? &model_ir_ndtha_adapt_boundary : nullptr,
+        {nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

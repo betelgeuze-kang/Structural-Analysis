@@ -2,6 +2,7 @@
 
 #include <array>
 #include <atomic>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -43,6 +44,10 @@ namespace {
     };
 }
 
+[[nodiscard]] bool near(const double actual, const double expected) {
+    return std::abs(actual - expected) <= std::max(1.0, std::abs(expected)) * 1.0e-12;
+}
+
 struct Fixture {
     std::array<char, 2> canonical {'{', '}'};
     std::array<char, 5> model_id {'m', 'o', 'd', 'e', 'l'};
@@ -55,11 +60,18 @@ struct Fixture {
         SA_DOF_RZ,
     };
     std::array<sa_dof_v1, 6> fixed_dofs = canonical_dofs;
+    std::array<sa_dof_v1, 5> guided_dofs {
+        SA_DOF_UY,
+        SA_DOF_UZ,
+        SA_DOF_RX,
+        SA_DOF_RY,
+        SA_DOF_RZ,
+    };
     std::array<sa_node_descriptor_v1, 2> nodes {};
     std::array<sa_material_descriptor_v1, 1> materials {};
     std::array<sa_section_descriptor_v1, 1> sections {};
     std::array<sa_element_descriptor_v1, 1> elements {};
-    std::array<sa_constraint_descriptor_v1, 1> constraints {};
+    std::array<sa_constraint_descriptor_v1, 2> constraints {};
     std::array<sa_nodal_load_descriptor_v1, 1> nodal_loads {};
     std::array<sa_load_pattern_descriptor_v1, 1> load_patterns {};
     sa_model_ir_descriptor_v1 descriptor {};
@@ -118,6 +130,13 @@ struct Fixture {
         constraints[0].node_id = text("n0");
         constraints[0].dofs = fixed_dofs.data();
         constraints[0].dof_count = fixed_dofs.size();
+        constraints[1].abi_version = SA_ABI_V1_1;
+        constraints[1].struct_size =
+            static_cast<std::uint32_t>(sizeof(sa_constraint_descriptor_v1));
+        constraints[1].identity = entity("c1", 1U);
+        constraints[1].node_id = text("n1");
+        constraints[1].dofs = guided_dofs.data();
+        constraints[1].dof_count = guided_dofs.size();
 
         nodal_loads[0].abi_version = SA_ABI_V1_1;
         nodal_loads[0].struct_size =
@@ -235,6 +254,7 @@ struct Fixture {
     CHECK(old.capabilities == SA_CAPABILITY_BUFFER_VALIDATION);
     CHECK(old.model_ir_create == nullptr);
     CHECK(old.model_ir_snapshot_write == nullptr);
+    CHECK(old.model_ir_ndtha_adapt == nullptr);
 
     const auto current = load_api(SA_ABI_V1_1);
     CHECK(current.abi_version == SA_ABI_V1_1);
@@ -246,6 +266,17 @@ struct Fixture {
     CHECK(current.model_ir_validation_report_write != nullptr);
     CHECK(current.model_ir_snapshot_size != nullptr);
     CHECK(current.model_ir_snapshot_write != nullptr);
+    CHECK(current.model_ir_ndtha_adapt == nullptr);
+
+    const auto restart = load_api(SA_ABI_V1_5);
+    CHECK(restart.abi_version == SA_ABI_V1_5);
+    CHECK(restart.model_ir_ndtha_adapt == nullptr);
+    CHECK((restart.capabilities & SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER) == 0U);
+
+    const auto adapter = load_api(SA_ABI_V1_6);
+    CHECK(adapter.abi_version == SA_ABI_V1_6);
+    CHECK(adapter.model_ir_ndtha_adapt != nullptr);
+    CHECK((adapter.capabilities & SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER) != 0U);
     return true;
 }
 
@@ -422,6 +453,192 @@ struct Fixture {
     return true;
 }
 
+struct AdapterOutputStorage {
+    std::array<double, 1> stiffness {41.0};
+    std::array<double, 1> height {42.0};
+    std::array<double, 1> axial {43.0};
+    std::array<double, 1> yield_drift {44.0};
+    std::array<double, 1> mass {45.0};
+    std::array<double, 1> damping {46.0};
+    std::array<double, 1> floor_load {47.0};
+
+    [[nodiscard]] bool operator==(const AdapterOutputStorage&) const = default;
+};
+
+[[nodiscard]] sa_buffer_view_v1 adapter_input_view(
+    const double* const data,
+    const std::uint64_t length) {
+    return {
+        SA_ABI_V1_6,
+        static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
+        data,
+        length,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+}
+
+[[nodiscard]] sa_mut_buffer_view_v1 adapter_output_view(std::array<double, 1>& values) {
+    return {
+        SA_ABI_V1_6,
+        static_cast<std::uint32_t>(sizeof(sa_mut_buffer_view_v1)),
+        values.data(),
+        values.size(),
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+}
+
+[[nodiscard]] sa_model_ir_ndtha_adapter_outputs_v1 adapter_outputs(
+    AdapterOutputStorage& storage) {
+    return {
+        SA_ABI_V1_6,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_ndtha_adapter_outputs_v1)),
+        adapter_output_view(storage.stiffness),
+        adapter_output_view(storage.height),
+        adapter_output_view(storage.axial),
+        adapter_output_view(storage.yield_drift),
+        adapter_output_view(storage.mass),
+        adapter_output_view(storage.damping),
+        adapter_output_view(storage.floor_load),
+        {0U, 0U},
+    };
+}
+
+[[nodiscard]] sa_model_ir_ndtha_adapter_request_v1 adapter_request(
+    const std::array<double, 3>& acceleration) {
+    sa_nonlinear_ndtha_config_v1 config {};
+    config.abi_version = SA_ABI_V1_6;
+    config.struct_size = static_cast<std::uint32_t>(sizeof(config));
+    config.story_count = 1U;
+    config.step_count = static_cast<std::uint32_t>(acceleration.size());
+    config.dt_s = 0.01;
+    config.newmark_beta = 0.25;
+    config.newmark_gamma = 0.5;
+    config.tolerance = 1.0e-5;
+    config.max_step_iterations = 16U;
+    config.adaptive_load_decay = 0.82;
+    config.damping_force_cap_ratio = 0.6;
+    config.newton_max_iter = 120U;
+    config.line_search_decay = 0.5;
+    config.line_search_min = 0.03125;
+    config.hardening_ratio = 0.2;
+    config.pdelta_factor = 0.0;
+    config.collapse_drift_threshold_pct = 10.0;
+    return {
+        SA_ABI_V1_6,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_ndtha_adapter_request_v1)),
+        SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1,
+        0U,
+        text("e0"),
+        text("n0"),
+        text("n1"),
+        text("lp0"),
+        0.00025,
+        0.01,
+        config,
+        adapter_input_view(acceleration.data(), acceleration.size()),
+        {0U, 0U},
+    };
+}
+
+void configure_adapter_model(Fixture& fixture) {
+    fixture.nodes[1].coordinates_m[0] = 0.0;
+    fixture.nodes[1].coordinates_m[2] = 3.2;
+    fixture.materials[0].parameters.linear.density_kg_m3 = 2500.0;
+    fixture.sections[0].parameters.frame = {
+        1.25,
+        50'000'000.0 * 3.2 * 3.2 * 3.2 / (12.0 * 2.0e11),
+        0.001,
+        0.001,
+        1.0,
+        1.0,
+    };
+    fixture.nodal_loads[0].components_si[0] = 200'000.0;
+}
+
+[[nodiscard]] bool bounded_ndtha_adapter_is_atomic_and_thread_safe() {
+    const auto api = load_api(SA_ABI_V1_6);
+    Fixture fixture;
+    configure_adapter_model(fixture);
+    sa_model_ir_handle_v1* handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
+    CHECK(report(api, handle).find("\"analysis_ready\":true") != std::string::npos);
+
+    const std::array<double, 3> acceleration {0.0, 0.05, -0.03};
+    auto request = adapter_request(acceleration);
+    AdapterOutputStorage storage;
+    auto outputs = adapter_outputs(storage);
+    sa_model_ir_ndtha_adapter_result_v1 result {};
+    result.abi_version = SA_ABI_V1_6;
+    result.struct_size = static_cast<std::uint32_t>(sizeof(result));
+    CHECK(api.model_ir_ndtha_adapt(handle, &request, &outputs, &result, nullptr) == SA_OK);
+    CHECK(near(storage.stiffness[0], 50'000'000.0));
+    CHECK(near(storage.height[0], 3.2));
+    CHECK(storage.axial[0] == 0.0);
+    CHECK(storage.yield_drift[0] == 0.01);
+    CHECK(near(storage.mass[0], 5000.0));
+    CHECK(near(storage.damping[0], 250.0));
+    CHECK(storage.floor_load[0] == 200'000.0);
+    CHECK(result.profile == SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1);
+    CHECK(result.story_count == 1U);
+    CHECK(result.element_index == 0U);
+    CHECK(result.load_pattern_index == 0U);
+    CHECK(result.execution_backend == SA_EXECUTION_BACKEND_CPU);
+    CHECK(result.fallback_count == 0U);
+
+    AdapterOutputStorage unchanged;
+    const auto before = unchanged;
+    auto invalid_outputs = adapter_outputs(unchanged);
+    invalid_outputs.story_height_m.data = invalid_outputs.story_stiffness_n_per_m.data;
+    sa_model_ir_ndtha_adapter_result_v1 failed {};
+    failed.abi_version = SA_ABI_V1_6;
+    failed.struct_size = static_cast<std::uint32_t>(sizeof(failed));
+    failed.story_count = 77U;
+    CHECK(api.model_ir_ndtha_adapt(handle, &request, &invalid_outputs, &failed, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(unchanged == before);
+    CHECK(failed.story_count == 77U);
+
+    std::atomic<bool> passed {true};
+    std::vector<std::thread> workers;
+    for (std::size_t worker = 0U; worker < 8U; ++worker) {
+        workers.emplace_back([api, handle, &passed] {
+            const std::array<double, 3> worker_acceleration {0.0, 0.05, -0.03};
+            const auto worker_request = adapter_request(worker_acceleration);
+            AdapterOutputStorage worker_storage;
+            const auto worker_outputs = adapter_outputs(worker_storage);
+            sa_model_ir_ndtha_adapter_result_v1 worker_result {};
+            worker_result.abi_version = SA_ABI_V1_6;
+            worker_result.struct_size = static_cast<std::uint32_t>(sizeof(worker_result));
+            for (std::size_t iteration = 0U; iteration < 128U; ++iteration) {
+                if (api.model_ir_ndtha_adapt(
+                        handle,
+                        &worker_request,
+                        &worker_outputs,
+                        &worker_result,
+                        nullptr)
+                        != SA_OK
+                    || !near(worker_storage.stiffness[0], 50'000'000.0)) {
+                    passed.store(false, std::memory_order_relaxed);
+                }
+            }
+        });
+    }
+    for (auto& worker : workers) {
+        worker.join();
+    }
+    CHECK(passed.load(std::memory_order_relaxed));
+    CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -431,6 +648,7 @@ int main() {
         failed_create_is_atomic_and_semantic_failures_are_reports,
         references_cycles_time_and_readiness_are_fail_closed,
         immutable_queries_are_concurrent,
+        bounded_ndtha_adapter_is_atomic_and_thread_safe,
     };
     for (const auto test : tests) {
         if (!test()) {

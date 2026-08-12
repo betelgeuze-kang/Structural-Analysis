@@ -43,6 +43,8 @@ Jobs:
      claim check
    - R4 ABI v1.5 caller-owned NDTHA restart-state layout, safe-wrapper split-execution bitwise
      identity, tamper rejection and failure atomicity
+   - ABI v1.6 bounded ModelIR-to-NDTHA layout, safe-wrapper closed-form parity, exact profile
+     rejection, failure atomicity and concurrent immutable execution
    - bounded CPU checkpoint C4 contract: canonical artifact, independent model/state/execution
      SHA-256 binding, atomic publish, frozen receipt and exact durable resume
    - nonlinear-static independent dense-matrix Python oracle, five-case product-golden SHA-256
@@ -64,7 +66,7 @@ Jobs:
    - track config/output pointer, length, stride, alignment, overlap and nonconvergence atomicity
    - nonlinear static five-input/output pointer, length, stride, alignment, finite, overlap and
      nonconvergence atomicity
-   - all solver operations run in ABI CTest; unavailable v1.0-v1.4 table tails remain null
+   - all solver operations run in ABI CTest; unavailable v1.0-v1.5 table tails remain null
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded

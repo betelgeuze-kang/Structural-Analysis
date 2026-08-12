@@ -25,6 +25,12 @@
       "owner": "structural-contracts",
       "claim": "strict Rust wire identity, typed C++ semantic validation, safe ABI v1.1 RAII round-trip and structural-cli model validate only; no solver, restart, ResultIR or backend readiness"
     },
+    "modelir_ndtha_adapter": {
+      "status": "implemented",
+      "cutover_gate": "C3",
+      "owner": "structural_model_ir",
+      "claim": "one exact fixed-guided one-story frame3d global-X reduction only: ABI v1.6 derives 12*E*Iy/L^3 stiffness, rho*A*L/2 mass and one selected floor FX load from immutable typed ModelIR, combines them with explicitly supplied damping ratio, elastic guard, solver configuration and acceleration, publishes seven caller-owned FP64 buffers atomically, and crosses a safe Rust wrapper with closed-form Python C1 parity and zero-fallback CPU execution; arbitrary topology reduction, P-delta derivation, nonlinear material inference, public ModelIR analysis C4/C5, HIP C2 and C6 remain open"
+    },
     "track_point_load_cpu": {
       "status": "implemented",
       "cutover_gate": "C1",
