@@ -769,6 +769,8 @@ dependencies = [
 name = "structural-runtime"
 version = "0.1.0"
 dependencies = [
+ "serde",
+ "sha2",
  "structural-contracts",
  "structural-ffi",
 ]

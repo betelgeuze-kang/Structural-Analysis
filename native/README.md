@@ -6,7 +6,7 @@ Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA
 identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic owner,
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
-bounded ModelIR domain to C3. Analysis, restart, ResultIR/ReportIR product E2E and HIP remain
+bounded ModelIR domain to C3. Analysis product E2E, ResultIR/ReportIR and HIP remain
 unimplemented; `capabilities.json` records that boundary. The existing `structural_runtime_ffi`
 package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
@@ -26,8 +26,12 @@ damping-cap, adaptive-retry, line-search and collapse matrix to C1. Broader dyna
 parity and HIP C2 remain open. R4 begins with an ABI v1.5 caller-owned inter-step restart state:
 the C++ kernel advances a validated private copy, the C boundary publishes only complete success,
 and the safe Rust owner proves bitwise one-shot/split identity for completion and collapse. This
-is a C3 transport foundation only; durable hash-bound checkpoint artifacts, crash recovery and
-product E2E remain open. The legacy five-symbol ABI is unchanged.
+state is serialized by `structural-runtime` into a bounded, canonical little-endian artifact with
+independent model/state/execution SHA-256 bindings. Same-directory write, file sync, atomic rename
+and directory sync provide the bounded Linux CPU durability contract; corruption, truncation,
+trailing bytes, binding drift and impossible native state fail closed. Exact save/load/resume is
+promoted as the separate CPU checkpoint C4 capability. Durable job-state crash recovery, broader
+solver coverage, HIP C2 and product E2E remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.

@@ -41,13 +41,13 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++ Newmark/Newton story-frame kernel with shared constitutive assembly and independent dense-matrix Python C1 full-result parity for the five-case 1/2/3-story Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping-cap, adaptive retry, line-search and collapse matrix, plus ABI v1.4 nested caller-owned inputs/outputs, safe Rust integration and the frozen legacy Rust boundary; broader dynamic input-space parity, HIP C2, durable restart and product E2E remain open"
+      "claim": "bounded serial FP64 C++ Newmark/Newton story-frame kernel with shared constitutive assembly and independent dense-matrix Python C1 full-result parity for the five-case 1/2/3-story Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping-cap, adaptive retry, line-search and collapse matrix, plus ABI v1.4 nested caller-owned inputs/outputs, safe Rust integration and the frozen legacy Rust boundary; broader dynamic input-space parity, HIP C2 and product E2E remain open, while restart is promoted only as the separate bounded CPU checkpoint capability"
     },
     "checkpoint_restart": {
-      "status": "planned",
-      "cutover_gate": null,
+      "status": "implemented",
+      "cutover_gate": "C4",
       "owner": "structural-runtime",
-      "claim": "ABI v1.5 and the safe Rust wrapper provide a C3 caller-owned NDTHA inter-step state transport foundation, but structural-runtime has no hash-bound durable checkpoint, crash recovery or C4 authority yet"
+      "claim": "bounded CPU nonlinear-NDTHA checkpoint C4 only: ABI v1.5 validates complete caller-owned inter-step state; structural-runtime emits a canonical pointer-free little-endian artifact bound to independent model, state and execution SHA-256 identities, publishes it by same-directory write/sync/rename/directory-sync, rejects corruption and binding mismatch, and resumes bitwise-identically; durable job-state crash recovery, HIP C2, broader solver coverage and product E2E remain open"
     },
     "product_e2e": {
       "status": "planned",

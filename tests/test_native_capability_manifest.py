@@ -43,8 +43,15 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "independent dense-matrix Python C1" in ndtha["claim"]
     assert "five-case" in ndtha["claim"]
     assert "broader dynamic input-space parity" in ndtha["claim"]
+    assert (
+        capabilities.capability_is_enabled(payload, "checkpoint_restart") is True
+    )
+    checkpoint = payload["capabilities"]["checkpoint_restart"]
+    assert checkpoint["cutover_gate"] == "C4"
+    assert "bounded CPU" in checkpoint["claim"]
+    assert "model, state and execution SHA-256" in checkpoint["claim"]
+    assert "job-state crash recovery" in checkpoint["claim"]
     for capability in (
-        "checkpoint_restart",
         "product_e2e",
         "hip_backend",
     ):

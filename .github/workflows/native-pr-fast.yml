@@ -587,6 +587,7 @@ jobs:
             echo "Durable runtime not introduced; restart lane is not applicable"
             exit 0
           fi
+          python3 scripts/check_native_checkpoint_restart.py
           cargo test --manifest-path native/Cargo.toml -p structural-runtime --locked checkpoint
           cargo test --manifest-path native/Cargo.toml -p structural-runtime --locked restart
 

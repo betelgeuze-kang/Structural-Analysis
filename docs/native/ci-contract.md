@@ -42,7 +42,9 @@ Jobs:
    - R3 nonlinear NDTHA shared constitutive ownership, ABI v1.4/safe-wrapper integration and C1
      claim check
    - R4 ABI v1.5 caller-owned NDTHA restart-state layout, safe-wrapper split-execution bitwise
-     identity, tamper rejection and failure atomicity (durable C4 remains a separate gate)
+     identity, tamper rejection and failure atomicity
+   - bounded CPU checkpoint C4 contract: canonical artifact, independent model/state/execution
+     SHA-256 binding, atomic publish, frozen receipt and exact durable resume
    - nonlinear-static independent dense-matrix Python oracle, five-case product-golden SHA-256
      matrix, frozen byte-identical legacy 3-story copy and nonconvergence taxonomy check
    - nonlinear-NDTHA independent dense-matrix Python oracle, strict five-case product-golden wire,
@@ -103,8 +105,10 @@ Required jobs:
    - nonlinear-NDTHA dense-matrix full-result/adaptive/collapse matrix와 nonconvergence taxonomy
      parity
 4. checkpoint-restart
-   - exact model/state/execution hash binding
-   - cancel/crash/restart and mismatch rejection
+   - exact model/state/execution hash binding, canonical byte/receipt freeze and every-byte tamper
+     rejection
+   - same-directory write/sync/rename/directory-sync persistence and bitwise exact restart
+   - cancel/job crash recovery is not claimed by this bounded checkpoint lane
 5. bounded-product-e2e
    - CLI/API input -> C++ core -> ResultIR/ReportIR output
    - no unsupported authority promotion

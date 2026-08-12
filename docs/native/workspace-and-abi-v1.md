@@ -479,6 +479,19 @@ R4의 첫 restart transport slice는 ABI v1.5다.
 - C++ unit, C ABI, sanitizer, fuzz와 safe Rust test는 one-shot, 1+remaining, step-by-step 결과가
   completion/collapse에서 bitwise identical이고 terminal resume이 idempotent임을 증명한다.
 
-이 slice는 ABI/Rust C3 transport foundation이다. model/state/execution hash가 결합된 canonical
-checkpoint artifact, filesystem durability, crash/restart job recovery와 product E2E가 추가되기 전에는
-C4 checkpoint gate 또는 제품 restart 완료를 주장하지 않는다.
+ABI/Rust C3 transport foundation 위에 `structural-runtime`이 한정된 CPU checkpoint C4를
+구현한다.
+
+- `SANDCP01`/format v1 pointer-free little-endian artifact가 complete inter-step state를 보존한다.
+- model, state, execution을 domain-separated SHA-256로 각각 결합하고 aggregate checkpoint hash가
+  세 identity와 payload length를 함께 봉인한다. execution identity에는 ABI v1.5, CPU backend,
+  algorithm id, solver configuration, load 및 acceleration record가 포함된다.
+- decode는 256 MiB artifact/1,000,000-value vector 상한, truncation, trailing bytes, overflow,
+  non-finite, non-canonical boolean, hash tamper와 model/execution mismatch를 fail closed한다.
+- 같은 directory의 create-new temporary write, file sync, rename, directory sync 순서로 publish하며
+  direct/split/durable reload 결과는 completion/collapse에서 bitwise identical하다.
+
+따라서 이 C4 claim은 추적 fixture와 Linux filesystem을 사용하는 bounded CPU nonlinear-NDTHA
+checkpoint에만 적용한다. durable job-state crash recovery, cancel lifecycle, broader solver coverage,
+HIP C2와 product E2E는 여전히 open이다. 상세 wire 계약은
+`docs/native/checkpoint-restart-v1.md`에 고정한다.
