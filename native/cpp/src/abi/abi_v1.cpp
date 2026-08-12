@@ -4,6 +4,7 @@
 #include "../model_ir/model_ir.hpp"
 #include "../solver_cpu/nonlinear_ndtha.hpp"
 #include "../solver_cpu/nonlinear_static.hpp"
+#include "../solver_cpu/sparse_linear.hpp"
 #include "../solver_cpu/track_point_load.hpp"
 
 #include <algorithm>
@@ -39,7 +40,7 @@ static_assert(offsetof(sa_mut_buffer_view_v1, flags) == 44U);
 static_assert(sizeof(sa_error_buffer_v1) == 32U);
 static_assert(offsetof(sa_error_buffer_v1, required) == 24U);
 static_assert(sizeof(sa_api_request_v1) == 40U);
-static_assert(sizeof(sa_api_v1) == 136U);
+static_assert(sizeof(sa_api_v1) == 144U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
@@ -49,7 +50,8 @@ static_assert(offsetof(sa_api_v1, nonlinear_ndtha_solve) == 88U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U);
 static_assert(offsetof(sa_api_v1, model_ir_ndtha_adapt) == 104U);
 static_assert(offsetof(sa_api_v1, reference_element_evaluate) == 112U);
-static_assert(offsetof(sa_api_v1, reserved) == 120U);
+static_assert(offsetof(sa_api_v1, sparse_linear_solve) == 120U);
+static_assert(offsetof(sa_api_v1, reserved) == 128U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -127,6 +129,16 @@ static_assert(offsetof(sa_reference_element_outputs_v1, reserved) == 248U);
 static_assert(sizeof(sa_reference_element_result_v1) == 56U);
 static_assert(offsetof(sa_reference_element_result_v1, output_matrix_length) == 32U);
 static_assert(offsetof(sa_reference_element_result_v1, reserved) == 40U);
+static_assert(sizeof(sa_sparse_csr_matrix_v1) == 176U);
+static_assert(offsetof(sa_sparse_csr_matrix_v1, row_offsets) == 16U);
+static_assert(offsetof(sa_sparse_csr_matrix_v1, reserved) == 160U);
+static_assert(sizeof(sa_sparse_linear_config_v1) == 56U);
+static_assert(offsetof(sa_sparse_linear_config_v1, absolute_residual_tolerance) == 16U);
+static_assert(offsetof(sa_sparse_linear_config_v1, reserved) == 40U);
+static_assert(sizeof(sa_sparse_linear_result_v1) == 80U);
+static_assert(offsetof(sa_sparse_linear_result_v1, initial_residual_inf) == 16U);
+static_assert(offsetof(sa_sparse_linear_result_v1, output_length) == 48U);
+static_assert(offsetof(sa_sparse_linear_result_v1, reserved) == 64U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -2571,6 +2583,356 @@ struct MemoryRegion {
     });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_sparse_input_view(
+    const sa_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::uint32_t expected_type,
+    const std::uint64_t expected_width,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_8) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "sparse linear input ABI is not v1.8");
+    }
+    if (view.struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "sparse linear input struct_size is too small");
+    }
+    if (view.length != expected_length || view.stride_bytes != expected_width
+        || view.element_type != expected_type || view.memory_space != SA_MEMORY_SPACE_HOST
+        || view.device_id != -1 || view.flags != 0U
+        || (expected_length == 0U ? view.data != nullptr : view.data == nullptr)) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (expected_length == 0U) {
+        return SA_OK;
+    }
+    if (expected_length > std::numeric_limits<std::uint64_t>::max() / expected_width) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "sparse linear input extent overflows");
+    }
+    const auto extent = expected_length * expected_width;
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % expected_width != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "sparse linear input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_sparse_output_view(
+    const sa_mut_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_8) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "sparse linear output ABI is not v1.8");
+    }
+    if (view.struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "sparse linear output struct_size is too small");
+    }
+    if (view.data == nullptr || view.length < expected_length
+        || view.stride_bytes != sizeof(double) || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(
+            error,
+            view.length < expected_length ? SA_ERR_BUFFER_TOO_SMALL : SA_ERR_INVALID_ARGUMENT,
+            "sparse linear solution metadata is invalid");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "sparse linear output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 sparse_solver_error(
+    const structural::solver_cpu::SolverStatus status,
+    sa_error_buffer_v1* const error) {
+    using structural::solver_cpu::SolverStatus;
+    switch (status) {
+    case SolverStatus::converged:
+        return SA_OK;
+    case SolverStatus::invalid_input:
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, "sparse linear input is invalid");
+    case SolverStatus::singularity:
+        return report_error(error, SA_ERR_SINGULARITY, "sparse linear operator is singular");
+    case SolverStatus::indefinite_operator:
+        return report_error(
+            error, SA_ERR_INDEFINITE_OPERATOR, "sparse linear operator is not positive definite");
+    case SolverStatus::nonconvergence:
+        return report_error(
+            error, SA_ERR_NONCONVERGENCE, "sparse linear PCG solve did not converge");
+    case SolverStatus::increment_limit:
+        return report_error(
+            error, SA_ERR_INCREMENT_LIMIT, "sparse linear increment limit was exceeded");
+    case SolverStatus::residual_limit:
+        return report_error(
+            error, SA_ERR_RESIDUAL_LIMIT, "sparse linear true residual gate failed");
+    case SolverStatus::cancelled:
+        return report_error(error, SA_ERR_CANCELLED, "sparse linear solve was cancelled");
+    case SolverStatus::checkpoint_mismatch:
+        return report_error(
+            error, SA_ERR_CHECKPOINT_MISMATCH, "sparse linear checkpoint does not match");
+    case SolverStatus::backend_unavailable:
+        return report_error(
+            error, SA_ERR_BACKEND_UNAVAILABLE, "sparse linear backend is unavailable");
+    }
+    return report_error(error, SA_ERR_INTERNAL, "sparse linear solver status is invalid");
+}
+
+[[nodiscard]] sa_status_code_v1 sparse_linear_solve_boundary(
+    const sa_sparse_linear_config_v1* const config,
+    const sa_sparse_csr_matrix_v1* const matrix,
+    const sa_buffer_view_v1* const right_hand_side,
+    const sa_buffer_view_v1* const initial_guess,
+    const sa_mut_buffer_view_v1* const solution,
+    sa_sparse_linear_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config, matrix, right_hand_side, initial_guess, solution, result, error]()
+            -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config) || !pointer_is_aligned(matrix)
+            || !pointer_is_aligned(right_hand_side) || !pointer_is_aligned(initial_guess)
+            || !pointer_is_aligned(solution) || !pointer_is_aligned(result)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "sparse linear descriptor is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_8 || matrix->abi_version != SA_ABI_V1_8
+            || result->abi_version != SA_ABI_V1_8) {
+            return report_error(
+                error, SA_ERR_ABI_VERSION_MISMATCH, "sparse linear descriptors require ABI v1.8");
+        }
+        if (config->struct_size < sizeof(sa_sparse_linear_config_v1)
+            || matrix->struct_size < sizeof(sa_sparse_csr_matrix_v1)
+            || result->struct_size < sizeof(sa_sparse_linear_result_v1)) {
+            return report_error(
+                error, SA_ERR_STRUCT_SIZE, "sparse linear descriptor struct_size is too small");
+        }
+        if (config->flags != 0U
+            || std::any_of(
+                std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                    return value != 0U;
+                })
+            || std::any_of(
+                std::begin(matrix->reserved), std::end(matrix->reserved), [](const auto value) {
+                    return value != 0U;
+                })) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "sparse linear reserved fields are not zero");
+        }
+        if (matrix->order == 0U || matrix->order > SA_SPARSE_LINEAR_MAX_ORDER
+            || matrix->order > std::numeric_limits<std::size_t>::max() - 1U) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "sparse linear order is outside the bounded domain");
+        }
+        const auto order = matrix->order;
+        const auto nonzero_count = matrix->values.length;
+        if (nonzero_count > SA_SPARSE_LINEAR_MAX_NONZEROS
+            || matrix->column_indices.length != nonzero_count) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "sparse linear nonzero dimensions are invalid");
+        }
+        auto input_status = validate_sparse_input_view(
+            matrix->row_offsets,
+            order + 1U,
+            SA_ELEMENT_TYPE_U64,
+            sizeof(std::uint64_t),
+            "sparse linear row-offset metadata is invalid",
+            error);
+        if (input_status != SA_OK) {
+            return input_status;
+        }
+        input_status = validate_sparse_input_view(
+            matrix->column_indices,
+            nonzero_count,
+            SA_ELEMENT_TYPE_U32,
+            sizeof(std::uint32_t),
+            "sparse linear column-index metadata is invalid",
+            error);
+        if (input_status != SA_OK) {
+            return input_status;
+        }
+        input_status = validate_sparse_input_view(
+            matrix->values,
+            nonzero_count,
+            SA_ELEMENT_TYPE_F64,
+            sizeof(double),
+            "sparse linear value metadata is invalid",
+            error);
+        if (input_status != SA_OK) {
+            return input_status;
+        }
+        input_status = validate_sparse_input_view(
+            *right_hand_side,
+            order,
+            SA_ELEMENT_TYPE_F64,
+            sizeof(double),
+            "sparse linear right-hand-side metadata is invalid",
+            error);
+        if (input_status != SA_OK) {
+            return input_status;
+        }
+        input_status = validate_sparse_input_view(
+            *initial_guess,
+            initial_guess->length == 0U ? 0U : order,
+            SA_ELEMENT_TYPE_F64,
+            sizeof(double),
+            "sparse linear initial-guess metadata is invalid",
+            error);
+        if (input_status != SA_OK) {
+            return input_status;
+        }
+        const auto output_status = validate_sparse_output_view(*solution, order, error);
+        if (output_status != SA_OK) {
+            return output_status;
+        }
+        const std::array descriptor_regions {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {matrix, sizeof(*matrix)},
+            MemoryRegion {right_hand_side, sizeof(*right_hand_side)},
+            MemoryRegion {initial_guess, sizeof(*initial_guess)},
+            MemoryRegion {solution, sizeof(*solution)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        for (std::size_t left = 0U; left < descriptor_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < descriptor_regions.size(); ++right) {
+                if (ranges_overlap(
+                        descriptor_regions[left].data,
+                        descriptor_regions[left].extent,
+                        descriptor_regions[right].data,
+                        descriptor_regions[right].extent)) {
+                    return report_error(
+                        error, SA_ERR_INVALID_ARGUMENT, "sparse linear descriptors overlap");
+                }
+            }
+        }
+        const std::array input_regions {
+            MemoryRegion {matrix->row_offsets.data, (order + 1U) * sizeof(std::uint64_t)},
+            MemoryRegion {matrix->column_indices.data, nonzero_count * sizeof(std::uint32_t)},
+            MemoryRegion {matrix->values.data, nonzero_count * sizeof(double)},
+            MemoryRegion {right_hand_side->data, order * sizeof(double)},
+            MemoryRegion {initial_guess->data, initial_guess->length * sizeof(double)},
+        };
+        for (std::size_t index = 0U; index < input_regions.size(); ++index) {
+            if (input_regions[index].extent == 0U) {
+                continue;
+            }
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        input_regions[index].data,
+                        input_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "sparse linear input overlaps descriptor storage");
+                }
+            }
+            for (std::size_t other = index + 1U; other < input_regions.size(); ++other) {
+                if (input_regions[other].extent > 0U
+                    && ranges_overlap(
+                        input_regions[index].data,
+                        input_regions[index].extent,
+                        input_regions[other].data,
+                        input_regions[other].extent)) {
+                    return report_error(
+                        error, SA_ERR_INVALID_ARGUMENT, "sparse linear input buffers overlap");
+                }
+            }
+        }
+        const MemoryRegion output_region {solution->data, order * sizeof(double)};
+        for (const auto& descriptor : descriptor_regions) {
+            if (ranges_overlap(
+                    output_region.data,
+                    output_region.extent,
+                    descriptor.data,
+                    descriptor.extent)) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "sparse linear output overlaps descriptor storage");
+            }
+        }
+        for (const auto& input : input_regions) {
+            if (input.extent > 0U
+                && ranges_overlap(output_region.data, output_region.extent, input.data, input.extent)) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "sparse linear output overlaps input data");
+            }
+        }
+
+        const auto native_matrix = structural::solver_cpu::CsrMatrixView {
+            static_cast<std::size_t>(order),
+            {static_cast<const std::uint64_t*>(matrix->row_offsets.data),
+             static_cast<std::size_t>(order + 1U)},
+            {static_cast<const std::uint32_t*>(matrix->column_indices.data),
+             static_cast<std::size_t>(nonzero_count)},
+            {static_cast<const double*>(matrix->values.data),
+             static_cast<std::size_t>(nonzero_count)},
+        };
+        const auto native_rhs = std::span<const double> {
+            static_cast<const double*>(right_hand_side->data), static_cast<std::size_t>(order)};
+        const auto native_initial = std::span<const double> {
+            static_cast<const double*>(initial_guess->data),
+            static_cast<std::size_t>(initial_guess->length)};
+        structural::solver_cpu::SparseLinearResult native;
+        try {
+            native = structural::solver_cpu::solve_sparse_spd_pcg(
+                native_matrix,
+                native_rhs,
+                native_initial,
+                {
+                    config->max_iterations,
+                    config->absolute_residual_tolerance,
+                    config->relative_residual_tolerance,
+                    config->maximum_increment,
+                });
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        const auto numerical_status = sparse_solver_error(native.status, error);
+        if (numerical_status != SA_OK) {
+            return numerical_status;
+        }
+        const std::array metrics {
+            native.initial_residual_inf,
+            native.final_residual_inf,
+            native.final_residual_l2,
+            native.last_increment_inf,
+        };
+        if (native.solution.size() != order || native.fallback_count != 0U
+            || std::any_of(metrics.begin(), metrics.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(
+                error, SA_ERR_INTERNAL, "sparse linear result invariant failed");
+        }
+        std::memcpy(solution->data, native.solution.data(), order * sizeof(double));
+        *result = {
+            SA_ABI_V1_8,
+            static_cast<std::uint32_t>(sizeof(sa_sparse_linear_result_v1)),
+            SA_SOLVER_CONVERGED,
+            native.iterations,
+            native.initial_residual_inf,
+            native.final_residual_inf,
+            native.final_residual_l2,
+            native.last_increment_inf,
+            order,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        return SA_OK;
+        });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -2608,6 +2970,9 @@ struct MemoryRegion {
     case SA_ABI_V1_7:
         api_min_size = SA_API_V1_7_MIN_SIZE;
         break;
+    case SA_ABI_V1_8:
+        api_min_size = SA_API_V1_8_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -2636,6 +3001,7 @@ struct MemoryRegion {
     const bool nonlinear_ndtha_restart_enabled = request->abi_version >= SA_ABI_V1_5;
     const bool model_ir_ndtha_adapter_enabled = request->abi_version >= SA_ABI_V1_6;
     const bool reference_elements_enabled = request->abi_version >= SA_ABI_V1_7;
+    const bool sparse_linear_enabled = request->abi_version >= SA_ABI_V1_8;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -2654,6 +3020,9 @@ struct MemoryRegion {
                     : UINT64_C(0))
             | (reference_elements_enabled
                     ? SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                    : UINT64_C(0))
+            | (sparse_linear_enabled
+                    ? SA_CAPABILITY_SPARSE_LINEAR_CPU
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -2668,6 +3037,7 @@ struct MemoryRegion {
         nonlinear_ndtha_restart_enabled ? &nonlinear_ndtha_advance_boundary : nullptr,
         model_ir_ndtha_adapter_enabled ? &model_ir_ndtha_adapt_boundary : nullptr,
         reference_elements_enabled ? &reference_element_evaluate_boundary : nullptr,
+        sparse_linear_enabled ? &sparse_linear_solve_boundary : nullptr,
         {nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));

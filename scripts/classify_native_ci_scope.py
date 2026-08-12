@@ -108,8 +108,11 @@ NATIVE_NUMERICAL_ORACLE_PREFIXES = (
     "native/cpp/src/solver_cpu/sparse_linear",
     "native/cpp/tests/solver_cpu/sparse_linear",
     "native/cpp/tests/fuzz/sparse_linear",
+    "native/cpp/tests/abi/sparse_linear",
     "native/crates/structural-ffi-sys/src/reference_elements",
     "native/crates/structural-ffi/tests/reference_elements",
+    "native/crates/structural-ffi-sys/src/sparse_linear",
+    "native/crates/structural-ffi/tests/sparse_linear",
     ".github/workflows/native-hip-dedicated.yml",
 )
 NATIVE_NUMERICAL_ORACLE_PATHS = frozenset(

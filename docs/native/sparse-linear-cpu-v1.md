@@ -1,6 +1,7 @@
 # Bounded Sparse Linear CPU v1
 
-Status: C0 and C1 complete for one canonical-CSR SPD/PCG reference family.
+Status: C0 and C1 complete; ABI/Rust C3 implementation complete but sequential promotion remains
+at C1 until protected-runner C2 closes.
 
 ## Native owner
 
@@ -14,7 +15,8 @@ is published, and has no fallback branch.
 The stable solver taxonomy reserves distinct values for invalid input, singularity, indefinite
 operator, nonconvergence, increment limit, residual limit, cancellation, checkpoint mismatch and
 backend unavailability. This slice exercises singularity, indefinite operator, nonconvergence and
-failure-atomic increment rejection; ABI error mapping is deliberately deferred to C3.
+failure-atomic increment rejection. ABI v1.8 maps each outcome to a fixed status code without
+publishing a partial solution or result structure.
 
 ## Evidence
 
@@ -28,6 +30,8 @@ C0 consists of the C++ unit matrix:
 
 A bounded libFuzzer target mutates valid diagonally dominant SPD systems into malformed offsets,
 duplicate columns, non-finite coefficients and asymmetric operators under ASan/UBSan.
+An additional ABI fuzzer mutates nested view lengths, strides, overlap, reserved fields and
+numerical config at the exception-containing C boundary.
 
 C1 compiles the product source independently and compares four profiles (`spd5`, irregular
 20-nonzero `irregular6`, condition-scaled diagonal `scaled4`, and `zero5`) with NumPy
@@ -37,8 +41,9 @@ and profile coverage are independently checked with NumPy eigenvalues.
 ## Remaining sequential gates
 
 - C2: implement and execute source-bound CPU/HIP sparse parity on the protected ROCm lane.
-- C3: publish caller-owned CSR/vector descriptors through append-only `sa_get_api_v1` and a safe
-  Rust wrapper.
+- C3 implementation: ABI v1.8 appends one capability/operation, validates caller-owned packed
+  U64/U32/F64 views and overlap/overflow, and crosses a safe reentrant Rust wrapper. It becomes
+  the promotable sequential gate only after authoritative C2 evidence exists.
 - C4: bind complete iterative state and model/state/execution hashes into checkpoint/restart.
 - C5: run a ModelIR-derived sparse problem through CLI/job/API to ResultIR and ReportIR.
 - C6: convert the oracle to language-neutral golden data and remove the corresponding production

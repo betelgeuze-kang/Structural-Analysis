@@ -186,7 +186,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   singularity/indefinite/nonconvergence/increment/residual taxonomy. Four SPD profiles—including
   irregular topology and a `4e12` diagonal condition ratio—match an independent NumPy direct
   solve, with malformed/asymmetric/failure paths covered at C0. General sparse/direct/indefinite
-  solvers, ABI/Rust C3, checkpoint C4, product C5, HIP C2 and C6 remain open.
+  solvers, checkpoint C4, product C5, HIP C2 and C6 remain open. ABI v1.8 and a safe reentrant
+  Rust wrapper implement the C3 boundary with fixed numerical errors and failure-atomic output,
+  but the capability remains sequentially at C1 until protected-runner C2 closes.
 
 ### D5. Durable Job API and process lifecycle
 

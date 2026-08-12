@@ -84,8 +84,9 @@ authoritative receipt. See `docs/native/reference-elements-hip-c2.md`.
 `structural_solver_cpu` also owns a bounded canonical-CSR FP64 PCG reference path. It validates
 strict row/column structure and symmetry, uses a Jacobi preconditioner, reports fixed numerical
 status values, performs a true-residual convergence postcheck and never falls back. Four profiles
-match an independent NumPy direct-solve oracle through C1; ABI/Rust C3, restart C4, product C5,
-HIP C2 and C6 remain open. See `docs/native/sparse-linear-cpu-v1.md`.
+match an independent NumPy direct-solve oracle through C1. ABI v1.8 and a safe Rust wrapper
+implement the C3 boundary, but promotion remains C1 until HIP C2 closes; restart C4, product C5
+and C6 remain open. See `docs/native/sparse-linear-cpu-v1.md`.
 
 ## Rust
 
@@ -231,9 +232,10 @@ library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occ
 slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
 v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
 uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter. ABI v1.7
-uses the next append-only slot at offset 112 for bounded CPU reference elements; the current
-table is 136 bytes. Existing callers may continue to provide their older struct size, and
-v1.0-v1.6 requests expose every later slot as null.
+uses the next append-only slot at offset 112 for bounded CPU reference elements. ABI v1.8 adds
+canonical-CSR sparse PCG at offset 120; the current table is 144 bytes. Existing callers may
+continue to provide their older struct size, and v1.0-v1.7 requests expose every later slot as
+null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

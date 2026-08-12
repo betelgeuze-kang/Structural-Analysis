@@ -67,7 +67,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert sparse["owner"] == "structural_solver_cpu"
     assert "canonical CSR" in sparse["claim"]
     assert "independent NumPy direct-solve oracle" in sparse["claim"]
-    assert "ABI/Rust C3" in sparse["claim"]
+    assert "ABI v1.8" in sparse["claim"]
+    assert "safe reentrant Rust wrapper" in sparse["claim"]
+    assert "sequential gate remains C1" in sparse["claim"]
     assert "HIP C2" in sparse["claim"]
     assert "C6" in sparse["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True

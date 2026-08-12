@@ -16,13 +16,15 @@ mod nonlinear_ndtha;
 pub use nonlinear_ndtha::*;
 mod reference_elements;
 pub use reference_elements::*;
+mod sparse_linear;
+pub use sparse_linear::*;
 mod track;
 pub use track::*;
 
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_7;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_8;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -39,6 +41,10 @@ pub const SA_ERR_DEVICE_MISMATCH: SaStatusCodeV1 = 1401;
 pub const SA_ERR_FALLBACK_FORBIDDEN: SaStatusCodeV1 = 1402;
 pub const SA_ERR_CANCELLED: SaStatusCodeV1 = 1500;
 pub const SA_ERR_NONCONVERGENCE: SaStatusCodeV1 = 1600;
+pub const SA_ERR_SINGULARITY: SaStatusCodeV1 = 1601;
+pub const SA_ERR_INCREMENT_LIMIT: SaStatusCodeV1 = 1602;
+pub const SA_ERR_RESIDUAL_LIMIT: SaStatusCodeV1 = 1603;
+pub const SA_ERR_INDEFINITE_OPERATOR: SaStatusCodeV1 = 1604;
 pub const SA_ERR_INTERNAL: SaStatusCodeV1 = 1900;
 
 pub const SA_ELEMENT_TYPE_F64: u32 = 1;
@@ -114,6 +120,7 @@ pub struct SaApiV1 {
     pub nonlinear_ndtha_advance: Option<SaNonlinearNdthaAdvanceFnV1>,
     pub model_ir_ndtha_adapt: Option<SaModelIrNdthaAdaptFnV1>,
     pub reference_element_evaluate: Option<SaReferenceElementEvaluateFnV1>,
+    pub sparse_linear_solve: Option<SaSparseLinearSolveFnV1>,
     pub reserved: [*const c_void; 2],
 }
 
@@ -136,6 +143,7 @@ impl Default for SaApiV1 {
             nonlinear_ndtha_advance: None,
             model_ir_ndtha_adapt: None,
             reference_element_evaluate: None,
+            sparse_linear_solve: None,
             reserved: [core::ptr::null(); 2],
         }
     }
@@ -168,7 +176,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 136);
+        assert_eq!(size_of::<SaApiV1>(), 144);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -178,7 +186,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_advance), 96);
         assert_eq!(offset_of!(SaApiV1, model_ir_ndtha_adapt), 104);
         assert_eq!(offset_of!(SaApiV1, reference_element_evaluate), 112);
-        assert_eq!(offset_of!(SaApiV1, reserved), 120);
+        assert_eq!(offset_of!(SaApiV1, sparse_linear_solve), 120);
+        assert_eq!(offset_of!(SaApiV1, reserved), 128);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

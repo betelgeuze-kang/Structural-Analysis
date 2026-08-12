@@ -159,6 +159,9 @@ def test_sparse_linear_sources_route_through_cpp_and_oracle_gates() -> None:
         [
             "native/cpp/src/solver_cpu/sparse_linear.cpp",
             "native/cpp/tests/solver_cpu/sparse_linear_test.cpp",
+            "native/cpp/tests/abi/sparse_linear_contract_test.cpp",
+            "native/crates/structural-ffi-sys/src/sparse_linear.rs",
+            "native/crates/structural-ffi/tests/sparse_linear_parity.rs",
             "tests/test_native_sparse_linear_python_parity.py",
             "scripts/check_native_sparse_linear.py",
         ]
@@ -166,6 +169,7 @@ def test_sparse_linear_sources_route_through_cpp_and_oracle_gates() -> None:
 
     assert payload["native"] is True
     assert payload["cpp"] is True
+    assert payload["rust"] is True
     assert payload["oracle"] is True
     assert payload["ci_control"] is True
     assert payload["applicable"] is True

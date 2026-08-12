@@ -273,6 +273,36 @@ pub struct ReferenceElementSolution {
     pub fallback_count: u32,
 }
 
+/// Caller-owned canonical CSR input for the bounded ABI v1.8 SPD solve.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SparseCsrMatrix {
+    pub row_offsets: Vec<u64>,
+    pub column_indices: Vec<u32>,
+    pub values: Vec<f64>,
+}
+
+/// Deterministic convergence and increment gates for the bounded sparse PCG solve.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SparseLinearConfig {
+    pub max_iterations: u32,
+    pub absolute_residual_tolerance: f64,
+    pub relative_residual_tolerance: f64,
+    pub maximum_increment: f64,
+}
+
+/// Complete caller-owned result from the C++ canonical-CSR CPU operation.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SparseLinearSolution {
+    pub solution: Vec<f64>,
+    pub iterations: u32,
+    pub initial_residual_inf: f64,
+    pub final_residual_inf: f64,
+    pub final_residual_l2: f64,
+    pub last_increment_inf: f64,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Caller-owned deterministic result from the bounded C++ track point-load CPU kernel.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TrackPointLoadSolution {
@@ -693,6 +723,15 @@ impl Api {
     /// Returns a stable ABI error if the reference-element capability or operation is absent.
     pub fn load_reference_elements() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_7)
+    }
+
+    /// Load the ABI v1.8 table with the bounded canonical-CSR sparse CPU operation.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the sparse capability or operation is absent.
+    pub fn load_sparse_linear() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_8)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -1320,6 +1359,159 @@ impl Api {
             fallback_count: raw_result.fallback_count,
         })
     }
+
+    /// Solve one bounded canonical-CSR SPD system through caller-owned ABI v1.8 buffers.
+    ///
+    /// Numerical failures are stable ABI errors and never expose the native last iterate. The
+    /// returned vector is published only after the result metadata and finite-value invariants
+    /// have passed.
+    ///
+    /// # Errors
+    ///
+    /// Returns validation, singularity, indefinite-operator, nonconvergence, increment-limit,
+    /// residual-limit, allocation, or output-contract errors.
+    pub fn solve_sparse_linear(
+        self,
+        matrix: &SparseCsrMatrix,
+        right_hand_side: &[f64],
+        initial_guess: Option<&[f64]>,
+        config: SparseLinearConfig,
+    ) -> Result<SparseLinearSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_8 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "sparse linear CPU solve requires ABI v1.8".to_owned(),
+            });
+        }
+        let initial = initial_guess.unwrap_or(&[]);
+        let order =
+            validate_sparse_linear_dimensions(matrix, right_hand_side.len(), initial.len())?;
+        let mut solution = allocate_f64_output(order)?;
+        let raw_config = sys::SaSparseLinearConfigV1 {
+            abi_version: sys::SA_ABI_V1_8,
+            struct_size: abi_size::<sys::SaSparseLinearConfigV1>(),
+            max_iterations: config.max_iterations,
+            flags: 0,
+            absolute_residual_tolerance: config.absolute_residual_tolerance,
+            relative_residual_tolerance: config.relative_residual_tolerance,
+            maximum_increment: config.maximum_increment,
+            reserved: [0; 2],
+        };
+        let raw_matrix = sys::SaSparseCsrMatrixV1 {
+            abi_version: sys::SA_ABI_V1_8,
+            struct_size: abi_size::<sys::SaSparseCsrMatrixV1>(),
+            order: usize_to_u64(order)?,
+            row_offsets: input_u64_view(&matrix.row_offsets, sys::SA_ABI_V1_8)?,
+            column_indices: input_u32_view(&matrix.column_indices, sys::SA_ABI_V1_8)?,
+            values: input_f64_view(&matrix.values, sys::SA_ABI_V1_8)?,
+            reserved: [0; 2],
+        };
+        let rhs_view = input_f64_view(right_hand_side, sys::SA_ABI_V1_8)?;
+        let initial_view = input_f64_view(initial, sys::SA_ABI_V1_8)?;
+        let solution_view = mutable_f64_view(&mut solution, sys::SA_ABI_V1_8)?;
+        let mut raw_result = sys::SaSparseLinearResultV1 {
+            abi_version: sys::SA_ABI_V1_8,
+            struct_size: abi_size::<sys::SaSparseLinearResultV1>(),
+            solver_status: u32::MAX,
+            iterations: u32::MAX,
+            initial_residual_inf: f64::NAN,
+            final_residual_inf: f64::NAN,
+            final_residual_l2: f64::NAN,
+            last_increment_inf: f64::NAN,
+            output_length: 0,
+            execution_backend: 0,
+            fallback_count: u32::MAX,
+            reserved: [u64::MAX; 2],
+        };
+        let solve = self.table.sparse_linear_solve.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all immutable CSR/vector slices and the disjoint Rust-owned output remain live
+        // for this synchronous call. The C++ boundary retains no pointer and publishes last.
+        let status = unsafe {
+            solve(
+                &raw_config,
+                &raw_matrix,
+                &rhs_view,
+                &initial_view,
+                &solution_view,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        sparse_solution_from_raw(raw_result, solution, order)
+    }
+}
+
+fn validate_sparse_linear_dimensions(
+    matrix: &SparseCsrMatrix,
+    right_hand_side_length: usize,
+    initial_guess_length: usize,
+) -> Result<usize, Error> {
+    let order = matrix
+        .row_offsets
+        .len()
+        .checked_sub(1)
+        .ok_or_else(|| Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "sparse CSR row offsets must contain at least two entries".to_owned(),
+        })?;
+    let invalid = order == 0
+        || u64::try_from(order).map_or(true, |value| value > sys::SA_SPARSE_LINEAR_MAX_ORDER)
+        || matrix.column_indices.len() != matrix.values.len()
+        || u64::try_from(matrix.values.len())
+            .map_or(true, |value| value > sys::SA_SPARSE_LINEAR_MAX_NONZEROS)
+        || right_hand_side_length != order
+        || (initial_guess_length != 0 && initial_guess_length != order);
+    if invalid {
+        Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "sparse CSR dimensions or vector lengths are invalid".to_owned(),
+        })
+    } else {
+        Ok(order)
+    }
+}
+
+fn sparse_solution_from_raw(
+    raw: sys::SaSparseLinearResultV1,
+    solution: Vec<f64>,
+    order: usize,
+) -> Result<SparseLinearSolution, Error> {
+    let metrics = [
+        raw.initial_residual_inf,
+        raw.final_residual_inf,
+        raw.final_residual_l2,
+        raw.last_increment_inf,
+    ];
+    let valid = raw.abi_version == sys::SA_ABI_V1_8
+        && raw.struct_size == abi_size::<sys::SaSparseLinearResultV1>()
+        && raw.solver_status == sys::SA_SOLVER_CONVERGED
+        && usize::try_from(raw.output_length) == Ok(order)
+        && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+        && raw.fallback_count == 0
+        && raw.reserved == [0; 2]
+        && metrics.into_iter().all(f64::is_finite)
+        && solution.iter().all(|value| value.is_finite());
+    if !valid {
+        return Err(Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native sparse linear result violated the v1.8 output contract".to_owned(),
+        });
+    }
+    Ok(SparseLinearSolution {
+        solution,
+        iterations: raw.iterations,
+        initial_residual_inf: raw.initial_residual_inf,
+        final_residual_inf: raw.final_residual_inf,
+        final_residual_l2: raw.final_residual_l2,
+        last_increment_inf: raw.last_increment_inf,
+        execution_backend: raw.execution_backend,
+        fallback_count: raw.fallback_count,
+    })
 }
 
 /// RAII owner of one deep-copied immutable C++ `ModelIR` handle.
@@ -1855,6 +2047,12 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let reference_elements_slot = table.reference_element_evaluate.is_some();
     let reference_elements_absent = !reference_elements_slot
         && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU == 0;
+    let sparse_linear_slot = table.sparse_linear_solve.is_some();
+    let sparse_linear_valid = if requested == sys::SA_ABI_V1_8 {
+        sparse_linear_slot && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+    } else {
+        !sparse_linear_slot && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU == 0
+    };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
@@ -1962,10 +2160,28 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
             && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+    } else if requested == sys::SA_ABI_V1_8 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
     } else {
         false
     };
-    if base_valid && version_valid {
+    if base_valid && version_valid && sparse_linear_valid {
         Ok(())
     } else {
         Err(invalid_table())
@@ -2079,10 +2295,50 @@ fn input_f64_view(values: &[f64], abi_version: u32) -> Result<sys::SaBufferViewV
     Ok(sys::SaBufferViewV1 {
         abi_version,
         struct_size: abi_size::<sys::SaBufferViewV1>(),
-        data: values.as_ptr().cast::<c_void>(),
+        data: if values.is_empty() {
+            ptr::null()
+        } else {
+            values.as_ptr().cast::<c_void>()
+        },
         length: usize_to_u64(values.len())?,
         stride_bytes: usize_to_u64(size_of::<f64>())?,
         element_type: sys::SA_ELEMENT_TYPE_F64,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
+}
+
+fn input_u64_view(values: &[u64], abi_version: u32) -> Result<sys::SaBufferViewV1, Error> {
+    Ok(sys::SaBufferViewV1 {
+        abi_version,
+        struct_size: abi_size::<sys::SaBufferViewV1>(),
+        data: if values.is_empty() {
+            ptr::null()
+        } else {
+            values.as_ptr().cast::<c_void>()
+        },
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<u64>())?,
+        element_type: sys::SA_ELEMENT_TYPE_U64,
+        memory_space: sys::SA_MEMORY_SPACE_HOST,
+        device_id: -1,
+        flags: 0,
+    })
+}
+
+fn input_u32_view(values: &[u32], abi_version: u32) -> Result<sys::SaBufferViewV1, Error> {
+    Ok(sys::SaBufferViewV1 {
+        abi_version,
+        struct_size: abi_size::<sys::SaBufferViewV1>(),
+        data: if values.is_empty() {
+            ptr::null()
+        } else {
+            values.as_ptr().cast::<c_void>()
+        },
+        length: usize_to_u64(values.len())?,
+        stride_bytes: usize_to_u64(size_of::<u32>())?,
+        element_type: sys::SA_ELEMENT_TYPE_U32,
         memory_space: sys::SA_MEMORY_SPACE_HOST,
         device_id: -1,
         flags: 0,
@@ -2225,11 +2481,12 @@ mod tests {
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
         SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7,
-        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
+        SA_ABI_V1_8, SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
         SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
         SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
-        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
+        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -2368,6 +2625,25 @@ mod tests {
                 | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
                 | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
                 | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+        );
+    }
+
+    #[test]
+    fn v1_8_table_adds_only_the_bounded_sparse_linear_capability() {
+        let api = Api::load_sparse_linear().expect("v1.8 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_8);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_CPU
         );
     }
 

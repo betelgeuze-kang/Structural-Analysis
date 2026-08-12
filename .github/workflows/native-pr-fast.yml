@@ -230,7 +230,8 @@ jobs:
             structural_track_point_load_abi_tests \
             structural_nonlinear_static_abi_tests \
             structural_nonlinear_ndtha_abi_tests \
-            structural_reference_elements_abi_tests
+            structural_reference_elements_abi_tests \
+            structural_sparse_linear_abi_tests
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
@@ -420,7 +421,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x00010007"
+          assert payload["abi_version"] == "0x00010008"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY

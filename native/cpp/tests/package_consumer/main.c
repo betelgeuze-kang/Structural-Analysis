@@ -4,23 +4,25 @@
 
 int main(void) {
     const sa_api_request_v1 request = {
-        SA_ABI_V1_7,
+        SA_ABI_V1_8,
         (uint32_t)sizeof(sa_api_request_v1),
         0U,
         {0U, 0U, 0U},
     };
     sa_api_v1 api = {0};
-    api.abi_version = SA_ABI_V1_7;
+    api.abi_version = SA_ABI_V1_8;
     api.struct_size = (uint32_t)sizeof(sa_api_v1);
     if (sa_get_api_v1(&request, &api, NULL) != SA_OK
         || api.track_point_load_solve == NULL
         || api.nonlinear_static_solve == NULL
         || api.nonlinear_ndtha_solve == NULL
         || api.reference_element_evaluate == NULL
+        || api.sparse_linear_solve == NULL
         || (api.capabilities & SA_CAPABILITY_TRACK_POINT_LOAD_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_CPU) == 0U
-        || (api.capabilities & SA_CAPABILITY_REFERENCE_ELEMENTS_CPU) == 0U) {
+        || (api.capabilities & SA_CAPABILITY_REFERENCE_ELEMENTS_CPU) == 0U
+        || (api.capabilities & SA_CAPABILITY_SPARSE_LINEAR_CPU) == 0U) {
         return 1;
     }
 
@@ -345,12 +347,102 @@ int main(void) {
         != SA_OK) {
         return 1;
     }
-    return reference_result.kind == SA_REFERENCE_ELEMENT_TRUSS3D
-            && reference_result.dof_count == 6U
-            && reference_result.recovery_count == 3U
-            && reference_result.execution_backend == SA_EXECUTION_BACKEND_CPU
-            && reference_result.fallback_count == 0U
-            && reference_recovery[0] > 0.0
-        ? 0
-        : 1;
+    if (reference_result.kind != SA_REFERENCE_ELEMENT_TRUSS3D
+        || reference_result.dof_count != 6U
+        || reference_result.recovery_count != 3U
+        || reference_result.execution_backend != SA_EXECUTION_BACKEND_CPU
+        || reference_result.fallback_count != 0U
+        || reference_recovery[0] <= 0.0) {
+        return 1;
+    }
+
+    const uint64_t sparse_rows[6] = {0U, 2U, 5U, 8U, 11U, 13U};
+    const uint32_t sparse_columns[13] = {
+        0U, 1U, 0U, 1U, 2U, 1U, 2U, 3U, 2U, 3U, 4U, 3U, 4U};
+    const double sparse_values[13] = {
+        4.0, -1.0, -1.0, 4.0, -1.0, -1.0, 4.0,
+        -1.0, -1.0, 3.0, -1.0, -1.0, 2.0};
+    const double sparse_rhs_values[5] = {6.0, -12.0, 18.0, -20.0, 14.0};
+    const sa_buffer_view_v1 sparse_f64_input = {
+        SA_ABI_V1_8,
+        (uint32_t)sizeof(sa_buffer_view_v1),
+        sparse_values,
+        13U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_sparse_csr_matrix_v1 sparse_matrix = {0};
+    sparse_matrix.abi_version = SA_ABI_V1_8;
+    sparse_matrix.struct_size = (uint32_t)sizeof(sparse_matrix);
+    sparse_matrix.order = 5U;
+    sparse_matrix.values = sparse_f64_input;
+    sparse_matrix.row_offsets = sparse_f64_input;
+    sparse_matrix.row_offsets.data = sparse_rows;
+    sparse_matrix.row_offsets.length = 6U;
+    sparse_matrix.row_offsets.stride_bytes = sizeof(uint64_t);
+    sparse_matrix.row_offsets.element_type = SA_ELEMENT_TYPE_U64;
+    sparse_matrix.column_indices = sparse_f64_input;
+    sparse_matrix.column_indices.data = sparse_columns;
+    sparse_matrix.column_indices.stride_bytes = sizeof(uint32_t);
+    sparse_matrix.column_indices.element_type = SA_ELEMENT_TYPE_U32;
+    const sa_buffer_view_v1 sparse_rhs = {
+        SA_ABI_V1_8,
+        (uint32_t)sizeof(sa_buffer_view_v1),
+        sparse_rhs_values,
+        5U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_buffer_view_v1 sparse_initial = sparse_rhs;
+    sparse_initial.data = NULL;
+    sparse_initial.length = 0U;
+    double sparse_solution[5] = {0.0};
+    const sa_mut_buffer_view_v1 sparse_output = {
+        SA_ABI_V1_8,
+        (uint32_t)sizeof(sa_mut_buffer_view_v1),
+        sparse_solution,
+        5U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    const sa_sparse_linear_config_v1 sparse_config = {
+        SA_ABI_V1_8,
+        (uint32_t)sizeof(sa_sparse_linear_config_v1),
+        100U,
+        0U,
+        1.0e-13,
+        1.0e-13,
+        0.0,
+        {0U, 0U},
+    };
+    sa_sparse_linear_result_v1 sparse_result = {0};
+    sparse_result.abi_version = SA_ABI_V1_8;
+    sparse_result.struct_size = (uint32_t)sizeof(sparse_result);
+    if (api.sparse_linear_solve(
+            &sparse_config,
+            &sparse_matrix,
+            &sparse_rhs,
+            &sparse_initial,
+            &sparse_output,
+            &sparse_result,
+            NULL)
+            != SA_OK
+        || sparse_result.solver_status != SA_SOLVER_CONVERGED
+        || sparse_result.output_length != 5U
+        || sparse_result.execution_backend != SA_EXECUTION_BACKEND_CPU
+        || sparse_result.fallback_count != 0U
+        || sparse_solution[0] < 0.999999999999
+        || sparse_solution[4] < 4.999999999999) {
+        return 1;
+    }
+    return 0;
 }

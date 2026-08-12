@@ -30,7 +30,8 @@ extern "C" {
 #define SA_ABI_V1_5 UINT32_C(0x00010005)
 #define SA_ABI_V1_6 UINT32_C(0x00010006)
 #define SA_ABI_V1_7 UINT32_C(0x00010007)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_7
+#define SA_ABI_V1_8 UINT32_C(0x00010008)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_8
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -53,6 +54,10 @@ enum {
     SA_ERR_FALLBACK_FORBIDDEN = 1402,
     SA_ERR_CANCELLED = 1500,
     SA_ERR_NONCONVERGENCE = 1600,
+    SA_ERR_SINGULARITY = 1601,
+    SA_ERR_INCREMENT_LIMIT = 1602,
+    SA_ERR_RESIDUAL_LIMIT = 1603,
+    SA_ERR_INDEFINITE_OPERATOR = 1604,
     SA_ERR_INTERNAL = 1900
 };
 
@@ -78,10 +83,13 @@ enum {
 #define SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU UINT64_C(64)
 #define SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER UINT64_C(128)
 #define SA_CAPABILITY_REFERENCE_ELEMENTS_CPU UINT64_C(256)
+#define SA_CAPABILITY_SPARSE_LINEAR_CPU UINT64_C(512)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STEP_COUNT UINT32_C(1000000)
+#define SA_SPARSE_LINEAR_MAX_ORDER UINT64_C(1000000)
+#define SA_SPARSE_LINEAR_MAX_NONZEROS UINT64_C(100000000)
 
 enum {
     SA_TRACK_SUPPORT_PINNED = 0,
@@ -119,6 +127,19 @@ enum {
     SA_REFERENCE_ELEMENT_TRUSS3D = 1,
     SA_REFERENCE_ELEMENT_FRAME3D = 2,
     SA_REFERENCE_ELEMENT_SHELL3_MEMBRANE = 3
+};
+
+enum {
+    SA_SOLVER_CONVERGED = 0,
+    SA_SOLVER_INVALID_INPUT = 1,
+    SA_SOLVER_SINGULARITY = 2,
+    SA_SOLVER_INDEFINITE_OPERATOR = 3,
+    SA_SOLVER_NONCONVERGENCE = 4,
+    SA_SOLVER_INCREMENT_LIMIT = 5,
+    SA_SOLVER_RESIDUAL_LIMIT = 6,
+    SA_SOLVER_CANCELLED = 7,
+    SA_SOLVER_CHECKPOINT_MISMATCH = 8,
+    SA_SOLVER_BACKEND_UNAVAILABLE = 9
 };
 
 typedef struct sa_header_v1 {
@@ -445,6 +466,43 @@ typedef struct sa_reference_element_result_v1 {
     uint64_t reserved[2];
 } sa_reference_element_result_v1;
 
+/* v1.8 bounded canonical-CSR symmetric-positive-definite CPU solve. */
+typedef struct sa_sparse_csr_matrix_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t order;
+    sa_buffer_view_v1 row_offsets;
+    sa_buffer_view_v1 column_indices;
+    sa_buffer_view_v1 values;
+    uint64_t reserved[2];
+} sa_sparse_csr_matrix_v1;
+
+typedef struct sa_sparse_linear_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t max_iterations;
+    uint32_t flags;
+    double absolute_residual_tolerance;
+    double relative_residual_tolerance;
+    double maximum_increment;
+    uint64_t reserved[2];
+} sa_sparse_linear_config_v1;
+
+typedef struct sa_sparse_linear_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t solver_status;
+    uint32_t iterations;
+    double initial_residual_inf;
+    double final_residual_inf;
+    double final_residual_l2;
+    double last_increment_inf;
+    uint64_t output_length;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_sparse_linear_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -527,6 +585,15 @@ typedef sa_status_code_v1 (*sa_reference_element_evaluate_fn_v1)(
     sa_reference_element_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_sparse_linear_solve_fn_v1)(
+    const sa_sparse_linear_config_v1* config,
+    const sa_sparse_csr_matrix_v1* matrix,
+    const sa_buffer_view_v1* right_hand_side,
+    const sa_buffer_view_v1* initial_guess,
+    const sa_mut_buffer_view_v1* solution,
+    sa_sparse_linear_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -544,6 +611,7 @@ typedef struct sa_api_v1 {
     sa_nonlinear_ndtha_advance_fn_v1 nonlinear_ndtha_advance;
     sa_model_ir_ndtha_adapt_fn_v1 model_ir_ndtha_adapt;
     sa_reference_element_evaluate_fn_v1 reference_element_evaluate;
+    sa_sparse_linear_solve_fn_v1 sparse_linear_solve;
     const void* reserved[2];
 } sa_api_v1;
 
@@ -555,7 +623,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_advance))
 #define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_ndtha_adapt))
 #define SA_API_V1_6_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reference_element_evaluate))
-#define SA_API_V1_7_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_7_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_solve))
+#define SA_API_V1_8_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

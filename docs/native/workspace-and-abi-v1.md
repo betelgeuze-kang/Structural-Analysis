@@ -133,6 +133,8 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - v1.6은 0x00010006이며 bounded ModelIR-to-NDTHA adapter 한 slot을 추가한다.
 - v1.7은 0x00010007이며 truss3d/frame3d/three-node membrane의 tangent, mass, residual, JVP,
   recovery를 disjoint caller-owned buffer로 쓰는 bounded CPU reference element 한 slot을 추가한다.
+- v1.8은 0x00010008이며 canonical CSR, RHS/initial guess와 failure-atomic solution/result를
+  전달하는 bounded sparse linear CPU operation 한 slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -171,8 +173,9 @@ serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 
 ### 5.4 ModelIR v1.1 table extension
 
-과거 v1.0-v1.6 consumer가 제공하던 128-byte table과 첫 24-byte prefix는 계속 지원한다.
-현재 header의 table은 v1.7 tail을 포함해 136 bytes이며 caller의 `struct_size`까지만 쓴다.
+과거 v1.0-v1.6 consumer가 제공하던 128-byte table, v1.7의 136-byte table과 첫 24-byte
+prefix는 계속 지원한다. 현재 header의 table은 v1.8 tail을 포함해 144 bytes이며 caller의
+`struct_size`까지만 쓴다.
 v1.0 요청에는 이후 slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability
 bit를 제공한다.
 
@@ -211,6 +214,10 @@ unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. �
 | 1402 | SA_ERR_FALLBACK_FORBIDDEN | explicit policy가 fallback을 거부 |
 | 1500 | SA_ERR_CANCELLED | cooperative cancellation |
 | 1600 | SA_ERR_NONCONVERGENCE | bounded numerical iteration이 허용 횟수 안에 수렴하지 않음 |
+| 1601 | SA_ERR_SINGULARITY | operator/factorization breakdown 또는 영 diagonal |
+| 1602 | SA_ERR_INCREMENT_LIMIT | 게시 전 increment guard 초과 |
+| 1603 | SA_ERR_RESIDUAL_LIMIT | recursive convergence 뒤 true residual gate 실패 |
+| 1604 | SA_ERR_INDEFINITE_OPERATOR | positive-definite contract 위반 |
 | 1900 | SA_ERR_INTERNAL | exception/panic을 log-safe detail로 변환 |
 
 새 오류는 기존 numeric 의미를 재사용하지 않는다. 상세 메시지는 diagnostic이며

@@ -43,6 +43,39 @@ REQUIRED_TOKENS = {
         "solve_sparse_spd_pcg",
         "std::invalid_argument",
     ),
+    "native/cpp/include/structural/abi_v1.h": (
+        "SA_ABI_V1_8",
+        "SA_CAPABILITY_SPARSE_LINEAR_CPU",
+        "sa_sparse_csr_matrix_v1",
+        "sa_sparse_linear_solve_fn_v1",
+    ),
+    "native/cpp/tests/abi/sparse_linear_contract_test.cpp": (
+        "table_is_append_only",
+        "failures_do_not_publish_partial_outputs",
+        "immutable_inputs_are_reentrant",
+        "SA_ERR_SINGULARITY",
+        "SA_ERR_INDEFINITE_OPERATOR",
+    ),
+    "native/crates/structural-ffi-sys/src/sparse_linear.rs": (
+        "SaSparseCsrMatrixV1",
+        "SaSparseLinearConfigV1",
+        "SaSparseLinearResultV1",
+    ),
+    "native/crates/structural-ffi/src/lib.rs": (
+        "load_sparse_linear",
+        "solve_sparse_linear",
+        "native sparse linear result violated the v1.8 output contract",
+    ),
+    "native/crates/structural-ffi/tests/sparse_linear_parity.rs": (
+        "numerical_error_taxonomy_crosses_the_safe_wrapper",
+        "immutable_sparse_operation_is_reentrant_and_bitwise_deterministic",
+        "SA_ERR_INCREMENT_LIMIT",
+    ),
+    "native/cpp/tests/fuzz/sparse_linear_abi_fuzz.cpp": (
+        "sparse_linear_solve",
+        "output_view.data = rhs.data()",
+        "config.flags = 1U",
+    ),
     "tests/test_native_sparse_linear_python_parity.py": (
         "independent_numpy_dense_solve",
         "np.linalg.solve",
@@ -79,7 +112,7 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
     if row.get("owner") != "structural_solver_cpu":
         blockers.append("sparse_linear_capability_owner_invalid")
     claim = str(row.get("claim", ""))
-    for token in ("canonical CSR", "NumPy", "HIP C2", "C6"):
+    for token in ("canonical CSR", "NumPy", "ABI v1.8", "HIP C2", "C6"):
         if token not in claim:
             blockers.append(f"sparse_linear_capability_scope_token_missing:{token}")
 
@@ -104,8 +137,9 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
         "blockers": blockers,
         "claim_boundary": (
             "This proves one bounded CPU canonical-CSR PCG family through C1. It does "
-            "not close general sparse solvers, ABI C3, restart C4, product C5, HIP C2, "
-            "or C6."
+            "include an ABI v1.8/Rust C3 implementation candidate, but does not promote "
+            "HIP C2 or subsequent C3, and does not close general sparse solvers, restart "
+            "C4, product C5, or C6."
         ),
     }
 

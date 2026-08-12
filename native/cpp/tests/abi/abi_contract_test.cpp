@@ -64,6 +64,10 @@ struct ErrorStorage {
     CHECK(SA_ERR_FALLBACK_FORBIDDEN == 1402);
     CHECK(SA_ERR_CANCELLED == 1500);
     CHECK(SA_ERR_NONCONVERGENCE == 1600);
+    CHECK(SA_ERR_SINGULARITY == 1601);
+    CHECK(SA_ERR_INCREMENT_LIMIT == 1602);
+    CHECK(SA_ERR_RESIDUAL_LIMIT == 1603);
+    CHECK(SA_ERR_INDEFINITE_OPERATOR == 1604);
     CHECK(SA_ERR_INTERNAL == 1900);
     return true;
 }
@@ -80,6 +84,7 @@ struct ErrorStorage {
     CHECK(api.track_point_load_solve == nullptr);
     CHECK(api.nonlinear_static_solve == nullptr);
     CHECK(api.nonlinear_ndtha_solve == nullptr);
+    CHECK(api.sparse_linear_solve == nullptr);
     for (const auto* reserved : api.reserved) {
         CHECK(reserved == nullptr);
     }

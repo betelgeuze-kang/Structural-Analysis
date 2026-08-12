@@ -47,6 +47,8 @@ Jobs:
      rejection, failure atomicity and concurrent immutable execution
    - ABI v1.7 bounded truss3d/frame3d/three-node-membrane layout, disjoint caller-owned complete
      response, failure atomicity and reentrant safe-wrapper execution
+   - ABI v1.8 canonical-CSR U64/U32/F64 layouts, append-only table compatibility, fixed sparse
+     numerical errors, failure atomicity and reentrant safe-wrapper execution
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-

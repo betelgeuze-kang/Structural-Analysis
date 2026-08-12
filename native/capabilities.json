@@ -59,7 +59,7 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++20 sparse linear C1 reference only: strict canonical CSR validation, symmetry enforcement, Jacobi-preconditioned conjugate gradients, true-residual postcheck, deterministic repetition, fallback 0 and fixed singularity/indefinite/nonconvergence/increment/residual taxonomy cover four SPD profiles and failure paths against an independent NumPy direct-solve oracle; general constraints/reordering/preconditioners, indefinite/direct solves, ABI/Rust C3, checkpoint C4, product E2E C5, HIP C2 and C6 remain open"
+      "claim": "bounded serial FP64 C++20 sparse linear C1 reference only: strict canonical CSR validation, symmetry enforcement, Jacobi-preconditioned conjugate gradients, true-residual postcheck, deterministic repetition, fallback 0 and fixed singularity/indefinite/nonconvergence/increment/residual taxonomy cover four SPD profiles and failure paths against an independent NumPy direct-solve oracle; append-only ABI v1.8 and a safe reentrant Rust wrapper implement failure-atomic caller-owned C3 integration, but the sequential gate remains C1 until protected-runner HIP C2 closes; general constraints/reordering/preconditioners, indefinite/direct solves, checkpoint C4, product E2E C5 and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",
