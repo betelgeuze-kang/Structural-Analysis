@@ -136,6 +136,24 @@ def test_reference_element_sources_route_through_cpp_abi_and_oracle_gates() -> N
     assert payload["applicable"] is True
 
 
+def test_reference_hip_sources_route_through_dedicated_hip_and_oracle_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/cpp/src/hip/reference_elements_hip.hip.cpp",
+            "native/cpp/tests/hip/reference_elements_hip_parity_test.hip.cpp",
+            ".github/workflows/native-hip-dedicated.yml",
+            "scripts/check_native_reference_elements_hip.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["hip"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

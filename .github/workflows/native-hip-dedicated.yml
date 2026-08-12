@@ -1,0 +1,101 @@
+name: native-hip-dedicated
+
+on:
+  workflow_dispatch:
+    inputs:
+      hip_architecture:
+        description: Approved ROCm architecture (for example gfx1030)
+        required: true
+        default: gfx1030
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-hip-dedicated-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  reference-elements-c2:
+    name: reference-elements-c2
+    environment: native-hip-approved
+    runs-on: [self-hosted, linux, x64, rocm, structural-approved]
+    timeout-minutes: 30
+    env:
+      NATIVE_HIP_APPROVAL_ENVIRONMENT: native-hip-approved
+    steps:
+      - name: Checkout exact approved ref without credentials
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify approved ROCm device and toolchain
+        id: rocm
+        shell: bash
+        env:
+          REQUESTED_HIP_ARCH: ${{ inputs.hip_architecture }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$REQUESTED_HIP_ARCH" =~ ^gfx[0-9a-f]+$ ]]; then
+            echo "invalid HIP architecture" >&2
+            exit 1
+          fi
+          test -r /dev/kfd
+          test -d /dev/dri
+          rocm_root=/opt/rocm
+          hip_compiler="$rocm_root/llvm/bin/clang++"
+          test -x "$hip_compiler"
+          device_lib_path="$rocm_root/amdgcn/bitcode"
+          if [[ ! -f "$device_lib_path/ocml.bc" || ! -f "$device_lib_path/ockl.bc" ]]; then
+            device_lib_path="$PWD/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
+          fi
+          test -f "$device_lib_path/ocml.bc"
+          test -f "$device_lib_path/ockl.bc"
+          test -f "$device_lib_path/oclc_isa_version_${REQUESTED_HIP_ARCH#gfx}.bc"
+          rocminfo > build-native-rocminfo.txt
+          grep -F "Name:                    $REQUESTED_HIP_ARCH" build-native-rocminfo.txt
+          "$hip_compiler" --version
+          {
+            echo "hip_architecture=$REQUESTED_HIP_ARCH"
+            echo "rocm_root=$rocm_root"
+            echo "hip_compiler=$hip_compiler"
+            echo "device_lib_path=$device_lib_path"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and execute the no-fallback FP64 C2 lane
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S native/cpp -B build/native-hip-dedicated -G "Unix Makefiles" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_HIP_COMPILER="${{ steps.rocm.outputs.hip_compiler }}" \
+            -DCMAKE_HIP_ARCHITECTURES="${{ steps.rocm.outputs.hip_architecture }}" \
+            -DSTRUCTURAL_ROCM_ROOT="${{ steps.rocm.outputs.rocm_root }}" \
+            -DSTRUCTURAL_HIP_DEVICE_LIB_PATH="${{ steps.rocm.outputs.device_lib_path }}" \
+            -DSTRUCTURAL_ENABLE_HIP=ON \
+            -DSTRUCTURAL_BUILD_TESTS=ON \
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          cmake --build build/native-hip-dedicated \
+            --target structural_reference_elements_hip_parity_tests --parallel 2
+          ctest --test-dir build/native-hip-dedicated --output-on-failure \
+            -R structural_reference_elements_hip_parity_tests
+          build/native-hip-dedicated/bin/structural_reference_elements_hip_parity_tests \
+            > build/native-reference-elements-hip-receipt.json
+          python3 scripts/check_native_reference_elements_hip.py \
+            --receipt build/native-reference-elements-hip-receipt.json \
+            --device-lib-path "${{ steps.rocm.outputs.device_lib_path }}" \
+            --require-approved-runner --json \
+            > build/native-reference-elements-hip-validation.json
+
+      - name: Upload immutable C2 execution receipts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: native-reference-elements-hip-c2-${{ github.sha }}
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            build/native-reference-elements-hip-receipt.json
+            build/native-reference-elements-hip-validation.json
+            build-native-rocminfo.txt

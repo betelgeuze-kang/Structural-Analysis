@@ -90,6 +90,15 @@ Jobs:
 pr-fast는 full Python collection, LFS evidence materialization, browser, external solver와
 hardware를 실행하지 않는다.
 
+### hip-dedicated
+
+`.github/workflows/native-hip-dedicated.yml` is manual-only and cannot run on hosted CI. Its
+`reference-elements-c2` job requires the protected `native-hip-approved` environment and the
+complete `self-hosted, linux, x64, rocm, structural-approved` label set. It verifies the requested
+`gfx` target against `rocminfo`, builds only with `STRUCTURAL_ENABLE_HIP=ON`, executes the
+no-fallback reference-element/assembly C2 parity test, validates source/device-library binding and
+uploads the raw device receipt. A local execution is a candidate, not authoritative C2 evidence.
+
 ## 3. merge-product
 
 Trigger: pull_request on the exact current merge ref after pr-fast

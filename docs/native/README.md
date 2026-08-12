@@ -12,6 +12,7 @@
 7. [Bounded ModelIR NDTHA Product E2E v1](modelir-ndtha-product-e2e-v1.md)
 8. [Bounded Native MGT Import Health v1](mgt-import-health-v1.md)
 9. [Bounded Reference Materials, Elements and Assembly v1](reference-elements-assembly-v1.md)
+10. [Bounded Reference Elements and Assembly HIP C2](reference-elements-hip-c2.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

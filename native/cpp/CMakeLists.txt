@@ -109,6 +109,81 @@ target_include_directories(
 structural_set_warnings(structural_assembly)
 structural_enable_sanitizers(structural_assembly)
 
+if(STRUCTURAL_ENABLE_HIP)
+  set(STRUCTURAL_REFERENCE_HIP_SOURCE src/hip/reference_elements_hip.hip.cpp)
+  set_source_files_properties(${STRUCTURAL_REFERENCE_HIP_SOURCE} PROPERTIES LANGUAGE HIP)
+  set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY CMAKE_CONFIGURE_DEPENDS
+      ${STRUCTURAL_REFERENCE_HIP_SOURCE}
+      src/hip/reference_elements_hip.hpp
+  )
+  file(READ ${STRUCTURAL_REFERENCE_HIP_SOURCE} STRUCTURAL_REFERENCE_HIP_SOURCE_TEXT)
+  file(READ src/hip/reference_elements_hip.hpp STRUCTURAL_REFERENCE_HIP_HEADER_TEXT)
+  string(
+    SHA256
+    STRUCTURAL_REFERENCE_HIP_SOURCE_SHA256
+    "${STRUCTURAL_REFERENCE_HIP_HEADER_TEXT}${STRUCTURAL_REFERENCE_HIP_SOURCE_TEXT}"
+  )
+  list(GET CMAKE_HIP_ARCHITECTURES 0 STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH)
+  string(REGEX REPLACE "^gfx" "" STRUCTURAL_REFERENCE_HIP_ISA_SUFFIX "${STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH}")
+  set(
+    STRUCTURAL_REFERENCE_HIP_ISA_FILE
+    "${STRUCTURAL_HIP_DEVICE_LIB_PATH}/oclc_isa_version_${STRUCTURAL_REFERENCE_HIP_ISA_SUFFIX}.bc"
+  )
+  if(NOT EXISTS "${STRUCTURAL_REFERENCE_HIP_ISA_FILE}")
+    message(FATAL_ERROR "HIP device libraries do not support ${STRUCTURAL_REFERENCE_HIP_PRIMARY_ARCH}")
+  endif()
+  file(SHA256 "${STRUCTURAL_HIP_DEVICE_LIB_PATH}/ocml.bc" STRUCTURAL_REFERENCE_HIP_OCML_SHA256)
+  file(SHA256 "${STRUCTURAL_HIP_DEVICE_LIB_PATH}/ockl.bc" STRUCTURAL_REFERENCE_HIP_OCKL_SHA256)
+  file(SHA256 "${STRUCTURAL_REFERENCE_HIP_ISA_FILE}" STRUCTURAL_REFERENCE_HIP_ISA_SHA256)
+  string(
+    SHA256
+    STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256
+    "${STRUCTURAL_REFERENCE_HIP_OCML_SHA256}${STRUCTURAL_REFERENCE_HIP_OCKL_SHA256}${STRUCTURAL_REFERENCE_HIP_ISA_SHA256}"
+  )
+  add_library(structural_elements_hip STATIC ${STRUCTURAL_REFERENCE_HIP_SOURCE})
+  add_library(Structural::elements_hip ALIAS structural_elements_hip)
+  set_target_properties(
+    structural_elements_hip
+    PROPERTIES
+      EXPORT_NAME elements_hip
+      HIP_STANDARD 20
+      HIP_STANDARD_REQUIRED ON
+      HIP_EXTENSIONS OFF
+      CXX_VISIBILITY_PRESET hidden
+      VISIBILITY_INLINES_HIDDEN YES
+  )
+  target_include_directories(
+    structural_elements_hip
+    PRIVATE
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/hip
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/assembly
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/elements
+      ${CMAKE_CURRENT_SOURCE_DIR}/src/materials
+  )
+  target_link_libraries(
+    structural_elements_hip
+    PUBLIC
+      structural_elements
+      structural_assembly
+  )
+  target_compile_definitions(
+    structural_elements_hip
+    PRIVATE
+      STRUCTURAL_REFERENCE_HIP_SOURCE_SHA256="${STRUCTURAL_REFERENCE_HIP_SOURCE_SHA256}"
+      STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256="${STRUCTURAL_REFERENCE_HIP_DEVICE_LIB_SHA256}"
+      STRUCTURAL_REFERENCE_HIP_COMPILED_ARCHITECTURES="${CMAKE_HIP_ARCHITECTURES}"
+  )
+  target_compile_options(
+    structural_elements_hip
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-ffp-contract=off>
+  )
+  structural_set_warnings(structural_elements_hip)
+endif()
+
 add_library(
   structural_solver_cpu STATIC
   src/solver_cpu/story_frame.cpp
@@ -178,14 +253,17 @@ if(STRUCTURAL_BUILD_FUZZERS)
   add_subdirectory(tests/fuzz)
 endif()
 
+set(
+  STRUCTURAL_INSTALL_TARGETS
+  structural_model_ir
+  structural_materials
+  structural_elements
+  structural_assembly
+  structural_solver_cpu
+  structural_c_abi_v1
+)
 install(
-  TARGETS
-    structural_model_ir
-    structural_materials
-    structural_elements
-    structural_assembly
-    structural_solver_cpu
-    structural_c_abi_v1
+  TARGETS ${STRUCTURAL_INSTALL_TARGETS}
   EXPORT StructuralNativeTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

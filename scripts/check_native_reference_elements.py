@@ -54,7 +54,7 @@ REQUIRED_TOKENS = {
     "docs/native/reference-elements-assembly-v1.md": (
         "C0",
         "C1",
-        "C2 is not closed",
+        "authoritatively closed",
         "C6",
     ),
 }

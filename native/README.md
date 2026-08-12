@@ -74,6 +74,13 @@ reference target. An independent NumPy oracle compares every output value. Becau
 still open, these capabilities remain at C1. See
 `docs/native/reference-elements-assembly-v1.md`.
 
+With `STRUCTURAL_ENABLE_HIP=ON`, `structural_elements_hip` evaluates the same five-profile FP64
+reference batch and performs stable-order non-atomic dense assembly without an intermediate host
+copy. Its live test records device/ROCm/compiler/source/device-library identity, transfer/sync/VRAM
+metrics, deterministic repetition and fallback zero. Local hardware execution is a C2 candidate;
+the manifest remains at C1 until the protected `native-hip-approved` dedicated workflow emits an
+authoritative receipt. See `docs/native/reference-elements-hip-c2.md`.
+
 ## Rust
 
 ~~~bash

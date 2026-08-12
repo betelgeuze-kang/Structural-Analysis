@@ -32,8 +32,12 @@ units. The ABI result records CPU execution and fallback count zero.
   exact-length immutable inputs, disjoint caller-owned outputs, stable errors,
   failure-atomic publication and a reentrant safe Rust wrapper.
 
-C2 is not closed. Consequently, despite the safe ABI wrapper, the capability's
-last promotable sequential cutover gate remains C1.
+C2 has a product-owned implementation and a successful local live candidate, but is not yet
+authoritatively closed. The HIP batch matched all five CPU profiles and their 38-DOF dense
+assembly with zero absolute error on a real `gfx1030`, repeated bitwise-identically, retained
+operator state on-device between its two kernels and reported fallback zero. The protected
+`native-hip-approved` runner receipt is still required, so despite the safe ABI wrapper the
+capability's last promotable sequential cutover gate remains C1.
 
 ## Explicit boundary
 
@@ -43,6 +47,6 @@ profile has no rigid offsets, releases, geometric stiffness or nonlinear
 constitutive state. Dense assembly is not CSR/sparse assembly and is not an
 arbitrary ModelIR operator graph.
 
-Still open: broader formulation/material parity, element-state aggregation,
-CSR and constraint assembly, CPU/HIP FP64 C2, resident GPU execution,
+Still open: protected-runner C2 promotion, broader formulation/material parity,
+element-state aggregation, CSR and constraint assembly, sparse resident execution,
 checkpoint/restart, ResultIR recovery, product E2E and C6 decommission.

@@ -47,13 +47,13 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_elements",
-      "claim": "bounded CPU C1 reference slice only: C++20 owns an explicit elastic-isotropic material, an epoch-checked bilinear uniaxial trial/commit/rollback point, linear truss3d and Euler-Bernoulli frame3d elements, and a three-node plane-stress membrane embedded in 3D; one independent NumPy oracle compares every tangent, consistent-mass, residual, JVP and recovery value, ABI v1.7 publishes disjoint caller-owned buffers atomically through a safe reentrant Rust wrapper with fallback 0, while frame offsets/releases, geometric and material nonlinearity, shell bending/drilling, general topology, HIP C2, checkpoint, product E2E and C6 remain open"
+      "claim": "bounded CPU C1 reference slice only: C++20 owns an explicit elastic-isotropic material, an epoch-checked bilinear uniaxial trial/commit/rollback point, linear truss3d and Euler-Bernoulli frame3d elements, and a three-node plane-stress membrane embedded in 3D; one independent NumPy oracle compares every tangent, consistent-mass, residual, JVP and recovery value, ABI v1.7 publishes disjoint caller-owned buffers atomically through a safe reentrant Rust wrapper with fallback 0; a product-owned FP64 HIP C2-candidate batch now has zero-error local live element/assembly parity, deterministic repeat, resident operator buffers and fallback 0, but the sequential gate remains C1 until a native-hip-approved protected-runner receipt exists; frame offsets/releases, geometric and material nonlinearity, shell bending/drilling, general topology, checkpoint, product E2E and C6 remain open"
     },
     "dense_assembly_cpu": {
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_assembly",
-      "claim": "bounded dense CPU C1 assembly slice only: C++20 validates unique stable element order, local shapes, finite values and global DOF references, then deterministically scatters tangent, consistent mass, residual and JVP; the complete three-DOF two-contribution result matches an independent NumPy oracle, while CSR, constraints, arbitrary ModelIR graph assembly, state epochs across elements, sparse operators, HIP C2, Rust FFI, checkpoint, product E2E and C6 remain open"
+      "claim": "bounded dense CPU C1 assembly slice only: C++20 validates unique stable element order, local shapes, finite values and global DOF references, then deterministically scatters tangent, consistent mass, residual and JVP; the complete three-DOF two-contribution result matches an independent NumPy oracle; the product-owned HIP C2-candidate batch uses non-atomic stable-order FP64 accumulation, keeps element/operator buffers resident between two kernels and has zero-error local live parity with fallback 0, but the sequential gate remains C1 until a native-hip-approved protected-runner receipt exists; CSR, constraints, arbitrary ModelIR graph assembly, state epochs, sparse operators, Rust FFI, checkpoint, product E2E and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",

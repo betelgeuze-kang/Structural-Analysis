@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW_DIR = ROOT / ".github" / "workflows"
 PR_FAST_PATH = WORKFLOW_DIR / "native-pr-fast.yml"
 NIGHTLY_QUALITY_PATH = WORKFLOW_DIR / "native-nightly-quality.yml"
+HIP_DEDICATED_PATH = WORKFLOW_DIR / "native-hip-dedicated.yml"
 
 PR_FAST_CHILDREN = (
     "scope-contract",
@@ -239,6 +240,26 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
     ):
         if required not in pr_text:
             blockers.append(f"native_pr_fast_contract_token_missing:{required}")
+
+    try:
+        hip_text = HIP_DEDICATED_PATH.read_text(encoding="utf-8")
+    except OSError as exc:
+        blockers.append(f"native_hip_dedicated_unreadable:{exc}")
+        hip_text = ""
+    for required in (
+        "workflow_dispatch:",
+        "environment: native-hip-approved",
+        "runs-on: [self-hosted, linux, x64, rocm, structural-approved]",
+        "STRUCTURAL_ENABLE_HIP=ON",
+        "structural_reference_elements_hip_parity_tests",
+        "check_native_reference_elements_hip.py",
+        "--require-approved-runner",
+    ):
+        if required not in hip_text:
+            blockers.append(f"native_hip_dedicated_contract_token_missing:{required}")
+    hip_trigger_text = hip_text.split("permissions:", 1)[0]
+    if "pull_request:" in hip_trigger_text or "push:" in hip_trigger_text:
+        blockers.append("native_hip_dedicated_has_automatic_trigger")
 
     trigger_text = pr_text.split("permissions:", 1)[0]
     if "paths:" in trigger_text:

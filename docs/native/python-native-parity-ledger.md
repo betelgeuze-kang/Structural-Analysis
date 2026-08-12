@@ -96,9 +96,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   plane-stress membrane. The same element response source emits tangent, consistent mass,
   residual, JVP and recovery; an independent NumPy oracle compares every value. ABI v1.7 and a
   safe reentrant Rust wrapper provide failure-atomic caller-owned integration with CPU fallback
-  zero, but cannot advance the sequential cutover beyond C1 while C2 is open. General
-  corotational/fiber/material families, shell bending/drilling, HIP parity, state checkpoint,
-  product E2E and C6 remain open. Existing partial HIP probes are not product authority.
+  zero. A product-owned FP64 HIP batch now evaluates the complete five-profile CPU matrix and
+  reports zero-error local live parity, bitwise deterministic repetition, resident
+  element/operator buffers, one final synchronization and fallback zero on `gfx1030`. This is a
+  C2 candidate rather than promotion evidence until the protected `native-hip-approved` workflow
+  emits its source/device-bound receipt, so the sequential cutover remains C1. General
+  corotational/fiber/material families, shell bending/drilling, state checkpoint, product E2E and
+  C6 remain open. Existing unrelated partial HIP probes are not product authority.
 
 ### D3. Assembly and operator graph
 
@@ -123,8 +127,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   DOF references, then scatters tangent, consistent mass, residual and JVP in stable-index order.
   The complete three-DOF/two-contribution output matches an independent NumPy oracle. This is not
   CSR, constraint handling, arbitrary ModelIR assembly, stateful epoch propagation or Rust
-  product integration. Those paths and HIP C2 remain open; probe/replay and Python-managed
-  HIPRTC paths are not product authority.
+  product integration. The same product-owned HIP candidate assembles a 38-DOF overlapping
+  five-element graph without atomics in stable order and matches CPU with zero error while
+  retaining element outputs on device; protected-runner C2 promotion remains open. CSR and the
+  other paths remain open; probe/replay and Python-managed HIPRTC paths are not product authority.
 
 ### D4. Linear, nonlinear, eigen and dynamic solvers
 

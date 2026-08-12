@@ -123,3 +123,18 @@ def test_merge_oracle_gate_runs_all_three_solver_python_c1_matrices() -> None:
 
     assert "tests/test_native_track_point_load_python_parity.py" in workflow
     assert "tests/test_native_reference_elements_python_parity.py" in workflow
+
+
+def test_reference_hip_c2_is_manual_protected_and_self_hosted_only() -> None:
+    workflow = (ROOT / ".github/workflows/native-hip-dedicated.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "workflow_dispatch:" in workflow
+    assert "pull_request:" not in workflow
+    assert "push:" not in workflow
+    assert "environment: native-hip-approved" in workflow
+    assert "runs-on: [self-hosted, linux, x64, rocm, structural-approved]" in workflow
+    assert "STRUCTURAL_ENABLE_HIP=ON" in workflow
+    assert "--require-approved-runner" in workflow
+    assert "structural_reference_elements_hip_parity_tests" in workflow

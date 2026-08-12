@@ -186,3 +186,51 @@ set_tests_properties(
   structural_dense_assembly_cpu_tests
   PROPERTIES LABELS "assembly;solver_cpu"
 )
+
+if(STRUCTURAL_ENABLE_HIP)
+  set(STRUCTURAL_REFERENCE_HIP_TEST_SOURCE hip/reference_elements_hip_parity_test.hip.cpp)
+  set_source_files_properties(${STRUCTURAL_REFERENCE_HIP_TEST_SOURCE} PROPERTIES LANGUAGE HIP)
+  add_executable(
+    structural_reference_elements_hip_parity_tests
+    ${STRUCTURAL_REFERENCE_HIP_TEST_SOURCE}
+  )
+  set_target_properties(
+    structural_reference_elements_hip_parity_tests
+    PROPERTIES
+      HIP_STANDARD 20
+      HIP_STANDARD_REQUIRED ON
+      HIP_EXTENSIONS OFF
+  )
+  target_include_directories(
+    structural_reference_elements_hip_parity_tests
+    PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/hip
+      ${PROJECT_SOURCE_DIR}/src/assembly
+      ${PROJECT_SOURCE_DIR}/src/elements
+      ${PROJECT_SOURCE_DIR}/src/materials
+  )
+  target_link_libraries(
+    structural_reference_elements_hip_parity_tests
+    PRIVATE
+      structural_elements_hip
+      structural_elements
+      structural_assembly
+  )
+  target_compile_options(
+    structural_reference_elements_hip_parity_tests
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-ffp-contract=off>
+  )
+  structural_set_warnings(structural_reference_elements_hip_parity_tests)
+  add_test(
+    NAME structural_reference_elements_hip_parity_tests
+    COMMAND structural_reference_elements_hip_parity_tests
+  )
+  set_tests_properties(
+    structural_reference_elements_hip_parity_tests
+    PROPERTIES
+      LABELS "hip;hip-dedicated;elements;assembly"
+      RESOURCE_LOCK "structural_rocm_device_0"
+      TIMEOUT 120
+  )
+endif()

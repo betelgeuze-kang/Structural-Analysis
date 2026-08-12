@@ -45,6 +45,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_pdf_report.py",
         "scripts/check_native_product_e2e.py",
         "scripts/check_native_reference_elements.py",
+        "scripts/check_native_reference_elements_hip.py",
         "scripts/check_structural_runtime_ffi_r1.py",
         "scripts/check_structural_runtime_ffi_r2.py",
         "scripts/check_structural_runtime_ffi_r3.py",
@@ -62,6 +63,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_nonlinear_ndtha_python_parity.py",
         "tests/test_native_product_e2e_contract.py",
         "tests/test_native_reference_elements_contract.py",
+        "tests/test_native_reference_elements_hip_contract.py",
         "tests/test_native_reference_elements_python_parity.py",
         "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
@@ -98,8 +100,11 @@ NATIVE_NUMERICAL_ORACLE_PREFIXES = (
     "native/cpp/tests/elements/",
     "native/cpp/tests/assembly/",
     "native/cpp/tests/abi/reference_elements_",
+    "native/cpp/src/hip/",
+    "native/cpp/tests/hip/",
     "native/crates/structural-ffi-sys/src/reference_elements",
     "native/crates/structural-ffi/tests/reference_elements",
+    ".github/workflows/native-hip-dedicated.yml",
 )
 NATIVE_NUMERICAL_ORACLE_PATHS = frozenset(
     {
