@@ -538,6 +538,7 @@ jobs:
           python -m pytest -q \
             tests/test_model_ir_v2_contract.py \
             tests/test_native_model_ir_rust_parity.py \
+            tests/test_native_nonlinear_ndtha_python_parity.py \
             tests/test_native_nonlinear_static_python_parity.py \
             tests/test_native_track_point_load_python_parity.py
           cargo test --manifest-path native/Cargo.toml --locked \

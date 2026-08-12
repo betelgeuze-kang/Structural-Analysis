@@ -455,5 +455,11 @@ R3의 세 번째 family는 `nonlinear_ndtha`다.
 - safe Rust wrapper와 C++ unit/C ABI/fuzz/reentrant test는 frozen 2-story, 3-step legacy Rust
   fixture의 모든 11 response channel과 summary를 `1e-15` 절대 오차 내에서 재현한다.
 
-이 범위는 C0다. 독립 Python C1 matrix, broader story/record/material domain, HIP C2,
-checkpoint/restart와 product E2E는 open이고 legacy 5-symbol ABI는 변경하지 않는다.
+별도 NumPy dense-matrix oracle은 native library를 호출하지 않고 1/2/3-story topology,
+Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping cap, adaptive retry,
+line search와 collapse의 5-case matrix를 계산한다. strict Rust product-golden wire는 duplicate,
+unknown, non-finite, vector-length 및 terminal-state mismatch를 거부한다. C++ safe path는
+displacement `1e-12 m`, drift `1e-10 %`, force `1e-8 kN`, residual `1e-6 N` 이내에서 11 response
+channel과 전체 summary를 재현하고 integer/boolean taxonomy는 exact match한다. 따라서 이 한정
+profile은 C1이다. Broader story/record/material domain, HIP C2, checkpoint/restart와 product E2E는
+open이고 legacy 5-symbol ABI는 변경하지 않는다.

@@ -197,30 +197,46 @@
   },
   "r3_nonlinear_ndtha": {
     "family": "nonlinear_ndtha",
-    "capability_gate": "C0",
+    "capability_gate": "C1",
     "cpp_target": "structural_solver_cpu",
     "abi_version": "0x00010004",
     "api_entry": "sa_get_api_v1",
     "api_slot": "nonlinear_ndtha_solve",
     "legacy_exports_preserved": true,
     "fallback_count": 0,
-    "c0_profile": {
-      "story_count": 2,
-      "step_count": 3,
+    "c1_profile": {
+      "case_count": 5,
+      "story_counts": [1, 2, 3],
+      "step_counts": [3, 5, 6],
       "response_channel_count": 11,
-      "absolute_tolerance": 1e-15,
-      "termination_axes": ["converged", "nonconverged", "collapsed"]
+      "displacement_absolute_tolerance_m": 1e-12,
+      "drift_absolute_tolerance_pct": 1e-10,
+      "force_absolute_tolerance_kn": 1e-8,
+      "residual_absolute_tolerance_n": 1e-6,
+      "axes": ["topology", "newmark_parameters", "elastic_plastic", "mixed_sign_acceleration", "pdelta", "damping_cap", "adaptive_retry", "line_search", "collapse"]
+    },
+    "product_goldens": {
+      "native/tests/fixtures/solver_cpu/nonlinear_ndtha_adaptive_retry_python_c1.json": "0abbab21f4f017569aee5b47e4034fb2962805b264c2de5c7d43c45bfc913737",
+      "native/tests/fixtures/solver_cpu/nonlinear_ndtha_collapse_python_c1.json": "f4cb928d2a970bde5e863d35a4f5dcb0a06d2b2175c4c64bde7d5acda10c0362",
+      "native/tests/fixtures/solver_cpu/nonlinear_ndtha_elastic_pdelta_python_c1.json": "7db98121fd9a9a8e2aec9f08aee865e930e679cbf9dd1ff080cb8d7c929568a9",
+      "native/tests/fixtures/solver_cpu/nonlinear_ndtha_one_story_elastic_python_c1.json": "5872c8a89cf055096339a0e4a39b776ebf4af3060b3417ff4e9569d3de7916b5",
+      "native/tests/fixtures/solver_cpu/nonlinear_ndtha_plastic_backtrack_python_c1.json": "6cac3a4009aa00dece13e7a08f7aa01ca3705882e94adc93f351ff96dd83d66f"
     },
     "owners": {
       "cpp_cpu_kernel": "native/cpp/src/solver_cpu/nonlinear_ndtha.cpp",
       "shared_constitutive_assembly": "native/cpp/src/solver_cpu/story_frame.cpp",
       "c_abi": "native/cpp/include/structural/abi_v1.h",
-      "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs"
+      "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs",
+      "rust_product_wire": "native/crates/structural-contracts/src/solver_cpu.rs",
+      "product_schema": "native/crates/structural-contracts/schemas/nonlinear_ndtha_cpu_v1.schema.json"
     },
     "verification": {
       "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_ndtha_test.cpp",
       "c_abi_contract": "native/cpp/tests/abi/nonlinear_ndtha_contract_test.cpp",
       "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_ndtha_parity.rs",
+      "rust_wire": "native/crates/structural-contracts/tests/solver_cpu_wire.rs",
+      "python_oracle": "tests/native_oracles/nonlinear_ndtha_story_frame.py",
+      "python_boundary": "tests/test_native_nonlinear_ndtha_python_parity.py",
       "fuzz_target": "native/cpp/tests/fuzz/nonlinear_ndtha_fuzz.cpp",
       "checker": "scripts/check_structural_runtime_ffi_r3.py"
     },
@@ -228,10 +244,11 @@
       "legacy_rust_full_result": "pass",
       "failure_atomicity": "pass",
       "collapse_terminal_mapping": "pass",
-      "c0_promoted": true,
-      "c1_python": "open",
+      "python_full_result_matrix": "pass",
+      "nonconvergence_taxonomy": "pass",
+      "c1_promoted": true,
       "c2_hip": "open"
     }
   },
-  "claim_boundary": "R3 owns three bounded C++ CPU product slices through the single sa_get_api_v1 table. Track point-load is C1 only for the four-case 9-node midpoint-load Python product-golden matrix exposed by ABI v1.2; the legacy endpoint convention remains frozen separately. Nonlinear static is C1 only for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking Python product-golden matrix exposed by ABI v1.3; its legacy 3-story case remains frozen and byte-identical to one product golden. Nonlinear NDTHA is C0 only for the frozen 2-story, 3-step legacy Rust full-result fixture and converged/nonconverged/collapsed termination mapping exposed by ABI v1.4; independent Python C1 parity is open. All legacy five-symbol exports remain unchanged, and broader input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
+  "claim_boundary": "R3 owns three bounded C++ CPU product slices through the single sa_get_api_v1 table. Track point-load is C1 only for the four-case 9-node midpoint-load Python product-golden matrix exposed by ABI v1.2; the legacy endpoint convention remains frozen separately. Nonlinear static is C1 only for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking Python product-golden matrix exposed by ABI v1.3; its legacy 3-story case remains frozen and byte-identical to one product golden. Nonlinear NDTHA is C1 only for the five-case 1/2/3-story Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping-cap, adaptive-retry, line-search and collapse Python product-golden matrix exposed by ABI v1.4; the frozen 2-story, 3-step legacy Rust case remains a shared config/input boundary. All legacy five-symbol exports remain unchanged, and broader dynamic input-space parity, HIP C2, compatibility cutover, checkpoint/restart and product E2E remain open."
 }

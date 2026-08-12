@@ -113,10 +113,11 @@ def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> No
     assert "--no-tests=error -L modelir" in workflow
 
 
-def test_merge_oracle_gate_runs_both_solver_python_c1_matrices() -> None:
+def test_merge_oracle_gate_runs_all_three_solver_python_c1_matrices() -> None:
     workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
     )
+    assert "tests/test_native_nonlinear_ndtha_python_parity.py" in workflow
     assert "tests/test_native_nonlinear_static_python_parity.py" in workflow
 
     assert "tests/test_native_track_point_load_python_parity.py" in workflow

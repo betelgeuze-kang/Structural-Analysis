@@ -1,13 +1,15 @@
 //! Wire-contract ownership for the native product.
 //!
-//! Slice B owns strict `ModelIR` JSON decoding, schema validation, canonical
-//! bytes and identity hashes. C++ remains the future owner of semantic model
-//! validation, so this crate deliberately makes no solver-readiness claim.
+//! This crate owns strict `ModelIR` decoding/canonical identity and strict,
+//! pointer-free bounded CPU product goldens. Numerical execution remains in
+//! C++; a golden wire records a verified parity slice without promoting broader
+//! solver readiness.
 
 #![forbid(unsafe_code)]
 
 pub mod legacy_runtime;
 pub mod model_ir;
+pub mod solver_cpu;
 
 /// ABI family consumed by the wire-contract crates.
 pub const ABI_V1_0: u32 = 0x0001_0000;

@@ -137,13 +137,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   nonconvergence taxonomy also match. The frozen legacy 3-story fixture remains byte-identical to
   one product golden. Broader nonlinear input-space parity and HIP C2 remain open, and the legacy
   Rust export is unchanged.
-- The bounded `nonlinear_ndtha` story-frame slice is C0. Its serial FP64 C++ Newmark/Newton kernel
+- The bounded `nonlinear_ndtha` story-frame slice is C1. Its serial FP64 C++ Newmark/Newton kernel
   shares constitutive assembly and recovery with nonlinear static, uses ABI v1.4 nested
   caller-owned descriptors and a safe Rust wrapper, and matches all 11 response channels plus the
   summary of the frozen 2-story, 3-step legacy Rust fixture within `1e-15`. Invalid and numerical
   nonconvergence calls are failure-atomic; physical collapse is a complete terminal result. An
-  independent Python C1 matrix, broader record/material coverage, HIP C2, restart and product E2E
-  remain open.
+  independent NumPy dense-matrix oracle and strict neutral golden wire cover five 1/2/3-story
+  cases across Newmark parameters, elastic/plastic response, mixed-sign acceleration, P-delta,
+  damping cap, adaptive retry, line search and collapse. C++/Rust matches displacement `1e-12 m`,
+  drift `1e-10 %`, force `1e-8 kN` and residual `1e-6 N` tolerances with exact integer/boolean
+  taxonomy. Broader record/material coverage, HIP C2, restart and product E2E remain open.
 
 ### D5. Durable Job API and process lifecycle
 
@@ -285,8 +288,9 @@ freshness는 별도 필드로 유지한다.
 `structural_runtime_ffi` R2 contract extraction은 migration topology, raw/wire ownership과 기존
 ABI/golden freeze다. 수치 구현의 C0/C1이나 product C3를 새로 통과한 것으로 세지 않는다.
 네 pointer-free neutral fixture는 향후 C++ parity 입력/결과 계약이지만 현재 numerical truth는
-기존 Rust compatibility owner에 있다. `track_point_load`와 `nonlinear_static`의 한정 product
-matrix는 각각 별도 Python C1 golden이 수치 truth를 소유한다. track은 legacy endpoint 차이를
-명시적으로 보존하고, nonlinear static은 legacy 3-story case를 byte-identical product golden으로
-포함한다. Python production consumer도 그대로 유지되며 나머지 R3 family의 C++ CPU parity와
-R4 restart/product integration 전에는 decommission 대상이 아니다.
+기존 Rust compatibility owner에 있다. `track_point_load`, `nonlinear_static`,
+`nonlinear_ndtha`의 한정 product matrix는 각각 별도 Python C1 golden이 수치 truth를 소유한다.
+track은 legacy endpoint 차이를 명시적으로 보존하고, nonlinear static은 legacy 3-story case를
+byte-identical product golden으로 포함하며, nonlinear NDTHA는 legacy 2-story config/input을 새
+strict product wire에서도 보존한다. Python production consumer도 그대로 유지되며 HIP C2와 R4
+restart/product integration 전에는 decommission 대상이 아니다.

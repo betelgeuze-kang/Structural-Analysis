@@ -125,11 +125,14 @@ families and later gates.
   assembly/recovery source를 사용하고 ABI v1.4 nested caller-owned contract와 safe Rust wrapper로
   연결됐다. frozen 2-story, 3-step legacy Rust fixture의 11 response channel, summary와
   converged/nonconverged/collapsed 종료를 재현하며 invalid/nonconverged failure atomicity와 CPU
-  fallback 0을 검증한다. 독립 Python matrix가 아직 없으므로 C0이며 C1을 주장하지 않는다.
+  fallback 0을 검증한다. native library를 호출하지 않는 NumPy dense-matrix oracle과 strict
+  Rust golden wire가 1/2/3-story, Newmark parameter, elastic/plastic, mixed-sign acceleration,
+  P-delta, damping cap, adaptive retry, line search와 collapse의 five-case full-result matrix를
+  검증하므로 이 한정 profile은 C1이다.
 
-Current next gate: nonlinear NDTHA의 독립 Python C1 matrix를 닫은 뒤 승인된 전용 ROCm
-runner에서 bounded CPU family의 HIP C2를 구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU
-family를 이전한다. R4 cutover는 아직 시작하지 않는다.
+Current next gate: 승인된 전용 ROCm runner에서 bounded CPU family의 HIP C2를 구현하거나,
+`inplace_scale_f32`를 compatibility-only utility 또는 product capability로 명시적으로 분류한 뒤
+R4 checkpoint/runtime cutover를 시작한다. R4 cutover는 아직 시작하지 않았다.
 
 ### Step R4: runtime cutover
 

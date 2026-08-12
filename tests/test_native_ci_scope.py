@@ -87,7 +87,9 @@ def test_track_python_parity_boundary_routes_through_the_oracle_gate() -> None:
 def test_nonlinear_python_parity_boundary_routes_through_the_oracle_gate() -> None:
     payload = scope.classify_paths(
         [
+            "tests/native_oracles/nonlinear_ndtha_story_frame.py",
             "tests/native_oracles/nonlinear_static_story_frame.py",
+            "tests/test_native_nonlinear_ndtha_python_parity.py",
             "tests/test_native_nonlinear_static_python_parity.py",
         ]
     )

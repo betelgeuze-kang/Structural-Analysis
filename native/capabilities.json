@@ -39,9 +39,9 @@
     },
     "nonlinear_ndtha_cpu": {
       "status": "implemented",
-      "cutover_gate": "C0",
+      "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++ Newmark/Newton story-frame kernel with shared constitutive assembly, ABI v1.4 nested caller-owned inputs/outputs, safe Rust integration and complete frozen legacy Rust fixture parity only; independent Python C1 matrix, HIP C2, restart and product E2E remain open"
+      "claim": "bounded serial FP64 C++ Newmark/Newton story-frame kernel with shared constitutive assembly and independent dense-matrix Python C1 full-result parity for the five-case 1/2/3-story Newmark parameter, elastic/plastic, mixed-sign acceleration, P-delta, damping-cap, adaptive retry, line-search and collapse matrix, plus ABI v1.4 nested caller-owned inputs/outputs, safe Rust integration and the frozen legacy Rust boundary; broader dynamic input-space parity, HIP C2, restart and product E2E remain open"
     },
     "checkpoint_restart": {
       "status": "planned",

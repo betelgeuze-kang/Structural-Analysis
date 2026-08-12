@@ -39,10 +39,12 @@ Jobs:
    - four-case 9-node Python product-golden SHA-256 matrix and frozen legacy endpoint-only
      divergence check
    - R3 nonlinear static CPU ownership, ABI v1.3/safe-wrapper integration and C1 claim check
-   - R3 nonlinear NDTHA shared constitutive ownership, ABI v1.4/safe-wrapper integration and C0
+   - R3 nonlinear NDTHA shared constitutive ownership, ABI v1.4/safe-wrapper integration and C1
      claim check
-   - independent dense-matrix Python oracle, five-case product-golden SHA-256 matrix, frozen
-     byte-identical legacy 3-story copy and nonconvergence taxonomy check
+   - nonlinear-static independent dense-matrix Python oracle, five-case product-golden SHA-256
+     matrix, frozen byte-identical legacy 3-story copy and nonconvergence taxonomy check
+   - nonlinear-NDTHA independent dense-matrix Python oracle, strict five-case product-golden wire,
+     all 11 response channels, adaptive/collapse taxonomy and frozen legacy config/input check
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
@@ -96,6 +98,8 @@ Required jobs:
    - canonical bytes/hash, error taxonomy와 bounded numerical vectors
    - track full-vector product golden parity; legacy endpoint convention remains separately frozen
    - nonlinear-static dense-matrix full-result matrix와 nonconvergence taxonomy parity
+   - nonlinear-NDTHA dense-matrix full-result/adaptive/collapse matrix와 nonconvergence taxonomy
+     parity
 4. checkpoint-restart
    - exact model/state/execution hash binding
    - cancel/crash/restart and mismatch rejection

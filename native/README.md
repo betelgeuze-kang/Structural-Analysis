@@ -19,9 +19,11 @@ NumPy dense-matrix oracle promotes only a five-case 1/3-story topology, elastic/
 mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity, HIP C2 and
 runtime cutover remain open. The third R3 slice moves nonlinear NDTHA to a serial FP64 C++
 Newmark/Newton kernel sharing the static constitutive/assembly source, exposes eleven disjoint
-caller-owned response channels through ABI v1.4, and closes C0 against the complete frozen
-2-story, 3-step legacy Rust fixture. Its independent Python C1 matrix is still open. The legacy
-five-symbol ABI is unchanged.
+caller-owned response channels through ABI v1.4, and preserves the complete frozen 2-story,
+3-step legacy Rust fixture. A separate NumPy dense-matrix oracle and strict product-golden wire
+promote a five-case 1/2/3-story Newmark, elastic/plastic, mixed-sign acceleration, P-delta,
+damping-cap, adaptive-retry, line-search and collapse matrix to C1. Broader dynamic input-space
+parity, HIP C2 and runtime cutover remain open. The legacy five-symbol ABI is unchanged.
 
 ## Rust
 
@@ -38,6 +40,9 @@ must not run a second CMake build.
 `structural-contracts` packages its own byte-identical transition copy of the Python-oracle
 `ModelIR` v2 schema. A focused test blocks silent drift between the two copies. The C1
 capability covers wire/schema/canonical identity only, not C++ semantics or solver readiness.
+It also packages the strict nonlinear-NDTHA CPU v1 golden schema; that separate contract records
+only the bounded five-case C1 matrix and rejects duplicate/unknown/non-finite fields, length drift
+and impossible terminal states.
 
 The `modelir_v2_cpp_core` capability remains narrower than aggregate `modelir_v2`: Slice C
 introduced it at C0 and Slice D's Python semantic parity advances it to C1. Slice D's C3 aggregate

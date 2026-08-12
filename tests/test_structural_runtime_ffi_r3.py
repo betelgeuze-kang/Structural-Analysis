@@ -26,7 +26,7 @@ def test_r3_tracks_each_cpu_family_without_overpromoting_later_gates() -> None:
     assert payload["capability_gates"] == {
         "track_point_load_cpu": "C1",
         "nonlinear_static_cpu": "C1",
-        "nonlinear_ndtha_cpu": "C0",
+        "nonlinear_ndtha_cpu": "C1",
     }
     assert payload["product_exports"] is None
     assert len(payload["legacy_exports"]) == 5
@@ -61,8 +61,9 @@ def test_r3_inventory_keeps_family_specific_parity_boundaries_explicit() -> None
     assert ndtha_parity["legacy_rust_full_result"] == "pass"
     assert ndtha_parity["failure_atomicity"] == "pass"
     assert ndtha_parity["collapse_terminal_mapping"] == "pass"
-    assert ndtha_parity["c0_promoted"] is True
-    assert ndtha_parity["c1_python"] == "open"
+    assert ndtha_parity["python_full_result_matrix"] == "pass"
+    assert ndtha_parity["nonconvergence_taxonomy"] == "pass"
+    assert ndtha_parity["c1_promoted"] is True
     assert ndtha_parity["c2_hip"] == "open"
 
 
@@ -102,8 +103,8 @@ def test_r3_checker_fails_closed_on_nonlinear_ndtha_gate_drift(
     inventory = json.loads(
         (ROOT / r3.DEFAULT_INVENTORY).read_text(encoding="utf-8")
     )
-    inventory["r3_nonlinear_ndtha"]["capability_gate"] = "C1"
-    path = tmp_path / "ndtha-python-overpromoted.json"
+    inventory["r3_nonlinear_ndtha"]["capability_gate"] = "C2"
+    path = tmp_path / "ndtha-hip-overpromoted.json"
     path.write_text(json.dumps(inventory), encoding="utf-8")
 
     payload = r3.check_r3(ROOT, path)

@@ -133,30 +133,66 @@ EXPECTED_NONLINEAR_STATIC_R3 = {
 
 EXPECTED_NONLINEAR_NDTHA_R3 = {
     "family": "nonlinear_ndtha",
-    "capability_gate": "C0",
+    "capability_gate": "C1",
     "cpp_target": "structural_solver_cpu",
     "abi_version": "0x00010004",
     "api_entry": "sa_get_api_v1",
     "api_slot": "nonlinear_ndtha_solve",
     "legacy_exports_preserved": True,
     "fallback_count": 0,
-    "c0_profile": {
-        "story_count": 2,
-        "step_count": 3,
+    "c1_profile": {
+        "case_count": 5,
+        "story_counts": [1, 2, 3],
+        "step_counts": [3, 5, 6],
         "response_channel_count": 11,
-        "absolute_tolerance": 1.0e-15,
-        "termination_axes": ["converged", "nonconverged", "collapsed"],
+        "displacement_absolute_tolerance_m": 1.0e-12,
+        "drift_absolute_tolerance_pct": 1.0e-10,
+        "force_absolute_tolerance_kn": 1.0e-8,
+        "residual_absolute_tolerance_n": 1.0e-6,
+        "axes": [
+            "topology",
+            "newmark_parameters",
+            "elastic_plastic",
+            "mixed_sign_acceleration",
+            "pdelta",
+            "damping_cap",
+            "adaptive_retry",
+            "line_search",
+            "collapse",
+        ],
+    },
+    "product_goldens": {
+        "native/tests/fixtures/solver_cpu/nonlinear_ndtha_adaptive_retry_python_c1.json": (
+            "0abbab21f4f017569aee5b47e4034fb2962805b264c2de5c7d43c45bfc913737"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_ndtha_collapse_python_c1.json": (
+            "f4cb928d2a970bde5e863d35a4f5dcb0a06d2b2175c4c64bde7d5acda10c0362"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_ndtha_elastic_pdelta_python_c1.json": (
+            "7db98121fd9a9a8e2aec9f08aee865e930e679cbf9dd1ff080cb8d7c929568a9"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_ndtha_one_story_elastic_python_c1.json": (
+            "5872c8a89cf055096339a0e4a39b776ebf4af3060b3417ff4e9569d3de7916b5"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_ndtha_plastic_backtrack_python_c1.json": (
+            "6cac3a4009aa00dece13e7a08f7aa01ca3705882e94adc93f351ff96dd83d66f"
+        ),
     },
     "owners": {
         "cpp_cpu_kernel": "native/cpp/src/solver_cpu/nonlinear_ndtha.cpp",
         "shared_constitutive_assembly": "native/cpp/src/solver_cpu/story_frame.cpp",
         "c_abi": "native/cpp/include/structural/abi_v1.h",
         "rust_safe_wrapper": "native/crates/structural-ffi/src/lib.rs",
+        "rust_product_wire": "native/crates/structural-contracts/src/solver_cpu.rs",
+        "product_schema": "native/crates/structural-contracts/schemas/nonlinear_ndtha_cpu_v1.schema.json",
     },
     "verification": {
         "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_ndtha_test.cpp",
         "c_abi_contract": "native/cpp/tests/abi/nonlinear_ndtha_contract_test.cpp",
         "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_ndtha_parity.rs",
+        "rust_wire": "native/crates/structural-contracts/tests/solver_cpu_wire.rs",
+        "python_oracle": "tests/native_oracles/nonlinear_ndtha_story_frame.py",
+        "python_boundary": "tests/test_native_nonlinear_ndtha_python_parity.py",
         "fuzz_target": "native/cpp/tests/fuzz/nonlinear_ndtha_fuzz.cpp",
         "checker": "scripts/check_structural_runtime_ffi_r3.py",
     },
@@ -164,8 +200,9 @@ EXPECTED_NONLINEAR_NDTHA_R3 = {
         "legacy_rust_full_result": "pass",
         "failure_atomicity": "pass",
         "collapse_terminal_mapping": "pass",
-        "c0_promoted": True,
-        "c1_python": "open",
+        "python_full_result_matrix": "pass",
+        "nonconvergence_taxonomy": "pass",
+        "c1_promoted": True,
         "c2_hip": "open",
     },
 }
@@ -356,6 +393,137 @@ def check_r3(
         if nonlinear_golden_bytes.get(product_legacy_copy) != legacy_bytes:
             blockers.append("r3_nonlinear_static_legacy_product_copy_mismatch")
 
+    ndtha_cases: list[dict[str, Any]] = []
+    ndtha_cases_by_path: dict[str, dict[str, Any]] = {}
+    for relative_path, expected_hash in EXPECTED_NONLINEAR_NDTHA_R3[
+        "product_goldens"
+    ].items():
+        golden_path = repo_root / relative_path
+        try:
+            golden_bytes = golden_path.read_bytes()
+        except OSError as exc:
+            blockers.append(
+                f"r3_nonlinear_ndtha_product_golden_unreadable:{relative_path}:{exc}"
+            )
+            continue
+        if hashlib.sha256(golden_bytes).hexdigest() != expected_hash:
+            blockers.append(
+                f"r3_nonlinear_ndtha_product_golden_sha256_mismatch:{relative_path}"
+            )
+        try:
+            product_case = json.loads(golden_bytes)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            blockers.append(
+                f"r3_nonlinear_ndtha_product_golden_invalid:{relative_path}:{exc}"
+            )
+            continue
+        if (
+            not isinstance(product_case, dict)
+            or product_case.get("schema_version")
+            != "structural-solver-cpu-nonlinear-ndtha.v1"
+            or product_case.get("operation") != "nonlinear_ndtha"
+            or not isinstance(product_case.get("config"), dict)
+            or not isinstance(product_case.get("inputs"), dict)
+            or not isinstance(product_case.get("result"), dict)
+        ):
+            blockers.append(
+                f"r3_nonlinear_ndtha_product_golden_contract_invalid:{relative_path}"
+            )
+            continue
+        ndtha_cases.append(product_case)
+        ndtha_cases_by_path[relative_path] = product_case
+
+    ndtha_profile = EXPECTED_NONLINEAR_NDTHA_R3["c1_profile"]
+    if len(ndtha_cases) != ndtha_profile["case_count"]:
+        blockers.append("r3_nonlinear_ndtha_product_golden_case_count_invalid")
+    else:
+        configs = [case["config"] for case in ndtha_cases]
+        inputs = [case["inputs"] for case in ndtha_cases]
+        results = [case["result"] for case in ndtha_cases]
+        try:
+            story_counts = sorted({config.get("story_count") for config in configs})
+            step_counts = sorted({config.get("step_count") for config in configs})
+            pdelta_factors = {config.get("pdelta_factor") for config in configs}
+            newmark_beta = {config.get("newmark_beta") for config in configs}
+            newmark_gamma = {config.get("newmark_gamma") for config in configs}
+            damping_caps = {
+                config.get("damping_force_cap_ratio") for config in configs
+            }
+            plastic_counts = {
+                result.get("max_plastic_story_count") for result in results
+            }
+            collapsed_states = {result.get("collapsed") for result in results}
+            has_mixed_sign_acceleration = any(
+                any(
+                    isinstance(value, (int, float)) and value < 0.0
+                    for value in row.get("ag_g", [])
+                )
+                for row in inputs
+            )
+            has_adaptive_retry = any(
+                max(result.get("response", {}).get("step_iterations", [])) > 1
+                for result in results
+            )
+            has_backtracking = any(
+                isinstance(result.get("total_line_search_backtracks"), int)
+                and result["total_line_search_backtracks"] > 0
+                for result in results
+            )
+            response_channel_counts = {
+                len(result.get("response", {})) for result in results
+            }
+        except (TypeError, ValueError):
+            blockers.append("r3_nonlinear_ndtha_product_golden_matrix_invalid")
+        else:
+            if story_counts != ndtha_profile["story_counts"]:
+                blockers.append("r3_nonlinear_ndtha_story_matrix_invalid")
+            if step_counts != ndtha_profile["step_counts"]:
+                blockers.append("r3_nonlinear_ndtha_step_matrix_invalid")
+            if pdelta_factors != {0.0, 1.0}:
+                blockers.append("r3_nonlinear_ndtha_pdelta_matrix_invalid")
+            if newmark_beta != {0.25, 0.3025} or newmark_gamma != {0.5, 0.6}:
+                blockers.append("r3_nonlinear_ndtha_newmark_matrix_invalid")
+            if damping_caps != {0.2, 0.6}:
+                blockers.append("r3_nonlinear_ndtha_damping_cap_matrix_invalid")
+            if plastic_counts != {0, 1, 2, 3}:
+                blockers.append("r3_nonlinear_ndtha_material_matrix_invalid")
+            if collapsed_states != {False, True}:
+                blockers.append("r3_nonlinear_ndtha_termination_matrix_invalid")
+            if not has_mixed_sign_acceleration:
+                blockers.append("r3_nonlinear_ndtha_acceleration_matrix_invalid")
+            if not has_adaptive_retry:
+                blockers.append("r3_nonlinear_ndtha_adaptive_matrix_invalid")
+            if not has_backtracking:
+                blockers.append("r3_nonlinear_ndtha_backtracking_matrix_invalid")
+            if response_channel_counts != {ndtha_profile["response_channel_count"]}:
+                blockers.append("r3_nonlinear_ndtha_response_channels_invalid")
+            if not all(
+                result.get("converged_all_steps") is not result.get("collapsed")
+                and result.get("execution_backend") == "cpu"
+                and result.get("fallback_count") == 0
+                for result in results
+            ):
+                blockers.append("r3_nonlinear_ndtha_success_matrix_invalid")
+
+    ndtha_legacy_path = (
+        repo_root / "native/tests/fixtures/legacy_runtime_v3/nonlinear_ndtha.json"
+    )
+    ndtha_product_legacy_copy = (
+        "native/tests/fixtures/solver_cpu/"
+        "nonlinear_ndtha_elastic_pdelta_python_c1.json"
+    )
+    try:
+        ndtha_legacy_case = _load_json(ndtha_legacy_path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        blockers.append(f"r3_nonlinear_ndtha_legacy_fixture_unreadable:{exc}")
+    else:
+        product_copy = ndtha_cases_by_path.get(ndtha_product_legacy_copy, {})
+        if (
+            product_copy.get("config") != ndtha_legacy_case.get("config")
+            or product_copy.get("inputs") != ndtha_legacy_case.get("inputs")
+        ):
+            blockers.append("r3_nonlinear_ndtha_legacy_product_copy_mismatch")
+
     sources = {
         "cmake": repo_root / "native/cpp/CMakeLists.txt",
         "header": repo_root / "native/cpp/include/structural/abi_v1.h",
@@ -466,6 +634,12 @@ def check_r3(
         "rust": sources["rust"],
         "rust_parity": repo_root
         / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["rust_ffi_parity"],
+        "rust_wire": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["rust_wire"],
+        "python_oracle": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["python_oracle"],
+        "python_boundary": repo_root
+        / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["python_boundary"],
         "abi_contract": repo_root
         / EXPECTED_NONLINEAR_NDTHA_R3["verification"]["c_abi_contract"],
         "fuzz": repo_root
@@ -501,8 +675,23 @@ def check_r3(
         ),
         "rust_parity": (
             "safe_v1_4_cpp_path_matches_the_complete_frozen_legacy_rust_result",
+            "safe_v1_4_cpp_path_matches_the_complete_python_c1_matrix",
             "SA_ERR_NONCONVERGENCE",
             "physical collapse is a complete terminal result",
+        ),
+        "rust_wire": (
+            "all_nonlinear_ndtha_product_goldens_are_strict_typed_round_trips",
+            "solver_cpu_terminal_state_invalid",
+        ),
+        "python_oracle": (
+            "Independent dense-matrix oracle",
+            "np.linalg.solve",
+            "solve_nonlinear_ndtha_oracle",
+        ),
+        "python_boundary": (
+            "PRODUCT_FIXTURES",
+            "test_dense_python_oracle_matches_every_product_result_channel",
+            "test_python_oracle_models_nonconvergence_without_committing_partial_state",
         ),
         "abi_contract": (
             "invalid_and_nonconverged_calls_are_failure_atomic",
@@ -511,17 +700,30 @@ def check_r3(
         ),
         "fuzz": ("LLVMFuzzerTestOneInput", "nonlinear_ndtha_solve"),
     }
+    ndtha_source_text: dict[str, str] = {}
     for role, path in ndtha_sources.items():
         try:
             text = path.read_text(encoding="utf-8")
         except OSError as exc:
             blockers.append(f"r3_source_unreadable:nonlinear_ndtha:{role}:{exc}")
             continue
+        ndtha_source_text[role] = text
         for token in ndtha_required_tokens[role]:
             if token not in text:
                 blockers.append(
                     f"r3_source_token_missing:nonlinear_ndtha:{role}:{token}"
                 )
+    ndtha_oracle_text = ndtha_source_text.get("python_oracle", "")
+    for forbidden in (
+        "import ctypes",
+        "import subprocess",
+        "structural_runtime_ffi",
+        "sa_get_api_v1",
+    ):
+        if forbidden in ndtha_oracle_text:
+            blockers.append(
+                f"r3_nonlinear_ndtha_python_oracle_native_dependency:{forbidden}"
+            )
 
     try:
         capabilities = _load_json(repo_root / "native/capabilities.json")
@@ -586,14 +788,17 @@ def check_r3(
     ):
         blockers.append("r3_nonlinear_ndtha_capability_not_implemented")
     else:
-        if ndtha_capability.get("cutover_gate") != "C0":
+        if ndtha_capability.get("cutover_gate") != "C1":
             blockers.append("r3_nonlinear_ndtha_capability_gate_invalid")
         ndtha_claim = str(ndtha_capability.get("claim", ""))
         for boundary in (
             "ABI v1.4",
             "shared constitutive assembly",
-            "frozen legacy Rust fixture parity only",
-            "independent Python C1 matrix",
+            "independent dense-matrix Python C1",
+            "five-case",
+            "adaptive retry",
+            "collapse",
+            "broader dynamic input-space parity",
             "HIP C2",
             "restart",
             "product E2E",
@@ -634,17 +839,18 @@ def _report(
         "capability_gates": {
             "track_point_load_cpu": "C1",
             "nonlinear_static_cpu": "C1",
-            "nonlinear_ndtha_cpu": "C0",
+            "nonlinear_ndtha_cpu": "C1",
         },
         "blockers": blockers,
         "claim_boundary": (
             "R3 proves track Python C1 full-vector parity only for the four-case 9-node "
             "midpoint-load matrix, plus nonlinear static Python C1 full-result parity only "
             "for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta "
-            "and backtracking matrix through ABI v1.3. Nonlinear NDTHA proves C0 frozen legacy "
-            "Rust full-result parity only for the 2-story, 3-step case through ABI v1.4. Its "
-            "independent Python C1 matrix, broader input-space parity, HIP C2 and runtime "
-            "cutover remain open."
+            "and backtracking matrix through ABI v1.3. Nonlinear NDTHA proves Python C1 "
+            "full-result parity only for the five-case 1/2/3-story Newmark, elastic/plastic, "
+            "mixed-sign acceleration, P-delta, damping-cap, adaptive-retry, line-search and "
+            "collapse matrix through ABI v1.4. Broader dynamic input-space parity, HIP C2 and "
+            "runtime cutover remain open."
         ),
     }
 

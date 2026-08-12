@@ -1,0 +1,139 @@
+{
+  "schema_version": "structural-solver-cpu-nonlinear-ndtha.v1",
+  "operation": "nonlinear_ndtha",
+  "config": {
+    "story_count": 1,
+    "step_count": 5,
+    "dt_s": 0.02,
+    "newmark_beta": 0.3025,
+    "newmark_gamma": 0.6,
+    "tolerance": 1e-07,
+    "max_step_iterations": 16,
+    "adaptive_load_decay": 0.82,
+    "damping_force_cap_ratio": 0.2,
+    "newton_max_iter": 120,
+    "line_search_decay": 0.5,
+    "line_search_min": 0.03125,
+    "hardening_ratio": 0.2,
+    "pdelta_factor": 0.0,
+    "collapse_drift_threshold_pct": 20.0
+  },
+  "inputs": {
+    "story_k_n_per_m": [
+      50000000.0
+    ],
+    "story_h_m": [
+      3.2
+    ],
+    "story_axial_n": [
+      0.0
+    ],
+    "story_yield_drift_m": [
+      0.01
+    ],
+    "story_mass_kg": [
+      5000.0
+    ],
+    "story_damping_n_s_per_m": [
+      250.0
+    ],
+    "floor_load_base_n": [
+      200000.0
+    ],
+    "ag_g": [
+      0.0,
+      0.05,
+      -0.03,
+      0.08,
+      -0.02
+    ]
+  },
+  "result": {
+    "converged_all_steps": true,
+    "collapsed": false,
+    "collapse_step": -1,
+    "collapse_time_s": 0.0,
+    "collapse_drift_ratio_pct": 0.0,
+    "collapse_top_displacement_m": 0.0,
+    "step_count_completed": 5,
+    "max_plastic_story_count": 0,
+    "max_drift_ratio_pct": 0.004711026603347354,
+    "avg_step_iterations": 1.0,
+    "residual_top_displacement_m": 2.1270051529710693e-05,
+    "residual_drift_ratio_pct": 0.0006646891103034592,
+    "total_line_search_backtracks": 0,
+    "execution_backend": "cpu",
+    "fallback_count": 0,
+    "response": {
+      "top_displacement_m": [
+        4.378901655659097e-05,
+        0.00015075285130711533,
+        4.914888471597023e-05,
+        -7.382546167693781e-05,
+        2.1270051529710693e-05
+      ],
+      "drift_ratio_pct": [
+        0.0013684067673934675,
+        0.004711026603347354,
+        0.0015359026473740695,
+        0.002307045677404307,
+        0.0006646891103034592
+      ],
+      "base_shear_kn": [
+        2.1894508278295484,
+        7.537642565355767,
+        2.457444235798511,
+        3.6912730838468906,
+        1.0635025764855346
+      ],
+      "core_drift_pct": [
+        0.0013684067673934675,
+        0.004711026603347354,
+        0.0015359026473740695,
+        -0.002307045677404307,
+        0.0006646891103034592
+      ],
+      "core_shear_kn": [
+        2.1894508278295484,
+        7.537642565355767,
+        2.457444235798511,
+        -3.6912730838468906,
+        1.0635025764855346
+      ],
+      "step_converged": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "step_iterations": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "step_plastic_story_count": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "step_residual_inf": [
+        4.547473508864641e-13,
+        1.3073986337985843e-12,
+        1.8189894035458565e-12,
+        1.8189894035458565e-12,
+        1.8189894035458565e-12
+      ],
+      "story_drift_envelope_pct": [
+        0.004711026603347354
+      ],
+      "final_story_drift_pct": [
+        0.0006646891103034592
+      ]
+    }
+  }
+}
