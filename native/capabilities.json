@@ -7,11 +7,17 @@
       "owner": "structural-ffi",
       "claim": "base descriptors, error buffers, layout, overflow and function table only"
     },
+    "modelir_v2_rust_wire": {
+      "status": "implemented",
+      "cutover_gate": "C1",
+      "owner": "structural-contracts",
+      "claim": "strict UTF-8 JSON decode, duplicate-key and schema rejection, Python-compatible canonical bytes and content/semantic/provenance hashes only"
+    },
     "modelir_v2": {
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-contracts",
-      "claim": "Slice B-D not implemented"
+      "claim": "C++ typed semantic validation, C ABI snapshot, safe Rust wrapper and product CLI remain Slice C-D work"
     },
     "checkpoint_restart": {
       "status": "planned",

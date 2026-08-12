@@ -2,6 +2,11 @@
 
 Status: implementation-ready design
 
+Implementation status: Slice A and Slice B are implemented on the native PR stack. Slice B
+promotes only `modelir_v2_rust_wire` at C1; the aggregate `modelir_v2` capability remains
+planned until C++ semantic ownership, snapshot ABI, safe wrapper and CLI validation land in
+Slices C-D.
+
 Depends on: ADR-002, ADR-009 and workspace-and-abi-v1.md
 
 ## 1. Outcome

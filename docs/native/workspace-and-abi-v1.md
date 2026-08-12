@@ -269,8 +269,9 @@ Slice A는 다음 파일에 foundation contract를 구현한다.
   error buffer, pointer/length/stride/overflow 검사와 C++ exception containment
 - `structural-ffi-sys`와 `structural-ffi`: C layout mirror, immutable function-table safe
   wrapper와 concurrent caller-owned read 검증
-- `native/capabilities.json`: ABI base만 C0 implemented로 표시하고 ModelIR, restart,
-  product E2E와 HIP는 planned로 fail closed
+- `native/capabilities.json`: ABI base는 C0, Rust ModelIR wire/canonical identity는 C1로
+  범위를 제한해 implemented로 표시하고 C++ semantic ModelIR, restart, product E2E와
+  HIP는 planned로 fail closed
 - installed `structural-native-build.json`: package/ABI/compiler/build-type/backend identity
 - `native/compatibility-owners.json`: 기존 `structural_runtime_ffi`와
   `mgt_hip_full_residual_ffi`를 아직 workspace member로 이동하지 않고 각각의 명시적

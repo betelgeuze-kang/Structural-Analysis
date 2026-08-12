@@ -14,11 +14,14 @@ sys.modules[SPEC.name] = capabilities
 SPEC.loader.exec_module(capabilities)
 
 
-def test_slice_a_promotes_only_the_base_abi_capability() -> None:
+def test_slice_b_promotes_only_base_abi_and_rust_modelir_wire() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
 
     assert capabilities.validate_capabilities(payload) == []
     assert capabilities.capability_is_enabled(payload, "abi_v1_base") is True
+    assert (
+        capabilities.capability_is_enabled(payload, "modelir_v2_rust_wire") is True
+    )
     for capability in (
         "modelir_v2",
         "checkpoint_restart",

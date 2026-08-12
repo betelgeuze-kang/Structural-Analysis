@@ -1,19 +1,26 @@
 # Structural Native Workspace
 
 This workspace is the staged Rust/C++ product boundary. Slice A implements the CPU-only
-build graph and C ABI v1 foundation; it does not implement ModelIR, analysis, restart or HIP.
-The fail-closed state is recorded in `capabilities.json`.
+build graph and C ABI v1 foundation. Slice B adds strict Rust `ModelIR` v2 wire decoding,
+Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA-256
+identities. C++ semantic validation, analysis, restart and HIP remain unimplemented. The
+fail-closed state is recorded in `capabilities.json`.
 
 ## Rust
 
 ~~~bash
 cargo fmt --manifest-path native/Cargo.toml --all -- --check
-cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets -- -D warnings
+cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets --locked -- -D warnings
 cargo test --manifest-path native/Cargo.toml --workspace --locked
+cargo +1.77.0 check --manifest-path native/Cargo.toml --workspace --all-targets --locked
 ~~~
 
 `structural-ffi` is the only crate that configures and links the C++ library. The other crates
 must not run a second CMake build.
+
+`structural-contracts` packages its own byte-identical transition copy of the Python-oracle
+`ModelIR` v2 schema. A focused test blocks silent drift between the two copies. The C1
+capability covers wire/schema/canonical identity only, not C++ semantics or solver readiness.
 
 ## CPU-only C++
 
