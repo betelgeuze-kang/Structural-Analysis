@@ -575,7 +575,11 @@ def check_r3(
             blockers.append(f"r3_source_unreadable:{role}:{exc}")
             source_text[role] = ""
     required_tokens = {
-        "cmake": ("structural_solver_cpu STATIC", "structural_solver_cpu structural_c_abi_v1"),
+        "cmake": (
+            "structural_solver_cpu STATIC",
+            "add_library(structural_c_abi_v1",
+            "target_link_libraries(\n  structural_c_abi_v1",
+        ),
         "header": (
             "#define SA_ABI_V1_2 UINT32_C(0x00010002)",
             "sa_track_point_load_solve_fn_v1 track_point_load_solve",

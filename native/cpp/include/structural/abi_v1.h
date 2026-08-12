@@ -29,7 +29,8 @@ extern "C" {
 #define SA_ABI_V1_4 UINT32_C(0x00010004)
 #define SA_ABI_V1_5 UINT32_C(0x00010005)
 #define SA_ABI_V1_6 UINT32_C(0x00010006)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_6
+#define SA_ABI_V1_7 UINT32_C(0x00010007)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_7
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -76,6 +77,7 @@ enum {
 #define SA_CAPABILITY_NONLINEAR_NDTHA_CPU UINT64_C(32)
 #define SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU UINT64_C(64)
 #define SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER UINT64_C(128)
+#define SA_CAPABILITY_REFERENCE_ELEMENTS_CPU UINT64_C(256)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
@@ -111,6 +113,12 @@ enum {
 
 enum {
     SA_MODEL_IR_NDTHA_ADAPTER_FIXED_GUIDED_FRAME3D_X_V1 = 1
+};
+
+enum {
+    SA_REFERENCE_ELEMENT_TRUSS3D = 1,
+    SA_REFERENCE_ELEMENT_FRAME3D = 2,
+    SA_REFERENCE_ELEMENT_SHELL3_MEMBRANE = 3
 };
 
 typedef struct sa_header_v1 {
@@ -388,6 +396,55 @@ typedef struct sa_model_ir_ndtha_adapter_result_v1 {
     uint64_t reserved[2];
 } sa_model_ir_ndtha_adapter_result_v1;
 
+/*
+ * v1.7 exposes bounded, stateless CPU reference elements. Coordinates and all outputs use
+ * SI base units. The shell profile is a three-node plane-stress membrane embedded in 3D;
+ * it does not claim bending, drilling, nonlinear shell, or arbitrary shell support.
+ */
+typedef struct sa_reference_element_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t kind;
+    uint32_t flags;
+    double youngs_modulus_pa;
+    double poisson_ratio;
+    double density_kg_per_m3;
+    double area_m2;
+    double iy_m4;
+    double iz_m4;
+    double torsional_constant_m4;
+    double thickness_m;
+    double local_axis_rotation_rad;
+    sa_buffer_view_v1 node_coordinates_m;
+    sa_buffer_view_v1 displacement;
+    sa_buffer_view_v1 direction;
+    uint64_t reserved[2];
+} sa_reference_element_config_v1;
+
+typedef struct sa_reference_element_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 tangent;
+    sa_mut_buffer_view_v1 consistent_mass;
+    sa_mut_buffer_view_v1 residual;
+    sa_mut_buffer_view_v1 jvp;
+    sa_mut_buffer_view_v1 recovery;
+    uint64_t reserved[2];
+} sa_reference_element_outputs_v1;
+
+typedef struct sa_reference_element_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t kind;
+    uint32_t dof_count;
+    uint32_t recovery_count;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint32_t reserved_u32;
+    uint64_t output_matrix_length;
+    uint64_t reserved[2];
+} sa_reference_element_result_v1;
+
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
@@ -464,6 +521,12 @@ typedef sa_status_code_v1 (*sa_model_ir_ndtha_adapt_fn_v1)(
     sa_model_ir_ndtha_adapter_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_reference_element_evaluate_fn_v1)(
+    const sa_reference_element_config_v1* config,
+    const sa_reference_element_outputs_v1* outputs,
+    sa_reference_element_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -480,6 +543,7 @@ typedef struct sa_api_v1 {
     sa_nonlinear_ndtha_solve_fn_v1 nonlinear_ndtha_solve;
     sa_nonlinear_ndtha_advance_fn_v1 nonlinear_ndtha_advance;
     sa_model_ir_ndtha_adapt_fn_v1 model_ir_ndtha_adapt;
+    sa_reference_element_evaluate_fn_v1 reference_element_evaluate;
     const void* reserved[2];
 } sa_api_v1;
 
@@ -490,7 +554,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_solve))
 #define SA_API_V1_4_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_ndtha_advance))
 #define SA_API_V1_5_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_ndtha_adapt))
-#define SA_API_V1_6_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_6_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reference_element_evaluate))
+#define SA_API_V1_7_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

@@ -140,6 +140,139 @@ pub struct ModelIrNdthaAdaptedProblem {
     pub receipt: ModelIrNdthaAdapterReceipt,
 }
 
+/// Explicit SI material properties for the bounded ABI v1.7 reference elements.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ReferenceMaterial {
+    pub youngs_modulus_pa: f64,
+    pub poisson_ratio: f64,
+    pub density_kg_per_m3: f64,
+}
+
+/// Caller-owned input for one bounded stateless reference element.
+#[derive(Clone, Debug, PartialEq)]
+pub enum ReferenceElementInput {
+    Truss3d {
+        node_coordinates_m: [f64; 6],
+        area_m2: f64,
+        displacement_m: Vec<f64>,
+        direction_m: Vec<f64>,
+    },
+    Frame3d {
+        node_coordinates_m: [f64; 6],
+        area_m2: f64,
+        iy_m4: f64,
+        iz_m4: f64,
+        torsional_constant_m4: f64,
+        local_axis_rotation_rad: f64,
+        displacement: Vec<f64>,
+        direction: Vec<f64>,
+    },
+    Shell3Membrane {
+        node_coordinates_m: [f64; 9],
+        thickness_m: f64,
+        displacement_m: Vec<f64>,
+        direction_m: Vec<f64>,
+    },
+}
+
+impl ReferenceElementInput {
+    #[allow(clippy::type_complexity)]
+    fn abi_parts(
+        &self,
+    ) -> (
+        u32,
+        &[f64],
+        &[f64],
+        &[f64],
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        f64,
+        usize,
+        usize,
+    ) {
+        match self {
+            Self::Truss3d {
+                node_coordinates_m,
+                area_m2,
+                displacement_m,
+                direction_m,
+            } => (
+                sys::SA_REFERENCE_ELEMENT_TRUSS3D,
+                node_coordinates_m,
+                displacement_m,
+                direction_m,
+                *area_m2,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                6,
+                3,
+            ),
+            Self::Frame3d {
+                node_coordinates_m,
+                area_m2,
+                iy_m4,
+                iz_m4,
+                torsional_constant_m4,
+                local_axis_rotation_rad,
+                displacement,
+                direction,
+            } => (
+                sys::SA_REFERENCE_ELEMENT_FRAME3D,
+                node_coordinates_m,
+                displacement,
+                direction,
+                *area_m2,
+                *iy_m4,
+                *iz_m4,
+                *torsional_constant_m4,
+                0.0,
+                *local_axis_rotation_rad,
+                12,
+                12,
+            ),
+            Self::Shell3Membrane {
+                node_coordinates_m,
+                thickness_m,
+                displacement_m,
+                direction_m,
+            } => (
+                sys::SA_REFERENCE_ELEMENT_SHELL3_MEMBRANE,
+                node_coordinates_m,
+                displacement_m,
+                direction_m,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                *thickness_m,
+                0.0,
+                9,
+                6,
+            ),
+        }
+    }
+}
+
+/// Complete caller-owned tangent, mass, residual, JVP and recovery response.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ReferenceElementSolution {
+    pub kind: u32,
+    pub dof_count: u32,
+    pub tangent: Vec<f64>,
+    pub consistent_mass: Vec<f64>,
+    pub residual: Vec<f64>,
+    pub jvp: Vec<f64>,
+    pub recovery: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Caller-owned deterministic result from the bounded C++ track point-load CPU kernel.
 #[derive(Clone, Debug, PartialEq)]
 pub struct TrackPointLoadSolution {
@@ -551,6 +684,15 @@ impl Api {
     /// Returns a stable ABI error if the adapter capability or operation is absent.
     pub fn load_model_ir_ndtha_adapter() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_6)
+    }
+
+    /// Load the ABI v1.7 table with bounded stateless CPU reference elements.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the reference-element capability or operation is absent.
+    pub fn load_reference_elements() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_7)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -1047,6 +1189,136 @@ impl Api {
         let advanced = arena.finish(&raw_state, story_count, step_count)?;
         *state = advanced;
         Ok(())
+    }
+
+    /// Evaluate one bounded CPU reference element through caller-owned ABI v1.7 buffers.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error for invalid geometry, properties, lengths, non-finite values,
+    /// unsupported kinds, or any native output-contract violation.
+    #[allow(clippy::similar_names, clippy::too_many_lines)]
+    pub fn evaluate_reference_element(
+        self,
+        material: ReferenceMaterial,
+        input: &ReferenceElementInput,
+    ) -> Result<ReferenceElementSolution, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_7 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "reference elements require ABI v1.7".to_owned(),
+            });
+        }
+        let (
+            kind,
+            coordinates,
+            displacement,
+            direction,
+            area_m2,
+            iy_m4,
+            iz_m4,
+            torsional_constant_m4,
+            thickness_m,
+            local_axis_rotation_rad,
+            dof_count,
+            recovery_count,
+        ) = input.abi_parts();
+        let matrix_length = dof_count.checked_mul(dof_count).ok_or_else(|| Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "reference element matrix length overflowed".to_owned(),
+        })?;
+        let mut tangent = allocate_f64_output(matrix_length)?;
+        let mut consistent_mass = allocate_f64_output(matrix_length)?;
+        let mut residual = allocate_f64_output(dof_count)?;
+        let mut jvp = allocate_f64_output(dof_count)?;
+        let mut recovery = allocate_f64_output(recovery_count)?;
+        let raw_config = sys::SaReferenceElementConfigV1 {
+            abi_version: sys::SA_ABI_V1_7,
+            struct_size: abi_size::<sys::SaReferenceElementConfigV1>(),
+            kind,
+            flags: 0,
+            youngs_modulus_pa: material.youngs_modulus_pa,
+            poisson_ratio: material.poisson_ratio,
+            density_kg_per_m3: material.density_kg_per_m3,
+            area_m2,
+            iy_m4,
+            iz_m4,
+            torsional_constant_m4,
+            thickness_m,
+            local_axis_rotation_rad,
+            node_coordinates_m: input_f64_view(coordinates, sys::SA_ABI_V1_7)?,
+            displacement: input_f64_view(displacement, sys::SA_ABI_V1_7)?,
+            direction: input_f64_view(direction, sys::SA_ABI_V1_7)?,
+            reserved: [0; 2],
+        };
+        let raw_outputs = sys::SaReferenceElementOutputsV1 {
+            abi_version: sys::SA_ABI_V1_7,
+            struct_size: abi_size::<sys::SaReferenceElementOutputsV1>(),
+            tangent: mutable_f64_view(&mut tangent, sys::SA_ABI_V1_7)?,
+            consistent_mass: mutable_f64_view(&mut consistent_mass, sys::SA_ABI_V1_7)?,
+            residual: mutable_f64_view(&mut residual, sys::SA_ABI_V1_7)?,
+            jvp: mutable_f64_view(&mut jvp, sys::SA_ABI_V1_7)?,
+            recovery: mutable_f64_view(&mut recovery, sys::SA_ABI_V1_7)?,
+            reserved: [0; 2],
+        };
+        let mut raw_result = sys::SaReferenceElementResultV1 {
+            abi_version: sys::SA_ABI_V1_7,
+            struct_size: abi_size::<sys::SaReferenceElementResultV1>(),
+            kind: 0,
+            dof_count: 0,
+            recovery_count: 0,
+            execution_backend: 0,
+            fallback_count: u32::MAX,
+            reserved_u32: 0,
+            output_matrix_length: 0,
+            reserved: [0; 2],
+        };
+        let evaluate = self
+            .table
+            .reference_element_evaluate
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all input slices and five disjoint Rust-owned output vectors remain live for
+        // this synchronous call. The native boundary retains no pointer and publishes atomically.
+        let status = unsafe { evaluate(&raw_config, &raw_outputs, &mut raw_result, &mut error) };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let output_values = tangent
+            .iter()
+            .chain(&consistent_mass)
+            .chain(&residual)
+            .chain(&jvp)
+            .chain(&recovery);
+        let valid = raw_result.abi_version == sys::SA_ABI_V1_7
+            && raw_result.struct_size == abi_size::<sys::SaReferenceElementResultV1>()
+            && raw_result.kind == kind
+            && usize::try_from(raw_result.dof_count) == Ok(dof_count)
+            && usize::try_from(raw_result.recovery_count) == Ok(recovery_count)
+            && usize::try_from(raw_result.output_matrix_length) == Ok(matrix_length)
+            && raw_result.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw_result.fallback_count == 0
+            && raw_result.reserved_u32 == 0
+            && raw_result.reserved == [0; 2]
+            && output_values.into_iter().all(|value| value.is_finite());
+        if !valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native reference element violated the v1.7 output contract".to_owned(),
+            });
+        }
+        Ok(ReferenceElementSolution {
+            kind,
+            dof_count: raw_result.dof_count,
+            tangent,
+            consistent_mass,
+            residual,
+            jvp,
+            recovery,
+            execution_backend: raw_result.execution_backend,
+            fallback_count: raw_result.fallback_count,
+        })
     }
 }
 
@@ -1580,6 +1852,9 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let model_ir_ndtha_adapter_slot = table.model_ir_ndtha_adapt.is_some();
     let model_ir_ndtha_adapter_absent = !model_ir_ndtha_adapter_slot
         && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER == 0;
+    let reference_elements_slot = table.reference_element_evaluate.is_some();
+    let reference_elements_absent = !reference_elements_slot
+        && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU == 0;
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
@@ -1587,6 +1862,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
@@ -1595,6 +1871,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU == 0
@@ -1607,6 +1884,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1619,6 +1897,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && !nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1631,6 +1910,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_ndtha_slot
             && !nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1644,6 +1924,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_ndtha_slot
             && nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_absent
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1657,6 +1938,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && nonlinear_ndtha_slot
             && nonlinear_ndtha_restart_slot
             && model_ir_ndtha_adapter_slot
+            && reference_elements_absent
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
             && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
@@ -1664,6 +1946,22 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+    } else if requested == sys::SA_ABI_V1_7 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
     } else {
         false
     };
@@ -1926,12 +2224,12 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7,
         SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
         SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
-        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
-        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
+        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -2052,6 +2350,24 @@ mod tests {
                 | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
                 | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
                 | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+        );
+    }
+
+    #[test]
+    fn v1_7_table_adds_only_the_bounded_reference_elements_capability() {
+        let api = Api::load_reference_elements().expect("v1.7 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_7);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
         );
     }
 

@@ -82,6 +82,22 @@ target_link_options(
 )
 structural_set_warnings(structural_nonlinear_ndtha_restart_fuzz)
 
+add_executable(structural_reference_elements_fuzz reference_elements_fuzz.cpp)
+target_link_libraries(structural_reference_elements_fuzz PRIVATE structural_c_abi_v1)
+target_compile_options(
+  structural_reference_elements_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+target_link_options(
+  structural_reference_elements_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+structural_set_warnings(structural_reference_elements_fuzz)
+
 add_custom_target(
   structural_native_fuzzers
   DEPENDS
@@ -90,6 +106,7 @@ add_custom_target(
     structural_nonlinear_static_fuzz
     structural_nonlinear_ndtha_fuzz
     structural_nonlinear_ndtha_restart_fuzz
+    structural_reference_elements_fuzz
 )
 add_test(
   NAME structural_abi_buffer_fuzz_smoke
@@ -137,6 +154,16 @@ add_test(
 )
 set_tests_properties(
   structural_nonlinear_ndtha_restart_fuzz_smoke
+  PROPERTIES
+    LABELS "fuzz-smoke"
+    TIMEOUT 30
+)
+add_test(
+  NAME structural_reference_elements_fuzz_smoke
+  COMMAND structural_reference_elements_fuzz -runs=256
+)
+set_tests_properties(
+  structural_reference_elements_fuzz_smoke
   PROPERTIES
     LABELS "fuzz-smoke"
     TIMEOUT 30

@@ -10,6 +10,9 @@ Baseline inventory: Python 2,002 files, Rust 2 files, C++/HIP 13 files
 native 코드를 product authority로 승격하지 못하게 하는 cutover 기준이다. 파일 수는
 진척률이 아니며 baseline 변화 시 다시 측정한다.
 
+Until a domain closes C6, Python remains authoritative oracle and rollback evidence for every
+family not explicitly cut over by a narrower row below.
+
 ## 1. Cutover gate
 
 각 domain은 적용 가능한 gate를 왼쪽부터 순서대로 통과한다.
@@ -82,11 +85,20 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - tests/test_stateful_corotational_fiber_frame3d.py
   - tests/test_mgt_frame_material_nonlinear_tangent.py
   - tests/test_mgt_shell_material_nonlinear_tangent.py
+  - tests/test_native_reference_elements_python_parity.py
 - Stable errors to preserve
   - unsupported formulation/material, invalid geometry/property, trial-state conflict
   - constitutive nonconvergence와 rollback failure
 - Required gates: C0 through C6, including CPU/HIP residual/tangent/recovery parity.
-- State: partial HIP probes exist; no product cutover.
+- State: aggregate D2 remains partial, with one bounded CPU reference slice at C1. C++20 now owns
+  explicit elastic-isotropic validation, one epoch-checked bilinear uniaxial
+  trial/commit/rollback point, linear truss3d, Euler-Bernoulli frame3d and a three-node
+  plane-stress membrane. The same element response source emits tangent, consistent mass,
+  residual, JVP and recovery; an independent NumPy oracle compares every value. ABI v1.7 and a
+  safe reentrant Rust wrapper provide failure-atomic caller-owned integration with CPU fallback
+  zero, but cannot advance the sequential cutover beyond C1 while C2 is open. General
+  corotational/fiber/material families, shell bending/drilling, HIP parity, state checkpoint,
+  product E2E and C6 remain open. Existing partial HIP probes are not product authority.
 
 ### D3. Assembly and operator graph
 
@@ -101,11 +113,18 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - tests/test_mgt_equilibrium_shell_assembly.py
   - tests/test_mgt_residual_jacobian_consistency_probe.py
   - tests/test_engine_v2_hip_current_tangent_operator.py
+  - tests/test_native_reference_elements_python_parity.py
 - Stable errors to preserve
   - DOF/reference/layout mismatch, CSR invalid, state epoch mismatch
   - fallback forbidden, backend unavailable와 device mismatch
 - Required gates: C0 through C6.
-- State: probe/replay and Python-managed HIPRTC paths are not product authority.
+- State: aggregate D3 remains C0, with one bounded dense reference assembly slice at C1. C++20
+  validates unique stable element indices, local matrix/vector shape, finite values and global
+  DOF references, then scatters tangent, consistent mass, residual and JVP in stable-index order.
+  The complete three-DOF/two-contribution output matches an independent NumPy oracle. This is not
+  CSR, constraint handling, arbitrary ModelIR assembly, stateful epoch propagation or Rust
+  product integration. Those paths and HIP C2 remain open; probe/replay and Python-managed
+  HIPRTC paths are not product authority.
 
 ### D4. Linear, nonlinear, eigen and dynamic solvers
 

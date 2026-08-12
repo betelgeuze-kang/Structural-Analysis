@@ -62,6 +62,19 @@ set_tests_properties(
   PROPERTIES LABELS "abi;solver_cpu;nonlinear_ndtha"
 )
 
+add_executable(
+  structural_reference_elements_abi_tests
+  abi/reference_elements_contract_test.cpp
+)
+target_link_libraries(structural_reference_elements_abi_tests PRIVATE structural_c_abi_v1)
+structural_set_warnings(structural_reference_elements_abi_tests)
+structural_enable_sanitizers(structural_reference_elements_abi_tests)
+add_test(NAME structural_reference_elements_abi_tests COMMAND structural_reference_elements_abi_tests)
+set_tests_properties(
+  structural_reference_elements_abi_tests
+  PROPERTIES LABELS "abi;elements;materials;solver_cpu"
+)
+
 add_executable(structural_abi_link_smoke_c abi/link_smoke.c)
 target_link_libraries(structural_abi_link_smoke_c PRIVATE structural_c_abi_v1)
 structural_set_warnings(structural_abi_link_smoke_c)
@@ -121,4 +134,55 @@ add_test(NAME structural_nonlinear_ndtha_cpu_tests COMMAND structural_nonlinear_
 set_tests_properties(
   structural_nonlinear_ndtha_cpu_tests
   PROPERTIES LABELS "solver_cpu;nonlinear_ndtha"
+)
+
+add_executable(structural_materials_cpu_tests materials/materials_test.cpp)
+target_include_directories(
+  structural_materials_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/materials
+)
+target_link_libraries(structural_materials_cpu_tests PRIVATE structural_materials)
+structural_set_warnings(structural_materials_cpu_tests)
+structural_enable_sanitizers(structural_materials_cpu_tests)
+add_test(NAME structural_materials_cpu_tests COMMAND structural_materials_cpu_tests)
+set_tests_properties(
+  structural_materials_cpu_tests
+  PROPERTIES LABELS "materials;solver_cpu"
+)
+
+add_executable(structural_reference_elements_cpu_tests elements/reference_elements_test.cpp)
+target_include_directories(
+  structural_reference_elements_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/elements
+    ${PROJECT_SOURCE_DIR}/src/materials
+)
+target_link_libraries(
+  structural_reference_elements_cpu_tests
+  PRIVATE
+    structural_elements
+    structural_materials
+)
+structural_set_warnings(structural_reference_elements_cpu_tests)
+structural_enable_sanitizers(structural_reference_elements_cpu_tests)
+add_test(NAME structural_reference_elements_cpu_tests COMMAND structural_reference_elements_cpu_tests)
+set_tests_properties(
+  structural_reference_elements_cpu_tests
+  PROPERTIES LABELS "elements;materials;solver_cpu"
+)
+
+add_executable(structural_dense_assembly_cpu_tests assembly/dense_assembly_test.cpp)
+target_include_directories(
+  structural_dense_assembly_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/assembly
+)
+target_link_libraries(structural_dense_assembly_cpu_tests PRIVATE structural_assembly)
+structural_set_warnings(structural_dense_assembly_cpu_tests)
+structural_enable_sanitizers(structural_dense_assembly_cpu_tests)
+add_test(NAME structural_dense_assembly_cpu_tests COMMAND structural_dense_assembly_cpu_tests)
+set_tests_properties(
+  structural_dense_assembly_cpu_tests
+  PROPERTIES LABELS "assembly;solver_cpu"
 )

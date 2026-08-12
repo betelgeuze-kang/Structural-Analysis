@@ -1,5 +1,6 @@
 #include "structural/abi_v1.h"
 
+#include "../elements/reference_elements.hpp"
 #include "../model_ir/model_ir.hpp"
 #include "../solver_cpu/nonlinear_ndtha.hpp"
 #include "../solver_cpu/nonlinear_static.hpp"
@@ -16,6 +17,7 @@
 #include <memory>
 #include <mutex>
 #include <new>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -37,7 +39,7 @@ static_assert(offsetof(sa_mut_buffer_view_v1, flags) == 44U);
 static_assert(sizeof(sa_error_buffer_v1) == 32U);
 static_assert(offsetof(sa_error_buffer_v1, required) == 24U);
 static_assert(sizeof(sa_api_request_v1) == 40U);
-static_assert(sizeof(sa_api_v1) == 128U);
+static_assert(sizeof(sa_api_v1) == 136U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
@@ -46,7 +48,8 @@ static_assert(offsetof(sa_api_v1, nonlinear_static_solve) == 80U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_solve) == 88U);
 static_assert(offsetof(sa_api_v1, nonlinear_ndtha_advance) == 96U);
 static_assert(offsetof(sa_api_v1, model_ir_ndtha_adapt) == 104U);
-static_assert(offsetof(sa_api_v1, reserved) == 112U);
+static_assert(offsetof(sa_api_v1, reference_element_evaluate) == 112U);
+static_assert(offsetof(sa_api_v1, reserved) == 120U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -113,6 +116,17 @@ static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, element_index) == 16
 static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, story_height_m) == 32U);
 static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, execution_backend) == 112U);
 static_assert(offsetof(sa_model_ir_ndtha_adapter_result_v1, reserved) == 120U);
+static_assert(sizeof(sa_reference_element_config_v1) == 248U);
+static_assert(offsetof(sa_reference_element_config_v1, youngs_modulus_pa) == 16U);
+static_assert(offsetof(sa_reference_element_config_v1, node_coordinates_m) == 88U);
+static_assert(offsetof(sa_reference_element_config_v1, reserved) == 232U);
+static_assert(sizeof(sa_reference_element_outputs_v1) == 264U);
+static_assert(offsetof(sa_reference_element_outputs_v1, tangent) == 8U);
+static_assert(offsetof(sa_reference_element_outputs_v1, recovery) == 200U);
+static_assert(offsetof(sa_reference_element_outputs_v1, reserved) == 248U);
+static_assert(sizeof(sa_reference_element_result_v1) == 56U);
+static_assert(offsetof(sa_reference_element_result_v1, output_matrix_length) == 32U);
+static_assert(offsetof(sa_reference_element_result_v1, reserved) == 40U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -2182,6 +2196,381 @@ struct MemoryRegion {
         });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_reference_input_view(
+    const sa_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_7) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "reference element input ABI is not v1.7");
+    }
+    if (view.struct_size < sizeof(sa_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "reference element input struct_size is too small");
+    }
+    if (view.data == nullptr || view.length != expected_length
+        || view.stride_bytes != sizeof(double) || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "reference element input pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_reference_output_view(
+    const sa_mut_buffer_view_v1& view,
+    const std::uint64_t expected_length,
+    const std::string_view label,
+    sa_error_buffer_v1* const error) {
+    if (view.abi_version != SA_ABI_V1_7) {
+        return report_error(
+            error, SA_ERR_ABI_VERSION_MISMATCH, "reference element output ABI is not v1.7");
+    }
+    if (view.struct_size < sizeof(sa_mut_buffer_view_v1)) {
+        return report_error(
+            error, SA_ERR_STRUCT_SIZE, "reference element output struct_size is too small");
+    }
+    if (view.data == nullptr || view.stride_bytes != sizeof(double)
+        || view.element_type != SA_ELEMENT_TYPE_F64
+        || view.memory_space != SA_MEMORY_SPACE_HOST || view.device_id != -1
+        || view.flags != 0U) {
+        return report_error(error, SA_ERR_INVALID_ARGUMENT, label);
+    }
+    if (view.length < expected_length) {
+        return report_error(
+            error, SA_ERR_BUFFER_TOO_SMALL, "reference element output buffer is too small");
+    }
+    const auto extent = expected_length * sizeof(double);
+    const auto address = reinterpret_cast<std::uintptr_t>(view.data);
+    if (address % alignof(double) != 0U
+        || address > std::numeric_limits<std::uintptr_t>::max() - (extent - 1U)) {
+        return report_error(
+            error, SA_ERR_INVALID_ARGUMENT, "reference element output pointer extent is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 reference_element_evaluate_boundary(
+    const sa_reference_element_config_v1* const config,
+    const sa_reference_element_outputs_v1* const outputs,
+    sa_reference_element_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [config, outputs, result, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config) || !pointer_is_aligned(outputs)
+            || !pointer_is_aligned(result)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "reference element descriptor is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_7 || outputs->abi_version != SA_ABI_V1_7
+            || result->abi_version != SA_ABI_V1_7) {
+            return report_error(
+                error, SA_ERR_ABI_VERSION_MISMATCH, "reference element descriptors require ABI v1.7");
+        }
+        if (config->struct_size < sizeof(sa_reference_element_config_v1)
+            || outputs->struct_size < sizeof(sa_reference_element_outputs_v1)
+            || result->struct_size < sizeof(sa_reference_element_result_v1)) {
+            return report_error(
+                error, SA_ERR_STRUCT_SIZE, "reference element descriptor struct_size is too small");
+        }
+        const auto reserved_nonzero = config->flags != 0U
+            || std::any_of(
+                std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                    return value != 0U;
+                })
+            || std::any_of(
+                std::begin(outputs->reserved), std::end(outputs->reserved), [](const auto value) {
+                    return value != 0U;
+                });
+        if (reserved_nonzero) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "reference element reserved fields are not zero");
+        }
+        const std::array scalar_values {
+            config->youngs_modulus_pa,
+            config->poisson_ratio,
+            config->density_kg_per_m3,
+            config->area_m2,
+            config->iy_m4,
+            config->iz_m4,
+            config->torsional_constant_m4,
+            config->thickness_m,
+            config->local_axis_rotation_rad,
+        };
+        if (std::any_of(scalar_values.begin(), scalar_values.end(), [](const auto value) {
+                return !std::isfinite(value);
+            })) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "reference element contains a non-finite scalar");
+        }
+        if (config->youngs_modulus_pa <= 0.0 || config->density_kg_per_m3 <= 0.0
+            || config->poisson_ratio <= -1.0 || config->poisson_ratio >= 0.5) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "reference material is outside the v1.7 domain");
+        }
+
+        std::uint64_t coordinate_count = 0U;
+        std::uint64_t dof_count = 0U;
+        std::uint64_t recovery_count = 0U;
+        if (config->kind == SA_REFERENCE_ELEMENT_TRUSS3D) {
+            coordinate_count = 6U;
+            dof_count = 6U;
+            recovery_count = 3U;
+            if (config->area_m2 <= 0.0 || config->iy_m4 != 0.0 || config->iz_m4 != 0.0
+                || config->torsional_constant_m4 != 0.0 || config->thickness_m != 0.0
+                || config->local_axis_rotation_rad != 0.0) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "truss reference properties are outside the v1.7 profile");
+            }
+        } else if (config->kind == SA_REFERENCE_ELEMENT_FRAME3D) {
+            coordinate_count = 6U;
+            dof_count = 12U;
+            recovery_count = 12U;
+            if (config->area_m2 <= 0.0 || config->iy_m4 <= 0.0 || config->iz_m4 <= 0.0
+                || config->torsional_constant_m4 <= 0.0 || config->thickness_m != 0.0) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "frame reference properties are outside the v1.7 profile");
+            }
+        } else if (config->kind == SA_REFERENCE_ELEMENT_SHELL3_MEMBRANE) {
+            coordinate_count = 9U;
+            dof_count = 9U;
+            recovery_count = 6U;
+            if (config->area_m2 != 0.0 || config->iy_m4 != 0.0 || config->iz_m4 != 0.0
+                || config->torsional_constant_m4 != 0.0 || config->thickness_m <= 0.0
+                || config->local_axis_rotation_rad != 0.0) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "shell reference properties are outside the v1.7 profile");
+            }
+        } else {
+            return report_error(
+                error, SA_ERR_UNSUPPORTED, "reference element kind is unsupported");
+        }
+        const auto matrix_length = dof_count * dof_count;
+        const std::array input_views {
+            &config->node_coordinates_m,
+            &config->displacement,
+            &config->direction,
+        };
+        const std::array input_lengths {coordinate_count, dof_count, dof_count};
+        const std::array input_labels {
+            std::string_view {"reference element coordinates metadata is invalid"},
+            std::string_view {"reference element displacement metadata is invalid"},
+            std::string_view {"reference element direction metadata is invalid"},
+        };
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            const auto status = validate_reference_input_view(
+                *input_views[index], input_lengths[index], input_labels[index], error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+        const std::array output_views {
+            &outputs->tangent,
+            &outputs->consistent_mass,
+            &outputs->residual,
+            &outputs->jvp,
+            &outputs->recovery,
+        };
+        const std::array output_lengths {
+            matrix_length, matrix_length, dof_count, dof_count, recovery_count};
+        const std::array output_labels {
+            std::string_view {"reference element tangent metadata is invalid"},
+            std::string_view {"reference element mass metadata is invalid"},
+            std::string_view {"reference element residual metadata is invalid"},
+            std::string_view {"reference element JVP metadata is invalid"},
+            std::string_view {"reference element recovery metadata is invalid"},
+        };
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            const auto status = validate_reference_output_view(
+                *output_views[index], output_lengths[index], output_labels[index], error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+        const std::array descriptor_regions {
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {outputs, sizeof(*outputs)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        for (std::size_t left = 0U; left < descriptor_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < descriptor_regions.size(); ++right) {
+                if (ranges_overlap(
+                        descriptor_regions[left].data,
+                        descriptor_regions[left].extent,
+                        descriptor_regions[right].data,
+                        descriptor_regions[right].extent)) {
+                    return report_error(
+                        error, SA_ERR_INVALID_ARGUMENT, "reference element descriptors overlap");
+                }
+            }
+        }
+        std::array<MemoryRegion, 3> input_regions {};
+        for (std::size_t index = 0U; index < input_views.size(); ++index) {
+            input_regions[index] = {
+                input_views[index]->data,
+                input_lengths[index] * sizeof(double),
+            };
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        input_regions[index].data,
+                        input_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "reference element input overlaps descriptor storage");
+                }
+            }
+        }
+        std::array<MemoryRegion, 5> output_regions {};
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            output_regions[index] = {
+                output_views[index]->data,
+                output_lengths[index] * sizeof(double),
+            };
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "reference element output overlaps descriptor storage");
+                }
+            }
+            for (const auto& input_region : input_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        input_region.data,
+                        input_region.extent)) {
+                    return report_error(
+                        error, SA_ERR_INVALID_ARGUMENT, "reference element output overlaps input data");
+                }
+            }
+        }
+        for (std::size_t left = 0U; left < output_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < output_regions.size(); ++right) {
+                if (ranges_overlap(
+                        output_regions[left].data,
+                        output_regions[left].extent,
+                        output_regions[right].data,
+                        output_regions[right].extent)) {
+                    return report_error(
+                        error, SA_ERR_INVALID_ARGUMENT, "reference element output buffers overlap");
+                }
+            }
+        }
+
+        const auto coordinates = std::span<const double> {
+            static_cast<const double*>(config->node_coordinates_m.data),
+            static_cast<std::size_t>(coordinate_count),
+        };
+        const auto displacement = std::span<const double> {
+            static_cast<const double*>(config->displacement.data),
+            static_cast<std::size_t>(dof_count),
+        };
+        const auto direction = std::span<const double> {
+            static_cast<const double*>(config->direction.data),
+            static_cast<std::size_t>(dof_count),
+        };
+        const auto finite_values = [](const std::span<const double> values) {
+            return std::all_of(values.begin(), values.end(), [](const auto value) {
+                return std::isfinite(value);
+            });
+        };
+        if (!finite_values(coordinates) || !finite_values(displacement)
+            || !finite_values(direction)) {
+            return report_error(
+                error, SA_ERR_INVALID_ARGUMENT, "reference element inputs contain a non-finite value");
+        }
+        const structural::materials::ElasticIsotropic material {
+            config->youngs_modulus_pa,
+            config->poisson_ratio,
+            config->density_kg_per_m3,
+        };
+        std::optional<structural::elements::ElementOperatorResponse> native;
+        try {
+            if (config->kind == SA_REFERENCE_ELEMENT_TRUSS3D) {
+                native.emplace(structural::elements::evaluate_truss3d({
+                    {coordinates[0], coordinates[1], coordinates[2]},
+                    {coordinates[3], coordinates[4], coordinates[5]},
+                    material,
+                    config->area_m2,
+                    displacement,
+                    direction,
+                }));
+            } else if (config->kind == SA_REFERENCE_ELEMENT_FRAME3D) {
+                native.emplace(structural::elements::evaluate_frame3d({
+                    {coordinates[0], coordinates[1], coordinates[2]},
+                    {coordinates[3], coordinates[4], coordinates[5]},
+                    material,
+                    config->area_m2,
+                    config->iy_m4,
+                    config->iz_m4,
+                    config->torsional_constant_m4,
+                    config->local_axis_rotation_rad,
+                    displacement,
+                    direction,
+                }));
+            } else {
+                native.emplace(structural::elements::evaluate_shell3_membrane({
+                    {{{coordinates[0], coordinates[1], coordinates[2]},
+                      {coordinates[3], coordinates[4], coordinates[5]},
+                      {coordinates[6], coordinates[7], coordinates[8]}}},
+                    material,
+                    config->thickness_m,
+                    displacement,
+                    direction,
+                }));
+            }
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        if (!native.has_value() || native->dof_count != dof_count
+            || native->tangent.size() != matrix_length
+            || native->consistent_mass.size() != matrix_length
+            || native->residual.size() != dof_count || native->jvp.size() != dof_count
+            || native->recovery.size() != recovery_count) {
+            return report_error(
+                error, SA_ERR_INTERNAL, "reference element result length invariant failed");
+        }
+        std::memcpy(
+            outputs->tangent.data, native->tangent.data(), matrix_length * sizeof(double));
+        std::memcpy(
+            outputs->consistent_mass.data,
+            native->consistent_mass.data(),
+            matrix_length * sizeof(double));
+        std::memcpy(outputs->residual.data, native->residual.data(), dof_count * sizeof(double));
+        std::memcpy(outputs->jvp.data, native->jvp.data(), dof_count * sizeof(double));
+        std::memcpy(
+            outputs->recovery.data, native->recovery.data(), recovery_count * sizeof(double));
+        *result = {
+            SA_ABI_V1_7,
+            static_cast<std::uint32_t>(sizeof(sa_reference_element_result_v1)),
+            config->kind,
+            static_cast<std::uint32_t>(dof_count),
+            static_cast<std::uint32_t>(recovery_count),
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            0U,
+            matrix_length,
+            {0U, 0U},
+        };
+        return SA_OK;
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -2216,6 +2605,9 @@ struct MemoryRegion {
     case SA_ABI_V1_6:
         api_min_size = SA_API_V1_6_MIN_SIZE;
         break;
+    case SA_ABI_V1_7:
+        api_min_size = SA_API_V1_7_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -2243,6 +2635,7 @@ struct MemoryRegion {
     const bool nonlinear_ndtha_enabled = request->abi_version >= SA_ABI_V1_4;
     const bool nonlinear_ndtha_restart_enabled = request->abi_version >= SA_ABI_V1_5;
     const bool model_ir_ndtha_adapter_enabled = request->abi_version >= SA_ABI_V1_6;
+    const bool reference_elements_enabled = request->abi_version >= SA_ABI_V1_7;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -2258,6 +2651,9 @@ struct MemoryRegion {
                     : UINT64_C(0))
             | (model_ir_ndtha_adapter_enabled
                     ? SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                    : UINT64_C(0))
+            | (reference_elements_enabled
+                    ? SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -2271,6 +2667,7 @@ struct MemoryRegion {
         nonlinear_ndtha_enabled ? &nonlinear_ndtha_boundary : nullptr,
         nonlinear_ndtha_restart_enabled ? &nonlinear_ndtha_advance_boundary : nullptr,
         model_ir_ndtha_adapter_enabled ? &model_ir_ndtha_adapt_boundary : nullptr,
+        reference_elements_enabled ? &reference_element_evaluate_boundary : nullptr,
         {nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));

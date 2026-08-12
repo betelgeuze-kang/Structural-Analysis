@@ -117,6 +117,25 @@ def test_mgt_import_oracle_and_fixture_route_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_reference_element_sources_route_through_cpp_abi_and_oracle_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/cpp/src/elements/reference_elements.cpp",
+            "native/cpp/src/materials/materials.cpp",
+            "native/cpp/tests/abi/reference_elements_contract_test.cpp",
+            "native/crates/structural-ffi/tests/reference_elements_parity.rs",
+            "tests/test_native_reference_elements_python_parity.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["abi"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

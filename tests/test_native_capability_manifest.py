@@ -42,6 +42,25 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "Python C1" in mgt_import["claim"]
     assert "CP949" in mgt_import["claim"]
     assert "C6" in mgt_import["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "reference_materials_elements_cpu"
+        )
+        is True
+    )
+    reference = payload["capabilities"]["reference_materials_elements_cpu"]
+    assert reference["cutover_gate"] == "C1"
+    assert "trial/commit/rollback" in reference["claim"]
+    assert "tangent, consistent-mass, residual, JVP and recovery" in reference["claim"]
+    assert "ABI v1.7" in reference["claim"]
+    assert "HIP C2" in reference["claim"]
+    assert capabilities.capability_is_enabled(payload, "dense_assembly_cpu") is True
+    assembly = payload["capabilities"]["dense_assembly_cpu"]
+    assert assembly["cutover_gate"] == "C1"
+    assert assembly["owner"] == "structural_assembly"
+    assert "unique stable element order" in assembly["claim"]
+    assert "CSR" in assembly["claim"]
+    assert "HIP C2" in assembly["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

@@ -43,6 +43,18 @@
       "owner": "structural-cli",
       "claim": "bounded MGT import-health C5 only: Rust owns bounded original bytes, strict UTF-8/BOM disposition, source SHA-256, section/row inventory and explicit mapped/preserved_only/dropped/unsupported diagnostics; the exact numeric frame/truss subset alone becomes canonical ModelIR and crosses the existing C++ semantic validator/snapshot through public import mgt, while four existing foundation fixtures remain honestly blocked where material/section/support/load data or shell support is absent; Python C1 raw-parser parity is frozen for all five fixtures, clean-environment artifacts are deterministic, and general MGT grammar, CP949, shell/load-combination/writeback, solver authority and C6 remain open"
     },
+    "reference_materials_elements_cpu": {
+      "status": "implemented",
+      "cutover_gate": "C1",
+      "owner": "structural_elements",
+      "claim": "bounded CPU C1 reference slice only: C++20 owns an explicit elastic-isotropic material, an epoch-checked bilinear uniaxial trial/commit/rollback point, linear truss3d and Euler-Bernoulli frame3d elements, and a three-node plane-stress membrane embedded in 3D; one independent NumPy oracle compares every tangent, consistent-mass, residual, JVP and recovery value, ABI v1.7 publishes disjoint caller-owned buffers atomically through a safe reentrant Rust wrapper with fallback 0, while frame offsets/releases, geometric and material nonlinearity, shell bending/drilling, general topology, HIP C2, checkpoint, product E2E and C6 remain open"
+    },
+    "dense_assembly_cpu": {
+      "status": "implemented",
+      "cutover_gate": "C1",
+      "owner": "structural_assembly",
+      "claim": "bounded dense CPU C1 assembly slice only: C++20 validates unique stable element order, local shapes, finite values and global DOF references, then deterministically scatters tangent, consistent mass, residual and JVP; the complete three-DOF two-contribution result matches an independent NumPy oracle, while CSR, constraints, arbitrary ModelIR graph assembly, state epochs across elements, sparse operators, HIP C2, Rust FFI, checkpoint, product E2E and C6 remain open"
+    },
     "track_point_load_cpu": {
       "status": "implemented",
       "cutover_gate": "C1",

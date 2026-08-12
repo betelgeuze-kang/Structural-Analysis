@@ -56,6 +56,59 @@ target_include_directories(
 structural_set_warnings(structural_model_ir)
 structural_enable_sanitizers(structural_model_ir)
 
+add_library(structural_materials STATIC src/materials/materials.cpp)
+add_library(Structural::materials ALIAS structural_materials)
+set_target_properties(
+  structural_materials
+  PROPERTIES
+    EXPORT_NAME materials
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
+target_include_directories(
+  structural_materials
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/materials
+)
+structural_set_warnings(structural_materials)
+structural_enable_sanitizers(structural_materials)
+
+add_library(structural_elements STATIC src/elements/reference_elements.cpp)
+add_library(Structural::elements ALIAS structural_elements)
+set_target_properties(
+  structural_elements
+  PROPERTIES
+    EXPORT_NAME elements
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
+target_include_directories(
+  structural_elements
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/elements
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/materials
+)
+target_link_libraries(structural_elements PUBLIC structural_materials)
+structural_set_warnings(structural_elements)
+structural_enable_sanitizers(structural_elements)
+
+add_library(structural_assembly STATIC src/assembly/dense_assembly.cpp)
+add_library(Structural::assembly ALIAS structural_assembly)
+set_target_properties(
+  structural_assembly
+  PROPERTIES
+    EXPORT_NAME assembly
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
+target_include_directories(
+  structural_assembly
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/assembly
+)
+structural_set_warnings(structural_assembly)
+structural_enable_sanitizers(structural_assembly)
+
 add_library(
   structural_solver_cpu STATIC
   src/solver_cpu/story_frame.cpp
@@ -81,7 +134,13 @@ structural_enable_sanitizers(structural_solver_cpu)
 
 add_library(structural_c_abi_v1 src/abi/abi_v1.cpp)
 add_library(Structural::c_abi_v1 ALIAS structural_c_abi_v1)
-target_link_libraries(structural_c_abi_v1 PUBLIC structural_model_ir structural_solver_cpu)
+target_link_libraries(
+  structural_c_abi_v1
+  PUBLIC
+    structural_model_ir
+    structural_elements
+    structural_solver_cpu
+)
 target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_C_ABI_V1_BUILD=1)
 set_target_properties(
   structural_c_abi_v1
@@ -120,7 +179,13 @@ if(STRUCTURAL_BUILD_FUZZERS)
 endif()
 
 install(
-  TARGETS structural_model_ir structural_solver_cpu structural_c_abi_v1
+  TARGETS
+    structural_model_ir
+    structural_materials
+    structural_elements
+    structural_assembly
+    structural_solver_cpu
+    structural_c_abi_v1
   EXPORT StructuralNativeTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

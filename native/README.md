@@ -66,6 +66,14 @@ the four tracked incomplete foundation fixtures remain blocked without invented 
 does not claim general MGT grammar, shell/load-combination/writeback or solver authority. See
 `docs/native/mgt-import-health-v1.md`.
 
+ABI v1.7 adds a bounded CPU reference slice for explicit elastic/bilinear material state,
+linear truss3d, Euler-Bernoulli frame3d and a three-node plane-stress membrane. The stateless
+element operation publishes complete tangent, consistent mass, residual, JVP and recovery
+buffers through one safe Rust wrapper; deterministic dense assembly remains a separate C++
+reference target. An independent NumPy oracle compares every output value. Because HIP C2 is
+still open, these capabilities remain at C1. See
+`docs/native/reference-elements-assembly-v1.md`.
+
 ## Rust
 
 ~~~bash
@@ -209,9 +217,10 @@ library, CMake package targets and `structural-native-build.json`. The only publ
 library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
 slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
 v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
-uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter while keeping
-the table at 128 bytes. v1.0-v1.5 table prefixes remain byte-compatible and expose that slot as
-null.
+uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter. ABI v1.7
+uses the next append-only slot at offset 112 for bounded CPU reference elements; the current
+table is 136 bytes. Existing callers may continue to provide their older struct size, and
+v1.0-v1.6 requests expose every later slot as null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

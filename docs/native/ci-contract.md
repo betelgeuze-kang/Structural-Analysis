@@ -45,6 +45,8 @@ Jobs:
      identity, tamper rejection and failure atomicity
    - ABI v1.6 bounded ModelIR-to-NDTHA layout, safe-wrapper closed-form parity, exact profile
      rejection, failure atomicity and concurrent immutable execution
+   - ABI v1.7 bounded truss3d/frame3d/three-node-membrane layout, disjoint caller-owned complete
+     response, failure atomicity and reentrant safe-wrapper execution
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -55,6 +57,8 @@ Jobs:
      matrix, frozen byte-identical legacy 3-story copy and nonconvergence taxonomy check
    - nonlinear-NDTHA independent dense-matrix Python oracle, strict five-case product-golden wire,
      all 11 response channels, adaptive/collapse taxonomy and frozen legacy config/input check
+   - reference material/element/dense-assembly independent NumPy oracle over every tangent, mass,
+     residual, JVP and recovery value
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
@@ -109,6 +113,8 @@ Required jobs:
    - track full-vector product golden parity; legacy endpoint convention remains separately frozen
    - nonlinear-static dense-matrix full-result matrix와 nonconvergence taxonomy parity
    - nonlinear-NDTHA dense-matrix full-result/adaptive/collapse matrix와 nonconvergence taxonomy
+     parity
+   - truss3d/frame3d/three-node membrane complete response and deterministic dense-assembly NumPy
      parity
 4. checkpoint-restart
    - exact model/state/execution hash binding, canonical byte/receipt freeze and every-byte tamper

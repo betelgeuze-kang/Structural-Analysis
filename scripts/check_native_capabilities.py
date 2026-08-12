@@ -20,6 +20,8 @@ EXPECTED_OWNERS = {
     "modelir_ndtha_adapter": "structural_model_ir",
     "modelir_ndtha_product_e2e": "structural-cli",
     "mgt_import_health": "structural-cli",
+    "reference_materials_elements_cpu": "structural_elements",
+    "dense_assembly_cpu": "structural_assembly",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",

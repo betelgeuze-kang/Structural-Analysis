@@ -98,7 +98,8 @@ def test_native_rust_gate_freezes_r3_product_and_legacy_runtime_exports() -> Non
     assert "structural_track_point_load_abi_tests" in workflow
     assert "structural_nonlinear_static_abi_tests" in workflow
     assert "structural_nonlinear_ndtha_abi_tests" in workflow
-    assert 'payload["abi_version"] == "0x00010004"' in workflow
+    assert "structural_reference_elements_abi_tests" in workflow
+    assert 'payload["abi_version"] == "0x00010007"' in workflow
 
 
 def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> None:
@@ -121,3 +122,4 @@ def test_merge_oracle_gate_runs_all_three_solver_python_c1_matrices() -> None:
     assert "tests/test_native_nonlinear_static_python_parity.py" in workflow
 
     assert "tests/test_native_track_point_load_python_parity.py" in workflow
+    assert "tests/test_native_reference_elements_python_parity.py" in workflow

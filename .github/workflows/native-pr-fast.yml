@@ -182,6 +182,7 @@ jobs:
             -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
           cmake --build build/native-pr-fast --parallel 2
           ctest --test-dir build/native-pr-fast --output-on-failure
+          python3 scripts/check_native_reference_elements.py
 
   abi-contract:
     name: abi-contract
@@ -227,7 +228,8 @@ jobs:
             structural_abi_contract_tests \
             structural_track_point_load_abi_tests \
             structural_nonlinear_static_abi_tests \
-            structural_nonlinear_ndtha_abi_tests
+            structural_nonlinear_ndtha_abi_tests \
+            structural_reference_elements_abi_tests
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
@@ -417,7 +419,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x00010004"
+          assert payload["abi_version"] == "0x00010007"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY
@@ -498,7 +500,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Python oracle
-        if: needs.scope-contract.outputs.modelir == 'true'
+        if: needs.scope-contract.outputs.oracle == 'true'
         uses: actions/setup-python@v6
         with:
           python-version: "3.10"
@@ -506,13 +508,13 @@ jobs:
 
       - name: Compare bounded native outputs with the Python oracle
         env:
-          MODELIR_CHANGED: ${{ needs.scope-contract.outputs.modelir }}
+          ORACLE_CHANGED: ${{ needs.scope-contract.outputs.oracle }}
           NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$MODELIR_CHANGED" != "true" ]]; then
-            echo "ModelIR/oracle paths unchanged; parity lane is not applicable"
+          if [[ "$ORACLE_CHANGED" != "true" ]]; then
+            echo "Native oracle paths unchanged; parity lane is not applicable"
             exit 0
           fi
           if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2_rust_wire; then
@@ -539,6 +541,7 @@ jobs:
             tests/test_model_ir_v2_contract.py \
             tests/test_native_model_ir_rust_parity.py \
             tests/test_native_mgt_import_health_python_parity.py \
+            tests/test_native_reference_elements_python_parity.py \
             tests/test_native_nonlinear_ndtha_python_parity.py \
             tests/test_native_nonlinear_static_python_parity.py \
             tests/test_native_track_point_load_python_parity.py

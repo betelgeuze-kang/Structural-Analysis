@@ -49,6 +49,8 @@ fn main() {
         build_dir.join("lib").display()
     );
     println!("cargo:rustc-link-lib=static=structural_c_abi_v1");
+    println!("cargo:rustc-link-lib=static=structural_elements");
+    println!("cargo:rustc-link-lib=static=structural_materials");
     println!("cargo:rustc-link-lib=static=structural_solver_cpu");
     println!("cargo:rustc-link-lib=static=structural_model_ir");
     let target = env::var("TARGET").unwrap_or_default();

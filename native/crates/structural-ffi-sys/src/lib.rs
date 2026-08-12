@@ -14,13 +14,15 @@ mod nonlinear_static;
 pub use nonlinear_static::*;
 mod nonlinear_ndtha;
 pub use nonlinear_ndtha::*;
+mod reference_elements;
+pub use reference_elements::*;
 mod track;
 pub use track::*;
 
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_6;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_7;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -111,6 +113,7 @@ pub struct SaApiV1 {
     pub nonlinear_ndtha_solve: Option<SaNonlinearNdthaSolveFnV1>,
     pub nonlinear_ndtha_advance: Option<SaNonlinearNdthaAdvanceFnV1>,
     pub model_ir_ndtha_adapt: Option<SaModelIrNdthaAdaptFnV1>,
+    pub reference_element_evaluate: Option<SaReferenceElementEvaluateFnV1>,
     pub reserved: [*const c_void; 2],
 }
 
@@ -132,6 +135,7 @@ impl Default for SaApiV1 {
             nonlinear_ndtha_solve: None,
             nonlinear_ndtha_advance: None,
             model_ir_ndtha_adapt: None,
+            reference_element_evaluate: None,
             reserved: [core::ptr::null(); 2],
         }
     }
@@ -164,7 +168,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 128);
+        assert_eq!(size_of::<SaApiV1>(), 136);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -173,7 +177,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_solve), 88);
         assert_eq!(offset_of!(SaApiV1, nonlinear_ndtha_advance), 96);
         assert_eq!(offset_of!(SaApiV1, model_ir_ndtha_adapt), 104);
-        assert_eq!(offset_of!(SaApiV1, reserved), 112);
+        assert_eq!(offset_of!(SaApiV1, reference_element_evaluate), 112);
+        assert_eq!(offset_of!(SaApiV1, reserved), 120);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

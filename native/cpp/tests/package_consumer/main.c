@@ -4,21 +4,23 @@
 
 int main(void) {
     const sa_api_request_v1 request = {
-        SA_ABI_V1_4,
+        SA_ABI_V1_7,
         (uint32_t)sizeof(sa_api_request_v1),
         0U,
         {0U, 0U, 0U},
     };
     sa_api_v1 api = {0};
-    api.abi_version = SA_ABI_V1_4;
+    api.abi_version = SA_ABI_V1_7;
     api.struct_size = (uint32_t)sizeof(sa_api_v1);
     if (sa_get_api_v1(&request, &api, NULL) != SA_OK
         || api.track_point_load_solve == NULL
         || api.nonlinear_static_solve == NULL
         || api.nonlinear_ndtha_solve == NULL
+        || api.reference_element_evaluate == NULL
         || (api.capabilities & SA_CAPABILITY_TRACK_POINT_LOAD_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_CPU) == 0U
-        || (api.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_CPU) == 0U) {
+        || (api.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_CPU) == 0U
+        || (api.capabilities & SA_CAPABILITY_REFERENCE_ELEMENTS_CPU) == 0U) {
         return 1;
     }
 
@@ -271,10 +273,84 @@ int main(void) {
         != SA_OK) {
         return 1;
     }
-    return ndtha_result.converged_all_steps == 1U
-            && ndtha_result.collapsed == 0U
-            && ndtha_result.fallback_count == 0U
-            && ndtha_result.execution_backend == SA_EXECUTION_BACKEND_CPU
+    if (ndtha_result.converged_all_steps != 1U || ndtha_result.collapsed != 0U
+        || ndtha_result.fallback_count != 0U
+        || ndtha_result.execution_backend != SA_EXECUTION_BACKEND_CPU) {
+        return 1;
+    }
+
+    const double reference_coordinates[6] = {0.0, 0.0, 0.0, 2.0, 0.0, 0.0};
+    const double reference_displacement[6] = {0.0, 0.0, 0.0, 0.002, 0.0, 0.0};
+    const double reference_direction[6] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0};
+    const sa_buffer_view_v1 reference_input = {
+        SA_ABI_V1_7,
+        (uint32_t)sizeof(sa_buffer_view_v1),
+        reference_coordinates,
+        6U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_reference_element_config_v1 reference_config = {0};
+    reference_config.abi_version = SA_ABI_V1_7;
+    reference_config.struct_size = (uint32_t)sizeof(reference_config);
+    reference_config.kind = SA_REFERENCE_ELEMENT_TRUSS3D;
+    reference_config.youngs_modulus_pa = 200.0;
+    reference_config.poisson_ratio = 0.25;
+    reference_config.density_kg_per_m3 = 1000.0;
+    reference_config.area_m2 = 0.01;
+    reference_config.node_coordinates_m = reference_input;
+    reference_config.displacement = reference_input;
+    reference_config.displacement.data = reference_displacement;
+    reference_config.direction = reference_input;
+    reference_config.direction.data = reference_direction;
+
+    double reference_tangent[36] = {0.0};
+    double reference_mass[36] = {0.0};
+    double reference_residual[6] = {0.0};
+    double reference_jvp[6] = {0.0};
+    double reference_recovery[3] = {0.0};
+    const sa_mut_buffer_view_v1 reference_matrix_output = {
+        SA_ABI_V1_7,
+        (uint32_t)sizeof(sa_mut_buffer_view_v1),
+        reference_tangent,
+        36U,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+    sa_reference_element_outputs_v1 reference_outputs = {0};
+    reference_outputs.abi_version = SA_ABI_V1_7;
+    reference_outputs.struct_size = (uint32_t)sizeof(reference_outputs);
+    reference_outputs.tangent = reference_matrix_output;
+    reference_outputs.consistent_mass = reference_matrix_output;
+    reference_outputs.consistent_mass.data = reference_mass;
+    reference_outputs.residual = reference_matrix_output;
+    reference_outputs.residual.data = reference_residual;
+    reference_outputs.residual.length = 6U;
+    reference_outputs.jvp = reference_outputs.residual;
+    reference_outputs.jvp.data = reference_jvp;
+    reference_outputs.recovery = reference_outputs.residual;
+    reference_outputs.recovery.data = reference_recovery;
+    reference_outputs.recovery.length = 3U;
+    sa_reference_element_result_v1 reference_result = {0};
+    reference_result.abi_version = SA_ABI_V1_7;
+    reference_result.struct_size = (uint32_t)sizeof(reference_result);
+    if (api.reference_element_evaluate(
+            &reference_config, &reference_outputs, &reference_result, NULL)
+        != SA_OK) {
+        return 1;
+    }
+    return reference_result.kind == SA_REFERENCE_ELEMENT_TRUSS3D
+            && reference_result.dof_count == 6U
+            && reference_result.recovery_count == 3U
+            && reference_result.execution_backend == SA_EXECUTION_BACKEND_CPU
+            && reference_result.fallback_count == 0U
+            && reference_recovery[0] > 0.0
         ? 0
         : 1;
 }
