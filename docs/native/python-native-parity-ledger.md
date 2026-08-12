@@ -169,9 +169,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: orchestration 자체는 backend-independent이지만 같은 job contract가
   CPU와 HIP execution handle을 명시적으로 선택하고 fallback을 기록하는 E2E가 필요하다.
-- State: Python SQLite single-host authority remains. Rust now owns the bounded NDTHA checkpoint
-  artifact and a synchronous run/resume CLI, but durable submit/poll/cancel, leases and startup
-  crash reconciliation are not started.
+- State: Rust now owns a bounded single-host CPU NDTHA slice through C5: strict idempotent
+  submit/poll/cancel, append-only hash-chained events, content-addressed artifacts, OS-lock worker
+  leases, expired-lease crash reconciliation, C4 checkpoint resume, deterministic terminal
+  re-projection and environment-cleared CLI export. The existing Python SQLite service remains
+  authoritative for tenant authorization, HTTP/API compatibility and solver families outside this
+  bounded request. HIP C2, distributed claim semantics and final C6 decommission remain open.
 
 ### D6. ResultIR and engineering result recovery
 

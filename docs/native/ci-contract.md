@@ -113,6 +113,10 @@ Required jobs:
    - strict request -> C++ core -> C4 checkpoint -> ResultIR/ReportIR/Markdown/receipt output
    - environment-cleared Rust CLI direct/resume artifact byte identity and frozen SHA-256
    - atomic create-new output publication and no unsupported authority promotion
+   - bounded single-host durable-job submit/poll/cancel, exclusive worker claim, expired-lease
+     crash reconciliation, checkpointed process restart and atomic artifact export
+   - append-only event self-hash chain and content-addressed blob corruption fail closed; direct,
+     restarted and exported core artifacts are byte-identical with Python/Node lookup removed
 6. merge-product aggregate
    - latest exact-head and merge-ref only
 

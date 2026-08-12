@@ -3,10 +3,15 @@
 #![forbid(unsafe_code)]
 
 mod checkpoint;
+mod job;
 
 use std::path::Path;
 
 pub use checkpoint::{NonlinearNdthaCheckpoint, NonlinearNdthaCheckpointReceipt};
+pub use job::{
+    unix_time_millis, DurableJobClaimV1, DurableJobCompletionV1, DurableJobError,
+    DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1, JobArtifactReferenceV1,
+};
 use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
 };

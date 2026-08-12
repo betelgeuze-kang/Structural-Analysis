@@ -635,6 +635,9 @@ jobs:
             exit 0
           fi
           python3 scripts/check_native_product_e2e.py
+          python3 scripts/check_native_durable_jobs.py
+          cargo test --manifest-path native/Cargo.toml -p structural-runtime \
+            --test durable_job --locked
           cargo test --manifest-path native/Cargo.toml -p structural-cli --locked
 
   native-merge-product:

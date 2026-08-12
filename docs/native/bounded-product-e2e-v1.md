@@ -31,6 +31,7 @@ identical. The request and all five terminal artifacts have frozen SHA-256 value
 ## Authority boundary
 
 The result remains `bounded_candidate`. This slice does not claim broader dynamic solver coverage,
-HIP C2, a ModelIR-to-analysis adapter, durable job submit/poll/cancel/crash reconciliation, a
-service API, external comparison ingestion, PDF rendering, native Workbench or C6 removal. Those
-remain independent gates even though the bounded CLI path is complete.
+HIP C2, a ModelIR-to-analysis adapter, distributed durable jobs/API, tenant authorization,
+external comparison ingestion, PDF rendering, native Workbench or C6 removal. A separate bounded
+single-host durable-job slice now owns local submit/poll/cancel/crash reconciliation, but it does
+not broaden this synchronous product claim or close those independent gates.

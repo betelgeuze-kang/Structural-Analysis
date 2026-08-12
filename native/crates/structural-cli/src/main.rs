@@ -8,6 +8,8 @@ use structural_cli::{
     validation_succeeds,
 };
 
+mod job_cli;
+
 const EXIT_FAILURE: u8 = 1;
 const EXIT_USAGE_OR_INVALID: u8 = 2;
 
@@ -27,8 +29,13 @@ fn run(arguments: &[OsString]) -> ExitCode {
     if let Some(command) = parse_analysis_arguments(arguments) {
         return run_native_analysis(&command);
     }
+    if arguments.first().is_some_and(|argument| argument == "job") {
+        if let Some(exit) = job_cli::run_job(arguments) {
+            return exit;
+        }
+    }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }

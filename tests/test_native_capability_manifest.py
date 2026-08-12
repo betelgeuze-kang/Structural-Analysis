@@ -50,7 +50,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert checkpoint["cutover_gate"] == "C4"
     assert "bounded CPU" in checkpoint["claim"]
     assert "model, state and execution SHA-256" in checkpoint["claim"]
-    assert "job-state crash recovery" in checkpoint["claim"]
+    assert "HIP C2" in checkpoint["claim"]
     assert capabilities.capability_is_enabled(payload, "product_e2e") is True
     product = payload["capabilities"]["product_e2e"]
     assert product["cutover_gate"] == "C5"
@@ -58,6 +58,14 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "ResultIR, ReportIR" in product["claim"]
     assert "no Python or Node" in product["claim"]
     assert "durable jobs/API" in product["claim"]
+    assert capabilities.capability_is_enabled(payload, "durable_jobs") is True
+    durable = payload["capabilities"]["durable_jobs"]
+    assert durable["cutover_gate"] == "C5"
+    assert "bounded single-host CPU nonlinear-NDTHA" in durable["claim"]
+    assert "expired-lease crash reconciliation" in durable["claim"]
+    assert "tenant authorization" in durable["claim"]
+    assert "HIP C2" in durable["claim"]
+    assert "C6" in durable["claim"]
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 

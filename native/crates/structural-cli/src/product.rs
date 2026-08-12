@@ -200,6 +200,26 @@ pub fn publish_native_analysis(
     output_directory: &Path,
     outcome: &NativeAnalysisRunOutcomeV1,
 ) -> Result<(), NativeAnalysisProductError> {
+    let mut artifacts = vec![
+        ("checkpoint.ndcp", outcome.checkpoint_bytes()),
+        ("run-receipt.json", outcome.run_receipt_json().as_bytes()),
+    ];
+    if let (Some(result), Some(report), Some(document)) = (
+        outcome.result_ir_json(),
+        outcome.report_ir_json(),
+        outcome.report_document(),
+    ) {
+        artifacts.push(("result-ir.json", result.as_bytes()));
+        artifacts.push(("report-ir.json", report.as_bytes()));
+        artifacts.push(("report.md", document.as_bytes()));
+    }
+    publish_artifact_directory(output_directory, &artifacts)
+}
+
+pub(crate) fn publish_artifact_directory(
+    output_directory: &Path,
+    artifacts: &[(&str, &[u8])],
+) -> Result<(), NativeAnalysisProductError> {
     if output_directory.exists() {
         return Err(io_contract_error(
             "native analysis output directory already exists",
@@ -228,22 +248,18 @@ pub fn publish_native_analysis(
     fs::create_dir(&temporary)
         .map_err(|error| io_error("create native analysis temporary directory", &error))?;
     let publish_result = (|| -> Result<(), NativeAnalysisProductError> {
-        write_synced_file(
-            &temporary.join("checkpoint.ndcp"),
-            outcome.checkpoint_bytes(),
-        )?;
-        write_synced_file(
-            &temporary.join("run-receipt.json"),
-            outcome.run_receipt_json().as_bytes(),
-        )?;
-        if let (Some(result), Some(report), Some(document)) = (
-            outcome.result_ir_json(),
-            outcome.report_ir_json(),
-            outcome.report_document(),
-        ) {
-            write_synced_file(&temporary.join("result-ir.json"), result.as_bytes())?;
-            write_synced_file(&temporary.join("report-ir.json"), report.as_bytes())?;
-            write_synced_file(&temporary.join("report.md"), document.as_bytes())?;
+        for (name, bytes) in artifacts {
+            if name.is_empty()
+                || name.contains('/')
+                || name.contains('\\')
+                || *name == "."
+                || *name == ".."
+            {
+                return Err(io_contract_error(
+                    "native analysis artifact has an invalid flat file name",
+                ));
+            }
+            write_synced_file(&temporary.join(name), bytes)?;
         }
         File::open(&temporary)
             .and_then(|directory| directory.sync_all())
@@ -329,7 +345,7 @@ fn build_run_receipt(
     canonicalize_value(&receipt, "run_receipt_canonicalization_failed")
 }
 
-fn artifact_entry(
+pub(crate) fn artifact_entry(
     role: &str,
     file: &str,
     media_type: &str,
@@ -344,7 +360,10 @@ fn artifact_entry(
     }))
 }
 
-fn canonicalize_value(value: &Value, code: &str) -> Result<String, NativeAnalysisProductError> {
+pub(crate) fn canonicalize_value(
+    value: &Value,
+    code: &str,
+) -> Result<String, NativeAnalysisProductError> {
     canonicalize_model_ir_v2(value).map_err(|_| {
         NativeAnalysisProductError::Contract(ProductIrContractError {
             code: code.to_owned(),

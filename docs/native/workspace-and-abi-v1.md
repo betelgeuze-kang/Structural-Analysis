@@ -492,8 +492,8 @@ ABI/Rust C3 transport foundation 위에 `structural-runtime`이 한정된 CPU ch
   direct/split/durable reload 결과는 completion/collapse에서 bitwise identical하다.
 
 따라서 이 C4 claim은 추적 fixture와 Linux filesystem을 사용하는 bounded CPU nonlinear-NDTHA
-checkpoint에만 적용한다. durable job-state crash recovery, cancel lifecycle, broader solver coverage,
-HIP C2와 product E2E는 여전히 open이다. 상세 wire 계약은
+checkpoint에만 적용한다. job-state crash recovery와 product E2E는 별도 bounded C5 capability로
+분리되며, broader solver coverage와 HIP C2는 여전히 open이다. 상세 wire 계약은
 `docs/native/checkpoint-restart-v1.md`에 고정한다.
 
 R5의 첫 product composition slice는 bounded CPU nonlinear-NDTHA C5다.
@@ -508,6 +508,23 @@ R5의 첫 product composition slice는 bounded CPU nonlinear-NDTHA C5다.
   publish한다. environment를 완전히 지운 child process E2E에서 direct/resume의 다섯 terminal
   artifact가 byte-identical하며 frozen SHA-256를 만족한다.
 
-이 C5는 tracked request 하나의 CPU 경로만 닫는다. broader solver, HIP C2, ModelIR analysis
-adapter, durable job submit/poll/cancel/crash recovery, API, external comparison, PDF render,
-Workbench와 C6는 open이다. 상세 계약은 `docs/native/bounded-product-e2e-v1.md`에 고정한다.
+이 synchronous C5는 tracked request 하나의 CPU 경로만 닫는다. broader solver, HIP C2,
+ModelIR analysis adapter, distributed API, external comparison, PDF render, Workbench와 C6는
+open이다. 상세 계약은 `docs/native/bounded-product-e2e-v1.md`에 고정한다.
+
+R6의 local durable-job slice도 같은 bounded CPU request에 한해 C5에 도달한다.
+
+- strict idempotent submit/poll/cancel과 `queued/running/checkpointed/succeeded/failed/cancelled`
+  상태를 Rust가 소유한다.
+- canonical full-state event는 append-only revision, prior-event SHA-256와 self-hash로 묶이고,
+  request/checkpoint/result/report는 content-addressed blob으로 보존된다.
+- OS file lock과 hashed random lease token이 single-host claim을 직렬화한다. process exit 뒤
+  expired lease는 기존 checkpoint 유무와 cancel flag에 따라 fail closed로 reconcile된다.
+- terminal completion은 worker 결과를 그대로 신뢰하지 않고 C++ checkpoint restore 뒤
+  ResultIR/ReportIR/document를 다시 생성해 exact bytes를 확인한다.
+- environment-cleared public CLI가 별도 process의 submit, partial work, poll, resume, export를
+  수행하며 direct synchronous 결과의 네 core artifact와 byte-identical함을 증명한다.
+
+이 capability는 local filesystem single-host queue다. tenant identity/authorization, distributed
+consensus/claim, network service API, HIP C2, broader solver family와 C6를 닫지 않는다. 상세 계약은
+`docs/native/durable-job-runtime-v1.md`에 고정한다.
