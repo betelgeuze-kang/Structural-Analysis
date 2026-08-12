@@ -65,10 +65,12 @@ link 가능한 unit부터 하나씩 가져오고, 기존 probe path가 새 libra
 | structural-runtime | durable jobs, artifacts, checkpoint/resume, cancellation, worker lifecycle | contracts, ffi | solver truth 재정의 |
 | structural-report | ResultIR/ReportIR projection과 deterministic document source | contracts | solver convergence 추론 |
 | structural-cli | CLI/API composition과 process exit contract | contracts, runtime, report | element/material implementation |
+| structural-workbench | durable Import/Validate/Run/Resume/Compare/Report composition | contracts, runtime, report | solver truth 재정의, browser/Node runtime |
+| structural-distribution | deterministic bundle manifest, install/update/rollback/recovery | serde, SHA-256, OS file lock | solver truth, release approval, remote updater |
 
 structural-contracts와 structural-ffi-sys는 서로 의존하지 않는다. structural-ffi가
 두 crate를 조합한다. runtime과 report는 병렬 consumer이며 CLI가 최상위 composition
-owner다.
+owner다. distribution은 계산 graph 밖에서 이미 빌드된 product payload만 검증·활성화한다.
 
 ## 3. C++ and HIP target graph
 
@@ -98,6 +100,9 @@ lower target은 ABI나 Rust를 알지 못한다. structural_solver_hip는 CPU ta
   검증한다. architecture를 source에 하드코딩하지 않는다.
 - Cargo build script는 CMake를 여러 crate에서 중복 실행하지 않는다. 한 integration
   crate 또는 top-level build driver만 native library location을 결정한다.
+- distribution shared build는 `STRUCTURAL_NATIVE_PREFIX`를 통해 Rust products를 설치될
+  `libstructural_c_abi_v1.so`에 link하고 `$ORIGIN/../lib` RUNPATH로 같은 bundle identity를
+  유지한다. 일반 Cargo unit build는 기존 CPU static composition을 유지한다.
 - production package는 exact ABI version, compiler/runtime identity와 enabled backend
   metadata를 포함한다.
 

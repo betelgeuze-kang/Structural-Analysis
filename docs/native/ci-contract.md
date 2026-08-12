@@ -126,7 +126,11 @@ complete `self-hosted, linux, x64, rocm, structural-approved` label set. It veri
 no-fallback reference-element/assembly, device-resident sparse-PCG, generalized-eigen,
 resident nonlinear-static Newton and resident nonlinear-NDTHA Newmark/Newton C2 parity tests,
 validates every source/device-library binding
-and uploads the raw receipts. A local execution is a candidate, not authoritative C2 evidence.
+and uploads the raw receipts. It then builds the separate ROCm shared distribution, installs it,
+loads HIP through the installed package's single `sa_get_api_v1` symbol, runs its CPU/HIP package
+consumer and bounded Workbench flow, exercises update/rollback, and uploads a deterministic tar plus
+receipts that bind the installed execution to the C2 receipt. A local execution is a candidate, not
+authoritative C2 or ROCm-package evidence.
 
 ## 3. merge-product
 
@@ -143,6 +147,11 @@ Required jobs:
    - shared/static link smoke와 package metadata/ABI identity
    - shared product export is exactly `sa_get_api_v1`; the H3 adapter export inventory is frozen,
      performs one symbol lookup and fails closed when HIP is requested from the CPU-only package
+   - deterministic CPU static/shared product bundles contain the headers, CMake libraries, CLI,
+     Workbench and Rust installer; installed shared binaries resolve the same packaged product ABI
+   - hash-bound install/update/rollback and all journal crash boundaries are covered by Rust tests;
+     an empty-PATH installed E2E runs ModelIR, CMake consumers and Workbench direct/restart parity
+     with Python/Node lookup count 0
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
    - bounded track/nonlinear-static C++/Python product-golden parity and fallback count 0

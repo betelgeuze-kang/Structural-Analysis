@@ -466,6 +466,48 @@ jobs:
             "build/native-package-consumer-$linkage/structural_native_package_consumer"
           done
 
+      - name: Exercise install update rollback and clean-machine native E2E
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; distribution lane is not applicable"
+            exit 0
+          fi
+          mkdir -p build/native-distribution
+          package_version="$(awk '$1 == "version" && $2 == "=" {gsub(/\"/, "", $3); print $3; exit}' native/Cargo.toml)"
+          source_sha256="sha256:$(git archive --format=tar HEAD | sha256sum | awk '{print $1}')"
+          for linkage in static shared; do
+            release_id="cpu-$linkage-$package_version-${GITHUB_SHA:0:12}"
+            bundle="build/native-distribution/$release_id"
+            receipt="build/native-distribution/$release_id-e2e.json"
+            backend_receipt="build/native-distribution/$release_id-backend.json"
+            scripts/build_native_distribution.sh \
+              --backend cpu-only \
+              --linkage "$linkage" \
+              --release-id "$release_id" \
+              --source-sha256 "$source_sha256" \
+              --output "$bundle"
+            scripts/run_native_distribution_e2e.sh \
+              --bundle "$bundle" \
+              --release-id "$release_id" \
+              --package-version "$package_version" \
+              --backend cpu-only \
+              --linkage "$linkage" \
+              --source-sha256 "$source_sha256" \
+              --installed-backend-receipt "$backend_receipt" \
+              --receipt "$receipt"
+            python3 scripts/check_native_distribution_receipt.py \
+              --receipt "$receipt" \
+              --manifest "$bundle/structural-distribution.json" \
+              --installed-backend-receipt "$backend_receipt" \
+              --require-backend cpu_only \
+              --require-authority \
+              --json
+          done
+
   rust-cpp-integration:
     name: rust-cpp-integration
     if: github.event_name == 'pull_request' || github.event_name == 'merge_group'

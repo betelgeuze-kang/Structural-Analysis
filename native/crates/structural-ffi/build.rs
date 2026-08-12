@@ -10,6 +10,29 @@ fn run(command: &mut Command, description: &str) {
 }
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=STRUCTURAL_NATIVE_PREFIX");
+    if let Some(prefix) = env::var_os("STRUCTURAL_NATIVE_PREFIX") {
+        let library_directory = PathBuf::from(prefix).join("lib");
+        let product_library = if cfg!(target_os = "macos") {
+            library_directory.join("libstructural_c_abi_v1.dylib")
+        } else if cfg!(target_os = "windows") {
+            library_directory.join("structural_c_abi_v1.lib")
+        } else {
+            library_directory.join("libstructural_c_abi_v1.so")
+        };
+        assert!(
+            product_library.is_file(),
+            "STRUCTURAL_NATIVE_PREFIX does not contain the shared product ABI library: {}",
+            product_library.display()
+        );
+        println!(
+            "cargo:rustc-link-search=native={}",
+            library_directory.display()
+        );
+        println!("cargo:rustc-link-lib=dylib=structural_c_abi_v1");
+        return;
+    }
+
     let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let cpp_source = manifest_dir.join("../../cpp");
     let build_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap()).join("cmake");

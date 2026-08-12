@@ -41,6 +41,7 @@ EXPECTED_OWNERS = {
     "external_comparison": "structural-cli",
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
+    "native_distribution": "structural-distribution",
     "hip_backend": "structural_c_abi_v1",
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})

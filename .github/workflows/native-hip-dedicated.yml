@@ -131,6 +131,44 @@ jobs:
             --require-approved-runner --json \
             > build/native-full-residual-backend-hip-validation.json
 
+      - name: Build install and execute the ROCm product distribution
+        shell: bash
+        env:
+          CMAKE_HIP_COMPILER: ${{ steps.rocm.outputs.hip_compiler }}
+          CMAKE_HIP_ARCHITECTURES: ${{ steps.rocm.outputs.hip_architecture }}
+          STRUCTURAL_ROCM_ROOT: ${{ steps.rocm.outputs.rocm_root }}
+          STRUCTURAL_HIP_DEVICE_LIB_PATH: ${{ steps.rocm.outputs.device_lib_path }}
+        run: |
+          set -euo pipefail
+          package_version="$(awk '$1 == "version" && $2 == "=" {gsub(/\"/, "", $3); print $3; exit}' native/Cargo.toml)"
+          source_sha256="sha256:$(git archive --format=tar HEAD | sha256sum | awk '{print $1}')"
+          release_id="rocm-shared-$package_version-${GITHUB_SHA:0:12}"
+          bundle="build/native-rocm-distribution"
+          scripts/build_native_distribution.sh \
+            --backend rocm \
+            --linkage shared \
+            --release-id "$release_id" \
+            --source-sha256 "$source_sha256" \
+            --output "$bundle"
+          scripts/run_native_rocm_distribution_e2e.sh \
+            --bundle "$bundle" \
+            --release-id "$release_id" \
+            --package-version "$package_version" \
+            --source-sha256 "$source_sha256" \
+            --c2-receipt build/native-full-residual-backend-hip-receipt.json \
+            --installed-backend-receipt build/native-rocm-installed-backend-receipt.json \
+            --receipt build/native-rocm-distribution-e2e-receipt.json
+          python3 scripts/check_native_distribution_receipt.py \
+            --receipt build/native-rocm-distribution-e2e-receipt.json \
+            --manifest "$bundle/structural-distribution.json" \
+            --installed-backend-receipt build/native-rocm-installed-backend-receipt.json \
+            --c2-receipt build/native-full-residual-backend-hip-receipt.json \
+            --require-backend rocm \
+            --require-authority \
+            --json > build/native-rocm-distribution-validation.json
+          tar --sort=name --mtime='@0' --owner=0 --group=0 --numeric-owner \
+            -cf build/native-rocm-distribution.tar -C build native-rocm-distribution
+
       - name: Upload immutable C2 execution receipts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -150,4 +188,8 @@ jobs:
             build/native-nonlinear-ndtha-hip-validation.json
             build/native-full-residual-backend-hip-receipt.json
             build/native-full-residual-backend-hip-validation.json
+            build/native-rocm-installed-backend-receipt.json
+            build/native-rocm-distribution-e2e-receipt.json
+            build/native-rocm-distribution-validation.json
+            build/native-rocm-distribution.tar
             build-native-rocminfo.txt
