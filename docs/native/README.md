@@ -14,6 +14,7 @@
 9. [Bounded Reference Materials, Elements and Assembly v1](reference-elements-assembly-v1.md)
 10. [Bounded Reference Elements and Assembly HIP C2](reference-elements-hip-c2.md)
 11. [Bounded Sparse Linear CPU v1](sparse-linear-cpu-v1.md)
+12. [Sparse Linear Product C4/C5 v1](sparse-linear-product-e2e-v1.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

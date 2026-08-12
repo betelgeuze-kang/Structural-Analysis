@@ -26,21 +26,25 @@ namespace {
 
 struct ErrorStorage {
     std::array<char, 160> bytes {};
-    sa_error_buffer_v1 descriptor {
-        SA_ABI_V1_8,
-        static_cast<std::uint32_t>(sizeof(sa_error_buffer_v1)),
-        bytes.data(),
-        bytes.size(),
-        0U,
-    };
+    sa_error_buffer_v1 descriptor;
+
+    explicit ErrorStorage(const std::uint32_t version = SA_ABI_V1_8)
+        : descriptor {
+            version,
+            static_cast<std::uint32_t>(sizeof(sa_error_buffer_v1)),
+            bytes.data(),
+            bytes.size(),
+            0U,
+        } {}
 };
 
 template <typename Value>
 [[nodiscard]] sa_buffer_view_v1 input(
     const std::span<const Value> values,
-    const std::uint32_t element_type) {
+    const std::uint32_t element_type,
+    const std::uint32_t version = SA_ABI_V1_8) {
     return {
-        SA_ABI_V1_8,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
         values.empty() ? nullptr : values.data(),
         values.size(),
@@ -52,9 +56,11 @@ template <typename Value>
     };
 }
 
-[[nodiscard]] sa_mut_buffer_view_v1 output(const std::span<double> values) {
+[[nodiscard]] sa_mut_buffer_view_v1 output(
+    const std::span<double> values,
+    const std::uint32_t version = SA_ABI_V1_8) {
     return {
-        SA_ABI_V1_8,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_mut_buffer_view_v1)),
         values.data(),
         values.size(),
@@ -75,22 +81,24 @@ struct Case {
         -1.0, -1.0, 3.0, -1.0, -1.0, 2.0};
     std::array<double, 5> rhs {6.0, -12.0, 18.0, -20.0, 14.0};
 
-    [[nodiscard]] sa_sparse_csr_matrix_v1 matrix() const {
+    [[nodiscard]] sa_sparse_csr_matrix_v1 matrix(
+        const std::uint32_t version = SA_ABI_V1_8) const {
         return {
-            SA_ABI_V1_8,
+            version,
             static_cast<std::uint32_t>(sizeof(sa_sparse_csr_matrix_v1)),
             5U,
-            input<std::uint64_t>(rows, SA_ELEMENT_TYPE_U64),
-            input<std::uint32_t>(columns, SA_ELEMENT_TYPE_U32),
-            input<double>(values, SA_ELEMENT_TYPE_F64),
+            input<std::uint64_t>(rows, SA_ELEMENT_TYPE_U64, version),
+            input<std::uint32_t>(columns, SA_ELEMENT_TYPE_U32, version),
+            input<double>(values, SA_ELEMENT_TYPE_F64, version),
             {0U, 0U},
         };
     }
 };
 
-[[nodiscard]] sa_sparse_linear_config_v1 config() {
+[[nodiscard]] sa_sparse_linear_config_v1 config(
+    const std::uint32_t version = SA_ABI_V1_8) {
     return {
-        SA_ABI_V1_8,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_sparse_linear_config_v1)),
         100U,
         0U,
@@ -137,6 +145,160 @@ struct Case {
     CHECK(current.struct_size == sizeof(sa_api_v1));
     CHECK(SA_API_V1_7_MIN_SIZE == offsetof(sa_api_v1, sparse_linear_solve));
     CHECK(SA_API_V1_8_MIN_SIZE == offsetof(sa_api_v1, modal_solve));
+    const auto spectral = load(SA_ABI_V1_9);
+    CHECK(spectral.modal_solve != nullptr && spectral.buckling_solve != nullptr);
+    CHECK(spectral.sparse_linear_begin == nullptr);
+    CHECK(spectral.sparse_linear_advance == nullptr);
+    CHECK((spectral.capabilities & SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU) == 0U);
+    const auto restart = load(SA_ABI_V1_10);
+    CHECK(restart.sparse_linear_begin != nullptr);
+    CHECK(restart.sparse_linear_advance != nullptr);
+    CHECK((restart.capabilities & SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU) != 0U);
+    CHECK(SA_API_V1_9_MIN_SIZE == offsetof(sa_api_v1, sparse_linear_begin));
+    CHECK(SA_API_V1_10_MIN_SIZE == sizeof(sa_api_v1));
+    return true;
+}
+
+struct RestartBuffers {
+    std::array<double, 5> solution {};
+    std::array<double, 5> residual {};
+    std::array<double, 5> direction {};
+    std::array<double, 5> diagonal_inverse {};
+};
+
+[[nodiscard]] sa_sparse_linear_state_v1 restart_state(RestartBuffers& buffers) {
+    return {
+        SA_ABI_V1_10,
+        static_cast<std::uint32_t>(sizeof(sa_sparse_linear_state_v1)),
+        SA_SPARSE_LINEAR_EXECUTION_ACTIVE,
+        SA_SOLVER_NONCONVERGENCE,
+        0U,
+        SA_EXECUTION_BACKEND_CPU,
+        0U,
+        0U,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        5U,
+        output(buffers.solution, SA_ABI_V1_10),
+        output(buffers.residual, SA_ABI_V1_10),
+        output(buffers.direction, SA_ABI_V1_10),
+        output(buffers.diagonal_inverse, SA_ABI_V1_10),
+        {0U, 0U},
+    };
+}
+
+[[nodiscard]] bool same_restart_state(
+    const sa_sparse_linear_state_v1& left,
+    const RestartBuffers& left_buffers,
+    const sa_sparse_linear_state_v1& right,
+    const RestartBuffers& right_buffers) {
+    return left.abi_version == right.abi_version && left.struct_size == right.struct_size
+        && left.execution_status == right.execution_status
+        && left.solver_status == right.solver_status && left.iterations == right.iterations
+        && left.execution_backend == right.execution_backend
+        && left.fallback_count == right.fallback_count
+        && left.reserved_u32 == right.reserved_u32
+        && left.initial_residual_inf == right.initial_residual_inf
+        && left.convergence_limit == right.convergence_limit && left.rho == right.rho
+        && left.last_increment_inf == right.last_increment_inf
+        && left.vector_length == right.vector_length && left.reserved[0] == right.reserved[0]
+        && left.reserved[1] == right.reserved[1]
+        && left_buffers.solution == right_buffers.solution
+        && left_buffers.residual == right_buffers.residual
+        && left_buffers.direction == right_buffers.direction
+        && left_buffers.diagonal_inverse == right_buffers.diagonal_inverse;
+}
+
+[[nodiscard]] bool caller_owned_restart_is_complete_and_failure_atomic() {
+    const auto api = load(SA_ABI_V1_10);
+    Case data;
+    auto matrix = data.matrix(SA_ABI_V1_10);
+    const auto rhs = input<double>(data.rhs, SA_ELEMENT_TYPE_F64, SA_ABI_V1_10);
+    const std::span<const double> no_initial {};
+    const auto initial = input<double>(
+        no_initial, SA_ELEMENT_TYPE_F64, SA_ABI_V1_10);
+    const auto valid_config = config(SA_ABI_V1_10);
+    ErrorStorage error {SA_ABI_V1_10};
+
+    RestartBuffers direct_buffers;
+    auto direct = restart_state(direct_buffers);
+    RestartBuffers segmented_buffers;
+    auto segmented = restart_state(segmented_buffers);
+    CHECK(api.sparse_linear_begin(
+              &valid_config, &matrix, &rhs, &initial, &direct, &error.descriptor)
+          == SA_OK);
+    CHECK(api.sparse_linear_begin(
+              &valid_config, &matrix, &rhs, &initial, &segmented, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, direct_buffers, segmented, segmented_buffers));
+
+    const auto zero_budget_state = segmented;
+    const auto zero_budget_buffers = segmented_buffers;
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, 0U, &segmented, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(
+        segmented, segmented_buffers, zero_budget_state, zero_budget_buffers));
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, 1U, &segmented, nullptr)
+          == SA_OK);
+    CHECK(segmented.execution_status == SA_SPARSE_LINEAR_EXECUTION_ACTIVE);
+    CHECK(segmented.solver_status == SA_SOLVER_NONCONVERGENCE);
+    CHECK(segmented.iterations == 1U);
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, 1U, &segmented, nullptr)
+          == SA_OK);
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, UINT32_MAX, &segmented, nullptr)
+          == SA_OK);
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, UINT32_MAX, &direct, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, direct_buffers, segmented, segmented_buffers));
+    CHECK(direct.execution_status == SA_SPARSE_LINEAR_EXECUTION_TERMINAL);
+    CHECK(direct.solver_status == SA_SOLVER_CONVERGED);
+
+    const auto terminal_state = direct;
+    const auto terminal_buffers = direct_buffers;
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, 1U, &direct, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, direct_buffers, terminal_state, terminal_buffers));
+
+    RestartBuffers corrupt_buffers;
+    auto corrupt = restart_state(corrupt_buffers);
+    CHECK(api.sparse_linear_begin(
+              &valid_config, &matrix, &rhs, &initial, &corrupt, nullptr)
+          == SA_OK);
+    corrupt.rho = std::numeric_limits<double>::quiet_NaN();
+    const auto corrupt_buffers_before = corrupt_buffers;
+    CHECK(api.sparse_linear_advance(
+              &valid_config, &matrix, &rhs, 1U, &corrupt, &error.descriptor)
+          == SA_ERR_CHECKPOINT_MISMATCH);
+    CHECK(std::isnan(corrupt.rho));
+    CHECK(corrupt_buffers.solution == corrupt_buffers_before.solution);
+    CHECK(corrupt_buffers.residual == corrupt_buffers_before.residual);
+    CHECK(corrupt_buffers.direction == corrupt_buffers_before.direction);
+    CHECK(corrupt_buffers.diagonal_inverse == corrupt_buffers_before.diagonal_inverse);
+
+    auto overlap = restart_state(corrupt_buffers);
+    overlap.residual.data = overlap.solution.data;
+    CHECK(api.sparse_linear_begin(
+              &valid_config, &matrix, &rhs, &initial, &overlap, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+
+    data.values[0] = 0.0;
+    matrix = data.matrix(SA_ABI_V1_10);
+    RestartBuffers singular_buffers;
+    auto singular = restart_state(singular_buffers);
+    CHECK(api.sparse_linear_begin(
+              &valid_config, &matrix, &rhs, &initial, &singular, nullptr)
+          == SA_OK);
+    CHECK(singular.execution_status == SA_SPARSE_LINEAR_EXECUTION_TERMINAL);
+    CHECK(singular.solver_status == SA_SOLVER_SINGULARITY);
+    CHECK(singular.iterations == 0U);
     return true;
 }
 
@@ -301,6 +463,7 @@ struct Case {
 int main() {
     const std::array tests {
         table_is_append_only,
+        caller_owned_restart_is_complete_and_failure_atomic,
         caller_owned_spd_solve_matches_reference,
         failures_do_not_publish_partial_outputs,
         metadata_overlap_and_nonfinite_inputs_fail_closed,

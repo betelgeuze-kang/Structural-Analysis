@@ -52,6 +52,8 @@ Jobs:
    - ABI v1.9 dense modal/buckling layouts, append-only v1.8 null-slot compatibility, disjoint
      failure-atomic caller-owned outputs, fixed numerical errors and reentrant safe-wrapper
      execution
+   - ABI v1.10 complete sparse-PCG state layout, append-only v1.9 null-slot compatibility,
+     failure-atomic begin/advance, real-iteration serialization and terminal-state idempotence
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -162,6 +164,10 @@ Required jobs:
    - bounded dense modal/linear-buckling strict request -> ABI v1.9 -> SAEIGC01 phase checkpoint
      -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared eigen-run/eigen-resume byte
      parity and explicit preservation of the open protected-runner C2 gate
+   - bounded canonical-CSR strict request -> ABI v1.10 real-iteration begin/advance -> SAPCGC01
+     checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared linear-run/
+     linear-resume byte parity, durable numerical-terminal receipts and explicit preservation of
+     the open protected-runner C2 gate
 6. merge-product aggregate
    - latest exact-head and merge-ref only
 

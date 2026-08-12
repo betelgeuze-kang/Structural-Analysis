@@ -133,6 +133,13 @@ void validate_symmetric_structure_and_values(const CsrMatrixView matrix) {
     };
 }
 
+void make_terminal(
+    SparseLinearExecutionState& state,
+    const SolverStatus status) noexcept {
+    state.execution_status = SparseLinearExecutionStatus::terminal;
+    state.solver_status = status;
+}
+
 void require_finite_vector(
     const std::span<const double> values,
     const std::string_view label) {
@@ -215,146 +222,206 @@ void validate_sparse_spd_problem(
     require_finite_vector(initial_guess, "sparse PCG initial guess");
 }
 
-SparseLinearResult solve_sparse_spd_pcg(
+SparseLinearExecutionState begin_sparse_spd_pcg(
     const CsrMatrixView matrix,
     const std::span<const double> right_hand_side,
     const std::span<const double> initial_guess,
     const SparseLinearConfig& config) {
     validate_sparse_spd_problem(matrix, right_hand_side, initial_guess, config);
 
-    std::vector<double> solution(matrix.order, 0.0);
+    SparseLinearExecutionState state {
+        SparseLinearExecutionStatus::active,
+        SolverStatus::nonconvergence,
+        0U,
+        0.0,
+        config.absolute_residual_tolerance
+            + config.relative_residual_tolerance * norm_inf(right_hand_side),
+        0.0,
+        0.0,
+        std::vector<double>(matrix.order, 0.0),
+        std::vector<double>(matrix.order, 0.0),
+        std::vector<double>(matrix.order, 0.0),
+        std::vector<double>(matrix.order, 0.0),
+    };
     if (!initial_guess.empty()) {
-        std::copy(initial_guess.begin(), initial_guess.end(), solution.begin());
+        std::copy(initial_guess.begin(), initial_guess.end(), state.solution.begin());
     }
     std::vector<double> product(matrix.order, 0.0);
-    matvec_unchecked(matrix, solution, product);
-    std::vector<double> residual(matrix.order, 0.0);
+    matvec_unchecked(matrix, state.solution, product);
     for (std::size_t index = 0U; index < matrix.order; ++index) {
-        residual[index] = right_hand_side[index] - product[index];
+        state.residual[index] = right_hand_side[index] - product[index];
     }
-    const double initial_residual_inf = norm_inf(residual);
+    state.initial_residual_inf = norm_inf(state.residual);
 
-    std::vector<double> diagonal_inverse(matrix.order, 0.0);
     for (std::size_t row = 0U; row < matrix.order; ++row) {
         const auto diagonal_offset =
             find_column(matrix, row, static_cast<std::uint32_t>(row));
         if (diagonal_offset == matrix.values.size()
             || matrix.values[diagonal_offset] == 0.0) {
-            return make_result(
-                SolverStatus::singularity, std::move(solution), 0U,
-                initial_residual_inf, residual, 0.0);
+            make_terminal(state, SolverStatus::singularity);
+            return state;
         }
         if (matrix.values[diagonal_offset] < 0.0) {
-            return make_result(
-                SolverStatus::indefinite_operator, std::move(solution), 0U,
-                initial_residual_inf, residual, 0.0);
+            make_terminal(state, SolverStatus::indefinite_operator);
+            return state;
         }
-        diagonal_inverse[row] = 1.0 / matrix.values[diagonal_offset];
-        if (!std::isfinite(diagonal_inverse[row])) {
-            return make_result(
-                SolverStatus::singularity, std::move(solution), 0U,
-                initial_residual_inf, residual, 0.0);
+        state.diagonal_inverse[row] = 1.0 / matrix.values[diagonal_offset];
+        if (!std::isfinite(state.diagonal_inverse[row])) {
+            make_terminal(state, SolverStatus::singularity);
+            return state;
         }
     }
-    const double convergence_limit = config.absolute_residual_tolerance
-        + config.relative_residual_tolerance * norm_inf(right_hand_side);
-    if (initial_residual_inf <= convergence_limit) {
-        return make_result(
-            SolverStatus::converged, std::move(solution), 0U,
-            initial_residual_inf, residual, 0.0);
+    if (state.initial_residual_inf <= state.convergence_limit) {
+        make_terminal(state, SolverStatus::converged);
+        return state;
     }
 
     std::vector<double> preconditioned(matrix.order, 0.0);
-    std::vector<double> direction(matrix.order, 0.0);
     for (std::size_t index = 0U; index < matrix.order; ++index) {
-        preconditioned[index] = diagonal_inverse[index] * residual[index];
-        direction[index] = preconditioned[index];
+        preconditioned[index] = state.diagonal_inverse[index] * state.residual[index];
+        state.direction[index] = preconditioned[index];
     }
-    double rho = dot(residual, preconditioned);
-    if (!std::isfinite(rho) || rho <= 0.0) {
-        return make_result(
-            SolverStatus::indefinite_operator, std::move(solution), 0U,
-            initial_residual_inf, residual, 0.0);
+    state.rho = dot(state.residual, preconditioned);
+    if (!std::isfinite(state.rho) || state.rho <= 0.0) {
+        make_terminal(state, SolverStatus::indefinite_operator);
+    }
+    return state;
+}
+
+void advance_sparse_spd_pcg(
+    const CsrMatrixView matrix,
+    const std::span<const double> right_hand_side,
+    const SparseLinearConfig& config,
+    const std::uint32_t iteration_budget,
+    SparseLinearExecutionState& state) {
+    validate_sparse_spd_problem(matrix, right_hand_side, {}, config);
+    const bool lengths_valid = state.solution.size() == matrix.order
+        && state.residual.size() == matrix.order
+        && state.direction.size() == matrix.order
+        && state.diagonal_inverse.size() == matrix.order;
+    const bool scalars_valid = std::isfinite(state.initial_residual_inf)
+        && std::isfinite(state.convergence_limit) && std::isfinite(state.rho)
+        && std::isfinite(state.last_increment_inf)
+        && state.initial_residual_inf >= 0.0 && state.convergence_limit >= 0.0
+        && state.last_increment_inf >= 0.0;
+    const bool vectors_valid = all_finite(state.solution) && all_finite(state.residual)
+        && all_finite(state.direction) && all_finite(state.diagonal_inverse);
+    const double expected_limit = config.absolute_residual_tolerance
+        + config.relative_residual_tolerance * norm_inf(right_hand_side);
+    const bool metadata_valid = state.execution_status == SparseLinearExecutionStatus::active
+        || state.execution_status == SparseLinearExecutionStatus::terminal;
+    if (!lengths_valid || !scalars_valid || !vectors_valid || !metadata_valid
+        || state.iterations > config.max_iterations
+        || state.convergence_limit != expected_limit) {
+        throw std::invalid_argument("sparse PCG restart state is invalid");
+    }
+    if (state.execution_status == SparseLinearExecutionStatus::terminal) {
+        return;
+    }
+    if (state.rho <= 0.0 || state.iterations >= config.max_iterations
+        || norm_inf(state.residual) <= state.convergence_limit
+        || std::any_of(
+            state.diagonal_inverse.begin(), state.diagonal_inverse.end(),
+            [](const double value) { return value <= 0.0; })) {
+        throw std::invalid_argument("active sparse PCG restart state is inconsistent");
     }
 
     std::vector<double> operator_direction(matrix.order, 0.0);
     std::vector<double> candidate(matrix.order, 0.0);
-    double last_increment_inf = 0.0;
-    for (std::uint32_t iteration = 1U; iteration <= config.max_iterations; ++iteration) {
-        matvec_unchecked(matrix, direction, operator_direction);
-        const double denominator = dot(direction, operator_direction);
+    std::vector<double> preconditioned(matrix.order, 0.0);
+    std::vector<double> product(matrix.order, 0.0);
+    const auto remaining = config.max_iterations - state.iterations;
+    const auto to_run = std::min(iteration_budget, remaining);
+    for (std::uint32_t offset = 0U; offset < to_run; ++offset) {
+        const auto iteration = state.iterations + 1U;
+        matvec_unchecked(matrix, state.direction, operator_direction);
+        const double denominator = dot(state.direction, operator_direction);
         const double breakdown_scale =
             kBreakdownFactor * std::numeric_limits<double>::epsilon()
-            * std::max(1.0, norm_l2(direction) * norm_l2(operator_direction));
+            * std::max(1.0, norm_l2(state.direction) * norm_l2(operator_direction));
         if (!std::isfinite(denominator) || denominator <= breakdown_scale) {
             const auto status = denominator < -breakdown_scale
                 ? SolverStatus::indefinite_operator
                 : SolverStatus::singularity;
-            return make_result(
-                status, std::move(solution), iteration - 1U,
-                initial_residual_inf, residual, last_increment_inf);
+            make_terminal(state, status);
+            return;
         }
-        const double alpha = rho / denominator;
+        const double alpha = state.rho / denominator;
         if (!std::isfinite(alpha)) {
-            return make_result(
-                SolverStatus::singularity, std::move(solution), iteration - 1U,
-                initial_residual_inf, residual, last_increment_inf);
+            make_terminal(state, SolverStatus::singularity);
+            return;
         }
-        last_increment_inf = 0.0;
+        state.last_increment_inf = 0.0;
         for (std::size_t index = 0U; index < matrix.order; ++index) {
-            const double increment = alpha * direction[index];
-            last_increment_inf = std::max(last_increment_inf, std::abs(increment));
-            candidate[index] = solution[index] + increment;
+            const double increment = alpha * state.direction[index];
+            state.last_increment_inf = std::max(state.last_increment_inf, std::abs(increment));
+            candidate[index] = state.solution[index] + increment;
         }
         if (config.maximum_increment > 0.0
-            && last_increment_inf > config.maximum_increment) {
-            return make_result(
-                SolverStatus::increment_limit, std::move(solution), iteration - 1U,
-                initial_residual_inf, residual, last_increment_inf);
+            && state.last_increment_inf > config.maximum_increment) {
+            make_terminal(state, SolverStatus::increment_limit);
+            return;
         }
-        solution.swap(candidate);
+        state.solution.swap(candidate);
         for (std::size_t index = 0U; index < matrix.order; ++index) {
-            residual[index] -= alpha * operator_direction[index];
+            state.residual[index] -= alpha * operator_direction[index];
         }
-        if (norm_inf(residual) <= convergence_limit) {
-            matvec_unchecked(matrix, solution, product);
+        state.iterations = iteration;
+        if (norm_inf(state.residual) <= state.convergence_limit) {
+            matvec_unchecked(matrix, state.solution, product);
             for (std::size_t index = 0U; index < matrix.order; ++index) {
-                residual[index] = right_hand_side[index] - product[index];
+                state.residual[index] = right_hand_side[index] - product[index];
             }
-            const auto status = norm_inf(residual) <= convergence_limit
+            const auto status = norm_inf(state.residual) <= state.convergence_limit
                 ? SolverStatus::converged
                 : SolverStatus::residual_limit;
-            return make_result(
-                status, std::move(solution), iteration,
-                initial_residual_inf, residual, last_increment_inf);
+            make_terminal(state, status);
+            return;
         }
         for (std::size_t index = 0U; index < matrix.order; ++index) {
-            preconditioned[index] = diagonal_inverse[index] * residual[index];
+            preconditioned[index] = state.diagonal_inverse[index] * state.residual[index];
         }
-        const double next_rho = dot(residual, preconditioned);
+        const double next_rho = dot(state.residual, preconditioned);
         if (!std::isfinite(next_rho) || next_rho <= 0.0) {
-            return make_result(
-                SolverStatus::indefinite_operator, std::move(solution), iteration,
-                initial_residual_inf, residual, last_increment_inf);
+            make_terminal(state, SolverStatus::indefinite_operator);
+            return;
         }
-        const double beta = next_rho / rho;
+        const double beta = next_rho / state.rho;
         if (!std::isfinite(beta)) {
-            return make_result(
-                SolverStatus::singularity, std::move(solution), iteration,
-                initial_residual_inf, residual, last_increment_inf);
+            make_terminal(state, SolverStatus::singularity);
+            return;
         }
         for (std::size_t index = 0U; index < matrix.order; ++index) {
-            direction[index] = preconditioned[index] + beta * direction[index];
+            state.direction[index] = preconditioned[index] + beta * state.direction[index];
         }
-        rho = next_rho;
+        state.rho = next_rho;
     }
-    matvec_unchecked(matrix, solution, product);
-    for (std::size_t index = 0U; index < matrix.order; ++index) {
-        residual[index] = right_hand_side[index] - product[index];
+    if (state.iterations == config.max_iterations) {
+        matvec_unchecked(matrix, state.solution, product);
+        for (std::size_t index = 0U; index < matrix.order; ++index) {
+            state.residual[index] = right_hand_side[index] - product[index];
+        }
+        make_terminal(state, SolverStatus::nonconvergence);
+    }
+}
+
+SparseLinearResult sparse_linear_result(const SparseLinearExecutionState& state) {
+    if (state.execution_status != SparseLinearExecutionStatus::terminal) {
+        throw std::invalid_argument("sparse PCG result requires a terminal state");
     }
     return make_result(
-        SolverStatus::nonconvergence, std::move(solution), config.max_iterations,
-        initial_residual_inf, residual, last_increment_inf);
+        state.solver_status, state.solution, state.iterations,
+        state.initial_residual_inf, state.residual, state.last_increment_inf);
+}
+
+SparseLinearResult solve_sparse_spd_pcg(
+    const CsrMatrixView matrix,
+    const std::span<const double> right_hand_side,
+    const std::span<const double> initial_guess,
+    const SparseLinearConfig& config) {
+    auto state = begin_sparse_spd_pcg(matrix, right_hand_side, initial_guess, config);
+    advance_sparse_spd_pcg(matrix, right_hand_side, config, config.max_iterations, state);
+    return sparse_linear_result(state);
 }
 
 }  // namespace structural::solver_cpu

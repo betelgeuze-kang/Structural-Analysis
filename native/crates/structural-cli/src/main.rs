@@ -8,9 +8,10 @@ use serde_json::json;
 use structural_cli::{
     contract_error_report, execute_dense_spectral_analysis, execute_external_comparison,
     execute_model_ir_native_analysis, execute_native_analysis, execute_native_mgt_import,
-    execute_pdf_report, publish_dense_spectral_analysis, publish_external_comparison,
-    publish_model_ir_native_analysis, publish_native_analysis, publish_native_mgt_import,
-    publish_pdf_report, validate_model_bytes, validation_succeeds,
+    execute_pdf_report, execute_sparse_linear_analysis, publish_dense_spectral_analysis,
+    publish_external_comparison, publish_model_ir_native_analysis, publish_native_analysis,
+    publish_native_mgt_import, publish_pdf_report, publish_sparse_linear_analysis,
+    validate_model_bytes, validation_succeeds,
 };
 
 mod job_cli;
@@ -23,6 +24,8 @@ const MAX_MODEL_IR_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_SPECTRAL_CHECKPOINT_BYTES: u64 = 5 * 1024 * 1024;
+const MAX_SPARSE_REQUEST_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_SPARSE_CHECKPOINT_BYTES: u64 = 68 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
 const MAX_EXTERNAL_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MGT_SOURCE_BYTES: u64 = 64 * 1024 * 1024;
@@ -49,6 +52,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     if let Some(command) = parse_spectral_analysis_arguments(arguments) {
         return run_dense_spectral_analysis(&command);
     }
+    if let Some(command) = parse_sparse_analysis_arguments(arguments) {
+        return run_sparse_linear_analysis(&command);
+    }
     if let Some(command) = parse_analysis_arguments(arguments) {
         return run_native_analysis(&command);
     }
@@ -72,7 +78,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
@@ -221,6 +227,14 @@ struct SpectralAnalysisCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SparseAnalysisCommand {
+    request_path: PathBuf,
+    checkpoint_path: Option<PathBuf>,
+    output_directory: PathBuf,
+    iteration_budget: u32,
+}
+
 fn run_dense_spectral_analysis(command: &SpectralAnalysisCommand) -> ExitCode {
     let Ok(request_bytes) =
         read_bounded_regular_file(&command.request_path, MAX_MODEL_ANALYSIS_REQUEST_BYTES)
@@ -281,6 +295,75 @@ fn spectral_analysis_input_failure(code: &str, path: &str) -> ExitCode {
             "code": code,
             "path": path,
             "detail": "dense spectral analysis input could not be read"
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
+}
+
+fn run_sparse_linear_analysis(command: &SparseAnalysisCommand) -> ExitCode {
+    let Ok(request_bytes) =
+        read_bounded_regular_file(&command.request_path, MAX_SPARSE_REQUEST_BYTES)
+    else {
+        return sparse_analysis_input_failure("request_read_error", "/request");
+    };
+    let checkpoint_bytes = if let Some(path) = command.checkpoint_path.as_ref() {
+        let Ok(bytes) = read_bounded_regular_file(path, MAX_SPARSE_CHECKPOINT_BYTES) else {
+            return sparse_analysis_input_failure("checkpoint_read_error", "/checkpoint");
+        };
+        Some(bytes)
+    } else {
+        None
+    };
+    let outcome = match execute_sparse_linear_analysis(
+        &request_bytes,
+        checkpoint_bytes.as_deref(),
+        command.iteration_budget,
+    ) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if matches!(error, structural_cli::SparseLinearProductError::Contract(_)) {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-sparse-linear-analysis-failure.v1",
+                    "code": "sparse_linear_analysis_failed",
+                    "detail": error.to_string()
+                })
+            );
+            return ExitCode::from(exit);
+        }
+    };
+    if let Err(error) = publish_sparse_linear_analysis(&command.output_directory, &outcome) {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-sparse-linear-analysis-failure.v1",
+                "code": "sparse_linear_publish_failed",
+                "detail": error.to_string()
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    }
+    println!("{}", outcome.run_receipt_json());
+    if outcome.is_terminal_failure() {
+        ExitCode::from(EXIT_FAILURE)
+    } else {
+        ExitCode::SUCCESS
+    }
+}
+
+fn sparse_analysis_input_failure(code: &str, path: &str) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-sparse-linear-analysis-failure.v1",
+            "code": code,
+            "path": path,
+            "detail": "sparse linear analysis input could not be read"
         })
     );
     ExitCode::from(EXIT_FAILURE)
@@ -860,6 +943,55 @@ fn parse_spectral_analysis_arguments(arguments: &[OsString]) -> Option<SpectralA
     })
 }
 
+fn parse_sparse_analysis_arguments(arguments: &[OsString]) -> Option<SparseAnalysisCommand> {
+    if arguments.len() < 5 || arguments[0] != "analysis" {
+        return None;
+    }
+    let (positional_count, checkpoint_index) = if arguments[1] == "linear-run" {
+        (1_usize, None)
+    } else if arguments[1] == "linear-resume" {
+        (2_usize, Some(3_usize))
+    } else {
+        return None;
+    };
+    let flag_start = 2 + positional_count;
+    if arguments[2..flag_start]
+        .iter()
+        .any(|value| value.to_string_lossy().starts_with('-'))
+    {
+        return None;
+    }
+    let mut output_directory = None;
+    let mut iteration_budget = u32::MAX;
+    let mut iteration_budget_seen = false;
+    let mut index = flag_start;
+    while index < arguments.len() {
+        if arguments[index] == "--output-dir" && output_directory.is_none() {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            output_directory = Some(PathBuf::from(&arguments[index]));
+        } else if arguments[index] == "--iteration-budget" && !iteration_budget_seen {
+            index += 1;
+            if index >= arguments.len() {
+                return None;
+            }
+            iteration_budget = arguments[index].to_str()?.parse::<u32>().ok()?;
+            iteration_budget_seen = true;
+        } else {
+            return None;
+        }
+        index += 1;
+    }
+    Some(SparseAnalysisCommand {
+        request_path: PathBuf::from(&arguments[2]),
+        checkpoint_path: checkpoint_index.map(|position| PathBuf::from(&arguments[position])),
+        output_directory: output_directory?,
+        iteration_budget,
+    })
+}
+
 fn parse_model_analysis_arguments(arguments: &[OsString]) -> Option<ModelAnalysisCommand> {
     if arguments.len() < 6 || arguments[0] != "analysis" {
         return None;
@@ -919,9 +1051,9 @@ mod tests {
     use super::{
         parse_analysis_arguments, parse_comparison_arguments, parse_mgt_import_arguments,
         parse_model_analysis_arguments, parse_pdf_report_arguments,
-        parse_spectral_analysis_arguments, parse_validate_arguments, AnalysisCommand,
-        ComparisonCommand, MgtImportCommand, ModelAnalysisCommand, PdfReportCommand,
-        SpectralAnalysisCommand,
+        parse_sparse_analysis_arguments, parse_spectral_analysis_arguments,
+        parse_validate_arguments, AnalysisCommand, ComparisonCommand, MgtImportCommand,
+        ModelAnalysisCommand, PdfReportCommand, SparseAnalysisCommand, SpectralAnalysisCommand,
     };
     use std::ffi::OsString;
 
@@ -1078,6 +1210,63 @@ mod tests {
             "1",
             "--output-dir",
             "out"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn sparse_arguments_expose_real_iteration_budget_and_bound_resume() {
+        assert_eq!(
+            parse_sparse_analysis_arguments(&args(&[
+                "analysis",
+                "linear-run",
+                "system.json",
+                "--output-dir",
+                "out",
+                "--iteration-budget",
+                "0"
+            ])),
+            Some(SparseAnalysisCommand {
+                request_path: "system.json".into(),
+                checkpoint_path: None,
+                output_directory: "out".into(),
+                iteration_budget: 0,
+            })
+        );
+        assert_eq!(
+            parse_sparse_analysis_arguments(&args(&[
+                "analysis",
+                "linear-resume",
+                "system.json",
+                "state.pcgcp",
+                "--iteration-budget",
+                "2",
+                "--output-dir",
+                "out"
+            ])),
+            Some(SparseAnalysisCommand {
+                request_path: "system.json".into(),
+                checkpoint_path: Some("state.pcgcp".into()),
+                output_directory: "out".into(),
+                iteration_budget: 2,
+            })
+        );
+        assert!(parse_sparse_analysis_arguments(&args(&[
+            "analysis",
+            "linear-resume",
+            "system.json",
+            "--output-dir",
+            "out"
+        ]))
+        .is_none());
+        assert!(parse_sparse_analysis_arguments(&args(&[
+            "analysis",
+            "linear-run",
+            "system.json",
+            "--output-dir",
+            "a",
+            "--output-dir",
+            "b"
         ]))
         .is_none());
     }

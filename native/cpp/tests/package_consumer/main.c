@@ -4,13 +4,13 @@
 
 int main(void) {
     const sa_api_request_v1 request = {
-        SA_ABI_V1_9,
+        SA_ABI_V1_10,
         (uint32_t)sizeof(sa_api_request_v1),
         0U,
         {0U, 0U, 0U},
     };
     sa_api_v1 api = {0};
-    api.abi_version = SA_ABI_V1_9;
+    api.abi_version = SA_ABI_V1_10;
     api.struct_size = (uint32_t)sizeof(sa_api_v1);
     if (sa_get_api_v1(&request, &api, NULL) != SA_OK
         || api.track_point_load_solve == NULL
@@ -20,12 +20,15 @@ int main(void) {
         || api.sparse_linear_solve == NULL
         || api.modal_solve == NULL
         || api.buckling_solve == NULL
+        || api.sparse_linear_begin == NULL
+        || api.sparse_linear_advance == NULL
         || (api.capabilities & SA_CAPABILITY_TRACK_POINT_LOAD_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_NONLINEAR_NDTHA_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_REFERENCE_ELEMENTS_CPU) == 0U
         || (api.capabilities & SA_CAPABILITY_SPARSE_LINEAR_CPU) == 0U
-        || (api.capabilities & SA_CAPABILITY_GENERALIZED_EIGEN_CPU) == 0U) {
+        || (api.capabilities & SA_CAPABILITY_GENERALIZED_EIGEN_CPU) == 0U
+        || (api.capabilities & SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU) == 0U) {
         return 1;
     }
 

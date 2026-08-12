@@ -9,6 +9,7 @@ mod model_product;
 mod product;
 mod report;
 mod service;
+mod sparse_product;
 mod spectral_product;
 
 use std::fmt;
@@ -41,6 +42,10 @@ pub use service::{
     load_native_job_api_credentials, NativeJobApiCredentialsV1, NativeJobApiError,
     NativeJobApiServeReceiptV1, NativeJobApiServerConfigV1, NativeJobApiServerV1,
     NATIVE_JOB_API_PROFILE_V1,
+};
+pub use sparse_product::{
+    execute_sparse_linear_analysis, publish_sparse_linear_analysis, SparseLinearProductError,
+    SparseLinearRunOutcomeV1,
 };
 pub use spectral_product::{
     execute_dense_spectral_analysis, publish_dense_spectral_analysis, DenseSpectralProductError,

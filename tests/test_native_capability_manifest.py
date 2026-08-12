@@ -75,6 +75,22 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in sparse["claim"]
     assert "native-hip-approved" in sparse["claim"]
     assert "C6" in sparse["claim"]
+    assert capabilities.capability_is_enabled(payload, "sparse_linear_checkpoint") is True
+    sparse_checkpoint = payload["capabilities"]["sparse_linear_checkpoint"]
+    assert sparse_checkpoint["cutover_gate"] == "C4"
+    assert sparse_checkpoint["owner"] == "structural-runtime"
+    assert "SAPCGC01" in sparse_checkpoint["claim"]
+    assert "real iteration state" in sparse_checkpoint["claim"]
+    assert "HIP C2" in sparse_checkpoint["claim"]
+    assert "C6" in sparse_checkpoint["claim"]
+    assert capabilities.capability_is_enabled(payload, "sparse_linear_product_e2e") is True
+    sparse_product = payload["capabilities"]["sparse_linear_product_e2e"]
+    assert sparse_product["cutover_gate"] == "C5"
+    assert sparse_product["owner"] == "structural-cli"
+    assert "ResultIR, ReportIR" in sparse_product["claim"]
+    assert "no Python or Node" in sparse_product["claim"]
+    assert "HIP C2" in sparse_product["claim"]
+    assert "C6" in sparse_product["claim"]
     assert capabilities.capability_is_enabled(
         payload, "generalized_eigen_solver_cpu"
     ) is True

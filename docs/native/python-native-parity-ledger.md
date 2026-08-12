@@ -186,12 +186,18 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   singularity/indefinite/nonconvergence/increment/residual taxonomy. Four SPD profiles—including
   irregular topology and a `4e12` diagonal condition ratio—match an independent NumPy direct
   solve, with malformed/asymmetric/failure paths covered at C0. General sparse/direct/indefinite
-  solvers, checkpoint C4, product C5 and C6 remain open. A product-owned fixed-tree FP64 HIP C2
+  solvers and C6 remain open. A product-owned fixed-tree FP64 HIP C2
   candidate keeps every PCG vector and iteration decision resident, has bitwise repeats, exact
   CPU/HIP status and iteration parity, local live maximum solution error `4.4408920985006262e-16`
-  and fallback zero. ABI v1.8 and a safe reentrant Rust wrapper implement the C3 boundary with
-  fixed numerical errors and failure-atomic output, but the capability remains sequentially at C1
-  until the `native-hip-approved` protected-runner C2 receipt exists.
+  and fallback zero. ABI v1.8 and a safe reentrant Rust wrapper implement the one-shot C3 boundary
+  with fixed numerical errors and failure-atomic output. ABI v1.10 additionally exposes complete
+  caller-owned PCG begin/advance state. The capability remains sequentially at C1 until the
+  `native-hip-approved` protected-runner C2 receipt exists. Separate bounded CPU implementation
+  slices cover C4 and C5 without bypassing that sequence: SAPCGC01 binds exact
+  request/model/real-state/execution identities, and public linear-run/linear-resume publish typed
+  active/failure receipts or self-hashed ResultIR/ReportIR/Markdown artifacts. Direct and
+  real-iteration resumed terminal directories are byte-identical with Python/Node lookup removed.
+  Arbitrary ModelIR sparse assembly, durable jobs, PDF projection, protected C2 and C6 remain open.
 - A bounded dense symmetric generalized-eigen reference family is C1. C++20 owns modal
   `K phi = omega^2 M phi` and linear-buckling `K phi = lambda Kg phi` for at most 128 DOFs,
   including strict definiteness/semidefiniteness, rigid and infinite-mode filtering, stable

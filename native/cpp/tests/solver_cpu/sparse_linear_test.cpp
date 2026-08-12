@@ -17,6 +17,8 @@ namespace {
 using structural::solver_cpu::CsrMatrixView;
 using structural::solver_cpu::SolverStatus;
 using structural::solver_cpu::SparseLinearConfig;
+using structural::solver_cpu::SparseLinearExecutionState;
+using structural::solver_cpu::SparseLinearExecutionStatus;
 
 void expect(const bool condition, const std::string_view message) {
     if (!condition) {
@@ -190,6 +192,80 @@ struct OwnedCsr {
     return true;
 }
 
+void expect_same_state(
+    const SparseLinearExecutionState& left,
+    const SparseLinearExecutionState& right,
+    const std::string_view message) {
+    expect(left.execution_status == right.execution_status, message);
+    expect(left.solver_status == right.solver_status, message);
+    expect(left.iterations == right.iterations, message);
+    expect(left.initial_residual_inf == right.initial_residual_inf, message);
+    expect(left.convergence_limit == right.convergence_limit, message);
+    expect(left.rho == right.rho, message);
+    expect(left.last_increment_inf == right.last_increment_inf, message);
+    expect(left.solution == right.solution, message);
+    expect(left.residual == right.residual, message);
+    expect(left.direction == right.direction, message);
+    expect(left.diagonal_inverse == right.diagonal_inverse, message);
+}
+
+[[nodiscard]] bool restart_boundaries_are_complete_and_bitwise_stable() {
+    const auto matrix = spd_five();
+    const std::array<double, 5> expected {1.0, -2.0, 3.0, -4.0, 5.0};
+    std::array<double, 5> right_hand_side {};
+    structural::solver_cpu::csr_matvec(matrix.view(), expected, right_hand_side);
+
+    auto direct = structural::solver_cpu::begin_sparse_spd_pcg(
+        matrix.view(), right_hand_side, {}, config());
+    auto segmented = direct;
+    const auto unchanged = segmented;
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 0U, segmented);
+    expect_same_state(segmented, unchanged, "zero-budget PCG advance must be a no-op");
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 1U, segmented);
+    expect(
+        segmented.execution_status == SparseLinearExecutionStatus::active,
+        "one PCG iteration must expose an active restart boundary");
+    expect(segmented.iterations == 1U, "one PCG iteration must be published");
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 1U, segmented);
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 100U, segmented);
+
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 100U, direct);
+    expect_same_state(segmented, direct, "segmented PCG restart must match direct execution");
+    expect(
+        direct.execution_status == SparseLinearExecutionStatus::terminal
+            && direct.solver_status == SolverStatus::converged,
+        "direct PCG restart execution must converge");
+    const auto terminal = direct;
+    structural::solver_cpu::advance_sparse_spd_pcg(
+        matrix.view(), right_hand_side, config(), 1U, direct);
+    expect_same_state(direct, terminal, "terminal PCG advance must be idempotent");
+
+    const auto projected = structural::solver_cpu::sparse_linear_result(direct);
+    const auto one_shot = structural::solver_cpu::solve_sparse_spd_pcg(
+        matrix.view(), right_hand_side, {}, config());
+    expect(projected.solution == one_shot.solution, "restart projection solution parity");
+    expect(projected.iterations == one_shot.iterations, "restart projection iteration parity");
+    expect(
+        projected.final_residual_inf == one_shot.final_residual_inf,
+        "restart projection residual parity");
+
+    auto corrupt = structural::solver_cpu::begin_sparse_spd_pcg(
+        matrix.view(), right_hand_side, {}, config());
+    corrupt.rho = std::numeric_limits<double>::quiet_NaN();
+    expect_throws(
+        [&matrix, &right_hand_side, &corrupt] {
+            structural::solver_cpu::advance_sparse_spd_pcg(
+                matrix.view(), right_hand_side, config(), 0U, corrupt);
+        },
+        "non-finite PCG restart scalar must fail closed");
+    return true;
+}
+
 }  // namespace
 
 int main() {
@@ -198,6 +274,7 @@ int main() {
         zero_rhs_and_exact_initial_guess_exit_without_iterations,
         canonical_validation_fails_closed,
         numerical_status_taxonomy_is_stable,
+        restart_boundaries_are_complete_and_bitwise_stable,
     };
     for (const auto test : tests) {
         if (!test()) {

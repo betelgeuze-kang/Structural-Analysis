@@ -5,6 +5,7 @@
 mod checkpoint;
 mod job;
 mod model_checkpoint;
+mod sparse_checkpoint;
 mod spectral_checkpoint;
 
 use std::path::Path;
@@ -17,6 +18,7 @@ pub use job::{
 pub use model_checkpoint::{
     ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
 };
+pub use sparse_checkpoint::{SparseLinearCheckpointReceiptV1, SparseLinearCheckpointV1};
 pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
 use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
@@ -26,6 +28,11 @@ use structural_contracts::product_ir::{
     average_step_iterations, build_nonlinear_ndtha_result_ir_v1, NativeAnalysisRequestDocumentV1,
     NonlinearNdthaResultIrDocumentV1, NonlinearNdthaResultSummaryV1,
     NonlinearNdthaTerminalStatusV1, ProductIrContractError, ResultIdentityV1,
+};
+use structural_contracts::sparse_product::{
+    build_sparse_linear_result_ir_v1, sparse_linear_execution_hash_v1, sparse_linear_model_hash_v1,
+    SparseLinearAnalysisRequestDocumentV1, SparseLinearAnalysisRequestV1, SparseLinearConfigV1,
+    SparseLinearResultIrDocumentV1, SparseLinearResultSummaryV1,
 };
 use structural_contracts::spectral_product::{
     build_dense_spectral_result_ir_v1, dense_spectral_execution_hash_v1,
@@ -39,6 +46,8 @@ pub use structural_ffi::{
     DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrNdthaAdaptedProblem,
     ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
     ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
+    SparseCsrMatrix, SparseLinearConfig, SparseLinearExecutionStatus, SparseLinearRestartState,
+    SparseLinearSolverStatus,
 };
 
 /// Runtime-layer projection of an error returned by the native ABI.
@@ -86,6 +95,13 @@ pub struct NonlinearNdthaProductResultV1 {
 pub struct DenseSpectralProductResultV1 {
     pub checkpoint: DenseSpectralCheckpointV1,
     pub result_ir: DenseSpectralResultIrDocumentV1,
+}
+
+/// One durable sparse PCG boundary, with `ResultIR` present only after convergence.
+#[derive(Clone, Debug)]
+pub struct SparseLinearProductProgressV1 {
+    pub checkpoint: SparseLinearCheckpointV1,
+    pub result_ir: Option<SparseLinearResultIrDocumentV1>,
 }
 
 /// CPU-only runtime foundation connected to the native ABI table.
@@ -173,6 +189,118 @@ impl Runtime {
             modes,
         )?;
         Ok(DenseSpectralProductResultV1 {
+            checkpoint,
+            result_ir,
+        })
+    }
+
+    /// Canonically bind one complete PCG state to its exact request.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error if the state is not a complete valid boundary for the request or
+    /// if an identity or bounded binary encoding cannot be constructed.
+    pub fn checkpoint_sparse_linear(
+        request: &SparseLinearAnalysisRequestDocumentV1,
+        state: &SparseLinearRestartState,
+    ) -> Result<SparseLinearCheckpointV1, RuntimeError> {
+        SparseLinearCheckpointV1::create(request, state)
+    }
+
+    /// Decode and verify a sparse PCG checkpoint against one exact request.
+    ///
+    /// # Errors
+    ///
+    /// Returns checkpoint-mismatch semantics for corrupt/noncanonical bytes or any request,
+    /// model, configuration, state, execution, or aggregate identity mismatch.
+    pub fn restore_sparse_linear(
+        request: &SparseLinearAnalysisRequestDocumentV1,
+        bytes: &[u8],
+    ) -> Result<SparseLinearCheckpointV1, RuntimeError> {
+        let checkpoint = SparseLinearCheckpointV1::from_bytes(bytes)?;
+        checkpoint.verify_request(request)?;
+        Ok(checkpoint)
+    }
+
+    /// Begin or resume one sparse PCG execution and publish at most `iteration_budget` boundaries.
+    ///
+    /// Active and numerically failed terminal states remain successful checkpoint transitions;
+    /// `ResultIR` is emitted only for a converged terminal state.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for invalid checkpoint bindings, ABI/solver transport failure, an
+    /// invalid restart state, or a failed deterministic checkpoint/ResultIR projection.
+    pub fn advance_sparse_linear_product(
+        &self,
+        request: &SparseLinearAnalysisRequestDocumentV1,
+        checkpoint_bytes: Option<&[u8]>,
+        iteration_budget: u32,
+    ) -> Result<SparseLinearProductProgressV1, RuntimeError> {
+        let value = request.request();
+        let (matrix, config) = sparse_linear_problem(value);
+        let api = Api::load_sparse_linear_restart().map_err(RuntimeError::from)?;
+        let mut state = match checkpoint_bytes {
+            Some(bytes) => Self::restore_sparse_linear(request, bytes)?.state().clone(),
+            None => api
+                .begin_sparse_linear(
+                    &matrix,
+                    &value.right_hand_side,
+                    (!value.initial_guess.is_empty()).then_some(value.initial_guess.as_slice()),
+                    config,
+                )
+                .map_err(RuntimeError::from)?,
+        };
+        api.advance_sparse_linear(
+            &matrix,
+            &value.right_hand_side,
+            config,
+            iteration_budget,
+            &mut state,
+        )
+        .map_err(RuntimeError::from)?;
+        let checkpoint = Self::checkpoint_sparse_linear(request, &state)?;
+        let result_ir = if state.execution_status == SparseLinearExecutionStatus::Terminal
+            && state.solver_status == SparseLinearSolverStatus::Converged
+        {
+            let solution = state.terminal_solution().map_err(RuntimeError::from)?;
+            let receipt = checkpoint.receipt();
+            let model_hash = sparse_linear_model_hash_v1(request)?;
+            let execution_hash = sparse_linear_execution_hash_v1(request)?;
+            if receipt.model_hash != model_hash || receipt.execution_hash != execution_hash {
+                return Err(RuntimeError {
+                    code: 1301,
+                    message: "sparse checkpoint identity drifted before ResultIR projection"
+                        .to_owned(),
+                });
+            }
+            Some(build_sparse_linear_result_ir_v1(
+                request,
+                ResultIdentityV1 {
+                    request_hash: request.request_hash().to_owned(),
+                    model_hash,
+                    state_hash: receipt.state_hash,
+                    execution_hash,
+                    checkpoint_hash: receipt.checkpoint_hash,
+                },
+                SparseLinearResultSummaryV1 {
+                    order: value.order,
+                    nonzero_count: u64::try_from(value.values.len()).map_err(|_| RuntimeError {
+                        code: 1900,
+                        message: "sparse nonzero count exceeds u64".to_owned(),
+                    })?,
+                    iterations: solution.iterations,
+                    initial_residual_inf: solution.initial_residual_inf,
+                    final_residual_inf: solution.final_residual_inf,
+                    final_residual_l2: solution.final_residual_l2,
+                    last_increment_inf: solution.last_increment_inf,
+                },
+                solution.solution,
+            )?)
+        } else {
+            None
+        };
+        Ok(SparseLinearProductProgressV1 {
             checkpoint,
             result_ir,
         })
@@ -442,6 +570,28 @@ impl Runtime {
             checkpoint,
             result_ir,
         })
+    }
+}
+
+fn sparse_linear_problem(
+    value: &SparseLinearAnalysisRequestV1,
+) -> (SparseCsrMatrix, SparseLinearConfig) {
+    (
+        SparseCsrMatrix {
+            row_offsets: value.row_offsets.clone(),
+            column_indices: value.column_indices.clone(),
+            values: value.values.clone(),
+        },
+        sparse_linear_config(value.config),
+    )
+}
+
+const fn sparse_linear_config(value: SparseLinearConfigV1) -> SparseLinearConfig {
+    SparseLinearConfig {
+        max_iterations: value.max_iterations,
+        absolute_residual_tolerance: value.absolute_residual_tolerance,
+        relative_residual_tolerance: value.relative_residual_tolerance,
+        maximum_increment: value.maximum_increment,
     }
 }
 

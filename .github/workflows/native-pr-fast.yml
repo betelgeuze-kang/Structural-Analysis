@@ -425,7 +425,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x00010009"
+          assert payload["abi_version"] == "0x0001000a"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY
@@ -652,6 +652,7 @@ jobs:
           python3 scripts/check_native_job_service_api.py
           python3 scripts/check_native_external_comparison.py
           python3 scripts/check_native_generalized_eigen_product.py
+          python3 scripts/check_native_sparse_linear_product.py
           python3 scripts/check_native_pdf_report.py
           cargo test --manifest-path native/Cargo.toml -p structural-runtime \
             --test durable_job --locked

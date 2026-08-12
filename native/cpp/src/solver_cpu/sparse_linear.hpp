@@ -49,6 +49,29 @@ struct SparseLinearResult {
     std::uint32_t fallback_count;
 };
 
+enum class SparseLinearExecutionStatus : std::uint32_t {
+    active = 0U,
+    terminal = 1U,
+};
+
+/// Complete caller-serializable PCG state at an iteration boundary.
+///
+/// Scratch vectors used inside one iteration are deliberately excluded: an advance either stops
+/// before publishing an iteration or publishes every value below for the next boundary.
+struct SparseLinearExecutionState {
+    SparseLinearExecutionStatus execution_status;
+    SolverStatus solver_status;
+    std::uint32_t iterations;
+    double initial_residual_inf;
+    double convergence_limit;
+    double rho;
+    double last_increment_inf;
+    std::vector<double> solution;
+    std::vector<double> residual;
+    std::vector<double> direction;
+    std::vector<double> diagonal_inverse;
+};
+
 /// Validate dimensions, bounds, finite values and canonical per-row ordering.
 ///
 /// Structural input failures throw `std::invalid_argument`; numerical solver outcomes are returned
@@ -70,6 +93,31 @@ void validate_sparse_spd_problem(
     std::span<const double> right_hand_side,
     std::span<const double> initial_guess,
     const SparseLinearConfig& config);
+
+/// Construct the deterministic iteration-zero PCG boundary.
+///
+/// Singular, indefinite and already-converged problems are represented as terminal states rather
+/// than exceptions. Structural input failures throw `std::invalid_argument`.
+[[nodiscard]] SparseLinearExecutionState begin_sparse_spd_pcg(
+    CsrMatrixView matrix,
+    std::span<const double> right_hand_side,
+    std::span<const double> initial_guess,
+    const SparseLinearConfig& config);
+
+/// Validate and advance an existing PCG state by at most `iteration_budget` boundaries.
+///
+/// A zero budget performs deterministic validation only. Terminal states are idempotent. State is
+/// updated only at a complete iteration boundary, making every returned active state restartable.
+void advance_sparse_spd_pcg(
+    CsrMatrixView matrix,
+    std::span<const double> right_hand_side,
+    const SparseLinearConfig& config,
+    std::uint32_t iteration_budget,
+    SparseLinearExecutionState& state);
+
+/// Project a terminal execution state into the stable one-shot result contract.
+[[nodiscard]] SparseLinearResult sparse_linear_result(
+    const SparseLinearExecutionState& state);
 
 /// Solve a symmetric positive-definite canonical CSR system using Jacobi-preconditioned CG.
 ///

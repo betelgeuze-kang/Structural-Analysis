@@ -13,6 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_TOKENS = {
     "native/cpp/src/solver_cpu/sparse_linear.hpp": (
         "enum class SolverStatus",
+        "SparseLinearExecutionState",
+        "begin_sparse_spd_pcg",
+        "advance_sparse_spd_pcg",
         "struct CsrMatrixView",
         "solve_sparse_spd_pcg",
         "fallback_count",
@@ -45,14 +48,20 @@ REQUIRED_TOKENS = {
     ),
     "native/cpp/include/structural/abi_v1.h": (
         "SA_ABI_V1_8",
+        "SA_ABI_V1_10",
         "SA_CAPABILITY_SPARSE_LINEAR_CPU",
+        "SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU",
         "sa_sparse_csr_matrix_v1",
         "sa_sparse_linear_solve_fn_v1",
+        "sa_sparse_linear_state_v1",
+        "sa_sparse_linear_begin_fn_v1",
+        "sa_sparse_linear_advance_fn_v1",
     ),
     "native/cpp/tests/abi/sparse_linear_contract_test.cpp": (
         "table_is_append_only",
         "failures_do_not_publish_partial_outputs",
         "immutable_inputs_are_reentrant",
+        "caller_owned_restart_is_complete_and_failure_atomic",
         "SA_ERR_SINGULARITY",
         "SA_ERR_INDEFINITE_OPERATOR",
     ),
@@ -63,6 +72,7 @@ REQUIRED_TOKENS = {
     ),
     "native/crates/structural-ffi/src/lib.rs": (
         "load_sparse_linear",
+        "load_sparse_linear_restart",
         "solve_sparse_linear",
         "native sparse linear result violated the v1.8 output contract",
     ),
@@ -116,6 +126,7 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
         "canonical CSR",
         "NumPy",
         "ABI v1.8",
+        "ABI v1.10",
         "HIP C2",
         "iteration control resident",
         "native-hip-approved",
@@ -145,9 +156,10 @@ def check_native_sparse_linear(repo_root: Path = ROOT) -> dict[str, object]:
         "blockers": blockers,
         "claim_boundary": (
             "This proves one bounded CPU canonical-CSR PCG family through C1. It does "
-            "include local live HIP C2 and ABI v1.8/Rust C3 implementation candidates, "
-            "but does not promote protected C2 or subsequent C3, and does not close "
-            "general sparse solvers, restart C4, product C5, or C6."
+            "include local live HIP C2 and ABI v1.8/v1.10 Rust C3 implementation "
+            "candidates, but does not promote protected C2 or subsequent C3. Separate "
+            "bounded CPU evidence may implement C4/C5 without promoting this numerical "
+            "family; this check does not close general sparse solvers or C6."
         ),
     }
 

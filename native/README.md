@@ -86,9 +86,12 @@ strict row/column structure and symmetry, uses a Jacobi preconditioner, reports 
 status values, performs a true-residual convergence postcheck and never falls back. Four profiles
 match an independent NumPy direct-solve oracle through C1. A product-owned fixed-tree FP64 HIP C2
 candidate keeps the complete PCG state resident and has bitwise local live parity with fallback
-zero. ABI v1.8 and a safe Rust wrapper implement the C3 boundary, but promotion remains C1 until
-the protected HIP receipt closes C2; restart C4, product C5 and C6 remain open. See
-`docs/native/sparse-linear-cpu-v1.md` and `docs/native/sparse-linear-hip-c2.md`.
+zero. ABI v1.8 and a safe Rust wrapper implement the one-shot C3 boundary; ABI v1.10 adds complete
+caller-owned PCG begin/advance state. A pointer-free `SAPCGC01` checkpoint and public
+`linear-run`/`linear-resume` ResultIR/ReportIR flow provide bounded CPU C4/C5 implementation
+evidence. Promotion remains C1 until the protected HIP receipt closes C2, and ModelIR sparse
+assembly, durable jobs, PDF and C6 remain open. See `docs/native/sparse-linear-cpu-v1.md`,
+`docs/native/sparse-linear-product-e2e-v1.md` and `docs/native/sparse-linear-hip-c2.md`.
 
 The same CPU library now also owns a bounded dense symmetric generalized-eigen reference path.
 It covers modal and linear-buckling systems through C1 with deterministic cyclic-Jacobi
@@ -261,10 +264,10 @@ slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU oc
 v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
 uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter. ABI v1.7
 uses the next append-only slot at offset 112 for bounded CPU reference elements. ABI v1.8 adds
-canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes the existing offsets 128 and 136 for
-bounded modal and linear-buckling CPU operations; the current table remains 144 bytes and has no
-reserved function-pointer slots left. Existing callers may continue to provide their older struct
-size, and v1.0-v1.8 requests expose every later slot as null.
+canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes offsets 128 and 136 for bounded modal
+and linear-buckling CPU operations. ABI v1.10 appends sparse PCG begin and advance operations at
+offsets 144 and 152; the current table is 160 bytes. Existing callers may continue to provide
+their older struct size, and every request exposes later-minor slots as null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing
 package name, cdylib name, Python bridge output location and rollback lockfile. Its frozen

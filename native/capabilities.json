@@ -59,7 +59,19 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++20 sparse linear C1 reference only: strict canonical CSR validation, symmetry enforcement, Jacobi-preconditioned conjugate gradients, true-residual postcheck, deterministic repetition, fallback 0 and fixed singularity/indefinite/nonconvergence/increment/residual taxonomy cover four SPD profiles and failure paths against an independent NumPy direct-solve oracle; a product-owned fixed-tree FP64 HIP C2 candidate now keeps all PCG vectors and iteration control resident, has bitwise repeats, CPU/HIP status and iteration parity, local live maximum solution error 4.4408920985006262e-16 and fallback 0; append-only ABI v1.8 and a safe reentrant Rust wrapper implement failure-atomic caller-owned C3 integration, but the sequential gate remains C1 until the native-hip-approved protected-runner C2 receipt exists; general constraints/reordering/preconditioners, indefinite/direct solves, checkpoint C4, product E2E C5 and C6 remain open"
+      "claim": "bounded serial FP64 C++20 sparse linear C1 reference only: strict canonical CSR validation, symmetry enforcement, Jacobi-preconditioned conjugate gradients, true-residual postcheck, deterministic repetition, fallback 0 and fixed singularity/indefinite/nonconvergence/increment/residual taxonomy cover four SPD profiles and failure paths against an independent NumPy direct-solve oracle; a product-owned fixed-tree FP64 HIP C2 candidate keeps all PCG vectors and iteration control resident, has bitwise repeats, CPU/HIP status and iteration parity, local live maximum solution error 4.4408920985006262e-16 and fallback 0; append-only ABI v1.8 one-shot plus ABI v1.10 complete-state begin/advance and a safe reentrant Rust wrapper implement failure-atomic caller-owned C3 integration, but the sequential gate remains C1 until the native-hip-approved protected-runner C2 receipt exists; general constraints/reordering/preconditioners, indefinite/direct solves and C6 remain open, while exact CPU iterative checkpoint and public CLI are tracked as separate bounded C4/C5 implementation capabilities without promoting this numerical family past C1"
+    },
+    "sparse_linear_checkpoint": {
+      "status": "implemented",
+      "cutover_gate": "C4",
+      "owner": "structural-runtime",
+      "claim": "bounded canonical-CSR CPU PCG checkpoint C4 implementation only: ABI v1.10 exposes complete real iteration state, and a pointer-free SAPCGC01 artifact binds the exact strict request plus model, iterative state, execution and aggregate checkpoint SHA-256 identities; every single-byte mutation and request/configuration drift fails with checkpoint-mismatch taxonomy, while direct and segmented execution produce bitwise-identical terminal checkpoint and ResultIR bytes; protected-runner HIP C2, durable queued-job integration, arbitrary ModelIR sparse assembly and C6 remain open"
+    },
+    "sparse_linear_product_e2e": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded canonical-CSR CPU PCG product E2E C5 implementation only: strict Rust request parsing crosses ABI v1.10 real-iteration begin/advance and exact C4 checkpoint, then public linear-run/linear-resume commands atomically publish typed active/failure receipts or self-hashed ResultIR, ReportIR and deterministic Markdown; direct and real-iteration resumed terminal artifact directories are byte-identical in a clean environment with no Python or Node lookup and fallback 0; protected-runner HIP C2, ModelIR sparse assembly, durable service jobs, engineering acceptance, PDF rendering and C6 remain open"
     },
     "generalized_eigen_solver_cpu": {
       "status": "implemented",

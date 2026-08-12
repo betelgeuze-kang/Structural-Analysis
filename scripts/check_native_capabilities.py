@@ -23,6 +23,8 @@ EXPECTED_OWNERS = {
     "reference_materials_elements_cpu": "structural_elements",
     "dense_assembly_cpu": "structural_assembly",
     "sparse_linear_solver_cpu": "structural_solver_cpu",
+    "sparse_linear_checkpoint": "structural-runtime",
+    "sparse_linear_product_e2e": "structural-cli",
     "generalized_eigen_solver_cpu": "structural_solver_cpu",
     "generalized_eigen_checkpoint": "structural-runtime",
     "generalized_eigen_product_e2e": "structural-cli",

@@ -13,6 +13,7 @@ pub mod mgt_import;
 pub mod model_ir;
 pub mod product_ir;
 pub mod solver_cpu;
+pub mod sparse_product;
 pub mod spectral_product;
 
 /// ABI family consumed by the wire-contract crates.

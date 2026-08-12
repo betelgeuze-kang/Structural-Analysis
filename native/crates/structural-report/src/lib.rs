@@ -15,6 +15,10 @@ use structural_contracts::product_ir::{
     build_nonlinear_ndtha_report_ir_v1, NonlinearNdthaReportIrDocumentV1,
     NonlinearNdthaResultIrDocumentV1, ProductIrContractError,
 };
+use structural_contracts::sparse_product::{
+    build_sparse_linear_report_ir_v1, SparseLinearReportIrDocumentV1,
+    SparseLinearResultIrDocumentV1,
+};
 use structural_contracts::spectral_product::{
     build_dense_spectral_report_ir_v1, DenseSpectralReportIrDocumentV1,
     DenseSpectralResultIrDocumentV1, SpectralAnalysisKindV1, SpectralModeV1,
@@ -31,6 +35,13 @@ pub struct NonlinearNdthaReportBundleV1 {
 #[derive(Clone, Debug)]
 pub struct DenseSpectralReportBundleV1 {
     pub report_ir: DenseSpectralReportIrDocumentV1,
+    pub document_source: String,
+}
+
+/// Exact sparse `ReportIR` plus deterministic Markdown document source.
+#[derive(Clone, Debug)]
+pub struct SparseLinearReportBundleV1 {
+    pub report_ir: SparseLinearReportIrDocumentV1,
     pub document_source: String,
 }
 
@@ -192,6 +203,98 @@ pub fn build_dense_spectral_report_v1(
     .expect("String writes cannot fail");
     let report_ir = build_dense_spectral_report_ir_v1(result, document.as_bytes())?;
     Ok(DenseSpectralReportBundleV1 {
+        report_ir,
+        document_source: document,
+    })
+}
+
+/// Project one converged bounded sparse `ResultIR` into deterministic report artifacts.
+///
+/// # Errors
+///
+/// Returns a contract error if the exact result cannot be rendered or bound into a canonical,
+/// self-hashed `ReportIR`.
+pub fn build_sparse_linear_report_v1(
+    result: &SparseLinearResultIrDocumentV1,
+) -> Result<SparseLinearReportBundleV1, ProductIrContractError> {
+    let source = result.result();
+    let maximum_absolute_solution = source
+        .solution
+        .iter()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max);
+    let mut document = String::new();
+    writeln!(&mut document, "# Sparse Linear Analysis Report").expect("String writes cannot fail");
+    writeln!(&mut document).expect("String writes cannot fail");
+    writeln!(&mut document, "- Case: `{}`", source.case_id).expect("String writes cannot fail");
+    writeln!(&mut document, "- Authority: `bounded_candidate`").expect("String writes cannot fail");
+    writeln!(&mut document, "- Matrix order: {}", source.summary.order)
+        .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Canonical nonzeros: {}",
+        source.summary.nonzero_count
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- PCG iterations: {}",
+        source.summary.iterations
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Initial residual infinity norm: {:.17e}",
+        source.summary.initial_residual_inf
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Final true residual infinity norm: {:.17e}",
+        source.summary.final_residual_inf
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Final true residual L2 norm: {:.17e}",
+        source.summary.final_residual_l2
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Maximum absolute solution component: {maximum_absolute_solution:.17e}"
+    )
+    .expect("String writes cannot fail");
+    writeln!(&mut document, "- Backend: `cpu` / `fp64` / fallback `0`")
+        .expect("String writes cannot fail");
+    writeln!(&mut document, "- Result hash: `{}`", source.result_hash)
+        .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Model hash: `{}`",
+        source.identity.model_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- State hash: `{}`",
+        source.identity.state_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Execution hash: `{}`",
+        source.identity.execution_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(&mut document).expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "> This report is a deterministic projection of a bounded canonical-CSR CPU candidate; it is not whole-model assembly authority, engineering acceptance, or design-code compliance."
+    )
+    .expect("String writes cannot fail");
+    let report_ir = build_sparse_linear_report_ir_v1(result, document.as_bytes())?;
+    Ok(SparseLinearReportBundleV1 {
         report_ir,
         document_source: document,
     })

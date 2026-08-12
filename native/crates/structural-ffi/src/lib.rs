@@ -303,6 +303,228 @@ pub struct SparseLinearSolution {
     pub fallback_count: u32,
 }
 
+/// Whether a caller-owned sparse PCG state can still advance.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SparseLinearExecutionStatus {
+    Active,
+    Terminal,
+}
+
+/// Stable numerical taxonomy stored in every sparse PCG restart boundary.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SparseLinearSolverStatus {
+    Converged,
+    Singularity,
+    IndefiniteOperator,
+    Nonconvergence,
+    IncrementLimit,
+    ResidualLimit,
+}
+
+/// Pointer-free Rust owner of the complete ABI v1.10 PCG iteration state.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct SparseLinearRestartState {
+    pub execution_status: SparseLinearExecutionStatus,
+    pub solver_status: SparseLinearSolverStatus,
+    pub iterations: u32,
+    pub initial_residual_inf: f64,
+    pub convergence_limit: f64,
+    pub rho: f64,
+    pub last_increment_inf: f64,
+    pub solution: Vec<f64>,
+    pub residual: Vec<f64>,
+    pub direction: Vec<f64>,
+    pub diagonal_inverse: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
+impl SparseLinearRestartState {
+    /// Project a converged terminal boundary into the stable sparse result contract.
+    ///
+    /// # Errors
+    ///
+    /// Active and numerically failed terminal states retain their state and return the matching
+    /// stable ABI taxonomy without discarding the last published iterate.
+    pub fn terminal_solution(&self) -> Result<SparseLinearSolution, Error> {
+        if self.execution_status == SparseLinearExecutionStatus::Active {
+            return Err(Error {
+                code: sys::SA_ERR_STATE_CONFLICT,
+                message: "sparse linear restart state is still active".to_owned(),
+            });
+        }
+        let numerical_error = match self.solver_status {
+            SparseLinearSolverStatus::Converged => None,
+            SparseLinearSolverStatus::Singularity => Some((
+                sys::SA_ERR_SINGULARITY,
+                "sparse linear operator is singular",
+            )),
+            SparseLinearSolverStatus::IndefiniteOperator => Some((
+                sys::SA_ERR_INDEFINITE_OPERATOR,
+                "sparse linear operator is not positive definite",
+            )),
+            SparseLinearSolverStatus::Nonconvergence => Some((
+                sys::SA_ERR_NONCONVERGENCE,
+                "sparse linear PCG solve did not converge",
+            )),
+            SparseLinearSolverStatus::IncrementLimit => Some((
+                sys::SA_ERR_INCREMENT_LIMIT,
+                "sparse linear increment limit was exceeded",
+            )),
+            SparseLinearSolverStatus::ResidualLimit => Some((
+                sys::SA_ERR_RESIDUAL_LIMIT,
+                "sparse linear true residual gate failed",
+            )),
+        };
+        if let Some((code, message)) = numerical_error {
+            return Err(Error {
+                code,
+                message: message.to_owned(),
+            });
+        }
+        let final_residual_inf = deterministic_norm_inf(&self.residual);
+        let final_residual_l2 = deterministic_norm_l2(&self.residual);
+        let valid = self.solution.len() == self.residual.len()
+            && !self.solution.is_empty()
+            && self.solution.iter().all(|value| value.is_finite())
+            && self.residual.iter().all(|value| value.is_finite())
+            && self.initial_residual_inf.is_finite()
+            && self.last_increment_inf.is_finite()
+            && final_residual_inf.is_finite()
+            && final_residual_l2.is_finite()
+            && self.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && self.fallback_count == 0;
+        if !valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "sparse linear terminal state violated the result contract".to_owned(),
+            });
+        }
+        Ok(SparseLinearSolution {
+            solution: try_clone_slice(&self.solution, "sparse terminal solution")?,
+            iterations: self.iterations,
+            initial_residual_inf: self.initial_residual_inf,
+            final_residual_inf,
+            final_residual_l2,
+            last_increment_inf: self.last_increment_inf,
+            execution_backend: self.execution_backend,
+            fallback_count: self.fallback_count,
+        })
+    }
+}
+
+struct SparseRestartArena {
+    solution: Vec<f64>,
+    residual: Vec<f64>,
+    direction: Vec<f64>,
+    diagonal_inverse: Vec<f64>,
+}
+
+impl SparseRestartArena {
+    fn allocate(order: usize) -> Result<Self, Error> {
+        Ok(Self {
+            solution: allocate_f64_output(order)?,
+            residual: allocate_f64_output(order)?,
+            direction: allocate_f64_output(order)?,
+            diagonal_inverse: allocate_f64_output(order)?,
+        })
+    }
+
+    fn from_state(state: &SparseLinearRestartState) -> Result<Self, Error> {
+        Ok(Self {
+            solution: try_clone_slice(&state.solution, "sparse restart solution")?,
+            residual: try_clone_slice(&state.residual, "sparse restart residual")?,
+            direction: try_clone_slice(&state.direction, "sparse restart direction")?,
+            diagonal_inverse: try_clone_slice(
+                &state.diagonal_inverse,
+                "sparse restart diagonal inverse",
+            )?,
+        })
+    }
+
+    fn descriptor(
+        &mut self,
+        state: &SparseLinearRestartState,
+    ) -> Result<sys::SaSparseLinearStateV1, Error> {
+        Ok(sys::SaSparseLinearStateV1 {
+            abi_version: sys::SA_ABI_V1_10,
+            struct_size: abi_size::<sys::SaSparseLinearStateV1>(),
+            execution_status: sparse_execution_status_to_raw(state.execution_status),
+            solver_status: sparse_solver_status_to_raw(state.solver_status),
+            iterations: state.iterations,
+            execution_backend: state.execution_backend,
+            fallback_count: state.fallback_count,
+            reserved_u32: 0,
+            initial_residual_inf: state.initial_residual_inf,
+            convergence_limit: state.convergence_limit,
+            rho: state.rho,
+            last_increment_inf: state.last_increment_inf,
+            vector_length: usize_to_u64(self.solution.len())?,
+            solution: mutable_f64_view(&mut self.solution, sys::SA_ABI_V1_10)?,
+            residual: mutable_f64_view(&mut self.residual, sys::SA_ABI_V1_10)?,
+            direction: mutable_f64_view(&mut self.direction, sys::SA_ABI_V1_10)?,
+            diagonal_inverse: mutable_f64_view(&mut self.diagonal_inverse, sys::SA_ABI_V1_10)?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn finish(
+        self,
+        raw: &sys::SaSparseLinearStateV1,
+        right_hand_side: &[f64],
+        config: SparseLinearConfig,
+    ) -> Result<SparseLinearRestartState, Error> {
+        let order = self.solution.len();
+        let valid_view = |view: &sys::SaMutBufferViewV1, data: *const f64| {
+            view.abi_version == sys::SA_ABI_V1_10
+                && view.struct_size == abi_size::<sys::SaMutBufferViewV1>()
+                && view.data.cast_const().cast::<f64>() == data
+                && usize::try_from(view.length) == Ok(order)
+                && view.stride_bytes == size_of::<f64>() as u64
+                && view.element_type == sys::SA_ELEMENT_TYPE_F64
+                && view.memory_space == sys::SA_MEMORY_SPACE_HOST
+                && view.device_id == -1
+                && view.flags == 0
+        };
+        let metadata_valid = raw.abi_version == sys::SA_ABI_V1_10
+            && raw.struct_size == abi_size::<sys::SaSparseLinearStateV1>()
+            && usize::try_from(raw.vector_length) == Ok(order)
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved_u32 == 0
+            && raw.reserved == [0; 2]
+            && valid_view(&raw.solution, self.solution.as_ptr())
+            && valid_view(&raw.residual, self.residual.as_ptr())
+            && valid_view(&raw.direction, self.direction.as_ptr())
+            && valid_view(&raw.diagonal_inverse, self.diagonal_inverse.as_ptr());
+        if !metadata_valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native sparse restart metadata violated ABI v1.10".to_owned(),
+            });
+        }
+        let state = SparseLinearRestartState {
+            execution_status: sparse_execution_status_from_raw(raw.execution_status)?,
+            solver_status: sparse_solver_status_from_raw(raw.solver_status)?,
+            iterations: raw.iterations,
+            initial_residual_inf: raw.initial_residual_inf,
+            convergence_limit: raw.convergence_limit,
+            rho: raw.rho,
+            last_increment_inf: raw.last_increment_inf,
+            solution: self.solution,
+            residual: self.residual,
+            direction: self.direction,
+            diagonal_inverse: self.diagonal_inverse,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        };
+        validate_sparse_restart_state(&state, right_hand_side, config)?;
+        Ok(state)
+    }
+}
+
 /// Caller-owned row-major dense symmetric matrix for the bounded ABI v1.9 reference solve.
 #[derive(Clone, Debug, PartialEq)]
 pub struct DenseSymmetricMatrix {
@@ -846,6 +1068,15 @@ impl Api {
     /// Returns a stable ABI error if either generalized-eigen capability is absent.
     pub fn load_generalized_eigen() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_9)
+    }
+
+    /// Load the ABI v1.10 table with complete caller-owned sparse PCG restart state.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if either restart operation or its capability is absent.
+    pub fn load_sparse_linear_restart() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_10)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -1559,6 +1790,132 @@ impl Api {
         sparse_solution_from_raw(raw_result, solution, order)
     }
 
+    /// Create the complete iteration-zero boundary for a bounded sparse PCG problem.
+    ///
+    /// Already-converged and numerical initialization failures are returned as terminal states so
+    /// their stable taxonomy and last published iterate remain checkpointable.
+    ///
+    /// # Errors
+    ///
+    /// Returns validation, allocation, ABI contract, or internal errors. Numerical initialization
+    /// outcomes are represented in the returned state rather than flattened into an error.
+    pub fn begin_sparse_linear(
+        self,
+        matrix: &SparseCsrMatrix,
+        right_hand_side: &[f64],
+        initial_guess: Option<&[f64]>,
+        config: SparseLinearConfig,
+    ) -> Result<SparseLinearRestartState, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_10 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "sparse linear restart requires ABI v1.10".to_owned(),
+            });
+        }
+        let initial = initial_guess.unwrap_or(&[]);
+        let order =
+            validate_sparse_linear_dimensions(matrix, right_hand_side.len(), initial.len())?;
+        let raw_config = sparse_restart_config_descriptor(config);
+        let raw_matrix = sparse_restart_matrix_descriptor(matrix, order)?;
+        let rhs_view = input_f64_view(right_hand_side, sys::SA_ABI_V1_10)?;
+        let initial_view = input_f64_view(initial, sys::SA_ABI_V1_10)?;
+        let seed = SparseLinearRestartState {
+            execution_status: SparseLinearExecutionStatus::Active,
+            solver_status: SparseLinearSolverStatus::Nonconvergence,
+            iterations: 0,
+            initial_residual_inf: 0.0,
+            convergence_limit: 0.0,
+            rho: 0.0,
+            last_increment_inf: 0.0,
+            solution: Vec::new(),
+            residual: Vec::new(),
+            direction: Vec::new(),
+            diagonal_inverse: Vec::new(),
+            execution_backend: sys::SA_EXECUTION_BACKEND_CPU,
+            fallback_count: 0,
+        };
+        let mut arena = SparseRestartArena::allocate(order)?;
+        let mut raw_state = arena.descriptor(&seed)?;
+        let begin = self.table.sparse_linear_begin.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: immutable problem slices and four disjoint arena-owned state vectors remain live
+        // for the synchronous call. The native boundary retains no pointer and publishes last.
+        let status = unsafe {
+            begin(
+                &raw_config,
+                &raw_matrix,
+                &rhs_view,
+                &initial_view,
+                &mut raw_state,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        arena.finish(&raw_state, right_hand_side, config)
+    }
+
+    /// Advance a complete caller-owned PCG state by at most `iteration_budget` boundaries.
+    ///
+    /// The Rust owner is deep-copied before crossing the ABI. Any rejection therefore leaves the
+    /// supplied state byte-for-byte unchanged; only a fully validated returned boundary replaces
+    /// it.
+    ///
+    /// # Errors
+    ///
+    /// Returns validation, checkpoint-mismatch, allocation, or ABI output-contract errors.
+    pub fn advance_sparse_linear(
+        self,
+        matrix: &SparseCsrMatrix,
+        right_hand_side: &[f64],
+        config: SparseLinearConfig,
+        iteration_budget: u32,
+        state: &mut SparseLinearRestartState,
+    ) -> Result<(), Error> {
+        if self.abi_version() < sys::SA_ABI_V1_10 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "sparse linear restart requires ABI v1.10".to_owned(),
+            });
+        }
+        let order = validate_sparse_linear_dimensions(matrix, right_hand_side.len(), 0)?;
+        validate_sparse_restart_state(state, right_hand_side, config)?;
+        if state.solution.len() != order {
+            return Err(Error {
+                code: sys::SA_ERR_CHECKPOINT_MISMATCH,
+                message: "sparse linear restart state order does not match the matrix".to_owned(),
+            });
+        }
+        let raw_config = sparse_restart_config_descriptor(config);
+        let raw_matrix = sparse_restart_matrix_descriptor(matrix, order)?;
+        let rhs_view = input_f64_view(right_hand_side, sys::SA_ABI_V1_10)?;
+        let mut arena = SparseRestartArena::from_state(state)?;
+        let mut raw_state = arena.descriptor(state)?;
+        let advance = self.table.sparse_linear_advance.ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: immutable problem slices and disjoint arena-owned state vectors remain live for
+        // the synchronous call. The native boundary first deep-copies and retains no pointer.
+        let status = unsafe {
+            advance(
+                &raw_config,
+                &raw_matrix,
+                &rhs_view,
+                iteration_budget,
+                &mut raw_state,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let advanced = arena.finish(&raw_state, right_hand_side, config)?;
+        *state = advanced;
+        Ok(())
+    }
+
     /// Solve `K phi = omega^2 M phi` through caller-owned ABI v1.9 buffers.
     ///
     /// # Errors
@@ -1691,6 +2048,188 @@ fn validate_sparse_linear_dimensions(
         })
     } else {
         Ok(order)
+    }
+}
+
+fn sparse_restart_config_descriptor(config: SparseLinearConfig) -> sys::SaSparseLinearConfigV1 {
+    sys::SaSparseLinearConfigV1 {
+        abi_version: sys::SA_ABI_V1_10,
+        struct_size: abi_size::<sys::SaSparseLinearConfigV1>(),
+        max_iterations: config.max_iterations,
+        flags: 0,
+        absolute_residual_tolerance: config.absolute_residual_tolerance,
+        relative_residual_tolerance: config.relative_residual_tolerance,
+        maximum_increment: config.maximum_increment,
+        reserved: [0; 2],
+    }
+}
+
+fn sparse_restart_matrix_descriptor(
+    matrix: &SparseCsrMatrix,
+    order: usize,
+) -> Result<sys::SaSparseCsrMatrixV1, Error> {
+    Ok(sys::SaSparseCsrMatrixV1 {
+        abi_version: sys::SA_ABI_V1_10,
+        struct_size: abi_size::<sys::SaSparseCsrMatrixV1>(),
+        order: usize_to_u64(order)?,
+        row_offsets: input_u64_view(&matrix.row_offsets, sys::SA_ABI_V1_10)?,
+        column_indices: input_u32_view(&matrix.column_indices, sys::SA_ABI_V1_10)?,
+        values: input_f64_view(&matrix.values, sys::SA_ABI_V1_10)?,
+        reserved: [0; 2],
+    })
+}
+
+fn validate_sparse_restart_problem_scalars(
+    right_hand_side: &[f64],
+    config: SparseLinearConfig,
+) -> Result<(), Error> {
+    let valid = config.max_iterations > 0
+        && config.absolute_residual_tolerance.is_finite()
+        && config.relative_residual_tolerance.is_finite()
+        && config.maximum_increment.is_finite()
+        && config.absolute_residual_tolerance >= 0.0
+        && config.relative_residual_tolerance >= 0.0
+        && (config.absolute_residual_tolerance > 0.0 || config.relative_residual_tolerance > 0.0)
+        && config.maximum_increment >= 0.0
+        && right_hand_side.iter().all(|value| value.is_finite());
+    if valid {
+        Ok(())
+    } else {
+        Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "sparse PCG configuration or right-hand side is invalid".to_owned(),
+        })
+    }
+}
+
+fn validate_sparse_restart_state(
+    state: &SparseLinearRestartState,
+    right_hand_side: &[f64],
+    config: SparseLinearConfig,
+) -> Result<(), Error> {
+    validate_sparse_restart_problem_scalars(right_hand_side, config)?;
+    let order = right_hand_side.len();
+    let lengths_valid = order > 0
+        && state.solution.len() == order
+        && state.residual.len() == order
+        && state.direction.len() == order
+        && state.diagonal_inverse.len() == order;
+    let vectors_finite = state.solution.iter().all(|value| value.is_finite())
+        && state.residual.iter().all(|value| value.is_finite())
+        && state.direction.iter().all(|value| value.is_finite())
+        && state.diagonal_inverse.iter().all(|value| value.is_finite());
+    let expected_limit = config.absolute_residual_tolerance
+        + config.relative_residual_tolerance * deterministic_norm_inf(right_hand_side);
+    let scalars_valid = state.initial_residual_inf.is_finite()
+        && state.convergence_limit.is_finite()
+        && state.rho.is_finite()
+        && state.last_increment_inf.is_finite()
+        && state.initial_residual_inf >= 0.0
+        && state.convergence_limit.to_bits() == expected_limit.to_bits()
+        && state.last_increment_inf >= 0.0;
+    let status_valid = match state.execution_status {
+        SparseLinearExecutionStatus::Active => {
+            state.solver_status == SparseLinearSolverStatus::Nonconvergence
+                && state.iterations < config.max_iterations
+                && state.rho > 0.0
+                && state.diagonal_inverse.iter().all(|value| *value > 0.0)
+                && deterministic_norm_inf(&state.residual) > state.convergence_limit
+        }
+        SparseLinearExecutionStatus::Terminal => match state.solver_status {
+            SparseLinearSolverStatus::Converged => {
+                deterministic_norm_inf(&state.residual) <= state.convergence_limit
+            }
+            SparseLinearSolverStatus::Nonconvergence => state.iterations == config.max_iterations,
+            SparseLinearSolverStatus::Singularity
+            | SparseLinearSolverStatus::IndefiniteOperator
+            | SparseLinearSolverStatus::IncrementLimit
+            | SparseLinearSolverStatus::ResidualLimit => true,
+        },
+    };
+    let metadata_valid = state.iterations <= config.max_iterations
+        && state.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+        && state.fallback_count == 0;
+    if lengths_valid && vectors_finite && scalars_valid && status_valid && metadata_valid {
+        Ok(())
+    } else {
+        Err(Error {
+            code: sys::SA_ERR_CHECKPOINT_MISMATCH,
+            message: "sparse linear restart state failed deterministic validation".to_owned(),
+        })
+    }
+}
+
+const fn sparse_execution_status_to_raw(status: SparseLinearExecutionStatus) -> u32 {
+    match status {
+        SparseLinearExecutionStatus::Active => sys::SA_SPARSE_LINEAR_EXECUTION_ACTIVE,
+        SparseLinearExecutionStatus::Terminal => sys::SA_SPARSE_LINEAR_EXECUTION_TERMINAL,
+    }
+}
+
+fn sparse_execution_status_from_raw(raw: u32) -> Result<SparseLinearExecutionStatus, Error> {
+    match raw {
+        sys::SA_SPARSE_LINEAR_EXECUTION_ACTIVE => Ok(SparseLinearExecutionStatus::Active),
+        sys::SA_SPARSE_LINEAR_EXECUTION_TERMINAL => Ok(SparseLinearExecutionStatus::Terminal),
+        _ => Err(Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native sparse restart returned an invalid execution status".to_owned(),
+        }),
+    }
+}
+
+const fn sparse_solver_status_to_raw(status: SparseLinearSolverStatus) -> u32 {
+    match status {
+        SparseLinearSolverStatus::Converged => sys::SA_SOLVER_CONVERGED,
+        SparseLinearSolverStatus::Singularity => sys::SA_SOLVER_SINGULARITY,
+        SparseLinearSolverStatus::IndefiniteOperator => sys::SA_SOLVER_INDEFINITE_OPERATOR,
+        SparseLinearSolverStatus::Nonconvergence => sys::SA_SOLVER_NONCONVERGENCE,
+        SparseLinearSolverStatus::IncrementLimit => sys::SA_SOLVER_INCREMENT_LIMIT,
+        SparseLinearSolverStatus::ResidualLimit => sys::SA_SOLVER_RESIDUAL_LIMIT,
+    }
+}
+
+fn sparse_solver_status_from_raw(raw: u32) -> Result<SparseLinearSolverStatus, Error> {
+    match raw {
+        sys::SA_SOLVER_CONVERGED => Ok(SparseLinearSolverStatus::Converged),
+        sys::SA_SOLVER_SINGULARITY => Ok(SparseLinearSolverStatus::Singularity),
+        sys::SA_SOLVER_INDEFINITE_OPERATOR => Ok(SparseLinearSolverStatus::IndefiniteOperator),
+        sys::SA_SOLVER_NONCONVERGENCE => Ok(SparseLinearSolverStatus::Nonconvergence),
+        sys::SA_SOLVER_INCREMENT_LIMIT => Ok(SparseLinearSolverStatus::IncrementLimit),
+        sys::SA_SOLVER_RESIDUAL_LIMIT => Ok(SparseLinearSolverStatus::ResidualLimit),
+        _ => Err(Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native sparse restart returned an invalid solver status".to_owned(),
+        }),
+    }
+}
+
+fn deterministic_norm_inf(values: &[f64]) -> f64 {
+    values
+        .iter()
+        .fold(0.0, |maximum, value| maximum.max(value.abs()))
+}
+
+fn deterministic_norm_l2(values: &[f64]) -> f64 {
+    let mut scale = 0.0;
+    let mut sum_squares = 1.0;
+    for value in values {
+        let magnitude = value.abs();
+        if magnitude == 0.0 {
+            continue;
+        }
+        if scale < magnitude {
+            let ratio = scale / magnitude;
+            sum_squares = 1.0 + sum_squares * ratio * ratio;
+            scale = magnitude;
+        } else {
+            let ratio = magnitude / scale;
+            sum_squares += ratio * ratio;
+        }
+    }
+    if scale == 0.0 {
+        0.0
+    } else {
+        scale * f64::sqrt(sum_squares)
     }
 }
 
@@ -2660,6 +3199,16 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.buckling_solve.is_none()
             && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU == 0
     };
+    let sparse_restart_slots =
+        table.sparse_linear_begin.is_some() && table.sparse_linear_advance.is_some();
+    let sparse_restart_valid = if requested >= sys::SA_ABI_V1_10 {
+        sparse_restart_slots
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+    } else {
+        table.sparse_linear_begin.is_none()
+            && table.sparse_linear_advance.is_none()
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU == 0
+    };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
@@ -2805,10 +3354,37 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+    } else if requested == sys::SA_ABI_V1_10 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && sparse_restart_slots
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
     } else {
         false
     };
-    if base_valid && version_valid && sparse_linear_valid && generalized_eigen_valid {
+    if base_valid
+        && version_valid
+        && sparse_linear_valid
+        && generalized_eigen_valid
+        && sparse_restart_valid
+    {
         Ok(())
     } else {
         Err(invalid_table())
@@ -3107,14 +3683,14 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7,
-        SA_ABI_V1_8, SA_ABI_V1_9, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6,
+        SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9, SA_CAPABILITY_BUFFER_VALIDATION,
         SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
         SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
         SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
-        SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
-        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU,
+        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -3292,6 +3868,27 @@ mod tests {
                 | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
                 | SA_CAPABILITY_SPARSE_LINEAR_CPU
                 | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
+        );
+    }
+
+    #[test]
+    fn v1_10_table_adds_only_sparse_linear_restart() {
+        let api = Api::load_sparse_linear_restart().expect("v1.10 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_10);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_CPU
+                | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
         );
     }
 

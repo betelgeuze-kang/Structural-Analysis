@@ -3,7 +3,9 @@
 use crate::{SaBufferViewV1, SaErrorBufferV1, SaMutBufferViewV1, SaStatusCodeV1};
 
 pub const SA_ABI_V1_8: u32 = 0x0001_0008;
+pub const SA_ABI_V1_10: u32 = 0x0001_000a;
 pub const SA_CAPABILITY_SPARSE_LINEAR_CPU: u64 = 1 << 9;
+pub const SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU: u64 = 1 << 11;
 pub const SA_SPARSE_LINEAR_MAX_ORDER: u64 = 1_000_000;
 pub const SA_SPARSE_LINEAR_MAX_NONZEROS: u64 = 100_000_000;
 
@@ -17,6 +19,8 @@ pub const SA_SOLVER_RESIDUAL_LIMIT: u32 = 6;
 pub const SA_SOLVER_CANCELLED: u32 = 7;
 pub const SA_SOLVER_CHECKPOINT_MISMATCH: u32 = 8;
 pub const SA_SOLVER_BACKEND_UNAVAILABLE: u32 = 9;
+pub const SA_SPARSE_LINEAR_EXECUTION_ACTIVE: u32 = 0;
+pub const SA_SPARSE_LINEAR_EXECUTION_TERMINAL: u32 = 1;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -60,6 +64,29 @@ pub struct SaSparseLinearResultV1 {
     pub reserved: [u64; 2],
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct SaSparseLinearStateV1 {
+    pub abi_version: u32,
+    pub struct_size: u32,
+    pub execution_status: u32,
+    pub solver_status: u32,
+    pub iterations: u32,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+    pub reserved_u32: u32,
+    pub initial_residual_inf: f64,
+    pub convergence_limit: f64,
+    pub rho: f64,
+    pub last_increment_inf: f64,
+    pub vector_length: u64,
+    pub solution: SaMutBufferViewV1,
+    pub residual: SaMutBufferViewV1,
+    pub direction: SaMutBufferViewV1,
+    pub diagonal_inverse: SaMutBufferViewV1,
+    pub reserved: [u64; 2],
+}
+
 pub type SaSparseLinearSolveFnV1 = unsafe extern "C" fn(
     config: *const SaSparseLinearConfigV1,
     matrix: *const SaSparseCsrMatrixV1,
@@ -70,9 +97,29 @@ pub type SaSparseLinearSolveFnV1 = unsafe extern "C" fn(
     error: *mut SaErrorBufferV1,
 ) -> SaStatusCodeV1;
 
+pub type SaSparseLinearBeginFnV1 = unsafe extern "C" fn(
+    config: *const SaSparseLinearConfigV1,
+    matrix: *const SaSparseCsrMatrixV1,
+    right_hand_side: *const SaBufferViewV1,
+    initial_guess: *const SaBufferViewV1,
+    state: *mut SaSparseLinearStateV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
+pub type SaSparseLinearAdvanceFnV1 = unsafe extern "C" fn(
+    config: *const SaSparseLinearConfigV1,
+    matrix: *const SaSparseCsrMatrixV1,
+    right_hand_side: *const SaBufferViewV1,
+    iteration_budget: u32,
+    state: *mut SaSparseLinearStateV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
 #[cfg(test)]
 mod tests {
-    use super::{SaSparseCsrMatrixV1, SaSparseLinearConfigV1, SaSparseLinearResultV1};
+    use super::{
+        SaSparseCsrMatrixV1, SaSparseLinearConfigV1, SaSparseLinearResultV1, SaSparseLinearStateV1,
+    };
     use core::mem::{align_of, offset_of, size_of};
 
     #[test]
@@ -91,5 +138,12 @@ mod tests {
         assert_eq!(offset_of!(SaSparseLinearResultV1, initial_residual_inf), 16);
         assert_eq!(offset_of!(SaSparseLinearResultV1, output_length), 48);
         assert_eq!(offset_of!(SaSparseLinearResultV1, reserved), 64);
+        assert_eq!(size_of::<SaSparseLinearStateV1>(), 280);
+        assert_eq!(align_of::<SaSparseLinearStateV1>(), 8);
+        assert_eq!(offset_of!(SaSparseLinearStateV1, initial_residual_inf), 32);
+        assert_eq!(offset_of!(SaSparseLinearStateV1, vector_length), 64);
+        assert_eq!(offset_of!(SaSparseLinearStateV1, solution), 72);
+        assert_eq!(offset_of!(SaSparseLinearStateV1, diagonal_inverse), 216);
+        assert_eq!(offset_of!(SaSparseLinearStateV1, reserved), 264);
     }
 }
