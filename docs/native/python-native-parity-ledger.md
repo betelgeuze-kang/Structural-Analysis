@@ -294,3 +294,8 @@ track은 legacy endpoint 차이를 명시적으로 보존하고, nonlinear stati
 byte-identical product golden으로 포함하며, nonlinear NDTHA는 legacy 2-story config/input을 새
 strict product wire에서도 보존한다. Python production consumer도 그대로 유지되며 HIP C2와 R4
 restart/product integration 전에는 decommission 대상이 아니다.
+
+`inplace_scale_f32`는 이 domain gate 표의 numerical product family가 아니다. 기존 Python
+producer hook의 pointer alias/checksum 계측을 보존하는 compatibility-only probe이며 C0-C6로
+승격하지 않는다. HIP execution receipt가 transfer/residency/fallback 계측을 직접 소유하고
+rollback/deprecation 조건이 확보되면 hook과 export를 함께 제거한다.

@@ -28,6 +28,7 @@ def test_r3_tracks_each_cpu_family_without_overpromoting_later_gates() -> None:
         "nonlinear_static_cpu": "C1",
         "nonlinear_ndtha_cpu": "C1",
     }
+    assert payload["compatibility_only_families"] == ["inplace_scale_f32"]
     assert payload["product_exports"] is None
     assert len(payload["legacy_exports"]) == 5
 
@@ -65,6 +66,13 @@ def test_r3_inventory_keeps_family_specific_parity_boundaries_explicit() -> None
     assert ndtha_parity["nonconvergence_taxonomy"] == "pass"
     assert ndtha_parity["c1_promoted"] is True
     assert ndtha_parity["c2_hip"] == "open"
+
+    assert inventory["r3_inplace_scale_f32"] == r3.EXPECTED_INPLACE_SCALE_R3
+    scale = inventory["r3_inplace_scale_f32"]
+    assert scale["disposition"] == "compatibility_only_probe"
+    assert scale["product_capability"] is False
+    assert scale["cutover_gate"] is None
+    assert "do not promote through C0-C6" in scale["removal_gate"]
 
 
 def test_r3_checker_fails_closed_on_inventory_gate_drift(tmp_path: Path) -> None:
@@ -111,3 +119,18 @@ def test_r3_checker_fails_closed_on_nonlinear_ndtha_gate_drift(
 
     assert payload["contract_pass"] is False
     assert "r3_nonlinear_ndtha_inventory_invalid" in payload["blockers"]
+
+
+def test_r3_checker_rejects_scale_probe_product_promotion(tmp_path: Path) -> None:
+    inventory = json.loads(
+        (ROOT / r3.DEFAULT_INVENTORY).read_text(encoding="utf-8")
+    )
+    inventory["r3_inplace_scale_f32"]["product_capability"] = True
+    inventory["r3_inplace_scale_f32"]["cutover_gate"] = "C1"
+    path = tmp_path / "scale-overpromoted.json"
+    path.write_text(json.dumps(inventory), encoding="utf-8")
+
+    payload = r3.check_r3(ROOT, path)
+
+    assert payload["contract_pass"] is False
+    assert "r3_inplace_scale_inventory_invalid" in payload["blockers"]

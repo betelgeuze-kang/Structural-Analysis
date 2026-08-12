@@ -131,8 +131,10 @@ families and later gates.
   검증하므로 이 한정 profile은 C1이다.
 
 Current next gate: 승인된 전용 ROCm runner에서 bounded CPU family의 HIP C2를 구현하거나,
-`inplace_scale_f32`를 compatibility-only utility 또는 product capability로 명시적으로 분류한 뒤
-R4 checkpoint/runtime cutover를 시작한다. R4 cutover는 아직 시작하지 않았다.
+R4 checkpoint/runtime cutover를 시작한다. `inplace_scale_f32`는 structural operation이 아닌
+alias/checksum instrumentation이므로 compatibility-only probe로 고정했고 C0-C6 product gate를
+부여하지 않는다. backend receipt가 transfer/residency/fallback 계측을 대체한 뒤 Python producer
+hook과 함께 제거한다. R4 cutover는 아직 시작하지 않았다.
 
 ### Step R4: runtime cutover
 

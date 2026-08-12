@@ -8,7 +8,7 @@
       "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "run a bounded CPU family HIP C2 on the approved ROCm runner, classify inplace_scale_f32 as compatibility-only or product capability, or begin the R4 checkpoint/runtime cutover"
+      "next_gate": "run a bounded CPU family HIP C2 on the approved ROCm runner or begin the R4 checkpoint/runtime cutover; inplace_scale_f32 is compatibility-only"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

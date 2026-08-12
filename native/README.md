@@ -24,6 +24,9 @@ caller-owned response channels through ABI v1.4, and preserves the complete froz
 promote a five-case 1/2/3-story Newmark, elastic/plastic, mixed-sign acceleration, P-delta,
 damping-cap, adaptive-retry, line-search and collapse matrix to C1. Broader dynamic input-space
 parity, HIP C2 and runtime cutover remain open. The legacy five-symbol ABI is unchanged.
+`inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
+Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
+will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
 
 ## Rust
 

@@ -207,6 +207,29 @@ EXPECTED_NONLINEAR_NDTHA_R3 = {
     },
 }
 
+EXPECTED_INPLACE_SCALE_R3 = {
+    "family": "inplace_scale_f32",
+    "disposition": "compatibility_only_probe",
+    "product_capability": False,
+    "cutover_gate": None,
+    "legacy_export_preserved": True,
+    "reason": (
+        "buffer alias and checksum instrumentation probe, not a structural engineering operation"
+    ),
+    "known_consumers": [
+        "implementation/phase1/rust_track_lf_bridge.py::run_inplace_probe",
+        "implementation/phase1/structural_runtime_hook.py::build_dlpack_bridge_probe",
+    ],
+    "replacement": (
+        "backend execution receipts own transfer, residency and fallback telemetry; "
+        "no product scale operation is introduced"
+    ),
+    "removal_gate": (
+        "remove with the deprecated Python producer hook after rollback coverage; "
+        "do not promote through C0-C6"
+    ),
+}
+
 
 def _load_json(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -260,6 +283,19 @@ def check_r3(
     ndtha_inventory = inventory.get("r3_nonlinear_ndtha")
     if ndtha_inventory != EXPECTED_NONLINEAR_NDTHA_R3:
         blockers.append("r3_nonlinear_ndtha_inventory_invalid")
+    scale_inventory = inventory.get("r3_inplace_scale_f32")
+    if scale_inventory != EXPECTED_INPLACE_SCALE_R3:
+        blockers.append("r3_inplace_scale_inventory_invalid")
+
+    for consumer in EXPECTED_INPLACE_SCALE_R3["known_consumers"]:
+        relative_path, symbol = consumer.split("::", 1)
+        try:
+            source = (repo_root / relative_path).read_text(encoding="utf-8")
+        except OSError as exc:
+            blockers.append(f"r3_inplace_scale_consumer_unreadable:{relative_path}:{exc}")
+            continue
+        if f"def {symbol}" not in source:
+            blockers.append(f"r3_inplace_scale_consumer_symbol_missing:{consumer}")
 
     for family, expected in (
         ("track", EXPECTED_R3),
@@ -807,6 +843,8 @@ def check_r3(
                 blockers.append(
                     f"r3_nonlinear_ndtha_claim_boundary_missing:{boundary}"
                 )
+    if "inplace_scale_f32" in capabilities.get("capabilities", {}):
+        blockers.append("r3_inplace_scale_must_not_be_a_product_capability")
 
     product_exports: list[str] | None = None
     if product_library is not None:
@@ -841,6 +879,7 @@ def _report(
             "nonlinear_static_cpu": "C1",
             "nonlinear_ndtha_cpu": "C1",
         },
+        "compatibility_only_families": ["inplace_scale_f32"],
         "blockers": blockers,
         "claim_boundary": (
             "R3 proves track Python C1 full-vector parity only for the four-case 9-node "
