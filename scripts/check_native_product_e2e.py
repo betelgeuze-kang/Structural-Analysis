@@ -58,10 +58,44 @@ REQUIRED_TOKENS = {
     ),
 }
 
+MODELIR_REQUIRED_TOKENS = {
+    "native/crates/structural-contracts/src/product_ir.rs": (
+        "structural-model-ir-ndtha-analysis-request.v1",
+        "parse_model_ir_ndtha_analysis_request_v1",
+        "model_ir_ndtha_request_domain_invalid",
+    ),
+    "native/crates/structural-runtime/src/model_checkpoint.rs": (
+        'b"SAMNCP01"',
+        "model_content_hash",
+        "generated_request_hash",
+        "inner_checkpoint_hash",
+        "verify_bindings",
+    ),
+    "native/crates/structural-cli/src/model_product.rs": (
+        "execute_model_ir_native_analysis",
+        "publish_model_ir_native_analysis",
+        "model_ir_ndtha_model_identity_mismatch",
+    ),
+    "native/crates/structural-cli/tests/model_ir_ndtha_product_cli.rs": (
+        "clean_environment_model_run_resume_is_bitwise_identical",
+        "verify_frozen_terminal_artifacts",
+        "model_identity_checkpoint_tamper_and_analysis_drift_publish_nothing",
+        "fallback_count",
+        "symlink_model",
+    ),
+    "docs/native/modelir-ndtha-product-e2e-v1.md": (
+        "C4 and C5",
+        "nine terminal",
+        "HIP C2",
+        "C6",
+    ),
+}
+
 
 def check_product_e2e_contract(repo_root: Path = ROOT) -> dict[str, object]:
     root = repo_root.resolve()
     blockers: list[str] = []
+    payload: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
@@ -99,6 +133,41 @@ def check_product_e2e_contract(repo_root: Path = ROOT) -> dict[str, object]:
             if token not in text:
                 blockers.append(
                     f"product_e2e_evidence_token_missing:{relative}:{token}"
+                )
+
+    try:
+        modelir_row = payload["capabilities"]["modelir_ndtha_product_e2e"]
+    except (KeyError, TypeError):
+        blockers.append("modelir_product_e2e_capability_manifest_invalid")
+        modelir_row = {}
+    if modelir_row.get("status") != "implemented":
+        blockers.append("modelir_product_e2e_capability_not_implemented")
+    if modelir_row.get("cutover_gate") != "C5":
+        blockers.append("modelir_product_e2e_capability_gate_not_c5")
+    if modelir_row.get("owner") != "structural-cli":
+        blockers.append("modelir_product_e2e_capability_owner_invalid")
+    modelir_claim = str(modelir_row.get("claim", ""))
+    for token in (
+        "exact fixed-guided",
+        "content/semantic/provenance",
+        "Python/Node-free",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in modelir_claim:
+            blockers.append(f"modelir_product_e2e_scope_token_missing:{token}")
+
+    for relative, tokens in MODELIR_REQUIRED_TOKENS.items():
+        path = root / relative
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError:
+            blockers.append(f"modelir_product_e2e_evidence_missing:{relative}")
+            continue
+        for token in tokens:
+            if token not in text:
+                blockers.append(
+                    f"modelir_product_e2e_evidence_token_missing:{relative}:{token}"
                 )
 
     blockers = sorted(set(blockers))

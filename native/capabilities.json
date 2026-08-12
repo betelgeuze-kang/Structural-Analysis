@@ -29,7 +29,13 @@
       "status": "implemented",
       "cutover_gate": "C3",
       "owner": "structural_model_ir",
-      "claim": "one exact fixed-guided one-story frame3d global-X reduction only: ABI v1.6 derives 12*E*Iy/L^3 stiffness, rho*A*L/2 mass and one selected floor FX load from immutable typed ModelIR, combines them with explicitly supplied damping ratio, elastic guard, solver configuration and acceleration, publishes seven caller-owned FP64 buffers atomically, and crosses a safe Rust wrapper with closed-form Python C1 parity and zero-fallback CPU execution; arbitrary topology reduction, P-delta derivation, nonlinear material inference, public ModelIR analysis C4/C5, HIP C2 and C6 remain open"
+      "claim": "one exact fixed-guided one-story frame3d global-X reduction only: ABI v1.6 derives 12*E*Iy/L^3 stiffness, rho*A*L/2 mass and one selected floor FX load from immutable typed ModelIR, combines them with explicitly supplied damping ratio, elastic guard, solver configuration and acceleration, publishes seven caller-owned FP64 buffers atomically, and crosses a safe Rust wrapper with closed-form Python C1 parity and zero-fallback CPU execution; arbitrary topology reduction, P-delta derivation, nonlinear material inference, HIP C2 and C6 remain open; public run/restart is promoted only as the separate exact-profile C5 capability"
+    },
+    "modelir_ndtha_product_e2e": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "the exact fixed-guided one-story frame3d global-X ModelIR profile only: Rust verifies strict ModelIR and explicit adapter-request identities, C++ derives the bounded native NDTHA problem through ABI v1.6, an outer canonical checkpoint binds content/semantic/provenance, adapter-request, generated-request and inner-state identities, and public model-run/model-resume emit bitwise-identical canonical model/request/checkpoint/ResultIR/ReportIR/Markdown/self-hashed receipt artifacts in a Python/Node-free environment; arbitrary topology, HIP C2, broader solver authority, Workbench and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",
@@ -59,7 +65,7 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench and C6 remain open; external comparison and PDF rendering are promoted only as separate bounded C5 capabilities"
+      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, arbitrary ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench and C6 remain open; the exact fixed-guided ModelIR profile, external comparison and PDF rendering are promoted only as separate bounded C5 capabilities"
     },
     "durable_jobs": {
       "status": "implemented",

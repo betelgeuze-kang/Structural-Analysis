@@ -6,8 +6,9 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use structural_cli::{
-    contract_error_report, execute_external_comparison, execute_native_analysis,
-    execute_pdf_report, publish_external_comparison, publish_native_analysis, publish_pdf_report,
+    contract_error_report, execute_external_comparison, execute_model_ir_native_analysis,
+    execute_native_analysis, execute_pdf_report, publish_external_comparison,
+    publish_model_ir_native_analysis, publish_native_analysis, publish_pdf_report,
     validate_model_bytes, validation_succeeds,
 };
 
@@ -17,6 +18,9 @@ mod service_cli;
 const EXIT_FAILURE: u8 = 1;
 const EXIT_USAGE_OR_INVALID: u8 = 2;
 const MAX_RESULT_IR_BYTES: u64 = 16 * 1024 * 1024;
+const MAX_MODEL_IR_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
+const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
 const MAX_EXTERNAL_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
 
@@ -32,6 +36,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     }
     if let Some((path, require_analysis_ready)) = parse_validate_arguments(arguments) {
         return run_model_validation(&path, require_analysis_ready);
+    }
+    if let Some(command) = parse_model_analysis_arguments(arguments) {
+        return run_model_native_analysis(&command);
     }
     if let Some(command) = parse_analysis_arguments(arguments) {
         return run_native_analysis(&command);
@@ -56,7 +63,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
@@ -127,6 +134,84 @@ struct AnalysisCommand {
     checkpoint_path: Option<PathBuf>,
     output_directory: PathBuf,
     step_budget: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelAnalysisCommand {
+    model_path: PathBuf,
+    request_path: PathBuf,
+    checkpoint_path: Option<PathBuf>,
+    output_directory: PathBuf,
+    step_budget: u32,
+}
+
+fn run_model_native_analysis(command: &ModelAnalysisCommand) -> ExitCode {
+    let Ok(model_bytes) = read_bounded_regular_file(&command.model_path, MAX_MODEL_IR_BYTES) else {
+        return model_analysis_input_failure("model_read_error", "/model");
+    };
+    let Ok(request_bytes) =
+        read_bounded_regular_file(&command.request_path, MAX_MODEL_ANALYSIS_REQUEST_BYTES)
+    else {
+        return model_analysis_input_failure("request_read_error", "/request");
+    };
+    let checkpoint_bytes = if let Some(path) = command.checkpoint_path.as_ref() {
+        let Ok(bytes) = read_bounded_regular_file(path, MAX_CHECKPOINT_BYTES) else {
+            return model_analysis_input_failure("checkpoint_read_error", "/checkpoint");
+        };
+        Some(bytes)
+    } else {
+        None
+    };
+    let outcome = match execute_model_ir_native_analysis(
+        &model_bytes,
+        &request_bytes,
+        checkpoint_bytes.as_deref(),
+        command.step_budget,
+    ) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if error.is_contract_error() {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-model-ir-ndtha-analysis-failure.v1",
+                    "code": "model_ir_ndtha_analysis_failed",
+                    "detail": error.to_string()
+                })
+            );
+            return ExitCode::from(exit);
+        }
+    };
+    if let Err(error) = publish_model_ir_native_analysis(&command.output_directory, &outcome) {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-model-ir-ndtha-analysis-failure.v1",
+                "code": "model_ir_ndtha_publish_failed",
+                "detail": error.to_string()
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    }
+    println!("{}", outcome.run_receipt_json());
+    ExitCode::SUCCESS
+}
+
+fn model_analysis_input_failure(code: &str, path: &str) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-model-ir-ndtha-analysis-failure.v1",
+            "code": code,
+            "path": path,
+            "detail": "ModelIR analysis input could not be read"
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
 }
 
 fn run_native_analysis(command: &AnalysisCommand) -> ExitCode {
@@ -566,11 +651,66 @@ fn parse_analysis_arguments(arguments: &[OsString]) -> Option<AnalysisCommand> {
     })
 }
 
+fn parse_model_analysis_arguments(arguments: &[OsString]) -> Option<ModelAnalysisCommand> {
+    if arguments.len() < 6 || arguments[0] != "analysis" {
+        return None;
+    }
+    let (positional_count, checkpoint_index) = if arguments[1] == "model-run" {
+        (2_usize, None)
+    } else if arguments[1] == "model-resume" {
+        (3_usize, Some(4_usize))
+    } else {
+        return None;
+    };
+    let flag_start = 2 + positional_count;
+    if arguments.len() < flag_start + 2
+        || arguments[2..flag_start]
+            .iter()
+            .any(|value| value.to_string_lossy().starts_with('-'))
+    {
+        return None;
+    }
+    let mut output_directory = None;
+    let mut step_budget = u32::MAX;
+    let mut step_budget_seen = false;
+    let mut index = flag_start;
+    while index < arguments.len() {
+        if arguments[index] == "--output-dir" && output_directory.is_none() {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            output_directory = Some(PathBuf::from(&arguments[index]));
+        } else if arguments[index] == "--step-budget" && !step_budget_seen {
+            index += 1;
+            if index >= arguments.len() {
+                return None;
+            }
+            step_budget = arguments[index].to_str()?.parse::<u32>().ok()?;
+            if step_budget == 0 {
+                return None;
+            }
+            step_budget_seen = true;
+        } else {
+            return None;
+        }
+        index += 1;
+    }
+    Some(ModelAnalysisCommand {
+        model_path: PathBuf::from(&arguments[2]),
+        request_path: PathBuf::from(&arguments[3]),
+        checkpoint_path: checkpoint_index.map(|position| PathBuf::from(&arguments[position])),
+        output_directory: output_directory?,
+        step_budget,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analysis_arguments, parse_comparison_arguments, parse_pdf_report_arguments,
-        parse_validate_arguments, AnalysisCommand, ComparisonCommand, PdfReportCommand,
+        parse_analysis_arguments, parse_comparison_arguments, parse_model_analysis_arguments,
+        parse_pdf_report_arguments, parse_validate_arguments, AnalysisCommand, ComparisonCommand,
+        ModelAnalysisCommand, PdfReportCommand,
     };
     use std::ffi::OsString;
 
@@ -642,6 +782,58 @@ mod tests {
             "0",
             "--output-dir",
             "out"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn model_analysis_arguments_require_model_request_and_bound_checkpoint() {
+        assert_eq!(
+            parse_model_analysis_arguments(&args(&[
+                "analysis",
+                "model-run",
+                "model.json",
+                "adapter.json",
+                "--output-dir",
+                "out",
+                "--step-budget",
+                "2"
+            ])),
+            Some(ModelAnalysisCommand {
+                model_path: "model.json".into(),
+                request_path: "adapter.json".into(),
+                checkpoint_path: None,
+                output_directory: "out".into(),
+                step_budget: 2,
+            })
+        );
+        assert_eq!(
+            parse_model_analysis_arguments(&args(&[
+                "analysis",
+                "model-resume",
+                "model.json",
+                "adapter.json",
+                "checkpoint.ndcp",
+                "--output-dir",
+                "out"
+            ])),
+            Some(ModelAnalysisCommand {
+                model_path: "model.json".into(),
+                request_path: "adapter.json".into(),
+                checkpoint_path: Some("checkpoint.ndcp".into()),
+                output_directory: "out".into(),
+                step_budget: u32::MAX,
+            })
+        );
+        assert!(parse_model_analysis_arguments(&args(&[
+            "analysis",
+            "model-run",
+            "model.json",
+            "adapter.json",
+            "--output-dir",
+            "out",
+            "--step-budget",
+            "0"
         ]))
         .is_none());
     }

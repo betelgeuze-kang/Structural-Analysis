@@ -52,7 +52,12 @@ concurrent immutable calls, an independent Python closed-form oracle, Rust raw-l
 RAII wrapper and a native-fed solve compared with the existing language-neutral product input.
 The tracked elastic case converges with zero plastic stories and fallback count zero.
 
-This evidence closes only C0, C1 and C3 for the exact transformation. Public ModelIR run/resume,
-adapter-specific hash provenance and checkpoint binding are C4/C5 work. Arbitrary topology,
-nonlinear material reduction and P-delta derivation are unsupported. HIP CPU/device parity is C2
-work and C6 decommission remains open.
+This adapter evidence closes only C0, C1 and C3 for the exact transformation. A separate public
+product slice now closes C4/C5 for the same profile by binding all three ModelIR identities, the
+explicit adapter request, the generated native request and the inner native state in one canonical
+checkpoint envelope. Its public `analysis model-run` and `analysis model-resume` paths are
+documented in [ModelIR NDTHA Product E2E v1](modelir-ndtha-product-e2e-v1.md).
+
+Neither promotion expands the accepted topology. Arbitrary topology, nonlinear material
+reduction and P-delta derivation are unsupported. HIP CPU/device parity is C2 work and C6
+decommission remains open.

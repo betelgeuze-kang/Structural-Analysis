@@ -52,9 +52,12 @@ fixed-guided Euler-Bernoulli frame3d element in global X, derives `12*E*Iy/L^3` 
 `rho*A*L/2` mass and one selected floor FX load, and keeps damping ratio, elastic guard, solver
 controls and acceleration explicit. C++ contract tests, an independent Python closed-form oracle
 and the safe Rust wrapper bind the result to the existing zero-fallback CPU solver. This is not an
-arbitrary topology reducer and does not yet provide a public ModelIR run/resume product path.
-The exact selectors, formulas, ownership rules and non-promoting boundary are documented in
-`docs/native/modelir-ndtha-adapter-v1.md`.
+arbitrary topology reducer. A separate exact-profile C5 slice adds public ModelIR run/resume and an
+outer C4 checkpoint binding the model's content/semantic/provenance identities, explicit adapter
+request, generated native request and inner native state. The exact selectors, formulas,
+ownership rules and authority boundaries are documented in
+`docs/native/modelir-ndtha-adapter-v1.md` and
+`docs/native/modelir-ndtha-product-e2e-v1.md`.
 
 ## Rust
 
@@ -111,6 +114,22 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Output-directory publication is create-new and fail-closed; it never overwrites an existing path.
 The exact scope and remaining authority boundaries are in
 `docs/native/bounded-product-e2e-v1.md`.
+
+The exact-profile ModelIR analysis commands are:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis model-run model.json model-request.json --output-dir model-run
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis model-run model.json model-request.json --output-dir model-partial --step-budget 2
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis model-resume model.json model-request.json model-partial/checkpoint.ndcp \
+  --output-dir model-resumed
+~~~
+
+The outer checkpoint prevents structurally or provenance-distinct models from sharing state even
+when they derive equal scalar properties. Direct and resumed terminal directories contain the
+same nine frozen artifacts; see `docs/native/modelir-ndtha-product-e2e-v1.md`.
 
 The bounded external-comparison command is:
 

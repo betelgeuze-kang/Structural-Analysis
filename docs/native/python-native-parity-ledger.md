@@ -57,13 +57,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: D1 is C3. Rust wire/schema/canonical identity and the C++ typed semantic/snapshot core
   are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
-  three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
-  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. ABI v1.6 additionally connects one exact
+  three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. ABI v1.6
+  additionally connects one exact
   fixed-guided one-story frame3d global-X reduction through C3: C++ owns structural derivation,
   an independent Python closed-form oracle owns C1 parity, and the safe Rust wrapper proves a
-  zero-fallback elastic CPU solve. That narrow adapter is not arbitrary ModelIR solver readiness;
-  public ModelIR run/restart provenance, HIP C2 and C5/C6 remain open. Python remains the broader
-  ModelIR oracle and rollback owner.
+  zero-fallback elastic CPU solve. A separate exact-profile product slice reaches C5: strict
+  `model-run`/`model-resume` bind all three ModelIR identities, the explicit adapter request, the
+  generated request and inner C4 state, then emit nine bitwise-identical terminal artifacts in an
+  environment with no Python/Node lookup. Aggregate D1 remains C3 because this is not arbitrary
+  ModelIR solver readiness; broader topology, generated-operator HIP C2 and C6 remain open. Python
+  remains the broader ModelIR oracle and rollback owner.
 
 ### D2. Elements and materials
 
@@ -268,7 +271,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
 - State: the public Rust CLI now owns a bounded CPU nonlinear-NDTHA run/checkpoint/resume to
-  ResultIR/ReportIR flow at C5. Rust also owns bounded single-host durable submit/poll/cancel,
+  ResultIR/ReportIR flow at C5. The exact fixed-guided frame3d ModelIR profile also reaches that
+  flow through public model-run/model-resume with provenance-bound restart and frozen artifacts.
+  Rust also owns bounded single-host durable submit/poll/cancel,
   expired-lease recovery, checkpoint continuation and export at C5. A separate loopback,
   single-tenant HTTP slice exposes submit/poll/cancel/work-once and immutable artifact retrieval
   at C5 with distinct static client/worker credentials and clean-process restart evidence. TLS,

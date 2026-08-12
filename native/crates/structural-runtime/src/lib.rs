@@ -4,6 +4,7 @@
 
 mod checkpoint;
 mod job;
+mod model_checkpoint;
 
 use std::path::Path;
 
@@ -11,6 +12,9 @@ pub use checkpoint::{NonlinearNdthaCheckpoint, NonlinearNdthaCheckpointReceipt};
 pub use job::{
     unix_time_millis, DurableJobClaimV1, DurableJobCompletionV1, DurableJobError,
     DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1, JobArtifactReferenceV1,
+};
+pub use model_checkpoint::{
+    ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
 };
 use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
@@ -24,6 +28,7 @@ use structural_contracts::product_ir::{
 use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
+    ModelIrNdthaAdaptedProblem, ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest,
     ModelIrValidation, ModelIrValidationReport, NonlinearNdthaExecutionStatus,
     NonlinearNdthaRestartState,
 };
@@ -81,7 +86,7 @@ impl Runtime {
     /// Returns a stable runtime error when the ABI table cannot be loaded.
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
-            api: Api::load_nonlinear_ndtha_restart().map_err(RuntimeError::from)?,
+            api: Api::load_model_ir_ndtha_adapter().map_err(RuntimeError::from)?,
         })
     }
 
@@ -101,6 +106,26 @@ impl Runtime {
     ) -> Result<ModelIrValidation, RuntimeError> {
         self.api
             .validate_model_ir(document)
+            .map_err(RuntimeError::from)
+    }
+
+    /// Adapt one immutable `ModelIR` into the exact bounded NDTHA story profile.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for descriptor/hash transfer, model readiness, selector, analysis
+    /// domain or native output invariant failures.
+    pub fn adapt_model_ir_ndtha(
+        &self,
+        document: &ModelIrV2Document,
+        request: &ModelIrNdthaAdapterRequest,
+    ) -> Result<ModelIrNdthaAdaptedProblem, RuntimeError> {
+        let model = self
+            .api
+            .create_model_ir(document)
+            .map_err(RuntimeError::from)?;
+        model
+            .adapt_nonlinear_ndtha(request)
             .map_err(RuntimeError::from)
     }
 
@@ -339,6 +364,6 @@ mod tests {
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
-        assert_eq!(runtime.native_capabilities(), 127);
+        assert_eq!(runtime.native_capabilities(), 255);
     }
 }

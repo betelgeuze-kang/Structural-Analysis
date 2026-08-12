@@ -45,6 +45,8 @@ Jobs:
      identity, tamper rejection and failure atomicity
    - ABI v1.6 bounded ModelIR-to-NDTHA layout, safe-wrapper closed-form parity, exact profile
      rejection, failure atomicity and concurrent immutable execution
+   - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
+     checkpoint binding of the adapter request, generated request and inner native state
    - bounded CPU checkpoint C4 contract: canonical artifact, independent model/state/execution
      SHA-256 binding, atomic publish, frozen receipt and exact durable resume
    - nonlinear-static independent dense-matrix Python oracle, five-case product-golden SHA-256
@@ -115,6 +117,9 @@ Required jobs:
    - strict request -> C++ core -> C4 checkpoint -> ResultIR/ReportIR/Markdown/receipt output
    - environment-cleared Rust CLI direct/resume artifact byte identity and frozen SHA-256
    - atomic create-new output publication and no unsupported authority promotion
+   - exact-profile ModelIR -> ABI v1.6 derivation -> ABI v1.5 execution, with public model-run/
+     model-resume producing nine frozen terminal artifacts and rejecting identity/symlink/tamper
+     inputs without publication
    - bounded single-host durable-job submit/poll/cancel, exclusive worker claim, expired-lease
      crash reconciliation, checkpointed process restart and atomic artifact export
    - append-only event self-hash chain and content-addressed blob corruption fail closed; direct,

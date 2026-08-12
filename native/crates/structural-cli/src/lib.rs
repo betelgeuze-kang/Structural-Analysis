@@ -4,6 +4,7 @@
 
 mod comparison;
 mod job;
+mod model_product;
 mod product;
 mod report;
 mod service;
@@ -19,6 +20,10 @@ pub use comparison::{
     NativeExternalComparisonOutcomeV1,
 };
 pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandError};
+pub use model_product::{
+    execute_model_ir_native_analysis, publish_model_ir_native_analysis,
+    ModelIrNativeAnalysisOutcomeV1,
+};
 pub use product::{
     execute_native_analysis, publish_native_analysis, NativeAnalysisProductError,
     NativeAnalysisRunOutcomeV1,
@@ -127,7 +132,7 @@ mod tests {
 
     #[test]
     fn cli_composition_reaches_the_current_native_api_table() {
-        assert_eq!(probe_native_runtime(), Ok(127));
+        assert_eq!(probe_native_runtime(), Ok(255));
     }
 
     #[test]

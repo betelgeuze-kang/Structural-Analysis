@@ -12,6 +12,8 @@ use crate::legacy_runtime::{NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaC
 use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 
 pub const NATIVE_ANALYSIS_REQUEST_V1: &str = "structural-native-analysis-request.v1";
+pub const MODEL_IR_NDTHA_ANALYSIS_REQUEST_V1: &str =
+    "structural-model-ir-ndtha-analysis-request.v1";
 pub const NONLINEAR_NDTHA_RESULT_IR_V1: &str = "structural-native-nonlinear-ndtha-result-ir.v1";
 pub const NONLINEAR_NDTHA_REPORT_IR_V1: &str = "structural-native-nonlinear-ndtha-report-ir.v1";
 
@@ -60,6 +62,72 @@ pub struct NativeAnalysisRequestDocumentV1 {
     request: NativeAnalysisRequestV1,
     canonical_json: String,
     request_hash: String,
+}
+
+/// Exact `ModelIR` identities required by a bounded adapter request.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModelIrIdentityV1 {
+    pub content_hash: String,
+    pub semantic_hash: String,
+    pub provenance_hash: String,
+}
+
+/// Only topology reduction profile implemented by ABI v1.6.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ModelIrNdthaAdapterProfileV1 {
+    FixedGuidedFrame3dX,
+}
+
+/// Strict product request that keeps structural `ModelIR` and dynamic analysis data separate.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct ModelIrNdthaAnalysisRequestV1 {
+    pub schema_version: String,
+    pub operation: String,
+    pub case_id: String,
+    pub backend: NativeAnalysisBackendV1,
+    pub profile: ModelIrNdthaAdapterProfileV1,
+    pub model_identity: ModelIrIdentityV1,
+    pub element_id: String,
+    pub base_node_id: String,
+    pub floor_node_id: String,
+    pub load_pattern_id: String,
+    pub damping_ratio: f64,
+    pub elastic_guard_yield_drift_m: f64,
+    pub config: NonlinearNdthaConfigV3,
+    pub acceleration_g: Vec<f64>,
+}
+
+/// Canonical, self-identified bounded `ModelIR` analysis request.
+#[derive(Clone, Debug)]
+pub struct ModelIrNdthaAnalysisRequestDocumentV1 {
+    request: ModelIrNdthaAnalysisRequestV1,
+    canonical_json: String,
+    request_hash: String,
+}
+
+impl ModelIrNdthaAnalysisRequestDocumentV1 {
+    #[must_use]
+    pub const fn request(&self) -> &ModelIrNdthaAnalysisRequestV1 {
+        &self.request
+    }
+
+    #[must_use]
+    pub fn canonical_json(&self) -> &str {
+        &self.canonical_json
+    }
+
+    #[must_use]
+    pub fn canonical_bytes(&self) -> &[u8] {
+        self.canonical_json.as_bytes()
+    }
+
+    #[must_use]
+    pub fn request_hash(&self) -> &str {
+        &self.request_hash
+    }
 }
 
 impl NativeAnalysisRequestDocumentV1 {
@@ -301,6 +369,58 @@ pub fn parse_native_analysis_request_v1(
     })
 }
 
+/// Build and validate a canonical native analysis request from typed caller-owned values.
+///
+/// # Errors
+///
+/// Returns a stable error for schema identity, non-finite values or vector/count mismatch.
+pub fn build_native_analysis_request_v1(
+    request: NativeAnalysisRequestV1,
+) -> Result<NativeAnalysisRequestDocumentV1, ProductIrContractError> {
+    let value = serde_json::to_value(&request).map_err(|_| {
+        contract_error(
+            "native_analysis_request_encode_failed",
+            "/",
+            "typed native analysis request could not be represented as JSON",
+        )
+    })?;
+    validate_request_schema(&value)?;
+    validate_request_lengths(&request)?;
+    let canonical_json = canonicalize(&value, "native_analysis_request_canonicalization_failed")?;
+    Ok(NativeAnalysisRequestDocumentV1 {
+        request_hash: sha256_identity(canonical_json.as_bytes()),
+        request,
+        canonical_json,
+    })
+}
+
+/// Decode, validate and canonicalize one bounded ModelIR-to-NDTHA product request.
+///
+/// # Errors
+///
+/// Returns a stable error for malformed/duplicate/unknown JSON, invalid hashes or stable IDs,
+/// non-finite analysis values, unsupported profile settings, or acceleration/count mismatch.
+pub fn parse_model_ir_ndtha_analysis_request_v1(
+    bytes: &[u8],
+) -> Result<ModelIrNdthaAnalysisRequestDocumentV1, ProductIrContractError> {
+    let value = strict_value(bytes, "model_ir_ndtha_request")?;
+    let request: ModelIrNdthaAnalysisRequestV1 =
+        serde_json::from_value(value.clone()).map_err(|_| {
+            contract_error(
+                "model_ir_ndtha_request_decode_failed",
+                "/",
+                "ModelIR NDTHA request has unknown, missing, or mistyped fields",
+            )
+        })?;
+    validate_model_ir_ndtha_request(&request)?;
+    let canonical_json = canonicalize(&value, "model_ir_ndtha_request_canonicalization_failed")?;
+    Ok(ModelIrNdthaAnalysisRequestDocumentV1 {
+        request_hash: sha256_identity(canonical_json.as_bytes()),
+        request,
+        canonical_json,
+    })
+}
+
 /// Build immutable canonical `ResultIR` from one terminal native state projection.
 ///
 /// # Errors
@@ -536,6 +656,77 @@ fn validate_request_lengths(
         return Err(length_error());
     }
     Ok(())
+}
+
+fn validate_model_ir_ndtha_request(
+    request: &ModelIrNdthaAnalysisRequestV1,
+) -> Result<(), ProductIrContractError> {
+    if request.schema_version != MODEL_IR_NDTHA_ANALYSIS_REQUEST_V1
+        || request.operation != "model_ir_nonlinear_ndtha"
+    {
+        return Err(contract_error(
+            "model_ir_ndtha_request_identity_invalid",
+            "/",
+            "ModelIR NDTHA request schema or operation is unsupported",
+        ));
+    }
+    validate_stable_id(&request.case_id, "/case_id")?;
+    validate_stable_id(&request.element_id, "/element_id")?;
+    validate_stable_id(&request.base_node_id, "/base_node_id")?;
+    validate_stable_id(&request.floor_node_id, "/floor_node_id")?;
+    validate_stable_id(&request.load_pattern_id, "/load_pattern_id")?;
+    validate_hash(
+        &request.model_identity.content_hash,
+        "/model_identity/content_hash",
+    )?;
+    validate_hash(
+        &request.model_identity.semantic_hash,
+        "/model_identity/semantic_hash",
+    )?;
+    validate_hash(
+        &request.model_identity.provenance_hash,
+        "/model_identity/provenance_hash",
+    )?;
+    if !request.damping_ratio.is_finite()
+        || !(0.0..=1.0).contains(&request.damping_ratio)
+        || !request.elastic_guard_yield_drift_m.is_finite()
+        || request.elastic_guard_yield_drift_m <= 0.0
+        || request.config.story_count != 1
+        || request.config.pdelta_factor != 0.0
+        || usize::try_from(request.config.step_count).ok() != Some(request.acceleration_g.len())
+    {
+        return Err(contract_error(
+            "model_ir_ndtha_request_domain_invalid",
+            "/",
+            "ModelIR NDTHA request is outside the fixed-guided one-story analysis domain",
+        ));
+    }
+    let probe = NativeAnalysisRequestV1 {
+        schema_version: NATIVE_ANALYSIS_REQUEST_V1.to_owned(),
+        operation: "nonlinear_ndtha".to_owned(),
+        case_id: request.case_id.clone(),
+        backend: request.backend,
+        config: request.config.clone(),
+        inputs: NdthaStoryInputsV3 {
+            story_k_n_per_m: vec![1.0],
+            story_h_m: vec![1.0],
+            story_axial_n: vec![0.0],
+            story_yield_drift_m: vec![request.elastic_guard_yield_drift_m],
+            story_mass_kg: vec![1.0],
+            story_damping_n_s_per_m: vec![0.0],
+            floor_load_base_n: vec![1.0],
+            ag_g: request.acceleration_g.clone(),
+        },
+    };
+    let probe_value = serde_json::to_value(&probe).map_err(|_| {
+        contract_error(
+            "model_ir_ndtha_request_non_finite",
+            "/",
+            "ModelIR NDTHA request contains a non-finite analysis value",
+        )
+    })?;
+    validate_request_schema(&probe_value)?;
+    validate_request_lengths(&probe)
 }
 
 fn validate_result(
@@ -881,6 +1072,24 @@ fn validate_hash(value: &str, path: &str) -> Result<(), ProductIrContractError> 
             "product_ir_hash_invalid",
             path,
             "identity must be lowercase sha256:<64 hex>",
+        ))
+    }
+}
+
+fn validate_stable_id(value: &str, path: &str) -> Result<(), ProductIrContractError> {
+    let valid = !value.is_empty()
+        && value.len() <= 128
+        && value.as_bytes()[0].is_ascii_alphanumeric()
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.' | b':'));
+    if valid {
+        Ok(())
+    } else {
+        Err(contract_error(
+            "product_ir_stable_id_invalid",
+            path,
+            "identifier must satisfy the bounded ASCII stable-id contract",
         ))
     }
 }

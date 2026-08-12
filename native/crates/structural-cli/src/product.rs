@@ -69,6 +69,10 @@ pub struct NativeAnalysisRunOutcomeV1 {
 }
 
 impl NativeAnalysisRunOutcomeV1 {
+    pub(crate) const fn checkpoint(&self) -> &NonlinearNdthaCheckpoint {
+        &self.checkpoint
+    }
+
     #[must_use]
     pub fn is_terminal(&self) -> bool {
         self.result_ir_json.is_some()
