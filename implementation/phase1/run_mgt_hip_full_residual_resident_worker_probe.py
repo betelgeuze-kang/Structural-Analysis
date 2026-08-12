@@ -261,6 +261,10 @@ def run_mgt_hip_full_residual_resident_worker_probe(
         "jvp_comparison": jvp,
         "backend_contract": {
             "full_residual_vector_on_native_hip": True,
+            "single_entry_symbol": "sa_get_api_v1",
+            "product_library_linked": True,
+            "kernel_owner": "structural_c_abi_v1",
+            "replay_executable_owns_kernels": False,
             "jvp_available_from_batch_residual_differences": bool(int(states.shape[0]) > 1),
             "uses_native_hip_frame_kernel": True,
             "uses_native_hip_shell_kernel": True,
@@ -289,9 +293,10 @@ def run_mgt_hip_full_residual_resident_worker_probe(
         "resident_worker_second_meta": resident_meta_second,
         "runtime_seconds": float(time.perf_counter() - started),
         "claim_boundary": (
-            "This validates a long-lived native HIP process worker for G1 full "
+            "This validates a long-lived product-library-linked HIP process worker for G1 full "
             "residual/JVP batch replay: operator buffers stay resident across two "
-            "evaluations with the same worker PID. It narrows the production HIP "
+            "evaluations with the same worker PID and the worker owns no HIP kernel. "
+            "It narrows the production HIP "
             "lane gap, but does not yet claim an in-process Rust FFI worker or "
             "material Newton consistency closure."
         ),

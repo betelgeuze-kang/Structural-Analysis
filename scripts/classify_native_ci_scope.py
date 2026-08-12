@@ -51,6 +51,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_product_e2e.py",
         "scripts/check_native_reference_elements.py",
         "scripts/check_native_reference_elements_hip.py",
+        "scripts/check_native_replay_product_link.py",
         "scripts/check_native_sparse_linear.py",
         "scripts/check_native_sparse_linear_hip.py",
         "scripts/check_native_workbench.py",
@@ -79,6 +80,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_reference_elements_contract.py",
         "tests/test_native_reference_elements_hip_contract.py",
         "tests/test_native_reference_elements_python_parity.py",
+        "tests/test_native_replay_product_link_contract.py",
         "tests/test_native_sparse_linear_contract.py",
         "tests/test_native_sparse_linear_hip_contract.py",
         "tests/test_native_sparse_linear_python_parity.py",
@@ -142,6 +144,25 @@ NATIVE_NUMERICAL_ORACLE_PATHS = frozenset(
 )
 
 LEGACY_RUNTIME_COMPAT_PREFIX = "implementation/phase1/structural_runtime_ffi/"
+LEGACY_REPLAY_CPP_PATHS = frozenset(
+    {
+        "implementation/phase1/hip_frame_force_batch_replay.cpp",
+        "implementation/phase1/hip_full_residual_batch_replay.cpp",
+        "implementation/phase1/hip_full_residual_resident_worker.cpp",
+        "implementation/phase1/hip_shell_csr_batch_replay.cpp",
+        "implementation/phase1/product_full_residual_replay.hpp",
+    }
+)
+LEGACY_REPLAY_RUNTIME_PATHS = frozenset(
+    {
+        "implementation/phase1/mgt_hip_full_residual_backend.py",
+        "implementation/phase1/run_mgt_hip_frame_force_batch_probe.py",
+        "implementation/phase1/run_mgt_hip_full_residual_batch_probe.py",
+        "implementation/phase1/run_mgt_hip_full_residual_resident_worker_probe.py",
+        "implementation/phase1/run_mgt_hip_shell_csr_batch_probe.py",
+    }
+)
+LEGACY_REPLAY_COMPAT_PATHS = LEGACY_REPLAY_CPP_PATHS | LEGACY_REPLAY_RUNTIME_PATHS
 
 
 def _normalize_path(raw: str) -> str:
@@ -168,7 +189,9 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
     native_paths = [
         path
         for path in paths
-        if path.startswith("native/") or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
+        if path.startswith("native/")
+        or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
+        or path in LEGACY_REPLAY_COMPAT_PATHS
     ]
     ci_control_paths = [path for path in paths if path in NATIVE_CI_CONTROL_PATHS]
     protected_paths = [
@@ -201,7 +224,9 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
     cpp_paths = [
         path
         for path in native_paths
-        if path.startswith("native/cpp/") or path.startswith("native/cmake/")
+        if path.startswith("native/cpp/")
+        or path.startswith("native/cmake/")
+        or path in LEGACY_REPLAY_CPP_PATHS
     ]
     abi_paths = [
         path
@@ -211,6 +236,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith("native/tests/abi/")
         or path.startswith("native/crates/structural-ffi")
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
+        or path in LEGACY_REPLAY_CPP_PATHS
     ]
     modelir_paths = [
         path
@@ -230,12 +256,14 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith("native/crates/structural-cli/")
         or path.startswith("native/tests/integration/")
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
+        or path in LEGACY_REPLAY_RUNTIME_PATHS
     ]
     hip_paths = [
         path
         for path in native_paths
         if path.startswith("native/cpp/hip/")
         or path.endswith((".hip", ".hip.cpp", ".hip.hpp"))
+        or path in LEGACY_REPLAY_COMPAT_PATHS
     ]
 
     docs_only = bool(paths) and all(path.startswith("docs/") for path in paths)

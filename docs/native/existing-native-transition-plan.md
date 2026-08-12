@@ -17,10 +17,10 @@ library를 구성하지 않는다.
   - 약 230 lines의 manual dlopen/dlsym wrapper
   - symbol별 function pointer와 global OnceLock API
   - C++ library lifecycle/error contract를 그대로 Rust에 투영
-- implementation/phase1/hip_full_residual_ffi.cpp
-  - long positional array ABI와 probe-specific status
-- implementation/phase1/hip_*_replay.cpp, hipsparse/rocalution solve source
-  - standalone executable/probe가 build와 runtime owner 역할을 겸함
+- implementation/phase1/hip_full_residual_ffi.cpp (historical source retained for receipts)
+  - long positional array ABI와 probe-specific status를 소유했음
+- implementation/phase1/hip_*_replay.cpp, hipsparse/rocalution solve source (historical baseline)
+  - standalone executable/probe가 build와 runtime owner 역할을 겸했음
 - implementation/phase1/hip_kernels/*.hip.cpp
   - useful operator kernels가 있으나 공통 CMake target, installed header와 product
     execution context가 없음
@@ -196,6 +196,9 @@ failure-atomic CPU contract test까지 구현됨.
 
 Status: deterministic no-atomic HIP candidate와 approved-runner receipt lane까지 구현됨.
 authoritative C2는 `native-hip-approved` live receipt 전까지 open이다.
+네 legacy replay/worker executable은 이제 `sa_get_api_v1`를 직접 링크하는 host-side consumer다.
+HIP kernel, allocation, copy와 telemetry는 product `structural_c_abi_v1` backend가 소유하며,
+hosted CTest는 같은 consumer의 CPU self-test를, dedicated lane은 HIP self-test를 실행한다.
 
 ### Step H5: legacy removal
 
@@ -212,9 +215,9 @@ authoritative C2는 `native-hip-approved` live receipt 전까지 open이다.
 | hip_kernels/engine_v2_current_tangent_operator.hip.cpp | structural_solver_hip/operators | descriptor/state epoch adapter |
 | hip_kernels/engine_v2_fgmres_recurrence.hip.cpp | structural_solver_hip/krylov | resident context and restart |
 | hip_kernels/engine_v2_sparse_lu_apply.hip.cpp | structural_solver_hip/sparse | explicit preconditioner capability |
-| hip_full_residual_ffi.cpp | structural_c_abi_v1 compatibility | table wrapper, no new positional args |
-| hip_full_residual_resident_worker.cpp | structural-runtime integration test | process lifecycle consumer |
-| hip_*_batch_replay.cpp | native integration/benchmark | link product library, stop owning kernels |
+| hip_full_residual_ffi.cpp | historical compatibility source | active build 제외, protected receipt 보존 뒤 제거 |
+| hip_full_residual_resident_worker.cpp | structural-runtime integration test | product ABI process-lifecycle consumer, kernel 0 |
+| hip_*_batch_replay.cpp | native integration/benchmark | product ABI linked consumer, kernel 0 |
 | hipsparse_ilu_bicgstab_solve.cpp | structural_solver_hip/sparse | capability-gated backend |
 | rocalution_sparse_solve.cpp | optional explicit backend | no automatic fallback |
 
@@ -245,3 +248,8 @@ authoritative C2는 `native-hip-approved` live receipt 전까지 open이다.
 10. legacy deprecation/removal PRs per domain
 
 각 PR은 이전 PR의 latest main을 normal merge하고 별도 gate와 bounded claim을 유지한다.
+
+현재 replay link-first action은 완료됐다. `product_full_residual_replay.hpp`가 strict file I/O,
+descriptor, backend selection과 lifecycle만 제공하고 네 executable의 dynamic undefined product
+symbol은 `sa_get_api_v1` 하나다. 이 변경은 새 hardware receipt를 만들지 않으므로 H4/C2
+freshness나 C6 removal을 승격하지 않는다.

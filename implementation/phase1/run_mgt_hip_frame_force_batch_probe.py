@@ -21,6 +21,7 @@ if str(PHASE1) not in sys.path:
     sys.path.insert(0, str(PHASE1))
 
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly  # noqa: E402
+from mgt_hip_full_residual_backend import build_product_replay_binary  # noqa: E402
 from run_mgt_direct_residual_newton_probe import DEFAULT_CHECKPOINT, PRODUCTIZATION  # noqa: E402
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
 from run_mgt_uncoarsened_boundary_global_equilibrium import DEFAULT_MGT  # noqa: E402
@@ -30,9 +31,6 @@ SCHEMA_VERSION = "mgt-hip-frame-force-batch-probe.v1"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_hip_frame_force_batch_followup38_probe.json"
 HIP_SOURCE = PHASE1 / "hip_frame_force_batch_replay.cpp"
 HIP_BINARY = PRODUCTIZATION / "bin/hip_frame_force_batch_replay"
-ROCM_DEVICE_LIB_PATH = (
-    PHASE1 / "third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
-)
 
 
 def _max_abs(values: np.ndarray) -> float:
@@ -63,41 +61,12 @@ def _candidate_state_batch(
 
 
 def _build_binary(*, hipcc: Path, force_rebuild: bool = False) -> dict[str, Any]:
-    HIP_BINARY.parent.mkdir(parents=True, exist_ok=True)
-    needs_build = bool(force_rebuild) or not HIP_BINARY.exists()
-    if HIP_BINARY.exists() and HIP_SOURCE.exists():
-        needs_build = needs_build or HIP_SOURCE.stat().st_mtime > HIP_BINARY.stat().st_mtime
-    command = [
-        str(hipcc),
-        "-O3",
-        "-std=c++17",
-        "--offload-arch=gfx1030",
-    ]
-    if ROCM_DEVICE_LIB_PATH.exists():
-        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
-    command.extend([str(HIP_SOURCE), "-o", str(HIP_BINARY)])
-    if not needs_build:
-        return {
-            "attempted": False,
-            "ok": True,
-            "binary": str(HIP_BINARY),
-            "source": str(HIP_SOURCE),
-            "command": command,
-            "reason": "binary_current",
-        }
-    started = time.perf_counter()
-    proc = subprocess.run(command, capture_output=True, text=True, check=False)
-    return {
-        "attempted": True,
-        "ok": proc.returncode == 0,
-        "binary": str(HIP_BINARY),
-        "source": str(HIP_SOURCE),
-        "command": command,
-        "returncode": int(proc.returncode),
-        "stdout": proc.stdout[-4000:],
-        "stderr": proc.stderr[-4000:],
-        "seconds": float(time.perf_counter() - started),
-    }
+    return build_product_replay_binary(
+        source=HIP_SOURCE,
+        binary=HIP_BINARY,
+        hipcc=hipcc,
+        force_rebuild=force_rebuild,
+    )
 
 
 def _run_hip_bridge(
@@ -310,8 +279,9 @@ def run_mgt_hip_frame_force_batch_probe(
         "hip": hip_payload,
         "runtime_seconds": float(time.perf_counter() - started),
         "claim_boundary": (
-            "Validates native HIP frame-force batch replay against the G1 prepacked CPU "
-            "frame path. This covers frame internal-force replay only; shell CSR batch "
+            "Validates the sa_get_api_v1 product backend's HIP frame-force projection "
+            "against the G1 prepacked CPU frame path. The replay owns no HIP kernel. "
+            "This covers frame internal-force replay only; shell CSR batch "
             "matvec and full residual gate closure remain separate work."
         ),
     }

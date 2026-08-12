@@ -27,7 +27,9 @@ DEFAULT_RUNTIME_PROBE = Path(
 )
 DEFAULT_RUNTIME_WRAPPER = Path("implementation/phase1/run_mgt_rust_hip_full_residual_ffi_probe.py")
 DEFAULT_CRATE_DIR = Path("implementation/phase1/mgt_hip_full_residual_ffi")
-DEFAULT_NATIVE_HIP_FFI_SOURCE = Path("implementation/phase1/hip_full_residual_ffi.cpp")
+DEFAULT_NATIVE_HIP_FFI_SOURCE = Path(
+    "native/cpp/src/hip/full_residual_hip.hip.cpp"
+)
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_ROLLBACK_RUNBOOK = Path("docs/runtime-production-packaging.md")

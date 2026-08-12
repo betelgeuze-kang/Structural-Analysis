@@ -85,6 +85,10 @@ jobs:
               structural_nonlinear_static_hip_parity_tests \
               structural_nonlinear_ndtha_hip_parity_tests \
               structural_full_residual_backend_hip_parity_tests \
+              structural_legacy_frame_force_replay_consumer \
+              structural_legacy_shell_csr_replay_consumer \
+              structural_legacy_full_residual_replay_consumer \
+              structural_legacy_full_residual_worker_consumer \
             --parallel 2
           ctest --test-dir build/native-hip-dedicated --output-on-failure \
             -R 'structural_(reference_elements|sparse_linear|generalized_eigen|nonlinear_static|nonlinear_ndtha|full_residual_backend)_hip_parity_tests'
@@ -130,6 +134,21 @@ jobs:
             --device-lib-path "${{ steps.rocm.outputs.device_lib_path }}" \
             --require-approved-runner --json \
             > build/native-full-residual-backend-hip-validation.json
+          build/native-hip-dedicated/bin/structural_legacy_frame_force_replay_consumer \
+            --self-test --backend hip > build/native-frame-replay-product-link-receipt.json
+          build/native-hip-dedicated/bin/structural_legacy_shell_csr_replay_consumer \
+            --self-test --backend hip > build/native-shell-replay-product-link-receipt.json
+          build/native-hip-dedicated/bin/structural_legacy_full_residual_replay_consumer \
+            --self-test --backend hip > build/native-full-residual-replay-product-link-receipt.json
+          build/native-hip-dedicated/bin/structural_legacy_full_residual_worker_consumer \
+            --self-test --backend hip > build/native-worker-replay-product-link-receipt.json
+          python3 scripts/check_native_replay_product_link.py \
+            --receipt build/native-frame-replay-product-link-receipt.json \
+            --receipt build/native-shell-replay-product-link-receipt.json \
+            --receipt build/native-full-residual-replay-product-link-receipt.json \
+            --receipt build/native-worker-replay-product-link-receipt.json \
+            --require-hip-receipts --json --fail-blocked \
+            > build/native-replay-product-link-validation.json
 
       - name: Build install and execute the ROCm product distribution
         shell: bash
@@ -188,6 +207,11 @@ jobs:
             build/native-nonlinear-ndtha-hip-validation.json
             build/native-full-residual-backend-hip-receipt.json
             build/native-full-residual-backend-hip-validation.json
+            build/native-frame-replay-product-link-receipt.json
+            build/native-shell-replay-product-link-receipt.json
+            build/native-full-residual-replay-product-link-receipt.json
+            build/native-worker-replay-product-link-receipt.json
+            build/native-replay-product-link-validation.json
             build/native-rocm-installed-backend-receipt.json
             build/native-rocm-distribution-e2e-receipt.json
             build/native-rocm-distribution-validation.json

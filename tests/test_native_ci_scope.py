@@ -295,6 +295,25 @@ def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates()
     assert payload["hip"] is False
 
 
+def test_legacy_replay_consumers_route_through_cpp_abi_runtime_and_hip_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "implementation/phase1/hip_full_residual_batch_replay.cpp",
+            "implementation/phase1/product_full_residual_replay.hpp",
+            "implementation/phase1/mgt_hip_full_residual_backend.py",
+            "scripts/check_native_replay_product_link.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["abi"] is True
+    assert payload["runtime"] is True
+    assert payload["hip"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [

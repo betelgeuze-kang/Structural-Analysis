@@ -367,8 +367,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 
 - Current partial source
   - implementation/phase1/hip_kernels/*.hip.cpp
-  - implementation/phase1/hip_full_residual_ffi.cpp
+  - native/cpp/src/hip/*.hip.cpp
   - implementation/phase1/mgt_hip_full_residual_ffi/
+  - implementation/phase1/hip_*_replay.cpp (product ABI consumers only)
 - Target owner
   - CMake structural_solver_hip and Rust safe execution selection
 - Oracle fixtures/tests
@@ -378,7 +379,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - FP64 deterministic mode, fallback 0, resident model/state/operator/Krylov buffers
   - H2D/D2H bytes, sync count, precision, device/architecture와 exact source hash
 - Required gates: C0 through C6 plus independently trusted receipt where promotion requires.
-- State: partial probe/receipt only; g1_closure remains false.
+- State: the full-residual replay and resident-worker executables no longer own HIP kernels or
+  direct runtime allocation/copy calls; all four link the product library through the single
+  `sa_get_api_v1` symbol. This closes the source-ownership cleanup only. Approved-runner H4/C2,
+  broader Newton/Krylov residency remain open, and g1_closure remains false.
 
 ## 3. Removal protocol
 

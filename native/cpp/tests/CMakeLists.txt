@@ -283,6 +283,44 @@ set_tests_properties(
   PROPERTIES LABELS "assembly;solver_cpu"
 )
 
+set(
+  STRUCTURAL_LEGACY_REPLAY_ROOT
+  "${PROJECT_SOURCE_DIR}/../../implementation/phase1"
+)
+function(structural_add_product_replay_consumer target source role)
+  add_executable(${target} "${STRUCTURAL_LEGACY_REPLAY_ROOT}/${source}")
+  target_include_directories(${target} PRIVATE "${STRUCTURAL_LEGACY_REPLAY_ROOT}")
+  target_link_libraries(${target} PRIVATE structural_c_abi_v1)
+  structural_set_warnings(${target})
+  structural_enable_sanitizers(${target})
+  add_test(NAME ${target} COMMAND ${target} --self-test --backend cpu)
+  set_tests_properties(
+    ${target}
+    PROPERTIES LABELS "abi;compatibility;product-link;full_residual;${role}"
+  )
+endfunction()
+
+structural_add_product_replay_consumer(
+  structural_legacy_frame_force_replay_consumer
+  hip_frame_force_batch_replay.cpp
+  frame
+)
+structural_add_product_replay_consumer(
+  structural_legacy_shell_csr_replay_consumer
+  hip_shell_csr_batch_replay.cpp
+  shell
+)
+structural_add_product_replay_consumer(
+  structural_legacy_full_residual_replay_consumer
+  hip_full_residual_batch_replay.cpp
+  full_residual
+)
+structural_add_product_replay_consumer(
+  structural_legacy_full_residual_worker_consumer
+  hip_full_residual_resident_worker.cpp
+  resident_worker
+)
+
 if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_REFERENCE_HIP_TEST_SOURCE hip/reference_elements_hip_parity_test.hip.cpp)
   set(STRUCTURAL_SPARSE_HIP_TEST_SOURCE hip/sparse_linear_hip_parity_test.hip.cpp)

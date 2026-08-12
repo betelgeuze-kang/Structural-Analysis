@@ -296,4 +296,8 @@ checks reject boundary regression. The C++ shared product library still exports 
 legacy Rust symbols remain in the compatibility cdylib. `mgt_hip_full_residual_ffi` is now the
 H3 workspace compatibility adapter: it resolves only `sa_get_api_v1`, converts the frozen
 positional ABI to v1.12 descriptors, and delegates context ownership to the product library.
+The four retained frame/shell/full-residual replay and resident-worker executables are also
+host-only compatibility consumers: they link `structural_c_abi_v1`, resolve no symbols manually,
+and contain no HIP kernels or runtime allocation/copy calls. Hosted CTest exercises their CPU
+self-test while the dedicated lane is configured to exercise the same binaries on HIP.
 H4 remains a C2 candidate until an approved-device receipt; no legacy removal is claimed.

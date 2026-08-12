@@ -25,6 +25,7 @@ HIP_SOURCE = PHASE1 / "hip_full_residual_batch_replay.cpp"
 HIP_BINARY = PRODUCTIZATION / "bin/hip_full_residual_batch_replay"
 HIP_WORKER_SOURCE = PHASE1 / "hip_full_residual_resident_worker.cpp"
 HIP_WORKER_BINARY = PRODUCTIZATION / "bin/hip_full_residual_resident_worker"
+PRODUCT_REPLAY_HEADER = PHASE1 / "product_full_residual_replay.hpp"
 HIP_FFI_LIBRARY = PRODUCTIZATION / "bin/libstructural_c_abi_v1.so"
 HIP_FFI_BUILD = PHASE1 / "build/native-full-residual-product"
 RUST_HIP_FFI_CRATE = PHASE1 / "mgt_hip_full_residual_ffi"
@@ -34,31 +35,64 @@ ROCM_DEVICE_LIB_PATH = (
 )
 
 
-def build_hip_full_residual_binary(
+def build_product_replay_binary(
     *,
+    source: Path,
+    binary: Path,
     hipcc: Path = Path("/opt/rocm/bin/hipcc"),
     force_rebuild: bool = False,
 ) -> dict[str, Any]:
-    HIP_BINARY.parent.mkdir(parents=True, exist_ok=True)
-    needs_build = bool(force_rebuild) or not HIP_BINARY.exists()
-    if HIP_BINARY.exists() and HIP_SOURCE.exists():
-        needs_build = needs_build or HIP_SOURCE.stat().st_mtime > HIP_BINARY.stat().st_mtime
+    product_build = build_hip_full_residual_ffi_library(
+        hipcc=hipcc,
+        force_rebuild=force_rebuild,
+    )
+    binary.parent.mkdir(parents=True, exist_ok=True)
+    compiler = os.environ.get("CXX", "c++")
     command = [
-        str(hipcc),
+        compiler,
         "-O3",
-        "-std=c++17",
-        "--offload-arch=gfx1030",
+        "-std=c++20",
+        "-I",
+        str(NATIVE_CPP / "include"),
+        "-I",
+        str(PHASE1),
+        str(source),
+        "-L",
+        str(HIP_FFI_LIBRARY.parent),
+        "-lstructural_c_abi_v1",
+        "-Wl,-z,defs",
+        "-Wl,-rpath,$ORIGIN",
+        "-o",
+        str(binary),
     ]
-    if ROCM_DEVICE_LIB_PATH.exists():
-        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
-    command.extend([str(HIP_SOURCE), "-o", str(HIP_BINARY)])
+    if not bool(product_build.get("ok")):
+        return {
+            "attempted": False,
+            "ok": False,
+            "binary": str(binary),
+            "source": str(source),
+            "command": command,
+            "product_library_build": product_build,
+            "reason": "product_library_build_failed",
+        }
+    tracked_sources = (source, PRODUCT_REPLAY_HEADER, NATIVE_CPP / "include/structural/abi_v1.h")
+    needs_build = bool(force_rebuild) or not binary.exists()
+    if binary.exists():
+        needs_build = needs_build or any(
+            path.exists() and path.stat().st_mtime > binary.stat().st_mtime
+            for path in tracked_sources
+        )
+        needs_build = needs_build or HIP_FFI_LIBRARY.stat().st_mtime > binary.stat().st_mtime
     if not needs_build:
         return {
             "attempted": False,
             "ok": True,
-            "binary": str(HIP_BINARY),
-            "source": str(HIP_SOURCE),
+            "binary": str(binary),
+            "source": str(source),
             "command": command,
+            "product_library": str(HIP_FFI_LIBRARY),
+            "product_library_build": product_build,
+            "single_entry_symbol": "sa_get_api_v1",
             "reason": "binary_current",
         }
     started = time.perf_counter()
@@ -66,14 +100,30 @@ def build_hip_full_residual_binary(
     return {
         "attempted": True,
         "ok": proc.returncode == 0,
-        "binary": str(HIP_BINARY),
-        "source": str(HIP_SOURCE),
+        "binary": str(binary),
+        "source": str(source),
         "command": command,
+        "product_library": str(HIP_FFI_LIBRARY),
+        "product_library_build": product_build,
+        "single_entry_symbol": "sa_get_api_v1",
         "returncode": int(proc.returncode),
         "stdout": proc.stdout[-4000:],
         "stderr": proc.stderr[-4000:],
         "seconds": float(time.perf_counter() - started),
     }
+
+
+def build_hip_full_residual_binary(
+    *,
+    hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+    force_rebuild: bool = False,
+) -> dict[str, Any]:
+    return build_product_replay_binary(
+        source=HIP_SOURCE,
+        binary=HIP_BINARY,
+        hipcc=hipcc,
+        force_rebuild=force_rebuild,
+    )
 
 
 def build_hip_full_residual_worker_binary(
@@ -81,41 +131,12 @@ def build_hip_full_residual_worker_binary(
     hipcc: Path = Path("/opt/rocm/bin/hipcc"),
     force_rebuild: bool = False,
 ) -> dict[str, Any]:
-    HIP_WORKER_BINARY.parent.mkdir(parents=True, exist_ok=True)
-    needs_build = bool(force_rebuild) or not HIP_WORKER_BINARY.exists()
-    if HIP_WORKER_BINARY.exists() and HIP_WORKER_SOURCE.exists():
-        needs_build = needs_build or HIP_WORKER_SOURCE.stat().st_mtime > HIP_WORKER_BINARY.stat().st_mtime
-    command = [
-        str(hipcc),
-        "-O3",
-        "-std=c++17",
-        "--offload-arch=gfx1030",
-    ]
-    if ROCM_DEVICE_LIB_PATH.exists():
-        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
-    command.extend([str(HIP_WORKER_SOURCE), "-o", str(HIP_WORKER_BINARY)])
-    if not needs_build:
-        return {
-            "attempted": False,
-            "ok": True,
-            "binary": str(HIP_WORKER_BINARY),
-            "source": str(HIP_WORKER_SOURCE),
-            "command": command,
-            "reason": "binary_current",
-        }
-    started = time.perf_counter()
-    proc = subprocess.run(command, capture_output=True, text=True, check=False)
-    return {
-        "attempted": True,
-        "ok": proc.returncode == 0,
-        "binary": str(HIP_WORKER_BINARY),
-        "source": str(HIP_WORKER_SOURCE),
-        "command": command,
-        "returncode": int(proc.returncode),
-        "stdout": proc.stdout[-4000:],
-        "stderr": proc.stderr[-4000:],
-        "seconds": float(time.perf_counter() - started),
-    }
+    return build_product_replay_binary(
+        source=HIP_WORKER_SOURCE,
+        binary=HIP_WORKER_BINARY,
+        hipcc=hipcc,
+        force_rebuild=force_rebuild,
+    )
 
 
 def build_hip_full_residual_ffi_library(
@@ -546,6 +567,10 @@ class HipFullResidualBatchBackend:
         )
         meta = {
             "backend": "native_hip_full_residual_batch",
+            "single_entry_symbol": hip_payload.get("single_entry_symbol"),
+            "product_library_linked": bool(hip_payload.get("product_library_linked")),
+            "kernel_owner": hip_payload.get("kernel_owner"),
+            "replay_executable_owns_kernels": False,
             "single_subprocess_boundary": True,
             "persistent_in_process_worker": False,
             "batch_size": int(state_batch.shape[0]),
@@ -758,6 +783,13 @@ class HipFullResidualResidentWorkerBackend:
         )
         meta = {
             "backend": "native_hip_full_residual_resident_worker",
+            "single_entry_symbol": hip_payload.get("single_entry_symbol"),
+            "product_library_linked": bool(
+                self.startup.get("product_library_linked")
+                and hip_payload.get("product_library_linked")
+            ),
+            "kernel_owner": hip_payload.get("kernel_owner"),
+            "replay_executable_owns_kernels": False,
             "single_subprocess_boundary": False,
             "persistent_process_worker": True,
             "persistent_in_process_worker": False,

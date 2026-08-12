@@ -90,6 +90,8 @@ Jobs:
    - CPU-only CMake configure
    - build with warnings as errors
    - CTest unit suite
+   - four legacy replay/worker consumers compile and self-test through `sa_get_api_v1`; source and
+     binary checks reject embedded HIP kernels, manual loaders or product symbols beyond the one entry
 4. abi-contract
    - public header compile as C11 and C++20
    - Rust/C layout, constants and struct_size compatibility
@@ -102,6 +104,8 @@ Jobs:
    - all solver operations run in ABI CTest; unavailable v1.0-v1.5 table tails remain null
    - the v1.12 backend table has fixed layouts, caller-owned failure atomicity, opaque-context
      lifetime checks, exclusive mutable execution and concurrent immutable device-name reads
+   - replay/worker executables link `structural_c_abi_v1` and use the backend table instead of
+     owning device kernels, allocations or transfers
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
    - C++ semantic CTest is required with `--no-tests=error` after the bounded

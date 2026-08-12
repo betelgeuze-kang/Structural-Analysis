@@ -21,6 +21,7 @@ if str(PHASE1) not in sys.path:
     sys.path.insert(0, str(PHASE1))
 
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly  # noqa: E402
+from mgt_hip_full_residual_backend import build_product_replay_binary  # noqa: E402
 from mgt_physical_residual_assembly import assemble_physical_internal_forces_batch  # noqa: E402
 from mgt_shell_force_based_assembly import _cached_shell_operator  # noqa: E402
 from run_mgt_direct_residual_newton_probe import DEFAULT_CHECKPOINT, PRODUCTIZATION  # noqa: E402
@@ -38,47 +39,15 @@ SCHEMA_VERSION = "mgt-hip-full-residual-batch-probe.v1"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_hip_full_residual_batch_post_shell_followup66_probe.json"
 HIP_SOURCE = PHASE1 / "hip_full_residual_batch_replay.cpp"
 HIP_BINARY = PRODUCTIZATION / "bin/hip_full_residual_batch_replay"
-ROCM_DEVICE_LIB_PATH = (
-    PHASE1 / "third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
-)
 
 
 def _build_binary(*, hipcc: Path, force_rebuild: bool = False) -> dict[str, Any]:
-    HIP_BINARY.parent.mkdir(parents=True, exist_ok=True)
-    needs_build = bool(force_rebuild) or not HIP_BINARY.exists()
-    if HIP_BINARY.exists() and HIP_SOURCE.exists():
-        needs_build = needs_build or HIP_SOURCE.stat().st_mtime > HIP_BINARY.stat().st_mtime
-    command = [
-        str(hipcc),
-        "-O3",
-        "-std=c++17",
-        "--offload-arch=gfx1030",
-    ]
-    if ROCM_DEVICE_LIB_PATH.exists():
-        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
-    command.extend([str(HIP_SOURCE), "-o", str(HIP_BINARY)])
-    if not needs_build:
-        return {
-            "attempted": False,
-            "ok": True,
-            "binary": str(HIP_BINARY),
-            "source": str(HIP_SOURCE),
-            "command": command,
-            "reason": "binary_current",
-        }
-    started = time.perf_counter()
-    proc = subprocess.run(command, capture_output=True, text=True, check=False)
-    return {
-        "attempted": True,
-        "ok": proc.returncode == 0,
-        "binary": str(HIP_BINARY),
-        "source": str(HIP_SOURCE),
-        "command": command,
-        "returncode": int(proc.returncode),
-        "stdout": proc.stdout[-4000:],
-        "stderr": proc.stderr[-4000:],
-        "seconds": float(time.perf_counter() - started),
-    }
+    return build_product_replay_binary(
+        source=HIP_SOURCE,
+        binary=HIP_BINARY,
+        hipcc=hipcc,
+        force_rebuild=force_rebuild,
+    )
 
 
 def _run_hip_bridge(
@@ -405,6 +374,10 @@ def run_mgt_hip_full_residual_batch_probe(
         "state_meta_sample": state_meta[: min(len(state_meta), 8)],
         "backend_contract": {
             "full_residual_vector_on_native_hip": True,
+            "single_entry_symbol": "sa_get_api_v1",
+            "product_library_linked": True,
+            "kernel_owner": "structural_c_abi_v1",
+            "replay_executable_owns_kernels": False,
             "jvp_available_from_batch_residual_differences": bool(int(states.shape[0]) > 1),
             "uses_native_hip_frame_kernel": True,
             "uses_native_hip_shell_kernel": True,
@@ -431,9 +404,10 @@ def run_mgt_hip_full_residual_batch_probe(
         "hip": hip_payload,
         "runtime_seconds": float(time.perf_counter() - started),
         "claim_boundary": (
-            "This validates a single native HIP subprocess boundary that assembles "
+            "This validates a product-library-linked HIP subprocess consumer that assembles "
             "the G1 frame+shell+spring full residual and residual-difference JVP "
-            "batch for free DOFs. It is stronger than separate component replay, "
+            "batch for free DOFs through sa_get_api_v1. The replay owns no HIP kernel. "
+            "It is stronger than separate component replay, "
             "but it is not yet a persistent in-process Rust/HIP worker and does "
             "not claim residual gate closure."
         ),

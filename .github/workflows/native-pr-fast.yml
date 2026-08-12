@@ -179,6 +179,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -DSTRUCTURAL_BUILD_TESTS=ON \
             -DSTRUCTURAL_ENABLE_HIP=OFF \
+            -DBUILD_SHARED_LIBS=ON \
             -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
           cmake --build build/native-pr-fast --parallel 2
           ctest --test-dir build/native-pr-fast --output-on-failure
@@ -191,6 +192,12 @@ jobs:
           python3 scripts/check_native_nonlinear_ndtha_hip.py --json
           python3 scripts/check_native_full_residual_backend_hip.py --json
           python3 scripts/check_native_backend_selector.py --json --fail-blocked
+          python3 scripts/check_native_replay_product_link.py \
+            --binary build/native-pr-fast/bin/structural_legacy_frame_force_replay_consumer \
+            --binary build/native-pr-fast/bin/structural_legacy_shell_csr_replay_consumer \
+            --binary build/native-pr-fast/bin/structural_legacy_full_residual_replay_consumer \
+            --binary build/native-pr-fast/bin/structural_legacy_full_residual_worker_consumer \
+            --json --fail-blocked
 
   abi-contract:
     name: abi-contract
@@ -240,7 +247,11 @@ jobs:
             structural_nonlinear_ndtha_abi_tests \
             structural_reference_elements_abi_tests \
             structural_sparse_linear_abi_tests \
-            structural_generalized_eigen_abi_tests
+            structural_generalized_eigen_abi_tests \
+            structural_legacy_frame_force_replay_consumer \
+            structural_legacy_shell_csr_replay_consumer \
+            structural_legacy_full_residual_replay_consumer \
+            structural_legacy_full_residual_worker_consumer
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
