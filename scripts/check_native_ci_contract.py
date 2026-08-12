@@ -146,6 +146,13 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         blockers.append("native_merge_product_aggregate_needs_mismatch")
     if "if: always()" not in merge_aggregate:
         blockers.append("native_merge_product_aggregate_not_fail_closed")
+    if "name: native-merge-product" not in merge_aggregate:
+        blockers.append("native_merge_product_context_name_mismatch")
+    if "uses: ./.github/workflows/" in merge_aggregate:
+        blockers.append("native_merge_product_context_is_reusable_compound_name")
+    for child in MERGE_PRODUCT_CHILDREN:
+        if _needs(pr_jobs.get(child, "")) != {"scope-contract", "native-pr-fast"}:
+            blockers.append(f"native_merge_product_child_not_sequenced:{child}")
 
     nightly_aggregate = nightly_jobs.get("native-nightly-quality", "")
     if _needs(nightly_aggregate) != set(NIGHTLY_QUALITY_CHILDREN):
@@ -209,9 +216,14 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "merge-ref base parent mismatch",
         "merge-ref head parent mismatch",
         "git rev-parse HEAD^{tree}",
+        "check_native_capabilities.py --fail-invalid",
     ):
         if required not in pr_text:
             blockers.append(f"native_pr_fast_contract_token_missing:{required}")
+
+    trigger_text = pr_text.split("permissions:", 1)[0]
+    if "paths:" in trigger_text:
+        blockers.append("native_required_context_workflow_uses_path_filter")
 
     for required in (
         "schedule:",

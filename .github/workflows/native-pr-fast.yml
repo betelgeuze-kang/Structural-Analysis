@@ -45,7 +45,9 @@ jobs:
           persist-credentials: false
 
       - name: Verify native workflow shape
-        run: python3 scripts/check_native_ci_contract.py --fail-blocked
+        run: |
+          python3 scripts/check_native_ci_contract.py --fail-blocked
+          python3 scripts/check_native_capabilities.py --fail-invalid
 
       - name: Verify exact tested ref identity
         env:
@@ -241,6 +243,16 @@ jobs:
             echo "Native scope unchanged; ModelIR golden lane is not applicable"
             exit 0
           fi
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "ModelIR v2 capability is not promoted; golden lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
           manifest=native/crates/structural-contracts/Cargo.toml
           if [[ ! -f "$manifest" ]]; then
             if [[ "$NATIVE_CHANGED" == "true" ]]; then
@@ -274,7 +286,9 @@ jobs:
           persist-credentials: false
 
       - name: Enforce native ownership and Python-free product source
-        run: python3 scripts/check_native_dependency_boundary.py --json --fail-blocked
+        run: |
+          python3 scripts/check_native_capabilities.py --json --fail-invalid
+          python3 scripts/check_native_dependency_boundary.py --json --fail-blocked
 
       - name: Check locked dependency sources and SPDX policy
         run: python3 scripts/check_native_dependency_licenses.py --json --fail-blocked
@@ -373,6 +387,40 @@ jobs:
               -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
             cmake --build "build/native-package-$linkage" --parallel 2
             ctest --test-dir "build/native-package-$linkage" --output-on-failure -L link
+            install_prefix="$PWD/build/native-package-install-$linkage"
+            cmake --install "build/native-package-$linkage" --prefix "$install_prefix"
+          python3 - "$install_prefix/share/structural-native/structural-native-build.json" <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert payload["abi_version"] == "0x00010000"
+          assert payload["hip_enabled"] is False
+          assert payload["cxx_compiler"]["id"]
+          PY
+            if [[ "$linkage" == "shared" ]]; then
+              shared_library="$install_prefix/lib/libstructural_c_abi_v1.so"
+              mapfile -t exported_symbols < <(
+                nm -D --defined-only "$shared_library" | awk '{ print $3 }'
+              )
+              if [[ "${exported_symbols[*]}" != "sa_get_api_v1" ]]; then
+                echo "unexpected public ABI symbols: ${exported_symbols[*]}" >&2
+                exit 1
+              fi
+              if ldd "$shared_library" | grep -Eiq 'hip|hsa|rocm'; then
+                echo "CPU-only package links a ROCm/HIP runtime" >&2
+                exit 1
+              fi
+            fi
+            cmake \
+              -S native/cpp/tests/package_consumer \
+              -B "build/native-package-consumer-$linkage" \
+              -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_PREFIX_PATH="$install_prefix"
+            cmake --build "build/native-package-consumer-$linkage" --parallel 2
+            "build/native-package-consumer-$linkage/structural_native_package_consumer"
           done
 
   rust-cpp-integration:
@@ -441,6 +489,16 @@ jobs:
             echo "ModelIR/oracle paths unchanged; parity lane is not applicable"
             exit 0
           fi
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "ModelIR v2 capability is not promoted; oracle parity is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
           if [[ ! -f native/crates/structural-contracts/Cargo.toml ]]; then
             if [[ "$NATIVE_CHANGED" == "true" ]]; then
               echo "native structural-contracts is required for ModelIR changes" >&2
@@ -477,6 +535,16 @@ jobs:
             echo "Native scope unchanged; restart lane is not applicable"
             exit 0
           fi
+          if python3 scripts/check_native_capabilities.py --is-enabled checkpoint_restart; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "Checkpoint/restart capability is not promoted; lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
           manifest=native/crates/structural-runtime/Cargo.toml
           if [[ ! -f "$manifest" ]]; then
             if [[ "$RUNTIME_CHANGED" == "true" ]]; then
@@ -512,6 +580,16 @@ jobs:
           if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
             echo "Native scope unchanged; product E2E lane is not applicable"
             exit 0
+          fi
+          if python3 scripts/check_native_capabilities.py --is-enabled product_e2e; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "Product E2E capability is not promoted; lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
           fi
           manifest=native/crates/structural-cli/Cargo.toml
           if [[ ! -f "$manifest" ]]; then
