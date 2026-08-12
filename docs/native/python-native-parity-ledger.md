@@ -265,9 +265,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
 - State: the public Rust CLI now owns a bounded CPU nonlinear-NDTHA run/checkpoint/resume to
   ResultIR/ReportIR flow at C5. Rust also owns bounded single-host durable submit/poll/cancel,
-  expired-lease recovery, checkpoint continuation and export at C5. A service API, tenant
-  authorization, distributed claims and the TypeScript-to-native Workbench replacement remain
-  open.
+  expired-lease recovery, checkpoint continuation and export at C5. A separate loopback,
+  single-tenant HTTP slice exposes submit/poll/cancel/work-once and immutable artifact retrieval
+  at C5 with distinct static client/worker credentials and clean-process restart evidence. TLS,
+  non-loopback deployment, tenant isolation, distributed claims, broader solver API composition
+  and the TypeScript-to-native Workbench replacement remain open.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

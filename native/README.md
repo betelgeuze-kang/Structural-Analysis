@@ -36,11 +36,13 @@ terminal `bounded_candidate` ResultIR, ReportIR, deterministic Markdown and a se
 receipt. Public CLI run/resume produces bitwise-identical terminal bundles without a Python/Node
 runtime lookup, closing only the tracked CPU nonlinear-NDTHA product C5 profile. A separate
 single-host C5 durable-job slice owns submit/poll/cancel, expired-lease recovery, checkpoint
-continuation and deterministic export. Another bounded C5 slice strictly ingests hash-bound
-external result/source artifacts and compares three global NDTHA quantities; its tracked source
-is a language-neutral Python C1 golden, not live solver evidence. Broader solver coverage,
-distributed API/authorization, live same-mesh external validation, HIP C2, Workbench, broader
-PDF/A/accessibility/report output and C6 remain open. The legacy five-symbol ABI is unchanged.
+continuation and deterministic export. A separate C5 loopback service slice exposes that exact
+store through strict HTTP/1.1 with distinct static client/worker credentials and process-restart
+evidence. Another bounded C5 slice strictly ingests hash-bound external result/source artifacts
+and compares three global NDTHA quantities; its tracked source is a language-neutral Python C1
+golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
+distributed API authority, live same-mesh external validation, HIP C2, Workbench, broader PDF/A/
+accessibility/report output and C6 remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -124,6 +126,19 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 The renderer re-projects and verifies all three inputs before emitting a deterministic A4 PDF and
 self-hashed receipt. It invokes no external renderer; see `docs/native/pdf-report-v1.md` for the
 PDF/A, accessibility and broader-report boundary.
+
+The bounded native job service command is:
+
+~~~bash
+chmod 600 client.token worker.token
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  service serve --listen 127.0.0.1:8080 --store native-jobs \
+  --client-token-file client.token --worker-token-file worker.token
+~~~
+
+It refuses non-loopback binds and exposes only the bounded durable submit/poll/cancel/work-once
+and immutable artifact routes. See `docs/native/job-service-api-v1.md` for exact HTTP, credential,
+restart and authority boundaries.
 
 ## CPU-only C++
 

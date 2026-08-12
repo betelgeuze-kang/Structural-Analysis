@@ -23,6 +23,7 @@ EXPECTED_OWNERS = {
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",
     "durable_jobs": "structural-runtime",
+    "service_api": "structural-cli",
     "external_comparison": "structural-cli",
     "pdf_report": "structural-report",
     "hip_backend": "structural_c_abi_v1",

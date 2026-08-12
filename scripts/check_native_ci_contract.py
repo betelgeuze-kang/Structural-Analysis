@@ -220,6 +220,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_checkpoint_restart.py",
         "check_native_product_e2e.py",
         "check_native_durable_jobs.py",
+        "check_native_job_service_api.py",
         "check_native_external_comparison.py",
         "check_native_pdf_report.py",
         "check_structural_runtime_ffi_r3.py",

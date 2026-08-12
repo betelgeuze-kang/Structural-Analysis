@@ -59,7 +59,13 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-runtime",
-      "claim": "bounded single-host CPU nonlinear-NDTHA durable-job C5 only: Rust owns strict idempotent submit/poll/cancel, append-only self-hashed event chains, content-addressed artifacts, OS-lock worker leases, expired-lease crash reconciliation, checkpoint resume, deterministic completion re-projection and public CLI work/export; clean-environment direct and restarted artifacts are byte-identical with no Python or Node lookup; tenant authorization, distributed consensus/claims, service API, HIP C2, broader solver families and C6 remain open"
+      "claim": "bounded single-host CPU nonlinear-NDTHA durable-job C5 only: Rust owns strict idempotent submit/poll/cancel, append-only self-hashed event chains, content-addressed artifacts, OS-lock worker leases, expired-lease crash reconciliation, checkpoint resume, deterministic completion re-projection and public CLI work/export; clean-environment direct and restarted artifacts are byte-identical with no Python or Node lookup; tenant authorization, distributed consensus/claims, broader service API, HIP C2, broader solver families and C6 remain open; loopback transport is promoted only as a separate bounded C5 capability"
+    },
+    "service_api": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded loopback single-host single-tenant nonlinear-NDTHA HTTP API C5 only: Rust serves exact HTTP/1.1 submit/poll/cancel/work-once and immutable checkpoint/ResultIR/ReportIR/document retrieval, rejects duplicate headers, transfer encoding, ambiguous paths and oversized bodies, uses distinct hashed client/worker bearer credentials from mode-restricted files, emits no-store/nosniff responses, and survives a clean-environment process kill after checkpoint before reopening the same durable store and returning artifacts byte-identical to direct native execution; TLS, non-loopback exposure, tenant isolation, remote/distributed workers, concurrent cancellation, rate limits/quotas, broader solver families, HIP C2 and C6 remain open"
     },
     "external_comparison": {
       "status": "implemented",

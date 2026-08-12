@@ -636,6 +636,7 @@ jobs:
           fi
           python3 scripts/check_native_product_e2e.py
           python3 scripts/check_native_durable_jobs.py
+          python3 scripts/check_native_job_service_api.py
           python3 scripts/check_native_external_comparison.py
           python3 scripts/check_native_pdf_report.py
           cargo test --manifest-path native/Cargo.toml -p structural-runtime \

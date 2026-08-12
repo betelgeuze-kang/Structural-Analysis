@@ -66,6 +66,17 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "tenant authorization" in durable["claim"]
     assert "HIP C2" in durable["claim"]
     assert "C6" in durable["claim"]
+    assert capabilities.capability_is_enabled(payload, "service_api") is True
+    service = payload["capabilities"]["service_api"]
+    assert service["cutover_gate"] == "C5"
+    assert service["owner"] == "structural-cli"
+    assert "loopback single-host single-tenant" in service["claim"]
+    assert "distinct hashed client/worker bearer credentials" in service["claim"]
+    assert "process kill after checkpoint" in service["claim"]
+    assert "byte-identical to direct native execution" in service["claim"]
+    assert "tenant isolation" in service["claim"]
+    assert "HIP C2" in service["claim"]
+    assert "C6" in service["claim"]
     assert capabilities.capability_is_enabled(payload, "external_comparison") is True
     comparison = payload["capabilities"]["external_comparison"]
     assert comparison["cutover_gate"] == "C5"

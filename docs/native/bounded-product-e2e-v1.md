@@ -33,6 +33,7 @@ identical. The request and all five terminal artifacts have frozen SHA-256 value
 The result remains `bounded_candidate`. This slice does not claim broader dynamic solver coverage,
 HIP C2, a ModelIR-to-analysis adapter, distributed durable jobs/API, tenant authorization, native
 Workbench or C6 removal. Separate bounded C5 slices now own local durable-job submit/poll/cancel/
-crash reconciliation, three global external-comparison quantities and a single-page native PDF,
-but they do not broaden this synchronous product claim or close live external-solver/same-mesh,
-PDF/A or accessibility gates.
+crash reconciliation, a loopback single-tenant static-role HTTP facade, three global external-
+comparison quantities and a single-page native PDF, but they do not broaden this synchronous
+product claim or close distributed/multi-tenant service, live external-solver/same-mesh, PDF/A or
+accessibility gates.

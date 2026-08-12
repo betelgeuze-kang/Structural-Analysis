@@ -6,6 +6,7 @@ mod comparison;
 mod job;
 mod product;
 mod report;
+mod service;
 
 use std::fmt;
 
@@ -24,6 +25,11 @@ pub use product::{
 };
 pub use report::{
     execute_pdf_report, publish_pdf_report, NativePdfReportError, NativePdfReportOutcomeV1,
+};
+pub use service::{
+    load_native_job_api_credentials, NativeJobApiCredentialsV1, NativeJobApiError,
+    NativeJobApiServeReceiptV1, NativeJobApiServerConfigV1, NativeJobApiServerV1,
+    NATIVE_JOB_API_PROFILE_V1,
 };
 
 /// Failure boundary for a complete native `ModelIR` validation request.

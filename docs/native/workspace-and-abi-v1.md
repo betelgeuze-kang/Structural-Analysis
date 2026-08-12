@@ -561,3 +561,19 @@ R8의 PDF slice는 같은 bounded ResultIR/ReportIR의 single-page A4 summary에
 
 PDF/A, tagged accessibility, Unicode/localized font, multipage table/chart, broader report profile,
 HIP C2와 C6는 open이다. 상세 계약은 `docs/native/pdf-report-v1.md`에 고정한다.
+
+R9의 service slice는 durable-job store의 loopback single-host/single-tenant HTTP facade에 한해
+C5에 도달한다.
+
+- Rust가 exact HTTP/1.1 request framing, duplicate-header/transfer-encoding/path/body bound,
+  routing과 stable error response를 소유한다.
+- client와 worker bearer token은 서로 다른 mode-restricted regular file에서 읽고 즉시
+  domain-separated SHA-256 identity로 바꾼다. raw token은 configuration/receipt/log에 없다.
+- submit/poll/cancel/work-once와 checkpoint/ResultIR/ReportIR/Markdown retrieval을 제공하며,
+  모든 response는 `no-store`, `nosniff`, exact length와 API profile을 보존한다.
+- environment-cleared E2E가 checkpoint commit 뒤 service process를 kill하고 같은 store를
+  새 process에서 열어 resume한다. HTTP artifact 네 종류는 direct native run과 byte-exact다.
+
+TLS, non-loopback exposure, tenant isolation, remote/distributed worker, concurrent request
+execution, rate limit/quota/backup/supervision, broader solver family, HIP C2, Workbench와 C6는
+open이다. 상세 계약은 `docs/native/job-service-api-v1.md`에 고정한다.

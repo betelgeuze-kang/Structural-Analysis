@@ -51,7 +51,9 @@ failure atomicity, and forged report rejection.
 ## Authority boundary
 
 This is a local filesystem queue, not a multi-tenant service. It does not provide identity,
-authorization, tenant isolation, network/API compatibility, distributed consensus, distributed
-worker claims, remote object storage, or release authority. Only the bounded CPU NDTHA profile is
-executable. HIP C2, additional solver families, service/API migration, Workbench integration, and
-C6 Python removal remain open.
+authorization, tenant isolation, general network/API compatibility, distributed consensus,
+distributed worker claims, remote object storage, or release authority. Only the bounded CPU
+NDTHA profile is executable. A separate C5 slice now exposes this exact store through a loopback,
+single-tenant, static-role HTTP API; it does not broaden the durable runtime claim. HIP C2,
+additional solver families, broader service/API migration, Workbench integration, and C6 Python removal
+remain open. See `docs/native/job-service-api-v1.md`.
