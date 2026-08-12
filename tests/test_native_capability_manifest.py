@@ -75,6 +75,19 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in sparse["claim"]
     assert "native-hip-approved" in sparse["claim"]
     assert "C6" in sparse["claim"]
+    assert capabilities.capability_is_enabled(
+        payload, "generalized_eigen_solver_cpu"
+    ) is True
+    generalized = payload["capabilities"]["generalized_eigen_solver_cpu"]
+    assert generalized["cutover_gate"] == "C1"
+    assert generalized["owner"] == "structural_solver_cpu"
+    assert "modal and linear-buckling" in generalized["claim"]
+    assert "independent SciPy generalized-eigen oracle" in generalized["claim"]
+    assert "coordinate-axis canonical mode bases" in generalized["claim"]
+    assert "HIP C2" in generalized["claim"]
+    assert "ABI C3" in generalized["claim"]
+    assert "fallback 0" in generalized["claim"]
+    assert "C6" in generalized["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

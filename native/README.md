@@ -90,6 +90,12 @@ zero. ABI v1.8 and a safe Rust wrapper implement the C3 boundary, but promotion 
 the protected HIP receipt closes C2; restart C4, product C5 and C6 remain open. See
 `docs/native/sparse-linear-cpu-v1.md` and `docs/native/sparse-linear-hip-c2.md`.
 
+The same CPU library now also owns a bounded dense symmetric generalized-eigen reference path.
+It covers modal and linear-buckling systems through C1 with deterministic cyclic-Jacobi
+decomposition, rigid/infinite-mode filtering, coordinate-axis canonical bases and independent
+SciPy parity. It has no sparse/HIP implementation, ABI slot, Rust wrapper, restart or product
+E2E authority yet. See `docs/native/generalized-eigen-cpu-v1.md`.
+
 ## Rust
 
 ~~~bash

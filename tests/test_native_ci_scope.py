@@ -193,6 +193,24 @@ def test_sparse_linear_hip_sources_route_through_protected_oracle_gates() -> Non
     assert payload["applicable"] is True
 
 
+def test_generalized_eigen_sources_route_through_cpp_and_oracle_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/cpp/src/solver_cpu/generalized_eigen.cpp",
+            "native/cpp/tests/solver_cpu/generalized_eigen_test.cpp",
+            "native/cpp/tests/fuzz/generalized_eigen_fuzz.cpp",
+            "tests/test_native_generalized_eigen_python_parity.py",
+            "scripts/check_native_generalized_eigen.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

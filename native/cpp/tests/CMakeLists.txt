@@ -169,6 +169,27 @@ set_tests_properties(
   PROPERTIES LABELS "solver_cpu;sparse_linear"
 )
 
+add_executable(
+  structural_generalized_eigen_cpu_tests
+  solver_cpu/generalized_eigen_test.cpp
+)
+target_include_directories(
+  structural_generalized_eigen_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/solver_cpu
+)
+target_link_libraries(structural_generalized_eigen_cpu_tests PRIVATE structural_solver_cpu)
+structural_set_warnings(structural_generalized_eigen_cpu_tests)
+structural_enable_sanitizers(structural_generalized_eigen_cpu_tests)
+add_test(
+  NAME structural_generalized_eigen_cpu_tests
+  COMMAND structural_generalized_eigen_cpu_tests
+)
+set_tests_properties(
+  structural_generalized_eigen_cpu_tests
+  PROPERTIES LABELS "solver_cpu;generalized_eigen;modal;buckling"
+)
+
 add_executable(structural_materials_cpu_tests materials/materials_test.cpp)
 target_include_directories(
   structural_materials_cpu_tests

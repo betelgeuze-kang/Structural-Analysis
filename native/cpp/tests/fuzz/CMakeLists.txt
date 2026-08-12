@@ -119,6 +119,27 @@ target_link_options(
 )
 structural_set_warnings(structural_sparse_linear_fuzz)
 
+add_executable(structural_generalized_eigen_fuzz generalized_eigen_fuzz.cpp)
+target_include_directories(
+  structural_generalized_eigen_fuzz
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/solver_cpu
+)
+target_link_libraries(structural_generalized_eigen_fuzz PRIVATE structural_solver_cpu)
+target_compile_options(
+  structural_generalized_eigen_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+target_link_options(
+  structural_generalized_eigen_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+structural_set_warnings(structural_generalized_eigen_fuzz)
+
 add_executable(structural_sparse_linear_abi_fuzz sparse_linear_abi_fuzz.cpp)
 target_link_libraries(structural_sparse_linear_abi_fuzz PRIVATE structural_c_abi_v1)
 target_compile_options(
@@ -145,6 +166,7 @@ add_custom_target(
     structural_nonlinear_ndtha_restart_fuzz
     structural_reference_elements_fuzz
     structural_sparse_linear_fuzz
+    structural_generalized_eigen_fuzz
     structural_sparse_linear_abi_fuzz
 )
 add_test(
@@ -215,6 +237,16 @@ set_tests_properties(
   structural_sparse_linear_fuzz_smoke
   PROPERTIES
     LABELS "fuzz-smoke;sparse_linear"
+    TIMEOUT 30
+)
+add_test(
+  NAME structural_generalized_eigen_fuzz_smoke
+  COMMAND structural_generalized_eigen_fuzz -runs=256
+)
+set_tests_properties(
+  structural_generalized_eigen_fuzz_smoke
+  PROPERTIES
+    LABELS "fuzz-smoke;generalized_eigen;modal;buckling"
     TIMEOUT 30
 )
 add_test(

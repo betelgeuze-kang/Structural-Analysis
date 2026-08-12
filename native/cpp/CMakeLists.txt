@@ -197,6 +197,7 @@ endif()
 
 add_library(
   structural_solver_cpu STATIC
+  src/solver_cpu/generalized_eigen.cpp
   src/solver_cpu/story_frame.cpp
   src/solver_cpu/nonlinear_ndtha.cpp
   src/solver_cpu/nonlinear_static.cpp

@@ -124,6 +124,8 @@ def test_merge_oracle_gate_runs_all_native_solver_python_c1_matrices() -> None:
     assert "tests/test_native_track_point_load_python_parity.py" in workflow
     assert "tests/test_native_reference_elements_python_parity.py" in workflow
     assert "tests/test_native_sparse_linear_python_parity.py" in workflow
+    assert "tests/test_native_generalized_eigen_python_parity.py" in workflow
+    assert "check_native_generalized_eigen.py" in workflow
     assert "structural_sparse_linear_abi_tests" in workflow
 
 

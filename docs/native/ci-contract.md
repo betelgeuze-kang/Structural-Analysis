@@ -63,6 +63,9 @@ Jobs:
      residual, JVP and recovery value
    - canonical-CSR sparse PCG C0 taxonomy and four-profile independent NumPy direct-solve C1
      parity, including asymmetric/malformed input rejection and fallback zero
+   - bounded dense modal/linear-buckling C0 taxonomy and six-profile independent SciPy
+     generalized-eigen C1 parity, including rigid/infinite-mode filtering, canonical repeated
+     eigenspaces, coordinate recovery and fallback zero
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality

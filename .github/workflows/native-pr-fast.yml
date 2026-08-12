@@ -184,6 +184,7 @@ jobs:
           ctest --test-dir build/native-pr-fast --output-on-failure
           python3 scripts/check_native_reference_elements.py
           python3 scripts/check_native_sparse_linear.py
+          python3 scripts/check_native_generalized_eigen.py
           python3 scripts/check_native_sparse_linear_hip.py --json
 
   abi-contract:
@@ -546,6 +547,7 @@ jobs:
             tests/test_native_mgt_import_health_python_parity.py \
             tests/test_native_reference_elements_python_parity.py \
             tests/test_native_sparse_linear_python_parity.py \
+            tests/test_native_generalized_eigen_python_parity.py \
             tests/test_native_nonlinear_ndtha_python_parity.py \
             tests/test_native_nonlinear_static_python_parity.py \
             tests/test_native_track_point_load_python_parity.py

@@ -192,6 +192,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   and fallback zero. ABI v1.8 and a safe reentrant Rust wrapper implement the C3 boundary with
   fixed numerical errors and failure-atomic output, but the capability remains sequentially at C1
   until the `native-hip-approved` protected-runner C2 receipt exists.
+- A bounded dense symmetric generalized-eigen reference family is C1. C++20 owns modal
+  `K phi = omega^2 M phi` and linear-buckling `K phi = lambda Kg phi` for at most 128 DOFs,
+  including strict definiteness/semidefiniteness, rigid and infinite-mode filtering, stable
+  complete-cluster selection, coordinate-axis canonical mode bases, residual/orthogonality
+  gates, deterministic repetition and fallback zero. Six modal/buckling profiles—including
+  non-identity coordinate recovery, a rigid mode, singular geometric stiffness and a `1e-15`
+  finite reciprocal mode—match an independent SciPy generalized-eigen oracle. This is not sparse
+  extraction or whole-model solver ownership. HIP C2, ABI/Rust C3, checkpoint C4, product C5 and
+  C6 remain open, so Python remains the broader modal/buckling oracle and rollback owner.
 
 ### D5. Durable Job API and process lifecycle
 

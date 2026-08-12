@@ -40,6 +40,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
         "scripts/check_native_external_comparison.py",
+        "scripts/check_native_generalized_eigen.py",
         "scripts/check_native_job_service_api.py",
         "scripts/check_native_mgt_import.py",
         "scripts/check_native_pdf_report.py",
@@ -58,6 +59,8 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
         "tests/test_native_external_comparison_contract.py",
+        "tests/test_native_generalized_eigen_contract.py",
+        "tests/test_native_generalized_eigen_python_parity.py",
         "tests/test_native_job_service_api_contract.py",
         "tests/test_native_mgt_import_contract.py",
         "tests/test_native_mgt_import_health_python_parity.py",
@@ -111,6 +114,9 @@ NATIVE_NUMERICAL_ORACLE_PREFIXES = (
     "native/cpp/tests/solver_cpu/sparse_linear",
     "native/cpp/tests/fuzz/sparse_linear",
     "native/cpp/tests/abi/sparse_linear",
+    "native/cpp/src/solver_cpu/generalized_eigen",
+    "native/cpp/tests/solver_cpu/generalized_eigen",
+    "native/cpp/tests/fuzz/generalized_eigen",
     "native/crates/structural-ffi-sys/src/reference_elements",
     "native/crates/structural-ffi/tests/reference_elements",
     "native/crates/structural-ffi-sys/src/sparse_linear",
@@ -121,6 +127,7 @@ NATIVE_NUMERICAL_ORACLE_PATHS = frozenset(
     {
         "tests/test_native_reference_elements_python_parity.py",
         "tests/test_native_sparse_linear_python_parity.py",
+        "tests/test_native_generalized_eigen_python_parity.py",
     }
 )
 

@@ -23,6 +23,7 @@ EXPECTED_OWNERS = {
     "reference_materials_elements_cpu": "structural_elements",
     "dense_assembly_cpu": "structural_assembly",
     "sparse_linear_solver_cpu": "structural_solver_cpu",
+    "generalized_eigen_solver_cpu": "structural_solver_cpu",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",
