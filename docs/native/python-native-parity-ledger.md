@@ -54,9 +54,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: JSON/semantic validation은 backend-independent이므로 byte/hash와
   Rust/C++ deterministic parity가 대체 gate다. 생성된 model descriptor를 소비하는
   operator부터 C2가 필수다.
-- State: Rust wire/schema/canonical identity is C1 with zero-diff Python oracle parity;
-  the C++ typed semantic/snapshot core is C0, while safe FFI round-trip, Python/C++ issue
-  parity and product CLI remain open. Python remains authoritative oracle and rollback owner.
+- State: D1 is C3. Rust wire/schema/canonical identity and the C++ typed semantic/snapshot core
+  are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
+  semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
+  three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
+  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains the authoritative oracle and
+  rollback owner; C5 and C6 remain open.
 
 ### D2. Elements and materials
 

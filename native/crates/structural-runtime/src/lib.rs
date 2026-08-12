@@ -4,7 +4,10 @@
 
 #![forbid(unsafe_code)]
 
+use structural_contracts::model_ir::ModelIrV2Document;
 use structural_ffi::{Api, Error};
+
+pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};
 
 /// Runtime-layer projection of an error returned by the native ABI.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -43,13 +46,27 @@ impl Runtime {
     /// Returns a stable runtime error when the ABI table cannot be loaded.
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
-            api: Api::load().map_err(RuntimeError::from)?,
+            api: Api::load_model_ir().map_err(RuntimeError::from)?,
         })
     }
 
     #[must_use]
     pub const fn native_capabilities(&self) -> u64 {
         self.api.capabilities()
+    }
+
+    /// Validate and identity-check one `ModelIR` document through the native C++ owner.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for descriptor, ABI, report, snapshot, or hash failures.
+    pub fn validate_model_ir(
+        &self,
+        document: &ModelIrV2Document,
+    ) -> Result<ModelIrValidation, RuntimeError> {
+        self.api
+            .validate_model_ir(document)
+            .map_err(RuntimeError::from)
     }
 }
 
@@ -60,6 +77,6 @@ mod tests {
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
-        assert_eq!(runtime.native_capabilities(), 1);
+        assert_eq!(runtime.native_capabilities(), 7);
     }
 }

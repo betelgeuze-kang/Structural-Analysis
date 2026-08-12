@@ -283,6 +283,9 @@ jobs:
               exit "$code"
             fi
           fi
+          python3 scripts/check_native_capabilities.py --is-enabled modelir_v2
+          cargo test --manifest-path native/Cargo.toml --locked \
+            -p structural-ffi -p structural-runtime -p structural-cli
 
   dependency-boundary:
     name: dependency-boundary
@@ -510,6 +513,7 @@ jobs:
             fi
             exit "$code"
           fi
+          python3 scripts/check_native_capabilities.py --is-enabled modelir_v2
           if [[ ! -f native/crates/structural-contracts/Cargo.toml ]]; then
             if [[ "$NATIVE_CHANGED" == "true" ]]; then
               echo "native structural-contracts is required for ModelIR changes" >&2
@@ -522,7 +526,8 @@ jobs:
           python -m pytest -q \
             tests/test_model_ir_v2_contract.py \
             tests/test_native_model_ir_rust_parity.py
-          cargo test --manifest-path native/Cargo.toml -p structural-contracts --locked
+          cargo test --manifest-path native/Cargo.toml --locked \
+            -p structural-contracts -p structural-ffi -p structural-cli
 
   checkpoint-restart:
     name: checkpoint-restart

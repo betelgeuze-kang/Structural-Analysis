@@ -87,11 +87,13 @@ def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
     assert "--workspace --all-targets --locked" in workflow
 
 
-def test_modelir_gate_separates_component_promotion_from_aggregate_slice() -> None:
+def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> None:
     workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
     )
 
     assert "--is-enabled modelir_v2_rust_wire" in workflow
     assert "--is-enabled modelir_v2_cpp_core; then" in workflow
+    assert "--is-enabled modelir_v2" in workflow
+    assert "-p structural-ffi -p structural-runtime -p structural-cli" in workflow
     assert "--no-tests=error -L modelir" in workflow

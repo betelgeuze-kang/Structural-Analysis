@@ -8,7 +8,7 @@
       "workspace_member": false,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "R1 workspace compatibility member after ModelIR Slice D"
+      "next_gate": "R1 workspace compatibility member is next after completed ModelIR Slice D"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",
