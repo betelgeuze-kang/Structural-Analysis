@@ -7,9 +7,9 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_cli::{
     contract_error_report, execute_external_comparison, execute_model_ir_native_analysis,
-    execute_native_analysis, execute_pdf_report, publish_external_comparison,
-    publish_model_ir_native_analysis, publish_native_analysis, publish_pdf_report,
-    validate_model_bytes, validation_succeeds,
+    execute_native_analysis, execute_native_mgt_import, execute_pdf_report,
+    publish_external_comparison, publish_model_ir_native_analysis, publish_native_analysis,
+    publish_native_mgt_import, publish_pdf_report, validate_model_bytes, validation_succeeds,
 };
 
 mod job_cli;
@@ -23,6 +23,7 @@ const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
 const MAX_EXTERNAL_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_MGT_SOURCE_BYTES: u64 = 64 * 1024 * 1024;
 
 fn main() -> ExitCode {
     let arguments = std::env::args_os().skip(1).collect::<Vec<_>>();
@@ -36,6 +37,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     }
     if let Some((path, require_analysis_ready)) = parse_validate_arguments(arguments) {
         return run_model_validation(&path, require_analysis_ready);
+    }
+    if let Some(command) = parse_mgt_import_arguments(arguments) {
+        return run_native_mgt_import(&command);
     }
     if let Some(command) = parse_model_analysis_arguments(arguments) {
         return run_model_native_analysis(&command);
@@ -63,7 +67,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
@@ -125,6 +129,66 @@ fn run_model_validation(path: &PathBuf, require_analysis_ready: bool) -> ExitCod
             );
             ExitCode::from(EXIT_FAILURE)
         }
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct MgtImportCommand {
+    source_path: PathBuf,
+    model_id: String,
+    output_directory: PathBuf,
+    require_normalized: bool,
+}
+
+fn run_native_mgt_import(command: &MgtImportCommand) -> ExitCode {
+    let Ok(source_bytes) = read_bounded_regular_file(&command.source_path, MAX_MGT_SOURCE_BYTES)
+    else {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-native-mgt-import-failure.v1",
+                "code": "mgt_source_read_error",
+                "path": "/source",
+                "detail": "MGT source must be a bounded regular non-symlink file"
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let outcome = match execute_native_mgt_import(&source_bytes, &command.model_id) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if error.is_contract_error() {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-native-mgt-import-failure.v1",
+                    "code": "mgt_import_failed",
+                    "detail": error.to_string()
+                })
+            );
+            return ExitCode::from(exit);
+        }
+    };
+    if let Err(error) = publish_native_mgt_import(&command.output_directory, &outcome) {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-native-mgt-import-failure.v1",
+                "code": "mgt_import_publish_failed",
+                "detail": error.to_string()
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    }
+    println!("{}", outcome.receipt_json());
+    if command.require_normalized && !outcome.is_normalized() {
+        ExitCode::from(EXIT_USAGE_OR_INVALID)
+    } else {
+        ExitCode::SUCCESS
     }
 }
 
@@ -505,6 +569,46 @@ fn read_bounded_regular_file(path: &PathBuf, maximum_bytes: u64) -> Result<Vec<u
     Ok(bytes)
 }
 
+fn parse_mgt_import_arguments(arguments: &[OsString]) -> Option<MgtImportCommand> {
+    if arguments.len() < 7
+        || arguments[0] != "import"
+        || arguments[1] != "mgt"
+        || arguments[2].to_string_lossy().starts_with('-')
+    {
+        return None;
+    }
+    let mut model_id = None;
+    let mut output_directory = None;
+    let mut require_normalized = false;
+    let mut index = 3;
+    while index < arguments.len() {
+        if arguments[index] == "--model-id" && model_id.is_none() {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            model_id = Some(arguments[index].to_str()?.to_owned());
+        } else if arguments[index] == "--output-dir" && output_directory.is_none() {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            output_directory = Some(PathBuf::from(&arguments[index]));
+        } else if arguments[index] == "--require-normalized" && !require_normalized {
+            require_normalized = true;
+        } else {
+            return None;
+        }
+        index += 1;
+    }
+    Some(MgtImportCommand {
+        source_path: PathBuf::from(&arguments[2]),
+        model_id: model_id?,
+        output_directory: output_directory?,
+        require_normalized,
+    })
+}
+
 fn parse_validate_arguments(arguments: &[OsString]) -> Option<(PathBuf, bool)> {
     if arguments.len() < 3 || arguments[0] != "model" || arguments[1] != "validate" {
         return None;
@@ -708,9 +812,10 @@ fn parse_model_analysis_arguments(arguments: &[OsString]) -> Option<ModelAnalysi
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analysis_arguments, parse_comparison_arguments, parse_model_analysis_arguments,
-        parse_pdf_report_arguments, parse_validate_arguments, AnalysisCommand, ComparisonCommand,
-        ModelAnalysisCommand, PdfReportCommand,
+        parse_analysis_arguments, parse_comparison_arguments, parse_mgt_import_arguments,
+        parse_model_analysis_arguments, parse_pdf_report_arguments, parse_validate_arguments,
+        AnalysisCommand, ComparisonCommand, MgtImportCommand, ModelAnalysisCommand,
+        PdfReportCommand,
     };
     use std::ffi::OsString;
 
@@ -737,6 +842,48 @@ mod tests {
         assert!(
             parse_validate_arguments(&args(&["model", "validate", "a.json", "b.json"])).is_none()
         );
+    }
+
+    #[test]
+    fn mgt_import_arguments_require_explicit_identity_and_destination() {
+        assert_eq!(
+            parse_mgt_import_arguments(&args(&[
+                "import",
+                "mgt",
+                "source.mgt",
+                "--model-id",
+                "native-mgt-v1",
+                "--output-dir",
+                "out",
+                "--require-normalized"
+            ])),
+            Some(MgtImportCommand {
+                source_path: "source.mgt".into(),
+                model_id: "native-mgt-v1".to_owned(),
+                output_directory: "out".into(),
+                require_normalized: true,
+            })
+        );
+        assert!(parse_mgt_import_arguments(&args(&[
+            "import",
+            "mgt",
+            "source.mgt",
+            "--output-dir",
+            "out"
+        ]))
+        .is_none());
+        assert!(parse_mgt_import_arguments(&args(&[
+            "import",
+            "mgt",
+            "source.mgt",
+            "--model-id",
+            "native-mgt-v1",
+            "--output-dir",
+            "out",
+            "--require-normalized",
+            "--require-normalized"
+        ]))
+        .is_none());
     }
 
     #[test]

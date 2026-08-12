@@ -9,6 +9,7 @@
 
 pub mod external_comparison;
 pub mod legacy_runtime;
+pub mod mgt_import;
 pub mod model_ir;
 pub mod product_ir;
 pub mod solver_cpu;

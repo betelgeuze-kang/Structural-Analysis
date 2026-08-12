@@ -226,7 +226,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C5, C6.
 - C2 disposition: import는 backend-independent이다. 생성된 ModelIR fixture를 CPU와
   HIP operator가 동일하게 소비하는 downstream parity를 별도 요구한다.
-- State: strict Python import contracts exist; native product connection not started.
+- State: a bounded native import-health slice is C5 for one explicit contract. Rust owns the exact
+  source bytes, strict UTF-8/BOM versus unsupported-encoding disposition, source SHA-256, section
+  and row inventory, and `mapped`/`preserved_only`/`dropped`/`unsupported` diagnostics. The exact
+  numeric frame/truss grammar alone emits canonical ModelIR and crosses the existing C++ semantic
+  validator/snapshot with three-hash identity. A language-neutral golden and Python raw parser
+  freeze five sources: one complete exact profile and all four existing `foundation_realish` MGT
+  fixtures. The latter remain blocked where material/section/support/load data or shell support is
+  absent; native code does not invent values. Aggregate D7 is still partial: CP949, repeated
+  `USE-STLD`, self-weight/load combinations, shells, offsets/links/thickness, general writeback,
+  downstream CPU/HIP consumption and C6 remain open.
 
 ### D8. ReportIR, external comparison and PDF
 

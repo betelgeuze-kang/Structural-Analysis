@@ -59,6 +59,13 @@ ownership rules and authority boundaries are documented in
 `docs/native/modelir-ndtha-adapter-v1.md` and
 `docs/native/modelir-ndtha-product-e2e-v1.md`.
 
+A separate bounded MGT C5 slice makes Rust the owner of original bytes, strict encoding
+disposition, source hash, section/row inventory and loss diagnostics. Only the exact numeric
+frame/truss subset is normalized to ModelIR and validated/snapshotted by the existing C++ owner;
+the four tracked incomplete foundation fixtures remain blocked without invented properties. This
+does not claim general MGT grammar, shell/load-combination/writeback or solver authority. See
+`docs/native/mgt-import-health-v1.md`.
+
 ## Rust
 
 ~~~bash
@@ -96,6 +103,18 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Without `--require-analysis-ready`, a contract-valid document with explicit blockers exits zero
 while preserving `analysis_ready: false` in the report. Semantic or wire invalidity exits 2;
 runtime/input transfer failure exits 1.
+
+The bounded native MGT import-health command is:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  import mgt source.mgt --model-id imported-model-v1 --output-dir import-health \
+  --require-normalized
+~~~
+
+Blocked inputs still publish their original bytes and complete loss/disposition report; the
+optional policy flag then exits 2. A complete exact-profile input additionally publishes canonical
+ModelIR, the C++ validation report and byte-identical C++ snapshot.
 
 The bounded analysis product commands are:
 

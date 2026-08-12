@@ -100,6 +100,23 @@ def test_nonlinear_python_parity_boundary_routes_through_the_oracle_gate() -> No
     assert payload["applicable"] is True
 
 
+def test_mgt_import_oracle_and_fixture_route_through_modelir_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "src/structural_analysis/io/midas/raw_parser.py",
+            "tests/fixtures/foundation_realish/foundation_small.mgt",
+            "native/tests/golden/mgt_import_health_v1.json",
+            "tests/test_native_mgt_import_health_python_parity.py",
+            "scripts/check_native_mgt_import.py",
+        ]
+    )
+
+    assert payload["modelir"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

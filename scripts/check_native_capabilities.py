@@ -19,6 +19,7 @@ EXPECTED_OWNERS = {
     "modelir_v2": "structural-contracts",
     "modelir_ndtha_adapter": "structural_model_ir",
     "modelir_ndtha_product_e2e": "structural-cli",
+    "mgt_import_health": "structural-cli",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",

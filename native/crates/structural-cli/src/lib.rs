@@ -4,6 +4,7 @@
 
 mod comparison;
 mod job;
+mod mgt_product;
 mod model_product;
 mod product;
 mod report;
@@ -20,6 +21,10 @@ pub use comparison::{
     NativeExternalComparisonOutcomeV1,
 };
 pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandError};
+pub use mgt_product::{
+    execute_native_mgt_import, publish_native_mgt_import, NativeMgtImportOutcomeV1,
+    NativeMgtImportProductError,
+};
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,
     ModelIrNativeAnalysisOutcomeV1,

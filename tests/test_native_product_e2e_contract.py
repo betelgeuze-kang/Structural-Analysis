@@ -16,7 +16,11 @@ SPEC.loader.exec_module(product)
 
 
 def _copy_contract(tmp_path: Path) -> None:
-    for relative in ("native/capabilities.json", *product.REQUIRED_TOKENS):
+    for relative in (
+        "native/capabilities.json",
+        *product.REQUIRED_TOKENS,
+        *product.MODELIR_REQUIRED_TOKENS,
+    ):
         source = ROOT / relative
         destination = tmp_path / relative
         destination.parent.mkdir(parents=True, exist_ok=True)

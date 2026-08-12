@@ -47,6 +47,8 @@ Jobs:
      rejection, failure atomicity and concurrent immutable execution
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
+   - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
+     normalized contract tests, including exact ModelIR identity and mutation rejection
    - bounded CPU checkpoint C4 contract: canonical artifact, independent model/state/execution
      SHA-256 binding, atomic publish, frozen receipt and exact durable resume
    - nonlinear-static independent dense-matrix Python oracle, five-case product-golden SHA-256
@@ -120,6 +122,9 @@ Required jobs:
    - exact-profile ModelIR -> ABI v1.6 derivation -> ABI v1.5 execution, with public model-run/
      model-resume producing nine frozen terminal artifacts and rejecting identity/symlink/tamper
      inputs without publication
+   - MGT import-health public CLI with five-fixture Python raw-parser parity, exact-profile C++
+     ModelIR validation/snapshot identity, clean-environment frozen artifacts and fail-closed
+     symlink/non-overwrite/policy behavior
    - bounded single-host durable-job submit/poll/cancel, exclusive worker claim, expired-lease
      crash reconciliation, checkpointed process restart and atomic artifact export
    - append-only event self-hash chain and content-addressed blob corruption fail closed; direct,

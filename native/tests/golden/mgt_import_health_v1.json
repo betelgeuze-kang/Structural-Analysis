@@ -1,0 +1,172 @@
+{
+  "schema_version": "structural-native-mgt-python-oracle.v1",
+  "cases": [
+    {
+      "case_id": "fixed-guided-frame3d-x",
+      "model_id": "mgt-fixed-guided-v1",
+      "source_path": "native/tests/fixtures/mgt_import/fixed_guided_frame3d_x.mgt",
+      "source_hash": "sha256:8316dbf1f9563a3239b303456970b827f5fc834a1d3d4aab84d7486e9a80d9f5",
+      "line_count": 28,
+      "section_counts": {
+        "CONLOAD": 1,
+        "CONSTRAINT": 2,
+        "ELEMENT": 1,
+        "MATERIAL": 1,
+        "NODE": 2,
+        "SECTION": 1,
+        "STLDCASE": 1,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "normalized",
+        "mapped_row_count": 10,
+        "preserved_only_row_count": 1,
+        "dropped_row_count": 0,
+        "unsupported_row_count": 0,
+        "blocker_count": 0,
+        "diagnostic_codes": []
+      }
+    },
+    {
+      "case_id": "foundation-deep-small",
+      "model_id": "foundation-deep-small-health-v1",
+      "source_path": "tests/fixtures/foundation_realish/foundation_deep_small.mgt",
+      "source_hash": "sha256:cb90fb3e2a2f3991f454743b8e4151237ece2531e2b2c8edfe8bbb81e85b8d6f",
+      "line_count": 37,
+      "section_counts": {
+        "ELEMENT": 4,
+        "GROUP": 2,
+        "MATERIAL": 2,
+        "NODE": 10,
+        "SECTION": 4,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "blocked",
+        "mapped_row_count": 11,
+        "preserved_only_row_count": 3,
+        "dropped_row_count": 1,
+        "unsupported_row_count": 9,
+        "blocker_count": 15,
+        "diagnostic_codes": [
+          "mgt_constraints_missing",
+          "mgt_element_dangling_material",
+          "mgt_element_family_dropped",
+          "mgt_load_cases_missing",
+          "mgt_material_properties_unsupported",
+          "mgt_materials_missing",
+          "mgt_nodal_loads_missing",
+          "mgt_section_properties_unsupported",
+          "mgt_sections_missing"
+        ]
+      }
+    },
+    {
+      "case_id": "foundation-generic-sections",
+      "model_id": "foundation-generic-sections-health-v1",
+      "source_path": "tests/fixtures/foundation_realish/foundation_generic_sections.mgt",
+      "source_hash": "sha256:1cc6504f713ae871f6360617946f1a84da5df309d1510a1da0cff2e702c1fd13",
+      "line_count": 33,
+      "section_counts": {
+        "ELEMENT": 3,
+        "GROUP": 2,
+        "MATERIAL": 2,
+        "NODE": 8,
+        "SECTION": 3,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "blocked",
+        "mapped_row_count": 9,
+        "preserved_only_row_count": 3,
+        "dropped_row_count": 1,
+        "unsupported_row_count": 7,
+        "blocker_count": 13,
+        "diagnostic_codes": [
+          "mgt_constraints_missing",
+          "mgt_element_dangling_material",
+          "mgt_element_family_dropped",
+          "mgt_load_cases_missing",
+          "mgt_material_properties_unsupported",
+          "mgt_materials_missing",
+          "mgt_nodal_loads_missing",
+          "mgt_section_properties_unsupported",
+          "mgt_sections_missing"
+        ]
+      }
+    },
+    {
+      "case_id": "foundation-parser-drop-small",
+      "model_id": "foundation-parser-drop-small-health-v1",
+      "source_path": "tests/fixtures/foundation_realish/foundation_parser_drop_small.mgt",
+      "source_hash": "sha256:8c8bb68d24235d72b0c2f9754fcd2dbd1e3f5080cdd73f206735cf32dcb2dd8b",
+      "line_count": 33,
+      "section_counts": {
+        "ELEMENT": 3,
+        "GROUP": 2,
+        "MATERIAL": 2,
+        "NODE": 8,
+        "SECTION": 3,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "blocked",
+        "mapped_row_count": 9,
+        "preserved_only_row_count": 3,
+        "dropped_row_count": 1,
+        "unsupported_row_count": 7,
+        "blocker_count": 13,
+        "diagnostic_codes": [
+          "mgt_constraints_missing",
+          "mgt_element_dangling_material",
+          "mgt_element_family_dropped",
+          "mgt_load_cases_missing",
+          "mgt_material_properties_unsupported",
+          "mgt_materials_missing",
+          "mgt_nodal_loads_missing",
+          "mgt_section_properties_unsupported",
+          "mgt_sections_missing"
+        ]
+      }
+    },
+    {
+      "case_id": "foundation-small",
+      "model_id": "foundation-small-health-v1",
+      "source_path": "tests/fixtures/foundation_realish/foundation_small.mgt",
+      "source_hash": "sha256:b5bbe7b31a74ee098e4c3b5ea4a62b59ec5a14e8754ba441c538bf1cc451c813",
+      "line_count": 33,
+      "section_counts": {
+        "ELEMENT": 3,
+        "GROUP": 2,
+        "MATERIAL": 2,
+        "NODE": 8,
+        "SECTION": 3,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "blocked",
+        "mapped_row_count": 9,
+        "preserved_only_row_count": 3,
+        "dropped_row_count": 1,
+        "unsupported_row_count": 7,
+        "blocker_count": 13,
+        "diagnostic_codes": [
+          "mgt_constraints_missing",
+          "mgt_element_dangling_material",
+          "mgt_element_family_dropped",
+          "mgt_load_cases_missing",
+          "mgt_material_properties_unsupported",
+          "mgt_materials_missing",
+          "mgt_nodal_loads_missing",
+          "mgt_section_properties_unsupported",
+          "mgt_sections_missing"
+        ]
+      }
+    }
+  ]
+}

@@ -26,6 +26,22 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert payload["capabilities"]["modelir_v2_cpp_core"]["cutover_gate"] == "C1"
     assert capabilities.capability_is_enabled(payload, "modelir_v2") is True
     assert payload["capabilities"]["modelir_v2"]["cutover_gate"] == "C3"
+    assert (
+        capabilities.capability_is_enabled(payload, "modelir_ndtha_product_e2e")
+        is True
+    )
+    model_product = payload["capabilities"]["modelir_ndtha_product_e2e"]
+    assert model_product["cutover_gate"] == "C5"
+    assert "content/semantic/provenance" in model_product["claim"]
+    assert "Python/Node-free" in model_product["claim"]
+    assert capabilities.capability_is_enabled(payload, "mgt_import_health") is True
+    mgt_import = payload["capabilities"]["mgt_import_health"]
+    assert mgt_import["cutover_gate"] == "C5"
+    assert "original bytes" in mgt_import["claim"]
+    assert "mapped/preserved_only/dropped/unsupported" in mgt_import["claim"]
+    assert "Python C1" in mgt_import["claim"]
+    assert "CP949" in mgt_import["claim"]
+    assert "C6" in mgt_import["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

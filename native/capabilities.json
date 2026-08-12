@@ -37,6 +37,12 @@
       "owner": "structural-cli",
       "claim": "the exact fixed-guided one-story frame3d global-X ModelIR profile only: Rust verifies strict ModelIR and explicit adapter-request identities, C++ derives the bounded native NDTHA problem through ABI v1.6, an outer canonical checkpoint binds content/semantic/provenance, adapter-request, generated-request and inner-state identities, and public model-run/model-resume emit bitwise-identical canonical model/request/checkpoint/ResultIR/ReportIR/Markdown/self-hashed receipt artifacts in a Python/Node-free environment; arbitrary topology, HIP C2, broader solver authority, Workbench and C6 remain open"
     },
+    "mgt_import_health": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded MGT import-health C5 only: Rust owns bounded original bytes, strict UTF-8/BOM disposition, source SHA-256, section/row inventory and explicit mapped/preserved_only/dropped/unsupported diagnostics; the exact numeric frame/truss subset alone becomes canonical ModelIR and crosses the existing C++ semantic validator/snapshot through public import mgt, while four existing foundation fixtures remain honestly blocked where material/section/support/load data or shell support is absent; Python C1 raw-parser parity is frozen for all five fixtures, clean-environment artifacts are deterministic, and general MGT grammar, CP949, shell/load-combination/writeback, solver authority and C6 remain open"
+    },
     "track_point_load_cpu": {
       "status": "implemented",
       "cutover_gate": "C1",

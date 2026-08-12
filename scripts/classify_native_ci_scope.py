@@ -41,6 +41,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_dependency_licenses.py",
         "scripts/check_native_external_comparison.py",
         "scripts/check_native_job_service_api.py",
+        "scripts/check_native_mgt_import.py",
         "scripts/check_native_pdf_report.py",
         "scripts/check_native_product_e2e.py",
         "scripts/check_structural_runtime_ffi_r1.py",
@@ -54,6 +55,8 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_dependency_license.py",
         "tests/test_native_external_comparison_contract.py",
         "tests/test_native_job_service_api_contract.py",
+        "tests/test_native_mgt_import_contract.py",
+        "tests/test_native_mgt_import_health_python_parity.py",
         "tests/test_native_pdf_report_contract.py",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
         "tests/test_native_product_e2e_contract.py",
@@ -67,6 +70,8 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
 
 MODELIR_ORACLE_PREFIXES = (
     "src/structural_analysis/model_ir/",
+    "src/structural_analysis/io/midas/",
+    "tests/fixtures/foundation_realish/",
     "tests/fixtures/model_ir_v2/",
     "tests/native_oracles/",
 )
@@ -75,6 +80,7 @@ MODELIR_ORACLE_PATHS = frozenset(
         "src/structural_analysis/schemas/model_ir_v2.schema.json",
         "tests/test_model_ir_v2_contract.py",
         "tests/test_native_model_ir_rust_parity.py",
+        "tests/test_native_mgt_import_health_python_parity.py",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
         "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
@@ -152,6 +158,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         if path == "native/capabilities.json"
         or "model_ir" in path
         or "modelir" in path.lower()
+        or "mgt_import" in path.lower()
         or path.startswith("native/crates/structural-contracts/")
         or path.startswith("native/tests/fixtures/")
     ]
