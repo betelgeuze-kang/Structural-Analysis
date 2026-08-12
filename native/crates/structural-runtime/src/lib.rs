@@ -5,6 +5,7 @@
 mod checkpoint;
 mod job;
 mod model_checkpoint;
+mod spectral_checkpoint;
 
 use std::path::Path;
 
@@ -16,6 +17,7 @@ pub use job::{
 pub use model_checkpoint::{
     ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
 };
+pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
 use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
 };
@@ -25,12 +27,18 @@ use structural_contracts::product_ir::{
     NonlinearNdthaResultIrDocumentV1, NonlinearNdthaResultSummaryV1,
     NonlinearNdthaTerminalStatusV1, ProductIrContractError, ResultIdentityV1,
 };
+use structural_contracts::spectral_product::{
+    build_dense_spectral_result_ir_v1, dense_spectral_execution_hash_v1,
+    dense_spectral_model_hash_v1, DenseSpectralAnalysisRequestDocumentV1,
+    DenseSpectralAnalysisRequestV1, DenseSpectralResultIrDocumentV1, SpectralAnalysisKindV1,
+    SpectralGeneralizedEigenConfigV1, SpectralModeV1, SpectralResultSummaryV1,
+};
 use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
-    ModelIrNdthaAdaptedProblem, ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest,
-    ModelIrValidation, ModelIrValidationReport, NonlinearNdthaExecutionStatus,
-    NonlinearNdthaRestartState,
+    DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrNdthaAdaptedProblem,
+    ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
+    ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
 };
 
 /// Runtime-layer projection of an error returned by the native ABI.
@@ -73,6 +81,13 @@ pub struct NonlinearNdthaProductResultV1 {
     pub result_ir: NonlinearNdthaResultIrDocumentV1,
 }
 
+/// Terminal dense spectral result bound to its exact phase-boundary checkpoint.
+#[derive(Clone, Debug)]
+pub struct DenseSpectralProductResultV1 {
+    pub checkpoint: DenseSpectralCheckpointV1,
+    pub result_ir: DenseSpectralResultIrDocumentV1,
+}
+
 /// CPU-only runtime foundation connected to the native ABI table.
 pub struct Runtime {
     api: Api,
@@ -87,6 +102,79 @@ impl Runtime {
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
             api: Api::load_model_ir_ndtha_adapter().map_err(RuntimeError::from)?,
+        })
+    }
+
+    /// Create the canonical restart boundary after strict request validation and before solve.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for canonical identity, hash, or allocation failure.
+    pub fn checkpoint_dense_spectral(
+        request: &DenseSpectralAnalysisRequestDocumentV1,
+    ) -> Result<DenseSpectralCheckpointV1, RuntimeError> {
+        DenseSpectralCheckpointV1::create(request)
+    }
+
+    /// Verify a phase-boundary checkpoint against one exact spectral request.
+    ///
+    /// # Errors
+    ///
+    /// Returns checkpoint-mismatch semantics for corruption, noncanonical payload, or any
+    /// request/model/execution identity drift.
+    pub fn restore_dense_spectral(
+        request: &DenseSpectralAnalysisRequestDocumentV1,
+        bytes: &[u8],
+    ) -> Result<DenseSpectralCheckpointV1, RuntimeError> {
+        let checkpoint = DenseSpectralCheckpointV1::from_bytes(bytes)?;
+        checkpoint.verify_request(request)?;
+        Ok(checkpoint)
+    }
+
+    /// Execute one exact bounded modal/buckling request and construct deterministic `ResultIR`.
+    ///
+    /// The native dense eigensolve is atomic; the checkpoint is intentionally the restartable
+    /// boundary immediately before dispatch, not an invented mid-Jacobi state.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable runtime/ABI error for checkpoint drift, matrix-contract failure,
+    /// nonconvergence, residual failure, allocation, or result invariant failure.
+    pub fn execute_dense_spectral_product(
+        &self,
+        request: &DenseSpectralAnalysisRequestDocumentV1,
+        checkpoint_bytes: Option<&[u8]>,
+    ) -> Result<DenseSpectralProductResultV1, RuntimeError> {
+        let checkpoint = match checkpoint_bytes {
+            Some(bytes) => Self::restore_dense_spectral(request, bytes)?,
+            None => Self::checkpoint_dense_spectral(request)?,
+        };
+        let (summary, modes) = solve_dense_spectral(request.request())?;
+        let receipt = checkpoint.receipt();
+        let model_hash = dense_spectral_model_hash_v1(request)?;
+        let execution_hash = dense_spectral_execution_hash_v1(request)?;
+        if receipt.model_hash != model_hash || receipt.execution_hash != execution_hash {
+            return Err(RuntimeError {
+                code: 1301,
+                message: "spectral checkpoint receipt identity drifted before result projection"
+                    .to_owned(),
+            });
+        }
+        let result_ir = build_dense_spectral_result_ir_v1(
+            request,
+            ResultIdentityV1 {
+                request_hash: request.request_hash().to_owned(),
+                model_hash,
+                state_hash: receipt.state_hash,
+                execution_hash,
+                checkpoint_hash: receipt.checkpoint_hash,
+            },
+            summary,
+            modes,
+        )?;
+        Ok(DenseSpectralProductResultV1 {
+            checkpoint,
+            result_ir,
         })
     }
 
@@ -355,6 +443,173 @@ impl Runtime {
             result_ir,
         })
     }
+}
+
+type SpectralNativeOutput = (SpectralResultSummaryV1, Vec<SpectralModeV1>);
+
+fn solve_dense_spectral(
+    value: &DenseSpectralAnalysisRequestV1,
+) -> Result<SpectralNativeOutput, RuntimeError> {
+    let order = usize::try_from(value.order).map_err(|_| RuntimeError {
+        code: 1100,
+        message: "spectral request order exceeds the address space".to_owned(),
+    })?;
+    let stiffness = DenseSymmetricMatrix {
+        order,
+        values: value.stiffness.clone(),
+    };
+    let secondary = DenseSymmetricMatrix {
+        order,
+        values: value.secondary_matrix.clone(),
+    };
+    let config = generalized_eigen_config(&value.config);
+    let scale = if value.coordinate_recovery_scale.is_empty() {
+        None
+    } else {
+        Some(value.coordinate_recovery_scale.as_slice())
+    };
+    let api = Api::load_generalized_eigen().map_err(RuntimeError::from)?;
+    match value.analysis_kind {
+        SpectralAnalysisKindV1::Modal => project_modal_solution(
+            &api,
+            &stiffness,
+            &secondary,
+            scale,
+            config,
+            value.config.mode_count,
+        ),
+        SpectralAnalysisKindV1::LinearBuckling => project_buckling_solution(
+            &api,
+            &stiffness,
+            &secondary,
+            scale,
+            config,
+            value.config.mode_count,
+        ),
+    }
+}
+
+fn generalized_eigen_config(value: &SpectralGeneralizedEigenConfigV1) -> GeneralizedEigenConfig {
+    GeneralizedEigenConfig {
+        mode_count: value.mode_count,
+        maximum_sweeps: value.maximum_sweeps,
+        symmetry_relative_tolerance: value.symmetry_relative_tolerance,
+        positive_semidefinite_relative_tolerance: value.positive_semidefinite_relative_tolerance,
+        mode_relative_tolerance: value.mode_relative_tolerance,
+        cluster_relative_tolerance: value.cluster_relative_tolerance,
+        residual_relative_tolerance: value.residual_relative_tolerance,
+        orthogonality_tolerance: value.orthogonality_tolerance,
+        eigensolver_relative_tolerance: value.eigensolver_relative_tolerance,
+    }
+}
+
+fn project_modal_solution(
+    api: &Api,
+    stiffness: &DenseSymmetricMatrix,
+    mass: &DenseSymmetricMatrix,
+    scale: Option<&[f64]>,
+    config: GeneralizedEigenConfig,
+    mode_count: u32,
+) -> Result<SpectralNativeOutput, RuntimeError> {
+    let solution = api
+        .solve_modal_modes(stiffness, mass, scale, config)
+        .map_err(RuntimeError::from)?;
+    let modes = solution
+        .modes
+        .into_iter()
+        .map(|mode| {
+            Ok(SpectralModeV1::Modal {
+                eigenvalue_rad2_per_s2: mode.eigenvalue_rad2_per_s2,
+                omega_rad_per_s: mode.omega_rad_per_s,
+                frequency_hz: mode.frequency_hz,
+                period_s: mode.period_s,
+                max_component_normalized_shape: max_component_normalized(
+                    &mode.mass_normalized_shape,
+                )?,
+                mass_normalized_shape: mode.mass_normalized_shape,
+                generalized_mass: mode.generalized_mass,
+                generalized_stiffness: mode.generalized_stiffness,
+                residual_relative_inf: mode.residual_relative_inf,
+            })
+        })
+        .collect::<Result<Vec<_>, RuntimeError>>()?;
+    Ok((
+        SpectralResultSummaryV1 {
+            mode_count,
+            rigid_mode_count: solution.rigid_mode_count,
+            finite_positive_eigenvalue_count: 0,
+            geometric_stiffness_positive_rank: 0,
+            eigensolver_sweeps: solution.eigensolver_sweeps,
+            critical_load_factor: None,
+            metric_orthogonality_error_inf: solution.mass_orthogonality_error_inf,
+            operator_diagonalization_error_inf: solution.stiffness_diagonalization_error_inf,
+            stiffness_relative_symmetry_error: solution.stiffness_relative_symmetry_error,
+            secondary_relative_symmetry_error: solution.mass_relative_symmetry_error,
+            stiffness_minimum_eigenvalue: solution.stiffness_minimum_eigenvalue,
+            secondary_minimum_eigenvalue: solution.mass_minimum_eigenvalue,
+        },
+        modes,
+    ))
+}
+
+fn project_buckling_solution(
+    api: &Api,
+    stiffness: &DenseSymmetricMatrix,
+    geometric_stiffness: &DenseSymmetricMatrix,
+    scale: Option<&[f64]>,
+    config: GeneralizedEigenConfig,
+    mode_count: u32,
+) -> Result<SpectralNativeOutput, RuntimeError> {
+    let solution = api
+        .solve_linear_buckling(stiffness, geometric_stiffness, scale, config)
+        .map_err(RuntimeError::from)?;
+    let modes = solution
+        .modes
+        .into_iter()
+        .map(|mode| {
+            Ok(SpectralModeV1::LinearBuckling {
+                load_factor: mode.load_factor,
+                max_component_normalized_shape: max_component_normalized(
+                    &mode.stiffness_normalized_shape,
+                )?,
+                stiffness_normalized_shape: mode.stiffness_normalized_shape,
+                generalized_elastic_stiffness: mode.generalized_elastic_stiffness,
+                generalized_geometric_stiffness: mode.generalized_geometric_stiffness,
+                residual_relative_inf: mode.residual_relative_inf,
+            })
+        })
+        .collect::<Result<Vec<_>, RuntimeError>>()?;
+    Ok((
+        SpectralResultSummaryV1 {
+            mode_count,
+            rigid_mode_count: 0,
+            finite_positive_eigenvalue_count: solution.finite_positive_eigenvalue_count,
+            geometric_stiffness_positive_rank: solution.geometric_stiffness_positive_rank,
+            eigensolver_sweeps: solution.eigensolver_sweeps,
+            critical_load_factor: Some(solution.critical_load_factor),
+            metric_orthogonality_error_inf: solution.stiffness_orthogonality_error_inf,
+            operator_diagonalization_error_inf: solution.geometric_diagonalization_error_inf,
+            stiffness_relative_symmetry_error: solution.stiffness_relative_symmetry_error,
+            secondary_relative_symmetry_error: solution.geometric_stiffness_relative_symmetry_error,
+            stiffness_minimum_eigenvalue: solution.stiffness_minimum_eigenvalue,
+            secondary_minimum_eigenvalue: solution.geometric_stiffness_minimum_eigenvalue,
+        },
+        modes,
+    ))
+}
+
+fn max_component_normalized(values: &[f64]) -> Result<Vec<f64>, RuntimeError> {
+    let maximum = values
+        .iter()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max);
+    if !maximum.is_finite() || maximum <= 0.0 {
+        return Err(RuntimeError {
+            code: 1900,
+            message: "native spectral mode cannot be max-component normalized".to_owned(),
+        });
+    }
+    Ok(values.iter().map(|value| value / maximum).collect())
 }
 
 #[cfg(test)]

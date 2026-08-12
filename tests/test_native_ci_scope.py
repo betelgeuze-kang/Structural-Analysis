@@ -229,6 +229,23 @@ def test_generalized_eigen_hip_sources_route_through_protected_oracle_gates() ->
     assert payload["applicable"] is True
 
 
+def test_generalized_eigen_product_contract_routes_through_runtime_ci_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/crates/structural-runtime/src/spectral_checkpoint.rs",
+            "native/crates/structural-cli/tests/dense_spectral_product_cli.rs",
+            "scripts/check_native_generalized_eigen_product.py",
+            "tests/test_native_generalized_eigen_product_contract.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["rust"] is True
+    assert payload["runtime"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

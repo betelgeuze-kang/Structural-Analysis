@@ -159,6 +159,9 @@ Required jobs:
      crash reconciliation, checkpointed process restart and atomic artifact export
    - append-only event self-hash chain and content-addressed blob corruption fail closed; direct,
      restarted and exported core artifacts are byte-identical with Python/Node lookup removed
+   - bounded dense modal/linear-buckling strict request -> ABI v1.9 -> SAEIGC01 phase checkpoint
+     -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared eigen-run/eigen-resume byte
+     parity and explicit preservation of the open protected-runner C2 gate
 6. merge-product aggregate
    - latest exact-head and merge-ref only
 

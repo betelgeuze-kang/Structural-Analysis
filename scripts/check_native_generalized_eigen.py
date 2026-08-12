@@ -163,7 +163,8 @@ def check_native_generalized_eigen(repo_root: Path = ROOT) -> dict[str, object]:
             "through C1 plus an append-only ABI v1.9 and safe Rust C3 implementation "
             "candidate plus a bounded local HIP C2 candidate. Sparse extraction and "
             "protected-runner C2 remain open, so sequential promotion remains C1; restart "
-            "C4, product E2E C5 and C6 remain open."
+            "C4 and product E2E C5 now exist as separate bounded CPU implementation "
+            "capabilities, while C6 remains open."
         ),
     }
 

@@ -234,7 +234,8 @@ jobs:
             structural_nonlinear_static_abi_tests \
             structural_nonlinear_ndtha_abi_tests \
             structural_reference_elements_abi_tests \
-            structural_sparse_linear_abi_tests
+            structural_sparse_linear_abi_tests \
+            structural_generalized_eigen_abi_tests
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
@@ -650,6 +651,7 @@ jobs:
           python3 scripts/check_native_durable_jobs.py
           python3 scripts/check_native_job_service_api.py
           python3 scripts/check_native_external_comparison.py
+          python3 scripts/check_native_generalized_eigen_product.py
           python3 scripts/check_native_pdf_report.py
           cargo test --manifest-path native/Cargo.toml -p structural-runtime \
             --test durable_job --locked

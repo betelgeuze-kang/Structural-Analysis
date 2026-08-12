@@ -170,6 +170,20 @@ Output-directory publication is create-new and fail-closed; it never overwrites 
 The exact scope and remaining authority boundaries are in
 `docs/native/bounded-product-e2e-v1.md`.
 
+The bounded dense modal/linear-buckling product commands are:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis eigen-run spectral-request.json --output-dir eigen-run
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis eigen-resume spectral-request.json eigen-run/checkpoint.eigcp \
+  --output-dir eigen-resumed
+~~~
+
+The C4 artifact is an explicit validated-ready phase boundary because the native dense eigensolve
+is atomic. Direct and resumed C5 artifacts are byte-identical without Python or Node lookup. The
+generalized-eigen product document records the bounded authority and open protected HIP C2 gate.
+
 The exact-profile ModelIR analysis commands are:
 
 ~~~bash

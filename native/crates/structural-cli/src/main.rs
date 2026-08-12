@@ -6,10 +6,11 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use structural_cli::{
-    contract_error_report, execute_external_comparison, execute_model_ir_native_analysis,
-    execute_native_analysis, execute_native_mgt_import, execute_pdf_report,
-    publish_external_comparison, publish_model_ir_native_analysis, publish_native_analysis,
-    publish_native_mgt_import, publish_pdf_report, validate_model_bytes, validation_succeeds,
+    contract_error_report, execute_dense_spectral_analysis, execute_external_comparison,
+    execute_model_ir_native_analysis, execute_native_analysis, execute_native_mgt_import,
+    execute_pdf_report, publish_dense_spectral_analysis, publish_external_comparison,
+    publish_model_ir_native_analysis, publish_native_analysis, publish_native_mgt_import,
+    publish_pdf_report, validate_model_bytes, validation_succeeds,
 };
 
 mod job_cli;
@@ -21,6 +22,7 @@ const MAX_RESULT_IR_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_MODEL_IR_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
+const MAX_SPECTRAL_CHECKPOINT_BYTES: u64 = 5 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
 const MAX_EXTERNAL_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MGT_SOURCE_BYTES: u64 = 64 * 1024 * 1024;
@@ -43,6 +45,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     }
     if let Some(command) = parse_model_analysis_arguments(arguments) {
         return run_model_native_analysis(&command);
+    }
+    if let Some(command) = parse_spectral_analysis_arguments(arguments) {
+        return run_dense_spectral_analysis(&command);
     }
     if let Some(command) = parse_analysis_arguments(arguments) {
         return run_native_analysis(&command);
@@ -67,7 +72,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
@@ -207,6 +212,78 @@ struct ModelAnalysisCommand {
     checkpoint_path: Option<PathBuf>,
     output_directory: PathBuf,
     step_budget: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SpectralAnalysisCommand {
+    request_path: PathBuf,
+    checkpoint_path: Option<PathBuf>,
+    output_directory: PathBuf,
+}
+
+fn run_dense_spectral_analysis(command: &SpectralAnalysisCommand) -> ExitCode {
+    let Ok(request_bytes) =
+        read_bounded_regular_file(&command.request_path, MAX_MODEL_ANALYSIS_REQUEST_BYTES)
+    else {
+        return spectral_analysis_input_failure("request_read_error", "/request");
+    };
+    let checkpoint_bytes = if let Some(path) = command.checkpoint_path.as_ref() {
+        let Ok(bytes) = read_bounded_regular_file(path, MAX_SPECTRAL_CHECKPOINT_BYTES) else {
+            return spectral_analysis_input_failure("checkpoint_read_error", "/checkpoint");
+        };
+        Some(bytes)
+    } else {
+        None
+    };
+    let outcome = match execute_dense_spectral_analysis(&request_bytes, checkpoint_bytes.as_deref())
+    {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if matches!(
+                error,
+                structural_cli::DenseSpectralProductError::Contract(_)
+            ) {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-dense-spectral-analysis-failure.v1",
+                    "code": "dense_spectral_analysis_failed",
+                    "detail": error.to_string()
+                })
+            );
+            return ExitCode::from(exit);
+        }
+    };
+    if let Err(error) = publish_dense_spectral_analysis(&command.output_directory, &outcome) {
+        println!(
+            "{}",
+            json!({
+                "schema_version": "structural-dense-spectral-analysis-failure.v1",
+                "code": "dense_spectral_publish_failed",
+                "detail": error.to_string()
+            })
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    }
+    println!("{}", outcome.run_receipt_json());
+    ExitCode::SUCCESS
+}
+
+fn spectral_analysis_input_failure(code: &str, path: &str) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-dense-spectral-analysis-failure.v1",
+            "code": code,
+            "path": path,
+            "detail": "dense spectral analysis input could not be read"
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
 }
 
 fn run_model_native_analysis(command: &ModelAnalysisCommand) -> ExitCode {
@@ -755,6 +832,34 @@ fn parse_analysis_arguments(arguments: &[OsString]) -> Option<AnalysisCommand> {
     })
 }
 
+fn parse_spectral_analysis_arguments(arguments: &[OsString]) -> Option<SpectralAnalysisCommand> {
+    if arguments.len() < 5 || arguments[0] != "analysis" {
+        return None;
+    }
+    let (positional_count, checkpoint_index) = if arguments[1] == "eigen-run" {
+        (1_usize, None)
+    } else if arguments[1] == "eigen-resume" {
+        (2_usize, Some(3_usize))
+    } else {
+        return None;
+    };
+    let flag_start = 2 + positional_count;
+    if arguments.len() != flag_start + 2
+        || arguments[flag_start] != "--output-dir"
+        || arguments[2..flag_start]
+            .iter()
+            .any(|value| value.to_string_lossy().starts_with('-'))
+        || arguments[flag_start + 1].to_string_lossy().starts_with('-')
+    {
+        return None;
+    }
+    Some(SpectralAnalysisCommand {
+        request_path: PathBuf::from(&arguments[2]),
+        checkpoint_path: checkpoint_index.map(|position| PathBuf::from(&arguments[position])),
+        output_directory: PathBuf::from(&arguments[flag_start + 1]),
+    })
+}
+
 fn parse_model_analysis_arguments(arguments: &[OsString]) -> Option<ModelAnalysisCommand> {
     if arguments.len() < 6 || arguments[0] != "analysis" {
         return None;
@@ -813,9 +918,10 @@ fn parse_model_analysis_arguments(arguments: &[OsString]) -> Option<ModelAnalysi
 mod tests {
     use super::{
         parse_analysis_arguments, parse_comparison_arguments, parse_mgt_import_arguments,
-        parse_model_analysis_arguments, parse_pdf_report_arguments, parse_validate_arguments,
-        AnalysisCommand, ComparisonCommand, MgtImportCommand, ModelAnalysisCommand,
-        PdfReportCommand,
+        parse_model_analysis_arguments, parse_pdf_report_arguments,
+        parse_spectral_analysis_arguments, parse_validate_arguments, AnalysisCommand,
+        ComparisonCommand, MgtImportCommand, ModelAnalysisCommand, PdfReportCommand,
+        SpectralAnalysisCommand,
     };
     use std::ffi::OsString;
 
@@ -927,6 +1033,49 @@ mod tests {
             "request.json",
             "--step-budget",
             "0",
+            "--output-dir",
+            "out"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn spectral_arguments_separate_atomic_run_and_checkpoint_resume() {
+        assert_eq!(
+            parse_spectral_analysis_arguments(&args(&[
+                "analysis",
+                "eigen-run",
+                "modal.json",
+                "--output-dir",
+                "out"
+            ])),
+            Some(SpectralAnalysisCommand {
+                request_path: "modal.json".into(),
+                checkpoint_path: None,
+                output_directory: "out".into(),
+            })
+        );
+        assert_eq!(
+            parse_spectral_analysis_arguments(&args(&[
+                "analysis",
+                "eigen-resume",
+                "buckling.json",
+                "ready.eigcp",
+                "--output-dir",
+                "out"
+            ])),
+            Some(SpectralAnalysisCommand {
+                request_path: "buckling.json".into(),
+                checkpoint_path: Some("ready.eigcp".into()),
+                output_directory: "out".into(),
+            })
+        );
+        assert!(parse_spectral_analysis_arguments(&args(&[
+            "analysis",
+            "eigen-run",
+            "modal.json",
+            "--step-budget",
+            "1",
             "--output-dir",
             "out"
         ]))

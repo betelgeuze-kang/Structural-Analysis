@@ -48,6 +48,8 @@ requires the same source SHA from `.github/workflows/native-hip-dedicated.yml` i
 ## Remaining boundary
 
 This candidate does not implement sparse extraction, Lanczos/subspace iteration, whole-model
-modal/buckling assembly, checkpoint/restart C4, product E2E C5, or Python/Node decommission C6.
-ABI v1.9 and its Rust wrapper remain C3 implementation evidence, but sequential capability
-promotion stays C1 until the protected C2 receipt is available.
+modal/buckling assembly or Python/Node decommission C6. Separate bounded CPU implementations now
+provide the honest pre-dispatch C4 phase checkpoint and C5 eigen-run/eigen-resume product path;
+the HIP candidate neither proves nor inherits those gates. ABI v1.9 and its Rust wrapper remain
+C3 implementation evidence, but sequential numerical capability promotion stays C1 until the
+protected C2 receipt is available.

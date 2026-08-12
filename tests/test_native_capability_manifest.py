@@ -88,6 +88,26 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "ABI C3" in generalized["claim"]
     assert "fallback 0" in generalized["claim"]
     assert "C6" in generalized["claim"]
+    assert capabilities.capability_is_enabled(
+        payload, "generalized_eigen_checkpoint"
+    ) is True
+    generalized_checkpoint = payload["capabilities"]["generalized_eigen_checkpoint"]
+    assert generalized_checkpoint["cutover_gate"] == "C4"
+    assert generalized_checkpoint["owner"] == "structural-runtime"
+    assert "SAEIGC01" in generalized_checkpoint["claim"]
+    assert "mid-Jacobi" in generalized_checkpoint["claim"]
+    assert "HIP C2" in generalized_checkpoint["claim"]
+    assert "C6" in generalized_checkpoint["claim"]
+    assert capabilities.capability_is_enabled(
+        payload, "generalized_eigen_product_e2e"
+    ) is True
+    generalized_product = payload["capabilities"]["generalized_eigen_product_e2e"]
+    assert generalized_product["cutover_gate"] == "C5"
+    assert generalized_product["owner"] == "structural-cli"
+    assert "ResultIR, ReportIR" in generalized_product["claim"]
+    assert "no Python or Node" in generalized_product["claim"]
+    assert "HIP C2" in generalized_product["claim"]
+    assert "C6" in generalized_product["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

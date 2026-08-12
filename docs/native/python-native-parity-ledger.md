@@ -207,8 +207,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   match, eigensolve/canonicalization/result recovery stay resident, maximum relative eigenvalue
   error is `1.3706125276112035e-16`, and fallback remains zero. It is explicitly a single-thread
   dense reference profile, not a sparse performance claim. Protected-runner C2 remains open, so
-  the capability remains C1; checkpoint C4, product C5 and C6 also remain open, and Python remains
-  the broader modal/buckling oracle and rollback owner.
+  the numerical capability remains C1. Separate bounded CPU implementation slices now cover C4
+  and C5 without bypassing that sequence: SAEIGC01 binds exact request/model/ready-state/execution
+  identities at the honest pre-dispatch phase boundary, and public eigen-run/eigen-resume produce
+  self-hashed ResultIR/ReportIR/Markdown/receipt artifacts that are byte-identical in an
+  environment with Python/Node lookup removed. Sparse/ModelIR adaptation, spectral durable jobs,
+  protected C2 and C6 remain open, and Python remains the broader modal/buckling oracle and
+  rollback owner.
 
 ### D5. Durable Job API and process lifecycle
 

@@ -24,6 +24,8 @@ EXPECTED_OWNERS = {
     "dense_assembly_cpu": "structural_assembly",
     "sparse_linear_solver_cpu": "structural_solver_cpu",
     "generalized_eigen_solver_cpu": "structural_solver_cpu",
+    "generalized_eigen_checkpoint": "structural-runtime",
+    "generalized_eigen_product_e2e": "structural-cli",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",

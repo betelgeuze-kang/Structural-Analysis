@@ -43,9 +43,18 @@ eigensolver authority.
   Rust layout tests, safe parity/taxonomy tests, concurrent bitwise-repeat tests and installed C11
   package consumption cover this integration. Because protected-runner C2 remains open, this
   implementation does not advance the sequential capability beyond C1.
-- C4: open. Eigen execution/checkpoint identity and restart are not implemented.
-- C5: open. No public CLI/API/Workbench ResultIR/ReportIR path consumes this solver yet.
+- C4 bounded CPU implementation: a canonical SAEIGC01 artifact binds the exact strict request,
+  model, validated-ready state, execution configuration and aggregate checkpoint identities. The
+  native solve is atomic, so this is an honest pre-dispatch phase boundary rather than an
+  invented mid-Jacobi state. Every byte mutation and request drift fails closed.
+- C5 bounded CPU implementation: public eigen-run/eigen-resume commands emit canonical
+  self-hashed ResultIR/ReportIR, deterministic Markdown, the phase checkpoint and an atomic
+  receipt. Modal and buckling direct/resume directories are byte-identical with Python/Node
+  lookup removed. This separately tracked product capability does not bypass the open protected
+  C2 gate or broaden the C1 numerical scope.
 - C6: open. Python remains the oracle and rollback authority; nothing is decommissioned.
 
 The current sequential promotion is therefore C1 only; the local HIP work and v1.9/Rust work are
-retained as C2/C3 implementation candidates behind the protected-runner C2 gate.
+retained as C2/C3 implementation candidates behind the protected-runner C2 gate. The exact
+C4/C5 product contract and remaining boundaries are documented in
+docs/native/generalized-eigen-product-e2e-v1.md.

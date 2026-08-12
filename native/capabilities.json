@@ -65,7 +65,19 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded dense symmetric FP64 C++20 modal and linear-buckling C1 reference only: strict positive-definite/semidefinite matrix contracts, deterministic cyclic-Jacobi decomposition, rigid/infinite-mode filtering, complete-cluster selection, coordinate-axis canonical mode bases, mass/stiffness normalization, residual/orthogonality gates and fallback 0 cover six profiles against an independent SciPy generalized-eigen oracle; a product-owned bounded single-thread HIP C2 candidate covers eight modal/buckling profiles with bitwise repeats, resident eigensolve/canonicalization/result recovery, local live maximum relative eigenvalue error 1.3706125276112035e-16 and fallback 0; append-only ABI v1.9 and a safe reentrant Rust wrapper implement the ABI C3 integration candidate, but the sequential gate remains C1 until the native-hip-approved protected-runner C2 receipt exists; sparse/subspace extraction, checkpoint C4, product E2E C5 and C6 remain open"
+      "claim": "bounded dense symmetric FP64 C++20 modal and linear-buckling C1 reference only: strict positive-definite/semidefinite matrix contracts, deterministic cyclic-Jacobi decomposition, rigid/infinite-mode filtering, complete-cluster selection, coordinate-axis canonical mode bases, mass/stiffness normalization, residual/orthogonality gates and fallback 0 cover six profiles against an independent SciPy generalized-eigen oracle; a product-owned bounded single-thread HIP C2 candidate covers eight modal/buckling profiles with bitwise repeats, resident eigensolve/canonicalization/result recovery, local live maximum relative eigenvalue error 1.3706125276112035e-16 and fallback 0; append-only ABI v1.9 and a safe reentrant Rust wrapper implement the ABI C3 integration candidate, but the sequential gate remains C1 until the native-hip-approved protected-runner C2 receipt exists; sparse/subspace extraction and C6 remain open, while the CPU phase-boundary checkpoint and public CLI are tracked as separate bounded C4/C5 implementation capabilities without promoting this numerical family past C1"
+    },
+    "generalized_eigen_checkpoint": {
+      "status": "implemented",
+      "cutover_gate": "C4",
+      "owner": "structural-runtime",
+      "claim": "bounded dense CPU modal/linear-buckling phase-boundary checkpoint C4 implementation only: a canonical pointer-free SAEIGC01 artifact binds the exact strict request plus model, ready-state, execution and aggregate checkpoint SHA-256 identities, rejects every single-byte mutation and request drift with checkpoint-mismatch taxonomy, and resumes to byte-identical ResultIR; the atomic eigensolve exposes no honest mid-Jacobi state, so this boundary is validated-ready-before-dispatch rather than an invented iterative snapshot; protected-runner HIP C2, durable queued-job integration, sparse whole-model authority and C6 remain open"
+    },
+    "generalized_eigen_product_e2e": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded dense CPU modal/linear-buckling product E2E C5 implementation only: strict Rust request parsing crosses ABI v1.9 C++ execution and the exact C4 phase checkpoint, then emits self-hashed ResultIR, ReportIR, deterministic Markdown and an atomic run receipt through public eigen-run/eigen-resume commands; modal and buckling direct/resume artifact directories are byte-identical in a clean environment with no Python or Node lookup and fallback 0; protected-runner HIP C2, ModelIR/sparse assembly adaptation, durable service jobs, engineering acceptance, PDF rendering for this profile and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",

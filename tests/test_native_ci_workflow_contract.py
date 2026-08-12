@@ -99,6 +99,7 @@ def test_native_rust_gate_freezes_r3_product_and_legacy_runtime_exports() -> Non
     assert "structural_nonlinear_static_abi_tests" in workflow
     assert "structural_nonlinear_ndtha_abi_tests" in workflow
     assert "structural_reference_elements_abi_tests" in workflow
+    assert "structural_generalized_eigen_abi_tests" in workflow
     assert 'payload["abi_version"] == "0x00010009"' in workflow
 
 
@@ -126,6 +127,7 @@ def test_merge_oracle_gate_runs_all_native_solver_python_c1_matrices() -> None:
     assert "tests/test_native_sparse_linear_python_parity.py" in workflow
     assert "tests/test_native_generalized_eigen_python_parity.py" in workflow
     assert "check_native_generalized_eigen.py" in workflow
+    assert "check_native_generalized_eigen_product.py" in workflow
     assert "structural_sparse_linear_abi_tests" in workflow
 
 

@@ -302,7 +302,8 @@ def check_native_generalized_eigen_hip(
             "buckling HIP C2 candidate. Authoritative C2 additionally requires the "
             "protected native-hip-approved self-hosted workflow context. The current "
             "single-thread reference profile is not a sparse production eigensolver "
-            "and does not close restart, whole-model product E2E, or C6."
+            "and does not itself promote the separate bounded CPU C4/C5 paths, close "
+            "whole-model product E2E, or decommission C6."
         ),
     }
 
