@@ -181,6 +181,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   taxonomy. Broader record/material coverage and HIP C2 remain open. A separate bounded CPU
   checkpoint capability is C4 and one tracked request-to-ResultIR/ReportIR CLI profile is C5;
   neither promotion expands this solver family's C1 numerical authority.
+- A bounded canonical-CSR sparse linear reference family is C1. C++20 owns strict CSR and symmetry
+  validation, deterministic Jacobi-PCG, a true-residual postcheck, fallback zero and fixed
+  singularity/indefinite/nonconvergence/increment/residual taxonomy. Four SPD profiles—including
+  irregular topology and a `4e12` diagonal condition ratio—match an independent NumPy direct
+  solve, with malformed/asymmetric/failure paths covered at C0. General sparse/direct/indefinite
+  solvers, ABI/Rust C3, checkpoint C4, product C5, HIP C2 and C6 remain open.
 
 ### D5. Durable Job API and process lifecycle
 

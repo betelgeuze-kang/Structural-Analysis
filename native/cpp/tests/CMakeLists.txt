@@ -136,6 +136,21 @@ set_tests_properties(
   PROPERTIES LABELS "solver_cpu;nonlinear_ndtha"
 )
 
+add_executable(structural_sparse_linear_cpu_tests solver_cpu/sparse_linear_test.cpp)
+target_include_directories(
+  structural_sparse_linear_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/solver_cpu
+)
+target_link_libraries(structural_sparse_linear_cpu_tests PRIVATE structural_solver_cpu)
+structural_set_warnings(structural_sparse_linear_cpu_tests)
+structural_enable_sanitizers(structural_sparse_linear_cpu_tests)
+add_test(NAME structural_sparse_linear_cpu_tests COMMAND structural_sparse_linear_cpu_tests)
+set_tests_properties(
+  structural_sparse_linear_cpu_tests
+  PROPERTIES LABELS "solver_cpu;sparse_linear"
+)
+
 add_executable(structural_materials_cpu_tests materials/materials_test.cpp)
 target_include_directories(
   structural_materials_cpu_tests

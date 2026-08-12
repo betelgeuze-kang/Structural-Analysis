@@ -81,6 +81,12 @@ metrics, deterministic repetition and fallback zero. Local hardware execution is
 the manifest remains at C1 until the protected `native-hip-approved` dedicated workflow emits an
 authoritative receipt. See `docs/native/reference-elements-hip-c2.md`.
 
+`structural_solver_cpu` also owns a bounded canonical-CSR FP64 PCG reference path. It validates
+strict row/column structure and symmetry, uses a Jacobi preconditioner, reports fixed numerical
+status values, performs a true-residual convergence postcheck and never falls back. Four profiles
+match an independent NumPy direct-solve oracle through C1; ABI/Rust C3, restart C4, product C5,
+HIP C2 and C6 remain open. See `docs/native/sparse-linear-cpu-v1.md`.
+
 ## Rust
 
 ~~~bash

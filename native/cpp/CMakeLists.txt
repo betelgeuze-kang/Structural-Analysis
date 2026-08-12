@@ -189,6 +189,7 @@ add_library(
   src/solver_cpu/story_frame.cpp
   src/solver_cpu/nonlinear_ndtha.cpp
   src/solver_cpu/nonlinear_static.cpp
+  src/solver_cpu/sparse_linear.cpp
   src/solver_cpu/track_point_load.cpp
 )
 add_library(Structural::solver_cpu ALIAS structural_solver_cpu)

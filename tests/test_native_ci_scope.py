@@ -154,6 +154,23 @@ def test_reference_hip_sources_route_through_dedicated_hip_and_oracle_gates() ->
     assert payload["applicable"] is True
 
 
+def test_sparse_linear_sources_route_through_cpp_and_oracle_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/cpp/src/solver_cpu/sparse_linear.cpp",
+            "native/cpp/tests/solver_cpu/sparse_linear_test.cpp",
+            "tests/test_native_sparse_linear_python_parity.py",
+            "scripts/check_native_sparse_linear.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["cpp"] is True
+    assert payload["oracle"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_legacy_runtime_compatibility_member_routes_through_rust_runtime_gates() -> None:
     payload = scope.classify_paths(
         ["implementation/phase1/structural_runtime_ffi/src/lib.rs"]

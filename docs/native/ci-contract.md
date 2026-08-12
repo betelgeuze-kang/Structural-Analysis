@@ -59,6 +59,8 @@ Jobs:
      all 11 response channels, adaptive/collapse taxonomy and frozen legacy config/input check
    - reference material/element/dense-assembly independent NumPy oracle over every tangent, mass,
      residual, JVP and recovery value
+   - canonical-CSR sparse PCG C0 taxonomy and four-profile independent NumPy direct-solve C1
+     parity, including asymmetric/malformed input rejection and fallback zero
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality

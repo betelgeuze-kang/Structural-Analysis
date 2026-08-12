@@ -1,0 +1,77 @@
+#ifndef STRUCTURAL_SOLVER_CPU_SPARSE_LINEAR_HPP
+#define STRUCTURAL_SOLVER_CPU_SPARSE_LINEAR_HPP
+
+#include <cstddef>
+#include <cstdint>
+#include <span>
+#include <vector>
+
+namespace structural::solver_cpu {
+
+/// Stable numerical outcome taxonomy shared by the bounded sparse solver families.
+enum class SolverStatus : std::uint32_t {
+    converged = 0U,
+    invalid_input = 1U,
+    singularity = 2U,
+    indefinite_operator = 3U,
+    nonconvergence = 4U,
+    increment_limit = 5U,
+    residual_limit = 6U,
+    cancelled = 7U,
+    checkpoint_mismatch = 8U,
+    backend_unavailable = 9U,
+};
+
+/// Caller-owned canonical CSR view. Rows must contain strictly increasing column indices.
+struct CsrMatrixView {
+    std::size_t order;
+    std::span<const std::uint64_t> row_offsets;
+    std::span<const std::uint32_t> column_indices;
+    std::span<const double> values;
+};
+
+struct SparseLinearConfig {
+    std::uint32_t max_iterations;
+    double absolute_residual_tolerance;
+    double relative_residual_tolerance;
+    /// Zero disables the guard. A positive value rejects an iteration before it is published.
+    double maximum_increment;
+};
+
+struct SparseLinearResult {
+    SolverStatus status;
+    std::vector<double> solution;
+    std::uint32_t iterations;
+    double initial_residual_inf;
+    double final_residual_inf;
+    double final_residual_l2;
+    double last_increment_inf;
+    std::uint32_t fallback_count;
+};
+
+/// Validate dimensions, bounds, finite values and canonical per-row ordering.
+///
+/// Structural input failures throw `std::invalid_argument`; numerical solver outcomes are returned
+/// through `SolverStatus` so later ABI layers can map them without parsing exception text.
+void validate_canonical_csr(CsrMatrixView matrix);
+
+/// Deterministic serial FP64 CSR matrix-vector product.
+void csr_matvec(
+    CsrMatrixView matrix,
+    std::span<const double> input,
+    std::span<double> output);
+
+/// Solve a symmetric positive-definite canonical CSR system using Jacobi-preconditioned CG.
+///
+/// The operation has no fallback path. `initial_guess` may be empty (all-zero) or exactly `order`
+/// values. Invalid input throws before a result is returned; numerical failure returns the last
+/// fully published iterate with a stable status.
+[[nodiscard]] SparseLinearResult solve_sparse_spd_pcg(
+    CsrMatrixView matrix,
+    std::span<const double> right_hand_side,
+    std::span<const double> initial_guess,
+    const SparseLinearConfig& config);
+
+}  // namespace structural::solver_cpu
+
+#endif

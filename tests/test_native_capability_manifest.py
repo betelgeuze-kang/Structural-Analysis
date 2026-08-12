@@ -61,6 +61,15 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "unique stable element order" in assembly["claim"]
     assert "CSR" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
+    assert capabilities.capability_is_enabled(payload, "sparse_linear_solver_cpu") is True
+    sparse = payload["capabilities"]["sparse_linear_solver_cpu"]
+    assert sparse["cutover_gate"] == "C1"
+    assert sparse["owner"] == "structural_solver_cpu"
+    assert "canonical CSR" in sparse["claim"]
+    assert "independent NumPy direct-solve oracle" in sparse["claim"]
+    assert "ABI/Rust C3" in sparse["claim"]
+    assert "HIP C2" in sparse["claim"]
+    assert "C6" in sparse["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
