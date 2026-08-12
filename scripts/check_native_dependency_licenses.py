@@ -15,6 +15,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_POLICY = Path("native/dependency-policy.json")
 SPDX_OPERATORS = frozenset({"AND", "OR", "WITH"})
 SPDX_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+-]*")
+SPDX_EXPRESSION_TOKEN_RE = re.compile(
+    r"\(|\)|/|[A-Za-z0-9][A-Za-z0-9.+-]*"
+)
+RUST_VERSION_RE = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?(?:[-+].*)?$")
 ALLOWED_REGISTRY_SOURCES = frozenset(
     {
         "registry+https://github.com/rust-lang/crates.io-index",
@@ -38,6 +42,89 @@ def _license_ids(expression: str) -> set[str]:
     }
 
 
+def _license_expression_allowed(expression: str, allowed_ids: set[str]) -> bool:
+    """Evaluate the bounded SPDX AND/OR/WITH grammar against an allowlist."""
+
+    tokens = SPDX_EXPRESSION_TOKEN_RE.findall(expression)
+    remainder = SPDX_EXPRESSION_TOKEN_RE.sub("", expression)
+    if not tokens or remainder.strip():
+        return False
+    position = 0
+
+    def parse_primary() -> bool:
+        nonlocal position
+        if position >= len(tokens):
+            raise ValueError("unexpected end of SPDX expression")
+        token = tokens[position]
+        if token == "(":
+            position += 1
+            value = parse_or()
+            if position >= len(tokens) or tokens[position] != ")":
+                raise ValueError("unbalanced SPDX expression")
+            position += 1
+            return value
+        if token in {"AND", "OR", "WITH", ")", "/"}:
+            raise ValueError("unexpected SPDX operator")
+        position += 1
+        return token in allowed_ids
+
+    def parse_with() -> bool:
+        nonlocal position
+        value = parse_primary()
+        while position < len(tokens) and tokens[position] == "WITH":
+            position += 1
+            value = parse_primary() and value
+        return value
+
+    def parse_and() -> bool:
+        nonlocal position
+        value = parse_with()
+        while position < len(tokens) and tokens[position] == "AND":
+            position += 1
+            value = parse_with() and value
+        return value
+
+    def parse_or() -> bool:
+        nonlocal position
+        value = parse_and()
+        while position < len(tokens) and tokens[position] in {"OR", "/"}:
+            position += 1
+            value = parse_and() or value
+        return value
+
+    try:
+        result = parse_or()
+    except ValueError:
+        return False
+    return result and position == len(tokens)
+
+
+def _rust_version_key(value: str) -> tuple[int, int, int] | None:
+    match = RUST_VERSION_RE.fullmatch(value.strip())
+    if match is None:
+        return None
+    return tuple(int(part or 0) for part in match.groups())
+
+
+def _validate_policy(policy: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    if policy.get("schema_version") != "native-dependency-policy.v1":
+        blockers.append("native_dependency_policy_schema_version_invalid")
+    maximum = str(policy.get("maximum_rust_version", "")).strip()
+    if not maximum:
+        blockers.append("native_dependency_policy_maximum_rust_version_missing")
+    elif _rust_version_key(maximum) is None:
+        blockers.append(
+            f"native_dependency_policy_maximum_rust_version_invalid:{maximum}"
+        )
+    allowed = policy.get("allowed_license_ids")
+    if not isinstance(allowed, list) or not allowed:
+        blockers.append("native_dependency_policy_license_allowlist_invalid")
+    if not isinstance(policy.get("exceptions"), list):
+        blockers.append("native_dependency_policy_exceptions_invalid")
+    return blockers
+
+
 def evaluate_metadata(
     metadata: dict[str, Any],
     policy: dict[str, Any],
@@ -45,6 +132,8 @@ def evaluate_metadata(
     allowed_licenses = {
         str(value) for value in policy.get("allowed_license_ids", []) if str(value)
     }
+    maximum_rust_version = str(policy.get("maximum_rust_version", "")).strip()
+    maximum_rust_key = _rust_version_key(maximum_rust_version)
     exceptions = {
         str(row.get("package", "")): row
         for row in policy.get("exceptions", [])
@@ -61,6 +150,8 @@ def evaluate_metadata(
         package_id = f"{name}@{version}"
         source = package.get("source")
         license_expression = str(package.get("license") or "").strip()
+        rust_version = str(package.get("rust_version") or "").strip()
+        rust_version_key = _rust_version_key(rust_version) if rust_version else None
         exception = exceptions.get(package_id)
         external = source is not None
         license_ids = sorted(_license_ids(license_expression))
@@ -71,8 +162,15 @@ def evaluate_metadata(
         )
         license_allowed = (
             not external
-            or bool(license_ids and set(license_ids) <= allowed_licenses)
+            or _license_expression_allowed(license_expression, allowed_licenses)
             or bool(exception and exception.get("allow_license") is True)
+        )
+        msrv_allowed = (
+            not external
+            or maximum_rust_key is None
+            or rust_version_key is None
+            or rust_version_key <= maximum_rust_key
+            or bool(exception and exception.get("allow_msrv") is True)
         )
         if external and not license_expression:
             blockers.append(f"dependency_license_missing:{package_id}")
@@ -82,6 +180,11 @@ def evaluate_metadata(
             )
         if external and not source_allowed:
             blockers.append(f"dependency_source_not_allowed:{package_id}:{source}")
+        if external and not msrv_allowed:
+            blockers.append(
+                "dependency_msrv_exceeds_workspace:"
+                f"{package_id}:{rust_version}>{maximum_rust_version}"
+            )
         rows.append(
             {
                 "package": package_id,
@@ -91,6 +194,8 @@ def evaluate_metadata(
                 "license": license_expression,
                 "license_ids": license_ids,
                 "license_allowed": license_allowed,
+                "rust_version": rust_version or None,
+                "msrv_allowed": msrv_allowed,
                 "exception": exception is not None,
             }
         )
@@ -119,6 +224,13 @@ def check_dependency_licenses(
         return _report(
             rows=[],
             blockers=[f"native_dependency_policy_invalid:{exc}"],
+            workspace_present=True,
+        )
+    policy_blockers = _validate_policy(policy)
+    if policy_blockers:
+        return _report(
+            rows=[],
+            blockers=policy_blockers,
             workspace_present=True,
         )
 

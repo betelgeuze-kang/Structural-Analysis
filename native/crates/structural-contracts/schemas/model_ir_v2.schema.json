@@ -1,0 +1,830 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/model_ir_v2.schema.json",
+  "title": "Structural Analysis ModelIR v2",
+  "description": "Backend-neutral, fail-closed structural model contract for Engine v2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "model_id",
+    "capability_profile",
+    "provenance",
+    "units",
+    "coordinate_system",
+    "dof_components",
+    "nodes",
+    "materials",
+    "sections",
+    "elements",
+    "constraints",
+    "load_patterns",
+    "load_combinations",
+    "time_functions",
+    "construction_stages",
+    "roundtrip_map",
+    "unsupported_features",
+    "extensions"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-model-ir.v2"},
+    "model_id": {"$ref": "#/$defs/stableId"},
+    "capability_profile": {
+      "enum": [
+        "engine_v2_phase0_linear_3d",
+        "bounded_planar_frame_alpha",
+        "planar_frame_verified_alpha.v1",
+        "bounded_frame3d_direct_displacement_control"
+      ]
+    },
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "units": {"$ref": "#/$defs/canonicalUnits"},
+    "coordinate_system": {"$ref": "#/$defs/coordinateSystem"},
+    "dof_components": {"const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/node"}
+    },
+    "materials": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/material"}
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/section"}
+    },
+    "elements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/element"}
+    },
+    "constraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/fixedDofConstraint"}
+    },
+    "load_patterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/loadPattern"}
+    },
+    "load_combinations": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/loadCombination"}
+    },
+    "time_functions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/timeFunction"}
+    },
+    "construction_stages": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/constructionStage"}
+    },
+    "roundtrip_map": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/roundtripRow"}
+    },
+    "unsupported_features": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/unsupportedFeature"}
+    },
+    "extensions": {"$ref": "#/$defs/extensions"}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {"const": "engine_v2_phase0_linear_3d"}
+        }
+      },
+      "then": {
+        "properties": {
+          "materials": {
+            "items": {"$ref": "#/$defs/linearMaterial"}
+          },
+          "sections": {
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/frameSection"},
+                {"$ref": "#/$defs/trussSection"}
+              ]
+            }
+          },
+          "elements": {
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/frameElement"},
+                {"$ref": "#/$defs/trussElement"}
+              ]
+            }
+          },
+          "load_patterns": {
+            "items": {"$ref": "#/$defs/linearLoadPattern"}
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {
+            "enum": [
+              "bounded_planar_frame_alpha",
+              "planar_frame_verified_alpha.v1"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "nodes": {"minItems": 2, "maxItems": 128},
+          "materials": {
+            "minItems": 2,
+            "items": {
+              "oneOf": [
+                {"$ref": "#/$defs/bilinearSteelMaterial"},
+                {"$ref": "#/$defs/asymmetricConcreteMaterial"}
+              ]
+            }
+          },
+          "sections": {
+            "items": {"$ref": "#/$defs/rectangularRcFiberSection"}
+          },
+          "elements": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/corotationalRcFiberFrame2dElement"}
+          },
+          "load_patterns": {
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {"$ref": "#/$defs/nonlinearLoadPattern"}
+          },
+          "load_combinations": {"maxItems": 0},
+          "time_functions": {"maxItems": 0},
+          "construction_stages": {"maxItems": 0},
+          "unsupported_features": {"maxItems": 0}
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "capability_profile": {
+            "const": "bounded_frame3d_direct_displacement_control"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "nodes": {"minItems": 2, "maxItems": 128},
+          "materials": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/bilinearSteelMaterial"}
+          },
+          "sections": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/frameSection"}
+          },
+          "elements": {
+            "minItems": 1,
+            "maxItems": 256,
+            "items": {"$ref": "#/$defs/statefulCorotationalFrame3dElement"}
+          },
+          "load_patterns": {
+            "minItems": 1,
+            "maxItems": 1,
+            "items": {"$ref": "#/$defs/directDisplacementControlLoadPattern"}
+          },
+          "load_combinations": {"maxItems": 0},
+          "time_functions": {"maxItems": 0},
+          "construction_stages": {"maxItems": 0},
+          "unsupported_features": {"maxItems": 0}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nonNegativeIndex": {"type": "integer", "minimum": 0},
+    "positiveNumber": {"type": "number", "exclusiveMinimum": 0},
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number"}
+    },
+    "dof": {
+      "enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_.-]*:[A-Za-z0-9_.-]+$"
+      },
+      "additionalProperties": true
+    },
+    "sourceUnits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length", "force", "mass", "time", "rotation"],
+      "properties": {
+        "length": {"enum": ["m", "mm", "cm", "ft", "in"]},
+        "force": {"enum": ["N", "kN", "MN", "lbf", "kip"]},
+        "mass": {"enum": ["kg", "tonne", "slug"]},
+        "time": {"enum": ["s"]},
+        "rotation": {"enum": ["rad", "deg"]}
+      }
+    },
+    "unitScales": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length_to_m", "force_to_n", "mass_to_kg", "time_to_s", "rotation_to_rad"],
+      "properties": {
+        "length_to_m": {"$ref": "#/$defs/positiveNumber"},
+        "force_to_n": {"$ref": "#/$defs/positiveNumber"},
+        "mass_to_kg": {"$ref": "#/$defs/positiveNumber"},
+        "time_to_s": {"$ref": "#/$defs/positiveNumber"},
+        "rotation_to_rad": {"$ref": "#/$defs/positiveNumber"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_format",
+        "source_ref",
+        "source_sha256",
+        "normalizer_id",
+        "normalizer_version",
+        "source_units",
+        "unit_scales_to_si"
+      ],
+      "properties": {
+        "source_format": {
+          "enum": ["neutral_json", "midas_mgt", "ifc", "opensees", "etabs_e2k", "dxf", "generated"]
+        },
+        "source_ref": {"type": "string", "minLength": 1},
+        "source_sha256": {"$ref": "#/$defs/sha256"},
+        "normalizer_id": {"$ref": "#/$defs/stableId"},
+        "normalizer_version": {"type": "string", "minLength": 1},
+        "source_units": {"$ref": "#/$defs/sourceUnits"},
+        "unit_scales_to_si": {"$ref": "#/$defs/unitScales"},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "canonicalUnits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length", "force", "mass", "time", "rotation"],
+      "properties": {
+        "length": {"const": "m"},
+        "force": {"const": "N"},
+        "mass": {"const": "kg"},
+        "time": {"const": "s"},
+        "rotation": {"const": "rad"}
+      }
+    },
+    "coordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frame_id", "axis_order", "up_axis", "handedness", "origin_m"],
+      "properties": {
+        "frame_id": {"const": "global"},
+        "axis_order": {"const": ["X", "Y", "Z"]},
+        "up_axis": {"const": "Z"},
+        "handedness": {"const": "right"},
+        "origin_m": {"$ref": "#/$defs/vector3"}
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "coordinates_m", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "coordinates_m": {"$ref": "#/$defs/vector3"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "linearMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "linear_elastic_isotropic"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elastic_modulus_pa", "poisson_ratio", "density_kg_m3"],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "poisson_ratio": {"type": "number", "exclusiveMinimum": -1, "exclusiveMaximum": 0.5},
+            "density_kg_m3": {"type": "number", "minimum": 0}
+          }
+        },
+        "state_schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stateful", "state_update_epoch", "supports_trial_commit_rollback"],
+          "properties": {
+            "stateful": {"const": false},
+            "state_update_epoch": {"const": "none"},
+            "supports_trial_commit_rollback": {"const": true}
+          }
+        },
+        "admissibility": {"$ref": "#/$defs/materialAdmissibility"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "bilinearSteelMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "bilinear_combined_hardening_steel"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elastic_modulus_pa", "yield_stress_pa", "isotropic_hardening_modulus_pa", "kinematic_hardening_modulus_pa", "yield_tolerance_pa"],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "shear_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "yield_stress_pa": {"$ref": "#/$defs/positiveNumber"},
+            "isotropic_hardening_modulus_pa": {"type": "number", "minimum": 0},
+            "kinematic_hardening_modulus_pa": {"type": "number", "minimum": 0},
+            "yield_tolerance_pa": {"type": "number", "minimum": 0}
+          }
+        },
+        "state_schema": {"$ref": "#/$defs/nonlinearMaterialStateSchema"},
+        "admissibility": {"$ref": "#/$defs/materialAdmissibility"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "asymmetricConcreteMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "law_id", "parameter_set_version", "parameters", "state_schema", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "law_id": {"const": "asymmetric_concrete_damage"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["elastic_modulus_pa", "tensile_strength_pa", "compressive_strength_pa", "tensile_softening_rate", "compressive_softening_rate", "history_tolerance"],
+          "properties": {
+            "elastic_modulus_pa": {"$ref": "#/$defs/positiveNumber"},
+            "tensile_strength_pa": {"$ref": "#/$defs/positiveNumber"},
+            "compressive_strength_pa": {"$ref": "#/$defs/positiveNumber"},
+            "tensile_softening_rate": {"$ref": "#/$defs/positiveNumber"},
+            "compressive_softening_rate": {"$ref": "#/$defs/positiveNumber"},
+            "history_tolerance": {"type": "number", "minimum": 0}
+          }
+        },
+        "state_schema": {"$ref": "#/$defs/nonlinearMaterialStateSchema"},
+        "admissibility": {"$ref": "#/$defs/materialAdmissibility"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "materialAdmissibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "loading_domain",
+        "supports_unloading",
+        "supports_reversal",
+        "supports_cyclic",
+        "supports_tension",
+        "supports_compression",
+        "supports_multiaxial"
+      ],
+      "properties": {
+        "loading_domain": {"type": "string", "minLength": 1},
+        "supports_unloading": {"type": "boolean"},
+        "supports_reversal": {"type": "boolean"},
+        "supports_cyclic": {"type": "boolean"},
+        "supports_tension": {"type": "boolean"},
+        "supports_compression": {"type": "boolean"},
+        "supports_multiaxial": {"type": "boolean"}
+      }
+    },
+    "nonlinearMaterialStateSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stateful", "state_update_epoch", "supports_trial_commit_rollback"],
+      "properties": {
+        "stateful": {"const": true},
+        "state_update_epoch": {"const": "accepted_step"},
+        "supports_trial_commit_rollback": {"const": true}
+      }
+    },
+    "material": {
+      "oneOf": [
+        {"$ref": "#/$defs/linearMaterial"},
+        {"$ref": "#/$defs/bilinearSteelMaterial"},
+        {"$ref": "#/$defs/asymmetricConcreteMaterial"}
+      ]
+    },
+    "frameSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "family_id", "parameter_set_version", "parameters", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "family_id": {"const": "frame_3d"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["area_m2", "iy_m4", "iz_m4", "torsional_constant_m4", "shear_area_y_m2", "shear_area_z_m2"],
+          "properties": {
+            "area_m2": {"$ref": "#/$defs/positiveNumber"},
+            "iy_m4": {"$ref": "#/$defs/positiveNumber"},
+            "iz_m4": {"$ref": "#/$defs/positiveNumber"},
+            "torsional_constant_m4": {"$ref": "#/$defs/positiveNumber"},
+            "shear_area_y_m2": {"$ref": "#/$defs/positiveNumber"},
+            "shear_area_z_m2": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "trussSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "family_id", "parameter_set_version", "parameters", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "family_id": {"const": "truss_3d"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["area_m2"],
+          "properties": {
+            "area_m2": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "rectangularRcFiberSection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "family_id", "parameter_set_version", "parameters", "steel_material_id", "concrete_material_id", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "family_id": {"const": "rectangular_rc_fiber_2d"},
+        "parameter_set_version": {"const": "1"},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width_m", "depth_m", "cover_m", "concrete_layer_count", "top_bar_count", "bottom_bar_count", "bar_area_m2"],
+          "properties": {
+            "width_m": {"$ref": "#/$defs/positiveNumber"},
+            "depth_m": {"$ref": "#/$defs/positiveNumber"},
+            "cover_m": {"$ref": "#/$defs/positiveNumber"},
+            "concrete_layer_count": {"type": "integer", "minimum": 2, "maximum": 32},
+            "top_bar_count": {"type": "integer", "minimum": 1, "maximum": 64},
+            "bottom_bar_count": {"type": "integer", "minimum": 1, "maximum": 64},
+            "bar_area_m2": {"$ref": "#/$defs/positiveNumber"}
+          }
+        },
+        "steel_material_id": {"$ref": "#/$defs/stableId"},
+        "concrete_material_id": {"$ref": "#/$defs/stableId"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "section": {
+      "oneOf": [
+        {"$ref": "#/$defs/frameSection"},
+        {"$ref": "#/$defs/trussSection"},
+        {"$ref": "#/$defs/rectangularRcFiberSection"}
+      ]
+    },
+    "elementOffsets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["i_global_m", "j_global_m"],
+      "properties": {
+        "i_global_m": {"$ref": "#/$defs/vector3"},
+        "j_global_m": {"$ref": "#/$defs/vector3"}
+      }
+    },
+    "elementReleases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["i", "j"],
+      "properties": {
+        "i": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/dof"}},
+        "j": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/dof"}}
+      }
+    },
+    "frameElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "material_id", "section_id", "local_axis_rotation_rad", "offsets", "releases", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "frame_3d"},
+        "formulation": {"const": "euler_bernoulli_3d"},
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "local_axis_rotation_rad": {"type": "number"},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "releases": {"$ref": "#/$defs/elementReleases"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "statefulCorotationalFrame3dElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "material_id", "section_id", "local_axis_rotation_rad", "offsets", "releases", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "frame_3d"},
+        "formulation": {
+          "const": "stateful_corotational_timoshenko_frame3d"
+        },
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "local_axis_rotation_rad": {"type": "number"},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "releases": {"$ref": "#/$defs/elementReleases"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "trussElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "material_id", "section_id", "offsets", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "truss_3d"},
+        "formulation": {"const": "linear_truss_3d"},
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "material_id": {"$ref": "#/$defs/stableId"},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "uniformMemberLoad2d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "behavior", "qx_n_per_m", "qy_n_per_m"],
+      "properties": {
+        "basis": {"const": "initial_member_local"},
+        "behavior": {"const": "dead"},
+        "qx_n_per_m": {"type": "number"},
+        "qy_n_per_m": {"type": "number"}
+      }
+    },
+    "corotationalRcFiberFrame2dElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "formulation", "node_ids", "section_id", "integration_order", "offsets", "releases", "uniform_distributed_load_local", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "frame_2d"},
+        "formulation": {"const": "stateful_corotational_rc_fiber_frame2d"},
+        "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
+        "section_id": {"$ref": "#/$defs/stableId"},
+        "integration_order": {"type": "integer", "minimum": 2, "maximum": 3},
+        "offsets": {"$ref": "#/$defs/elementOffsets"},
+        "releases": {"$ref": "#/$defs/elementReleases"},
+        "uniform_distributed_load_local": {"$ref": "#/$defs/uniformMemberLoad2d"},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "element": {
+      "oneOf": [
+        {"$ref": "#/$defs/frameElement"},
+        {"$ref": "#/$defs/trussElement"},
+        {"$ref": "#/$defs/corotationalRcFiberFrame2dElement"},
+        {"$ref": "#/$defs/statefulCorotationalFrame3dElement"}
+      ]
+    },
+    "fixedDofConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "node_id", "dofs", "prescribed_values_si", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "fixed_dofs"},
+        "node_id": {"$ref": "#/$defs/stableId"},
+        "dofs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/dof"}},
+        "prescribed_values_si": {
+          "type": "object",
+          "propertyNames": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+          "additionalProperties": {"type": "number"}
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "nodalLoad": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "node_id", "components_si", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "node_id": {"$ref": "#/$defs/stableId"},
+        "components_si": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["FX", "FY", "FZ", "MX", "MY", "MZ"],
+          "properties": {
+            "FX": {"type": "number"},
+            "FY": {"type": "number"},
+            "FZ": {"type": "number"},
+            "MX": {"type": "number"},
+            "MY": {"type": "number"},
+            "MZ": {"type": "number"}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "linearLoadPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "analysis_type": {"const": "linear_static"},
+        "self_weight": {"$ref": "#/$defs/vector3"},
+        "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "nonlinearLoadPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "analysis_type": {"const": "nonlinear_static_load_control"},
+        "self_weight": {"const": [0.0, 0.0, 0.0]},
+        "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "directDisplacementControlLoadPattern": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "analysis_type", "self_weight", "nodal_loads", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "analysis_type": {
+          "const": "nonlinear_static_direct_displacement_control"
+        },
+        "self_weight": {"const": [0.0, 0.0, 0.0]},
+        "nodal_loads": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/nodalLoad"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "loadPattern": {
+      "oneOf": [
+        {"$ref": "#/$defs/linearLoadPattern"},
+        {"$ref": "#/$defs/nonlinearLoadPattern"},
+        {"$ref": "#/$defs/directDisplacementControlLoadPattern"}
+      ]
+    },
+    "combinationTerm": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref_id", "ref_kind", "factor"],
+      "properties": {
+        "ref_id": {"$ref": "#/$defs/stableId"},
+        "ref_kind": {"enum": ["load_pattern", "load_combination"]},
+        "factor": {"type": "number"}
+      }
+    },
+    "loadCombination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "combination_type", "terms", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "combination_type": {"const": "linear"},
+        "terms": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/combinationTerm"}},
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "timeFunction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "type", "points", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "type": {"const": "piecewise_linear"},
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {"type": "number"}
+          }
+        },
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "constructionStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "active_element_ids", "active_constraint_ids", "load_pattern_ids", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "active_element_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "active_constraint_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "load_pattern_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/stableId"}},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "roundtripRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_entity_id", "entity_kind", "model_ir_entity_id", "mapping_status", "extensions"],
+      "properties": {
+        "source_entity_id": {"type": "string", "minLength": 1},
+        "entity_kind": {"enum": ["node", "material", "section", "element", "constraint", "load_pattern", "load_combination", "time_function", "construction_stage"]},
+        "model_ir_entity_id": {"$ref": "#/$defs/stableId"},
+        "mapping_status": {"enum": ["exact", "canonicalized", "approximated", "unsupported"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
+    "unsupportedFeature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feature_id", "kind", "source_entity_id", "disposition", "blocking", "detail", "extensions"],
+      "properties": {
+        "feature_id": {"$ref": "#/$defs/stableId"},
+        "kind": {"type": "string", "minLength": 1},
+        "source_entity_id": {"type": ["string", "null"]},
+        "disposition": {"enum": ["blocked", "partial_import", "approximated", "preserved_only"]},
+        "blocking": {"type": "boolean"},
+        "detail": {"type": "string", "minLength": 1},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    }
+  }
+}

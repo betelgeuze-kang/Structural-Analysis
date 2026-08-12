@@ -1,5 +1,6 @@
 {
   "schema_version": "native-dependency-policy.v1",
+  "maximum_rust_version": "1.77",
   "allowed_license_ids": [
     "Apache-2.0",
     "BSD-2-Clause",

@@ -65,6 +65,14 @@ def test_scope_classifies_language_and_product_boundaries() -> None:
     assert payload["docs_only"] is False
 
 
+def test_capability_promotion_routes_through_modelir_gates() -> None:
+    payload = scope.classify_paths(["native/capabilities.json"])
+
+    assert payload["native"] is True
+    assert payload["modelir"] is True
+    assert payload["applicable"] is True
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [
@@ -97,6 +105,23 @@ def test_dependency_boundary_requires_one_workspace_lockfile(tmp_path: Path) -> 
     assert payload["blockers"] == [
         "native_workspace_must_own_exactly_one_root_lockfile:none"
     ]
+
+
+def test_dependency_boundary_ignores_generated_package_lockfile(tmp_path: Path) -> None:
+    (tmp_path / "native" / "target" / "package" / "crate").mkdir(parents=True)
+    (tmp_path / "native" / "Cargo.toml").write_text(
+        "[workspace]\n", encoding="utf-8"
+    )
+    (tmp_path / "native" / "Cargo.lock").write_text("", encoding="utf-8")
+    (tmp_path / "native" / "target" / "package" / "crate" / "Cargo.lock").write_text(
+        "", encoding="utf-8"
+    )
+    _write_compatibility_owners(tmp_path)
+
+    payload = boundary.check_boundary(tmp_path)
+
+    assert payload["cargo_lockfiles"] == ["native/Cargo.lock"]
+    assert payload["contract_pass"] is True
 
 
 def test_dependency_boundary_rejects_python_runtime_calls(tmp_path: Path) -> None:
