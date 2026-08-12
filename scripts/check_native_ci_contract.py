@@ -227,6 +227,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_generalized_eigen.py",
         "check_native_generalized_eigen_product.py",
         "check_native_pdf_report.py",
+        "check_native_workbench.py",
         "check_native_reference_elements.py",
         "check_native_sparse_linear.py",
         "check_native_sparse_linear_product.py",

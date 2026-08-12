@@ -792,6 +792,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "structural-workbench"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "serde",
+ "serde_json",
+ "structural-cli",
+ "structural-contracts",
+ "structural-report",
+]
+
+[[package]]
 name = "structural_runtime_ffi"
 version = "0.1.0"
 dependencies = [

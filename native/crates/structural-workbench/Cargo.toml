@@ -1,0 +1,21 @@
+[package]
+name = "structural-workbench"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Rust-native terminal Workbench for the structural native product"
+
+[dependencies]
+libc = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+structural-cli = { path = "../structural-cli" }
+structural-contracts = { path = "../structural-contracts" }
+
+[dev-dependencies]
+structural-report = { path = "../structural-report" }
+
+[lints]
+workspace = true

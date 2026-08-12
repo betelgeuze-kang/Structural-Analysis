@@ -16,6 +16,7 @@ on:
       - "scripts/check_native_capabilities.py"
       - "scripts/check_native_dependency_boundary.py"
       - "scripts/check_native_dependency_licenses.py"
+      - "scripts/check_native_workbench.py"
       - "scripts/classify_native_ci_scope.py"
       - "scripts/check_product_ci_boundaries.py"
       - "scripts/run_product_ci_lane.py"
@@ -26,6 +27,7 @@ on:
       - "tests/test_native_capability_manifest.py"
       - "tests/test_native_ci_workflow_contract.py"
       - "tests/test_native_dependency_license.py"
+      - "tests/test_native_workbench_contract.py"
       - "tests/test_check_product_ci_boundaries.py"
       - "tests/test_external_vv_clean_runner_contract.py"
       - "tests/test_external_vv_receipt_ancestry_contract.py"
@@ -131,6 +133,7 @@ jobs:
             tests/test_native_capability_manifest.py \
             tests/test_native_ci_workflow_contract.py \
             tests/test_native_dependency_license.py \
+            tests/test_native_workbench_contract.py \
             tests/test_check_product_ci_boundaries.py \
             tests/test_external_vv_receipt_ancestry_contract.py \
             tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary \

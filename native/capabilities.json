@@ -157,6 +157,12 @@
       "owner": "structural-report",
       "claim": "bounded single-page nonlinear-NDTHA PDF report C5 only: Rust re-projects and byte-verifies exact ResultIR, ReportIR and Markdown bindings, emits a deterministic A4 PDF 1.7 with fixed ASCII standard fonts, validates its own xref/object/trailer structure, publishes a self-hashed receipt, and repeats bitwise-identically through a clean-environment CLI with no Python, Node or external renderer lookup; PDF/A, tagged accessibility, Unicode/localized fonts, multipage tables/charts, broader report profiles, HIP C2 and C6 remain open"
     },
+    "native_workbench": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-workbench",
+      "claim": "bounded terminal Rust-native Workbench C5 only: one exact fixed-guided ModelIR NDTHA profile owns Import -> Validate -> Run -> Resume -> Compare -> Report through direct Rust product-library calls, immutable hash-bound inputs, Rust -> C ABI -> C++ validation, a real checkpoint, ResultIR/ReportIR, external comparison and deterministic PDF; atomically published self-hashed stage inventories reconcile a process death after checkpoint publication, while clean-environment stage-by-stage and one-shot workflows are byte-identical with no Python, Node, browser, CLI subprocess or external renderer lookup; general visual editing/results exploration, MGT-to-analysis selection, broader solver profiles, live MIDAS/OpenSees/CalculiX, React/TypeScript removal, installer/rollback, HIP C2 and C6 remain open"
+    },
     "hip_backend": {
       "status": "planned",
       "cutover_gate": null,
