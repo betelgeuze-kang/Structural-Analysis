@@ -1,10 +1,14 @@
 #include "nonlinear_ndtha.hpp"
 
 #include <array>
+#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
+#include <span>
+#include <stdexcept>
+#include <vector>
 
 namespace {
 
@@ -18,6 +22,77 @@ namespace {
 
 [[nodiscard]] bool near(const double actual, const double expected) {
     return std::abs(actual - expected) <= 1.0e-15;
+}
+
+[[nodiscard]] bool exact_double(const double left, const double right) {
+    return std::bit_cast<std::uint64_t>(left) == std::bit_cast<std::uint64_t>(right);
+}
+
+[[nodiscard]] bool exact_doubles(
+    const std::vector<double>& left,
+    const std::vector<double>& right) {
+    if (left.size() != right.size()) {
+        return false;
+    }
+    for (std::size_t index = 0U; index < left.size(); ++index) {
+        if (!exact_double(left[index], right[index])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+[[nodiscard]] bool exact_response(
+    const structural::solver_cpu::NonlinearNdthaResponse& left,
+    const structural::solver_cpu::NonlinearNdthaResponse& right) {
+    return exact_doubles(left.top_displacement_m, right.top_displacement_m)
+        && exact_doubles(left.drift_ratio_pct, right.drift_ratio_pct)
+        && exact_doubles(left.base_shear_kn, right.base_shear_kn)
+        && exact_doubles(left.core_drift_pct, right.core_drift_pct)
+        && exact_doubles(left.core_shear_kn, right.core_shear_kn)
+        && left.step_converged == right.step_converged
+        && left.step_iterations == right.step_iterations
+        && left.step_plastic_story_count == right.step_plastic_story_count
+        && exact_doubles(left.step_residual_inf, right.step_residual_inf)
+        && exact_doubles(left.story_drift_envelope_pct, right.story_drift_envelope_pct)
+        && exact_doubles(left.final_story_drift_pct, right.final_story_drift_pct);
+}
+
+[[nodiscard]] bool exact_result(
+    const structural::solver_cpu::NonlinearNdthaResult& left,
+    const structural::solver_cpu::NonlinearNdthaResult& right) {
+    return left.converged_all_steps == right.converged_all_steps
+        && left.collapsed == right.collapsed && left.collapse_step == right.collapse_step
+        && exact_double(left.collapse_time_s, right.collapse_time_s)
+        && exact_double(left.collapse_drift_ratio_pct, right.collapse_drift_ratio_pct)
+        && exact_double(left.collapse_top_displacement_m, right.collapse_top_displacement_m)
+        && left.step_count_completed == right.step_count_completed
+        && left.max_plastic_story_count == right.max_plastic_story_count
+        && exact_double(left.max_drift_ratio_pct, right.max_drift_ratio_pct)
+        && exact_double(left.avg_step_iterations, right.avg_step_iterations)
+        && exact_double(
+            left.residual_top_displacement_m, right.residual_top_displacement_m)
+        && exact_double(left.residual_drift_ratio_pct, right.residual_drift_ratio_pct)
+        && left.total_line_search_backtracks == right.total_line_search_backtracks
+        && exact_response(left.response, right.response);
+}
+
+[[nodiscard]] bool exact_state(
+    const structural::solver_cpu::NonlinearNdthaExecutionState& left,
+    const structural::solver_cpu::NonlinearNdthaExecutionState& right) {
+    return left.next_step == right.next_step && left.status == right.status
+        && left.collapse_step == right.collapse_step
+        && exact_double(left.collapse_time_s, right.collapse_time_s)
+        && exact_double(left.collapse_drift_ratio_pct, right.collapse_drift_ratio_pct)
+        && exact_double(left.collapse_top_displacement_m, right.collapse_top_displacement_m)
+        && left.max_plastic_story_count == right.max_plastic_story_count
+        && exact_double(left.max_drift_ratio_pct, right.max_drift_ratio_pct)
+        && left.adaptive_iteration_sum == right.adaptive_iteration_sum
+        && left.total_line_search_backtracks == right.total_line_search_backtracks
+        && exact_doubles(left.displacement_m, right.displacement_m)
+        && exact_doubles(left.velocity_m_per_s, right.velocity_m_per_s)
+        && exact_doubles(left.acceleration_m_per_s2, right.acceleration_m_per_s2)
+        && exact_response(left.response, right.response);
 }
 
 [[nodiscard]] structural::solver_cpu::NonlinearNdthaConfig config() {
@@ -154,6 +229,121 @@ struct InputStorage {
     return true;
 }
 
+[[nodiscard]] bool segmented_resume_is_bitwise_identical_to_one_shot() {
+    const InputStorage storage;
+    const auto expected = structural::solver_cpu::solve_nonlinear_ndtha(
+        config(), storage.views());
+
+    auto state = structural::solver_cpu::make_nonlinear_ndtha_initial_state(config());
+    structural::solver_cpu::advance_nonlinear_ndtha(config(), storage.views(), 0U, state);
+    CHECK(state.next_step == 0U);
+    CHECK(state.status == structural::solver_cpu::NonlinearNdthaExecutionStatus::active);
+    structural::solver_cpu::advance_nonlinear_ndtha(config(), storage.views(), 1U, state);
+    CHECK(state.next_step == 1U);
+    CHECK(state.status == structural::solver_cpu::NonlinearNdthaExecutionStatus::active);
+
+    auto bulk_resume = state;
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        config(), storage.views(), 100U, bulk_resume);
+    CHECK(bulk_resume.status
+        == structural::solver_cpu::NonlinearNdthaExecutionStatus::completed);
+    const auto bulk_result = structural::solver_cpu::finalize_nonlinear_ndtha(
+        config(), bulk_resume);
+    CHECK(exact_result(bulk_result, expected));
+
+    auto single_step_resume = state;
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        config(), storage.views(), 1U, single_step_resume);
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        config(), storage.views(), 1U, single_step_resume);
+    const auto single_step_result = structural::solver_cpu::finalize_nonlinear_ndtha(
+        config(), single_step_resume);
+    CHECK(exact_result(single_step_result, expected));
+    CHECK(exact_state(bulk_resume, single_step_resume));
+    return true;
+}
+
+[[nodiscard]] bool terminal_resume_is_idempotent_and_bitwise_identical() {
+    const InputStorage storage;
+    auto collapse = config();
+    collapse.collapse_drift_threshold_pct = 1.0e-6;
+    const auto expected_collapse = structural::solver_cpu::solve_nonlinear_ndtha(
+        collapse, storage.views());
+    auto collapsed_state = structural::solver_cpu::make_nonlinear_ndtha_initial_state(collapse);
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        collapse, storage.views(), 1U, collapsed_state);
+    CHECK(collapsed_state.status
+        == structural::solver_cpu::NonlinearNdthaExecutionStatus::collapsed);
+    const auto collapsed_snapshot = collapsed_state;
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        collapse, storage.views(), 100U, collapsed_state);
+    CHECK(exact_state(collapsed_state, collapsed_snapshot));
+    const auto resumed_collapse = structural::solver_cpu::finalize_nonlinear_ndtha(
+        collapse, collapsed_state);
+    CHECK(exact_result(resumed_collapse, expected_collapse));
+
+    auto bounded = config();
+    bounded.max_step_iterations = 1U;
+    bounded.newton_max_iter = 1U;
+    bounded.tolerance = 1.0e-30;
+    const auto expected_failure = structural::solver_cpu::solve_nonlinear_ndtha(
+        bounded, storage.views());
+    auto failed_state = structural::solver_cpu::make_nonlinear_ndtha_initial_state(bounded);
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        bounded, storage.views(), 1U, failed_state);
+    CHECK(failed_state.status
+        == structural::solver_cpu::NonlinearNdthaExecutionStatus::nonconverged);
+    const auto failed_snapshot = failed_state;
+    structural::solver_cpu::advance_nonlinear_ndtha(
+        bounded, storage.views(), 100U, failed_state);
+    CHECK(exact_state(failed_state, failed_snapshot));
+    const auto resumed_failure = structural::solver_cpu::finalize_nonlinear_ndtha(
+        bounded, failed_state);
+    CHECK(exact_result(resumed_failure, expected_failure));
+    return true;
+}
+
+[[nodiscard]] bool invalid_resume_state_is_rejected_without_mutation() {
+    const InputStorage storage;
+    auto state = structural::solver_cpu::make_nonlinear_ndtha_initial_state(config());
+    structural::solver_cpu::advance_nonlinear_ndtha(config(), storage.views(), 1U, state);
+    const auto snapshot = state;
+
+    auto short_inputs = storage.views();
+    short_inputs.acceleration_g = std::span<const double>(storage.acceleration.data(), 2U);
+    bool input_rejected = false;
+    try {
+        structural::solver_cpu::advance_nonlinear_ndtha(
+            config(), short_inputs, 1U, state);
+    } catch (const std::invalid_argument&) {
+        input_rejected = true;
+    }
+    CHECK(input_rejected);
+    CHECK(exact_state(state, snapshot));
+
+    auto corrupt = state;
+    corrupt.response.step_iterations[2] = 1U;
+    bool tail_rejected = false;
+    try {
+        structural::solver_cpu::advance_nonlinear_ndtha(
+            config(), storage.views(), 1U, corrupt);
+    } catch (const std::invalid_argument&) {
+        tail_rejected = true;
+    }
+    CHECK(tail_rejected);
+
+    corrupt = state;
+    corrupt.status = static_cast<structural::solver_cpu::NonlinearNdthaExecutionStatus>(99U);
+    bool status_rejected = false;
+    try {
+        static_cast<void>(structural::solver_cpu::finalize_nonlinear_ndtha(config(), corrupt));
+    } catch (const std::invalid_argument&) {
+        status_rejected = true;
+    }
+    CHECK(status_rejected);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -161,6 +351,9 @@ int main() {
         frozen_legacy_case_matches_every_response_channel,
         numerical_nonconvergence_preserves_the_previous_state,
         collapse_is_a_deterministic_physical_termination,
+        segmented_resume_is_bitwise_identical_to_one_shot,
+        terminal_resume_is_idempotent_and_bitwise_identical,
+        invalid_resume_state_is_rejected_without_mutation,
     };
     for (const auto test : tests) {
         if (!test()) {

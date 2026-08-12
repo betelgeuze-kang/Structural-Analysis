@@ -67,6 +67,51 @@ struct NonlinearNdthaResult {
     NonlinearNdthaResponse response;
 };
 
+enum class NonlinearNdthaExecutionStatus : std::uint32_t {
+    active = 0U,
+    completed = 1U,
+    collapsed = 2U,
+    nonconverged = 3U,
+};
+
+/// Complete caller-owned state at a deterministic inter-step restart boundary.
+struct NonlinearNdthaExecutionState {
+    std::uint32_t next_step;
+    NonlinearNdthaExecutionStatus status;
+    std::int32_t collapse_step;
+    double collapse_time_s;
+    double collapse_drift_ratio_pct;
+    double collapse_top_displacement_m;
+    std::uint32_t max_plastic_story_count;
+    double max_drift_ratio_pct;
+    std::uint64_t adaptive_iteration_sum;
+    std::uint32_t total_line_search_backtracks;
+    std::vector<double> displacement_m;
+    std::vector<double> velocity_m_per_s;
+    std::vector<double> acceleration_m_per_s2;
+    NonlinearNdthaResponse response;
+};
+
+/// Allocate the deterministic zero initial state for one bounded NDTHA case.
+[[nodiscard]] NonlinearNdthaExecutionState make_nonlinear_ndtha_initial_state(
+    const NonlinearNdthaConfig& config);
+
+/// Advance at most `step_budget` inter-step boundaries and retain all restart state.
+///
+/// The supplied state is validated before execution and remains unchanged when validation or
+/// allocation throws. A numerical nonconvergence is a committed terminal state rather than an
+/// exception so the ABI boundary can map it to its stable error taxonomy.
+void advance_nonlinear_ndtha(
+    const NonlinearNdthaConfig& config,
+    const NonlinearNdthaInputs& inputs,
+    std::uint32_t step_budget,
+    NonlinearNdthaExecutionState& state);
+
+/// Project a validated execution state into the existing complete result contract.
+[[nodiscard]] NonlinearNdthaResult finalize_nonlinear_ndtha(
+    const NonlinearNdthaConfig& config,
+    NonlinearNdthaExecutionState state);
+
 /// Run the deterministic serial FP64 Newmark/Newton story-frame reference kernel.
 [[nodiscard]] NonlinearNdthaResult solve_nonlinear_ndtha(
     const NonlinearNdthaConfig& config,
