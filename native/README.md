@@ -6,8 +6,9 @@ Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA
 identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic owner,
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
-bounded ModelIR domain to C3. Analysis product E2E, ResultIR/ReportIR and HIP remain
-unimplemented; `capabilities.json` records that boundary. The existing `structural_runtime_ffi`
+bounded ModelIR domain to C3. Later bounded slices add CPU ResultIR/ReportIR product composition,
+restart, durable jobs and external comparison while HIP remains unimplemented;
+`capabilities.json` records each separate boundary. The existing `structural_runtime_ffi`
 package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
 `structural-contracts`, and keeps the original crate as the numerical oracle plus adapter. Its
@@ -33,9 +34,13 @@ trailing bytes, binding drift and impossible native state fail closed. Exact sav
 promoted as the separate CPU checkpoint C4 capability. R5 adds a strict result-free native request,
 terminal `bounded_candidate` ResultIR, ReportIR, deterministic Markdown and a self-hashed artifact
 receipt. Public CLI run/resume produces bitwise-identical terminal bundles without a Python/Node
-runtime lookup, closing only the tracked CPU nonlinear-NDTHA product C5 profile. Durable job-state
-crash recovery, broader solver coverage, HIP C2, Workbench/PDF and C6 remain open. The legacy
-five-symbol ABI is unchanged.
+runtime lookup, closing only the tracked CPU nonlinear-NDTHA product C5 profile. A separate
+single-host C5 durable-job slice owns submit/poll/cancel, expired-lease recovery, checkpoint
+continuation and deterministic export. Another bounded C5 slice strictly ingests hash-bound
+external result/source artifacts and compares three global NDTHA quantities; its tracked source
+is a language-neutral Python C1 golden, not live solver evidence. Broader solver coverage,
+distributed API/authorization, live same-mesh external validation, HIP C2, Workbench/PDF and C6
+remain open. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -95,6 +100,18 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 Output-directory publication is create-new and fail-closed; it never overwrites an existing path.
 The exact scope and remaining authority boundaries are in
 `docs/native/bounded-product-e2e-v1.md`.
+
+The bounded external-comparison command is:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  comparison run result-ir.json external-result.json raw-solver-output \
+  --output-dir comparison --require-pass
+~~~
+
+Live external evidence additionally requires `--executable-artifact`. Exact source and executable
+bytes are verified before comparison; see `docs/native/external-comparison-v1.md` for the
+non-promoting authority boundary.
 
 ## CPU-only C++
 

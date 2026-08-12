@@ -23,6 +23,7 @@ EXPECTED_OWNERS = {
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",
     "durable_jobs": "structural-runtime",
+    "external_comparison": "structural-cli",
     "hip_backend": "structural_c_abi_v1",
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})

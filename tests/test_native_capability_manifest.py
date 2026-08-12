@@ -66,6 +66,15 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "tenant authorization" in durable["claim"]
     assert "HIP C2" in durable["claim"]
     assert "C6" in durable["claim"]
+    assert capabilities.capability_is_enabled(payload, "external_comparison") is True
+    comparison = payload["capabilities"]["external_comparison"]
+    assert comparison["cutover_gate"] == "C5"
+    assert "bounded global nonlinear-NDTHA" in comparison["claim"]
+    assert "verifies source artifact bytes" in comparison["claim"]
+    assert "live MIDAS/OpenSees/CalculiX execution" in comparison["claim"]
+    assert "node/member mapping" in comparison["claim"]
+    assert "HIP C2" in comparison["claim"]
+    assert "C6" in comparison["claim"]
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 

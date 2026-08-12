@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+mod comparison;
 mod job;
 mod product;
 
@@ -11,6 +12,10 @@ use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError};
 use structural_runtime::{ModelIrValidation, Runtime, RuntimeError};
 
+pub use comparison::{
+    execute_external_comparison, publish_external_comparison, NativeComparisonProductError,
+    NativeExternalComparisonOutcomeV1,
+};
 pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandError};
 pub use product::{
     execute_native_analysis, publish_native_analysis, NativeAnalysisProductError,

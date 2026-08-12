@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural.invalid/schemas/external_result_v1.schema.json",
+  "title": "Bounded native external result input v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "comparison_id",
+    "source",
+    "binding",
+    "observations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-native-external-result.v1"
+    },
+    "comparison_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "solver_family",
+        "solver_version",
+        "run_id",
+        "evidence_kind",
+        "source_artifact_hash",
+        "executable_hash"
+      ],
+      "properties": {
+        "solver_family": {
+          "enum": ["midas_gen", "opensees", "calculix", "reference_oracle"]
+        },
+        "solver_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "evidence_kind": {
+          "enum": ["live_external_execution", "language_neutral_golden", "proxy"]
+        },
+        "source_artifact_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "executable_hash": {
+          "oneOf": [
+            { "$ref": "#/$defs/hash" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analysis_kind", "case_id", "model_hash", "coordinate_frame"],
+      "properties": {
+        "analysis_kind": { "const": "nonlinear_ndtha" },
+        "case_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "model_hash": { "$ref": "#/$defs/hash" },
+        "coordinate_frame": { "const": "global_story_axis" }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/observation" }
+    }
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "tolerance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["absolute", "relative"],
+      "properties": {
+        "absolute": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1e100
+        },
+        "relative": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1000000.0
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_id",
+        "quantity",
+        "external_location_id",
+        "native_location_id",
+        "native_result_path",
+        "unit",
+        "value",
+        "tolerance"
+      ],
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"
+        },
+        "quantity": {
+          "enum": [
+            "max_drift_ratio_pct",
+            "residual_drift_ratio_pct",
+            "residual_top_displacement_m"
+          ]
+        },
+        "external_location_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$"
+        },
+        "native_location_id": {
+          "enum": ["global_response_envelope", "terminal_global_response"]
+        },
+        "native_result_path": {
+          "enum": [
+            "/summary/max_drift_ratio_pct",
+            "/summary/residual_drift_ratio_pct",
+            "/summary/residual_top_displacement_m"
+          ]
+        },
+        "unit": {
+          "enum": ["percent", "m"]
+        },
+        "value": {
+          "type": "number",
+          "minimum": -1e100,
+          "maximum": 1e100
+        },
+        "tolerance": { "$ref": "#/$defs/tolerance" }
+      }
+    }
+  }
+}

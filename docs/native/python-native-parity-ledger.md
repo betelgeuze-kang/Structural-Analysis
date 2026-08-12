@@ -240,8 +240,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: report serialization은 backend-independent이다. ReportIR의 source
   ResultIR에는 CPU/HIP recovery parity와 exact backend provenance가 필요하다.
 - State: Python report generators still dominate. Rust now emits one deterministic ReportIR and
-  Markdown document source bound to the bounded CPU nonlinear-NDTHA ResultIR. External comparison,
-  PDF rendering and broader report profiles remain open.
+  Markdown document source bound to the bounded CPU nonlinear-NDTHA ResultIR. A separate bounded
+  C5 Rust comparison contract verifies exact source/executable bytes and three global NDTHA
+  quantities against a Python C1 golden without promoting that fixture to live external-solver
+  evidence. Live MIDAS/OpenSees/CalculiX execution, same-mesh node/member mapping, PDF rendering
+  and broader report/comparison profiles remain open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -258,8 +261,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
 - State: the public Rust CLI now owns a bounded CPU nonlinear-NDTHA run/checkpoint/resume to
-  ResultIR/ReportIR flow at C5. Durable job/API composition and the TypeScript-to-native Workbench
-  replacement remain open.
+  ResultIR/ReportIR flow at C5. Rust also owns bounded single-host durable submit/poll/cancel,
+  expired-lease recovery, checkpoint continuation and export at C5. A service API, tenant
+  authorization, distributed claims and the TypeScript-to-native Workbench replacement remain
+  open.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

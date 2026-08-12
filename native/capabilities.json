@@ -53,13 +53,19 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench, external comparison, PDF rendering and C6 remain open"
+      "claim": "bounded CPU nonlinear-NDTHA C5 only: a strict canonical request crosses Rust to ABI v1.5 C++ execution, C4 checkpoint identity, deterministic ResultIR, ReportIR, Markdown document source and a self-hashed artifact receipt through public CLI run/resume; direct and resumed outputs are byte-identical in an environment with no Python or Node lookup, and authority remains bounded_candidate; HIP C2, ModelIR-to-analysis adaptation, distributed durable jobs/API, Workbench, PDF rendering and C6 remain open; external comparison is promoted only as a separate bounded C5 capability"
     },
     "durable_jobs": {
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-runtime",
       "claim": "bounded single-host CPU nonlinear-NDTHA durable-job C5 only: Rust owns strict idempotent submit/poll/cancel, append-only self-hashed event chains, content-addressed artifacts, OS-lock worker leases, expired-lease crash reconciliation, checkpoint resume, deterministic completion re-projection and public CLI work/export; clean-environment direct and restarted artifacts are byte-identical with no Python or Node lookup; tenant authorization, distributed consensus/claims, service API, HIP C2, broader solver families and C6 remain open"
+    },
+    "external_comparison": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded global nonlinear-NDTHA external comparison C5 only: Rust strictly ingests one hash-bound language-neutral external-result contract, verifies source artifact bytes and any declared executable bytes, requires exact model/case/frame/unit/location/ResultIR mapping, emits self-hashed comparison and receipt artifacts, preserves divergence, and runs through a clean-environment CLI with no Python or Node lookup; Python C1 golden parity covers three global quantities, while live MIDAS/OpenSees/CalculiX execution, same-mesh proof, node/member mapping, broader quantities, HIP C2 and C6 remain open"
     },
     "hip_backend": {
       "status": "planned",

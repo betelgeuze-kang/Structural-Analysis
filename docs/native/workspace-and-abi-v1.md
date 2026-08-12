@@ -509,8 +509,9 @@ R5의 첫 product composition slice는 bounded CPU nonlinear-NDTHA C5다.
   artifact가 byte-identical하며 frozen SHA-256를 만족한다.
 
 이 synchronous C5는 tracked request 하나의 CPU 경로만 닫는다. broader solver, HIP C2,
-ModelIR analysis adapter, distributed API, external comparison, PDF render, Workbench와 C6는
-open이다. 상세 계약은 `docs/native/bounded-product-e2e-v1.md`에 고정한다.
+ModelIR analysis adapter, distributed API, PDF render, Workbench와 C6는 open이다. external
+comparison은 아래 별도 bounded capability로만 승격한다. 상세 계약은
+`docs/native/bounded-product-e2e-v1.md`에 고정한다.
 
 R6의 local durable-job slice도 같은 bounded CPU request에 한해 C5에 도달한다.
 
@@ -528,3 +529,19 @@ R6의 local durable-job slice도 같은 bounded CPU request에 한해 C5에 도�
 이 capability는 local filesystem single-host queue다. tenant identity/authorization, distributed
 consensus/claim, network service API, HIP C2, broader solver family와 C6를 닫지 않는다. 상세 계약은
 `docs/native/durable-job-runtime-v1.md`에 고정한다.
+
+R7의 external-comparison slice는 같은 bounded ResultIR의 세 global NDTHA quantity에 한해
+C5에 도달한다.
+
+- Rust가 strict external-result wire, source/executable artifact SHA-256, model/case/frame/unit/
+  location/ResultIR-path binding과 absolute-or-relative tolerance를 소유한다.
+- `language_neutral_golden`, `proxy`, `live_external_execution`을 구분하며 solver 이름만으로
+  authority를 올리지 않는다. live 표시는 executable bytes까지 hash 검증해야 한다.
+- comparison row arithmetic와 aggregate status는 재검증 가능하고, comparison IR와 receipt는
+  self-hash된다. divergence는 artifact로 보존하며 `--require-pass`가 policy exit를 결정한다.
+- environment-cleared CLI E2E가 Python/Node lookup 없이 반복 실행 byte identity와 source hash
+  mismatch/symlink 거부를 증명한다.
+
+현재 tracked C1 source는 language-neutral Python golden이며 live MIDAS/OpenSees/CalculiX 실행,
+same-mesh proof, node/member/local-axis mapping, broader quantity, HIP C2와 C6를 닫지 않는다.
+상세 계약은 `docs/native/external-comparison-v1.md`에 고정한다.

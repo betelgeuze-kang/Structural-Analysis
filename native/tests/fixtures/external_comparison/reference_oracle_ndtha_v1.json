@@ -1,0 +1,59 @@
+{
+  "schema_version": "structural-native-external-result.v1",
+  "comparison_id": "ndtha-one-story-elastic-python-c1",
+  "source": {
+    "solver_family": "reference_oracle",
+    "solver_version": "python-c1-golden.v1",
+    "run_id": "nonlinear-ndtha-one-story-elastic-python-c1",
+    "evidence_kind": "language_neutral_golden",
+    "source_artifact_hash": "sha256:5872c8a89cf055096339a0e4a39b776ebf4af3060b3417ff4e9569d3de7916b5",
+    "executable_hash": null
+  },
+  "binding": {
+    "analysis_kind": "nonlinear_ndtha",
+    "case_id": "ndtha-one-story-elastic",
+    "model_hash": "sha256:ec014742cc1079fe02be7379b49b969f219e89fd8cf715dcee3c4590f2929fc0",
+    "coordinate_frame": "global_story_axis"
+  },
+  "observations": [
+    {
+      "observation_id": "python-c1-max-drift",
+      "quantity": "max_drift_ratio_pct",
+      "external_location_id": "python_c1.result.max_drift_ratio_pct",
+      "native_location_id": "global_response_envelope",
+      "native_result_path": "/summary/max_drift_ratio_pct",
+      "unit": "percent",
+      "value": 0.004711026603347354,
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "observation_id": "python-c1-residual-drift",
+      "quantity": "residual_drift_ratio_pct",
+      "external_location_id": "python_c1.result.residual_drift_ratio_pct",
+      "native_location_id": "terminal_global_response",
+      "native_result_path": "/summary/residual_drift_ratio_pct",
+      "unit": "percent",
+      "value": 0.0006646891103034592,
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    },
+    {
+      "observation_id": "python-c1-residual-displacement",
+      "quantity": "residual_top_displacement_m",
+      "external_location_id": "python_c1.result.residual_top_displacement_m",
+      "native_location_id": "terminal_global_response",
+      "native_result_path": "/summary/residual_top_displacement_m",
+      "unit": "m",
+      "value": 2.1270051529710693e-05,
+      "tolerance": {
+        "absolute": 1e-12,
+        "relative": 1e-10
+      }
+    }
+  ]
+}

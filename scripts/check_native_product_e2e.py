@@ -53,7 +53,7 @@ REQUIRED_TOKENS = {
         "C5",
         "bounded_candidate",
         "HIP C2",
-        "single-host durable-job slice",
+        "local durable-job",
         "C6",
     ),
 }
