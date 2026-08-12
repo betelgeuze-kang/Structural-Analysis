@@ -659,6 +659,186 @@ pub struct NonlinearStaticSolution {
     pub fallback_count: u32,
 }
 
+/// Stable execution phase stored at every ABI v1.11 Newton iteration boundary.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum NonlinearStaticExecutionStatus {
+    Active,
+    Converged,
+    Nonconverged,
+}
+
+/// Pointer-free Rust owner of the complete ABI v1.11 nonlinear-static Newton state.
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct NonlinearStaticRestartState {
+    pub status: NonlinearStaticExecutionStatus,
+    pub iterations: u32,
+    pub line_search_backtracks: u32,
+    pub plastic_story_count: u32,
+    pub residual_inf: f64,
+    pub residual_l2: f64,
+    pub max_abs_displacement_m: f64,
+    pub top_displacement_m: f64,
+    pub base_shear_kn: f64,
+    pub displacement_m: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
+impl NonlinearStaticRestartState {
+    /// Project a converged terminal boundary into the stable nonlinear-static result contract.
+    ///
+    /// # Errors
+    ///
+    /// Active and nonconverged boundaries retain their state and return a stable taxonomy.
+    pub fn terminal_solution(&self) -> Result<NonlinearStaticSolution, Error> {
+        match self.status {
+            NonlinearStaticExecutionStatus::Active => {
+                return Err(Error {
+                    code: sys::SA_ERR_STATE_CONFLICT,
+                    message: "nonlinear static restart state is still active".to_owned(),
+                });
+            }
+            NonlinearStaticExecutionStatus::Nonconverged => {
+                return Err(Error {
+                    code: sys::SA_ERR_NONCONVERGENCE,
+                    message: "nonlinear static CPU Newton solve did not converge".to_owned(),
+                });
+            }
+            NonlinearStaticExecutionStatus::Converged => {}
+        }
+        let metrics = [
+            self.residual_inf,
+            self.residual_l2,
+            self.max_abs_displacement_m,
+            self.top_displacement_m,
+            self.base_shear_kn,
+        ];
+        let valid = self.iterations > 0
+            && !self.displacement_m.is_empty()
+            && self.displacement_m.iter().all(|value| value.is_finite())
+            && metrics.into_iter().all(f64::is_finite)
+            && self.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && self.fallback_count == 0;
+        if !valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "nonlinear static terminal state violated the result contract".to_owned(),
+            });
+        }
+        Ok(NonlinearStaticSolution {
+            iterations: self.iterations,
+            residual_inf: self.residual_inf,
+            residual_l2: self.residual_l2,
+            max_abs_displacement_m: self.max_abs_displacement_m,
+            top_displacement_m: self.top_displacement_m,
+            base_shear_kn: self.base_shear_kn,
+            plastic_story_count: self.plastic_story_count,
+            line_search_backtracks: self.line_search_backtracks,
+            displacement_m: try_clone_slice(
+                &self.displacement_m,
+                "nonlinear static terminal displacement",
+            )?,
+            execution_backend: self.execution_backend,
+            fallback_count: self.fallback_count,
+        })
+    }
+}
+
+struct NonlinearStaticRestartArena {
+    displacement_m: Vec<f64>,
+}
+
+impl NonlinearStaticRestartArena {
+    fn allocate(story_count: usize) -> Result<Self, Error> {
+        Ok(Self {
+            displacement_m: allocate_f64_output(story_count)?,
+        })
+    }
+
+    fn from_state(state: &NonlinearStaticRestartState) -> Result<Self, Error> {
+        Ok(Self {
+            displacement_m: try_clone_slice(
+                &state.displacement_m,
+                "nonlinear static restart displacement",
+            )?,
+        })
+    }
+
+    fn descriptor(
+        &mut self,
+        state: &NonlinearStaticRestartState,
+    ) -> Result<sys::SaNonlinearStaticStateV1, Error> {
+        Ok(sys::SaNonlinearStaticStateV1 {
+            abi_version: sys::SA_ABI_V1_11,
+            struct_size: abi_size::<sys::SaNonlinearStaticStateV1>(),
+            status: nonlinear_static_status_to_raw(state.status),
+            iterations: state.iterations,
+            line_search_backtracks: state.line_search_backtracks,
+            plastic_story_count: state.plastic_story_count,
+            execution_backend: state.execution_backend,
+            fallback_count: state.fallback_count,
+            reserved_u32: 0,
+            residual_inf: state.residual_inf,
+            residual_l2: state.residual_l2,
+            max_abs_displacement_m: state.max_abs_displacement_m,
+            top_displacement_m: state.top_displacement_m,
+            base_shear_kn: state.base_shear_kn,
+            output_length: usize_to_u64(self.displacement_m.len())?,
+            displacement_m: mutable_f64_view(&mut self.displacement_m, sys::SA_ABI_V1_11)?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn finish(
+        self,
+        raw: &sys::SaNonlinearStaticStateV1,
+        config: &NonlinearStaticConfigV3,
+        inputs: &StaticStoryInputsV3,
+    ) -> Result<NonlinearStaticRestartState, Error> {
+        let count = self.displacement_m.len();
+        let view = &raw.displacement_m;
+        let metadata_valid = raw.abi_version == sys::SA_ABI_V1_11
+            && raw.struct_size == abi_size::<sys::SaNonlinearStaticStateV1>()
+            && usize::try_from(raw.output_length) == Ok(count)
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved_u32 == 0
+            && raw.reserved == [0; 2]
+            && view.abi_version == sys::SA_ABI_V1_11
+            && view.struct_size == abi_size::<sys::SaMutBufferViewV1>()
+            && view.data.cast_const().cast::<f64>() == self.displacement_m.as_ptr()
+            && usize::try_from(view.length) == Ok(count)
+            && view.stride_bytes == size_of::<f64>() as u64
+            && view.element_type == sys::SA_ELEMENT_TYPE_F64
+            && view.memory_space == sys::SA_MEMORY_SPACE_HOST
+            && view.device_id == -1
+            && view.flags == 0;
+        if !metadata_valid {
+            return Err(Error {
+                code: sys::SA_ERR_INTERNAL,
+                message: "native nonlinear static restart metadata violated ABI v1.11".to_owned(),
+            });
+        }
+        let state = NonlinearStaticRestartState {
+            status: nonlinear_static_status_from_raw(raw.status)?,
+            iterations: raw.iterations,
+            line_search_backtracks: raw.line_search_backtracks,
+            plastic_story_count: raw.plastic_story_count,
+            residual_inf: raw.residual_inf,
+            residual_l2: raw.residual_l2,
+            max_abs_displacement_m: raw.max_abs_displacement_m,
+            top_displacement_m: raw.top_displacement_m,
+            base_shear_kn: raw.base_shear_kn,
+            displacement_m: self.displacement_m,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        };
+        validate_nonlinear_static_restart_state(&state, config, inputs)?;
+        Ok(state)
+    }
+}
+
 /// Caller-owned deterministic response channels from the C++ nonlinear NDTHA CPU kernel.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct NonlinearNdthaResponse {
@@ -1079,6 +1259,15 @@ impl Api {
         Self::load_version(sys::SA_ABI_V1_10)
     }
 
+    /// Load the ABI v1.11 table with complete caller-owned nonlinear-static Newton state.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if either restart operation or its capability is absent.
+    pub fn load_nonlinear_static_restart() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_11)
+    }
+
     fn load_version(abi_version: u32) -> Result<Self, Error> {
         let request = sys::SaApiRequestV1 {
             abi_version,
@@ -1435,6 +1624,132 @@ impl Api {
             execution_backend: raw_result.execution_backend,
             fallback_count: raw_result.fallback_count,
         })
+    }
+
+    /// Create the complete iteration-zero boundary for a bounded nonlinear-static problem.
+    ///
+    /// # Errors
+    ///
+    /// Returns validation, allocation, ABI contract, or internal errors.
+    pub fn begin_nonlinear_static(
+        self,
+        config: &NonlinearStaticConfigV3,
+        inputs: &StaticStoryInputsV3,
+    ) -> Result<NonlinearStaticRestartState, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_11 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "nonlinear static restart requires ABI v1.11".to_owned(),
+            });
+        }
+        let count = nonlinear_static_count(config, inputs)?;
+        validate_nonlinear_static_problem_scalars(config, inputs)?;
+        let raw_config = nonlinear_static_restart_config_descriptor(config);
+        let stiffness_view = input_f64_view(&inputs.story_k_n_per_m, sys::SA_ABI_V1_11)?;
+        let height_view = input_f64_view(&inputs.story_h_m, sys::SA_ABI_V1_11)?;
+        let axial_view = input_f64_view(&inputs.story_axial_n, sys::SA_ABI_V1_11)?;
+        let yield_drift_view = input_f64_view(&inputs.story_yield_drift_m, sys::SA_ABI_V1_11)?;
+        let load_view = input_f64_view(&inputs.floor_load_n, sys::SA_ABI_V1_11)?;
+        let seed = NonlinearStaticRestartState {
+            status: NonlinearStaticExecutionStatus::Active,
+            iterations: 0,
+            line_search_backtracks: 0,
+            plastic_story_count: 0,
+            residual_inf: 0.0,
+            residual_l2: 0.0,
+            max_abs_displacement_m: 0.0,
+            top_displacement_m: 0.0,
+            base_shear_kn: 0.0,
+            displacement_m: Vec::new(),
+            execution_backend: sys::SA_EXECUTION_BACKEND_CPU,
+            fallback_count: 0,
+        };
+        let mut arena = NonlinearStaticRestartArena::allocate(count)?;
+        let mut raw_state = arena.descriptor(&seed)?;
+        let begin = self
+            .table
+            .nonlinear_static_begin
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all immutable inputs and the disjoint arena-owned state remain live for the
+        // synchronous call. The native boundary retains no pointer and publishes state last.
+        let status = unsafe {
+            begin(
+                &raw_config,
+                &stiffness_view,
+                &height_view,
+                &axial_view,
+                &yield_drift_view,
+                &load_view,
+                &mut raw_state,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        arena.finish(&raw_state, config, inputs)
+    }
+
+    /// Advance a complete caller-owned Newton state by at most `iteration_budget` boundaries.
+    ///
+    /// The Rust state is deep-copied before crossing the ABI, so any rejection leaves the supplied
+    /// state byte-for-byte unchanged. Terminal states and a zero budget are deterministic no-ops.
+    ///
+    /// # Errors
+    ///
+    /// Returns validation, checkpoint-mismatch, allocation, or ABI output-contract errors.
+    pub fn advance_nonlinear_static(
+        self,
+        config: &NonlinearStaticConfigV3,
+        inputs: &StaticStoryInputsV3,
+        iteration_budget: u32,
+        state: &mut NonlinearStaticRestartState,
+    ) -> Result<(), Error> {
+        if self.abi_version() < sys::SA_ABI_V1_11 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "nonlinear static restart requires ABI v1.11".to_owned(),
+            });
+        }
+        nonlinear_static_count(config, inputs)?;
+        validate_nonlinear_static_restart_state(state, config, inputs)?;
+        let raw_config = nonlinear_static_restart_config_descriptor(config);
+        let stiffness_view = input_f64_view(&inputs.story_k_n_per_m, sys::SA_ABI_V1_11)?;
+        let height_view = input_f64_view(&inputs.story_h_m, sys::SA_ABI_V1_11)?;
+        let axial_view = input_f64_view(&inputs.story_axial_n, sys::SA_ABI_V1_11)?;
+        let yield_drift_view = input_f64_view(&inputs.story_yield_drift_m, sys::SA_ABI_V1_11)?;
+        let load_view = input_f64_view(&inputs.floor_load_n, sys::SA_ABI_V1_11)?;
+        let mut arena = NonlinearStaticRestartArena::from_state(state)?;
+        let mut raw_state = arena.descriptor(state)?;
+        let advance = self
+            .table
+            .nonlinear_static_advance
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: all immutable inputs and the disjoint private state copy remain live for the
+        // synchronous call. Native code deep-copies before execution and publishes only on success.
+        let status = unsafe {
+            advance(
+                &raw_config,
+                &stiffness_view,
+                &height_view,
+                &axial_view,
+                &yield_drift_view,
+                &load_view,
+                iteration_budget,
+                &mut raw_state,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let advanced = arena.finish(&raw_state, config, inputs)?;
+        *state = advanced;
+        Ok(())
     }
 
     /// Solve one bounded nonlinear Newmark time-history story-frame case on the serial FP64 CPU.
@@ -3209,6 +3524,16 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.sparse_linear_advance.is_none()
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU == 0
     };
+    let nonlinear_static_restart_slots =
+        table.nonlinear_static_begin.is_some() && table.nonlinear_static_advance.is_some();
+    let nonlinear_static_restart_valid = if requested >= sys::SA_ABI_V1_11 {
+        nonlinear_static_restart_slots
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
+    } else {
+        table.nonlinear_static_begin.is_none()
+            && table.nonlinear_static_advance.is_none()
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU == 0
+    };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
             && !track_slot
@@ -3376,6 +3701,30 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+    } else if requested == sys::SA_ABI_V1_11 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && sparse_restart_slots
+            && nonlinear_static_restart_slots
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
     } else {
         false
     };
@@ -3384,6 +3733,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         && sparse_linear_valid
         && generalized_eigen_valid
         && sparse_restart_valid
+        && nonlinear_static_restart_valid
     {
         Ok(())
     } else {
@@ -3419,6 +3769,204 @@ fn allocate_u32_output(length: usize) -> Result<Vec<u32>, Error> {
     })?;
     output.resize(length, 0);
     Ok(output)
+}
+
+fn nonlinear_static_restart_config_descriptor(
+    config: &NonlinearStaticConfigV3,
+) -> sys::SaNonlinearStaticConfigV1 {
+    sys::SaNonlinearStaticConfigV1 {
+        abi_version: sys::SA_ABI_V1_11,
+        struct_size: abi_size::<sys::SaNonlinearStaticConfigV1>(),
+        story_count: config.story_count,
+        max_iter: config.max_iter,
+        tolerance: config.tolerance,
+        hardening_ratio: config.hardening_ratio,
+        line_search_decay: config.line_search_decay,
+        line_search_min: config.line_search_min,
+        pdelta_factor: config.pdelta_factor,
+        flags: 0,
+        reserved_u32: 0,
+        reserved: [0; 2],
+    }
+}
+
+fn validate_nonlinear_static_problem_scalars(
+    config: &NonlinearStaticConfigV3,
+    inputs: &StaticStoryInputsV3,
+) -> Result<(), Error> {
+    let config_scalars = [
+        config.tolerance,
+        config.hardening_ratio,
+        config.line_search_decay,
+        config.line_search_min,
+        config.pdelta_factor,
+    ];
+    let finite_inputs = [
+        inputs.story_k_n_per_m.as_slice(),
+        inputs.story_h_m.as_slice(),
+        inputs.story_axial_n.as_slice(),
+        inputs.story_yield_drift_m.as_slice(),
+        inputs.floor_load_n.as_slice(),
+    ]
+    .into_iter()
+    .flatten()
+    .all(|value| value.is_finite());
+    let valid = config.max_iter > 0
+        && config_scalars.into_iter().all(f64::is_finite)
+        && config.tolerance > 0.0
+        && (0.0..=1.0).contains(&config.hardening_ratio)
+        && config.line_search_decay > 0.0
+        && config.line_search_decay < 1.0
+        && config.line_search_min > 0.0
+        && config.line_search_min <= 1.0
+        && config.pdelta_factor >= 0.0
+        && finite_inputs
+        && inputs.story_k_n_per_m.iter().all(|value| *value > 0.0)
+        && inputs.story_h_m.iter().all(|value| *value > 0.0);
+    if valid {
+        Ok(())
+    } else {
+        Err(Error {
+            code: sys::SA_ERR_INVALID_ARGUMENT,
+            message: "nonlinear static configuration or input values are invalid".to_owned(),
+        })
+    }
+}
+
+struct NonlinearStaticDerived {
+    residual_inf: f64,
+    residual_l2: f64,
+    max_abs_displacement_m: f64,
+    top_displacement_m: f64,
+    base_shear_kn: f64,
+    plastic_story_count: u32,
+}
+
+fn nonlinear_static_derived(
+    config: &NonlinearStaticConfigV3,
+    inputs: &StaticStoryInputsV3,
+    displacement_m: &[f64],
+) -> Result<NonlinearStaticDerived, Error> {
+    let count = displacement_m.len();
+    let mut spring_force = allocate_f64_output(count)?;
+    let mut plastic_story_count = 0_u32;
+    for index in 0..count {
+        let previous = if index == 0 {
+            0.0
+        } else {
+            displacement_m[index - 1]
+        };
+        let drift = displacement_m[index] - previous;
+        let initial_stiffness = inputs.story_k_n_per_m[index].max(1.0e-12);
+        let yield_drift = inputs.story_yield_drift_m[index].abs().max(1.0e-9);
+        let hardened_stiffness = config.hardening_ratio * initial_stiffness;
+        spring_force[index] = if drift.abs() <= yield_drift {
+            initial_stiffness * drift
+        } else {
+            let sign = if drift >= 0.0 { 1.0 } else { -1.0 };
+            plastic_story_count = plastic_story_count.checked_add(1).ok_or_else(|| Error {
+                code: sys::SA_ERR_CHECKPOINT_MISMATCH,
+                message: "nonlinear static plastic-story count overflowed".to_owned(),
+            })?;
+            sign * (initial_stiffness * yield_drift
+                + hardened_stiffness * (drift.abs() - yield_drift))
+        };
+    }
+    let mut residual_inf: f64 = 0.0;
+    let mut residual_square_sum = 0.0;
+    for index in 0..count {
+        let internal_force = if index < count - 1 {
+            spring_force[index] - spring_force[index + 1]
+        } else {
+            spring_force[index]
+        };
+        let residual = inputs.floor_load_n[index] - internal_force;
+        residual_inf = residual_inf.max(residual.abs());
+        residual_square_sum += residual * residual;
+    }
+    let max_abs_displacement_m = displacement_m
+        .iter()
+        .fold(0.0_f64, |maximum, value| maximum.max(value.abs()));
+    Ok(NonlinearStaticDerived {
+        residual_inf,
+        residual_l2: residual_square_sum.sqrt(),
+        max_abs_displacement_m,
+        top_displacement_m: displacement_m[count - 1],
+        base_shear_kn: spring_force[0].abs() / 1000.0,
+        plastic_story_count,
+    })
+}
+
+fn validate_nonlinear_static_restart_state(
+    state: &NonlinearStaticRestartState,
+    config: &NonlinearStaticConfigV3,
+    inputs: &StaticStoryInputsV3,
+) -> Result<(), Error> {
+    let count = nonlinear_static_count(config, inputs)?;
+    validate_nonlinear_static_problem_scalars(config, inputs)?;
+    let basic_valid = state.displacement_m.len() == count
+        && state.displacement_m.iter().all(|value| value.is_finite())
+        && state.iterations <= config.max_iter
+        && state.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+        && state.fallback_count == 0;
+    if !basic_valid {
+        return Err(Error {
+            code: sys::SA_ERR_CHECKPOINT_MISMATCH,
+            message: "nonlinear static restart state shape or backend is invalid".to_owned(),
+        });
+    }
+    let expected = nonlinear_static_derived(config, inputs, &state.displacement_m)?;
+    let metrics_valid = state.residual_inf.to_bits() == expected.residual_inf.to_bits()
+        && state.residual_l2.to_bits() == expected.residual_l2.to_bits()
+        && state.max_abs_displacement_m.to_bits() == expected.max_abs_displacement_m.to_bits()
+        && state.top_displacement_m.to_bits() == expected.top_displacement_m.to_bits()
+        && state.base_shear_kn.to_bits() == expected.base_shear_kn.to_bits()
+        && state.plastic_story_count == expected.plastic_story_count;
+    let status_valid = match state.status {
+        NonlinearStaticExecutionStatus::Active => state.iterations < config.max_iter,
+        NonlinearStaticExecutionStatus::Converged => {
+            state.iterations > 0
+                && state.iterations <= config.max_iter
+                && state.residual_inf <= config.tolerance
+        }
+        NonlinearStaticExecutionStatus::Nonconverged => {
+            state.iterations > 0 && state.iterations <= config.max_iter
+        }
+    };
+    if metrics_valid && status_valid {
+        Ok(())
+    } else {
+        Err(Error {
+            code: sys::SA_ERR_CHECKPOINT_MISMATCH,
+            message: "nonlinear static restart state failed deterministic validation".to_owned(),
+        })
+    }
+}
+
+const fn nonlinear_static_status_to_raw(status: NonlinearStaticExecutionStatus) -> u32 {
+    match status {
+        NonlinearStaticExecutionStatus::Active => sys::SA_NONLINEAR_STATIC_EXECUTION_ACTIVE,
+        NonlinearStaticExecutionStatus::Converged => sys::SA_NONLINEAR_STATIC_EXECUTION_CONVERGED,
+        NonlinearStaticExecutionStatus::Nonconverged => {
+            sys::SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED
+        }
+    }
+}
+
+fn nonlinear_static_status_from_raw(raw: u32) -> Result<NonlinearStaticExecutionStatus, Error> {
+    match raw {
+        sys::SA_NONLINEAR_STATIC_EXECUTION_ACTIVE => Ok(NonlinearStaticExecutionStatus::Active),
+        sys::SA_NONLINEAR_STATIC_EXECUTION_CONVERGED => {
+            Ok(NonlinearStaticExecutionStatus::Converged)
+        }
+        sys::SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED => {
+            Ok(NonlinearStaticExecutionStatus::Nonconverged)
+        }
+        _ => Err(Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native nonlinear static restart returned an invalid status".to_owned(),
+        }),
+    }
 }
 
 fn nonlinear_static_count(
@@ -3683,12 +4231,13 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6,
-        SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9, SA_CAPABILITY_BUFFER_VALIDATION,
-        SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
-        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
-        SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
-        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
+        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4,
+        SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9,
+        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_GENERALIZED_EIGEN_CPU,
+        SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
+        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_CAPABILITY_NONLINEAR_NDTHA_CPU,
+        SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU, SA_CAPABILITY_NONLINEAR_STATIC_CPU,
+        SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
         SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU,
         SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
@@ -3889,6 +4438,28 @@ mod tests {
                 | SA_CAPABILITY_SPARSE_LINEAR_CPU
                 | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
                 | SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
+        );
+    }
+
+    #[test]
+    fn v1_11_table_adds_only_nonlinear_static_restart() {
+        let api = Api::load_nonlinear_static_restart().expect("v1.11 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_11);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_CPU
+                | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
         );
     }
 

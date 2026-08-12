@@ -7,6 +7,7 @@ mod job;
 mod model_checkpoint;
 mod sparse_checkpoint;
 mod spectral_checkpoint;
+mod static_checkpoint;
 
 use std::path::Path;
 
@@ -20,6 +21,7 @@ pub use model_checkpoint::{
 };
 pub use sparse_checkpoint::{SparseLinearCheckpointReceiptV1, SparseLinearCheckpointV1};
 pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
+pub use static_checkpoint::{NonlinearStaticCheckpointReceiptV1, NonlinearStaticCheckpointV1};
 use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
 };
@@ -40,13 +42,19 @@ use structural_contracts::spectral_product::{
     DenseSpectralAnalysisRequestV1, DenseSpectralResultIrDocumentV1, SpectralAnalysisKindV1,
     SpectralGeneralizedEigenConfigV1, SpectralModeV1, SpectralResultSummaryV1,
 };
+use structural_contracts::static_product::{
+    build_nonlinear_static_result_ir_v1, nonlinear_static_execution_hash_v1,
+    nonlinear_static_model_hash_v1, NonlinearStaticAnalysisRequestDocumentV1,
+    NonlinearStaticResultIrDocumentV1, NonlinearStaticResultSummaryV1,
+};
 use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
     DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrNdthaAdaptedProblem,
     ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
     ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
-    SparseCsrMatrix, SparseLinearConfig, SparseLinearExecutionStatus, SparseLinearRestartState,
+    NonlinearStaticExecutionStatus, NonlinearStaticRestartState, SparseCsrMatrix,
+    SparseLinearConfig, SparseLinearExecutionStatus, SparseLinearRestartState,
     SparseLinearSolverStatus,
 };
 
@@ -102,6 +110,13 @@ pub struct DenseSpectralProductResultV1 {
 pub struct SparseLinearProductProgressV1 {
     pub checkpoint: SparseLinearCheckpointV1,
     pub result_ir: Option<SparseLinearResultIrDocumentV1>,
+}
+
+/// One durable nonlinear-static Newton boundary, with `ResultIR` only after convergence.
+#[derive(Clone, Debug)]
+pub struct NonlinearStaticProductProgressV1 {
+    pub checkpoint: NonlinearStaticCheckpointV1,
+    pub result_ir: Option<NonlinearStaticResultIrDocumentV1>,
 }
 
 /// CPU-only runtime foundation connected to the native ABI table.
@@ -301,6 +316,106 @@ impl Runtime {
             None
         };
         Ok(SparseLinearProductProgressV1 {
+            checkpoint,
+            result_ir,
+        })
+    }
+
+    /// Canonically bind one complete Newton state to its exact nonlinear-static request.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error if the state is invalid for the request or binary identity
+    /// construction fails.
+    pub fn checkpoint_nonlinear_static(
+        request: &NonlinearStaticAnalysisRequestDocumentV1,
+        state: &NonlinearStaticRestartState,
+    ) -> Result<NonlinearStaticCheckpointV1, RuntimeError> {
+        NonlinearStaticCheckpointV1::create(request, state)
+    }
+
+    /// Decode and verify a nonlinear-static Newton checkpoint against one exact request.
+    ///
+    /// # Errors
+    ///
+    /// Returns checkpoint-mismatch semantics for corrupt/noncanonical bytes or any request,
+    /// model, configuration, state, execution, or aggregate identity drift.
+    pub fn restore_nonlinear_static(
+        request: &NonlinearStaticAnalysisRequestDocumentV1,
+        bytes: &[u8],
+    ) -> Result<NonlinearStaticCheckpointV1, RuntimeError> {
+        let checkpoint = NonlinearStaticCheckpointV1::from_bytes(bytes)?;
+        checkpoint.verify_request(request)?;
+        Ok(checkpoint)
+    }
+
+    /// Begin or resume one nonlinear-static Newton execution for a bounded iteration budget.
+    ///
+    /// Active and nonconverged terminal states remain successful checkpoint transitions;
+    /// `ResultIR` is emitted only for a converged terminal state.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for invalid checkpoint bindings, ABI transport failure, invalid
+    /// restart state, or deterministic checkpoint/ResultIR projection failure.
+    pub fn advance_nonlinear_static_product(
+        &self,
+        request: &NonlinearStaticAnalysisRequestDocumentV1,
+        checkpoint_bytes: Option<&[u8]>,
+        iteration_budget: u32,
+    ) -> Result<NonlinearStaticProductProgressV1, RuntimeError> {
+        let value = request.request();
+        let api = Api::load_nonlinear_static_restart().map_err(RuntimeError::from)?;
+        let mut state = match checkpoint_bytes {
+            Some(bytes) => Self::restore_nonlinear_static(request, bytes)?
+                .state()
+                .clone(),
+            None => api
+                .begin_nonlinear_static(&value.config, &value.inputs)
+                .map_err(RuntimeError::from)?,
+        };
+        api.advance_nonlinear_static(&value.config, &value.inputs, iteration_budget, &mut state)
+            .map_err(RuntimeError::from)?;
+        let checkpoint = Self::checkpoint_nonlinear_static(request, &state)?;
+        let result_ir = if state.status == NonlinearStaticExecutionStatus::Converged {
+            let solution = state.terminal_solution().map_err(RuntimeError::from)?;
+            let receipt = checkpoint.receipt();
+            let model_hash = nonlinear_static_model_hash_v1(request)?;
+            let execution_hash = nonlinear_static_execution_hash_v1(request)?;
+            if receipt.model_hash != model_hash || receipt.execution_hash != execution_hash {
+                return Err(RuntimeError {
+                    code: 1301,
+                    message:
+                        "nonlinear-static checkpoint identity drifted before ResultIR projection"
+                            .to_owned(),
+                });
+            }
+            Some(build_nonlinear_static_result_ir_v1(
+                request,
+                ResultIdentityV1 {
+                    request_hash: request.request_hash().to_owned(),
+                    model_hash,
+                    state_hash: receipt.state_hash,
+                    execution_hash,
+                    checkpoint_hash: receipt.checkpoint_hash,
+                },
+                NonlinearStaticResultSummaryV1 {
+                    story_count: value.config.story_count,
+                    iterations: solution.iterations,
+                    residual_inf: solution.residual_inf,
+                    residual_l2: solution.residual_l2,
+                    max_abs_displacement_m: solution.max_abs_displacement_m,
+                    top_displacement_m: solution.top_displacement_m,
+                    base_shear_kn: solution.base_shear_kn,
+                    plastic_story_count: solution.plastic_story_count,
+                    line_search_backtracks: solution.line_search_backtracks,
+                },
+                solution.displacement_m,
+            )?)
+        } else {
+            None
+        };
+        Ok(NonlinearStaticProductProgressV1 {
             checkpoint,
             result_ir,
         })

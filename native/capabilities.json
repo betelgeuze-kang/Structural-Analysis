@@ -101,7 +101,19 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++ story-frame Newton kernel with independent dense-matrix Python C1 oracle parity for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking matrix, ABI v1.3 caller-owned inputs/output and safe Rust integration; broader nonlinear input-space parity, HIP C2, restart and product E2E remain open"
+      "claim": "bounded serial FP64 C++ story-frame Newton C1 family with independent dense-matrix Python C1 oracle parity for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking matrix; ABI v1.3 one-shot plus ABI v1.11 complete caller-owned real-iteration begin/advance state and a safe reentrant Rust wrapper provide failure-atomic C3 implementation evidence with fallback 0, but the sequential numerical gate remains C1 until an approved HIP C2 receipt exists; broader nonlinear input-space parity and general ModelIR topology remain open, while restart and product E2E are tracked as separate bounded CPU C4/C5 implementation capabilities and C6 remains open"
+    },
+    "nonlinear_static_checkpoint": {
+      "status": "implemented",
+      "cutover_gate": "C4",
+      "owner": "structural-runtime",
+      "claim": "bounded story-frame CPU Newton checkpoint C4 implementation only: ABI v1.11 exposes complete real iteration state, and a pointer-free SASTAC01 artifact binds the exact strict request plus model, Newton state, execution and aggregate checkpoint SHA-256 identities; every single-byte mutation and request/input/configuration drift fails with checkpoint-mismatch taxonomy, while direct and segmented execution produce byte-identical terminal checkpoint and ResultIR artifacts; HIP C2, durable queued-job integration, arbitrary ModelIR assembly and C6 remain open"
+    },
+    "nonlinear_static_product_e2e": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded story-frame CPU Newton product E2E C5 implementation only: strict Rust request parsing crosses ABI v1.11 real-iteration begin/advance and exact C4 checkpoint, then public static-run/static-resume commands atomically publish typed active/failure receipts or self-hashed ResultIR, ReportIR and deterministic Markdown; direct and real-iteration resumed terminal artifact directories are byte-identical in a clean environment with no Python or Node lookup and fallback 0; HIP C2, arbitrary ModelIR assembly, durable service jobs, engineering acceptance, PDF rendering and C6 remain open"
     },
     "nonlinear_ndtha_cpu": {
       "status": "implemented",

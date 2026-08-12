@@ -155,7 +155,7 @@ struct Case {
     CHECK(restart.sparse_linear_advance != nullptr);
     CHECK((restart.capabilities & SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU) != 0U);
     CHECK(SA_API_V1_9_MIN_SIZE == offsetof(sa_api_v1, sparse_linear_begin));
-    CHECK(SA_API_V1_10_MIN_SIZE == sizeof(sa_api_v1));
+    CHECK(SA_API_V1_10_MIN_SIZE == offsetof(sa_api_v1, nonlinear_static_begin));
     return true;
 }
 

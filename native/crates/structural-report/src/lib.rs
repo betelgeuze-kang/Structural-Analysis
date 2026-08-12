@@ -23,6 +23,10 @@ use structural_contracts::spectral_product::{
     build_dense_spectral_report_ir_v1, DenseSpectralReportIrDocumentV1,
     DenseSpectralResultIrDocumentV1, SpectralAnalysisKindV1, SpectralModeV1,
 };
+use structural_contracts::static_product::{
+    build_nonlinear_static_report_ir_v1, NonlinearStaticReportIrDocumentV1,
+    NonlinearStaticResultIrDocumentV1,
+};
 
 /// Exact `ReportIR` plus deterministic Markdown document source suitable for a later PDF renderer.
 #[derive(Clone, Debug)]
@@ -42,6 +46,13 @@ pub struct DenseSpectralReportBundleV1 {
 #[derive(Clone, Debug)]
 pub struct SparseLinearReportBundleV1 {
     pub report_ir: SparseLinearReportIrDocumentV1,
+    pub document_source: String,
+}
+
+/// Exact nonlinear-static `ReportIR` plus deterministic Markdown document source.
+#[derive(Clone, Debug)]
+pub struct NonlinearStaticReportBundleV1 {
+    pub report_ir: NonlinearStaticReportIrDocumentV1,
     pub document_source: String,
 }
 
@@ -295,6 +306,105 @@ pub fn build_sparse_linear_report_v1(
     .expect("String writes cannot fail");
     let report_ir = build_sparse_linear_report_ir_v1(result, document.as_bytes())?;
     Ok(SparseLinearReportBundleV1 {
+        report_ir,
+        document_source: document,
+    })
+}
+
+/// Project one converged nonlinear-static `ResultIR` into deterministic report artifacts.
+///
+/// # Errors
+///
+/// Returns a contract error if the exact result cannot be rendered or bound into a canonical,
+/// self-hashed `ReportIR`.
+pub fn build_nonlinear_static_report_v1(
+    result: &NonlinearStaticResultIrDocumentV1,
+) -> Result<NonlinearStaticReportBundleV1, ProductIrContractError> {
+    let source = result.result();
+    let mut document = String::new();
+    writeln!(&mut document, "# Nonlinear Static Analysis Report")
+        .expect("String writes cannot fail");
+    writeln!(&mut document).expect("String writes cannot fail");
+    writeln!(&mut document, "- Case: `{}`", source.case_id).expect("String writes cannot fail");
+    writeln!(&mut document, "- Authority: `bounded_candidate`").expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Story count: {}",
+        source.summary.story_count
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Newton iterations: {}",
+        source.summary.iterations
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Final residual infinity norm: {:.17e} N",
+        source.summary.residual_inf
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Maximum absolute displacement: {:.17e} m",
+        source.summary.max_abs_displacement_m
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Top displacement: {:.17e} m",
+        source.summary.top_displacement_m
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Base shear: {:.17e} kN",
+        source.summary.base_shear_kn
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Plastic stories: {}",
+        source.summary.plastic_story_count
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Line-search backtracks: {}",
+        source.summary.line_search_backtracks
+    )
+    .expect("String writes cannot fail");
+    writeln!(&mut document, "- Backend: `cpu` / `fp64` / fallback `0`")
+        .expect("String writes cannot fail");
+    writeln!(&mut document, "- Result hash: `{}`", source.result_hash)
+        .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Model hash: `{}`",
+        source.identity.model_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- State hash: `{}`",
+        source.identity.state_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "- Execution hash: `{}`",
+        source.identity.execution_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(&mut document).expect("String writes cannot fail");
+    writeln!(
+        &mut document,
+        "> This report is a deterministic projection of a bounded story-frame CPU Newton candidate; it is not general whole-model authority, engineering acceptance, or design-code compliance."
+    )
+    .expect("String writes cannot fail");
+    let report_ir = build_nonlinear_static_report_ir_v1(result, document.as_bytes())?;
+    Ok(NonlinearStaticReportBundleV1 {
         report_ir,
         document_source: document,
     })

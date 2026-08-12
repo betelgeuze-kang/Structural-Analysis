@@ -142,6 +142,10 @@ symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
 - v1.10은 0x0001000a이며 table을 160 bytes로 append한다. offset 144와 152의 bounded sparse
   PCG begin/advance operation은 네 caller-owned state vector와 complete scalar iteration state를
   사용한다. v1.0-v1.9 요청에는 두 slot과 restart capability bit가 모두 null/clear다.
+- v1.11은 0x0001000b이며 table을 176 bytes로 append한다. offset 160과 168의 bounded
+  nonlinear-static begin/advance operation은 complete caller-owned Newton iteration state와
+  displacement vector를 사용한다. v1.0-v1.10 요청에는 두 slot과 restart capability bit가
+  모두 null/clear다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -181,8 +185,9 @@ serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 ### 5.4 ModelIR v1.1 table extension
 
 과거 v1.0-v1.6 consumer가 제공하던 128-byte table, v1.7의 136-byte table, v1.8-v1.9의
-144-byte table과 첫 24-byte prefix는 계속 지원한다. 현재 header의 table은 v1.10 sparse
-restart tail을 포함해 160 bytes이며 caller의 `struct_size`까지만 쓴다.
+144-byte table, v1.10의 160-byte table과 첫 24-byte prefix는 계속 지원한다. 현재 header의
+table은 v1.11 nonlinear-static restart tail을 포함해 176 bytes이며 caller의
+`struct_size`까지만 쓴다.
 v1.0 요청에는 이후 slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability
 bit를 제공한다.
 

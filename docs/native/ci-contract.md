@@ -54,6 +54,9 @@ Jobs:
      execution
    - ABI v1.10 complete sparse-PCG state layout, append-only v1.9 null-slot compatibility,
      failure-atomic begin/advance, real-iteration serialization and terminal-state idempotence
+   - ABI v1.11 complete nonlinear-static Newton state layout, append-only v1.10 null-slot
+     compatibility, failure-atomic begin/advance, real-iteration serialization and terminal-state
+     idempotence
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -168,6 +171,10 @@ Required jobs:
      checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared linear-run/
      linear-resume byte parity, durable numerical-terminal receipts and explicit preservation of
      the open protected-runner C2 gate
+   - bounded story-frame strict request -> ABI v1.11 real Newton iteration begin/advance ->
+     SASTAC01 checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared
+     static-run/static-resume byte parity, durable nonconvergence receipts and explicit
+     preservation of the open HIP C2 gate
 6. merge-product aggregate
    - latest exact-head and merge-ref only
 

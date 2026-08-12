@@ -18,7 +18,11 @@ only the 9-node midpoint-load support/theory matrix to Python C1. The next slice
 nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller. An independent
 NumPy dense-matrix oracle promotes only a five-case 1/3-story topology, elastic/plastic,
 mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity, HIP C2 and
-runtime cutover remain open. The third R3 slice moves nonlinear NDTHA to a serial FP64 C++
+sequential runtime cutover remain open. ABI v1.11 separately adds complete real-iteration
+caller-owned Newton begin/advance state. The pointer-free `SASTAC01` checkpoint and public
+`static-run`/`static-resume` ResultIR/ReportIR flow provide bounded CPU C4/C5 implementation
+evidence without promoting the numerical family past C1; protected HIP C2, arbitrary ModelIR
+assembly, durable-job integration and C6 remain open. The third R3 slice moves nonlinear NDTHA to a serial FP64 C++
 Newmark/Newton kernel sharing the static constitutive/assembly source, exposes eleven disjoint
 caller-owned response channels through ABI v1.4, and preserves the complete frozen 2-story,
 3-step legacy Rust fixture. A separate NumPy dense-matrix oracle and strict product-golden wire
@@ -266,7 +270,8 @@ uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA ada
 uses the next append-only slot at offset 112 for bounded CPU reference elements. ABI v1.8 adds
 canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes offsets 128 and 136 for bounded modal
 and linear-buckling CPU operations. ABI v1.10 appends sparse PCG begin and advance operations at
-offsets 144 and 152; the current table is 160 bytes. Existing callers may continue to provide
+offsets 144 and 152. ABI v1.11 appends nonlinear-static Newton begin and advance operations at
+offsets 160 and 168; the current table is 176 bytes. Existing callers may continue to provide
 their older struct size, and every request exposes later-minor slots as null.
 
 `structural_runtime_ffi` is the R3 temporary compatibility member while retaining the existing

@@ -26,7 +26,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_10;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_11;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -127,6 +127,8 @@ pub struct SaApiV1 {
     pub buckling_solve: Option<SaBucklingSolveFnV1>,
     pub sparse_linear_begin: Option<SaSparseLinearBeginFnV1>,
     pub sparse_linear_advance: Option<SaSparseLinearAdvanceFnV1>,
+    pub nonlinear_static_begin: Option<SaNonlinearStaticBeginFnV1>,
+    pub nonlinear_static_advance: Option<SaNonlinearStaticAdvanceFnV1>,
 }
 
 impl Default for SaApiV1 {
@@ -153,6 +155,8 @@ impl Default for SaApiV1 {
             buckling_solve: None,
             sparse_linear_begin: None,
             sparse_linear_advance: None,
+            nonlinear_static_begin: None,
+            nonlinear_static_advance: None,
         }
     }
 }
@@ -184,7 +188,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 160);
+        assert_eq!(size_of::<SaApiV1>(), 176);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -199,6 +203,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, buckling_solve), 136);
         assert_eq!(offset_of!(SaApiV1, sparse_linear_begin), 144);
         assert_eq!(offset_of!(SaApiV1, sparse_linear_advance), 152);
+        assert_eq!(offset_of!(SaApiV1, nonlinear_static_begin), 160);
+        assert_eq!(offset_of!(SaApiV1, nonlinear_static_advance), 168);
         assert_eq!(SA_ERR_NONCONVERGENCE, 1600);
     }
 }

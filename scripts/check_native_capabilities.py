@@ -30,6 +30,8 @@ EXPECTED_OWNERS = {
     "generalized_eigen_product_e2e": "structural-cli",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
+    "nonlinear_static_checkpoint": "structural-runtime",
+    "nonlinear_static_product_e2e": "structural-cli",
     "nonlinear_ndtha_cpu": "structural_solver_cpu",
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",

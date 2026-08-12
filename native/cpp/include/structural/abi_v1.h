@@ -33,7 +33,8 @@ extern "C" {
 #define SA_ABI_V1_8 UINT32_C(0x00010008)
 #define SA_ABI_V1_9 UINT32_C(0x00010009)
 #define SA_ABI_V1_10 UINT32_C(0x0001000a)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_10
+#define SA_ABI_V1_11 UINT32_C(0x0001000b)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_11
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -88,6 +89,7 @@ enum {
 #define SA_CAPABILITY_SPARSE_LINEAR_CPU UINT64_C(512)
 #define SA_CAPABILITY_GENERALIZED_EIGEN_CPU UINT64_C(1024)
 #define SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU UINT64_C(2048)
+#define SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU UINT64_C(4096)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_NDTHA_MAX_STORY_COUNT UINT32_C(1000000)
@@ -258,6 +260,33 @@ typedef struct sa_nonlinear_static_result_v1 {
     uint32_t fallback_count;
     uint64_t reserved;
 } sa_nonlinear_static_result_v1;
+
+enum {
+    SA_NONLINEAR_STATIC_EXECUTION_ACTIVE = 0,
+    SA_NONLINEAR_STATIC_EXECUTION_CONVERGED = 1,
+    SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED = 2
+};
+
+/* v1.11 complete caller-owned Newton state at a published iteration boundary. */
+typedef struct sa_nonlinear_static_state_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint32_t status;
+    uint32_t iterations;
+    uint32_t line_search_backtracks;
+    uint32_t plastic_story_count;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint32_t reserved_u32;
+    double residual_inf;
+    double residual_l2;
+    double max_abs_displacement_m;
+    double top_displacement_m;
+    double base_shear_kn;
+    uint64_t output_length;
+    sa_mut_buffer_view_v1 displacement_m;
+    uint64_t reserved[2];
+} sa_nonlinear_static_state_v1;
 
 typedef struct sa_nonlinear_ndtha_config_v1 {
     uint32_t abi_version;
@@ -686,6 +715,27 @@ typedef sa_status_code_v1 (*sa_nonlinear_static_solve_fn_v1)(
     sa_nonlinear_static_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_nonlinear_static_begin_fn_v1)(
+    const sa_nonlinear_static_config_v1* config,
+    const sa_buffer_view_v1* story_stiffness_n_per_m,
+    const sa_buffer_view_v1* story_height_m,
+    const sa_buffer_view_v1* story_axial_n,
+    const sa_buffer_view_v1* story_yield_drift_m,
+    const sa_buffer_view_v1* floor_load_n,
+    sa_nonlinear_static_state_v1* state,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_nonlinear_static_advance_fn_v1)(
+    const sa_nonlinear_static_config_v1* config,
+    const sa_buffer_view_v1* story_stiffness_n_per_m,
+    const sa_buffer_view_v1* story_height_m,
+    const sa_buffer_view_v1* story_axial_n,
+    const sa_buffer_view_v1* story_yield_drift_m,
+    const sa_buffer_view_v1* floor_load_n,
+    uint32_t iteration_budget,
+    sa_nonlinear_static_state_v1* state,
+    sa_error_buffer_v1* error);
+
 typedef sa_status_code_v1 (*sa_nonlinear_ndtha_solve_fn_v1)(
     const sa_nonlinear_ndtha_config_v1* config,
     const sa_nonlinear_ndtha_inputs_v1* inputs,
@@ -778,6 +828,8 @@ typedef struct sa_api_v1 {
     sa_buckling_solve_fn_v1 buckling_solve;
     sa_sparse_linear_begin_fn_v1 sparse_linear_begin;
     sa_sparse_linear_advance_fn_v1 sparse_linear_advance;
+    sa_nonlinear_static_begin_fn_v1 nonlinear_static_begin;
+    sa_nonlinear_static_advance_fn_v1 nonlinear_static_advance;
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -791,7 +843,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_7_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_solve))
 #define SA_API_V1_8_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, modal_solve))
 #define SA_API_V1_9_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_begin))
-#define SA_API_V1_10_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
+#define SA_API_V1_10_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_begin))
+#define SA_API_V1_11_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

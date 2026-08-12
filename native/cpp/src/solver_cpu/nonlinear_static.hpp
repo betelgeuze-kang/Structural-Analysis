@@ -38,6 +38,42 @@ struct NonlinearStaticResult {
     std::vector<double> displacement_m;
 };
 
+enum class NonlinearStaticExecutionStatus : std::uint32_t {
+    active = 0U,
+    converged = 1U,
+    nonconverged = 2U,
+};
+
+/// Complete deterministic state at a published Newton iteration boundary.
+struct NonlinearStaticExecutionState {
+    NonlinearStaticExecutionStatus status {NonlinearStaticExecutionStatus::active};
+    std::uint32_t iterations {0U};
+    std::uint32_t line_search_backtracks {0U};
+    double residual_inf {0.0};
+    double residual_l2 {0.0};
+    double max_abs_displacement_m {0.0};
+    double top_displacement_m {0.0};
+    double base_shear_kn {0.0};
+    std::uint32_t plastic_story_count {0U};
+    std::vector<double> displacement_m;
+};
+
+/// Validate the problem and construct the exact zero-displacement Newton boundary.
+[[nodiscard]] NonlinearStaticExecutionState begin_nonlinear_static(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs);
+
+/// Advance a complete state by at most `iteration_budget` Newton loop iterations.
+void advance_nonlinear_static(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs,
+    std::uint32_t iteration_budget,
+    NonlinearStaticExecutionState& state);
+
+/// Project any validated terminal or active state into the stable result structure.
+[[nodiscard]] NonlinearStaticResult nonlinear_static_result(
+    const NonlinearStaticExecutionState& state);
+
 /// Run the deterministic serial FP64 story-frame Newton reference kernel.
 [[nodiscard]] NonlinearStaticResult solve_nonlinear_static(
     const NonlinearStaticConfig& config,

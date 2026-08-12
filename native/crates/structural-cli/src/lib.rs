@@ -11,6 +11,7 @@ mod report;
 mod service;
 mod sparse_product;
 mod spectral_product;
+mod static_product;
 
 use std::fmt;
 
@@ -50,6 +51,10 @@ pub use sparse_product::{
 pub use spectral_product::{
     execute_dense_spectral_analysis, publish_dense_spectral_analysis, DenseSpectralProductError,
     DenseSpectralRunOutcomeV1,
+};
+pub use static_product::{
+    execute_nonlinear_static_analysis, publish_nonlinear_static_analysis,
+    NonlinearStaticProductError, NonlinearStaticRunOutcomeV1,
 };
 
 /// Failure boundary for a complete native `ModelIR` validation request.

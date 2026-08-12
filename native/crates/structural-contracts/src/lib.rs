@@ -15,6 +15,7 @@ pub mod product_ir;
 pub mod solver_cpu;
 pub mod sparse_product;
 pub mod spectral_product;
+pub mod static_product;
 
 /// ABI family consumed by the wire-contract crates.
 pub const ABI_V1_0: u32 = 0x0001_0000;

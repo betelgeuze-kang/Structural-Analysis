@@ -22,15 +22,15 @@ namespace {
     return std::abs(actual - expected) <= 1.0e-15;
 }
 
-[[nodiscard]] sa_api_v1 load_api() {
+[[nodiscard]] sa_api_v1 load_api(const std::uint32_t version = SA_ABI_V1_3) {
     const sa_api_request_v1 request {
-        SA_ABI_V1_3,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_api_request_v1)),
         0U,
         {0U, 0U, 0U},
     };
     sa_api_v1 api {};
-    api.abi_version = SA_ABI_V1_3;
+    api.abi_version = version;
     api.struct_size = static_cast<std::uint32_t>(sizeof(sa_api_v1));
     if (sa_get_api_v1(&request, &api, nullptr) != SA_OK) {
         return {};
@@ -38,9 +38,10 @@ namespace {
     return api;
 }
 
-[[nodiscard]] sa_nonlinear_static_config_v1 config() {
+[[nodiscard]] sa_nonlinear_static_config_v1 config(
+    const std::uint32_t version = SA_ABI_V1_3) {
     return {
-        SA_ABI_V1_3,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_nonlinear_static_config_v1)),
         3U,
         60U,
@@ -55,9 +56,12 @@ namespace {
     };
 }
 
-[[nodiscard]] sa_buffer_view_v1 input(const double* const data, const std::uint64_t length = 3U) {
+[[nodiscard]] sa_buffer_view_v1 input(
+    const double* const data,
+    const std::uint64_t length = 3U,
+    const std::uint32_t version = SA_ABI_V1_3) {
     return {
-        SA_ABI_V1_3,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
         data,
         length,
@@ -69,9 +73,12 @@ namespace {
     };
 }
 
-[[nodiscard]] sa_mut_buffer_view_v1 output(double* const data, const std::uint64_t length = 3U) {
+[[nodiscard]] sa_mut_buffer_view_v1 output(
+    double* const data,
+    const std::uint64_t length = 3U,
+    const std::uint32_t version = SA_ABI_V1_3) {
     return {
-        SA_ABI_V1_3,
+        version,
         static_cast<std::uint32_t>(sizeof(sa_mut_buffer_view_v1)),
         data,
         length,
@@ -392,6 +399,171 @@ struct Inputs {
     return true;
 }
 
+struct RestartState {
+    std::array<double, 3> displacement {};
+    sa_nonlinear_static_state_v1 descriptor {
+        SA_ABI_V1_11,
+        static_cast<std::uint32_t>(sizeof(sa_nonlinear_static_state_v1)),
+        SA_NONLINEAR_STATIC_EXECUTION_ACTIVE,
+        0U,
+        0U,
+        0U,
+        SA_EXECUTION_BACKEND_CPU,
+        0U,
+        0U,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        3U,
+        output(displacement.data(), displacement.size(), SA_ABI_V1_11),
+        {0U, 0U},
+    };
+};
+
+[[nodiscard]] bool same_restart_state(const RestartState& left, const RestartState& right) {
+    const auto& a = left.descriptor;
+    const auto& b = right.descriptor;
+    return a.abi_version == b.abi_version && a.struct_size == b.struct_size
+        && a.status == b.status && a.iterations == b.iterations
+        && a.line_search_backtracks == b.line_search_backtracks
+        && a.plastic_story_count == b.plastic_story_count
+        && a.execution_backend == b.execution_backend && a.fallback_count == b.fallback_count
+        && a.reserved_u32 == b.reserved_u32 && a.residual_inf == b.residual_inf
+        && a.residual_l2 == b.residual_l2
+        && a.max_abs_displacement_m == b.max_abs_displacement_m
+        && a.top_displacement_m == b.top_displacement_m
+        && a.base_shear_kn == b.base_shear_kn && a.output_length == b.output_length
+        && a.reserved[0] == b.reserved[0] && a.reserved[1] == b.reserved[1]
+        && left.displacement == right.displacement;
+}
+
+[[nodiscard]] bool v1_11_restart_is_append_only_complete_and_failure_atomic() {
+    const auto prior = load_api(SA_ABI_V1_10);
+    CHECK(prior.nonlinear_static_begin == nullptr);
+    CHECK(prior.nonlinear_static_advance == nullptr);
+    CHECK((prior.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU) == 0U);
+    const auto api = load_api(SA_ABI_V1_11);
+    CHECK(api.nonlinear_static_begin != nullptr);
+    CHECK(api.nonlinear_static_advance != nullptr);
+    CHECK((api.capabilities & SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU) != 0U);
+    CHECK(SA_API_V1_10_MIN_SIZE == offsetof(sa_api_v1, nonlinear_static_begin));
+    CHECK(SA_API_V1_11_MIN_SIZE == sizeof(sa_api_v1));
+
+    const auto cfg = config(SA_ABI_V1_11);
+    Inputs values;
+    const auto stiffness = input(values.stiffness.data(), 3U, SA_ABI_V1_11);
+    const auto height = input(values.height.data(), 3U, SA_ABI_V1_11);
+    const auto axial = input(values.axial.data(), 3U, SA_ABI_V1_11);
+    const auto yield_drift = input(values.yield_drift.data(), 3U, SA_ABI_V1_11);
+    const auto load = input(values.load.data(), 3U, SA_ABI_V1_11);
+    RestartState direct;
+    RestartState segmented;
+    CHECK(api.nonlinear_static_begin(
+              &cfg,
+              &stiffness,
+              &height,
+              &axial,
+              &yield_drift,
+              &load,
+              &direct.descriptor,
+              nullptr)
+          == SA_OK);
+    CHECK(api.nonlinear_static_begin(
+              &cfg,
+              &stiffness,
+              &height,
+              &axial,
+              &yield_drift,
+              &load,
+              &segmented.descriptor,
+              nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, segmented));
+    const auto initial = segmented;
+    CHECK(api.nonlinear_static_advance(
+              &cfg,
+              &stiffness,
+              &height,
+              &axial,
+              &yield_drift,
+              &load,
+              0U,
+              &segmented.descriptor,
+              nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(segmented, initial));
+    CHECK(api.nonlinear_static_advance(
+              &cfg,
+              &stiffness,
+              &height,
+              &axial,
+              &yield_drift,
+              &load,
+              1U,
+              &segmented.descriptor,
+              nullptr)
+          == SA_OK);
+    CHECK(segmented.descriptor.status == SA_NONLINEAR_STATIC_EXECUTION_ACTIVE);
+    CHECK(segmented.descriptor.iterations == 1U);
+    CHECK(api.nonlinear_static_advance(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load, 2U,
+              &segmented.descriptor, nullptr)
+          == SA_OK);
+    CHECK(api.nonlinear_static_advance(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load, UINT32_MAX,
+              &segmented.descriptor, nullptr)
+          == SA_OK);
+    CHECK(api.nonlinear_static_advance(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load, UINT32_MAX,
+              &direct.descriptor, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, segmented));
+    CHECK(direct.descriptor.status == SA_NONLINEAR_STATIC_EXECUTION_CONVERGED);
+    CHECK(direct.descriptor.iterations == 6U);
+    const auto terminal = direct;
+    CHECK(api.nonlinear_static_advance(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load, 1U,
+              &direct.descriptor, nullptr)
+          == SA_OK);
+    CHECK(same_restart_state(direct, terminal));
+
+    auto corrupt = segmented;
+    corrupt.descriptor.displacement_m.data = corrupt.displacement.data();
+    corrupt.descriptor.residual_inf = std::numeric_limits<double>::quiet_NaN();
+    const auto corrupt_before = corrupt;
+    CHECK(api.nonlinear_static_advance(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load, 1U,
+              &corrupt.descriptor, nullptr)
+          == SA_ERR_CHECKPOINT_MISMATCH);
+    CHECK(std::memcmp(&corrupt.descriptor, &corrupt_before.descriptor, sizeof(corrupt.descriptor))
+          == 0);
+    CHECK(corrupt.displacement == corrupt_before.displacement);
+
+    auto overlapping = RestartState {};
+    overlapping.descriptor.displacement_m.data = values.stiffness.data();
+    CHECK(api.nonlinear_static_begin(
+              &cfg, &stiffness, &height, &axial, &yield_drift, &load,
+              &overlapping.descriptor, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+
+    auto exhausted_config = cfg;
+    exhausted_config.max_iter = 1U;
+    RestartState exhausted;
+    CHECK(api.nonlinear_static_begin(
+              &exhausted_config, &stiffness, &height, &axial, &yield_drift, &load,
+              &exhausted.descriptor, nullptr)
+          == SA_OK);
+    CHECK(api.nonlinear_static_advance(
+              &exhausted_config, &stiffness, &height, &axial, &yield_drift, &load, UINT32_MAX,
+              &exhausted.descriptor, nullptr)
+          == SA_OK);
+    CHECK(exhausted.descriptor.status == SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED);
+    CHECK(exhausted.descriptor.iterations == 1U);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -400,6 +572,7 @@ int main() {
         caller_owned_output_matches_the_frozen_legacy_result,
         invalid_and_nonconverged_calls_are_atomic,
         output_metadata_and_aliasing_fail_closed,
+        v1_11_restart_is_append_only_complete_and_failure_atomic,
     };
     for (const auto test : tests) {
         if (!test()) {

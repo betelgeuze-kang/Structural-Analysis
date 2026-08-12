@@ -2,6 +2,7 @@
 #include "story_frame.hpp"
 
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -22,58 +23,168 @@ namespace {
         && inputs.floor_load_n.size() == expected;
 }
 
-} // namespace
+struct WorkBuffers {
+    explicit WorkBuffers(const std::size_t count)
+        : internal_force(count, 0.0),
+          lower(count - 1U, 0.0),
+          diagonal(count, 0.0),
+          upper(count - 1U, 0.0),
+          residual(count, 0.0),
+          increment(count, 0.0),
+          trial(count, 0.0) {}
 
-NonlinearStaticResult solve_nonlinear_static(
-    const NonlinearStaticConfig& config,
-    const NonlinearStaticInputs& inputs) {
-    if (!spans_match(config, inputs)) {
-        throw std::invalid_argument("nonlinear static input lengths do not match story_count");
-    }
+    std::vector<double> internal_force;
+    std::vector<double> lower;
+    std::vector<double> diagonal;
+    std::vector<double> upper;
+    std::vector<double> residual;
+    std::vector<double> increment;
+    std::vector<double> trial;
+};
 
-    const auto count = static_cast<std::size_t>(config.story_count);
-    const detail::StoryFrameConstitutiveConfig constitutive {
-        config.hardening_ratio,
-        config.pdelta_factor,
-    };
-    const detail::StoryFrameInputs story_inputs {
+[[nodiscard]] detail::StoryFrameConstitutiveConfig constitutive_config(
+    const NonlinearStaticConfig& config) {
+    return {config.hardening_ratio, config.pdelta_factor};
+}
+
+[[nodiscard]] detail::StoryFrameInputs story_inputs(const NonlinearStaticInputs& inputs) {
+    return {
         inputs.story_stiffness_n_per_m,
         inputs.story_height_m,
         inputs.story_axial_n,
         inputs.story_yield_drift_m,
     };
-    std::vector<double> displacement(count, 0.0);
-    std::vector<double> internal_force(count, 0.0);
-    std::vector<double> lower(count - 1U, 0.0);
-    std::vector<double> diagonal(count, 0.0);
-    std::vector<double> upper(count - 1U, 0.0);
-    std::vector<double> residual(count, 0.0);
-    std::vector<double> increment(count, 0.0);
-    std::vector<double> trial(count, 0.0);
+}
 
-    bool converged = false;
-    std::uint32_t iterations = 0U;
-    std::uint32_t backtracks = 0U;
-    for (std::uint32_t iteration = 1U; iteration <= config.max_iter; ++iteration) {
+void update_derived_state(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs,
+    WorkBuffers& work,
+    NonlinearStaticExecutionState& state) {
+    const auto assembly = detail::assemble_story_frame(
+        state.displacement_m,
+        constitutive_config(config),
+        story_inputs(inputs),
+        work.internal_force,
+        work.lower,
+        work.diagonal,
+        work.upper);
+    for (std::size_t index = 0U; index < state.displacement_m.size(); ++index) {
+        work.residual[index] = inputs.floor_load_n[index] - work.internal_force[index];
+    }
+    state.residual_inf = detail::norm_inf(work.residual);
+    state.residual_l2 = detail::norm_l2(work.residual);
+    state.max_abs_displacement_m = 0.0;
+    for (const auto value : state.displacement_m) {
+        state.max_abs_displacement_m =
+            std::max(state.max_abs_displacement_m, std::abs(value));
+    }
+    state.top_displacement_m = state.displacement_m.back();
+    state.base_shear_kn = assembly.base_shear_kn;
+    state.plastic_story_count = assembly.plastic_story_count;
+}
+
+[[nodiscard]] bool same_bits(const double left, const double right) {
+    return std::bit_cast<std::uint64_t>(left) == std::bit_cast<std::uint64_t>(right);
+}
+
+void validate_state(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs,
+    const NonlinearStaticExecutionState& state) {
+    const auto count = static_cast<std::size_t>(config.story_count);
+    if (!spans_match(config, inputs) || state.displacement_m.size() != count
+        || state.iterations > config.max_iter
+        || !std::all_of(state.displacement_m.begin(), state.displacement_m.end(), [](const double value) {
+               return std::isfinite(value);
+           })) {
+        throw std::invalid_argument("nonlinear static restart state shape is invalid");
+    }
+    WorkBuffers work(count);
+    auto expected = state;
+    update_derived_state(config, inputs, work, expected);
+    const bool derived_valid = same_bits(state.residual_inf, expected.residual_inf)
+        && same_bits(state.residual_l2, expected.residual_l2)
+        && same_bits(state.max_abs_displacement_m, expected.max_abs_displacement_m)
+        && same_bits(state.top_displacement_m, expected.top_displacement_m)
+        && same_bits(state.base_shear_kn, expected.base_shear_kn)
+        && state.plastic_story_count == expected.plastic_story_count;
+    const bool finite = std::isfinite(state.residual_inf) && std::isfinite(state.residual_l2)
+        && std::isfinite(state.max_abs_displacement_m)
+        && std::isfinite(state.top_displacement_m) && std::isfinite(state.base_shear_kn);
+    bool status_valid = false;
+    switch (state.status) {
+    case NonlinearStaticExecutionStatus::active:
+        status_valid = state.iterations < config.max_iter;
+        break;
+    case NonlinearStaticExecutionStatus::converged:
+        status_valid = state.iterations > 0U && state.iterations <= config.max_iter
+            && state.residual_inf <= config.tolerance;
+        break;
+    case NonlinearStaticExecutionStatus::nonconverged:
+        status_valid = state.iterations > 0U && state.iterations <= config.max_iter;
+        break;
+    }
+    if (!derived_valid || !finite || !status_valid) {
+        throw std::invalid_argument("nonlinear static restart state is inconsistent");
+    }
+}
+
+} // namespace
+
+NonlinearStaticExecutionState begin_nonlinear_static(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs) {
+    if (!spans_match(config, inputs)) {
+        throw std::invalid_argument("nonlinear static input lengths do not match story_count");
+    }
+    const auto count = static_cast<std::size_t>(config.story_count);
+    WorkBuffers work(count);
+    NonlinearStaticExecutionState state;
+    state.displacement_m.assign(count, 0.0);
+    update_derived_state(config, inputs, work, state);
+    return state;
+}
+
+void advance_nonlinear_static(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs,
+    std::uint32_t iteration_budget,
+    NonlinearStaticExecutionState& state) {
+    validate_state(config, inputs, state);
+    if (state.status != NonlinearStaticExecutionStatus::active || iteration_budget == 0U) {
+        return;
+    }
+
+    const auto count = static_cast<std::size_t>(config.story_count);
+    const auto constitutive = constitutive_config(config);
+    const auto frame_inputs = story_inputs(inputs);
+    WorkBuffers work(count);
+    while (iteration_budget > 0U && state.status == NonlinearStaticExecutionStatus::active) {
+        const auto iteration = state.iterations + 1U;
         static_cast<void>(detail::assemble_story_frame(
-            displacement,
+            state.displacement_m,
             constitutive,
-            story_inputs,
-            internal_force,
-            lower,
-            diagonal,
-            upper));
+            frame_inputs,
+            work.internal_force,
+            work.lower,
+            work.diagonal,
+            work.upper));
         for (std::size_t index = 0U; index < count; ++index) {
-            residual[index] = inputs.floor_load_n[index] - internal_force[index];
+            work.residual[index] = inputs.floor_load_n[index] - work.internal_force[index];
         }
-        const double residual_inf = detail::norm_inf(residual);
+        const double residual_inf = detail::norm_inf(work.residual);
         if (std::isfinite(residual_inf) && residual_inf <= config.tolerance) {
-            converged = true;
-            iterations = iteration;
+            state.iterations = iteration;
+            state.status = NonlinearStaticExecutionStatus::converged;
+            update_derived_state(config, inputs, work, state);
             break;
         }
-        if (!detail::solve_tridiagonal(lower, diagonal, upper, residual, increment)) {
-            iterations = iteration;
+        if (!detail::solve_tridiagonal(
+                work.lower, work.diagonal, work.upper, work.residual, work.increment)) {
+            state.iterations = iteration;
+            state.status = NonlinearStaticExecutionStatus::nonconverged;
+            update_derived_state(config, inputs, work, state);
             break;
         }
 
@@ -83,74 +194,66 @@ NonlinearStaticResult solve_nonlinear_static(
         std::uint32_t local_backtracks = 0U;
         while (scale >= config.line_search_min) {
             for (std::size_t index = 0U; index < count; ++index) {
-                trial[index] = displacement[index] + scale * increment[index];
+                work.trial[index] = state.displacement_m[index] + scale * work.increment[index];
             }
             static_cast<void>(detail::assemble_story_frame(
-                trial,
+                work.trial,
                 constitutive,
-                story_inputs,
-                internal_force,
-                lower,
-                diagonal,
-                upper));
+                frame_inputs,
+                work.internal_force,
+                work.lower,
+                work.diagonal,
+                work.upper));
             for (std::size_t index = 0U; index < count; ++index) {
-                residual[index] = inputs.floor_load_n[index] - internal_force[index];
+                work.residual[index] = inputs.floor_load_n[index] - work.internal_force[index];
             }
-            const double trial_norm = detail::norm_inf(residual);
+            const double trial_norm = detail::norm_inf(work.residual);
             if (std::isfinite(trial_norm) && trial_norm < baseline) {
-                displacement = trial;
+                state.displacement_m = work.trial;
                 accepted = true;
                 break;
             }
             scale *= config.line_search_decay;
             ++local_backtracks;
         }
-        backtracks += local_backtracks;
-        iterations = iteration;
+        state.line_search_backtracks += local_backtracks;
+        state.iterations = iteration;
+        update_derived_state(config, inputs, work, state);
         if (!accepted) {
+            state.status = NonlinearStaticExecutionStatus::nonconverged;
             break;
         }
+        if (state.iterations == config.max_iter) {
+            state.status = state.residual_inf <= config.tolerance
+                ? NonlinearStaticExecutionStatus::converged
+                : NonlinearStaticExecutionStatus::nonconverged;
+            break;
+        }
+        --iteration_budget;
     }
+}
 
-    const auto assembly = detail::assemble_story_frame(
-        displacement,
-        constitutive,
-        story_inputs,
-        internal_force,
-        lower,
-        diagonal,
-        upper);
-    for (std::size_t index = 0U; index < count; ++index) {
-        residual[index] = inputs.floor_load_n[index] - internal_force[index];
-    }
-    const double residual_inf = detail::norm_inf(residual);
-    const double residual_l2 = detail::norm_l2(residual);
-    double maximum_displacement = 0.0;
-    for (const auto value : displacement) {
-        maximum_displacement = std::max(maximum_displacement, std::abs(value));
-    }
-    const double top_displacement = displacement[count - 1U];
-    const bool finite_result = std::isfinite(residual_inf) && std::isfinite(residual_l2)
-        && std::isfinite(maximum_displacement) && std::isfinite(top_displacement)
-        && std::isfinite(assembly.base_shear_kn)
-        && std::all_of(displacement.begin(), displacement.end(), [](const auto value) {
-               return std::isfinite(value);
-           });
-    if (finite_result && residual_inf <= config.tolerance) {
-        converged = true;
-    }
+NonlinearStaticResult nonlinear_static_result(const NonlinearStaticExecutionState& state) {
     return {
-        converged && finite_result,
-        iterations,
-        residual_inf,
-        residual_l2,
-        maximum_displacement,
-        top_displacement,
-        assembly.base_shear_kn,
-        assembly.plastic_story_count,
-        backtracks,
-        std::move(displacement),
+        state.status == NonlinearStaticExecutionStatus::converged,
+        state.iterations,
+        state.residual_inf,
+        state.residual_l2,
+        state.max_abs_displacement_m,
+        state.top_displacement_m,
+        state.base_shear_kn,
+        state.plastic_story_count,
+        state.line_search_backtracks,
+        state.displacement_m,
     };
+}
+
+NonlinearStaticResult solve_nonlinear_static(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs) {
+    auto state = begin_nonlinear_static(config, inputs);
+    advance_nonlinear_static(config, inputs, UINT32_MAX, state);
+    return nonlinear_static_result(state);
 }
 
 } // namespace structural::solver_cpu

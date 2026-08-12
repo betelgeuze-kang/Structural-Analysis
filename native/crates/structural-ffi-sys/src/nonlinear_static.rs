@@ -3,8 +3,14 @@
 use crate::{SaBufferViewV1, SaErrorBufferV1, SaMutBufferViewV1, SaStatusCodeV1};
 
 pub const SA_ABI_V1_3: u32 = 0x0001_0003;
+pub const SA_ABI_V1_11: u32 = 0x0001_000b;
 pub const SA_CAPABILITY_NONLINEAR_STATIC_CPU: u64 = 1 << 4;
+pub const SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU: u64 = 1 << 12;
 pub const SA_NONLINEAR_STATIC_MAX_STORY_COUNT: u32 = 1_000_000;
+
+pub const SA_NONLINEAR_STATIC_EXECUTION_ACTIVE: u32 = 0;
+pub const SA_NONLINEAR_STATIC_EXECUTION_CONVERGED: u32 = 1;
+pub const SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED: u32 = 2;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
@@ -43,6 +49,28 @@ pub struct SaNonlinearStaticResultV1 {
     pub reserved: u64,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct SaNonlinearStaticStateV1 {
+    pub abi_version: u32,
+    pub struct_size: u32,
+    pub status: u32,
+    pub iterations: u32,
+    pub line_search_backtracks: u32,
+    pub plastic_story_count: u32,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+    pub reserved_u32: u32,
+    pub residual_inf: f64,
+    pub residual_l2: f64,
+    pub max_abs_displacement_m: f64,
+    pub top_displacement_m: f64,
+    pub base_shear_kn: f64,
+    pub output_length: u64,
+    pub displacement_m: SaMutBufferViewV1,
+    pub reserved: [u64; 2],
+}
+
 pub type SaNonlinearStaticSolveFnV1 = unsafe extern "C" fn(
     config: *const SaNonlinearStaticConfigV1,
     story_stiffness_n_per_m: *const SaBufferViewV1,
@@ -55,9 +83,32 @@ pub type SaNonlinearStaticSolveFnV1 = unsafe extern "C" fn(
     error: *mut SaErrorBufferV1,
 ) -> SaStatusCodeV1;
 
+pub type SaNonlinearStaticBeginFnV1 = unsafe extern "C" fn(
+    config: *const SaNonlinearStaticConfigV1,
+    story_stiffness_n_per_m: *const SaBufferViewV1,
+    story_height_m: *const SaBufferViewV1,
+    story_axial_n: *const SaBufferViewV1,
+    story_yield_drift_m: *const SaBufferViewV1,
+    floor_load_n: *const SaBufferViewV1,
+    state: *mut SaNonlinearStaticStateV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
+pub type SaNonlinearStaticAdvanceFnV1 = unsafe extern "C" fn(
+    config: *const SaNonlinearStaticConfigV1,
+    story_stiffness_n_per_m: *const SaBufferViewV1,
+    story_height_m: *const SaBufferViewV1,
+    story_axial_n: *const SaBufferViewV1,
+    story_yield_drift_m: *const SaBufferViewV1,
+    floor_load_n: *const SaBufferViewV1,
+    iteration_budget: u32,
+    state: *mut SaNonlinearStaticStateV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
 #[cfg(test)]
 mod tests {
-    use super::{SaNonlinearStaticConfigV1, SaNonlinearStaticResultV1};
+    use super::{SaNonlinearStaticConfigV1, SaNonlinearStaticResultV1, SaNonlinearStaticStateV1};
     use core::mem::{align_of, offset_of, size_of};
 
     #[test]
@@ -75,5 +126,13 @@ mod tests {
         assert_eq!(offset_of!(SaNonlinearStaticResultV1, base_shear_kn), 48);
         assert_eq!(offset_of!(SaNonlinearStaticResultV1, output_length), 64);
         assert_eq!(offset_of!(SaNonlinearStaticResultV1, execution_backend), 72);
+
+        assert_eq!(size_of::<SaNonlinearStaticStateV1>(), 152);
+        assert_eq!(align_of::<SaNonlinearStaticStateV1>(), 8);
+        assert_eq!(offset_of!(SaNonlinearStaticStateV1, status), 8);
+        assert_eq!(offset_of!(SaNonlinearStaticStateV1, residual_inf), 40);
+        assert_eq!(offset_of!(SaNonlinearStaticStateV1, output_length), 80);
+        assert_eq!(offset_of!(SaNonlinearStaticStateV1, displacement_m), 88);
+        assert_eq!(offset_of!(SaNonlinearStaticStateV1, reserved), 136);
     }
 }

@@ -167,8 +167,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   mixed-sign loads, P-delta and line-search backtracking. Displacement uses `1e-12 m`, residual
   `1e-7 N` and base shear `1e-10 kN` absolute tolerances; iteration/plastic/backtrack fields and
   nonconvergence taxonomy also match. The frozen legacy 3-story fixture remains byte-identical to
-  one product golden. Broader nonlinear input-space parity and HIP C2 remain open, and the legacy
-  Rust export is unchanged.
+  one product golden. ABI v1.11 adds complete caller-owned real-iteration Newton begin/advance
+  state through a safe Rust wrapper. Separate bounded CPU implementation slices now cover C4 and
+  C5: `SASTAC01` binds exact request/model/Newton-state/execution identities, and public
+  static-run/static-resume publish typed active/failure receipts or self-hashed
+  ResultIR/ReportIR/Markdown artifacts with direct/resumed byte identity and Python/Node lookup
+  removed. These do not bypass the open protected HIP C2 gate or promote the numerical family
+  beyond C1. Broader nonlinear input-space, arbitrary ModelIR assembly, durable jobs and C6 remain
+  open, and the legacy Rust export is unchanged.
 - The bounded `nonlinear_ndtha` story-frame slice is C1. Its serial FP64 C++ Newmark/Newton kernel
   shares constitutive assembly and recovery with nonlinear static, uses ABI v1.4 nested
   caller-owned descriptors and a safe Rust wrapper, and matches all 11 response channels plus the

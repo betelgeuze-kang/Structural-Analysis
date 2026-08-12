@@ -42,7 +42,7 @@ static_assert(offsetof(sa_mut_buffer_view_v1, flags) == 44U);
 static_assert(sizeof(sa_error_buffer_v1) == 32U);
 static_assert(offsetof(sa_error_buffer_v1, required) == 24U);
 static_assert(sizeof(sa_api_request_v1) == 40U);
-static_assert(sizeof(sa_api_v1) == 160U);
+static_assert(sizeof(sa_api_v1) == 176U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
@@ -57,6 +57,8 @@ static_assert(offsetof(sa_api_v1, modal_solve) == 128U);
 static_assert(offsetof(sa_api_v1, buckling_solve) == 136U);
 static_assert(offsetof(sa_api_v1, sparse_linear_begin) == 144U);
 static_assert(offsetof(sa_api_v1, sparse_linear_advance) == 152U);
+static_assert(offsetof(sa_api_v1, nonlinear_static_begin) == 160U);
+static_assert(offsetof(sa_api_v1, nonlinear_static_advance) == 168U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -76,6 +78,11 @@ static_assert(offsetof(sa_nonlinear_static_result_v1, residual_inf) == 16U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, base_shear_kn) == 48U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, output_length) == 64U);
 static_assert(offsetof(sa_nonlinear_static_result_v1, execution_backend) == 72U);
+static_assert(sizeof(sa_nonlinear_static_state_v1) == 152U);
+static_assert(offsetof(sa_nonlinear_static_state_v1, residual_inf) == 40U);
+static_assert(offsetof(sa_nonlinear_static_state_v1, output_length) == 80U);
+static_assert(offsetof(sa_nonlinear_static_state_v1, displacement_m) == 88U);
+static_assert(offsetof(sa_nonlinear_static_state_v1, reserved) == 136U);
 static_assert(sizeof(sa_nonlinear_ndtha_config_v1) == 144U);
 static_assert(offsetof(sa_nonlinear_ndtha_config_v1, story_count) == 8U);
 static_assert(offsetof(sa_nonlinear_ndtha_config_v1, dt_s) == 16U);
@@ -544,13 +551,14 @@ template <typename Value>
 [[nodiscard]] sa_status_code_v1 validate_nonlinear_input(
     const sa_buffer_view_v1* const view,
     const std::uint64_t expected_length,
+    const std::uint32_t expected_abi,
     const std::string_view label,
     sa_error_buffer_v1* const error) {
     if (!pointer_is_aligned(view)) {
         return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static input descriptor is null or misaligned");
     }
-    if (view->abi_version != SA_ABI_V1_3) {
-        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static input ABI is not v1.3");
+    if (view->abi_version != expected_abi) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static input ABI does not match its operation");
     }
     if (view->struct_size < sizeof(sa_buffer_view_v1)) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear static input struct_size is too small");
@@ -576,12 +584,13 @@ template <typename Value>
 [[nodiscard]] sa_status_code_v1 validate_nonlinear_output(
     const sa_mut_buffer_view_v1* const view,
     const std::uint64_t expected_length,
+    const std::uint32_t expected_abi,
     sa_error_buffer_v1* const error) {
     if (!pointer_is_aligned(view)) {
         return report_error(error, SA_ERR_INVALID_ARGUMENT, "nonlinear static output descriptor is null or misaligned");
     }
-    if (view->abi_version != SA_ABI_V1_3) {
-        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static output ABI is not v1.3");
+    if (view->abi_version != expected_abi) {
+        return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "nonlinear static output ABI does not match its operation");
     }
     if (view->struct_size < sizeof(sa_mut_buffer_view_v1)) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "nonlinear static output struct_size is too small");
@@ -736,6 +745,11 @@ template <typename Value>
         });
 }
 
+struct MemoryRegion {
+    const void* data;
+    std::uint64_t extent;
+};
+
 [[nodiscard]] sa_status_code_v1 nonlinear_static_boundary(
     const sa_nonlinear_static_config_v1* const config,
     const sa_buffer_view_v1* const story_stiffness_n_per_m,
@@ -812,13 +826,13 @@ template <typename Value>
         };
         for (std::size_t index = 0U; index < input_views.size(); ++index) {
             const auto status = validate_nonlinear_input(
-                input_views[index], expected_length, input_labels[index], error);
+                input_views[index], expected_length, SA_ABI_V1_3, input_labels[index], error);
             if (status != SA_OK) {
                 return status;
             }
         }
         const auto output_status =
-            validate_nonlinear_output(displacement_m, expected_length, error);
+            validate_nonlinear_output(displacement_m, expected_length, SA_ABI_V1_3, error);
         if (output_status != SA_OK) {
             return output_status;
         }
@@ -921,6 +935,474 @@ template <typename Value>
         });
 }
 
+[[nodiscard]] sa_status_code_v1 validate_nonlinear_static_restart_problem(
+    const sa_nonlinear_static_config_v1* const config,
+    const sa_buffer_view_v1* const story_stiffness_n_per_m,
+    const sa_buffer_view_v1* const story_height_m,
+    const sa_buffer_view_v1* const story_axial_n,
+    const sa_buffer_view_v1* const story_yield_drift_m,
+    const sa_buffer_view_v1* const floor_load_n,
+    std::uint64_t& count,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(config)) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart config is null or misaligned");
+    }
+    if (config->abi_version != SA_ABI_V1_11) {
+        return report_error(
+            error,
+            SA_ERR_ABI_VERSION_MISMATCH,
+            "nonlinear static restart config requires ABI v1.11");
+    }
+    if (config->struct_size < sizeof(sa_nonlinear_static_config_v1)) {
+        return report_error(
+            error,
+            SA_ERR_STRUCT_SIZE,
+            "nonlinear static restart config struct_size is too small");
+    }
+    if (config->flags != 0U || config->reserved_u32 != 0U
+        || std::any_of(
+            std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                return value != 0U;
+            })) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart config reserved fields are not zero");
+    }
+    const std::array scalar_values {
+        config->tolerance,
+        config->hardening_ratio,
+        config->line_search_decay,
+        config->line_search_min,
+        config->pdelta_factor,
+    };
+    if (std::any_of(scalar_values.begin(), scalar_values.end(), [](const auto value) {
+            return !std::isfinite(value);
+        })) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart config contains a non-finite scalar");
+    }
+    if (config->story_count == 0U
+        || config->story_count > SA_NONLINEAR_STATIC_MAX_STORY_COUNT
+        || config->max_iter == 0U || config->tolerance <= 0.0
+        || config->hardening_ratio < 0.0 || config->hardening_ratio > 1.0
+        || config->line_search_decay <= 0.0 || config->line_search_decay >= 1.0
+        || config->line_search_min <= 0.0 || config->line_search_min > 1.0
+        || config->pdelta_factor < 0.0) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart config is outside the v1.11 domain");
+    }
+    count = config->story_count;
+    const std::array input_views {
+        story_stiffness_n_per_m,
+        story_height_m,
+        story_axial_n,
+        story_yield_drift_m,
+        floor_load_n,
+    };
+    const std::array input_labels {
+        std::string_view {"nonlinear static restart stiffness metadata is invalid"},
+        std::string_view {"nonlinear static restart height metadata is invalid"},
+        std::string_view {"nonlinear static restart axial metadata is invalid"},
+        std::string_view {"nonlinear static restart yield-drift metadata is invalid"},
+        std::string_view {"nonlinear static restart floor-load metadata is invalid"},
+    };
+    for (std::size_t index = 0U; index < input_views.size(); ++index) {
+        const auto status = validate_nonlinear_input(
+            input_views[index], count, SA_ABI_V1_11, input_labels[index], error);
+        if (status != SA_OK) {
+            return status;
+        }
+    }
+    const auto size = static_cast<std::size_t>(count);
+    const auto values = [size](const sa_buffer_view_v1* const view) {
+        return std::span<const double> {static_cast<const double*>(view->data), size};
+    };
+    const auto stiffness = values(story_stiffness_n_per_m);
+    const auto height = values(story_height_m);
+    const auto axial = values(story_axial_n);
+    const auto yield_drift = values(story_yield_drift_m);
+    const auto load = values(floor_load_n);
+    const auto all_finite = [](const std::span<const double> input) {
+        return std::all_of(input.begin(), input.end(), [](const auto value) {
+            return std::isfinite(value);
+        });
+    };
+    if (!all_finite(stiffness) || !all_finite(height) || !all_finite(axial)
+        || !all_finite(yield_drift) || !all_finite(load)) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart inputs contain a non-finite value");
+    }
+    if (std::any_of(stiffness.begin(), stiffness.end(), [](const auto value) {
+            return value <= 0.0;
+        })
+        || std::any_of(height.begin(), height.end(), [](const auto value) {
+               return value <= 0.0;
+           })) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart stiffness and height must be positive");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_nonlinear_static_restart_state(
+    const sa_nonlinear_static_state_v1* const state,
+    const std::uint64_t count,
+    const bool initial_output,
+    sa_error_buffer_v1* const error) {
+    if (!pointer_is_aligned(state)) {
+        return report_error(
+            error,
+            SA_ERR_INVALID_ARGUMENT,
+            "nonlinear static restart state is null or misaligned");
+    }
+    if (state->abi_version != SA_ABI_V1_11) {
+        return report_error(
+            error,
+            SA_ERR_ABI_VERSION_MISMATCH,
+            "nonlinear static restart state requires ABI v1.11");
+    }
+    if (state->struct_size < sizeof(sa_nonlinear_static_state_v1)) {
+        return report_error(
+            error,
+            SA_ERR_STRUCT_SIZE,
+            "nonlinear static restart state struct_size is too small");
+    }
+    if (state->reserved_u32 != 0U
+        || std::any_of(
+            std::begin(state->reserved), std::end(state->reserved), [](const auto value) {
+                return value != 0U;
+            })) {
+        return report_error(
+            error,
+            SA_ERR_CHECKPOINT_MISMATCH,
+            "nonlinear static restart state reserved fields are not zero");
+    }
+    const auto output_status =
+        validate_nonlinear_output(&state->displacement_m, count, SA_ABI_V1_11, error);
+    if (output_status != SA_OK) {
+        return output_status;
+    }
+    if (state->displacement_m.length != count || state->output_length != count
+        || state->execution_backend != SA_EXECUTION_BACKEND_CPU
+        || state->fallback_count != 0U) {
+        return report_error(
+            error,
+            SA_ERR_CHECKPOINT_MISMATCH,
+            "nonlinear static restart state metadata is not canonical");
+    }
+    if (initial_output) {
+        const bool initial_valid = state->status == SA_NONLINEAR_STATIC_EXECUTION_ACTIVE
+            && state->iterations == 0U && state->line_search_backtracks == 0U
+            && state->plastic_story_count == 0U && state->residual_inf == 0.0
+            && state->residual_l2 == 0.0 && state->max_abs_displacement_m == 0.0
+            && state->top_displacement_m == 0.0 && state->base_shear_kn == 0.0;
+        if (!initial_valid) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "nonlinear static initial restart state is not canonical");
+        }
+        return SA_OK;
+    }
+    if (state->status > SA_NONLINEAR_STATIC_EXECUTION_NONCONVERGED) {
+        return report_error(
+            error,
+            SA_ERR_CHECKPOINT_MISMATCH,
+            "nonlinear static restart status is invalid");
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] sa_status_code_v1 validate_nonlinear_static_restart_memory(
+    const sa_nonlinear_static_config_v1* const config,
+    const sa_buffer_view_v1* const story_stiffness_n_per_m,
+    const sa_buffer_view_v1* const story_height_m,
+    const sa_buffer_view_v1* const story_axial_n,
+    const sa_buffer_view_v1* const story_yield_drift_m,
+    const sa_buffer_view_v1* const floor_load_n,
+    const sa_nonlinear_static_state_v1* const state,
+    const std::uint64_t count,
+    sa_error_buffer_v1* const error) {
+    const std::array descriptors {
+        MemoryRegion {config, sizeof(*config)},
+        MemoryRegion {story_stiffness_n_per_m, sizeof(*story_stiffness_n_per_m)},
+        MemoryRegion {story_height_m, sizeof(*story_height_m)},
+        MemoryRegion {story_axial_n, sizeof(*story_axial_n)},
+        MemoryRegion {story_yield_drift_m, sizeof(*story_yield_drift_m)},
+        MemoryRegion {floor_load_n, sizeof(*floor_load_n)},
+        MemoryRegion {state, sizeof(*state)},
+    };
+    const auto extent = count * sizeof(double);
+    const std::array inputs {
+        MemoryRegion {story_stiffness_n_per_m->data, extent},
+        MemoryRegion {story_height_m->data, extent},
+        MemoryRegion {story_axial_n->data, extent},
+        MemoryRegion {story_yield_drift_m->data, extent},
+        MemoryRegion {floor_load_n->data, extent},
+    };
+    const MemoryRegion output {state->displacement_m.data, extent};
+    for (std::size_t left = 0U; left < descriptors.size(); ++left) {
+        for (std::size_t right = left + 1U; right < descriptors.size(); ++right) {
+            if (ranges_overlap(
+                    descriptors[left].data,
+                    descriptors[left].extent,
+                    descriptors[right].data,
+                    descriptors[right].extent)) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "nonlinear static restart descriptors overlap");
+            }
+        }
+    }
+    for (const auto& input : inputs) {
+        for (const auto& descriptor : descriptors) {
+            if (ranges_overlap(input.data, input.extent, descriptor.data, descriptor.extent)) {
+                return report_error(
+                    error,
+                    SA_ERR_INVALID_ARGUMENT,
+                    "nonlinear static restart input overlaps descriptor storage");
+            }
+        }
+        if (ranges_overlap(output.data, output.extent, input.data, input.extent)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "nonlinear static restart output overlaps input data");
+        }
+    }
+    for (const auto& descriptor : descriptors) {
+        if (ranges_overlap(output.data, output.extent, descriptor.data, descriptor.extent)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "nonlinear static restart output overlaps descriptor storage");
+        }
+    }
+    return SA_OK;
+}
+
+[[nodiscard]] structural::solver_cpu::NonlinearStaticConfig nonlinear_static_native_config(
+    const sa_nonlinear_static_config_v1& config) noexcept {
+    return {
+        config.story_count,
+        config.tolerance,
+        config.max_iter,
+        config.hardening_ratio,
+        config.line_search_decay,
+        config.line_search_min,
+        config.pdelta_factor,
+    };
+}
+
+[[nodiscard]] structural::solver_cpu::NonlinearStaticInputs nonlinear_static_native_inputs(
+    const sa_buffer_view_v1& story_stiffness_n_per_m,
+    const sa_buffer_view_v1& story_height_m,
+    const sa_buffer_view_v1& story_axial_n,
+    const sa_buffer_view_v1& story_yield_drift_m,
+    const sa_buffer_view_v1& floor_load_n,
+    const std::size_t count) noexcept {
+    const auto values = [count](const sa_buffer_view_v1& view) {
+        return std::span<const double> {static_cast<const double*>(view.data), count};
+    };
+    return {
+        values(story_stiffness_n_per_m),
+        values(story_height_m),
+        values(story_axial_n),
+        values(story_yield_drift_m),
+        values(floor_load_n),
+    };
+}
+
+void publish_nonlinear_static_restart_state(
+    const structural::solver_cpu::NonlinearStaticExecutionState& native,
+    sa_nonlinear_static_state_v1& state) {
+    std::memcpy(
+        state.displacement_m.data,
+        native.displacement_m.data(),
+        native.displacement_m.size() * sizeof(double));
+    state.status = static_cast<std::uint32_t>(native.status);
+    state.iterations = native.iterations;
+    state.line_search_backtracks = native.line_search_backtracks;
+    state.plastic_story_count = native.plastic_story_count;
+    state.execution_backend = SA_EXECUTION_BACKEND_CPU;
+    state.fallback_count = 0U;
+    state.residual_inf = native.residual_inf;
+    state.residual_l2 = native.residual_l2;
+    state.max_abs_displacement_m = native.max_abs_displacement_m;
+    state.top_displacement_m = native.top_displacement_m;
+    state.base_shear_kn = native.base_shear_kn;
+    state.output_length = native.displacement_m.size();
+}
+
+[[nodiscard]] sa_status_code_v1 nonlinear_static_begin_boundary(
+    const sa_nonlinear_static_config_v1* const config,
+    const sa_buffer_view_v1* const story_stiffness_n_per_m,
+    const sa_buffer_view_v1* const story_height_m,
+    const sa_buffer_view_v1* const story_axial_n,
+    const sa_buffer_view_v1* const story_yield_drift_m,
+    const sa_buffer_view_v1* const floor_load_n,
+    sa_nonlinear_static_state_v1* const state,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config,
+         story_stiffness_n_per_m,
+         story_height_m,
+         story_axial_n,
+         story_yield_drift_m,
+         floor_load_n,
+         state,
+         error]() -> sa_status_code_v1 {
+        std::uint64_t count = 0U;
+        auto status = validate_nonlinear_static_restart_problem(
+            config,
+            story_stiffness_n_per_m,
+            story_height_m,
+            story_axial_n,
+            story_yield_drift_m,
+            floor_load_n,
+            count,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        status = validate_nonlinear_static_restart_state(state, count, true, error);
+        if (status != SA_OK) {
+            return status;
+        }
+        status = validate_nonlinear_static_restart_memory(
+            config,
+            story_stiffness_n_per_m,
+            story_height_m,
+            story_axial_n,
+            story_yield_drift_m,
+            floor_load_n,
+            state,
+            count,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        try {
+            const auto native = structural::solver_cpu::begin_nonlinear_static(
+                nonlinear_static_native_config(*config),
+                nonlinear_static_native_inputs(
+                    *story_stiffness_n_per_m,
+                    *story_height_m,
+                    *story_axial_n,
+                    *story_yield_drift_m,
+                    *floor_load_n,
+                    static_cast<std::size_t>(count)));
+            publish_nonlinear_static_restart_state(native, *state);
+        } catch (const std::invalid_argument& exception) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, exception.what());
+        }
+        return SA_OK;
+        });
+}
+
+[[nodiscard]] sa_status_code_v1 nonlinear_static_advance_boundary(
+    const sa_nonlinear_static_config_v1* const config,
+    const sa_buffer_view_v1* const story_stiffness_n_per_m,
+    const sa_buffer_view_v1* const story_height_m,
+    const sa_buffer_view_v1* const story_axial_n,
+    const sa_buffer_view_v1* const story_yield_drift_m,
+    const sa_buffer_view_v1* const floor_load_n,
+    const std::uint32_t iteration_budget,
+    sa_nonlinear_static_state_v1* const state,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(
+        error,
+        [config,
+         story_stiffness_n_per_m,
+         story_height_m,
+         story_axial_n,
+         story_yield_drift_m,
+         floor_load_n,
+         iteration_budget,
+         state,
+         error]() -> sa_status_code_v1 {
+        std::uint64_t count = 0U;
+        auto status = validate_nonlinear_static_restart_problem(
+            config,
+            story_stiffness_n_per_m,
+            story_height_m,
+            story_axial_n,
+            story_yield_drift_m,
+            floor_load_n,
+            count,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        status = validate_nonlinear_static_restart_state(state, count, false, error);
+        if (status != SA_OK) {
+            return status;
+        }
+        status = validate_nonlinear_static_restart_memory(
+            config,
+            story_stiffness_n_per_m,
+            story_height_m,
+            story_axial_n,
+            story_yield_drift_m,
+            floor_load_n,
+            state,
+            count,
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        const auto* const displacement =
+            static_cast<const double*>(state->displacement_m.data);
+        structural::solver_cpu::NonlinearStaticExecutionState native {
+            static_cast<structural::solver_cpu::NonlinearStaticExecutionStatus>(state->status),
+            state->iterations,
+            state->line_search_backtracks,
+            state->residual_inf,
+            state->residual_l2,
+            state->max_abs_displacement_m,
+            state->top_displacement_m,
+            state->base_shear_kn,
+            state->plastic_story_count,
+            std::vector<double>(
+                displacement, displacement + static_cast<std::size_t>(count)),
+        };
+        try {
+            structural::solver_cpu::advance_nonlinear_static(
+                nonlinear_static_native_config(*config),
+                nonlinear_static_native_inputs(
+                    *story_stiffness_n_per_m,
+                    *story_height_m,
+                    *story_axial_n,
+                    *story_yield_drift_m,
+                    *floor_load_n,
+                    static_cast<std::size_t>(count)),
+                iteration_budget,
+                native);
+        } catch (const std::invalid_argument&) {
+            return report_error(
+                error,
+                SA_ERR_CHECKPOINT_MISMATCH,
+                "nonlinear static restart state failed deterministic validation");
+        }
+        publish_nonlinear_static_restart_state(native, *state);
+        return SA_OK;
+        });
+}
+
 [[nodiscard]] sa_status_code_v1 validate_ndtha_input_view(
     const sa_buffer_view_v1& view,
     const std::uint64_t expected_length,
@@ -982,11 +1464,6 @@ template <typename Value>
     }
     return SA_OK;
 }
-
-struct MemoryRegion {
-    const void* data;
-    std::uint64_t extent;
-};
 
 [[nodiscard]] sa_status_code_v1 nonlinear_ndtha_boundary(
     const sa_nonlinear_ndtha_config_v1* const config,
@@ -4157,6 +4634,9 @@ void publish_sparse_restart_state(
     case SA_ABI_V1_10:
         api_min_size = SA_API_V1_10_MIN_SIZE;
         break;
+    case SA_ABI_V1_11:
+        api_min_size = SA_API_V1_11_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -4188,6 +4668,7 @@ void publish_sparse_restart_state(
     const bool sparse_linear_enabled = request->abi_version >= SA_ABI_V1_8;
     const bool generalized_eigen_enabled = request->abi_version >= SA_ABI_V1_9;
     const bool sparse_linear_restart_enabled = request->abi_version >= SA_ABI_V1_10;
+    const bool nonlinear_static_restart_enabled = request->abi_version >= SA_ABI_V1_11;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -4215,6 +4696,9 @@ void publish_sparse_restart_state(
                     : UINT64_C(0))
             | (sparse_linear_restart_enabled
                     ? SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
+                    : UINT64_C(0))
+            | (nonlinear_static_restart_enabled
+                    ? SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -4234,6 +4718,8 @@ void publish_sparse_restart_state(
         generalized_eigen_enabled ? &buckling_solve_boundary : nullptr,
         sparse_linear_restart_enabled ? &sparse_linear_begin_boundary : nullptr,
         sparse_linear_restart_enabled ? &sparse_linear_advance_boundary : nullptr,
+        nonlinear_static_restart_enabled ? &nonlinear_static_begin_boundary : nullptr,
+        nonlinear_static_restart_enabled ? &nonlinear_static_advance_boundary : nullptr,
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);
