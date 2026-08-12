@@ -155,6 +155,48 @@ namespace {
     return true;
 }
 
+[[nodiscard]] bool shared_problem_validation_rejects_invalid_inputs() {
+    constexpr std::array height {3.0};
+    constexpr std::array axial {0.0};
+    constexpr std::array yield_drift {0.01};
+    constexpr std::array load {1'000.0};
+    const std::array bad_stiffness {std::numeric_limits<double>::quiet_NaN()};
+    const structural::solver_cpu::NonlinearStaticInputs bad_inputs {
+        bad_stiffness,
+        height,
+        axial,
+        yield_drift,
+        load,
+    };
+    auto one_story = config();
+    one_story.story_count = 1U;
+    bool nonfinite_rejected = false;
+    try {
+        structural::solver_cpu::validate_nonlinear_static_problem(one_story, bad_inputs);
+    } catch (const std::invalid_argument&) {
+        nonfinite_rejected = true;
+    }
+    CHECK(nonfinite_rejected);
+
+    constexpr std::array stiffness {1.0e7};
+    const structural::solver_cpu::NonlinearStaticInputs inputs {
+        stiffness,
+        height,
+        axial,
+        yield_drift,
+        load,
+    };
+    one_story.line_search_decay = 1.0;
+    bool config_rejected = false;
+    try {
+        structural::solver_cpu::validate_nonlinear_static_problem(one_story, inputs);
+    } catch (const std::invalid_argument&) {
+        config_rejected = true;
+    }
+    CHECK(config_rejected);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -162,6 +204,7 @@ int main() {
         three_story_case_matches_the_frozen_legacy_result,
         one_story_case_is_supported_and_deterministic,
         restart_boundaries_are_complete_and_bitwise_stable,
+        shared_problem_validation_rejects_invalid_inputs,
     };
     for (const auto test : tests) {
         if (!test()) {

@@ -77,6 +77,10 @@ Jobs:
      and a product-owned bounded HIP C2 candidate with eight-profile CPU/HIP parity, bitwise
      repeats, resident eigensolve/result recovery and fallback zero, without sequential promotion
      past C1 before a protected-runner receipt
+   - bounded nonlinear-static resident HIP Newton C2 candidate over the full five-profile CPU
+     matrix plus nonconvergence, with bitwise repeats, exact iteration/status/material/line-search
+     parity, zero measured result error and fallback zero; sequential promotion remains C1 before
+     the protected receipt
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
@@ -115,9 +119,9 @@ existing `reference-elements-c2` job id (displayed as `bounded-native-c2`) requi
 `native-hip-approved` environment and the
 complete `self-hosted, linux, x64, rocm, structural-approved` label set. It verifies the requested
 `gfx` target against `rocminfo`, builds only with `STRUCTURAL_ENABLE_HIP=ON`, executes the
-no-fallback reference-element/assembly and device-resident sparse-PCG C2 parity tests, validates
-both source/device-library bindings and uploads the raw receipts. A local execution is a
-candidate, not authoritative C2 evidence.
+no-fallback reference-element/assembly, device-resident sparse-PCG, generalized-eigen and
+resident nonlinear-static Newton C2 parity tests, validates every source/device-library binding
+and uploads the raw receipts. A local execution is a candidate, not authoritative C2 evidence.
 
 ## 3. merge-product
 
@@ -293,9 +297,9 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
 - `.github/workflows/native-nightly-quality.yml` owns ASan/UBSan, bounded libFuzzer smoke and
   locked dependency/SPDX policy checks. Once `native/Cargo.toml` exists, missing sanitizer,
   fuzz or dependency-policy ownership fails closed.
-- no hosted workflow invokes HIP/ROCm. `hip-dedicated` owns the product reference-element and
-  sparse-PCG live targets and source-bound receipt schemas, while protected execution remains a
-  manual external gate.
+- no hosted workflow invokes HIP/ROCm. `hip-dedicated` owns the product reference-element,
+  sparse-PCG, generalized-eigen and nonlinear-static Newton live targets and source-bound receipt
+  schemas, while protected execution remains a manual external gate.
 
 이 mapping은 workflow topology 구현만 뜻한다. workspace, ABI, ModelIR, sanitizer/fuzzer
 실행 성공 또는 hardware evidence를 주장하지 않는다.

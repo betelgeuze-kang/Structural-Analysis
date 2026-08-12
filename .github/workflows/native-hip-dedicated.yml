@@ -82,9 +82,10 @@ jobs:
               structural_reference_elements_hip_parity_tests \
               structural_sparse_linear_hip_parity_tests \
               structural_generalized_eigen_hip_parity_tests \
+              structural_nonlinear_static_hip_parity_tests \
             --parallel 2
           ctest --test-dir build/native-hip-dedicated --output-on-failure \
-            -R 'structural_(reference_elements|sparse_linear|generalized_eigen)_hip_parity_tests'
+            -R 'structural_(reference_elements|sparse_linear|generalized_eigen|nonlinear_static)_hip_parity_tests'
           build/native-hip-dedicated/bin/structural_reference_elements_hip_parity_tests \
             > build/native-reference-elements-hip-receipt.json
           python3 scripts/check_native_reference_elements_hip.py \
@@ -106,6 +107,13 @@ jobs:
             --device-lib-path "${{ steps.rocm.outputs.device_lib_path }}" \
             --require-approved-runner --json \
             > build/native-generalized-eigen-hip-validation.json
+          build/native-hip-dedicated/bin/structural_nonlinear_static_hip_parity_tests \
+            > build/native-nonlinear-static-hip-receipt.json
+          python3 scripts/check_native_nonlinear_static_hip.py \
+            --receipt build/native-nonlinear-static-hip-receipt.json \
+            --device-lib-path "${{ steps.rocm.outputs.device_lib_path }}" \
+            --require-approved-runner --json \
+            > build/native-nonlinear-static-hip-validation.json
 
       - name: Upload immutable C2 execution receipts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -120,4 +128,6 @@ jobs:
             build/native-sparse-linear-hip-validation.json
             build/native-generalized-eigen-hip-receipt.json
             build/native-generalized-eigen-hip-validation.json
+            build/native-nonlinear-static-hip-receipt.json
+            build/native-nonlinear-static-hip-validation.json
             build-native-rocminfo.txt

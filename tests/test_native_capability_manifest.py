@@ -134,6 +134,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "Python C1 oracle parity" in nonlinear["claim"]
     assert "five-case" in nonlinear["claim"]
     assert "broader nonlinear input-space parity" in nonlinear["claim"]
+    assert "bounded single-thread FP64 HIP C2 candidate" in nonlinear["claim"]
+    assert "exact local CPU/HIP status/iteration/plastic/backtrack parity" in nonlinear["claim"]
+    assert "native-hip-approved" in nonlinear["claim"]
     assert capabilities.capability_is_enabled(payload, "nonlinear_ndtha_cpu") is True
     ndtha = payload["capabilities"]["nonlinear_ndtha_cpu"]
     assert ndtha["cutover_gate"] == "C1"

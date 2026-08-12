@@ -265,12 +265,17 @@ set_tests_properties(
 if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_REFERENCE_HIP_TEST_SOURCE hip/reference_elements_hip_parity_test.hip.cpp)
   set(STRUCTURAL_SPARSE_HIP_TEST_SOURCE hip/sparse_linear_hip_parity_test.hip.cpp)
+  set(STRUCTURAL_NONLINEAR_STATIC_HIP_TEST_SOURCE hip/nonlinear_static_hip_parity_test.hip.cpp)
   set(
     STRUCTURAL_GENERALIZED_EIGEN_HIP_TEST_SOURCE
     hip/generalized_eigen_hip_parity_test.hip.cpp
   )
   set_source_files_properties(${STRUCTURAL_REFERENCE_HIP_TEST_SOURCE} PROPERTIES LANGUAGE HIP)
   set_source_files_properties(${STRUCTURAL_SPARSE_HIP_TEST_SOURCE} PROPERTIES LANGUAGE HIP)
+  set_source_files_properties(
+    ${STRUCTURAL_NONLINEAR_STATIC_HIP_TEST_SOURCE}
+    PROPERTIES LANGUAGE HIP
+  )
   set_source_files_properties(
     ${STRUCTURAL_GENERALIZED_EIGEN_HIP_TEST_SOURCE}
     PROPERTIES LANGUAGE HIP
@@ -356,6 +361,47 @@ if(STRUCTURAL_ENABLE_HIP)
     structural_sparse_linear_hip_parity_tests
     PROPERTIES
       LABELS "hip;hip-dedicated;solver_hip;sparse_linear"
+      RESOURCE_LOCK "structural_rocm_device_0"
+      TIMEOUT 120
+  )
+
+  add_executable(
+    structural_nonlinear_static_hip_parity_tests
+    ${STRUCTURAL_NONLINEAR_STATIC_HIP_TEST_SOURCE}
+  )
+  set_target_properties(
+    structural_nonlinear_static_hip_parity_tests
+    PROPERTIES
+      HIP_STANDARD 20
+      HIP_STANDARD_REQUIRED ON
+      HIP_EXTENSIONS OFF
+  )
+  target_include_directories(
+    structural_nonlinear_static_hip_parity_tests
+    PRIVATE
+      ${PROJECT_SOURCE_DIR}/src/hip
+      ${PROJECT_SOURCE_DIR}/src/solver_cpu
+  )
+  target_link_libraries(
+    structural_nonlinear_static_hip_parity_tests
+    PRIVATE
+      structural_solver_hip
+      structural_solver_cpu
+  )
+  target_compile_options(
+    structural_nonlinear_static_hip_parity_tests
+    PRIVATE
+      $<$<COMPILE_LANGUAGE:HIP>:-ffp-contract=off>
+  )
+  structural_set_warnings(structural_nonlinear_static_hip_parity_tests)
+  add_test(
+    NAME structural_nonlinear_static_hip_parity_tests
+    COMMAND structural_nonlinear_static_hip_parity_tests
+  )
+  set_tests_properties(
+    structural_nonlinear_static_hip_parity_tests
+    PROPERTIES
+      LABELS "hip;hip-dedicated;solver_hip;nonlinear_static;newton"
       RESOURCE_LOCK "structural_rocm_device_0"
       TIMEOUT 120
   )

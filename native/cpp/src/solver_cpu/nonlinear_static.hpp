@@ -58,6 +58,11 @@ struct NonlinearStaticExecutionState {
     std::vector<double> displacement_m;
 };
 
+/// Validate the shared CPU/accelerator nonlinear-static problem contract.
+void validate_nonlinear_static_problem(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs);
+
 /// Validate the problem and construct the exact zero-displacement Newton boundary.
 [[nodiscard]] NonlinearStaticExecutionState begin_nonlinear_static(
     const NonlinearStaticConfig& config,

@@ -101,7 +101,7 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_solver_cpu",
-      "claim": "bounded serial FP64 C++ story-frame Newton C1 family with independent dense-matrix Python C1 oracle parity for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking matrix; ABI v1.3 one-shot plus ABI v1.11 complete caller-owned real-iteration begin/advance state and a safe reentrant Rust wrapper provide failure-atomic C3 implementation evidence with fallback 0, but the sequential numerical gate remains C1 until an approved HIP C2 receipt exists; broader nonlinear input-space parity and general ModelIR topology remain open, while restart and product E2E are tracked as separate bounded CPU C4/C5 implementation capabilities and C6 remains open"
+      "claim": "bounded serial FP64 C++ story-frame Newton C1 family with independent dense-matrix Python C1 oracle parity for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta and backtracking matrix; a product-owned bounded single-thread FP64 HIP C2 candidate keeps model, Newton state, tangent solve and recovery resident, has bitwise repeats, exact local CPU/HIP status/iteration/plastic/backtrack parity, zero measured result error and fallback 0; ABI v1.3 one-shot plus ABI v1.11 complete caller-owned real-iteration begin/advance state and a safe reentrant Rust wrapper provide failure-atomic C3 implementation evidence, but the sequential numerical gate remains C1 until the native-hip-approved protected-runner C2 receipt exists; broader nonlinear input-space parity, parallel/general ModelIR topology and transient HIP execution remain open, while restart and product E2E are tracked as separate bounded CPU C4/C5 implementation capabilities and C6 remains open"
     },
     "nonlinear_static_checkpoint": {
       "status": "implemented",
@@ -161,7 +161,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural_c_abi_v1",
-      "claim": "the hosted and CPU-only packages contain no HIP dependency or selectable backend; product-owned reference-element/assembly and resident sparse-PCG local C2 candidates exist only behind STRUCTURAL_ENABLE_HIP=ON, while protected receipts, an ABI backend selector, ROCm packaging and general Newton/Krylov authority remain open"
+      "claim": "the hosted and CPU-only packages contain no HIP dependency or selectable backend; product-owned reference-element/assembly, resident sparse-PCG, generalized-eigen and bounded resident nonlinear-static Newton local C2 candidates exist only behind STRUCTURAL_ENABLE_HIP=ON, while protected receipts, an ABI backend selector, ROCm packaging, parallel/general Newton and transient authority remain open"
     }
   }
 }

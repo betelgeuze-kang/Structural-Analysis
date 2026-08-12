@@ -172,9 +172,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   C5: `SASTAC01` binds exact request/model/Newton-state/execution identities, and public
   static-run/static-resume publish typed active/failure receipts or self-hashed
   ResultIR/ReportIR/Markdown artifacts with direct/resumed byte identity and Python/Node lookup
-  removed. These do not bypass the open protected HIP C2 gate or promote the numerical family
-  beyond C1. Broader nonlinear input-space, arbitrary ModelIR assembly, durable jobs and C6 remain
-  open, and the legacy Rust export is unchanged.
+  removed. A product-owned bounded single-thread HIP candidate now keeps model/Newton/tangent/
+  recovery buffers resident and covers the same five profiles plus numerical exhaustion. Local
+  `gfx1030` execution has bitwise repeats, exact status/iteration/plastic/backtrack parity, zero
+  measured displacement/residual/recovery error, zero intermediate/control transfers and fallback
+  zero. This does not bypass the open protected `native-hip-approved` C2 gate or promote the
+  numerical family beyond C1. Broader nonlinear input-space, parallel/general ModelIR assembly,
+  transient HIP, durable jobs and C6 remain open, and the legacy Rust export is unchanged.
 - The bounded `nonlinear_ndtha` story-frame slice is C1. Its serial FP64 C++ Newmark/Newton kernel
   shares constitutive assembly and recovery with nonlinear static, uses ABI v1.4 nested
   caller-owned descriptors and a safe Rust wrapper, and matches all 11 response channels plus the

@@ -7,7 +7,7 @@ identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic o
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
 bounded ModelIR domain to C3. Later bounded slices add CPU ResultIR/ReportIR product composition,
-restart, durable jobs and external comparison while HIP remains unimplemented;
+restart, durable jobs and external comparison plus opt-in source-bound HIP C2 candidates;
 `capabilities.json` records each separate boundary. The existing `structural_runtime_ffi`
 package is a temporary compatibility member. R2 moves its seven raw ABI declarations to
 `structural-ffi-sys`, defines strict pointer-free compatibility wire cases in
@@ -108,6 +108,15 @@ local C2 candidate and fallback zero. Sequential promotion remains C1 until the 
 `native-hip-approved` receipt exists; sparse extraction, restart and product E2E authority remain
 open. See `docs/native/generalized-eigen-cpu-v1.md` and
 `docs/native/generalized-eigen-hip-c2.md`.
+
+The bounded nonlinear-static family also has an opt-in `structural_solver_hip` execution. One
+device work item keeps all five model vectors, displacement/Newton state, constitutive assembly,
+tridiagonal tangent solve, line search and result recovery resident for the full solve. The local
+five-profile `gfx1030` run is bitwise repeatable, has exact CPU/HIP status, iteration,
+plastic-story and backtracking parity, reports zero measured result error and fallback zero. It is
+still only a C2 candidate until the protected runner verifies the same source SHA; no HIP ABI
+selector or ROCm package authority follows from it. See
+`docs/native/nonlinear-static-hip-c2.md`.
 
 ## Rust
 

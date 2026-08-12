@@ -466,8 +466,15 @@ elastic/plastic, mixed-sign load, P-delta 및 line-search backtracking의 5-case
 C++와 safe Rust 경로는 displacement `1e-12 m`, residual `1e-7 N`, base shear `1e-10 kN` 이내에서
 golden과 일치하며 iteration/plastic/backtrack 및 nonconvergence taxonomy도 일치한다. 따라서 이
 한정 profile은 C1이다. frozen legacy 3-story fixture는 product golden 하나와 byte-identical하다.
-Broader story/material/load domain, HIP C2, checkpoint/restart와 product E2E는 open이고 기존 Rust
-5-symbol ABI는 변경하지 않는다.
+별도 opt-in `structural_solver_hip` 경로는 동일한 shared problem validation을 사용하며 256-story/
+10,000-iteration bounded profile에서 model, Newton state, constitutive/tangent assembly,
+tridiagonal solve, line search와 recovery를 한 device kernel에 상주시킨다. 다섯 C1 profile의
+두 번 반복과 한 nonconvergence profile은 로컬 `gfx1030`에서 CPU와 status/iteration/plastic/
+backtrack이 같고 측정된 result error와 fallback이 0이다. 이것은 source-bound C2 candidate이며
+`native-hip-approved` protected receipt 전에는 sequential C1을 승격하지 않는다. Broader
+story/material/load, parallel/general ModelIR topology, transient HIP, package C6는 open이고 기존
+Rust 5-symbol ABI는 변경하지 않는다. CPU checkpoint/restart와 product E2E는 별도 C4/C5
+implementation capability다.
 
 R3의 세 번째 family는 `nonlinear_ndtha`다.
 

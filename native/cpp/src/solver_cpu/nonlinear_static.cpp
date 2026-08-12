@@ -2,6 +2,7 @@
 #include "story_frame.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bit>
 #include <cmath>
 #include <cstddef>
@@ -132,12 +133,58 @@ void validate_state(
 
 } // namespace
 
+void validate_nonlinear_static_problem(
+    const NonlinearStaticConfig& config,
+    const NonlinearStaticInputs& inputs) {
+    constexpr std::uint32_t maximum_story_count = 1'000'000U;
+    const std::array scalar_values {
+        config.tolerance,
+        config.hardening_ratio,
+        config.line_search_decay,
+        config.line_search_min,
+        config.pdelta_factor,
+    };
+    if (!spans_match(config, inputs) || config.story_count > maximum_story_count
+        || config.max_iter == 0U
+        || std::any_of(scalar_values.begin(), scalar_values.end(), [](const double value) {
+               return !std::isfinite(value);
+           })
+        || config.tolerance <= 0.0 || config.hardening_ratio < 0.0
+        || config.hardening_ratio > 1.0 || config.line_search_decay <= 0.0
+        || config.line_search_decay >= 1.0 || config.line_search_min <= 0.0
+        || config.line_search_min > 1.0 || config.pdelta_factor < 0.0) {
+        throw std::invalid_argument("nonlinear static problem is outside the bounded domain");
+    }
+    const std::array values {
+        inputs.story_stiffness_n_per_m,
+        inputs.story_height_m,
+        inputs.story_axial_n,
+        inputs.story_yield_drift_m,
+        inputs.floor_load_n,
+    };
+    for (const auto input : values) {
+        if (!std::all_of(input.begin(), input.end(), [](const double value) {
+                return std::isfinite(value);
+            })) {
+            throw std::invalid_argument("nonlinear static input contains a non-finite value");
+        }
+    }
+    if (std::any_of(
+            inputs.story_stiffness_n_per_m.begin(),
+            inputs.story_stiffness_n_per_m.end(),
+            [](const double value) { return value <= 0.0; })
+        || std::any_of(
+            inputs.story_height_m.begin(),
+            inputs.story_height_m.end(),
+            [](const double value) { return value <= 0.0; })) {
+        throw std::invalid_argument("nonlinear static stiffness and height must be positive");
+    }
+}
+
 NonlinearStaticExecutionState begin_nonlinear_static(
     const NonlinearStaticConfig& config,
     const NonlinearStaticInputs& inputs) {
-    if (!spans_match(config, inputs)) {
-        throw std::invalid_argument("nonlinear static input lengths do not match story_count");
-    }
+    validate_nonlinear_static_problem(config, inputs);
     const auto count = static_cast<std::size_t>(config.story_count);
     WorkBuffers work(count);
     NonlinearStaticExecutionState state;
