@@ -71,19 +71,42 @@ EXPECTED_R3 = {
 
 EXPECTED_NONLINEAR_STATIC_R3 = {
     "family": "nonlinear_static",
-    "capability_gate": "C0",
+    "capability_gate": "C1",
     "cpp_target": "structural_solver_cpu",
     "abi_version": "0x00010003",
     "api_entry": "sa_get_api_v1",
     "api_slot": "nonlinear_static_solve",
     "legacy_exports_preserved": True,
     "fallback_count": 0,
-    "c0_profile": {
-        "story_count": 3,
-        "absolute_tolerance": 1.0e-15,
-        "fixture": "native/tests/fixtures/legacy_runtime_v3/nonlinear_static.json",
-        "fixture_sha256": (
+    "c1_profile": {
+        "case_count": 5,
+        "story_counts": [1, 3],
+        "displacement_absolute_tolerance_m": 1.0e-12,
+        "residual_absolute_tolerance_n": 1.0e-7,
+        "base_shear_absolute_tolerance_kn": 1.0e-10,
+        "axes": [
+            "topology",
+            "elastic_plastic",
+            "mixed_sign_load",
+            "pdelta",
+            "backtracking",
+        ],
+    },
+    "product_goldens": {
+        "native/tests/fixtures/solver_cpu/nonlinear_static_elastic_pdelta_python_c1.json": (
             "57df412800943da8fdd2214a88cadd314b1620c7b2c707a15f56f4828a3a9ab0"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_static_mixed_sign_python_c1.json": (
+            "bdc3d7cc7681bf2de33fb092d3bc2eff5e057483fd00b315523a9b9e01aced85"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_static_one_story_elastic_python_c1.json": (
+            "8759476e257a538d474ca9b3a3aa07ad0e19e823063f5bfadbf877131b7fcea1"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_static_one_story_pdelta_backtrack_python_c1.json": (
+            "d06e605136921ded5fe8402f3494405cbddb2f27197fcad5d8360e468fd6002a"
+        ),
+        "native/tests/fixtures/solver_cpu/nonlinear_static_plastic_python_c1.json": (
+            "4a08640068907cc7ceec32888f835a4e953caa5d33ad808cb6771e0f05553d16"
         ),
     },
     "owners": {
@@ -95,12 +118,15 @@ EXPECTED_NONLINEAR_STATIC_R3 = {
         "cpp_unit": "native/cpp/tests/solver_cpu/nonlinear_static_test.cpp",
         "c_abi_contract": "native/cpp/tests/abi/nonlinear_static_contract_test.cpp",
         "rust_ffi_parity": "native/crates/structural-ffi/tests/nonlinear_static_parity.rs",
+        "python_oracle": "tests/native_oracles/nonlinear_static_story_frame.py",
+        "python_boundary": "tests/test_native_nonlinear_static_python_parity.py",
         "checker": "scripts/check_structural_runtime_ffi_r3.py",
     },
     "parity": {
         "legacy_rust_full_result": "pass",
-        "python_oracle": "open",
-        "c1_promoted": False,
+        "python_full_result_matrix": "pass",
+        "nonconvergence_taxonomy": "pass",
+        "c1_promoted": True,
         "c2_hip": "open",
     },
 }
@@ -187,37 +213,105 @@ def check_r3(
         ):
             blockers.append(f"r3_product_golden_contract_invalid:{relative_path}")
 
-    nonlinear_profile = EXPECTED_NONLINEAR_STATIC_R3["c0_profile"]
-    nonlinear_fixture_relative = nonlinear_profile["fixture"]
-    nonlinear_fixture_path = repo_root / nonlinear_fixture_relative
-    try:
-        nonlinear_fixture_bytes = nonlinear_fixture_path.read_bytes()
-    except OSError as exc:
-        blockers.append(f"r3_nonlinear_static_fixture_unreadable:{exc}")
-    else:
-        nonlinear_fixture_hash = hashlib.sha256(nonlinear_fixture_bytes).hexdigest()
-        if nonlinear_fixture_hash != nonlinear_profile["fixture_sha256"]:
-            blockers.append("r3_nonlinear_static_fixture_sha256_mismatch")
+    nonlinear_cases: list[dict[str, Any]] = []
+    nonlinear_golden_bytes: dict[str, bytes] = {}
+    for relative_path, expected_hash in EXPECTED_NONLINEAR_STATIC_R3[
+        "product_goldens"
+    ].items():
+        golden_path = repo_root / relative_path
         try:
-            nonlinear_case = json.loads(nonlinear_fixture_bytes)
-        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-            blockers.append(f"r3_nonlinear_static_fixture_invalid:{exc}")
-        else:
-            nonlinear_config = (
-                nonlinear_case.get("config")
-                if isinstance(nonlinear_case, dict)
-                else None
+            golden_bytes = golden_path.read_bytes()
+        except OSError as exc:
+            blockers.append(
+                f"r3_nonlinear_static_product_golden_unreadable:{relative_path}:{exc}"
             )
-            if (
-                not isinstance(nonlinear_case, dict)
-                or nonlinear_case.get("schema_version")
-                != "structural-runtime-compat.v3"
-                or nonlinear_case.get("operation") != "nonlinear_static"
-                or not isinstance(nonlinear_config, dict)
-                or nonlinear_config.get("story_count")
-                != nonlinear_profile["story_count"]
+            continue
+        nonlinear_golden_bytes[relative_path] = golden_bytes
+        actual_hash = hashlib.sha256(golden_bytes).hexdigest()
+        if actual_hash != expected_hash:
+            blockers.append(
+                f"r3_nonlinear_static_product_golden_sha256_mismatch:{relative_path}"
+            )
+        try:
+            product_case = json.loads(golden_bytes)
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            blockers.append(
+                f"r3_nonlinear_static_product_golden_invalid:{relative_path}:{exc}"
+            )
+            continue
+        if (
+            not isinstance(product_case, dict)
+            or product_case.get("schema_version")
+            != "structural-runtime-compat.v3"
+            or product_case.get("operation") != "nonlinear_static"
+            or not isinstance(product_case.get("config"), dict)
+            or not isinstance(product_case.get("inputs"), dict)
+            or not isinstance(product_case.get("result"), dict)
+        ):
+            blockers.append(
+                f"r3_nonlinear_static_product_golden_contract_invalid:{relative_path}"
+            )
+            continue
+        nonlinear_cases.append(product_case)
+
+    nonlinear_profile = EXPECTED_NONLINEAR_STATIC_R3["c1_profile"]
+    if len(nonlinear_cases) != nonlinear_profile["case_count"]:
+        blockers.append("r3_nonlinear_static_product_golden_case_count_invalid")
+    else:
+        configs = [case["config"] for case in nonlinear_cases]
+        inputs = [case["inputs"] for case in nonlinear_cases]
+        results = [case["result"] for case in nonlinear_cases]
+        try:
+            story_counts = sorted({config.get("story_count") for config in configs})
+            pdelta_factors = {config.get("pdelta_factor") for config in configs}
+            plastic_counts = {
+                result.get("plastic_story_count") for result in results
+            }
+            has_mixed_sign_load = any(
+                any(
+                    isinstance(value, (int, float)) and value < 0.0
+                    for value in row.get("floor_load_n", [])
+                )
+                for row in inputs
+            )
+            has_backtracking = any(
+                isinstance(result.get("line_search_backtracks"), int)
+                and result["line_search_backtracks"] > 0
+                for result in results
+            )
+        except (TypeError, ValueError):
+            blockers.append("r3_nonlinear_static_product_golden_matrix_invalid")
+        else:
+            if story_counts != nonlinear_profile["story_counts"]:
+                blockers.append("r3_nonlinear_static_story_matrix_invalid")
+            if pdelta_factors != {0.0, 1.0}:
+                blockers.append("r3_nonlinear_static_pdelta_matrix_invalid")
+            if plastic_counts != {0, 2, 3}:
+                blockers.append("r3_nonlinear_static_material_matrix_invalid")
+            if not has_mixed_sign_load:
+                blockers.append("r3_nonlinear_static_load_matrix_invalid")
+            if not has_backtracking:
+                blockers.append("r3_nonlinear_static_backtracking_matrix_invalid")
+            if not all(
+                result.get("converged") is True and result.get("status_code") == 0
+                for result in results
             ):
-                blockers.append("r3_nonlinear_static_fixture_contract_invalid")
+                blockers.append("r3_nonlinear_static_success_matrix_invalid")
+
+    legacy_fixture_path = (
+        repo_root / "native/tests/fixtures/legacy_runtime_v3/nonlinear_static.json"
+    )
+    product_legacy_copy = (
+        "native/tests/fixtures/solver_cpu/"
+        "nonlinear_static_elastic_pdelta_python_c1.json"
+    )
+    try:
+        legacy_bytes = legacy_fixture_path.read_bytes()
+    except OSError as exc:
+        blockers.append(f"r3_nonlinear_static_legacy_fixture_unreadable:{exc}")
+    else:
+        if nonlinear_golden_bytes.get(product_legacy_copy) != legacy_bytes:
+            blockers.append("r3_nonlinear_static_legacy_product_copy_mismatch")
 
     sources = {
         "cmake": repo_root / "native/cpp/CMakeLists.txt",
@@ -256,6 +350,12 @@ def check_r3(
         "kernel": repo_root
         / EXPECTED_NONLINEAR_STATIC_R3["owners"]["cpp_cpu_kernel"],
         "rust": sources["rust"],
+        "rust_parity": repo_root
+        / EXPECTED_NONLINEAR_STATIC_R3["verification"]["rust_ffi_parity"],
+        "python_oracle": repo_root
+        / EXPECTED_NONLINEAR_STATIC_R3["verification"]["python_oracle"],
+        "python_boundary": repo_root
+        / EXPECTED_NONLINEAR_STATIC_R3["verification"]["python_boundary"],
     }
     nonlinear_required_tokens = {
         "cmake": ("src/solver_cpu/nonlinear_static.cpp",),
@@ -266,19 +366,51 @@ def check_r3(
         ),
         "abi": ("nonlinear_static_boundary", "SA_ERR_NONCONVERGENCE"),
         "kernel": ("solve_nonlinear_static", "solve_tridiagonal"),
-        "rust": ("pub fn load_nonlinear_static", "pub fn solve_nonlinear_static"),
+        "rust": (
+            "pub fn load_nonlinear_static",
+            "pub fn solve_nonlinear_static",
+        ),
+        "rust_parity": (
+            "safe_v1_3_cpp_path_matches_the_complete_python_c1_matrix",
+            "nonconverged.max_iter = 1",
+            "SA_ERR_NONCONVERGENCE",
+        ),
+        "python_oracle": (
+            "Independent dense-matrix oracle",
+            "np.linalg.solve",
+            "solve_nonlinear_static_oracle",
+        ),
+        "python_boundary": (
+            "PRODUCT_FIXTURES",
+            "test_dense_python_oracle_matches_the_complete_product_c1_matrix",
+            "test_python_oracle_and_native_error_contract_share_the_nonconvergence_case",
+        ),
     }
+    nonlinear_source_text: dict[str, str] = {}
     for role, path in nonlinear_sources.items():
         try:
             text = path.read_text(encoding="utf-8")
         except OSError as exc:
             blockers.append(f"r3_source_unreadable:nonlinear_static:{role}:{exc}")
             continue
+        nonlinear_source_text[role] = text
         for token in nonlinear_required_tokens[role]:
             if token not in text:
                 blockers.append(
                     f"r3_source_token_missing:nonlinear_static:{role}:{token}"
                 )
+    python_oracle_text = nonlinear_source_text.get("python_oracle", "")
+    for forbidden in (
+        "import ctypes",
+        "import subprocess",
+        "rust_nonlinear_frame_bridge",
+        "structural_runtime_ffi",
+        "sa_get_api_v1",
+    ):
+        if forbidden in python_oracle_text:
+            blockers.append(
+                f"r3_nonlinear_static_python_oracle_native_dependency:{forbidden}"
+            )
 
     try:
         capabilities = _load_json(repo_root / "native/capabilities.json")
@@ -313,14 +445,17 @@ def check_r3(
     ):
         blockers.append("r3_nonlinear_static_capability_not_implemented")
     else:
-        if nonlinear_capability.get("cutover_gate") != "C0":
+        if nonlinear_capability.get("cutover_gate") != "C1":
             blockers.append("r3_nonlinear_static_capability_gate_invalid")
         nonlinear_claim = str(nonlinear_capability.get("claim", ""))
         for boundary in (
             "ABI v1.3",
-            "frozen legacy Rust parity",
-            "3-story compatibility case only",
             "Python C1",
+            "five-case",
+            "elastic/plastic",
+            "mixed-sign load",
+            "P-delta",
+            "backtracking",
             "broader nonlinear input-space",
             "HIP C2",
             "restart",
@@ -361,14 +496,15 @@ def _report(
         "capability_gate": "C1",
         "capability_gates": {
             "track_point_load_cpu": "C1",
-            "nonlinear_static_cpu": "C0",
+            "nonlinear_static_cpu": "C1",
         },
         "blockers": blockers,
         "claim_boundary": (
             "R3 proves track Python C1 full-vector parity only for the four-case 9-node "
-            "midpoint-load matrix, plus nonlinear static C0 parity only for one frozen "
-            "3-story legacy Rust case through ABI v1.3. Independent nonlinear Python C1, "
-            "broader input-space parity, HIP C2 and runtime cutover remain open."
+            "midpoint-load matrix, plus nonlinear static Python C1 full-result parity only "
+            "for the five-case 1/3-story topology, elastic/plastic, mixed-sign load, P-delta "
+            "and backtracking matrix through ABI v1.3. Broader input-space parity, HIP C2 "
+            "and runtime cutover remain open."
         ),
     }
 

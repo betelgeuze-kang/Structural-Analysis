@@ -8,7 +8,7 @@
       "workspace_member": true,
       "legacy_abi_preserved": true,
       "removal_allowed": false,
-      "next_gate": "close nonlinear_static Python C1 matrix parity, run track_point_load HIP C2 on the approved ROCm runner, or migrate the next R3 CPU numerical family"
+      "next_gate": "run track_point_load or nonlinear_static HIP C2 on the approved ROCm runner, or migrate the next R3 CPU numerical family"
     },
     {
       "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",

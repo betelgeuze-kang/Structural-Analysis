@@ -31,6 +31,31 @@ fn golden_case() -> NonlinearStaticCaseV3 {
     }
 }
 
+fn product_cases() -> Vec<NonlinearStaticCaseV3> {
+    const FIXTURES: [&str; 5] = [
+        "nonlinear_static_one_story_elastic_python_c1.json",
+        "nonlinear_static_one_story_pdelta_backtrack_python_c1.json",
+        "nonlinear_static_elastic_pdelta_python_c1.json",
+        "nonlinear_static_plastic_python_c1.json",
+        "nonlinear_static_mixed_sign_python_c1.json",
+    ];
+    FIXTURES
+        .iter()
+        .map(|name| {
+            let bytes = std::fs::read(
+                repository_root()
+                    .join("native/tests/fixtures/solver_cpu")
+                    .join(name),
+            )
+            .expect("tracked Python C1 fixture");
+            match parse_legacy_runtime_case_v3(&bytes).expect("strict nonlinear static fixture") {
+                LegacyRuntimeCaseV3::NonlinearStatic(case) => case,
+                _ => panic!("nonlinear static fixture decoded as another family"),
+            }
+        })
+        .collect()
+}
+
 fn legacy_config(case: &NonlinearStaticCaseV3) -> NlFrameSolveConfig {
     NlFrameSolveConfig {
         story_count: case.config.story_count,
@@ -140,6 +165,60 @@ fn safe_v1_3_cpp_path_matches_the_frozen_legacy_rust_case() {
     ] {
         assert_close(cpp_value, legacy_value);
         assert_close(cpp_value, golden_value);
+    }
+}
+
+#[test]
+fn safe_v1_3_cpp_path_matches_the_complete_python_c1_matrix() {
+    let api = Api::load_nonlinear_static().expect("ABI v1.3 nonlinear static table");
+    for case in product_cases() {
+        let cpp = api
+            .solve_nonlinear_static(&case.config, &case.inputs)
+            .expect("C++ nonlinear static CPU solve");
+        assert!(case.result.converged);
+        assert_eq!(case.result.status_code, 0);
+        assert_eq!(cpp.iterations, case.result.iterations);
+        assert_eq!(cpp.plastic_story_count, case.result.plastic_story_count);
+        assert_eq!(
+            cpp.line_search_backtracks,
+            case.result.line_search_backtracks
+        );
+        assert_eq!(cpp.execution_backend, SA_EXECUTION_BACKEND_CPU);
+        assert_eq!(cpp.fallback_count, 0);
+        assert_eq!(cpp.displacement_m.len(), case.result.u_story_m.len());
+        for (actual, expected) in cpp.displacement_m.iter().zip(&case.result.u_story_m) {
+            assert!(
+                (actual - expected).abs() <= 1.0e-12,
+                "displacement mismatch: expected {expected:.17e}, received {actual:.17e}"
+            );
+        }
+        for (actual, expected) in [
+            (
+                cpp.max_abs_displacement_m,
+                case.result.max_abs_displacement_m,
+            ),
+            (cpp.top_displacement_m, case.result.top_displacement_m),
+        ] {
+            assert!(
+                (actual - expected).abs() <= 1.0e-12,
+                "result mismatch: expected {expected:.17e}, received {actual:.17e}"
+            );
+        }
+        for (actual, expected) in [
+            (cpp.residual_inf, case.result.residual_inf),
+            (cpp.residual_l2, case.result.residual_l2),
+        ] {
+            assert!(
+                (actual - expected).abs() <= 1.0e-7,
+                "residual mismatch: expected {expected:.17e}, received {actual:.17e}"
+            );
+        }
+        assert!(
+            (cpp.base_shear_kn - case.result.base_shear_kn).abs() <= 1.0e-10,
+            "base shear mismatch: expected {:.17e}, received {:.17e}",
+            case.result.base_shear_kn,
+            cpp.base_shear_kn
+        );
     }
 }
 

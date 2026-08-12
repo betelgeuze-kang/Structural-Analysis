@@ -14,10 +14,10 @@ package is a temporary compatibility member. R2 moves its seven raw ABI declarat
 ABI v3 layouts, five exports, status codes and bounded numerical vectors remain frozen. R3 first
 moves `track_point_load` into `structural_solver_cpu`, exposes it through ABI v1.2 and promotes
 only the 9-node midpoint-load support/theory matrix to Python C1. The next slice moves the
-nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller, but remains C0:
-only one frozen 3-story legacy Rust case is matched. Independent nonlinear Python C1, broader
-input-space parity, HIP C2 and runtime cutover remain open; the legacy five-symbol ABI is
-unchanged.
+nonlinear static story-frame Newton kernel through ABI v1.3 and a safe Rust caller. An independent
+NumPy dense-matrix oracle promotes only a five-case 1/3-story topology, elastic/plastic,
+mixed-sign load, P-delta and backtracking matrix to C1. Broader input-space parity, HIP C2 and
+runtime cutover remain open; the legacy five-symbol ABI is unchanged.
 
 ## Rust
 

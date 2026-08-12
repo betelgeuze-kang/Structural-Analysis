@@ -46,6 +46,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_capability_manifest.py",
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
+        "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
         "tests/test_structural_runtime_ffi_r1.py",
         "tests/test_structural_runtime_ffi_r2.py",
@@ -56,12 +57,14 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
 MODELIR_ORACLE_PREFIXES = (
     "src/structural_analysis/model_ir/",
     "tests/fixtures/model_ir_v2/",
+    "tests/native_oracles/",
 )
 MODELIR_ORACLE_PATHS = frozenset(
     {
         "src/structural_analysis/schemas/model_ir_v2.schema.json",
         "tests/test_model_ir_v2_contract.py",
         "tests/test_native_model_ir_rust_parity.py",
+        "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
     }
 )

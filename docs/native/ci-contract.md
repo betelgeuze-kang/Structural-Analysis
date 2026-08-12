@@ -38,8 +38,9 @@ Jobs:
    - R3 bounded track CPU ownership, ABI v1.2/safe-wrapper integration and C1 claim check
    - four-case 9-node Python product-golden SHA-256 matrix and frozen legacy endpoint-only
      divergence check
-   - R3 nonlinear static CPU ownership, ABI v1.3/safe-wrapper integration, frozen 3-story legacy
-     full-result parity and C0-only claim check
+   - R3 nonlinear static CPU ownership, ABI v1.3/safe-wrapper integration and C1 claim check
+   - independent dense-matrix Python oracle, five-case product-golden SHA-256 matrix, frozen
+     byte-identical legacy 3-story copy and nonconvergence taxonomy check
    - retained R2 raw/wire/adapter ownership and neutral fixture SHA-256 checks
    - retained R1 ABI v3 layout/numerical golden tests and exact release cdylib export set
 3. cpp-quality
@@ -86,12 +87,13 @@ Required jobs:
    - shared/static link smoke와 package metadata/ABI identity
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
-   - bounded track C++/Python product-golden parity and fallback count 0
+   - bounded track/nonlinear-static C++/Python product-golden parity and fallback count 0
    - legacy Rust displacement/residual/interior parity와 frozen endpoint-only divergence
 3. python-oracle-parity
    - focused existing Python oracle only
    - canonical bytes/hash, error taxonomy와 bounded numerical vectors
    - track full-vector product golden parity; legacy endpoint convention remains separately frozen
+   - nonlinear-static dense-matrix full-result matrix와 nonconvergence taxonomy parity
 4. checkpoint-restart
    - exact model/state/execution hash binding
    - cancel/crash/restart and mismatch rejection

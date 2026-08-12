@@ -32,9 +32,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "broader input-space parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]
     assert capabilities.capability_is_enabled(payload, "nonlinear_static_cpu") is True
     nonlinear = payload["capabilities"]["nonlinear_static_cpu"]
-    assert nonlinear["cutover_gate"] == "C0"
-    assert "frozen legacy Rust parity" in nonlinear["claim"]
-    assert "Python C1" in nonlinear["claim"]
+    assert nonlinear["cutover_gate"] == "C1"
+    assert "Python C1 oracle parity" in nonlinear["claim"]
+    assert "five-case" in nonlinear["claim"]
     assert "broader nonlinear input-space parity" in nonlinear["claim"]
     for capability in (
         "checkpoint_restart",

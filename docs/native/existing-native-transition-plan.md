@@ -115,13 +115,16 @@ families and later gates.
 - `nonlinear_static` serial FP64 story-frame Newton kernel은 ABI v1.3 optional slot과 safe Rust
   wrapper까지 연결됐다. five packed input views, caller-owned displacement, invalid/overlap/
   nonconvergence atomicity와 CPU fallback 0을 검증한다.
-- frozen 3-story legacy Rust fixture의 전체 displacement/result만 `1e-15` 내에서 일치하므로
-  이 slice는 C0다. 독립 Python support/material/load matrix가 없고 broader nonlinear domain과
-  HIP C2가 open이므로 C1을 주장하지 않는다.
+- native library를 호출하지 않는 NumPy dense-matrix oracle이 1/3-story topology,
+  elastic/plastic, mixed-sign load, P-delta와 backtracking을 포함하는 5-case product golden을
+  소유한다. displacement는 `1e-12 m`, residual은 `1e-7 N`, base shear는 `1e-10 kN` 이내이며
+  iteration/plastic/backtrack taxonomy도 일치하므로 이 한정 profile은 C1이다.
+- 기존 3-story legacy fixture는 product golden 하나와 byte-identical하게 유지한다. broader
+  nonlinear input space와 HIP C2는 계속 open이다.
 
-Current next gate: nonlinear static의 독립 Python C1 matrix를 고정하거나, 승인된 전용 ROCm
-runner에서 track HIP C2를 구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU family를
-이전한다. R4 cutover는 아직 시작하지 않는다.
+Current next gate: 승인된 전용 ROCm runner에서 track 또는 nonlinear static HIP C2를
+구현하거나, 같은 fail-closed 방식으로 다음 R3 CPU family를 이전한다. R4 cutover는 아직
+시작하지 않는다.
 
 ### Step R4: runtime cutover
 

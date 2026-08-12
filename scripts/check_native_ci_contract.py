@@ -219,6 +219,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_capabilities.py --fail-invalid",
         "check_structural_runtime_ffi_r3.py",
         "native/target/release/libstructural_runtime_ffi.so",
+        "tests/test_native_nonlinear_static_python_parity.py",
         "tests/test_native_track_point_load_python_parity.py",
         "structural_nonlinear_static_abi_tests",
         'payload["abi_version"] == "0x00010003"',

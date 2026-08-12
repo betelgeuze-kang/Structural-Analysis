@@ -432,6 +432,10 @@ R3의 두 번째 family는 `nonlinear_static`이다.
   확인한다. C++ unit, C ABI negative/atomicity, Rust layout/concurrency test가 frozen 3-story
   legacy Rust fixture의 전체 result와 `1e-15` 절대 오차 내에서 일치한다.
 
-이 증거는 legacy compatibility case 하나의 C0만 닫는다. 독립 Python oracle matrix가 아직
-없으므로 `nonlinear_static_cpu` C1, broader story/material/load/nonconvergence domain, HIP C2,
-checkpoint/restart와 product E2E는 모두 open이다. 기존 Rust 5-symbol ABI는 변경하지 않는다.
+별도 NumPy dense-matrix oracle은 native library를 호출하지 않고 1/3-story topology,
+elastic/plastic, mixed-sign load, P-delta 및 line-search backtracking의 5-case matrix를 계산한다.
+C++와 safe Rust 경로는 displacement `1e-12 m`, residual `1e-7 N`, base shear `1e-10 kN` 이내에서
+golden과 일치하며 iteration/plastic/backtrack 및 nonconvergence taxonomy도 일치한다. 따라서 이
+한정 profile은 C1이다. frozen legacy 3-story fixture는 product golden 하나와 byte-identical하다.
+Broader story/material/load domain, HIP C2, checkpoint/restart와 product E2E는 open이고 기존 Rust
+5-symbol ABI는 변경하지 않는다.
