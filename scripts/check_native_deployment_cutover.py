@@ -308,6 +308,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--gid 65532",
         "--setenv PATH /nonexistent",
         "workflow-mgt",
+        "inspect --workspace",
+        "--decision review",
+        "review-show --workspace",
+        "export --workspace",
+        "--workbench-inspect-before-review",
         "runtime-probe",
         "runtime-receipt-verify",
     ):

@@ -233,6 +233,8 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "static/shared" in distribution["claim"]
     assert "install/update/rollback" in distribution["claim"]
     assert "Python/Node lookup 0" in distribution["claim"]
+    assert "append-only v3 receipt" in distribution["claim"]
+    assert "explicit non-promoting review" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
@@ -247,6 +249,8 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert deployment["owner"] == "structural-workbench"
     assert "cpu-only static native distribution" in deployment["claim"]
     assert "no network namespace, listener, port, secret, Python, Node or React runtime" in deployment["claim"]
+    assert "explicit non-promoting review" in deployment["claim"]
+    assert "operator artifact self-hashes" in deployment["claim"]
     assert "outside .github/workflows" in deployment["claim"]
     assert "final C6 remain open" in deployment["claim"]
 

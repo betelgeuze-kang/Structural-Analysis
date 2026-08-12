@@ -11,6 +11,7 @@ RUN_ROCM = ROOT / "scripts" / "run_native_rocm_distribution_e2e.sh"
 CHECK = ROOT / "scripts" / "check_native_distribution_receipt.py"
 LIB = ROOT / "native" / "crates" / "structural-distribution" / "src" / "lib.rs"
 FFI_BUILD = ROOT / "native" / "crates" / "structural-ffi" / "build.rs"
+ROOTFS_RUN = ROOT / "scripts" / "run_native_rootfs_isolation_e2e.sh"
 
 
 def run_checker(tmp_path: Path, receipt: dict, manifest: dict) -> subprocess.CompletedProcess[str]:
@@ -119,6 +120,24 @@ def valid_v2_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v3_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v2_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v3",
+            "workbench_operator_surface_passed": True,
+            "workbench_review_decision": "review",
+            "workbench_review_sha256": "sha256:" + "5" * 64,
+            "workbench_export_sha256": "sha256:" + "6" * 64,
+            "mgt_workbench_operator_surface_passed": True,
+            "mgt_workbench_review_decision": "review",
+            "mgt_workbench_review_sha256": "sha256:" + "7" * 64,
+            "mgt_workbench_export_sha256": "sha256:" + "8" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -135,6 +154,24 @@ def test_distribution_receipt_accepts_mgt_workbench_v2_contract(tmp_path: Path):
     validation = json.loads(completed.stdout)
     assert validation["valid"] is True
     assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_accepts_operator_surface_v3_contract(tmp_path: Path):
+    receipt, manifest = valid_v3_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_promoting_v3_review_decision(tmp_path: Path):
+    receipt, manifest = valid_v3_contract()
+    receipt["workbench_review_decision"] = "pass"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("workbench_review_decision" in error for error in validation["errors"])
 
 
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
@@ -172,6 +209,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     build = BUILD.read_text(encoding="utf-8")
     e2e = RUN.read_text(encoding="utf-8")
     rocm_e2e = RUN_ROCM.read_text(encoding="utf-8")
+    rootfs_e2e = ROOTFS_RUN.read_text(encoding="utf-8")
     ffi = FFI_BUILD.read_text(encoding="utf-8")
     assert 'STRUCTURAL_ENABLE_HIP="$enable_hip"' in build
     assert "ROCm distribution currently requires shared linkage" in build
@@ -185,6 +223,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workflow-mgt" in e2e
     assert "diff -r \"$mgt_restarted\" \"$mgt_direct\"" in e2e
     assert "mgt_workbench_direct_parity_passed" in e2e
+    assert "exercise_operator_surface" in e2e
+    assert "workbench_operator_surface_passed" in e2e
+    assert "structural-native-distribution-e2e.v3" in e2e
     assert "update --bundle" in e2e
     assert "rollback --root" in e2e
     assert "single_product_abi" in e2e
@@ -196,4 +237,13 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural_native_backend_package_consumer\" hip" in rocm_e2e
     assert "workflow-mgt" in rocm_e2e
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
+    assert "exercise_operator_surface" in rocm_e2e
+    assert "workbench_operator_surface_passed" in rocm_e2e
+    assert "structural-native-distribution-e2e.v3" in rocm_e2e
     assert '"approved_device_runner\\\":true' in rocm_e2e
+    assert "inspect --workspace /mnt/modelir-workbench" in rootfs_e2e
+    assert "review-show --workspace /mnt/modelir-workbench" in rootfs_e2e
+    assert "export --workspace /mnt/modelir-workbench" in rootfs_e2e
+    assert "inspect --workspace /mnt/mgt-workbench" in rootfs_e2e
+    assert "--workbench-inspect-before-review" in rootfs_e2e
+    assert "runtime-receipt-verify" in rootfs_e2e

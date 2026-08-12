@@ -137,8 +137,9 @@ and uploads the raw receipts. It then builds the separate ROCm shared distributi
 loads HIP through the installed package's single `sa_get_api_v1` symbol, runs its CPU/HIP package
 consumer and bounded Workbench flow, exercises update/rollback, and uploads a deterministic tar plus
 receipts that bind the installed execution to the C2 receipt. Both strict ModelIR and exact-profile
-MGT Workbench paths run with original MGT/import-health identities in the append-only distribution
-v2 receipt. A local execution is a candidate, not
+MGT Workbench paths run with original MGT/import-health identities plus deterministic inspect,
+explicit non-promoting review, review reopen and export hashes in the append-only distribution v3
+receipt. A local execution is a candidate, not
 authoritative C2 or ROCm-package evidence.
 
 ## 3. merge-product

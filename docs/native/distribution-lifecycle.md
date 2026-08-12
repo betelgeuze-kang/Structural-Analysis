@@ -68,10 +68,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 4. selects and executes the installed ABI backend;
 5. runs stage-by-stage and one-shot Workbench flows from both strict ModelIR and the bounded MGT
    source, then byte-compares every artifact and preserves MGT import-health evidence;
-6. installs an immutable update, rolls back and re-verifies activation;
-7. emits an append-only v2 hash-bound receipt with ModelIR/MGT result, report, MGT source and
-   import-health identities, Python/Node lookup count 0 and fallback count 0. The receipt checker
-   continues to accept frozen v1 receipts without treating them as MGT evidence.
+6. exercises deterministic inspect, immutable explicit `review`, review reopen and handoff export
+   from both installed sessions without inferring an engineering approval;
+7. installs an immutable update, rolls back and re-verifies activation;
+8. emits an append-only v3 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+   import-health, review and export identities, Python/Node lookup count 0 and fallback count 0.
+   The receipt checker continues to accept frozen v1/v2 receipts without treating them as v3
+   operator-surface evidence.
 
 The reference command is:
 
@@ -88,10 +91,14 @@ scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> \
 
 On Linux hosts that permit unprivileged namespaces, the rootfs harness executes both Workbench
 profiles from the verified CPU bundle as UID/GID 65532 with an empty lookup path, a read-only root
-and payload, a writable operator workspace, and only loopback networking. `structural-installer`
-creates and validates the canonical self-hashed receipt. Its authority is deliberately
-`local_rootfs_diagnostic_c5`; it records that neither an OCI image nor a customer image receipt was
-created.
+and payload, a writable operator workspace, and only loopback networking. Both profiles also run
+inspect, an explicit non-promoting `review`, review reopen, post-review inspect and handoff export.
+`structural-installer` verifies each operator artifact's canonical self-hash, session binding,
+ResultIR/comparison/PDF binding and fixed `review` decision before it creates and validates the v2
+self-hashed receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that
+neither an OCI image nor a customer image receipt or engineering approval was created.
+The installer continues to verify frozen v1 rootfs receipts against their original bundle and
+claim boundary, while only newly generated v2 receipts carry operator-surface evidence.
 
 The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to-NDTHA Workbench
 profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver

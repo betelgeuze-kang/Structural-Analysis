@@ -79,15 +79,47 @@ unshare -Urn bwrap \
       --external-result "$3" --source-artifact "$4" \
       --workspace /mnt/modelir-workbench --step-budget 1 \
       > /mnt/modelir-workflow.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/modelir-workbench \
+      > /mnt/modelir-inspect-before-review.json
+    /opt/payload/bin/structural-workbench review --workspace /mnt/modelir-workbench \
+      --decision review --reviewer native-rootfs-c5 \
+      --comment "Explicit isolated C5 handoff review; no engineering approval is inferred." \
+      > /mnt/modelir-review-publish.json
+    /opt/payload/bin/structural-workbench review-show --workspace /mnt/modelir-workbench \
+      > /mnt/modelir-review-show.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/modelir-workbench \
+      > /mnt/modelir-inspect-after-review.json
+    /opt/payload/bin/structural-workbench export --workspace /mnt/modelir-workbench \
+      > /mnt/modelir-export.json
     /opt/payload/bin/structural-workbench workflow-mgt "$5" "$6" \
       --model-id workbench-mgt-fixed-guided-v1 \
       --external-result "$3" --source-artifact "$4" \
       --workspace /mnt/mgt-workbench --step-budget 1 \
       > /mnt/mgt-workflow.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/mgt-workbench \
+      > /mnt/mgt-inspect-before-review.json
+    /opt/payload/bin/structural-workbench review --workspace /mnt/mgt-workbench \
+      --decision review --reviewer native-rootfs-c5 \
+      --comment "Explicit isolated C5 handoff review; no engineering approval is inferred." \
+      > /mnt/mgt-review-publish.json
+    /opt/payload/bin/structural-workbench review-show --workspace /mnt/mgt-workbench \
+      > /mnt/mgt-review-show.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/mgt-workbench \
+      > /mnt/mgt-inspect-after-review.json
+    /opt/payload/bin/structural-workbench export --workspace /mnt/mgt-workbench \
+      > /mnt/mgt-export.json
     /opt/payload/bin/structural-installer runtime-probe \
       --bundle /opt --payload-root /opt/payload --workspace /mnt \
       --workbench-root /mnt/modelir-workbench \
       --mgt-workbench-root /mnt/mgt-workbench \
+      --workbench-inspect-before-review /mnt/modelir-inspect-before-review.json \
+      --workbench-review-show /mnt/modelir-review-show.json \
+      --workbench-inspect-after-review /mnt/modelir-inspect-after-review.json \
+      --workbench-export /mnt/modelir-export.json \
+      --mgt-workbench-inspect-before-review /mnt/mgt-inspect-before-review.json \
+      --mgt-workbench-review-show /mnt/mgt-review-show.json \
+      --mgt-workbench-inspect-after-review /mnt/mgt-inspect-after-review.json \
+      --mgt-workbench-export /mnt/mgt-export.json \
       --receipt /mnt/rootfs-isolation-receipt.json \
       > /mnt/runtime-probe-result.json
   ' structural-rootfs-e2e \

@@ -157,6 +157,14 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--workspace",
             "--workbench-root",
             "--mgt-workbench-root",
+            "--workbench-inspect-before-review",
+            "--workbench-review-show",
+            "--workbench-inspect-after-review",
+            "--workbench-export",
+            "--mgt-workbench-inspect-before-review",
+            "--mgt-workbench-review-show",
+            "--mgt-workbench-inspect-after-review",
+            "--mgt-workbench-export",
             "--receipt",
         ],
     )?;
@@ -165,6 +173,18 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
     let workspace = required_path(options, "--workspace")?;
     let workbench_root = required_path(options, "--workbench-root")?;
     let mgt_workbench_root = required_path(options, "--mgt-workbench-root")?;
+    let workbench_inspect_before_review =
+        required_path(options, "--workbench-inspect-before-review")?;
+    let workbench_review_show = required_path(options, "--workbench-review-show")?;
+    let workbench_inspect_after_review =
+        required_path(options, "--workbench-inspect-after-review")?;
+    let workbench_export = required_path(options, "--workbench-export")?;
+    let mgt_workbench_inspect_before_review =
+        required_path(options, "--mgt-workbench-inspect-before-review")?;
+    let mgt_workbench_review_show = required_path(options, "--mgt-workbench-review-show")?;
+    let mgt_workbench_inspect_after_review =
+        required_path(options, "--mgt-workbench-inspect-after-review")?;
+    let mgt_workbench_export = required_path(options, "--mgt-workbench-export")?;
     let receipt = required_path(options, "--receipt")?;
     let result = create_rootfs_isolation_receipt(&RootfsIsolationProbeRequest {
         bundle: &bundle,
@@ -172,6 +192,14 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         workspace: &workspace,
         workbench_root: &workbench_root,
         mgt_workbench_root: &mgt_workbench_root,
+        workbench_inspect_before_review: &workbench_inspect_before_review,
+        workbench_review_show: &workbench_review_show,
+        workbench_inspect_after_review: &workbench_inspect_after_review,
+        workbench_export: &workbench_export,
+        mgt_workbench_inspect_before_review: &mgt_workbench_inspect_before_review,
+        mgt_workbench_review_show: &mgt_workbench_review_show,
+        mgt_workbench_inspect_after_review: &mgt_workbench_inspect_after_review,
+        mgt_workbench_export: &mgt_workbench_export,
         receipt: &receipt,
     })?;
     json_result("runtime_probe", result)
@@ -263,7 +291,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
+    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
 }
 
 #[cfg(test)]

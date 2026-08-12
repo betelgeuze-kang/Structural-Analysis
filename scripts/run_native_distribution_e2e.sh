@@ -151,6 +151,29 @@ env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-mgt \
 grep -Fq '"stage":"reported"' "$e2e_root/mgt-workflow.json"
 diff -r "$mgt_restarted" "$mgt_direct" > "$e2e_root/mgt-workbench-diff.txt"
 
+exercise_operator_surface() {
+  local label="$1"
+  local workspace="$2"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" inspect \
+    --workspace "$workspace" > "$e2e_root/$label-inspect-before-review.json"
+  grep -Fq '"next_action":"review"' "$e2e_root/$label-inspect-before-review.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" review \
+    --workspace "$workspace" --decision review --reviewer native-c5-e2e \
+    --comment 'Explicit C5 package handoff review; no engineering approval is inferred.' \
+    > "$e2e_root/$label-review.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" review-show \
+    --workspace "$workspace" > "$e2e_root/$label-review-show.json"
+  cmp "$e2e_root/$label-review.json" "$e2e_root/$label-review-show.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" inspect \
+    --workspace "$workspace" > "$e2e_root/$label-inspect-after-review.json"
+  grep -Fq '"next_action":"export"' "$e2e_root/$label-inspect-after-review.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" export \
+    --workspace "$workspace" > "$e2e_root/$label-export.json"
+  grep -Fq '"decision":"review"' "$e2e_root/$label-export.json"
+}
+exercise_operator_surface workbench "$direct"
+exercise_operator_surface mgt-workbench "$mgt_direct"
+
 consumer_build="$e2e_root/package-consumer"
 cmake -S "$repository_root/native/cpp/tests/package_consumer" -B "$consumer_build" \
   -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$active" > "$e2e_root/consumer-configure.txt"
@@ -188,9 +211,13 @@ mgt_source_hash="$(sha256sum "$mgt_direct/01-import/source.mgt" | awk '{print $1
 mgt_health_hash="$(sha256sum "$mgt_direct/01-import/import-health.json" | awk '{print $1}')"
 mgt_result_hash="$(sha256sum "$mgt_direct/04-resume/result-ir.json" | awk '{print $1}')"
 mgt_report_hash="$(sha256sum "$mgt_direct/06-report/report.pdf" | awk '{print $1}')"
+workbench_review_hash="$(sha256sum "$direct/07-review/review.json" | awk '{print $1}')"
+workbench_export_hash="$(sha256sum "$e2e_root/workbench-export.json" | awk '{print $1}')"
+mgt_workbench_review_hash="$(sha256sum "$mgt_direct/07-review/review.json" | awk '{print $1}')"
+mgt_workbench_export_hash="$(sha256sum "$e2e_root/mgt-workbench-export.json" | awk '{print $1}')"
 installed_backend_hash="$(sha256sum "$e2e_root/installed-backend-receipt.json" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
-printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v2\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
+printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v3\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
 cp "$e2e_root/installed-backend-receipt.json" "$backend_output_stage"

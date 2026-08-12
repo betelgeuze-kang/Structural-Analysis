@@ -10,14 +10,16 @@ absent from the runtime image.
 - `structural-workbench` is the non-root image entrypoint.
 - The container has no listener, exposed port, secret, or network namespace.
 - `/workspace` is the only operator-mounted working directory; the root filesystem is read-only.
-- The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report terminal flow.
+- The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report flow plus
+  deterministic Inspect -> explicit Review -> Export handoff.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
   distribution build candidate.
 - Native bundle install, update, crash recovery, and rollback remain owned and tested by
   `structural-installer` and `scripts/run_native_distribution_e2e.sh`.
 - When Docker is unavailable, `scripts/run_native_rootfs_isolation_e2e.sh` uses unprivileged Linux
   user, mount, and network namespaces to execute both ModelIR and MGT workflows as UID/GID 65532.
-  The Rust installer emits and re-verifies a source-bound `local_rootfs_diagnostic_c5` receipt for
+  It also verifies inspect, explicit non-promoting review, review reopen and handoff export before
+  the Rust installer emits and re-verifies a source-bound `local_rootfs_diagnostic_c5` receipt for
   empty-PATH execution, read-only root/payload, writable workspace, and loopback-only networking.
 
 ## Build
@@ -51,6 +53,11 @@ structural-workbench run --workspace /workspace/session --step-budget 1
 structural-workbench resume --workspace /workspace/session
 structural-workbench compare --workspace /workspace/session --require-pass
 structural-workbench report --workspace /workspace/session
+structural-workbench inspect --workspace /workspace/session
+structural-workbench review --workspace /workspace/session --decision review \
+  --reviewer "Engineer A" --comment "Check connection assumptions."
+structural-workbench review-show --workspace /workspace/session
+structural-workbench export --workspace /workspace/session
 ```
 
 With Compose, override the default `--version` command while retaining the entrypoint:
