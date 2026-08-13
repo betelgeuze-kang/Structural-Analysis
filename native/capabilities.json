@@ -193,6 +193,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 build orchestration only: package build enters through structural-frontend-contract frontend-build; Rust freezes package/lock/source-map identity plus a bounded complete inventory of the configured frontend source files and roots, hashes installed TypeScript and Vite CLI entrypoint bytes for live execution, removes inherited NODE_OPTIONS, owns the two direct Node children, rejects source or CLI entrypoint mutation, validates the resulting bounded delivery tree, and emits a canonical self-hashed receipt, while dry-run requires no node_modules and spawns no process; Node executable identity, transitive npm package bytes, TypeScript/Vite internals, plugins, build environment and build-time network behavior remain outside Rust ownership, and no browser behavior, clean-machine publication, native UI parity, C5, or C6 is claimed"
     },
+    "native_frontend_preview": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 local serving only: package preview enters through structural-frontend-contract frontend-preview; Rust validates the pinned frontend contract and already-built delivery receipt, confines the delivery root and SPA fallback, permits only one fixed IPv4 loopback listener plus bounded GET/HEAD requests, rejects traversal, dotfiles and symlinks, spawns zero child processes, and emits a canonical self-hashed startup receipt, while dry-run validates the delivery and binds zero listeners; the npm package script remains a launcher convenience but the preview server requires no Node, Vite, browser or Python, and rendered behavior, clean-machine publication, native UI parity, C5 and C6 remain open"
+    },
     "native_viewer_report_pdf_export": {
       "status": "implemented",
       "cutover_gate": "C0",

@@ -43,6 +43,7 @@ EXPECTED_OWNERS = {
     "native_workbench": "structural-workbench",
     "native_benchmark_catalog": "structural-catalog",
     "native_frontend_build": "structural-frontend-contract",
+    "native_frontend_preview": "structural-frontend-contract",
     "native_frontend_contract": "structural-frontend-contract",
     "native_viewer_js_syntax": "structural-frontend-contract",
     "native_viewer_readme_capture": "structural-frontend-contract",

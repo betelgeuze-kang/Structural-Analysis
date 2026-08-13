@@ -6,22 +6,22 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json, canonical_receipt_json,
-    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
-    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
-    canonical_viewer_report_pdf_export_receipt_json,
+    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json,
+    canonical_frontend_preview_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, plan_viewer_server, run_frontend_build, run_frontend_smoke,
-    run_viewer_browser_smoke, run_viewer_js_syntax, run_viewer_performance_probe,
-    run_viewer_readme_capture, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
-    run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
-    FrontendBuildOptions, FrontendContractError, ViewerJsSyntaxOptions,
+    check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_build,
+    run_frontend_smoke, run_viewer_browser_smoke, run_viewer_js_syntax,
+    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
+    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_frontend_preview,
+    serve_viewer, FrontendBuildOptions, FrontendContractError, ViewerJsSyntaxOptions,
     ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
     ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
@@ -78,6 +78,17 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         options.dry_run = dry_run;
         let receipt = run_frontend_build(&options)?;
         return canonical_frontend_build_receipt_json(&receipt).map_err(Into::into);
+    }
+    if command == "frontend-preview" {
+        let options = parse_preview_arguments(&arguments[1..])?;
+        if options.dry_run {
+            let receipt = plan_frontend_preview(&options.root, &options.host, options.port)?;
+            return canonical_frontend_preview_receipt_json(&receipt).map_err(Into::into);
+        }
+        return match serve_frontend_preview(&options.root, &options.host, options.port) {
+            Ok(never) => match never {},
+            Err(error) => Err(error.into()),
+        };
     }
     if command == "smoke" {
         let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
@@ -169,7 +180,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, frontend-build, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, frontend-build, frontend-preview, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -876,6 +887,66 @@ fn parse_serve_arguments(arguments: &[OsString]) -> Result<ServeOptions, CliErro
     })
 }
 
+fn parse_preview_arguments(arguments: &[OsString]) -> Result<ServeOptions, CliError> {
+    let mut root = None;
+    let mut host = None;
+    let mut port = None;
+    let mut dry_run = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("frontend-preview option names must be UTF-8"))?;
+        if name == "--dry-run" {
+            if dry_run {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            dry_run = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("frontend-preview value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--host" if host.is_none() => {
+                host = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("--host must be UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--port" if port.is_none() => {
+                port = Some(parse_preview_port(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("--port must be UTF-8"))?,
+                )?);
+            }
+            "--root" | "--host" | "--port" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "frontend-preview options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    Ok(ServeOptions {
+        root: root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        host: host.unwrap_or_else(|| "127.0.0.1".to_owned()),
+        port: port.unwrap_or(4_173),
+        dry_run,
+    })
+}
+
 fn optional_environment_utf8(name: &str) -> Result<Option<String>, CliError> {
     std::env::var_os(name)
         .map(|value| {
@@ -892,6 +963,14 @@ fn parse_port(value: &str) -> Result<u16, CliError> {
         .ok()
         .filter(|port| *port > 0)
         .ok_or_else(|| usage_error("Viewer server port must be in 1..=65535"))
+}
+
+fn parse_preview_port(value: &str) -> Result<u16, CliError> {
+    value
+        .parse::<u16>()
+        .ok()
+        .filter(|port| *port > 0)
+        .ok_or_else(|| usage_error("frontend preview port must be in 1..=65535"))
 }
 
 fn parse_smoke_arguments(arguments: &[OsString]) -> Result<(PathBuf, bool), CliError> {
@@ -987,7 +1066,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-build|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-build|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -996,11 +1075,12 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_js_syntax_arguments, parse_viewer_performance_probe_arguments,
-        parse_viewer_readme_capture_arguments, parse_viewer_report_pdf_export_arguments,
-        parse_viewer_report_pdf_smoke_arguments, parse_viewer_sample_workflow_arguments,
-        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
+        parse_browser_smoke_arguments, parse_preview_arguments, parse_serve_arguments,
+        parse_smoke_arguments, parse_viewer_js_syntax_arguments,
+        parse_viewer_performance_probe_arguments, parse_viewer_readme_capture_arguments,
+        parse_viewer_report_pdf_export_arguments, parse_viewer_report_pdf_smoke_arguments,
+        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -1086,6 +1166,33 @@ mod tests {
             OsString::from("a"),
             OsString::from("--port"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn frontend_preview_parser_uses_vite_compatible_defaults_and_rejects_duplicates() {
+        assert_eq!(
+            parse_preview_arguments(&[
+                OsString::from("--root"),
+                OsString::from("a"),
+                OsString::from("--dry-run"),
+            ])
+            .expect("valid frontend-preview arguments"),
+            ServeOptions {
+                root: PathBuf::from("a"),
+                host: "127.0.0.1".to_owned(),
+                port: 4173,
+                dry_run: true,
+            }
+        );
+        assert!(parse_preview_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--host"),
+            OsString::from("0.0.0.0"),
+            OsString::from("--host"),
+            OsString::from("127.0.0.1"),
         ])
         .is_err());
     }

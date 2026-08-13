@@ -6,20 +6,20 @@ use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json, canonical_receipt_json,
-    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
-    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
-    canonical_viewer_report_pdf_export_receipt_json,
+    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json,
+    canonical_frontend_preview_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, plan_viewer_server, run_frontend_build, run_frontend_smoke,
-    run_viewer_browser_smoke, run_viewer_js_syntax, run_viewer_performance_probe,
-    run_viewer_readme_capture, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
-    run_viewer_sample_workflow, run_viewer_visual_regression,
+    check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_build,
+    run_frontend_smoke, run_viewer_browser_smoke, run_viewer_js_syntax,
+    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
+    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendBuildOptions,
     ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
     ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
@@ -502,6 +502,41 @@ fn tracked_viewer_server_plan_is_loopback_bounded_and_self_hashed() {
     let error = plan_viewer_server(&root, "0.0.0.0", 8765)
         .expect_err("non-loopback Viewer server must fail");
     assert_eq!(error.code, "viewer_server_host_forbidden");
+}
+
+#[test]
+fn built_delivery_preview_plan_is_node_free_loopback_bounded_and_self_hashed() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+
+    let first = plan_frontend_preview(&test.0, "127.0.0.1", 4173).expect("frontend preview plan");
+    let second =
+        plan_frontend_preview(&test.0, "127.0.0.1", 4173).expect("repeat frontend preview plan");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.dist_directory, "dist");
+    assert_eq!(first.spa_fallback_entry, "index.html");
+    assert_eq!(first.preview_url, "http://127.0.0.1:4173/");
+    assert!(first.loopback_only);
+    assert_eq!(first.listener_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.external_network_access_count, 0);
+    assert!(!first.runtime_requirements.node_required);
+    assert!(!first.runtime_requirements.browser_required);
+    assert!(!first.runtime_requirements.loopback_listener_required);
+    assert!(first.delivery_validated);
+    assert!(first.frontend_contract_receipt_hash.starts_with("sha256:"));
+    assert!(first.delivery_receipt_hash.starts_with("sha256:"));
+    let encoded = canonical_frontend_preview_receipt_json(&first)
+        .expect("canonical frontend preview receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("frontend preview receipt JSON");
+    verify_receipt_hash(&value);
+
+    let error = plan_frontend_preview(&test.0, "0.0.0.0", 4173)
+        .expect_err("non-loopback frontend preview must fail");
+    assert_eq!(error.code, "frontend_preview_host_forbidden");
 }
 
 #[test]
@@ -2379,6 +2414,43 @@ fn clean_environment_viewer_server_dry_run_emits_one_canonical_receipt() {
     );
     assert_eq!(value["action"], "viewer_server");
     assert_eq!(value["listener_count"], 0);
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_frontend_preview_dry_run_emits_one_canonical_receipt() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-preview", "--root"])
+        .arg(&test.0)
+        .args(["--host", "127.0.0.1", "--port", "4173", "--dry-run"])
+        .env_clear()
+        .output()
+        .expect("run frontend preview dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("frontend preview receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "frontend_preview");
+    assert_eq!(value["listener_count"], 0);
+    assert_eq!(value["direct_processes_spawned"], 0);
+    assert_eq!(value["runtime_requirements"]["node_required"], false);
+    assert_eq!(
+        value["runtime_requirements"]["loopback_listener_required"],
+        false
+    );
     verify_receipt_hash(&value);
 }
 

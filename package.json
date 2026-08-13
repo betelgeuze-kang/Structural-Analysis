@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "vite",
     "build": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .",
-    "preview": "vite preview",
+    "preview": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-preview --root .",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-js-syntax": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-js-syntax --root .",

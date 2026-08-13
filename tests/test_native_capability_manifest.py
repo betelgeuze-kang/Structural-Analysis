@@ -329,6 +329,22 @@ def test_native_frontend_build_capability_is_bounded_c0() -> None:
     assert "C5, or C6" in frontend["claim"]
 
 
+def test_native_frontend_preview_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_preview") is True
+    preview = payload["capabilities"]["native_frontend_preview"]
+    assert preview["cutover_gate"] == "C0"
+    assert preview["owner"] == "structural-frontend-contract"
+    assert "package preview" in preview["claim"]
+    assert "frontend-preview" in preview["claim"]
+    assert "already-built delivery receipt" in preview["claim"]
+    assert "one fixed IPv4 loopback listener" in preview["claim"]
+    assert "rejects traversal, dotfiles and symlinks" in preview["claim"]
+    assert "spawns zero child processes" in preview["claim"]
+    assert "requires no Node, Vite, browser or Python" in preview["claim"]
+    assert "C5 and C6 remain open" in preview["claim"]
+
+
 def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

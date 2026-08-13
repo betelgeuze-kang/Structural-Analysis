@@ -22,6 +22,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
+    Path("native/crates/structural-frontend-contract/src/frontend_preview.rs"),
     Path("native/crates/structural-frontend-contract/src/playwright.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
@@ -213,6 +214,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
         "structural-frontend-contract frontend-build",
+        "structural-frontend-contract frontend-preview",
         "structural-frontend-contract prototype",
         "structural-frontend-contract prototype-browser-smoke",
         "structural-frontend-contract workbench-v2-browser-smoke",
@@ -235,6 +237,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_build_vite_required": True,
         "frontend_build_browser_required": False,
         "frontend_build_listener_required": False,
+        "frontend_preview_node_required": False,
+        "frontend_preview_browser_required": False,
+        "frontend_preview_loopback_required": True,
         "browser_smoke_node_required": True,
         "browser_smoke_playwright_required": True,
         "browser_smoke_browser_required": True,
@@ -374,6 +379,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- frontend-build --root ."
     ):
         blockers.append("workbench_ui_frontend_build_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("preview") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- frontend-preview --root ."
+    ):
+        blockers.append("workbench_ui_frontend_preview_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get("verify:frontend-smoke") != (
         "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- smoke --root ."
@@ -615,6 +625,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "frontend_build_runtime_changed",
             '.env_remove("NODE_OPTIONS")',
             "check_frontend_delivery",
+            "direct_processes_spawned",
+            "delivery_receipt_hash",
+        ),
+        blockers,
+    )
+    frontend_preview = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/frontend_preview.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/frontend_preview.rs"),
+        frontend_preview,
+        (
+            "pub fn plan_frontend_preview",
+            "pub fn serve_frontend_preview",
+            "structural-native-frontend-preview-receipt.v1",
+            "frontend_preview_host_forbidden",
+            "check_frontend_delivery",
+            "handle_spa_stream",
             "direct_processes_spawned",
             "delivery_receipt_hash",
         ),
@@ -943,9 +973,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/frontend-build/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/frontend-build/frontend-preview/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Frontend TypeScript/Vite build orchestration is Rust-native",
+            "Frontend production-delivery preview serving is Rust-native",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
             "Viewer JavaScript syntax gate orchestration is Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",

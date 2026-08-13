@@ -76,6 +76,7 @@
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/frontend_build.rs",
+    "native/crates/structural-frontend-contract/src/frontend_preview.rs",
     "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
@@ -101,7 +102,7 @@
     "capture:readme-viewer-image": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-readme-capture --root .",
     "dev": "vite",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
-    "preview": "vite preview",
+    "preview": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-preview --root .",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "verify:frontend-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- browser-smoke --root .",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
@@ -161,6 +162,14 @@
     "maximum_cli_bytes": 16777216,
     "external_network_access_accounting": "not_instrumented_vite_plugins_transitive_runtime_and_environment",
     "claim_boundary": "This transitional C0 receipt proves only that Rust freezes the package/lock/source map and a bounded complete inventory of the configured frontend source roots, hashes the installed TypeScript and Vite CLI entrypoint bytes for live execution, removes inherited NODE_OPTIONS, owns the two direct Node children, rejects source or CLI entrypoint mutation, and validates the resulting bounded delivery tree. Dry-run requires no installed packages and spawns no process. Node executable identity, transitive npm package bytes, TypeScript/Vite internals, plugins, environment and build-time network behavior remain outside Rust authority; browser behavior, clean-machine publication, native UI parity, C5, and C6 remain open."
+  },
+  "frontend_preview_contract": {
+    "schema_version": "structural-native-frontend-preview-contract.v1",
+    "default_host": "127.0.0.1",
+    "default_port": 4173,
+    "dist_directory": "dist",
+    "spa_fallback_entry": "index.html",
+    "claim_boundary": "This transitional C0 local-server receipt proves only that Rust validates the pinned frontend contract and already-built delivery, binds one fixed IPv4 loopback listener, and serves bounded regular non-symlink files from the delivery tree with confined SPA fallback, GET/HEAD-only, traversal and dotfile rejection, no-store, and nosniff responses. Dry-run validates the delivery and binds no listener. The npm package script remains a launcher convenience, while the server itself spawns no process and requires no Node, Vite, browser, Python, engineering analysis, or external network access. It does not prove rendered browser behavior, clean-machine publication, native UI parity, C5, or C6."
   },
   "delivery_contract": {
     "contract": "workbench_viewer_production_delivery_v1",
