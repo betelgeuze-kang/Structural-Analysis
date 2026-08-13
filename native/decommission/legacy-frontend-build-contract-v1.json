@@ -75,6 +75,7 @@
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
+    "native/crates/structural-frontend-contract/src/frontend_audit.rs",
     "native/crates/structural-frontend-contract/src/frontend_build.rs",
     "native/crates/structural-frontend-contract/src/frontend_dev.rs",
     "native/crates/structural-frontend-contract/src/frontend_install.rs",
@@ -135,6 +136,21 @@
     "postcss": "8.5.26",
     "typescript": "5.0.2",
     "vite": "8.0.16"
+  },
+  "frontend_audit_contract": {
+    "schema_version": "structural-native-frontend-audit-contract.v1",
+    "npm_launcher": "npm",
+    "arguments": [
+      "audit",
+      "--audit-level",
+      "high"
+    ],
+    "workflow_failure_policy": "record_numeric_nonzero_without_failing_workflow",
+    "findings_interpretation": "nonzero_not_classified_as_vulnerability_network_or_tool_failure",
+    "network_access_accounting": "not_instrumented_npm_registry_advisory_service_and_cache_access",
+    "filesystem_mutation_accounting": "repository_contract_must_remain_unchanged_external_cache_mutation_not_instrumented",
+    "environment_accounting": "npm_executable_configuration_registry_response_and_transitive_process_identity_not_instrumented",
+    "claim_boundary": "This transitional C0 dependency-audit receipt proves only that Rust validates the frontend contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects package/lock/source-map or required-inventory mutation, records its numeric exit, and preserves the hosted workflow's non-blocking numeric-exit policy. Exit zero is recorded as npm's audit-clean exit; a numeric nonzero is deliberately classified only as advisory_or_tool_failure because Rust does not parse or independently validate npm findings and cannot distinguish a vulnerability from registry, network, configuration, or tool failure. Direct dry-run resolves neither npm nor Node and spawns no child. Live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identity, external cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
   },
   "frontend_build_contract": {
     "schema_version": "structural-native-frontend-build-contract.v1",

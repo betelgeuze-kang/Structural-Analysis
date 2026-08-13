@@ -157,6 +157,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "structural-frontend-contract frontend-dev" in docs_text
     assert "npm run install:dependencies" in docs_text
     assert "structural-frontend-contract frontend-install" in docs_text
+    assert "structural-frontend-contract -- frontend-audit" in docs_text
+    assert "advisory_or_tool_failure" in docs_text
     assert "npm run install:browser-runtime" in docs_text
     assert "structural-frontend-contract playwright-install" in docs_text
     assert "npm run build" in docs_text
@@ -281,6 +283,63 @@ def test_native_frontend_install_dry_run_is_runtime_free_and_self_hashed() -> No
     }
     assert "not_instrumented" in payload["network_access_accounting"]
     assert "node_modules_replaced" in payload["filesystem_mutation_accounting"]
+    assert "identity_not_instrumented" in payload["environment_accounting"]
+    assert payload["deterministic_receipt"] is True
+    receipt_hash = payload.pop("receipt_hash")
+    canonical = json.dumps(
+        payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")
+    ).encode()
+    assert receipt_hash == f"sha256:{hashlib.sha256(canonical).hexdigest()}"
+
+
+def test_native_frontend_audit_dry_run_is_runtime_free_and_self_hashed() -> None:
+    result = subprocess.run(
+        [
+            "cargo",
+            "run",
+            "--quiet",
+            "--locked",
+            "--manifest-path",
+            "native/Cargo.toml",
+            "-p",
+            "structural-frontend-contract",
+            "--",
+            "frontend-audit",
+            "--root",
+            ".",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-frontend-audit-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["logical_command"] == ["npm", "audit", "--audit-level", "high"]
+    assert payload["process_launcher"] == "npm"
+    assert payload["node_options_disposition"] == "removed_for_direct_child"
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["observed_exit_code"] is None
+    assert (
+        payload["workflow_failure_policy"]
+        == "record_numeric_nonzero_without_failing_workflow"
+    )
+    assert (
+        payload["findings_interpretation"]
+        == "nonzero_not_classified_as_vulnerability_network_or_tool_failure"
+    )
+    assert payload["runtime_requirements"] == {
+        "required": ["node", "npm"],
+        "browser_required": False,
+        "repository_contract_mutation_allowed": False,
+    }
+    assert "not_instrumented" in payload["network_access_accounting"]
+    assert "must_remain_unchanged" in payload["filesystem_mutation_accounting"]
     assert "identity_not_instrumented" in payload["environment_accounting"]
     assert payload["deterministic_receipt"] is True
     receipt_hash = payload.pop("receipt_hash")

@@ -364,6 +364,23 @@ def test_native_frontend_install_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in install["claim"]
 
 
+def test_native_frontend_audit_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_audit") is True
+    audit = payload["capabilities"]["native_frontend_audit"]
+    assert audit["cutover_gate"] == "C0"
+    assert audit["owner"] == "structural-frontend-contract"
+    assert "frontend-web invokes structural-frontend-contract frontend-audit directly" in audit["claim"]
+    assert "one exact npm audit --audit-level high direct child" in audit["claim"]
+    assert "removes inherited NODE_OPTIONS" in audit["claim"]
+    assert "non-blocking numeric-exit policy" in audit["claim"]
+    assert "advisory_or_tool_failure" in audit["claim"]
+    assert "does not parse or independently classify" in audit["claim"]
+    assert "dry-run resolves neither npm nor Node and spawns no child" in audit["claim"]
+    assert "finding counts and identities, dependency/license clearance" in audit["claim"]
+    assert "C5 and C6 remain open" in audit["claim"]
+
+
 def test_native_frontend_ci_entrypoints_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_ci_entrypoints") is True
@@ -376,6 +393,7 @@ def test_native_frontend_ci_entrypoints_capability_is_bounded_c0() -> None:
     assert "npm run entrypoints 0" in entrypoints["claim"]
     assert "npx entrypoints 0" in entrypoints["claim"]
     assert "direct Node entrypoints 0" in entrypoints["claim"]
+    assert "direct npm audit entrypoints 0" in entrypoints["claim"]
     assert "setup-node, npm, Node, TypeScript, Vite, Playwright" in entrypoints["claim"]
     assert "AI worker contract workflow is intentionally outside" in entrypoints["claim"]
     assert "C5 and C6 remain open" in entrypoints["claim"]

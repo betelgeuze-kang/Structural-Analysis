@@ -9,6 +9,10 @@ FRONTEND_INSTALL = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- frontend-install --root ."
 )
+FRONTEND_AUDIT = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- frontend-audit --root ."
+)
 PLAYWRIGHT_INSTALL = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- playwright-install --root ."
@@ -175,9 +179,19 @@ def test_hosted_dependency_install_routes_through_the_native_orchestrator() -> N
         assert "npm run install:dependencies" not in workflow
 
 
+def test_frontend_dependency_audit_routes_through_the_native_orchestrator() -> None:
+    workflow = _read("frontend-web-ci.yml")
+
+    assert workflow.count(FRONTEND_AUDIT) == 1
+    assert "Rust-orchestrated non-blocking dependency audit" in workflow
+    assert "run: npm audit" not in workflow
+    assert 'npm audit --audit-level high || echo' not in workflow
+
+
 def test_frontend_workflow_product_commands_bypass_npm_script_launchers() -> None:
     expected = {
         "frontend-web-ci.yml": (
+            "frontend-audit --root .",
             "frontend-build --root .",
             "check --root .",
             "prototype --root .",

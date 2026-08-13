@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -55,9 +55,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   the exact `npm ci` child, and rejects contract mutation. npm registry/cache access, lifecycle
   scripts, configuration/environment, transitive processes, extracted bytes, `node_modules`
   contents and rollback remain retained and uninstrumented.
+  Frontend dependency-audit orchestration is Rust-native: frontend-web CI enters one direct Rust
+  command that freezes the frontend contract, removes inherited `NODE_OPTIONS`, owns the exact
+  `npm audit --audit-level high` child, rejects repository-contract mutation, and records every
+  numeric exit. Numeric nonzero remains deliberately non-blocking and is only
+  `advisory_or_tool_failure`; npm findings, registry/network/configuration/tool-failure
+  classification, dependency/license clearance, and external cache mutation remain outside the
+  receipt.
   Hosted frontend/browser workflow product entrypoints are Rust-native: frontend web, nightly full,
   runtime-input Viewer, and Viewer-browser jobs call the Cargo commands directly, with no `npm run`,
-  `npx`, or direct Node entrypoint. The two native catalog/evidence Bash wrappers remain because they
+  `npx`, direct Node, or direct `npm audit` entrypoint. The two native catalog/evidence Bash wrappers remain because they
   own repository-root and source-commit timestamp projection; package scripts remain local
   conveniences and Node/npm still execute retained frontend internals.
   Frontend development-server orchestration is Rust-native: the package development command hashes

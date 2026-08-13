@@ -6,27 +6,29 @@ use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json,
-    canonical_frontend_dev_receipt_json, canonical_frontend_install_receipt_json,
-    canonical_frontend_preview_receipt_json, canonical_playwright_install_receipt_json,
-    canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
+    canonical_delivery_receipt_json, canonical_frontend_audit_receipt_json,
+    canonical_frontend_build_receipt_json, canonical_frontend_dev_receipt_json,
+    canonical_frontend_install_receipt_json, canonical_frontend_preview_receipt_json,
+    canonical_playwright_install_receipt_json, canonical_receipt_json,
+    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
+    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_build,
-    run_frontend_dev, run_frontend_install, run_frontend_smoke, run_playwright_install,
-    run_viewer_browser_smoke, run_viewer_js_syntax, run_viewer_performance_probe,
-    run_viewer_readme_capture, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
-    run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendBuildOptions,
-    FrontendDevOptions, FrontendInstallOptions, PlaywrightInstallOptions, ViewerJsSyntaxOptions,
-    ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
-    ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
+    check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_audit,
+    run_frontend_build, run_frontend_dev, run_frontend_install, run_frontend_smoke,
+    run_playwright_install, run_viewer_browser_smoke, run_viewer_js_syntax,
+    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
+    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendAuditOptions,
+    FrontendBuildOptions, FrontendDevOptions, FrontendInstallOptions, PlaywrightInstallOptions,
+    ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
+    ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
+    ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -2710,6 +2712,150 @@ fn frontend_install_rejects_package_mutation_after_child_success() {
         serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
             .expect("frontend install mutation error JSON");
     assert_eq!(error["code"], "frontend_install_contract_changed");
+}
+
+#[test]
+fn frontend_audit_dry_run_is_deterministic_runtime_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = FrontendAuditOptions::new(root);
+    options.dry_run = true;
+    let first = run_frontend_audit(&options).expect("frontend audit dry-run");
+    let second = run_frontend_audit(&options).expect("repeat frontend audit dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(
+        first.logical_command,
+        ["npm", "audit", "--audit-level", "high"]
+    );
+    assert_eq!(first.process_launcher, "npm");
+    assert_eq!(first.node_options_disposition, "removed_for_direct_child");
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.observed_exit_code, None);
+    assert_eq!(
+        first.workflow_failure_policy,
+        "record_numeric_nonzero_without_failing_workflow"
+    );
+    assert!(first.findings_interpretation.contains("not_classified"));
+    assert_eq!(first.runtime_requirements.required, ["node", "npm"]);
+    assert!(!first.runtime_requirements.browser_required);
+    assert!(
+        !first
+            .runtime_requirements
+            .repository_contract_mutation_allowed
+    );
+    assert!(first
+        .network_access_accounting
+        .starts_with("not_instrumented"));
+    assert!(first
+        .environment_accounting
+        .contains("identity_not_instrumented"));
+    assert!(first.deterministic_receipt);
+    let encoded =
+        canonical_frontend_audit_receipt_json(&first).expect("canonical frontend audit receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("frontend audit receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_owns_exact_child_removes_node_options_and_records_clean_exit() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nif [ \"${NODE_OPTIONS+x}\" = x ]; then exit 91; fi\nprintf '%s\\n' \"$*\" > \"$FRONTEND_AUDIT_TEST_LOG\"\nexit 0\n",
+    );
+    let log = test.0.join("frontend-audit-invocation.log");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .env("NODE_OPTIONS", "--inspect")
+        .env("FRONTEND_AUDIT_TEST_LOG", &log)
+        .output()
+        .expect("run frontend audit with fake npm");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        std::fs::read_to_string(log).expect("frontend audit invocation log"),
+        "audit --audit-level high\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("frontend audit receipt JSON");
+    assert_eq!(value["execution_mode"], "execute");
+    assert_eq!(value["status"], "audit_clean_exit");
+    assert_eq!(
+        value["logical_command"],
+        serde_json::json!(["npm", "audit", "--audit-level", "high"])
+    );
+    assert_eq!(value["direct_processes_spawned"], 1);
+    assert_eq!(value["observed_exit_code"], 0);
+    assert_eq!(
+        value["node_options_disposition"],
+        "removed_for_direct_child"
+    );
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_records_numeric_nonzero_without_failing_or_overclassifying() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(&test.0, b"#!/bin/sh\nexit 7\n");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run nonzero frontend audit");
+    assert!(output.status.success());
+    assert!(output.stderr.is_empty());
+    let value: Value = serde_json::from_slice(
+        output
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one frontend audit receipt line"),
+    )
+    .expect("frontend audit nonzero receipt JSON");
+    assert_eq!(value["status"], "advisory_or_tool_failure");
+    assert_eq!(value["observed_exit_code"], 7);
+    assert_eq!(
+        value["workflow_failure_policy"],
+        "record_numeric_nonzero_without_failing_workflow"
+    );
+    assert_eq!(
+        value["findings_interpretation"],
+        "nonzero_not_classified_as_vulnerability_network_or_tool_failure"
+    );
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_rejects_package_mutation_even_after_numeric_nonzero() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(&test.0, b"#!/bin/sh\nprintf ' ' >> package.json\nexit 7\n");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run mutating frontend audit");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("frontend audit mutation error JSON");
+    assert_eq!(error["code"], "frontend_audit_contract_changed");
 }
 
 #[test]

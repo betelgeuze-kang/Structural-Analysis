@@ -199,6 +199,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 development process ownership only: package dev enters through structural-frontend-contract frontend-dev; Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint, removes inherited NODE_OPTIONS, fixes IPv4 loopback and strict-port arguments, directly owns one Node child, records a successful terminal exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules and spawns no process; source mutation remains deliberately allowed for HMR and is not revalidated after launch, and Node executable identity, Vite internals and transitive packages, plugin and environment loading, HMR, retained listener readiness, page requests, rendered behavior, clean-machine publication, native UI parity, C5 and C6 remain open"
     },
+    "native_frontend_audit": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 dependency-audit orchestration only: frontend-web invokes structural-frontend-contract frontend-audit directly instead of retaining direct npm audit shell authority; Rust validates the package/lock/source-map contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects repository-contract mutation, records every numeric exit in a canonical self-hashed receipt, and preserves the hosted workflow's non-blocking numeric-exit policy; exit zero is only npm's audit-clean exit and numeric nonzero is deliberately advisory_or_tool_failure because Rust does not parse or independently classify vulnerability, registry, network, configuration or tool failure, while direct dry-run resolves neither npm nor Node and spawns no child; live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identities, external-cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_install": {
       "status": "implemented",
       "cutover_gate": "C0",
@@ -209,7 +215,7 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "structural-frontend-contract",
-      "claim": "bounded transitional C0 hosted-entrypoint ownership only: frontend-web, nightly-full-quality, runtime-input-viewer and viewer-browser workflows invoke every frontend product check, build, browser verifier and runtime installer through direct Cargo structural-frontend-contract commands, retain only the native benchmark-catalog and evidence-bundle Bash wrappers for repository-root and source-commit timestamp projection, and contain npm run entrypoints 0, npx entrypoints 0 and direct Node entrypoints 0; setup-node, npm, Node, TypeScript, Vite, Playwright, Chromium, JavaScript application behavior, package-script local conveniences and inner runtime/network/filesystem effects remain retained, while the separate AI worker contract workflow is intentionally outside this product-entrypoint slice; clean-machine live evidence, native UI parity, C5 and C6 remain open"
+      "claim": "bounded transitional C0 hosted-entrypoint ownership only: frontend-web, nightly-full-quality, runtime-input-viewer and viewer-browser workflows invoke every frontend product check, dependency audit, build, browser verifier and runtime installer through direct Cargo structural-frontend-contract commands, retain only the native benchmark-catalog and evidence-bundle Bash wrappers for repository-root and source-commit timestamp projection, and contain npm run entrypoints 0, npx entrypoints 0, direct Node entrypoints 0 and direct npm audit entrypoints 0; setup-node, npm, Node, TypeScript, Vite, Playwright, Chromium, JavaScript application behavior, package-script local conveniences and inner runtime/network/filesystem effects remain retained, while the separate AI worker contract workflow is intentionally outside this product-entrypoint slice; clean-machine live evidence, native UI parity, C5 and C6 remain open"
     },
     "native_frontend_preview": {
       "status": "implemented",

@@ -21,6 +21,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
+    Path("native/crates/structural-frontend-contract/src/frontend_audit.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_dev.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_install.rs"),
@@ -78,6 +79,10 @@ FRONTEND_INSTALL_WORKFLOW_COMMAND = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- frontend-install --root ."
 )
+FRONTEND_AUDIT_WORKFLOW_COMMAND = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- frontend-audit --root ."
+)
 PLAYWRIGHT_INSTALL_WORKFLOW_COMMAND = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- playwright-install --root ."
@@ -88,6 +93,7 @@ FRONTEND_CONTRACT_WORKFLOW_PREFIX = (
 )
 DIRECT_FRONTEND_WORKFLOW_COMMANDS = {
     "frontend-web-ci.yml": (
+        "frontend-audit --root .",
         "frontend-build --root .",
         "check --root .",
         "prototype --root .",
@@ -253,6 +259,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract check",
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
+        "structural-frontend-contract frontend-audit",
         "structural-frontend-contract frontend-build",
         "structural-frontend-contract frontend-dev",
         "structural-frontend-contract frontend-install",
@@ -289,6 +296,12 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_install_browser_required": False,
         "frontend_install_network_uninstrumented": True,
         "frontend_install_node_modules_mutation_expected": True,
+        "frontend_audit_node_required": True,
+        "frontend_audit_npm_required": True,
+        "frontend_audit_browser_required": False,
+        "frontend_audit_numeric_nonzero_non_blocking": True,
+        "frontend_audit_findings_not_independently_classified": True,
+        "frontend_audit_network_uninstrumented": True,
         "hosted_frontend_workflow_npm_script_entrypoints": 0,
         "hosted_frontend_workflow_direct_rust_entrypoints": True,
         "hosted_frontend_workflow_native_bash_wrappers_retained": True,
@@ -607,6 +620,12 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     frontend_web_ci = _text(
         root, Path(".github/workflows/frontend-web-ci.yml"), blockers
     )
+    if (
+        frontend_web_ci.count(FRONTEND_AUDIT_WORKFLOW_COMMAND) != 1
+        or "Rust-orchestrated non-blocking dependency audit" not in frontend_web_ci
+        or "run: npm audit" in frontend_web_ci
+    ):
+        blockers.append("workbench_ui_frontend_audit_ci_authority_invalid")
     for wrapper in (
         "bash ./scripts/build_native_benchmark_catalog.sh --check",
         "bash ./scripts/build_native_workbench_evidence_bundle.sh",
@@ -799,6 +818,31 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "frontend_install_contract_changed",
             '.env_remove("NODE_OPTIONS")',
             "direct_processes_spawned",
+            "network_access_accounting",
+            "filesystem_mutation_accounting",
+            "environment_accounting",
+        ),
+        blockers,
+    )
+    frontend_audit = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/frontend_audit.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/frontend_audit.rs"),
+        frontend_audit,
+        (
+            "pub fn run_frontend_audit",
+            "structural-native-frontend-audit-receipt.v1",
+            '"audit"',
+            '"--audit-level"',
+            '"high"',
+            "frontend_audit_contract_changed",
+            '.env_remove("NODE_OPTIONS")',
+            "observed_exit_code",
+            "record_numeric_nonzero_without_failing_workflow",
+            "nonzero_not_classified_as_vulnerability_network_or_tool_failure",
             "network_access_accounting",
             "filesystem_mutation_accounting",
             "environment_accounting",
@@ -1171,10 +1215,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Frontend TypeScript/Vite build orchestration is Rust-native",
             "Frontend dependency-install orchestration is Rust-native",
+            "Frontend dependency-audit orchestration is Rust-native",
             "Hosted frontend/browser workflow product entrypoints are Rust-native",
             "Frontend development-server orchestration is Rust-native",
             "Frontend production-delivery preview serving is Rust-native",
@@ -1229,7 +1274,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
-        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/cache/lifecycle/configuration and node_modules mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, and the native catalog/evidence Bash launcher conveniences visible",
+        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

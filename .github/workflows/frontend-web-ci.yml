@@ -84,8 +84,8 @@ jobs:
       - name: Rust-orchestrated frontend dependency install
         run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .
 
-      - name: Dependency audit
-        run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
+      - name: Rust-orchestrated non-blocking dependency audit
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-audit --root .
 
       - name: Verify native benchmark catalog
         run: bash ./scripts/build_native_benchmark_catalog.sh --check
