@@ -14,10 +14,10 @@ use serde_json::{json, Value};
 use structural_cli::{
     execute_external_comparison, execute_localized_pdf_report, execute_model_ir_linear_analysis,
     execute_model_ir_linear_external_comparison, execute_model_ir_native_analysis,
-    execute_native_mgt_import, execute_pdf_report, execute_sparse_linear_pdf_report,
-    publish_external_comparison, publish_localized_pdf_report, publish_model_ir_linear_analysis,
-    publish_model_ir_linear_external_comparison, publish_model_ir_native_analysis,
-    publish_pdf_report, validate_model_bytes, PdfReportLocaleV2,
+    execute_native_mgt_import, execute_pdf_report, execute_sparse_linear_localized_pdf_report,
+    execute_sparse_linear_pdf_report, publish_external_comparison, publish_localized_pdf_report,
+    publish_model_ir_linear_analysis, publish_model_ir_linear_external_comparison,
+    publish_model_ir_native_analysis, publish_pdf_report, validate_model_bytes, PdfReportLocaleV2,
 };
 use structural_contracts::external_comparison::{parse_external_result_v1, ExternalSourceV1};
 use structural_contracts::model_ir::{
@@ -1599,10 +1599,10 @@ impl NativeWorkbench {
 
     /// Publish a deterministic embedded-font English or Korean PDF from a verified report session.
     ///
-    /// The durable v1 PDF remains byte-identical and authoritative inside the workspace. This
-    /// method first reproduces that stored PDF and receipt from the exact terminal artifacts, then
-    /// publishes a separate create-new localized output directory. It uses no host font, Python,
-    /// Node, browser, subprocess, or external renderer.
+    /// The durable profile-specific v1 PDF remains byte-identical and authoritative inside the
+    /// workspace. This method first reproduces that stored PDF and receipt from the exact report
+    /// artifacts, then publishes a separate create-new localized output directory. It uses no host
+    /// font, Python, Node, browser, subprocess, or external renderer.
     ///
     /// # Errors
     ///
@@ -1613,8 +1613,10 @@ impl NativeWorkbench {
         locale: WorkbenchReportLocaleV1,
         output_directory: &Path,
     ) -> Result<String, WorkbenchError> {
-        self.require_ndtha_profile("localized PDF export")?;
         self.require_stage(WorkbenchStageV1::Reported)?;
+        if self.session.analysis_profile.is_some() {
+            return self.export_model_ir_linear_localized_pdf(locale, output_directory);
+        }
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -1651,6 +1653,54 @@ impl NativeWorkbench {
         };
         let outcome = execute_localized_pdf_report(&result, &report, &document, locale)
             .map_err(|error| input_error("workbench_localized_pdf_render_failed", &error))?;
+        publish_localized_pdf_report(output_directory, &outcome)
+            .map_err(|error| input_error("workbench_localized_pdf_publish_failed", &error))?;
+        Ok(outcome.receipt_json().to_owned())
+    }
+
+    fn export_model_ir_linear_localized_pdf(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        output_directory: &Path,
+    ) -> Result<String, WorkbenchError> {
+        let report_directory = self.root.join(REPORT_DIRECTORY);
+        let result = read_bounded_regular_file(
+            &report_directory.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report = read_bounded_regular_file(
+            &report_directory.join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let document = read_bounded_regular_file(
+            &report_directory.join("report.md"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let stored_pdf = read_bounded_regular_file(
+            &report_directory.join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let stored_receipt = read_bounded_regular_file(
+            &report_directory.join("pdf-receipt.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reproduced = execute_sparse_linear_pdf_report(&result, &report, &document)
+            .map_err(|error| input_error("workbench_localized_pdf_binding_invalid", &error))?;
+        if reproduced.pdf_bytes() != stored_pdf
+            || reproduced.receipt_json().as_bytes() != stored_receipt
+        {
+            return Err(WorkbenchError::new(
+                "workbench_localized_pdf_binding_mismatch",
+                "stored sparse PDF or receipt differs from the exact ResultIR/ReportIR/Markdown projection",
+            ));
+        }
+        let locale = match locale {
+            WorkbenchReportLocaleV1::EnUs => PdfReportLocaleV2::EnUs,
+            WorkbenchReportLocaleV1::KoKr => PdfReportLocaleV2::KoKr,
+        };
+        let outcome =
+            execute_sparse_linear_localized_pdf_report(&result, &report, &document, locale)
+                .map_err(|error| input_error("workbench_localized_pdf_render_failed", &error))?;
         publish_localized_pdf_report(output_directory, &outcome)
             .map_err(|error| input_error("workbench_localized_pdf_publish_failed", &error))?;
         Ok(outcome.receipt_json().to_owned())

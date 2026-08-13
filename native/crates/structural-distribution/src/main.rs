@@ -148,6 +148,7 @@ fn run(arguments: &[OsString]) -> Result<serde_json::Value, CliError> {
     Ok(value)
 }
 
+#[allow(clippy::too_many_lines)]
 fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::Value, CliError> {
     require_exact_options(
         options,
@@ -170,6 +171,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-ir-linear-workbench-review-show",
             "--model-ir-linear-workbench-inspect-after-review",
             "--model-ir-linear-workbench-export",
+            "--model-ir-linear-workbench-session-before-localized-pdf",
+            "--model-ir-linear-localized-pdf-en-us-first-root",
+            "--model-ir-linear-localized-pdf-en-us-second-root",
+            "--model-ir-linear-localized-pdf-ko-kr-first-root",
+            "--model-ir-linear-localized-pdf-ko-kr-second-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -202,6 +208,18 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-ir-linear-workbench-inspect-after-review")?;
     let model_ir_linear_workbench_export =
         required_path(options, "--model-ir-linear-workbench-export")?;
+    let model_ir_linear_workbench_session_before_localized_pdf = required_path(
+        options,
+        "--model-ir-linear-workbench-session-before-localized-pdf",
+    )?;
+    let model_ir_linear_localized_pdf_en_us_first_root =
+        required_path(options, "--model-ir-linear-localized-pdf-en-us-first-root")?;
+    let model_ir_linear_localized_pdf_en_us_second_root =
+        required_path(options, "--model-ir-linear-localized-pdf-en-us-second-root")?;
+    let model_ir_linear_localized_pdf_ko_kr_first_root =
+        required_path(options, "--model-ir-linear-localized-pdf-ko-kr-first-root")?;
+    let model_ir_linear_localized_pdf_ko_kr_second_root =
+        required_path(options, "--model-ir-linear-localized-pdf-ko-kr-second-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -226,6 +244,16 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_ir_linear_workbench_inspect_after_review:
             &model_ir_linear_workbench_inspect_after_review,
         model_ir_linear_workbench_export: &model_ir_linear_workbench_export,
+        model_ir_linear_workbench_session_before_localized_pdf:
+            &model_ir_linear_workbench_session_before_localized_pdf,
+        model_ir_linear_localized_pdf_en_us_first_root:
+            &model_ir_linear_localized_pdf_en_us_first_root,
+        model_ir_linear_localized_pdf_en_us_second_root:
+            &model_ir_linear_localized_pdf_en_us_second_root,
+        model_ir_linear_localized_pdf_ko_kr_first_root:
+            &model_ir_linear_localized_pdf_ko_kr_first_root,
+        model_ir_linear_localized_pdf_ko_kr_second_root:
+            &model_ir_linear_localized_pdf_ko_kr_second_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -319,7 +347,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --model-ir-linear-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --model-ir-linear-workbench-inspect-before-review FILE --model-ir-linear-workbench-review-show FILE --model-ir-linear-workbench-inspect-after-review FILE --model-ir-linear-workbench-export FILE --workbench-catalog FILE --workbench-evidence FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
+    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --model-ir-linear-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --model-ir-linear-workbench-inspect-before-review FILE --model-ir-linear-workbench-review-show FILE --model-ir-linear-workbench-inspect-after-review FILE --model-ir-linear-workbench-export FILE --model-ir-linear-workbench-session-before-localized-pdf FILE --model-ir-linear-localized-pdf-en-us-first-root DIR --model-ir-linear-localized-pdf-en-us-second-root DIR --model-ir-linear-localized-pdf-ko-kr-first-root DIR --model-ir-linear-localized-pdf-ko-kr-second-root DIR --workbench-catalog FILE --workbench-evidence FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
 }
 
 #[cfg(test)]

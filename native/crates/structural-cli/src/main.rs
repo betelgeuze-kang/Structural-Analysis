@@ -10,11 +10,11 @@ use structural_cli::{
     execute_localized_pdf_report, execute_model_ir_linear_analysis,
     execute_model_ir_native_analysis, execute_native_analysis, execute_native_mgt_import,
     execute_nonlinear_static_analysis, execute_pdf_report, execute_sparse_linear_analysis,
-    execute_sparse_linear_pdf_report, publish_dense_spectral_analysis, publish_external_comparison,
-    publish_localized_pdf_report, publish_model_ir_linear_analysis,
-    publish_model_ir_native_analysis, publish_native_analysis, publish_native_mgt_import,
-    publish_nonlinear_static_analysis, publish_pdf_report, publish_sparse_linear_analysis,
-    validate_model_bytes, validation_succeeds, PdfReportLocaleV2,
+    execute_sparse_linear_localized_pdf_report, execute_sparse_linear_pdf_report,
+    publish_dense_spectral_analysis, publish_external_comparison, publish_localized_pdf_report,
+    publish_model_ir_linear_analysis, publish_model_ir_native_analysis, publish_native_analysis,
+    publish_native_mgt_import, publish_nonlinear_static_analysis, publish_pdf_report,
+    publish_sparse_linear_analysis, validate_model_bytes, validation_succeeds, PdfReportLocaleV2,
 };
 
 mod job_cli;
@@ -721,6 +721,22 @@ fn run_pdf_report(command: &PdfReportCommand) -> ExitCode {
             }
         };
     let receipt = if command.profile == PdfReportProfile::SparseLinear {
+        if let Some(locale) = command.locale {
+            let outcome = match execute_sparse_linear_localized_pdf_report(
+                &result_ir,
+                &report_ir,
+                &document_source,
+                locale,
+            ) {
+                Ok(outcome) => outcome,
+                Err(error) => return pdf_render_failure(&error),
+            };
+            if let Err(error) = publish_localized_pdf_report(&command.output_directory, &outcome) {
+                return pdf_publish_failure(&error);
+            }
+            println!("{}", outcome.receipt_json());
+            return ExitCode::SUCCESS;
+        }
         let outcome =
             match execute_sparse_linear_pdf_report(&result_ir, &report_ir, &document_source) {
                 Ok(outcome) => outcome,
@@ -1011,7 +1027,7 @@ fn parse_pdf_report_arguments(arguments: &[OsString]) -> Option<PdfReportCommand
     }
     let profile = match arguments[1].to_str()? {
         "render-pdf" => PdfReportProfile::NonlinearNdtha,
-        "render-sparse-pdf" if arguments.len() == 7 => PdfReportProfile::SparseLinear,
+        "render-sparse-pdf" => PdfReportProfile::SparseLinear,
         _ => return None,
     };
     if [&arguments[2], &arguments[3], &arguments[4], &arguments[6]]
@@ -1757,6 +1773,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn pdf_report_arguments_have_no_implicit_input_or_output() {
         assert_eq!(
             parse_pdf_report_arguments(&args(&[
@@ -1817,18 +1834,27 @@ mod tests {
                 locale: None,
             })
         );
-        assert!(parse_pdf_report_arguments(&args(&[
-            "report",
-            "render-sparse-pdf",
-            "result.json",
-            "report.json",
-            "report.md",
-            "--output-dir",
-            "pdf",
-            "--locale",
-            "en-US"
-        ]))
-        .is_none());
+        assert_eq!(
+            parse_pdf_report_arguments(&args(&[
+                "report",
+                "render-sparse-pdf",
+                "result.json",
+                "report.json",
+                "report.md",
+                "--output-dir",
+                "pdf",
+                "--locale",
+                "en-US"
+            ])),
+            Some(PdfReportCommand {
+                profile: PdfReportProfile::SparseLinear,
+                result_ir_path: "result.json".into(),
+                report_ir_path: "report.json".into(),
+                document_source_path: "report.md".into(),
+                output_directory: "pdf".into(),
+                locale: Some(PdfReportLocaleV2::EnUs),
+            })
+        );
         assert!(parse_pdf_report_arguments(&args(&[
             "report",
             "render-pdf",

@@ -4,6 +4,9 @@ use structural_contracts::product_ir::{
     sha256_identity, NonlinearNdthaReportIrDocumentV1, NonlinearNdthaResultIrDocumentV1,
     NonlinearNdthaTerminalStatusV1,
 };
+use structural_contracts::sparse_product::{
+    SparseLinearReportIrDocumentV1, SparseLinearResultIrDocumentV1,
+};
 
 use crate::localized_font::{
     LOCALIZED_FONT_BYTES, LOCALIZED_FONT_BYTE_LENGTH, LOCALIZED_FONT_GLYPHS,
@@ -12,7 +15,7 @@ use crate::localized_font::{
     LOCALIZED_FONT_POSTSCRIPT_NAME, LOCALIZED_FONT_PROVENANCE_BYTES,
     LOCALIZED_FONT_PROVENANCE_BYTE_LENGTH, LOCALIZED_FONT_PROVENANCE_HASH,
 };
-use crate::{build_nonlinear_ndtha_report_v1, PdfRenderError};
+use crate::{build_nonlinear_ndtha_report_v1, build_sparse_linear_report_v1, PdfRenderError};
 
 const PDF_MEDIA_TYPE: &str = "application/pdf";
 const PDF_CLAIM_BOUNDARY: &str = "deterministic_single_page_embedded_font_projection_for_fixed_en_us_or_ko_kr_labels_and_portable_ascii_dynamic_values_not_arbitrary_unicode_pdf_ua_accessibility_engineering_acceptance_or_design_code_compliance";
@@ -55,6 +58,13 @@ pub struct NonlinearNdthaLocalizedPdfDocumentV2 {
     document_source_hash: String,
     pdf_hash: String,
 }
+
+/// Exact localized PDF bytes for the bounded sparse-linear source profile.
+///
+/// The embedded-font container metadata is intentionally shared with the nonlinear-NDTHA v2
+/// document. The alias names the accepted source profile at call sites; the renderer's sparse
+/// input types and the profile-typed receipt enforce the actual boundary.
+pub type SparseLinearLocalizedPdfDocumentV2 = NonlinearNdthaLocalizedPdfDocumentV2;
 
 impl NonlinearNdthaLocalizedPdfDocumentV2 {
     #[must_use]
@@ -164,6 +174,37 @@ pub fn render_nonlinear_ndtha_localized_pdf_v2(
     })
 }
 
+/// Render one deterministic sparse-linear localized PDF using only the vendored TrueType subset.
+///
+/// The exact sparse `ResultIR`, `ReportIR`, and Markdown projection remains authoritative. Only
+/// fixed English or Korean presentation labels are localized; the case identifier remains
+/// printable ASCII. No host font, external renderer, Python, Node, browser, or network is used.
+///
+/// # Errors
+///
+/// Rejects sparse projection drift, unsupported locale text, non-portable case identifiers,
+/// embedded-font identity drift, PDF construction overflow, and malformed object tables.
+pub fn render_sparse_linear_localized_pdf_v2(
+    result: &SparseLinearResultIrDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    document_source: &[u8],
+    locale: PdfReportLocaleV2,
+) -> Result<SparseLinearLocalizedPdfDocumentV2, PdfRenderError> {
+    verify_exact_sparse_projection(result, report, document_source)?;
+    verify_font_asset()?;
+    require_portable_dynamic_text(&result.result().case_id, "/result_ir/case_id")?;
+    let bytes = build_sparse_pdf_bytes(result, report, locale)?;
+    validate_deterministic_localized_pdf_v2(&bytes)?;
+    Ok(SparseLinearLocalizedPdfDocumentV2 {
+        pdf_hash: sha256_identity(&bytes),
+        source_result_hash: result.result_hash().to_owned(),
+        source_report_hash: report.report_hash().to_owned(),
+        document_source_hash: sha256_identity(document_source),
+        locale,
+        bytes,
+    })
+}
+
 /// Validate the fixed localized PDF object graph, embedded font, `ToUnicode` map, and xref offsets.
 ///
 /// # Errors
@@ -237,6 +278,29 @@ fn verify_exact_projection(
             "pdf_report_ir_projection_mismatch",
             "/report_ir",
             "ReportIR bytes are not the deterministic projection of the supplied ResultIR and document source",
+        ));
+    }
+    Ok(())
+}
+
+fn verify_exact_sparse_projection(
+    result: &SparseLinearResultIrDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    document_source: &[u8],
+) -> Result<(), PdfRenderError> {
+    let expected = build_sparse_linear_report_v1(result)?;
+    if expected.document_source.as_bytes() != document_source {
+        return Err(binding_error(
+            "pdf_document_source_projection_mismatch",
+            "/document_source",
+            "PDF source bytes are not the deterministic projection of the supplied sparse ResultIR",
+        ));
+    }
+    if expected.report_ir.canonical_json() != report.canonical_json() {
+        return Err(binding_error(
+            "pdf_report_ir_projection_mismatch",
+            "/report_ir",
+            "ReportIR bytes are not the deterministic projection of the supplied sparse ResultIR and document source",
         ));
     }
     Ok(())
@@ -598,6 +662,332 @@ fn build_pdf_bytes(
     let identity = sha256_identity(
         format!(
             "{}|{}|{}",
+            result.result_hash(),
+            locale.language_tag(),
+            LOCALIZED_FONT_HASH
+        )
+        .as_bytes(),
+    );
+    assemble_pdf(&objects, &identity)
+}
+
+struct SparseLabels {
+    title: &'static str,
+    subtitle: &'static str,
+    summary: &'static str,
+    case_id: &'static str,
+    matrix_order: &'static str,
+    nonzero_count: &'static str,
+    iterations: &'static str,
+    final_residual: &'static str,
+    provenance: &'static str,
+    provenance_headings: [&'static str; 8],
+    execution_receipt: &'static str,
+    backend: &'static str,
+    determinism: &'static str,
+    fallback_count: &'static str,
+    authority_boundary: &'static str,
+    boundary_line_one: &'static str,
+    boundary_line_two: &'static str,
+    footer: &'static str,
+    page: &'static str,
+}
+
+fn sparse_labels(locale: PdfReportLocaleV2) -> SparseLabels {
+    match locale {
+        PdfReportLocaleV2::EnUs => SparseLabels {
+            title: "Structural Analysis Report",
+            subtitle: "Bounded sparse linear static - deterministic native PDF v2",
+            summary: "Analysis summary",
+            case_id: "Case",
+            matrix_order: "Matrix order",
+            nonzero_count: "Canonical nonzeros",
+            iterations: "PCG iterations",
+            final_residual: "Final residual infinity norm",
+            provenance: "Provenance",
+            provenance_headings: [
+                "Result",
+                "Report",
+                "Document",
+                "Request",
+                "Model",
+                "State",
+                "Execution",
+                "Checkpoint",
+            ],
+            execution_receipt: "Execution receipt",
+            backend: "Backend",
+            determinism: "Determinism",
+            fallback_count: "Fallback count",
+            authority_boundary: "Authority boundary",
+            boundary_line_one:
+                "Bounded CPU candidate. Not engineering acceptance or design-code compliance.",
+            boundary_line_two:
+                "Verify ResultIR, recovery, ReportIR and receipt hashes before redistribution.",
+            footer: "structural-native / sparse-report-pdf.v2 / en-US",
+            page: "Page 1 / 1",
+        },
+        PdfReportLocaleV2::KoKr => SparseLabels {
+            title: "구조 해석 보고서",
+            subtitle: "제한된 선형 해석 결정론적 네이티브 PDF v2",
+            summary: "해석 요약",
+            case_id: "케이스",
+            matrix_order: "크기",
+            nonzero_count: "비영 수",
+            iterations: "PCG 실행 횟수",
+            final_residual: "최종 잔류",
+            provenance: "출처",
+            provenance_headings: [
+                "결과",
+                "보고서",
+                "문서",
+                "요청",
+                "모델",
+                "상태",
+                "실행",
+                "체크포인트",
+            ],
+            execution_receipt: "실행 영수증",
+            backend: "백엔드",
+            determinism: "결정론",
+            fallback_count: "폴백 횟수",
+            authority_boundary: "권한 경계",
+            boundary_line_one: "제한된 후보 결과. 공학적 승인 또는 설계 기준 적합성 인증이 아님.",
+            boundary_line_two:
+                "검토 또는 재배포 전에 결과 보고서 문서와 영수증 해시를 확인하십시오.",
+            footer: "구조 네이티브 / sparse-report-pdf.v2 / ko-KR",
+            page: "페이지 1 / 1",
+        },
+    }
+}
+
+#[allow(clippy::too_many_lines)]
+fn build_sparse_pdf_bytes(
+    result: &SparseLinearResultIrDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    locale: PdfReportLocaleV2,
+) -> Result<Vec<u8>, PdfRenderError> {
+    let source = result.result();
+    let report_source = report.report();
+    let labels = sparse_labels(locale);
+
+    let mut content = String::new();
+    writeln!(&mut content, "q").expect("String writes cannot fail");
+    writeln!(&mut content, "0.055 0.118 0.204 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 742 595 100 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "0.129 0.588 0.953 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 734 595 8 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "Q").expect("String writes cannot fail");
+    text_line(&mut content, 21.0, 1.0, 1.0, 1.0, 48.0, 794.0, labels.title)?;
+    text_line(
+        &mut content,
+        10.0,
+        0.82,
+        0.88,
+        0.95,
+        48.0,
+        773.0,
+        labels.subtitle,
+    )?;
+
+    panel(&mut content, 48.0, 550.0, 499.0, 154.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        678.0,
+        labels.summary,
+    )?;
+    label_value(&mut content, 66.0, 653.0, labels.case_id, &source.case_id)?;
+    label_value(
+        &mut content,
+        66.0,
+        633.0,
+        labels.matrix_order,
+        &source.summary.order.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        613.0,
+        labels.nonzero_count,
+        &source.summary.nonzero_count.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        593.0,
+        labels.iterations,
+        &source.summary.iterations.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        573.0,
+        labels.final_residual,
+        &format!("{:.8e}", source.summary.final_residual_inf),
+    )?;
+
+    panel(&mut content, 48.0, 315.0, 499.0, 215.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        504.0,
+        labels.provenance,
+    )?;
+    let provenance = [
+        source.result_hash.as_str(),
+        report_source.report_hash.as_str(),
+        report_source.document_source_hash.as_str(),
+        source.identity.request_hash.as_str(),
+        source.identity.model_hash.as_str(),
+        source.identity.state_hash.as_str(),
+        source.identity.execution_hash.as_str(),
+        source.identity.checkpoint_hash.as_str(),
+    ];
+    for (index, (label, hash)) in labels
+        .provenance_headings
+        .iter()
+        .zip(provenance.iter())
+        .enumerate()
+    {
+        let index = u32::try_from(index).map_err(|_| {
+            pdf_error(
+                "pdf_layout_overflow",
+                "provenance row index exceeded the bounded page layout",
+            )
+        })?;
+        let y = 480.0 - f64::from(index) * 20.0;
+        text_line(&mut content, 7.2, 0.29, 0.35, 0.43, 66.0, y, label)?;
+        text_line(&mut content, 7.2, 0.08, 0.12, 0.18, 126.0, y, hash)?;
+    }
+
+    panel(&mut content, 48.0, 170.0, 499.0, 120.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        264.0,
+        labels.execution_receipt,
+    )?;
+    label_value(&mut content, 66.0, 239.0, labels.backend, "cpu / fp64")?;
+    label_value(
+        &mut content,
+        66.0,
+        219.0,
+        labels.determinism,
+        &source.backend_receipt.deterministic_policy,
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        199.0,
+        labels.fallback_count,
+        &source.backend_receipt.fallback_count.to_string(),
+    )?;
+
+    text_line(
+        &mut content,
+        9.0,
+        0.55,
+        0.16,
+        0.10,
+        48.0,
+        136.0,
+        labels.authority_boundary,
+    )?;
+    text_line(
+        &mut content,
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        119.0,
+        labels.boundary_line_one,
+    )?;
+    text_line(
+        &mut content,
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        103.0,
+        labels.boundary_line_two,
+    )?;
+    writeln!(&mut content, "0.78 0.81 0.85 RG 0.5 w 48 72 m 547 72 l S")
+        .expect("String writes cannot fail");
+    text_line(
+        &mut content,
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        48.0,
+        54.0,
+        labels.footer,
+    )?;
+    text_line(
+        &mut content,
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        505.0,
+        54.0,
+        labels.page,
+    )?;
+
+    let content_object = stream_object(content.as_bytes(), None);
+    let widths = font_widths()?;
+    let to_unicode = build_to_unicode_cmap()?;
+    let font_file_object = stream_object(
+        LOCALIZED_FONT_BYTES,
+        Some(&format!("/Length1 {LOCALIZED_FONT_BYTE_LENGTH}")),
+    );
+    let to_unicode_object = stream_object(to_unicode.as_bytes(), None);
+    let title = pdf_literal("Localized Structural Analysis Report")?;
+    let subject = pdf_literal("Bounded sparse linear deterministic embedded-font report")?;
+    let producer = pdf_literal("structural-report 0.1.0 native localized PDF renderer")?;
+    let objects = vec![
+        format!(
+            "<< /Type /Catalog /Pages 2 0 R /Lang ({}) /ViewerPreferences << /DisplayDocTitle true >> >>\n",
+            locale.language_tag()
+        )
+        .into_bytes(),
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>\n".to_vec(),
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\n".to_vec(),
+        content_object,
+        format!(
+            "<< /Type /Font /Subtype /Type0 /BaseFont /{LOCALIZED_FONT_POSTSCRIPT_NAME} /Encoding /Identity-H /DescendantFonts [6 0 R] /ToUnicode 9 0 R >>\n"
+        )
+        .into_bytes(),
+        format!(
+            "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{LOCALIZED_FONT_POSTSCRIPT_NAME} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 7 0 R /DW 1000 /W [1 [{widths}]] /CIDToGIDMap /Identity >>\n"
+        )
+        .into_bytes(),
+        format!(
+            "<< /Type /FontDescriptor /FontName /{LOCALIZED_FONT_POSTSCRIPT_NAME} /Flags 4 /FontBBox [9 -198 1005 785] /ItalicAngle 0 /Ascent 920 /Descent -230 /CapHeight 700 /StemV 80 /FontFile2 8 0 R >>\n"
+        )
+        .into_bytes(),
+        font_file_object,
+        to_unicode_object,
+        format!("<< /Title ({title}) /Subject ({subject}) /Creator ({producer}) /Producer ({producer}) /Trapped /False >>\n").into_bytes(),
+    ];
+    let identity = sha256_identity(
+        format!(
+            "sparse-linear|{}|{}|{}",
             result.result_hash(),
             locale.language_tag(),
             LOCALIZED_FONT_HASH

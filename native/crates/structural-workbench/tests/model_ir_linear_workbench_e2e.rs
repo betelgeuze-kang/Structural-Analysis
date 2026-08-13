@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use structural_cli::execute_model_ir_linear_analysis;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
-use structural_report::validate_deterministic_pdf_v1;
+use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
 
 fn repository_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -272,6 +272,53 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(report_text.contains("구조 ModelIR 선형 Workbench 보고서"));
     assert!(report_text.contains("structural-native-workbench-model-ir-linear-report-view.v1"));
     assert!(report_text.contains("# Sparse Linear Analysis Report"));
+
+    let session_before_localized_export =
+        fs::read(restarted.join("workbench-session.json")).expect("session before PDF export");
+    let mut localized_hashes = Vec::new();
+    for locale in ["en-US", "ko-KR"] {
+        let first = root.join(format!("localized-linear-{locale}-first"));
+        let second = root.join(format!("localized-linear-{locale}-second"));
+        for output_directory in [&first, &second] {
+            let output = run_workbench(&[
+                text("report-export-pdf"),
+                text("--workspace"),
+                restarted.as_os_str(),
+                text("--output-dir"),
+                output_directory.as_os_str(),
+                text("--locale"),
+                text(locale),
+            ]);
+            assert_success(&output);
+            let receipt = verify_self_hash(&output.stdout, "receipt_hash");
+            assert_eq!(
+                receipt["schema_version"],
+                "structural-native-sparse-linear-localized-pdf-report-receipt.v2"
+            );
+            assert_eq!(receipt["profile"], "sparse_linear_cpu_v1");
+            assert_eq!(receipt["locale"], locale);
+            let localized_pdf =
+                fs::read(output_directory.join("report.pdf")).expect("localized linear PDF");
+            validate_deterministic_localized_pdf_v2(&localized_pdf)
+                .expect("localized linear PDF structure");
+        }
+        for file in ["report.pdf", "pdf-receipt.json"] {
+            assert_eq!(
+                fs::read(first.join(file)).expect("first localized linear artifact"),
+                fs::read(second.join(file)).expect("second localized linear artifact"),
+                "localized linear export drift: {locale}/{file}"
+            );
+        }
+        localized_hashes.push(sha256_identity(
+            &fs::read(first.join("report.pdf")).expect("localized linear PDF"),
+        ));
+    }
+    assert_ne!(localized_hashes[0], localized_hashes[1]);
+    assert_eq!(
+        fs::read(restarted.join("workbench-session.json")).expect("session after PDF export"),
+        session_before_localized_export,
+        "localized linear export mutated the durable session"
+    );
 
     let unsupported = run_workbench(&[
         text("result-view"),

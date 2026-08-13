@@ -44,10 +44,16 @@ REQUIRED_TOKENS = {
         "sparse-report-pdf.v1",
         "validate_deterministic_pdf_v1",
     ),
+    "native/crates/structural-report/src/localized_pdf.rs": (
+        "render_sparse_linear_localized_pdf_v2",
+        "verify_exact_sparse_projection",
+    ),
     "native/crates/structural-cli/src/report.rs": (
         "execute_sparse_linear_pdf_report",
         "structural-native-sparse-linear-pdf-report-receipt.v1",
         "sparse_linear_pdf_report",
+        "execute_sparse_linear_localized_pdf_report",
+        "structural-native-sparse-linear-localized-pdf-report-receipt.v2",
     ),
     "native/crates/structural-workbench/src/lib.rs": (
         "WorkbenchAnalysisProfileV1",
@@ -58,6 +64,8 @@ REQUIRED_TOKENS = {
         "execute_model_ir_linear_external_comparison",
         "publish_model_ir_linear_pdf_report",
         "execute_sparse_linear_pdf_report",
+        "execute_sparse_linear_localized_pdf_report",
+        "export_model_ir_linear_localized_pdf",
         "structural-native-model-ir-linear-pdf-report-receipt.v1",
         "sparse_linear_pdf_report",
         "pdf_ready_document_source",
@@ -80,6 +88,8 @@ REQUIRED_TOKENS = {
         "simulate crash before session persistence",
         "restart drift",
         "validate_deterministic_pdf_v1",
+        "validate_deterministic_localized_pdf_v2",
+        "localized linear export drift",
         "tampered_pdf",
         "sparse_linear_pdf_report",
         "pdf_ready_document_source",
@@ -89,6 +99,7 @@ REQUIRED_TOKENS = {
         "Import -> Validate -> Run -> Resume -> Compare -> Report",
         "PDF-ready Markdown",
         "deterministic single-page sparse PDF",
+        "embedded-font localized sparse PDF",
         "render_sparse_linear_pdf_v1",
         "process death after atomic checkpoint publication",
         "no Python, Node, browser, CLI subprocess",
@@ -129,7 +140,7 @@ def check_model_ir_linear_workbench(repo_root: Path = ROOT) -> dict[str, object]
         "clean-environment process restart",
         "no Python, Node, browser, CLI subprocess",
         "existing fixed-guided NDTHA session and receipt bytes",
-        "localized sparse PDF",
+        "embedded-font localized sparse PDF",
         "approved protected-runner HIP C2",
         "authoritative numerical C2/C3",
         "C6",
@@ -176,8 +187,9 @@ def check_model_ir_linear_workbench(repo_root: Path = ROOT) -> dict[str, object]
         "blockers": blockers,
         "claim_boundary": (
             "This check closes only bounded typed-ModelIR CPU linear Workbench C5 composition. "
-            "It includes one deterministic sparse PDF but cannot promote numerical C2, "
-            "authoritative C3, HIP C2, localized/general PDF authority, or C6."
+            "It includes deterministic standard-font and fixed-locale embedded-font sparse PDFs "
+            "but cannot promote numerical C2, authoritative C3, HIP C2, general PDF authority, "
+            "or C6."
         ),
     }
 

@@ -103,8 +103,11 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 14. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-15. installs an immutable update, rolls back and re-verifies activation;
-16. emits an append-only v14 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+15. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
+    embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
+    receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
+16. installs an immutable update, rolls back and re-verifies activation;
+17. emits an append-only v15 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
@@ -113,8 +116,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
-   count 0. The receipt checker continues to accept frozen v1 through v13 receipts without treating
-   them as v14 ModelIR-linear Workbench authority.
+   count 0, plus the localized ModelIR-linear PDF and receipt identities. The receipt checker
+   continues to accept frozen v1 through v14 receipts without treating them as v15 localized
+   ModelIR-linear PDF authority.
 
 The reference command is:
 
@@ -137,14 +141,16 @@ inspect, an explicit non-promoting `review`, review reopen, post-review inspect 
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v4 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v5 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
 The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
 deterministic PDF, document source, PDF/report receipts and inspect/review/export identities. The
-installer continues to verify frozen v1 through v3 rootfs receipts against their original bundles
-and claim boundaries; v3 first carried catalog/evidence surface evidence, and only v4 carries the
-ModelIR-linear surface.
+append-only v5 receipt additionally binds repeated `en-US`/`ko-KR` embedded-font sparse PDF and
+typed receipt identities, exact installed TTF/OFL/provenance bytes, locale separation and durable
+session nonmutation. The installer continues to verify frozen v1 through v4 rootfs receipts against
+their original bundles and claim boundaries; v3 first carried catalog/evidence surface evidence,
+v4 first carried the ModelIR-linear surface, and only v5 carries its localized PDF surface.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA and
 frame3d/truss3d ModelIR-linear Workbench profiles. General native UI/MGT coverage,

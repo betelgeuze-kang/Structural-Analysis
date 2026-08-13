@@ -306,6 +306,21 @@ def valid_v14_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v15_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v14_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v15",
+            "model_ir_linear_localized_pdf_surface_passed": True,
+            "model_ir_linear_localized_pdf_en_us_sha256": "sha256:" + "2" * 64,
+            "model_ir_linear_localized_pdf_ko_kr_sha256": "sha256:" + "3" * 64,
+            "model_ir_linear_localized_pdf_en_us_receipt_sha256": "sha256:" + "4" * 64,
+            "model_ir_linear_localized_pdf_ko_kr_receipt_sha256": "sha256:" + "5" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -694,6 +709,38 @@ def test_distribution_receipt_rejects_promoting_or_unbound_v14_linear_report(
     )
 
 
+def test_distribution_receipt_accepts_model_ir_linear_localized_pdf_v15_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v15_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v15_linear_localized_pdf(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v15_contract()
+    receipt["model_ir_linear_localized_pdf_surface_passed"] = False
+    receipt["model_ir_linear_localized_pdf_ko_kr_sha256"] = receipt[
+        "model_ir_linear_localized_pdf_en_us_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_linear_localized_pdf_surface_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "localized en-US and ko-KR PDF identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -713,9 +760,11 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
     for token in (
         "structural-distribution.v1",
         "structural-install-transaction.v1",
-        "structural-native-rootfs-isolation-e2e.v4",
+        "structural-native-rootfs-isolation-e2e.v5",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
+        "model_ir_linear_localized_pdf_surface_passed",
+        "model_ir_linear_localized_pdf_en_us_sha256",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -770,19 +819,25 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v14" in e2e
+    assert "structural-native-distribution-e2e.v15" in e2e
     assert "workflow-model-linear" in e2e
     assert "model_ir_linear_workbench_restart_passed" in e2e
     assert "model_ir_linear_workbench_direct_parity_passed" in e2e
     assert "model_ir_linear_workbench_operator_surface_passed" in e2e
     assert "model_ir_linear_result_recovery_ir_sha256" in e2e
     assert "model_ir_linear_report_pdf_sha256" in e2e
+    assert "exercise_model_ir_linear_localized_pdf_surface" in e2e
+    assert "model_ir_linear_localized_pdf_surface_passed" in e2e
+    assert "structural-native-sparse-linear-localized-pdf-report-receipt.v2" in e2e
     assert "structural-native-sparse-linear-pdf-report-receipt.v1" in e2e
     assert "frame_cantilever_language_neutral_oracle_v1.txt" in e2e
     assert "exercise_localized_pdf_surface" in e2e
     assert "report-export-pdf" in e2e
     assert "workbench_localized_pdf_surface_passed" in e2e
     assert "localized_report_font_license_sha256" in e2e
+    assert "model-ir-linear-localized-pdf-en-US-first" in rootfs_e2e
+    assert "--model-ir-linear-workbench-session-before-localized-pdf" in rootfs_e2e
+    assert "--model-ir-linear-localized-pdf-ko-kr-second-root" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

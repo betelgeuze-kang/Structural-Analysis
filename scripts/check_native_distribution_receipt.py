@@ -147,6 +147,14 @@ V14_MODEL_IR_LINEAR_WORKBENCH_KEYS = {
     "model_ir_linear_report_receipt_sha256",
 }
 V14_EXPECTED_KEYS = V13_EXPECTED_KEYS | V14_MODEL_IR_LINEAR_WORKBENCH_KEYS
+V15_MODEL_IR_LINEAR_LOCALIZED_PDF_KEYS = {
+    "model_ir_linear_localized_pdf_surface_passed",
+    "model_ir_linear_localized_pdf_en_us_sha256",
+    "model_ir_linear_localized_pdf_ko_kr_sha256",
+    "model_ir_linear_localized_pdf_en_us_receipt_sha256",
+    "model_ir_linear_localized_pdf_ko_kr_receipt_sha256",
+}
+V15_EXPECTED_KEYS = V14_EXPECTED_KEYS | V15_MODEL_IR_LINEAR_LOCALIZED_PDF_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -203,12 +211,16 @@ def validate(
         "structural-native-distribution-e2e.v12": V12_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v13": V13_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v14": V14_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v15": V15_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
-    if receipt_schema_version == "structural-native-distribution-e2e.v14":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v14",
+        "structural-native-distribution-e2e.v15",
+    }:
         schema_version = "structural-native-distribution-e2e.v13"
     backend = payload.get("backend_profile")
     if backend not in {"cpu_only", "rocm"}:
@@ -522,7 +534,10 @@ def validate(
             "workbench_model_view_isometric_sha256"
         ):
             errors.append("localized en-US and ko-KR model-view identities must differ")
-    if receipt_schema_version == "structural-native-distribution-e2e.v14":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v14",
+        "structural-native-distribution-e2e.v15",
+    }:
         for name in (
             "model_ir_linear_workbench_restart_passed",
             "model_ir_linear_workbench_direct_parity_passed",
@@ -545,6 +560,21 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v15":
+        if payload.get("model_ir_linear_localized_pdf_surface_passed") is not True:
+            errors.append("model_ir_linear_localized_pdf_surface_passed must be true")
+        for name in (
+            "model_ir_linear_localized_pdf_en_us_sha256",
+            "model_ir_linear_localized_pdf_ko_kr_sha256",
+            "model_ir_linear_localized_pdf_en_us_receipt_sha256",
+            "model_ir_linear_localized_pdf_ko_kr_receipt_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+        if payload.get("model_ir_linear_localized_pdf_en_us_sha256") == payload.get(
+            "model_ir_linear_localized_pdf_ko_kr_sha256"
+        ):
+            errors.append("ModelIR-linear localized en-US and ko-KR PDF identities must differ")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):
         if type(payload.get(name)) is not int or payload[name] != 0:
             errors.append(f"{name} must be integer zero")

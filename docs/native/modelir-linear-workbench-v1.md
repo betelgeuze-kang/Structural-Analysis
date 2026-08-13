@@ -32,7 +32,9 @@ The restart proof models process death after atomic checkpoint publication.
    The stage receipt binds the source artifacts, PDF, renderer receipt, and all six hashes.
 7. `inspect`, English/Korean `report-view`, immutable explicit `review`, and `export` bind the exact
    session, result, recovery, comparison, ReportIR, document source, and PDF. Export preserves both
-   `sparse_linear_pdf_report` and `pdf_ready_document_source` as distinct artifacts.
+   `sparse_linear_pdf_report` and `pdf_ready_document_source` as distinct artifacts. The separate
+   `report-export-pdf` command revalidates the durable standard-font PDF and publishes an
+   embedded-font localized sparse PDF in exactly `en-US` or `ko-KR` without mutating the session.
 
 The one-shot equivalent is:
 
@@ -72,8 +74,10 @@ ResultIR before accepting the inputs. The fixed A4 PDF 1.7 object graph contains
 nonzero count, PCG iterations, true residual, backend policy, fallback count, and ResultIR,
 ReportIR, document, request, model, state, execution, and checkpoint hashes. Its standard-font
 ASCII path performs no host-font lookup, subprocess, browser, office-suite, or external-renderer
-call. A self-hashed sparse PDF receipt and the Workbench report-stage receipt independently bind
-the bytes.
+call. An explicit locale selects `render_sparse_linear_localized_pdf_v2`, which embeds the fixed
+OFL-1.1 subset with Identity-H and ToUnicode while preserving the exact sparse projection. A
+self-hashed sparse PDF receipt and the Workbench report-stage receipt independently bind the
+durable bytes; the exported localized PDF has its own profile-typed v2 receipt.
 
 ## Restart and compatibility proof
 
@@ -81,8 +85,9 @@ The clean-environment E2E starts a new process for each command, advances exactl
 iteration, restores the pre-Run session file to model process death after atomic checkpoint
 publication, reopens and reconciles the stage, then completes Resume -> Compare -> Report. Every
 terminal result, recovery, report, comparison, PDF, and receipt byte is identical to a separate
-direct one-shot workflow. The same test exercises inspect, Korean report view, explicit review,
-export, PDF tamper rejection, and fail-closed NDTHA-only result-view access.
+direct one-shot workflow. The same test exercises inspect, Korean report view, repeated English and
+Korean embedded-font localized sparse PDF export, explicit review, export, PDF tamper rejection,
+and fail-closed NDTHA-only result-view access.
 
 The session profile field is optional and omitted for the existing fixed-guided NDTHA profile.
 Existing NDTHA session, import, review, export, PDF, and stage receipt shapes therefore remain
@@ -91,8 +96,9 @@ byte-stable; the original 14-test Workbench E2E remains the compatibility gate.
 ## Claim boundary
 
 This closes only the bounded typed-ModelIR frame3d/truss3d CPU linear Workbench composition and its
-single-page standard-font PDF at C5. It does not close localized sparse PDF, PDF/A or accessibility
-conformance, ModelIR linear MGT ingestion, live MIDAS/OpenSees/CalculiX execution, general
+single-page standard-font PDF and embedded-font localized sparse PDF at C5. It does not close
+PDF/A or accessibility conformance, ModelIR linear MGT ingestion, live
+MIDAS/OpenSees/CalculiX execution, general
 nonlinear-static/modal/buckling/transient Workbench profiles, arbitrary result visualization,
-React/TypeScript removal, protected-runner HIP C2, authoritative numerical C2/C3, packaging
-receipts, or C6 decommission.
+React/TypeScript removal, protected-runner HIP C2, authoritative numerical C2/C3, package
+signing/publication receipts, customer receipts, or C6 decommission.

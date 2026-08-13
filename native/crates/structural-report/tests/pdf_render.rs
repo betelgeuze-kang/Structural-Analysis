@@ -15,9 +15,9 @@ use structural_contracts::sparse_product::{
 };
 use structural_report::{
     build_nonlinear_ndtha_report_v1, render_nonlinear_ndtha_localized_pdf_v2,
-    render_nonlinear_ndtha_pdf_v1, render_sparse_linear_pdf_v1,
-    validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1, PdfRenderError,
-    PdfReportLocaleV2,
+    render_nonlinear_ndtha_pdf_v1, render_sparse_linear_localized_pdf_v2,
+    render_sparse_linear_pdf_v1, validate_deterministic_localized_pdf_v2,
+    validate_deterministic_pdf_v1, PdfRenderError, PdfReportLocaleV2,
 };
 
 fn repository_root() -> PathBuf {
@@ -160,6 +160,54 @@ fn sparse_linear_pdf_is_deterministic_and_exactly_projection_bound() {
 
     assert!(matches!(
         render_sparse_linear_pdf_v1(&result, &report.report_ir, b"forged document"),
+        Err(PdfRenderError::Binding { ref code, .. })
+            if code == "pdf_document_source_projection_mismatch"
+    ));
+}
+
+#[test]
+fn localized_sparse_linear_pdfs_are_deterministic_distinct_and_projection_bound() {
+    let result = sparse_result_document();
+    let report = structural_report::build_sparse_linear_report_v1(&result)
+        .expect("deterministic sparse report");
+    let mut rendered = Vec::new();
+    for locale in [PdfReportLocaleV2::EnUs, PdfReportLocaleV2::KoKr] {
+        let first = render_sparse_linear_localized_pdf_v2(
+            &result,
+            &report.report_ir,
+            report.document_source.as_bytes(),
+            locale,
+        )
+        .expect("localized sparse PDF");
+        let second = render_sparse_linear_localized_pdf_v2(
+            &result,
+            &report.report_ir,
+            report.document_source.as_bytes(),
+            locale,
+        )
+        .expect("repeated localized sparse PDF");
+        assert_eq!(first, second);
+        assert_eq!(first.locale(), locale);
+        assert_eq!(first.source_result_hash(), result.result_hash());
+        assert_eq!(first.source_report_hash(), report.report_ir.report_hash());
+        validate_deterministic_localized_pdf_v2(first.as_bytes())
+            .expect("localized sparse PDF structure and embedded font");
+        assert!(first
+            .as_bytes()
+            .windows(b"sparse linear deterministic embedded-font report".len())
+            .any(|window| window == b"sparse linear deterministic embedded-font report"));
+        rendered.push(first);
+    }
+    assert_ne!(rendered[0].pdf_hash(), rendered[1].pdf_hash());
+    assert_ne!(rendered[0].as_bytes(), rendered[1].as_bytes());
+
+    assert!(matches!(
+        render_sparse_linear_localized_pdf_v2(
+            &result,
+            &report.report_ir,
+            b"forged document",
+            PdfReportLocaleV2::KoKr,
+        ),
         Err(PdfRenderError::Binding { ref code, .. })
             if code == "pdf_document_source_projection_mismatch"
     ));

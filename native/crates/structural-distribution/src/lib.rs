@@ -29,7 +29,8 @@ const MAX_TOTAL_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V1: &str = "structural-native-rootfs-isolation-e2e.v1";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V2: &str = "structural-native-rootfs-isolation-e2e.v2";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V3: &str = "structural-native-rootfs-isolation-e2e.v3";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v4";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V4: &str = "structural-native-rootfs-isolation-e2e.v4";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v5";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -38,10 +39,15 @@ const ROOTFS_RUNTIME_GID: u32 = 65_532;
 const ROOTFS_REVIEWER: &str = "native-rootfs-c5";
 const ROOTFS_REVIEW_COMMENT: &str =
     "Explicit isolated C5 handoff review; no engineering approval is inferred.";
+const SPARSE_LOCALIZED_PDF_RECEIPT_SCHEMA: &str =
+    "structural-native-sparse-linear-localized-pdf-report-receipt.v2";
+const SPARSE_LOCALIZED_PDF_PROFILE: &str = "sparse_linear_cpu_v1";
+const SPARSE_LOCALIZED_PDF_CLAIM_BOUNDARY: &str = "inventory_for_one_deterministic_bounded_sparse_linear_fixed_en_us_or_ko_kr_embedded_font_candidate_pdf_not_arbitrary_unicode_pdf_ua_accessibility_or_engineering_acceptance";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V1: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V2: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, and handoff export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V3: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -138,6 +144,11 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub model_ir_linear_workbench_review_show: &'a Path,
     pub model_ir_linear_workbench_inspect_after_review: &'a Path,
     pub model_ir_linear_workbench_export: &'a Path,
+    pub model_ir_linear_workbench_session_before_localized_pdf: &'a Path,
+    pub model_ir_linear_localized_pdf_en_us_first_root: &'a Path,
+    pub model_ir_linear_localized_pdf_en_us_second_root: &'a Path,
+    pub model_ir_linear_localized_pdf_ko_kr_first_root: &'a Path,
+    pub model_ir_linear_localized_pdf_ko_kr_second_root: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -395,6 +406,26 @@ pub struct RootfsIsolationReceiptV4 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV5 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV4,
+    pub model_ir_linear_localized_pdf_surface_passed: bool,
+    pub model_ir_linear_localized_pdf_en_us_sha256: String,
+    pub model_ir_linear_localized_pdf_ko_kr_sha256: String,
+    pub model_ir_linear_localized_pdf_en_us_receipt_sha256: String,
+    pub model_ir_linear_localized_pdf_ko_kr_receipt_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV5 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV5,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -402,6 +433,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V2(Box<RootfsIsolationReceiptV2>),
     V3(Box<RootfsIsolationReceiptV3>),
     V4(Box<RootfsIsolationReceiptV4>),
+    V5(Box<RootfsIsolationReceiptV5>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -689,7 +721,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV4, DistributionError> {
+) -> Result<RootfsIsolationReceiptV5, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -865,6 +897,16 @@ pub fn create_rootfs_isolation_receipt(
         request.workbench_catalog,
         request.workbench_evidence,
     )?;
+    let localized_pdf_surface = inspect_model_ir_linear_localized_pdf_surface(
+        &workspace,
+        &payload_root,
+        request.model_ir_linear_workbench_root,
+        request.model_ir_linear_workbench_session_before_localized_pdf,
+        request.model_ir_linear_localized_pdf_en_us_first_root,
+        request.model_ir_linear_localized_pdf_en_us_second_root,
+        request.model_ir_linear_localized_pdf_ko_kr_first_root,
+        request.model_ir_linear_localized_pdf_ko_kr_second_root,
+    )?;
     let mgt_root =
         resolve_workspace_child(&workspace, request.mgt_workbench_root, "MGT Workbench")?;
     let model_ir_linear_root = resolve_workspace_child(
@@ -872,7 +914,7 @@ pub fn create_rootfs_isolation_receipt(
         request.model_ir_linear_workbench_root,
         "ModelIR linear Workbench",
     )?;
-    let evidence = RootfsIsolationEvidenceV4 {
+    let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY.to_owned(),
         isolation_technology: ROOTFS_ISOLATION_TECHNOLOGY.to_owned(),
@@ -962,7 +1004,15 @@ pub fn create_rootfs_isolation_receipt(
         container_image_built: false,
         customer_image_receipt: false,
     };
-    validate_rootfs_isolation_evidence_v4(&evidence)?;
+    let evidence = RootfsIsolationEvidenceV5 {
+        prior,
+        model_ir_linear_localized_pdf_surface_passed: true,
+        model_ir_linear_localized_pdf_en_us_sha256: localized_pdf_surface.en_us_pdf,
+        model_ir_linear_localized_pdf_ko_kr_sha256: localized_pdf_surface.ko_kr_pdf,
+        model_ir_linear_localized_pdf_en_us_receipt_sha256: localized_pdf_surface.en_us_receipt,
+        model_ir_linear_localized_pdf_ko_kr_receipt_sha256: localized_pdf_surface.ko_kr_receipt,
+    };
+    validate_rootfs_isolation_evidence_v5(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -976,6 +1026,7 @@ pub fn create_rootfs_isolation_receipt(
 /// Returns an error for noncanonical bytes, unknown or weakened evidence, hash drift, or a bundle
 /// identity mismatch. This remains diagnostic C5 evidence and never promotes an OCI/customer C6
 /// claim.
+#[allow(clippy::too_many_lines)]
 pub fn verify_rootfs_isolation_receipt(
     receipt_path: &Path,
     bundle: &Path,
@@ -1042,7 +1093,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V3(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V4) => {
             let receipt: RootfsIsolationReceiptV4 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v4(&receipt.evidence)?;
@@ -1058,6 +1109,23 @@ pub fn verify_rootfs_isolation_receipt(
                 &receipt.evidence.workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V4(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV5 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v5(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &receipt.evidence.prior.release_id,
+                &receipt.evidence.prior.source_sha256,
+                &receipt.evidence.prior.bundle_manifest_hash,
+                &receipt.evidence.prior.bundle_manifest_file_sha256,
+                &receipt.evidence.prior.installer_sha256,
+                &receipt.evidence.prior.workbench_sha256,
+                &receipt.evidence.prior.workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V5(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -1706,6 +1774,13 @@ struct ReadOnlySurfaceSummary {
     evidence_sha256: String,
 }
 
+struct LocalizedPdfSurfaceSummary {
+    en_us_pdf: String,
+    ko_kr_pdf: String,
+    en_us_receipt: String,
+    ko_kr_receipt: String,
+}
+
 fn resolve_real_directory(path: &Path, label: &str) -> Result<PathBuf, DistributionError> {
     ensure_directory(path, label)?;
     path.canonicalize()
@@ -1725,6 +1800,299 @@ fn resolve_workspace_child(
         ));
     }
     Ok(resolved)
+}
+
+fn require_exact_json_keys(
+    value: &serde_json::Value,
+    expected: &[&str],
+    label: &str,
+) -> Result<(), DistributionError> {
+    let object = value.as_object().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_localized_pdf_receipt_invalid",
+            format!("{label} must be a JSON object"),
+        )
+    })?;
+    let actual = object.keys().map(String::as_str).collect::<BTreeSet<_>>();
+    let expected = expected.iter().copied().collect::<BTreeSet<_>>();
+    if actual != expected {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_receipt_invalid",
+            format!("{label} has an unexpected field set"),
+        ));
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_lines)]
+fn inspect_sparse_localized_pdf_output(
+    workspace: &Path,
+    payload_root: &Path,
+    output_root: &Path,
+    locale: &str,
+) -> Result<(Vec<u8>, Vec<u8>), DistributionError> {
+    let root = resolve_workspace_child(workspace, output_root, "localized sparse PDF output")?;
+    let pdf = read_bounded_regular_file(&root.join("report.pdf"), MAX_MANIFEST_BYTES)?;
+    let receipt_bytes =
+        read_bounded_regular_file(&root.join("pdf-receipt.json"), MAX_MANIFEST_BYTES)?;
+    let receipt: serde_json::Value = serde_json::from_slice(&receipt_bytes).map_err(|error| {
+        DistributionError::new(
+            "rootfs_localized_pdf_receipt_invalid",
+            format!("localized sparse PDF receipt is invalid JSON: {error}"),
+        )
+    })?;
+    if compact_operator_json(&receipt)? != receipt_bytes {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_receipt_noncanonical",
+            "localized sparse PDF receipt is not canonical JSON",
+        ));
+    }
+    require_exact_json_keys(
+        &receipt,
+        &[
+            "artifacts",
+            "case_id",
+            "claim_boundary",
+            "document_source_hash",
+            "embedded_font",
+            "locale",
+            "pdf_claim_boundary",
+            "pdf_hash",
+            "profile",
+            "receipt_hash",
+            "schema_version",
+            "source_report_hash",
+            "source_result_hash",
+        ],
+        "localized sparse PDF receipt",
+    )?;
+    verify_operator_self_hash(&receipt, "receipt_hash", "localized sparse PDF receipt")?;
+    let exact_profile =
+        require_operator_string(&receipt, "schema_version", "localized sparse PDF receipt")?
+            == SPARSE_LOCALIZED_PDF_RECEIPT_SCHEMA
+            && require_operator_string(&receipt, "profile", "localized sparse PDF receipt")?
+                == SPARSE_LOCALIZED_PDF_PROFILE
+            && require_operator_string(&receipt, "locale", "localized sparse PDF receipt")?
+                == locale
+            && require_operator_string(&receipt, "claim_boundary", "localized sparse PDF receipt")?
+                == SPARSE_LOCALIZED_PDF_CLAIM_BOUNDARY;
+    if !exact_profile {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_receipt_invalid",
+            "localized sparse PDF receipt profile, locale, or authority boundary is invalid",
+        ));
+    }
+    for field in [
+        "source_result_hash",
+        "source_report_hash",
+        "document_source_hash",
+        "pdf_hash",
+        "receipt_hash",
+    ] {
+        validate_sha256_identity(
+            require_operator_string(&receipt, field, "localized sparse PDF receipt")?,
+            field,
+        )?;
+    }
+    if require_operator_string(&receipt, "pdf_hash", "localized sparse PDF receipt")?
+        != sha256_identity(&pdf)
+        || !pdf.starts_with(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
+        || !pdf.ends_with(b"%%EOF\n")
+        || !pdf
+            .windows(b"/Encoding /Identity-H".len())
+            .any(|window| window == b"/Encoding /Identity-H")
+        || !pdf
+            .windows(b"/ToUnicode 9 0 R".len())
+            .any(|window| window == b"/ToUnicode 9 0 R")
+    {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_artifact_invalid",
+            "localized sparse PDF bytes do not match the receipt or embedded-font container",
+        ));
+    }
+
+    let artifacts = receipt
+        .get("artifacts")
+        .and_then(serde_json::Value::as_array)
+        .filter(|artifacts| artifacts.len() == 1)
+        .ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_localized_pdf_receipt_invalid",
+                "localized sparse PDF receipt must contain exactly one artifact",
+            )
+        })?;
+    let artifact = &artifacts[0];
+    require_exact_json_keys(
+        artifact,
+        &["byte_length", "content_hash", "file", "media_type", "role"],
+        "localized sparse PDF artifact",
+    )?;
+    if require_operator_string(artifact, "role", "localized sparse PDF artifact")?
+        != "sparse_linear_localized_pdf_report"
+        || require_operator_string(artifact, "file", "localized sparse PDF artifact")?
+            != "report.pdf"
+        || require_operator_string(artifact, "media_type", "localized sparse PDF artifact")?
+            != "application/pdf"
+        || require_operator_string(artifact, "content_hash", "localized sparse PDF artifact")?
+            != sha256_identity(&pdf)
+        || artifact
+            .get("byte_length")
+            .and_then(serde_json::Value::as_u64)
+            != u64::try_from(pdf.len()).ok()
+    {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_artifact_invalid",
+            "localized sparse PDF artifact inventory does not match report.pdf",
+        ));
+    }
+
+    let font = receipt.get("embedded_font").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_localized_pdf_receipt_invalid",
+            "localized sparse PDF receipt has no embedded font inventory",
+        )
+    })?;
+    require_exact_json_keys(
+        font,
+        &[
+            "byte_length",
+            "content_hash",
+            "license",
+            "postscript_name",
+            "provenance",
+        ],
+        "localized sparse PDF embedded font",
+    )?;
+    let font_path = payload_root.join("share/structural-report/StructuralReportKoreanSubset.ttf");
+    let font_bytes = read_bounded_regular_file(&font_path, MAX_MANIFEST_BYTES)?;
+    if font_bytes.is_empty()
+        || require_operator_string(
+            font,
+            "postscript_name",
+            "localized sparse PDF embedded font",
+        )? != "StructuralReportKoreanSubset"
+        || require_operator_string(font, "content_hash", "localized sparse PDF embedded font")?
+            != sha256_identity(&font_bytes)
+        || font.get("byte_length").and_then(serde_json::Value::as_u64)
+            != u64::try_from(font_bytes.len()).ok()
+        || !pdf
+            .windows(font_bytes.len())
+            .any(|window| window == font_bytes.as_slice())
+    {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_font_invalid",
+            "localized sparse PDF does not embed the exact installed font",
+        ));
+    }
+    for (field, path, distribution_path, id) in [
+        (
+            "license",
+            "share/structural-report/OFL-1.1.txt",
+            "share/structural-report/OFL-1.1.txt",
+            Some("OFL-1.1"),
+        ),
+        (
+            "provenance",
+            "share/structural-report/StructuralReportKoreanSubset.provenance.json",
+            "share/structural-report/StructuralReportKoreanSubset.provenance.json",
+            None,
+        ),
+    ] {
+        let item = font.get(field).ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_localized_pdf_receipt_invalid",
+                format!("localized sparse PDF embedded font has no {field}"),
+            )
+        })?;
+        let expected_keys = if id.is_some() {
+            &["byte_length", "content_hash", "distribution_path", "id"][..]
+        } else {
+            &["byte_length", "content_hash", "distribution_path"][..]
+        };
+        require_exact_json_keys(item, expected_keys, field)?;
+        let bytes = read_bounded_regular_file(&payload_root.join(path), MAX_MANIFEST_BYTES)?;
+        let valid = require_operator_string(item, "distribution_path", field)? == distribution_path
+            && require_operator_string(item, "content_hash", field)? == sha256_identity(&bytes)
+            && item.get("byte_length").and_then(serde_json::Value::as_u64)
+                == u64::try_from(bytes.len()).ok()
+            && id.map_or(true, |expected| {
+                item.get("id").and_then(serde_json::Value::as_str) == Some(expected)
+            });
+        if !valid {
+            return Err(DistributionError::new(
+                "rootfs_localized_pdf_font_invalid",
+                format!("localized sparse PDF {field} does not match the installed payload"),
+            ));
+        }
+    }
+    Ok((pdf, receipt_bytes))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn inspect_model_ir_linear_localized_pdf_surface(
+    workspace: &Path,
+    payload_root: &Path,
+    workbench_root: &Path,
+    session_before: &Path,
+    en_us_first_root: &Path,
+    en_us_second_root: &Path,
+    ko_kr_first_root: &Path,
+    ko_kr_second_root: &Path,
+) -> Result<LocalizedPdfSurfaceSummary, DistributionError> {
+    let model_root = resolve_workspace_child(
+        workspace,
+        workbench_root,
+        "ModelIR linear Workbench localized PDF source",
+    )?;
+    let session_parent = session_before.parent().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_localized_pdf_session_path_invalid",
+            "localized PDF session snapshot has no parent directory",
+        )
+    })?;
+    if resolve_real_directory(session_parent, "localized PDF session snapshot parent")? != workspace
+    {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_session_path_invalid",
+            "localized PDF session snapshot must be a direct operator-workspace file",
+        ));
+    }
+    let before = read_bounded_regular_file(session_before, MAX_MANIFEST_BYTES)?;
+    let after = read_bounded_regular_file(
+        &model_root.join("workbench-session.json"),
+        MAX_MANIFEST_BYTES,
+    )?;
+    if before != after {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_session_mutated",
+            "localized sparse PDF export mutated the durable ModelIR-linear session",
+        ));
+    }
+    let (en_first_pdf, en_first_receipt) =
+        inspect_sparse_localized_pdf_output(workspace, payload_root, en_us_first_root, "en-US")?;
+    let (en_second_pdf, en_second_receipt) =
+        inspect_sparse_localized_pdf_output(workspace, payload_root, en_us_second_root, "en-US")?;
+    let (ko_first_pdf, ko_first_receipt) =
+        inspect_sparse_localized_pdf_output(workspace, payload_root, ko_kr_first_root, "ko-KR")?;
+    let (ko_second_pdf, ko_second_receipt) =
+        inspect_sparse_localized_pdf_output(workspace, payload_root, ko_kr_second_root, "ko-KR")?;
+    if en_first_pdf != en_second_pdf
+        || en_first_receipt != en_second_receipt
+        || ko_first_pdf != ko_second_pdf
+        || ko_first_receipt != ko_second_receipt
+        || en_first_pdf == ko_first_pdf
+    {
+        return Err(DistributionError::new(
+            "rootfs_localized_pdf_determinism_failed",
+            "localized sparse PDF repeats drifted or locale outputs were not distinct",
+        ));
+    }
+    Ok(LocalizedPdfSurfaceSummary {
+        en_us_pdf: sha256_identity(&en_first_pdf),
+        ko_kr_pdf: sha256_identity(&ko_first_pdf),
+        en_us_receipt: sha256_identity(&en_first_receipt),
+        ko_kr_receipt: sha256_identity(&ko_first_receipt),
+    })
 }
 
 fn inspect_reported_workbench(
@@ -2286,10 +2654,10 @@ fn linux_ipv4_route_count() -> Result<u64, DistributionError> {
 }
 
 fn seal_rootfs_isolation_evidence(
-    evidence: RootfsIsolationEvidenceV4,
-) -> Result<RootfsIsolationReceiptV4, DistributionError> {
+    evidence: RootfsIsolationEvidenceV5,
+) -> Result<RootfsIsolationReceiptV5, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
-    Ok(RootfsIsolationReceiptV4 {
+    Ok(RootfsIsolationReceiptV5 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -2522,7 +2890,7 @@ fn validate_rootfs_isolation_evidence_v3(
 fn validate_rootfs_isolation_evidence_v4(
     evidence: &RootfsIsolationEvidenceV4,
 ) -> Result<(), DistributionError> {
-    if evidence.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    if evidence.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4
         || evidence.model_ir_linear_workbench_stage != "reported"
         || evidence.model_ir_linear_workbench_terminal_status != "completed"
         || !evidence.model_ir_linear_workbench_comparison_passed
@@ -2631,6 +2999,44 @@ fn validate_rootfs_isolation_evidence_v4(
         )
     })?;
     validate_rootfs_isolation_evidence_v3(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v5(
+    evidence: &RootfsIsolationEvidenceV5,
+) -> Result<(), DistributionError> {
+    if evidence.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_linear_localized_pdf_surface_passed
+        || evidence.model_ir_linear_localized_pdf_en_us_sha256
+            == evidence.model_ir_linear_localized_pdf_ko_kr_sha256
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v5 receipt weakens or exceeds the exact localized-PDF diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_linear_localized_pdf_en_us_sha256,
+            "rootfs ModelIR linear localized en-US PDF SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_localized_pdf_ko_kr_sha256,
+            "rootfs ModelIR linear localized ko-KR PDF SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_localized_pdf_en_us_receipt_sha256,
+            "rootfs ModelIR linear localized en-US receipt SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_localized_pdf_ko_kr_receipt_sha256,
+            "rootfs ModelIR linear localized ko-KR receipt SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4.clone_into(&mut prior.claim_boundary);
+    validate_rootfs_isolation_evidence_v4(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -3424,13 +3830,13 @@ mod tests {
         serde_json::from_value(value).expect("decode v3 rootfs evidence")
     }
 
-    fn rootfs_evidence() -> RootfsIsolationEvidenceV4 {
+    fn rootfs_evidence_v4() -> RootfsIsolationEvidenceV4 {
         let mut value =
             serde_json::to_value(rootfs_evidence_v3()).expect("project v3 rootfs evidence");
         let object = value.as_object_mut().expect("rootfs evidence object");
         object.insert(
             "claim_boundary".to_owned(),
-            serde_json::Value::String(ROOTFS_RECEIPT_CLAIM_BOUNDARY.to_owned()),
+            serde_json::Value::String(ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4.to_owned()),
         );
         let identity = |value: u8| serde_json::Value::String(format!("sha256:{value:064x}"));
         object.insert(
@@ -3469,6 +3875,19 @@ mod tests {
             object.insert(field.to_owned(), identity(value));
         }
         serde_json::from_value(value).expect("decode v4 rootfs evidence")
+    }
+
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV5 {
+        let mut prior = rootfs_evidence_v4();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.claim_boundary);
+        RootfsIsolationEvidenceV5 {
+            prior,
+            model_ir_linear_localized_pdf_surface_passed: true,
+            model_ir_linear_localized_pdf_en_us_sha256: format!("sha256:{:064x}", 33),
+            model_ir_linear_localized_pdf_ko_kr_sha256: format!("sha256:{:064x}", 34),
+            model_ir_linear_localized_pdf_en_us_receipt_sha256: format!("sha256:{:064x}", 35),
+            model_ir_linear_localized_pdf_ko_kr_receipt_sha256: format!("sha256:{:064x}", 36),
+        }
     }
 
     fn rootfs_evidence_v1() -> RootfsIsolationEvidenceV1 {
@@ -3662,31 +4081,33 @@ mod tests {
             .expect("frozen v2 evidence remains verifiable");
         validate_rootfs_isolation_evidence_v3(&rootfs_evidence_v3())
             .expect("frozen v3 evidence remains verifiable");
+        validate_rootfs_isolation_evidence_v4(&rootfs_evidence_v4())
+            .expect("frozen v4 evidence remains verifiable");
 
         let evidence = rootfs_evidence();
-        validate_rootfs_isolation_evidence_v4(&evidence).expect("valid bounded evidence");
+        validate_rootfs_isolation_evidence_v5(&evidence).expect("valid bounded evidence");
         let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
         assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
         assert_eq!(
             receipt.receipt_hash,
             sha256_identity(&canonical_json(&evidence).expect("canonical evidence"))
         );
-        assert!(!receipt.evidence.container_image_built);
-        assert!(!receipt.evidence.customer_image_receipt);
+        assert!(!receipt.evidence.prior.container_image_built);
+        assert!(!receipt.evidence.prior.customer_image_receipt);
 
         let mut promoting = evidence.clone();
-        promoting.model_ir_linear_workbench_review_decision = "pass".to_owned();
+        promoting.prior.model_ir_linear_workbench_review_decision = "pass".to_owned();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v4(&promoting)
+            validate_rootfs_isolation_evidence_v5(&promoting)
                 .expect_err("promoting review decision must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
 
         let mut weakened = evidence;
-        weakened.network_interfaces.push("eth0".to_owned());
+        weakened.prior.network_interfaces.push("eth0".to_owned());
         assert_eq!(
-            validate_rootfs_isolation_evidence_v4(&weakened)
+            validate_rootfs_isolation_evidence_v5(&weakened)
                 .expect_err("external interface must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"

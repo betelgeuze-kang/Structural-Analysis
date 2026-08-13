@@ -263,6 +263,45 @@ exercise_localized_pdf_surface() {
 }
 exercise_localized_pdf_surface "$direct"
 
+exercise_model_ir_linear_localized_pdf_surface() {
+  local workspace="$1"
+  local workspace_before="$e2e_root/model-ir-linear-workbench-before-localized-pdf"
+  cp -a -- "$workspace" "$workspace_before"
+  for locale in en-US ko-KR; do
+    local first="$e2e_root/model-ir-linear-localized-pdf-$locale-first"
+    local second="$e2e_root/model-ir-linear-localized-pdf-$locale-second"
+    local output_directory
+    for output_directory in "$first" "$second"; do
+      env -i PATH="$empty_path" "$active/bin/structural-workbench" report-export-pdf \
+        --workspace "$workspace" --output-dir "$output_directory" --locale "$locale" \
+        > "$output_directory.stdout.json"
+      test -s "$output_directory/report.pdf"
+      test -s "$output_directory/pdf-receipt.json"
+      grep -Fq '"schema_version":"structural-native-sparse-linear-localized-pdf-report-receipt.v2"' \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq '"profile":"sparse_linear_cpu_v1"' \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq "\"locale\":\"$locale\"" "$output_directory/pdf-receipt.json"
+      grep -Fq "\"content_hash\":\"sha256:$localized_report_font_hash\"" \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq "\"content_hash\":\"sha256:$localized_report_font_license_hash\"" \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq "\"content_hash\":\"sha256:$localized_report_font_provenance_hash\"" \
+        "$output_directory/pdf-receipt.json"
+    done
+    cmp "$first/report.pdf" "$second/report.pdf"
+    cmp "$first/pdf-receipt.json" "$second/pdf-receipt.json"
+  done
+  if cmp -s "$e2e_root/model-ir-linear-localized-pdf-en-US-first/report.pdf" \
+    "$e2e_root/model-ir-linear-localized-pdf-ko-KR-first/report.pdf"; then
+    echo "installed ModelIR-linear localized PDF outputs must differ by locale" >&2
+    exit 1
+  fi
+  diff -r "$workspace_before" "$workspace" \
+    > "$e2e_root/model-ir-linear-workbench-localized-pdf-diff.txt"
+}
+exercise_model_ir_linear_localized_pdf_surface "$linear_direct"
+
 exercise_model_view_surface() {
   local topology_model="$repository_root/examples/bounded_planar_frame_alpha.model-ir.v2.json"
   local projections=(isometric xy xz yz)
@@ -596,6 +635,10 @@ linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
 linear_workbench_review_hash="$(sha256sum "$linear_direct/07-review/review.json" | awk '{print $1}')"
 linear_workbench_export_hash="$(sha256sum "$e2e_root/model-ir-linear-workbench-export.json" | awk '{print $1}')"
+linear_localized_pdf_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-en-US-first/report.pdf" | awk '{print $1}')"
+linear_localized_pdf_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-ko-KR-first/report.pdf" | awk '{print $1}')"
+linear_localized_pdf_en_us_receipt_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-en-US-first/pdf-receipt.json" | awk '{print $1}')"
+linear_localized_pdf_ko_kr_receipt_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-ko-KR-first/pdf-receipt.json" | awk '{print $1}')"
 mgt_source_hash="$(sha256sum "$mgt_direct/01-import/source.mgt" | awk '{print $1}')"
 mgt_health_hash="$(sha256sum "$mgt_direct/01-import/import-health.json" | awk '{print $1}')"
 mgt_result_hash="$(sha256sum "$mgt_direct/04-resume/result-ir.json" | awk '{print $1}')"
@@ -644,6 +687,10 @@ v14_receipt_json="${v13_receipt_json/structural-native-distribution-e2e.v13/stru
 linear_receipt_fields="\"model_ir_linear_workbench_restart_passed\":true,\"model_ir_linear_workbench_direct_parity_passed\":true,\"model_ir_linear_workbench_operator_surface_passed\":true,\"model_ir_linear_workbench_review_decision\":\"review\",\"model_ir_linear_workbench_review_sha256\":\"sha256:$linear_workbench_review_hash\",\"model_ir_linear_workbench_export_sha256\":\"sha256:$linear_workbench_export_hash\",\"model_ir_linear_result_ir_sha256\":\"sha256:$linear_result_hash\",\"model_ir_linear_result_recovery_ir_sha256\":\"sha256:$linear_recovery_hash\",\"model_ir_linear_report_pdf_sha256\":\"sha256:$linear_report_hash\",\"model_ir_linear_pdf_receipt_sha256\":\"sha256:$linear_pdf_receipt_hash\",\"model_ir_linear_report_receipt_sha256\":\"sha256:$linear_report_receipt_hash\","
 v14_receipt_json="${v14_receipt_json/\"mgt_workbench_restart_passed\":true,/${linear_receipt_fields}\"mgt_workbench_restart_passed\":true,}"
 printf '%s\n' "$v14_receipt_json" > "$temporary_receipt"
+v15_receipt_json="${v14_receipt_json/structural-native-distribution-e2e.v14/structural-native-distribution-e2e.v15}"
+linear_localized_pdf_fields="\"model_ir_linear_localized_pdf_surface_passed\":true,\"model_ir_linear_localized_pdf_en_us_sha256\":\"sha256:$linear_localized_pdf_en_us_hash\",\"model_ir_linear_localized_pdf_ko_kr_sha256\":\"sha256:$linear_localized_pdf_ko_kr_hash\",\"model_ir_linear_localized_pdf_en_us_receipt_sha256\":\"sha256:$linear_localized_pdf_en_us_receipt_hash\",\"model_ir_linear_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$linear_localized_pdf_ko_kr_receipt_hash\","
+v15_receipt_json="${v15_receipt_json/\"mgt_workbench_restart_passed\":true,/${linear_localized_pdf_fields}\"mgt_workbench_restart_passed\":true,}"
+printf '%s\n' "$v15_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

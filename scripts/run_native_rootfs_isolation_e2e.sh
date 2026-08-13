@@ -129,6 +129,26 @@ unshare -Urn bwrap \
       > /mnt/model-ir-linear-inspect-after-review.json
     /opt/payload/bin/structural-workbench export --workspace /mnt/model-ir-linear-workbench \
       > /mnt/model-ir-linear-export.json
+    /bin/cp /mnt/model-ir-linear-workbench/workbench-session.json \
+      /mnt/model-ir-linear-session-before-localized-pdf.json
+    for locale in en-US ko-KR; do
+      for repeat in first second; do
+        output="/mnt/model-ir-linear-localized-pdf-$locale-$repeat"
+        /opt/payload/bin/structural-workbench report-export-pdf \
+          --workspace /mnt/model-ir-linear-workbench --output-dir "$output" \
+          --locale "$locale" > "$output.stdout.json"
+      done
+      /usr/bin/cmp "/mnt/model-ir-linear-localized-pdf-$locale-first/report.pdf" \
+        "/mnt/model-ir-linear-localized-pdf-$locale-second/report.pdf"
+      /usr/bin/cmp "/mnt/model-ir-linear-localized-pdf-$locale-first/pdf-receipt.json" \
+        "/mnt/model-ir-linear-localized-pdf-$locale-second/pdf-receipt.json"
+    done
+    if /usr/bin/cmp -s /mnt/model-ir-linear-localized-pdf-en-US-first/report.pdf \
+      /mnt/model-ir-linear-localized-pdf-ko-KR-first/report.pdf; then
+      exit 1
+    fi
+    /usr/bin/cmp /mnt/model-ir-linear-session-before-localized-pdf.json \
+      /mnt/model-ir-linear-workbench/workbench-session.json
     /opt/payload/bin/structural-workbench catalog --truth geometry_only --size large \
       > /mnt/workbench-catalog.json
     IFS= read -r catalog_line < /mnt/workbench-catalog.json
@@ -162,6 +182,16 @@ unshare -Urn bwrap \
       --model-ir-linear-workbench-inspect-after-review \
         /mnt/model-ir-linear-inspect-after-review.json \
       --model-ir-linear-workbench-export /mnt/model-ir-linear-export.json \
+      --model-ir-linear-workbench-session-before-localized-pdf \
+        /mnt/model-ir-linear-session-before-localized-pdf.json \
+      --model-ir-linear-localized-pdf-en-us-first-root \
+        /mnt/model-ir-linear-localized-pdf-en-US-first \
+      --model-ir-linear-localized-pdf-en-us-second-root \
+        /mnt/model-ir-linear-localized-pdf-en-US-second \
+      --model-ir-linear-localized-pdf-ko-kr-first-root \
+        /mnt/model-ir-linear-localized-pdf-ko-KR-first \
+      --model-ir-linear-localized-pdf-ko-kr-second-root \
+        /mnt/model-ir-linear-localized-pdf-ko-KR-second \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

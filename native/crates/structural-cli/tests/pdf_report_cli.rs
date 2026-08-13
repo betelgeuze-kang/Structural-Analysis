@@ -124,6 +124,20 @@ fn render_localized_pdf(analysis: &Path, output_directory: &Path, locale: &str) 
     ])
 }
 
+fn render_sparse_localized_pdf(analysis: &Path, output_directory: &Path, locale: &str) -> Output {
+    run_cli(&[
+        text("report"),
+        text("render-sparse-pdf"),
+        &analysis.join("result-ir.json"),
+        &analysis.join("report-ir.json"),
+        &analysis.join("report.md"),
+        text("--output-dir"),
+        output_directory,
+        text("--locale"),
+        text(locale),
+    ])
+}
+
 fn verify_receipt(directory: &Path) {
     let receipt_bytes =
         std::fs::read(directory.join("pdf-receipt.json")).expect("PDF receipt bytes");
@@ -225,6 +239,55 @@ fn sparse_linear_pdf_cli_is_clean_environment_deterministic_and_profile_typed() 
     let wrong_profile = render_pdf(&analysis, &temporary.0.join("wrong-profile"));
     assert_eq!(wrong_profile.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&wrong_profile.stdout).contains("result_ir"));
+}
+
+#[test]
+fn localized_sparse_linear_pdf_cli_is_deterministic_and_profile_typed() {
+    let temporary = TestDirectory::create();
+    let analysis = temporary.0.join("model-linear-analysis");
+    build_model_linear_analysis(&analysis);
+    let mut locale_hashes = Vec::new();
+    for locale in ["en-US", "ko-KR"] {
+        let first = temporary.0.join(format!("sparse-localized-{locale}-first"));
+        let second = temporary
+            .0
+            .join(format!("sparse-localized-{locale}-second"));
+        for output_directory in [&first, &second] {
+            let output = render_sparse_localized_pdf(&analysis, output_directory, locale);
+            assert!(
+                output.status.success(),
+                "{}",
+                String::from_utf8_lossy(&output.stdout)
+            );
+            let receipt: Value =
+                serde_json::from_slice(&output.stdout).expect("sparse localized receipt stdout");
+            assert_eq!(
+                receipt["schema_version"],
+                "structural-native-sparse-linear-localized-pdf-report-receipt.v2"
+            );
+            assert_eq!(receipt["profile"], "sparse_linear_cpu_v1");
+            assert_eq!(receipt["locale"], locale);
+            assert_eq!(
+                receipt["artifacts"][0]["role"],
+                "sparse_linear_localized_pdf_report"
+            );
+            let pdf = std::fs::read(output_directory.join("report.pdf"))
+                .expect("localized sparse PDF artifact");
+            validate_deterministic_localized_pdf_v2(&pdf)
+                .expect("localized sparse PDF and embedded font structure");
+        }
+        for file in ["report.pdf", "pdf-receipt.json"] {
+            assert_eq!(
+                std::fs::read(first.join(file)).expect("first localized sparse artifact"),
+                std::fs::read(second.join(file)).expect("second localized sparse artifact"),
+                "localized sparse artifact drift: {locale}/{file}"
+            );
+        }
+        locale_hashes.push(sha256_identity(
+            &std::fs::read(first.join("report.pdf")).expect("localized sparse PDF"),
+        ));
+    }
+    assert_ne!(locale_hashes[0], locale_hashes[1]);
 }
 
 #[test]

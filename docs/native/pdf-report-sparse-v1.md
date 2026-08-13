@@ -13,6 +13,10 @@ The public entrypoint is explicit about the accepted result family:
 structural-cli report render-sparse-pdf \
   result-ir.json report-ir.json report.md \
   --output-dir sparse-pdf-report
+
+structural-cli report render-sparse-pdf \
+  result-ir.json report-ir.json report.md \
+  --output-dir localized-sparse-pdf-report --locale ko-KR
 ```
 
 The `model_ir_linear_cpu_v1` Workbench profile calls the same product-library function directly.
@@ -35,9 +39,16 @@ that receipt as a hash-bound artifact in
 `structural-native-model-ir-linear-pdf-report-receipt.v1`. Clean-environment tests prove repeated
 bytes, direct/restart identity, wrong-profile rejection, and one-byte PDF tamper rejection.
 
+The additive localized sparse-linear PDF v2 path embeds the same renamed OFL-1.1 TrueType subset
+used by nonlinear NDTHA. It supports exactly `en-US` and `ko-KR`, preserves printable-ASCII case
+identifiers, uses Identity-H plus ToUnicode, and emits the typed
+`structural-native-sparse-linear-localized-pdf-report-receipt.v2`. CLI and ModelIR-linear
+Workbench tests prove repeated locale bytes, locale separation, exact projection binding, and
+durable-session nonmutation. The absent-locale v1 PDF and receipt remain byte-identical.
+
 ## Authority boundary
 
 This is a bounded sparse CPU candidate summary, not engineering acceptance or design-code
-compliance. It does not claim localized sparse-linear PDF, arbitrary Unicode, PDF/A, tagged PDF,
-PDF/UA, WCAG or assistive-technology conformance, multipage tables/charts, signatures, approved
-HIP C2 parity, broader report profiles, or C6 decommission.
+compliance. It does not claim arbitrary Unicode, PDF/A, tagged PDF, PDF/UA, WCAG or
+assistive-technology conformance, multipage tables/charts, signatures, approved HIP C2 parity,
+broader report profiles, or C6 decommission.

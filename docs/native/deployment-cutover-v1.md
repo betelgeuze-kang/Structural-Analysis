@@ -14,12 +14,14 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate command. Distribution E2E v14 proves repeated edited
+provenance-bound `model-edit-node` coordinate command. Distribution E2E v15 proves repeated edited
 model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
 same installed-package gate now also executes the ModelIR linear staged/restart/direct Workbench
-path and binds typed recovery, external comparison, deterministic PDF and both report receipts.
+path and binds typed recovery, external comparison, deterministic PDF and both report receipts. It
+also proves repeated `en-US`/`ko-KR` embedded-font sparse PDF exports, locale separation and
+durable-session nonmutation from the installed package.
 This does not
 promote the rootfs diagnostic into general
 visual-editing, 3D result exploration, or customer-image evidence.
@@ -54,8 +56,10 @@ emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact
 `EROFS` from both root and payload write probes, a writable operator workspace, only `lo`, zero
 IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
 artifacts. Its append-only v4 adds typed linear recovery, external comparison, deterministic PDF,
-document source, PDF/report receipts and inspect/review/export identities while preserving frozen
-v1 through v3 verification. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
+document source, PDF/report receipts and inspect/review/export identities. The append-only v5 adds
+repeated `en-US`/`ko-KR` embedded-font sparse PDF export, exact installed font/license/provenance,
+locale separation and durable-session nonmutation while preserving frozen v1 through v4
+verification. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
 non-promoting geometry/no-runner and ready/blocked/unavailable boundaries. Its contract fixes
 `container_image_built=false` and `customer_image_receipt=false`; browsing does not generate or
 approve evidence.
