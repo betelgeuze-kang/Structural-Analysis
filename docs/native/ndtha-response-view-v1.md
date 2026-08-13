@@ -19,6 +19,10 @@ The default window starts at one-based step 1 and requests 64 rows. `--count` is
 returned without synthetic padding. This keeps output bounded even though the solver contract can
 carry up to one million steps; any completed step can still be selected explicitly.
 
+`--locale` accepts only `en-US` or `ko-KR` and defaults to English with the original bytes
+preserved. Korean changes fixed labels and guidance while keeping exact row data and provenance
+tokens. See `docs/native/localized-terminal-result-views-v1.md`.
+
 ## Determinism and provenance
 
 Each row contains the exact `.17e` response value together with convergence, iteration,

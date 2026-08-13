@@ -6,13 +6,16 @@ session reaches `terminal` or later.
 
 ```text
 structural-workbench result-deformed-view --workspace SESSION \
-  --projection xz --step 2 --scale 250
+  --locale ko-KR --projection xz --step 2 --scale 250
 ```
 
 `--projection` is one of `isometric`, `xy`, `xz`, or `yz`. Without `--step`, the last completed
 step is selected. The one-based step must belong to the completed ResultIR prefix. `--scale` is a
 finite presentation-only magnification in `(0, 1000000]`; its default is `1000`. Neither option
 changes the durable workspace or re-executes the solver.
+`--locale` accepts only `en-US` or `ko-KR` and defaults to the byte-compatible original English
+view. Localization changes fixed labels and guidance, not the coordinates, selectors, state tokens
+or hashes; see `docs/native/localized-terminal-result-views-v1.md`.
 
 Before rendering, the Workbench reopens and verifies every durable stage receipt and artifact
 inventory. The view then:

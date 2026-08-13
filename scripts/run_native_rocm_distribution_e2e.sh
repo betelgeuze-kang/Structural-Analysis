@@ -368,6 +368,30 @@ exercise_result_view_surface() {
     grep -Fq 'Displayed steps: 2-3 of 5' "$output"
   done
   cmp "$e2e_root/result-view-window-first.txt" "$e2e_root/result-view-window-second.txt"
+  for label in first second; do
+    output="$e2e_root/result-view-ko-KR-$label.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" result-view \
+      --workspace "$workspace" --locale ko-KR --channel top-displacement > "$output"
+    grep -Fq '로케일: ko-KR' "$output"
+    grep -Fq '채널: 최상단 변위 [top-displacement]' "$output"
+    grep -Fq '시간값을 추론하지 않습니다' "$output"
+    grep -Eq '보기 해시: sha256:[0-9a-f]{64}' "$output"
+    if LC_ALL=C grep -q $'\033' "$output"; then
+      echo "installed Korean NDTHA response view contains an ANSI escape" >&2
+      exit 1
+    fi
+  done
+  cmp "$e2e_root/result-view-ko-KR-first.txt" "$e2e_root/result-view-ko-KR-second.txt"
+  if cmp -s "$e2e_root/result-view-top-displacement-first.txt" \
+    "$e2e_root/result-view-ko-KR-first.txt"; then
+    echo "installed en-US and ko-KR response views must have distinct identities" >&2
+    exit 1
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" result-view \
+    --workspace "$workspace" --locale en-US --channel top-displacement \
+    > "$e2e_root/result-view-en-US-explicit.txt"
+  cmp "$e2e_root/result-view-top-displacement-first.txt" \
+    "$e2e_root/result-view-en-US-explicit.txt"
   diff -r "$workspace_before" "$workspace" > "$e2e_root/workbench-result-view-diff.txt"
 }
 exercise_result_view_surface "$direct"
@@ -422,6 +446,31 @@ exercise_deformed_view_surface() {
     echo "installed explicit deformed-shape view must have a distinct identity" >&2
     exit 1
   fi
+  for label in first second; do
+    output="$e2e_root/deformed-view-ko-KR-$label.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" result-deformed-view \
+      --workspace "$workspace" --locale ko-KR --projection isometric > "$output"
+    grep -Fq '로케일: ko-KR' "$output"
+    grep -Fq '프로파일: fixed_guided_frame3d_x' "$output"
+    grep -Fq 'C++ 의미 스냅샷: verified' "$output"
+    grep -Eq '보기 해시: sha256:[0-9a-f]{64}' "$output"
+    if LC_ALL=C grep -q $'\033' "$output"; then
+      echo "installed Korean fixed-guided deformed view contains an ANSI escape" >&2
+      exit 1
+    fi
+  done
+  cmp "$e2e_root/deformed-view-ko-KR-first.txt" \
+    "$e2e_root/deformed-view-ko-KR-second.txt"
+  if cmp -s "$e2e_root/deformed-view-isometric-first.txt" \
+    "$e2e_root/deformed-view-ko-KR-first.txt"; then
+    echo "installed en-US and ko-KR deformed views must have distinct identities" >&2
+    exit 1
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" result-deformed-view \
+    --workspace "$workspace" --locale en-US --projection isometric \
+    > "$e2e_root/deformed-view-en-US-explicit.txt"
+  cmp "$e2e_root/deformed-view-isometric-first.txt" \
+    "$e2e_root/deformed-view-en-US-explicit.txt"
   diff -r "$workspace_before" "$workspace" > "$e2e_root/workbench-deformed-view-diff.txt"
 }
 exercise_deformed_view_surface "$direct"
@@ -510,14 +559,16 @@ result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-fir
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
 result_view_residual_inf_hash="$(sha256sum "$e2e_root/result-view-residual-inf-first.txt" | awk '{print $1}')"
 result_view_window_hash="$(sha256sum "$e2e_root/result-view-window-first.txt" | awk '{print $1}')"
+result_view_ko_kr_hash="$(sha256sum "$e2e_root/result-view-ko-KR-first.txt" | awk '{print $1}')"
 deformed_view_isometric_hash="$(sha256sum "$e2e_root/deformed-view-isometric-first.txt" | awk '{print $1}')"
 deformed_view_xy_hash="$(sha256sum "$e2e_root/deformed-view-xy-first.txt" | awk '{print $1}')"
 deformed_view_xz_hash="$(sha256sum "$e2e_root/deformed-view-xz-first.txt" | awk '{print $1}')"
 deformed_view_yz_hash="$(sha256sum "$e2e_root/deformed-view-yz-first.txt" | awk '{print $1}')"
 deformed_view_explicit_hash="$(sha256sum "$e2e_root/deformed-view-explicit-first.txt" | awk '{print $1}')"
+deformed_view_ko_kr_hash="$(sha256sum "$e2e_root/deformed-view-ko-KR-first.txt" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
 printf '%s\n' \
-  "{\"schema_version\":\"structural-native-distribution-e2e.v11\",\"backend_profile\":\"rocm\",\"linkage\":\"shared\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":\"sha256:$c2_hash\",\"approved_device_runner\":true,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"workbench_localized_pdf_surface_passed\":true,\"workbench_localized_pdf_en_us_sha256\":\"sha256:$localized_pdf_en_us_hash\",\"workbench_localized_pdf_ko_kr_sha256\":\"sha256:$localized_pdf_ko_kr_hash\",\"workbench_localized_pdf_en_us_receipt_sha256\":\"sha256:$localized_pdf_en_us_receipt_hash\",\"workbench_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$localized_pdf_ko_kr_receipt_hash\",\"localized_report_font_sha256\":\"sha256:$localized_report_font_hash\",\"localized_report_font_license_sha256\":\"sha256:$localized_report_font_license_hash\",\"localized_report_font_provenance_sha256\":\"sha256:$localized_report_font_provenance_hash\",\"workbench_model_view_surface_passed\":true,\"workbench_model_view_isometric_sha256\":\"sha256:$model_view_isometric_hash\",\"workbench_model_view_xy_sha256\":\"sha256:$model_view_xy_hash\",\"workbench_model_view_xz_sha256\":\"sha256:$model_view_xz_hash\",\"workbench_model_view_yz_sha256\":\"sha256:$model_view_yz_hash\",\"workbench_model_edit_surface_passed\":true,\"workbench_model_edit_model_sha256\":\"sha256:$model_edit_model_hash\",\"workbench_model_edit_receipt_sha256\":\"sha256:$model_edit_receipt_hash\",\"workbench_result_view_surface_passed\":true,\"workbench_result_view_top_displacement_sha256\":\"sha256:$result_view_top_displacement_hash\",\"workbench_result_view_drift_ratio_sha256\":\"sha256:$result_view_drift_ratio_hash\",\"workbench_result_view_base_shear_sha256\":\"sha256:$result_view_base_shear_hash\",\"workbench_result_view_residual_inf_sha256\":\"sha256:$result_view_residual_inf_hash\",\"workbench_result_view_window_sha256\":\"sha256:$result_view_window_hash\",\"workbench_deformed_view_surface_passed\":true,\"workbench_deformed_view_isometric_sha256\":\"sha256:$deformed_view_isometric_hash\",\"workbench_deformed_view_xy_sha256\":\"sha256:$deformed_view_xy_hash\",\"workbench_deformed_view_xz_sha256\":\"sha256:$deformed_view_xz_hash\",\"workbench_deformed_view_yz_sha256\":\"sha256:$deformed_view_yz_hash\",\"workbench_deformed_view_explicit_sha256\":\"sha256:$deformed_view_explicit_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"approved_rocm_c5\"}" > "$temporary_receipt"
+  "{\"schema_version\":\"structural-native-distribution-e2e.v12\",\"backend_profile\":\"rocm\",\"linkage\":\"shared\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":\"sha256:$c2_hash\",\"approved_device_runner\":true,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"workbench_localized_pdf_surface_passed\":true,\"workbench_localized_pdf_en_us_sha256\":\"sha256:$localized_pdf_en_us_hash\",\"workbench_localized_pdf_ko_kr_sha256\":\"sha256:$localized_pdf_ko_kr_hash\",\"workbench_localized_pdf_en_us_receipt_sha256\":\"sha256:$localized_pdf_en_us_receipt_hash\",\"workbench_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$localized_pdf_ko_kr_receipt_hash\",\"localized_report_font_sha256\":\"sha256:$localized_report_font_hash\",\"localized_report_font_license_sha256\":\"sha256:$localized_report_font_license_hash\",\"localized_report_font_provenance_sha256\":\"sha256:$localized_report_font_provenance_hash\",\"workbench_model_view_surface_passed\":true,\"workbench_model_view_isometric_sha256\":\"sha256:$model_view_isometric_hash\",\"workbench_model_view_xy_sha256\":\"sha256:$model_view_xy_hash\",\"workbench_model_view_xz_sha256\":\"sha256:$model_view_xz_hash\",\"workbench_model_view_yz_sha256\":\"sha256:$model_view_yz_hash\",\"workbench_model_edit_surface_passed\":true,\"workbench_model_edit_model_sha256\":\"sha256:$model_edit_model_hash\",\"workbench_model_edit_receipt_sha256\":\"sha256:$model_edit_receipt_hash\",\"workbench_result_view_surface_passed\":true,\"workbench_result_view_top_displacement_sha256\":\"sha256:$result_view_top_displacement_hash\",\"workbench_result_view_drift_ratio_sha256\":\"sha256:$result_view_drift_ratio_hash\",\"workbench_result_view_base_shear_sha256\":\"sha256:$result_view_base_shear_hash\",\"workbench_result_view_residual_inf_sha256\":\"sha256:$result_view_residual_inf_hash\",\"workbench_result_view_window_sha256\":\"sha256:$result_view_window_hash\",\"workbench_localized_result_views_surface_passed\":true,\"workbench_result_view_ko_kr_sha256\":\"sha256:$result_view_ko_kr_hash\",\"workbench_deformed_view_ko_kr_sha256\":\"sha256:$deformed_view_ko_kr_hash\",\"workbench_deformed_view_surface_passed\":true,\"workbench_deformed_view_isometric_sha256\":\"sha256:$deformed_view_isometric_hash\",\"workbench_deformed_view_xy_sha256\":\"sha256:$deformed_view_xy_hash\",\"workbench_deformed_view_xz_sha256\":\"sha256:$deformed_view_xz_hash\",\"workbench_deformed_view_yz_sha256\":\"sha256:$deformed_view_yz_hash\",\"workbench_deformed_view_explicit_sha256\":\"sha256:$deformed_view_explicit_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"approved_rocm_c5\"}" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$installed_backend_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

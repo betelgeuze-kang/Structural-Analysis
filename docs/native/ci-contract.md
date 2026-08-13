@@ -139,8 +139,9 @@ consumer and bounded Workbench flow, exercises update/rollback, and uploads a de
 receipts that bind the installed execution to the C2 receipt. Both strict ModelIR and exact-profile
 MGT Workbench paths run with original MGT/import-health identities plus deterministic inspect,
 explicit non-promoting review, review reopen, export, catalog/evidence, localized PDF, general
-ModelIR topology-view, and provenance-bound node-coordinate edit hashes in the append-only
-distribution v11 receipt together with exact-profile deformed-shape projection hashes. A local execution is a candidate, not
+ModelIR topology-view, provenance-bound node-coordinate edit, and `en-US`/`ko-KR` terminal result
+view hashes in the append-only distribution v12 receipt together with exact-profile deformed-shape
+projection hashes. A local execution is a candidate, not
 authoritative C2 or ROCm-package evidence.
 
 ## 3. merge-product

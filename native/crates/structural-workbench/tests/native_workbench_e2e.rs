@@ -1117,6 +1117,7 @@ fn verified_response_channel_views(workspace: &Path, result_hash: &str) -> Vec<S
 }
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated() {
     let (model, request, external, source) = inputs();
     let temporary = TestDirectory::create();
@@ -1143,6 +1144,66 @@ fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated()
     let result_hash = result["result_hash"].as_str().expect("result hash");
     let channel_outputs = verified_response_channel_views(&workspace, result_hash);
     assert_eq!(channel_outputs.len(), 4);
+    let explicit_english = run_workbench(&[
+        text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--locale"),
+        text("en-US"),
+        text("--channel"),
+        text("top-displacement"),
+    ]);
+    assert_success(&explicit_english);
+    assert_eq!(explicit_english.stdout, channel_outputs[0].as_bytes());
+
+    let localized_arguments = [
+        text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--channel"),
+        text("top-displacement"),
+    ];
+    let localized_first = run_workbench(&localized_arguments);
+    let localized_second = run_workbench(&localized_arguments);
+    assert_success(&localized_first);
+    assert_eq!(localized_first.stdout, localized_second.stdout);
+    assert!(!localized_first.stdout.contains(&0x1b));
+    let localized = String::from_utf8(localized_first.stdout).expect("Korean UTF-8 response view");
+    assert!(localized.starts_with("Structural Native Workbench - NDTHA 응답 이력\n"));
+    assert!(localized.contains("로케일: ko-KR\n"));
+    assert!(localized.contains("채널: 최상단 변위 [top-displacement]\n"));
+    assert!(localized.contains("가로 좌표: 1부터 시작하는 단계 번호"));
+    assert!(localized.contains("시간값을 추론하지 않습니다"));
+    assert!(localized.contains(result_hash));
+    for key in [
+        "request_hash",
+        "model_hash",
+        "state_hash",
+        "execution_hash",
+        "checkpoint_hash",
+    ] {
+        assert!(localized.contains(
+            result["identity"][key]
+                .as_str()
+                .expect("terminal ResultIR identity")
+        ));
+    }
+    let english_rows = channel_outputs[0]
+        .lines()
+        .filter(|line| line.starts_with("000"))
+        .collect::<Vec<_>>();
+    let localized_rows = localized
+        .lines()
+        .filter(|line| line.starts_with("000"))
+        .collect::<Vec<_>>();
+    assert_eq!(localized_rows, english_rows);
+    let (unsigned, hash_line) = localized
+        .rsplit_once("보기 해시: ")
+        .expect("Korean response view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    assert_ne!(localized, channel_outputs[0]);
 
     let window = run_workbench(&[
         text("result-view"),
@@ -1276,6 +1337,71 @@ fn fixed_guided_deformed_view_is_profile_bound_deterministic_and_terminal_gated(
         }
     }
     assert!(projection_outputs[3].contains("Projected motion visible: false\n"));
+    let explicit_english = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--locale"),
+        text("en-US"),
+        text("--projection"),
+        text("isometric"),
+    ]);
+    assert_success(&explicit_english);
+    assert_eq!(explicit_english.stdout, projection_outputs[0].as_bytes());
+
+    let localized_arguments = [
+        text("result-deformed-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--projection"),
+        text("isometric"),
+    ];
+    let localized_first = run_workbench(&localized_arguments);
+    let localized_second = run_workbench(&localized_arguments);
+    assert_success(&localized_first);
+    assert_eq!(localized_first.stdout, localized_second.stdout);
+    assert!(!localized_first.stdout.contains(&0x1b));
+    let localized = String::from_utf8(localized_first.stdout).expect("Korean UTF-8 deformed view");
+    assert!(localized.starts_with("Structural Native Workbench - 고정-가이드 NDTHA 변형 형상\n"));
+    assert!(localized.contains("로케일: ko-KR\n"));
+    assert!(localized.contains("프로파일: fixed_guided_frame3d_x\n"));
+    assert!(localized.contains("투영: isometric\n"));
+    assert!(localized.contains("C++ 의미 스냅샷: verified\n"));
+    assert!(localized.contains("주장 경계: exact_executed_fixed_guided"));
+    assert!(localized.contains(result_hash));
+    for key in [
+        "request_hash",
+        "model_hash",
+        "state_hash",
+        "execution_hash",
+        "checkpoint_hash",
+    ] {
+        assert!(localized.contains(
+            result["identity"][key]
+                .as_str()
+                .expect("terminal ResultIR identity")
+        ));
+    }
+    let displacement = result["response"]["top_displacement_m"][4]
+        .as_f64()
+        .expect("terminal top displacement");
+    assert!(localized.contains(&format!("{displacement:+.17e}")));
+    let english_canvas = projection_outputs[0]
+        .lines()
+        .filter(|line| line.starts_with('|') || line.starts_with('+'))
+        .collect::<Vec<_>>();
+    let localized_canvas = localized
+        .lines()
+        .filter(|line| line.starts_with('|') || line.starts_with('+'))
+        .collect::<Vec<_>>();
+    assert_eq!(localized_canvas, english_canvas);
+    let (unsigned, hash_line) = localized
+        .rsplit_once("보기 해시: ")
+        .expect("Korean deformed view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    assert_ne!(localized, projection_outputs[0]);
 
     let explicit = run_workbench(&[
         text("result-deformed-view"),

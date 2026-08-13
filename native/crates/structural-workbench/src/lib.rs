@@ -1045,6 +1045,30 @@ impl NativeWorkbench {
         start_step: u32,
         count: u32,
     ) -> Result<String, WorkbenchError> {
+        self.ndtha_response_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            channel,
+            start_step,
+            count,
+        )
+    }
+
+    /// Return a localized deterministic bounded window over one verified terminal response.
+    ///
+    /// The locale changes presentation only; the same verified `ResultIR` values and identities
+    /// remain visible in both supported languages.
+    ///
+    /// # Errors
+    ///
+    /// Requires at least the terminal stage and rejects receipt drift, invalid `ResultIR`, an
+    /// unsupported channel window, or an unsafe terminal projection.
+    pub fn ndtha_response_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        channel: WorkbenchResultChannelV1,
+        start_step: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
         if self.session.stage < WorkbenchStageV1::Terminal {
             return Err(WorkbenchError::new(
                 "workbench_transition_invalid",
@@ -1060,7 +1084,7 @@ impl NativeWorkbench {
         )?;
         let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
             .map_err(|error| input_error("workbench_result_view_result_invalid", &error))?;
-        result_view::render_ndtha_response_view(result.result(), channel, start_step, count)
+        result_view::render_ndtha_response_view(result.result(), locale, channel, start_step, count)
     }
 
     /// Return a deterministic original/deformed overlay for the executed fixed-guided profile.
@@ -1076,6 +1100,30 @@ impl NativeWorkbench {
     /// an incomplete result prefix, an out-of-range step, or an unsafe visual magnification.
     pub fn fixed_guided_deformed_shape_view_text(
         &self,
+        projection: ModelTopologyProjectionV1,
+        step: Option<u32>,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        self.fixed_guided_deformed_shape_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            projection,
+            step,
+            scale,
+        )
+    }
+
+    /// Return a localized original/deformed overlay for the executed fixed-guided profile.
+    ///
+    /// The locale changes only labels and operator guidance; coordinates, selectors, exact
+    /// provenance identities, and the selected displacement remain unchanged.
+    ///
+    /// # Errors
+    ///
+    /// Requires at least the terminal stage and rejects receipt drift, profile/identity mismatch,
+    /// an incomplete result prefix, an out-of-range step, or an unsafe visual magnification.
+    pub fn fixed_guided_deformed_shape_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
         projection: ModelTopologyProjectionV1,
         step: Option<u32>,
         scale: f64,
@@ -1104,6 +1152,7 @@ impl NativeWorkbench {
             &model,
             &request,
             result.result(),
+            locale,
             projection,
             step,
             scale,

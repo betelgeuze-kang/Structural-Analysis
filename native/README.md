@@ -49,8 +49,10 @@ and compares three global NDTHA quantities; its tracked source is a language-neu
 golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
 distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A,
 tagged or arbitrary-Unicode PDF output, general accessibility/localization and C6 remain open. The
-bounded Workbench separately provides a self-hashed `en-US`/`ko-KR` UTF-8 linear report alternative
-and fixed-label embedded-font PDF export; neither is a certification or general UI-parity claim.
+bounded Workbench separately provides self-hashed `en-US`/`ko-KR` UTF-8 linear report, bounded
+response-history, and exact-profile deformed-shape views plus fixed-label embedded-font PDF export;
+none is a certification or general UI-parity claim. See
+`docs/native/localized-terminal-result-views-v1.md` for the result-view boundary.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and

@@ -143,6 +143,11 @@ hides that motion, and preserves ModelIR/request/result/state/execution/checkpoi
 does not synthesize a general nodal field, element curvature, stress, contour, modal shape, or
 engineering verdict; see `docs/native/fixed-guided-deformed-shape-view-v1.md`.
 
+Both result views accept the closed `en-US`/`ko-KR` locale set. Their existing public methods and
+CLI defaults preserve the original English bytes; localized methods translate only fixed labels
+and guidance while retaining exact numeric and provenance fields. See
+`docs/native/localized-terminal-result-views-v1.md`.
+
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
 non-symlink bundle directory; every artifact is bounded and must match the manifest SHA-256. An

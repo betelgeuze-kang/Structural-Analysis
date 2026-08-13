@@ -33,12 +33,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   terminal NDTHA ResultIR. It exposes exact top-displacement, drift-ratio, base-shear or
   residual-infinity values plus per-step convergence metadata through a maximum 256-row window.
   ResultIR v1 has no `dt_s`, so the view preserves step indices and does not invent timestamps;
-  general 3D/deformed/modal/contour exploration remains open.
+  `en-US` and `ko-KR` change labels only while exact values and provenance remain visible; general
+  3D/deformed/modal/contour exploration remains open.
 - `result-deformed-view`: a deterministic self-hashed ANSI-free original/deformed overlay for the
   exact executed fixed-guided one-story profile. It revalidates the immutable ModelIR through C++,
   applies only a selected ResultIR top displacement in global X, records the visual magnification
-  and all provenance hashes, and fails closed outside the completed prefix. It is not a general
-  nodal-field, stress, contour, modal, animation, or 3D-result surface.
+  and all provenance hashes, and fails closed outside the completed prefix. Its `en-US` and `ko-KR`
+  paths preserve the same numeric geometry and identities. It is not a general nodal-field, stress,
+  contour, modal, animation, or 3D-result surface.
 - `report-export-pdf`: a deterministic bounded embedded-font PDF export in `en-US` or `ko-KR`.
   It re-verifies the stored v1 report chain, embeds a renamed OFL-1.1 Type0/ToUnicode subset,
   publishes to a new directory, and leaves the Workbench unchanged. Fixed labels and printable
@@ -200,6 +202,13 @@ The fixed-guided deformed-shape view is C5-implemented for the exact executed on
 profile, four fixed projections, and a bounded visual magnification. It closes selected-step
 original/deformed inspection only; general nodal displacement fields, element curvature, stress,
 contour, modal, animation, and interactive 3D exploration remain open.
+
+The localized NDTHA result views are C5-implemented for the closed `en-US` and `ko-KR` locale set.
+The locale changes only labels and operator guidance: exact response values, coordinates and all
+provenance identities remain visible, output stays ANSI-free, and each localized byte stream is
+self-hashed. This linear-text slice does not claim WCAG conformance, assistive-technology testing,
+general application localization, or general 3D result parity, so the composite accessibility and
+visual-parity rows remain open.
 
 ## Legacy authority still active
 

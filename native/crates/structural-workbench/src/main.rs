@@ -60,6 +60,7 @@ struct ModelEditNodeCommand {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ResultViewCommand {
     workspace: PathBuf,
+    locale: WorkbenchReportLocaleV1,
     channel: WorkbenchResultChannelV1,
     start_step: u32,
     count: u32,
@@ -68,6 +69,7 @@ struct ResultViewCommand {
 #[derive(Clone, Debug, PartialEq)]
 struct DeformedViewCommand {
     workspace: PathBuf,
+    locale: WorkbenchReportLocaleV1,
     projection: ModelTopologyProjectionV1,
     step: Option<u32>,
     scale: f64,
@@ -248,7 +250,12 @@ fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(&command.workspace)?;
     print!(
         "{}",
-        workbench.ndtha_response_view_text(command.channel, command.start_step, command.count)?
+        workbench.ndtha_response_view_text_localized(
+            command.locale,
+            command.channel,
+            command.start_step,
+            command.count,
+        )?
     );
     Ok(())
 }
@@ -257,7 +264,8 @@ fn run_deformed_view(command: &DeformedViewCommand) -> Result<(), WorkbenchError
     let workbench = NativeWorkbench::open(&command.workspace)?;
     print!(
         "{}",
-        workbench.fixed_guided_deformed_shape_view_text(
+        workbench.fixed_guided_deformed_shape_view_text_localized(
+            command.locale,
             command.projection,
             command.step,
             command.scale,
@@ -591,6 +599,8 @@ fn parse_report_view(
 
 fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, WorkbenchError> {
     let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
     let mut channel = WorkbenchResultChannelV1::TopDisplacement;
     let mut channel_seen = false;
     let mut start_step = 1;
@@ -608,6 +618,13 @@ fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, Workbe
         let value = &arguments[index + 1];
         match flag {
             "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| usage_error("result-view locale must be en-US or ko-KR"))?;
+            }
             "--channel" if !channel_seen => {
                 channel_seen = true;
                 channel = value
@@ -639,6 +656,7 @@ fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, Workbe
     }
     Ok(ResultViewCommand {
         workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
         channel,
         start_step,
         count,
@@ -647,6 +665,8 @@ fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, Workbe
 
 fn parse_deformed_view(arguments: &[OsString]) -> Result<DeformedViewCommand, WorkbenchError> {
     let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
     let mut projection = ModelTopologyProjectionV1::Isometric;
     let mut projection_seen = false;
     let mut step = None;
@@ -663,6 +683,15 @@ fn parse_deformed_view(arguments: &[OsString]) -> Result<DeformedViewCommand, Wo
         let value = &arguments[index + 1];
         match flag {
             "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("result-deformed-view locale must be en-US or ko-KR")
+                    })?;
+            }
             "--projection" if !projection_seen => {
                 projection_seen = true;
                 projection = value
@@ -705,6 +734,7 @@ fn parse_deformed_view(arguments: &[OsString]) -> Result<DeformedViewCommand, Wo
     }
     Ok(DeformedViewCommand {
         workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
         projection,
         step,
         scale,
@@ -984,7 +1014,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -1176,6 +1206,7 @@ mod tests {
         ];
         let parsed = parse_result_view(&default).expect("default result view");
         assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.locale.label(), "en-US");
         assert_eq!(parsed.channel.label(), "top-displacement");
         assert_eq!(parsed.start_step, 1);
         assert_eq!(parsed.count, 64);
@@ -1196,6 +1227,24 @@ mod tests {
         assert_eq!(parsed.start_step, 3);
         assert_eq!(parsed.count, 2);
 
+        let korean = [
+            OsString::from("result-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+        ];
+        assert_eq!(
+            parse_result_view(&korean)
+                .expect("Korean result view")
+                .locale
+                .label(),
+            "ko-KR"
+        );
+        let mut invalid_locale = korean;
+        invalid_locale[4] = OsString::from("ko-kr");
+        assert!(parse_result_view(&invalid_locale).is_err());
+
         for (index, invalid_value) in [(2, "257"), (4, "energy"), (6, "0")] {
             let mut invalid = window.clone();
             invalid[index] = OsString::from(invalid_value);
@@ -1212,6 +1261,7 @@ mod tests {
         ];
         let parsed = parse_deformed_view(&default).expect("default deformed view");
         assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.locale.label(), "en-US");
         assert_eq!(parsed.projection.label(), "isometric");
         assert_eq!(parsed.step, None);
         assert_eq!(parsed.scale.to_bits(), 1_000.0_f64.to_bits());
@@ -1231,6 +1281,24 @@ mod tests {
         assert_eq!(parsed.projection.label(), "xz");
         assert_eq!(parsed.step, Some(3));
         assert_eq!(parsed.scale.to_bits(), 25.5_f64.to_bits());
+
+        let korean = [
+            OsString::from("result-deformed-view"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        assert_eq!(
+            parse_deformed_view(&korean)
+                .expect("Korean deformed view")
+                .locale
+                .label(),
+            "ko-KR"
+        );
+        let mut invalid_locale = korean;
+        invalid_locale[2] = OsString::from("ko-kr");
+        assert!(parse_deformed_view(&invalid_locale).is_err());
 
         for (index, invalid_value) in [(2, "NaN"), (4, "0"), (6, "perspective")] {
             let mut invalid = explicit.clone();

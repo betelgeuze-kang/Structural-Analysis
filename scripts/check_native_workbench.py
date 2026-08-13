@@ -32,7 +32,9 @@ REQUIRED_TOKENS = {
         "inspect_json",
         "linear_report_text",
         "ndtha_response_view_text",
+        "ndtha_response_view_text_localized",
         "fixed_guided_deformed_shape_view_text",
+        "fixed_guided_deformed_shape_view_text_localized",
         "export_localized_pdf",
         "render_model_topology_view",
         "export_json",
@@ -56,6 +58,7 @@ REQUIRED_TOKENS = {
         "WORKBENCH_RESULT_VIEW_MAX_COUNT_V1",
         "ResultIR v1 does not carry dt_s",
         "not a time reconstruction, 3D/deformed/modal/contour view",
+        "시간값을 추론하지 않습니다",
     ),
     "native/crates/structural-workbench/src/deformed_view.rs": (
         "structural-native-workbench-fixed-guided-deformed-view.v1",
@@ -63,6 +66,8 @@ REQUIRED_TOKENS = {
         "validate_model_bytes",
         "Top displacement global X (m)",
         "C++ fixed-guided adapter execution",
+        "C++ 고정-가이드 어댑터 실행",
+        'semantic_snapshot_value: "verified"',
         "not_general_nodal_displacement_3d_modal_contour",
     ),
     "native/crates/structural-workbench/src/model_view.rs": (
@@ -144,6 +149,13 @@ REQUIRED_TOKENS = {
         "HIP C2",
         "C6",
     ),
+    "docs/native/localized-terminal-result-views-v1.md": (
+        "en-US",
+        "ko-KR",
+        "Omitting `--locale` preserves the original `en-US` bytes",
+        "append-only distribution v12 receipt",
+        "not WCAG conformance",
+    ),
 }
 
 
@@ -177,7 +189,8 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "English/Korean embedded-font PDF export",
         "general ModelIR terminal topology view",
         "provenance-bound ModelIR node-coordinate edit",
-        "bounded self-hashed NDTHA response-history view",
+        "English/Korean bounded self-hashed NDTHA response-history view",
+        "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",
         "HIP C2",
         "C6",

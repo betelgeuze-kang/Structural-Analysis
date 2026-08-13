@@ -4,7 +4,7 @@ use structural_contracts::product_ir::{
     sha256_identity, NonlinearNdthaResultIrV1, NonlinearNdthaTerminalStatusV1,
 };
 
-use crate::WorkbenchError;
+use crate::{WorkbenchError, WorkbenchReportLocaleV1};
 
 pub(crate) const RESPONSE_VIEW_SCHEMA_V1: &str =
     "structural-native-workbench-ndtha-response-view.v1";
@@ -61,6 +61,15 @@ impl WorkbenchResultChannelV1 {
         }
     }
 
+    const fn label_ko_kr(self) -> &'static str {
+        match self {
+            Self::TopDisplacement => "최상단 변위",
+            Self::DriftRatio => "층간 변위비",
+            Self::BaseShear => "밑면 전단력",
+            Self::ResidualInf => "잔차 무한대 노름",
+        }
+    }
+
     fn values(self, result: &NonlinearNdthaResultIrV1) -> &[f64] {
         match self {
             Self::TopDisplacement => &result.response.top_displacement_m,
@@ -74,25 +83,51 @@ impl WorkbenchResultChannelV1 {
 /// Render one deterministic, bounded window over a strictly verified terminal `ResultIR`.
 pub(crate) fn render_ndtha_response_view(
     result: &NonlinearNdthaResultIrV1,
+    locale: WorkbenchReportLocaleV1,
     channel: WorkbenchResultChannelV1,
     start_step: u32,
     count: u32,
 ) -> Result<String, WorkbenchError> {
     let window = response_window(result, channel, start_step, count)?;
-    let terminal_status = match result.summary.terminal_status {
-        NonlinearNdthaTerminalStatusV1::Completed => "completed",
-        NonlinearNdthaTerminalStatusV1::Collapsed => "collapsed",
-    };
     let mut output = String::new();
-    push_response_header(&mut output, result, channel, &window, terminal_status);
-    push_response_rows(&mut output, result, &window);
+    match locale {
+        WorkbenchReportLocaleV1::EnUs => {
+            let terminal_status = match result.summary.terminal_status {
+                NonlinearNdthaTerminalStatusV1::Completed => "completed",
+                NonlinearNdthaTerminalStatusV1::Collapsed => "collapsed",
+            };
+            push_response_header(&mut output, result, channel, &window, terminal_status);
+            push_response_rows(&mut output, result, &window);
+        }
+        WorkbenchReportLocaleV1::KoKr => {
+            let terminal_status = match result.summary.terminal_status {
+                NonlinearNdthaTerminalStatusV1::Completed => "completed",
+                NonlinearNdthaTerminalStatusV1::Collapsed => "collapsed",
+            };
+            push_response_header_ko_kr(&mut output, result, channel, &window, terminal_status);
+            push_response_rows(&mut output, result, &window);
+        }
+    }
     push_line(&mut output, "");
-    push_line(
-        &mut output,
-        "Boundary: bounded terminal view of one verified NDTHA ResultIR response channel; not a time reconstruction, 3D/deformed/modal/contour view, engineering acceptance, or design-code compliance.",
-    );
+    match locale {
+        WorkbenchReportLocaleV1::EnUs => push_line(
+            &mut output,
+            "Boundary: bounded terminal view of one verified NDTHA ResultIR response channel; not a time reconstruction, 3D/deformed/modal/contour view, engineering acceptance, or design-code compliance.",
+        ),
+        WorkbenchReportLocaleV1::KoKr => push_line(
+            &mut output,
+            "경계: 검증된 NDTHA ResultIR 응답 채널 하나의 제한된 종료 뷰입니다. 시간 복원, 3D/변형/모드/등고선 뷰, 공학적 승인 또는 설계 기준 준수를 의미하지 않습니다.",
+        ),
+    }
     let view_hash = sha256_identity(output.as_bytes());
-    push_field(&mut output, "View hash", &view_hash);
+    push_field(
+        &mut output,
+        match locale {
+            WorkbenchReportLocaleV1::EnUs => "View hash",
+            WorkbenchReportLocaleV1::KoKr => "보기 해시",
+        },
+        &view_hash,
+    );
     if output.as_bytes().contains(&0x1b) {
         return Err(WorkbenchError::new(
             "workbench_result_view_unsafe",
@@ -100,6 +135,60 @@ pub(crate) fn render_ndtha_response_view(
         ));
     }
     Ok(output)
+}
+
+fn push_response_header_ko_kr(
+    output: &mut String,
+    result: &NonlinearNdthaResultIrV1,
+    channel: WorkbenchResultChannelV1,
+    window: &ResponseWindow<'_>,
+    terminal_status: &str,
+) {
+    push_line(output, "Structural Native Workbench - NDTHA 응답 이력");
+    push_field(output, "스키마", RESPONSE_VIEW_SCHEMA_V1);
+    push_field(output, "로케일", WorkbenchReportLocaleV1::KoKr.label());
+    push_field(output, "해석 사례", &result.case_id);
+    push_field(output, "권한", "제한된 후보");
+    push_field(output, "종료 상태", terminal_status);
+    push_field(
+        output,
+        "채널",
+        &format!("{} [{}]", channel.label_ko_kr(), channel.label()),
+    );
+    push_field(output, "단위", channel.unit());
+    push_field(output, "완료 단계", &window.completed.to_string());
+    push_field(
+        output,
+        "표시 단계",
+        &format!("{}-{} / {}", window.start + 1, window.end, window.completed),
+    );
+    push_field(output, "최솟값", &format!("{:+.17e}", window.minimum));
+    push_field(output, "최댓값", &format!("{:+.17e}", window.maximum));
+    push_field(
+        output,
+        "종료값",
+        &format!("{:+.17e}", window.values[window.completed - 1]),
+    );
+    push_field(output, "백엔드", "cpu / fp64 / fallback 0");
+    push_field(output, "결과 해시", &result.result_hash);
+    push_field(output, "요청 해시", &result.identity.request_hash);
+    push_field(output, "모델 해시", &result.identity.model_hash);
+    push_field(output, "상태 해시", &result.identity.state_hash);
+    push_field(output, "실행 해시", &result.identity.execution_hash);
+    push_field(output, "체크포인트 해시", &result.identity.checkpoint_hash);
+    push_line(
+        output,
+        "표시 형식: 선택한 채널의 전체 실행 범위로 정규화한 ASCII 고정폭 플롯과 정밀 숫자 표.",
+    );
+    push_line(
+        output,
+        "가로 좌표: 1부터 시작하는 단계 번호. ResultIR v1에는 dt_s가 없으므로 시간값을 추론하지 않습니다.",
+    );
+    push_line(output, "");
+    push_line(
+        output,
+        "단계   플롯                                      값                     수렴 반복       소성 잔차 무한대 (N)",
+    );
 }
 
 fn response_window(

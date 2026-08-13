@@ -18,6 +18,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/main.rs"),
     Path("native/crates/structural-workbench/src/deformed_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
+    Path("native/crates/structural-workbench/src/result_view.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
@@ -77,6 +78,7 @@ REQUIRED_PATHS = (
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/benchmark-catalog-v1.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
+    Path("docs/native/localized-terminal-result-views-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
     Path("vite.config.ts"),
@@ -132,6 +134,10 @@ EXPECTED_FEATURES = {
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
     "bounded_ndtha_terminal_response_history_view": ("c5_implemented", False),
     "bounded_fixed_guided_ndtha_deformed_shape_view": ("c5_implemented", False),
+    "bounded_terminal_utf8_ndtha_result_views_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
     "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),
@@ -414,6 +420,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         blockers.append("workbench_ui_native_linear_report_locales_invalid")
     if native.get("localized_pdf_locales") != ["en-US", "ko-KR"]:
         blockers.append("workbench_ui_native_localized_pdf_locales_invalid")
+    if native.get("localized_result_view_locales") != ["en-US", "ko-KR"]:
+        blockers.append("workbench_ui_native_localized_result_view_locales_invalid")
 
     legacy = manifest.get("legacy_surface")
     if not isinstance(legacy, dict):
@@ -723,7 +731,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn inspect_json",
             "pub fn linear_report_text",
             "pub fn ndtha_response_view_text",
+            "pub fn ndtha_response_view_text_localized",
             "pub fn fixed_guided_deformed_shape_view_text",
+            "pub fn fixed_guided_deformed_shape_view_text_localized",
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
@@ -760,6 +770,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "WORKBENCH_RESULT_VIEW_MAX_COUNT_V1",
             "ResultIR v1 does not carry dt_s",
             "not a time reconstruction, 3D/deformed/modal/contour view",
+            "시간값을 추론하지 않습니다",
         ),
         blockers,
     )
@@ -775,6 +786,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "validate_model_bytes",
             "Top displacement global X (m)",
             "C++ fixed-guided adapter execution",
+            "C++ 고정-가이드 어댑터 실행",
+            'semantic_snapshot_value: "verified"',
             "not_general_nodal_displacement_3d_modal_contour",
         ),
         blockers,
@@ -1393,6 +1406,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "bounded embedded-font PDF export is C5-implemented",
             "bounded NDTHA response-history view is C5-implemented",
             "fixed-guided deformed-shape view is C5-implemented",
+            "localized NDTHA result views are C5-implemented",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

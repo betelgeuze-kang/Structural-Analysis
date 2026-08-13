@@ -8,7 +8,7 @@ use structural_contracts::product_ir::{
     NonlinearNdthaResultIrV1, NonlinearNdthaTerminalStatusV1,
 };
 
-use crate::{input_error, ModelTopologyProjectionV1, WorkbenchError};
+use crate::{input_error, ModelTopologyProjectionV1, WorkbenchError, WorkbenchReportLocaleV1};
 
 pub(crate) const DEFORMED_VIEW_SCHEMA_V1: &str =
     "structural-native-workbench-fixed-guided-deformed-view.v1";
@@ -43,12 +43,59 @@ enum PointKind {
     DeformedFloor,
 }
 
+struct DeformedViewLabels {
+    title: &'static str,
+    locale: Option<&'static str>,
+    schema: &'static str,
+    authority: &'static str,
+    authority_value: &'static str,
+    profile: &'static str,
+    projection: &'static str,
+    viewport: &'static str,
+    case: &'static str,
+    terminal_status: &'static str,
+    completed_steps: &'static str,
+    selected_step: &'static str,
+    top_displacement: &'static str,
+    visual_magnification: &'static str,
+    magnified_offset: &'static str,
+    projected_motion_visible: &'static str,
+    true_value: &'static str,
+    false_value: &'static str,
+    model: &'static str,
+    capability_profile: &'static str,
+    semantic_snapshot: &'static str,
+    semantic_snapshot_value: &'static str,
+    adapter_execution: &'static str,
+    adapter_execution_value: &'static str,
+    content_hash: &'static str,
+    semantic_hash: &'static str,
+    provenance_hash: &'static str,
+    snapshot_hash: &'static str,
+    adapter_request_hash: &'static str,
+    result_hash: &'static str,
+    result_request_hash: &'static str,
+    result_model_hash: &'static str,
+    state_hash: &'static str,
+    execution_hash: &'static str,
+    checkpoint_hash: &'static str,
+    legend: &'static str,
+    coordinates: &'static str,
+    base_coordinate: &'static str,
+    floor_original_coordinate: &'static str,
+    floor_deformed_coordinate: &'static str,
+    element: &'static str,
+    claim_boundary: &'static str,
+    view_hash: &'static str,
+}
+
 /// Render an original/deformed overlay for the one executed C++ adapter profile.
 #[allow(clippy::too_many_lines)]
 pub(crate) fn render_fixed_guided_deformed_view(
     model_ir_bytes: &[u8],
     request: &ModelIrNdthaAnalysisRequestDocumentV1,
     result: &NonlinearNdthaResultIrV1,
+    locale: WorkbenchReportLocaleV1,
     projection: ModelTopologyProjectionV1,
     step: Option<u32>,
     scale: f64,
@@ -122,93 +169,105 @@ pub(crate) fn render_fixed_guided_deformed_view(
             (cells[3], PointKind::DeformedFloor),
         ],
     );
+    let labels = deformed_view_labels(locale);
     let terminal_status = match result.summary.terminal_status {
         NonlinearNdthaTerminalStatusV1::Completed => "completed",
         NonlinearNdthaTerminalStatusV1::Collapsed => "collapsed",
     };
     let mut output = String::new();
-    writeln!(
-        output,
-        "Structural Native Workbench - fixed-guided NDTHA deformed shape"
-    )
-    .expect("String writes cannot fail");
-    push_field(&mut output, "Schema", DEFORMED_VIEW_SCHEMA_V1);
-    push_field(&mut output, "Authority", "bounded candidate");
-    push_field(&mut output, "Profile", "fixed_guided_frame3d_x");
-    push_field(&mut output, "Projection", projection.label());
-    push_field(&mut output, "Viewport", "73x25 cells");
-    push_field(&mut output, "Case", &result.case_id);
-    push_field(&mut output, "Terminal status", terminal_status);
-    push_field(&mut output, "Completed steps", &completed.to_string());
-    push_field(&mut output, "Selected step", &selected_step.to_string());
+    writeln!(output, "{}", labels.title).expect("String writes cannot fail");
+    push_field(&mut output, labels.schema, DEFORMED_VIEW_SCHEMA_V1);
+    if let Some(locale_label) = labels.locale {
+        push_field(&mut output, locale_label, locale.label());
+    }
+    push_field(&mut output, labels.authority, labels.authority_value);
+    push_field(&mut output, labels.profile, "fixed_guided_frame3d_x");
+    push_field(&mut output, labels.projection, projection.label());
+    push_field(&mut output, labels.viewport, "73x25 cells");
+    push_field(&mut output, labels.case, &result.case_id);
+    push_field(&mut output, labels.terminal_status, terminal_status);
+    push_field(&mut output, labels.completed_steps, &completed.to_string());
     push_field(
         &mut output,
-        "Top displacement global X (m)",
+        labels.selected_step,
+        &selected_step.to_string(),
+    );
+    push_field(
+        &mut output,
+        labels.top_displacement,
         &format!("{displacement:+.17e}"),
     );
     push_field(
         &mut output,
-        "Visual magnification",
+        labels.visual_magnification,
         &format!("{scale:.17e}"),
     );
     push_field(
         &mut output,
-        "Magnified global X offset (m)",
+        labels.magnified_offset,
         &format!("{magnified_displacement:+.17e}"),
     );
     push_field(
         &mut output,
-        "Projected motion visible",
+        labels.projected_motion_visible,
         if cells[1] == cells[3] {
-            "false"
+            labels.false_value
         } else {
-            "true"
+            labels.true_value
         },
     );
-    push_field(&mut output, "Model", &geometry.model_id);
+    push_field(&mut output, labels.model, &geometry.model_id);
     push_field(
         &mut output,
-        "Capability profile",
+        labels.capability_profile,
         &geometry.capability_profile,
     );
-    push_field(&mut output, "C++ semantic snapshot", "verified");
     push_field(
         &mut output,
-        "C++ fixed-guided adapter execution",
-        "verified by durable terminal receipt",
+        labels.semantic_snapshot,
+        labels.semantic_snapshot_value,
     );
-    push_field(&mut output, "Content hash", &geometry.content_hash);
-    push_field(&mut output, "Semantic hash", &geometry.semantic_hash);
-    push_field(&mut output, "Provenance hash", &geometry.provenance_hash);
-    push_field(&mut output, "Snapshot hash", &geometry.snapshot_hash);
-    push_field(&mut output, "Adapter request hash", request.request_hash());
-    push_field(&mut output, "Result hash", &result.result_hash);
     push_field(
         &mut output,
-        "Result request hash",
+        labels.adapter_execution,
+        labels.adapter_execution_value,
+    );
+    push_field(&mut output, labels.content_hash, &geometry.content_hash);
+    push_field(&mut output, labels.semantic_hash, &geometry.semantic_hash);
+    push_field(
+        &mut output,
+        labels.provenance_hash,
+        &geometry.provenance_hash,
+    );
+    push_field(&mut output, labels.snapshot_hash, &geometry.snapshot_hash);
+    push_field(
+        &mut output,
+        labels.adapter_request_hash,
+        request.request_hash(),
+    );
+    push_field(&mut output, labels.result_hash, &result.result_hash);
+    push_field(
+        &mut output,
+        labels.result_request_hash,
         &result.identity.request_hash,
     );
     push_field(
         &mut output,
-        "Result model hash",
+        labels.result_model_hash,
         &result.identity.model_hash,
     );
-    push_field(&mut output, "State hash", &result.identity.state_hash);
+    push_field(&mut output, labels.state_hash, &result.identity.state_hash);
     push_field(
         &mut output,
-        "Execution hash",
+        labels.execution_hash,
         &result.identity.execution_hash,
     );
     push_field(
         &mut output,
-        "Checkpoint hash",
+        labels.checkpoint_hash,
         &result.identity.checkpoint_hash,
     );
-    writeln!(
-        output,
-        "Legend: .=original element *=magnified deformed element ==coincident elements o=original floor d=deformed floor X=coincident floor B=fixed base @=other collision"
-    )
-    .expect("String writes cannot fail");
+    writeln!(output, "{}", labels.legend).expect("String writes cannot fail");
     let border = format!("+{}+", "-".repeat(VIEW_WIDTH));
     writeln!(output, "{border}").expect("String writes cannot fail");
     for row in &canvas {
@@ -216,38 +275,38 @@ pub(crate) fn render_fixed_guided_deformed_view(
             .expect("String writes cannot fail");
     }
     writeln!(output, "{border}").expect("String writes cannot fail");
-    writeln!(output, "Selected profile coordinates (global SI):")
-        .expect("String writes cannot fail");
+    writeln!(output, "{}", labels.coordinates).expect("String writes cannot fail");
     push_coordinate(
         &mut output,
-        "base original/deformed",
+        labels.base_coordinate,
         &geometry.base_node_id,
         geometry.base,
         cells[0],
     );
     push_coordinate(
         &mut output,
-        "floor original",
+        labels.floor_original_coordinate,
         &geometry.floor_node_id,
         geometry.floor,
         cells[1],
     );
     push_coordinate(
         &mut output,
-        "floor magnified deformed",
+        labels.floor_deformed_coordinate,
         &geometry.floor_node_id,
         deformed_floor,
         cells[3],
     );
     writeln!(
         output,
-        "Element: {} {} -> {}",
-        geometry.element_id, geometry.base_node_id, geometry.floor_node_id
+        "{}: {} {} -> {}",
+        labels.element, geometry.element_id, geometry.base_node_id, geometry.floor_node_id
     )
     .expect("String writes cannot fail");
-    writeln!(output, "Claim boundary: {CLAIM_BOUNDARY}").expect("String writes cannot fail");
+    writeln!(output, "{}: {CLAIM_BOUNDARY}", labels.claim_boundary)
+        .expect("String writes cannot fail");
     let view_hash = sha256_identity(output.as_bytes());
-    push_field(&mut output, "View hash", &view_hash);
+    push_field(&mut output, labels.view_hash, &view_hash);
     if output.as_bytes().contains(&0x1b) {
         return Err(view_error(
             "workbench_deformed_view_unsafe",
@@ -255,6 +314,101 @@ pub(crate) fn render_fixed_guided_deformed_view(
         ));
     }
     Ok(output)
+}
+
+fn deformed_view_labels(locale: WorkbenchReportLocaleV1) -> DeformedViewLabels {
+    match locale {
+        WorkbenchReportLocaleV1::EnUs => DeformedViewLabels {
+            title: "Structural Native Workbench - fixed-guided NDTHA deformed shape",
+            locale: None,
+            schema: "Schema",
+            authority: "Authority",
+            authority_value: "bounded candidate",
+            profile: "Profile",
+            projection: "Projection",
+            viewport: "Viewport",
+            case: "Case",
+            terminal_status: "Terminal status",
+            completed_steps: "Completed steps",
+            selected_step: "Selected step",
+            top_displacement: "Top displacement global X (m)",
+            visual_magnification: "Visual magnification",
+            magnified_offset: "Magnified global X offset (m)",
+            projected_motion_visible: "Projected motion visible",
+            true_value: "true",
+            false_value: "false",
+            model: "Model",
+            capability_profile: "Capability profile",
+            semantic_snapshot: "C++ semantic snapshot",
+            semantic_snapshot_value: "verified",
+            adapter_execution: "C++ fixed-guided adapter execution",
+            adapter_execution_value: "verified by durable terminal receipt",
+            content_hash: "Content hash",
+            semantic_hash: "Semantic hash",
+            provenance_hash: "Provenance hash",
+            snapshot_hash: "Snapshot hash",
+            adapter_request_hash: "Adapter request hash",
+            result_hash: "Result hash",
+            result_request_hash: "Result request hash",
+            result_model_hash: "Result model hash",
+            state_hash: "State hash",
+            execution_hash: "Execution hash",
+            checkpoint_hash: "Checkpoint hash",
+            legend: "Legend: .=original element *=magnified deformed element ==coincident elements o=original floor d=deformed floor X=coincident floor B=fixed base @=other collision",
+            coordinates: "Selected profile coordinates (global SI):",
+            base_coordinate: "base original/deformed",
+            floor_original_coordinate: "floor original",
+            floor_deformed_coordinate: "floor magnified deformed",
+            element: "Element",
+            claim_boundary: "Claim boundary",
+            view_hash: "View hash",
+        },
+        WorkbenchReportLocaleV1::KoKr => DeformedViewLabels {
+            title: "Structural Native Workbench - 고정-가이드 NDTHA 변형 형상",
+            locale: Some("로케일"),
+            schema: "스키마",
+            authority: "권한",
+            authority_value: "bounded candidate",
+            profile: "프로파일",
+            projection: "투영",
+            viewport: "뷰포트",
+            case: "해석 사례",
+            terminal_status: "종료 상태",
+            completed_steps: "완료 단계",
+            selected_step: "선택 단계",
+            top_displacement: "최상단 전역 X 변위 (m)",
+            visual_magnification: "시각 확대 배율",
+            magnified_offset: "확대된 전역 X 편위 (m)",
+            projected_motion_visible: "투영 변위 표시",
+            true_value: "true",
+            false_value: "false",
+            model: "모델",
+            capability_profile: "기능 프로파일",
+            semantic_snapshot: "C++ 의미 스냅샷",
+            semantic_snapshot_value: "verified",
+            adapter_execution: "C++ 고정-가이드 어댑터 실행",
+            adapter_execution_value: "verified by durable terminal receipt",
+            content_hash: "콘텐츠 해시",
+            semantic_hash: "의미 해시",
+            provenance_hash: "출처 해시",
+            snapshot_hash: "스냅샷 해시",
+            adapter_request_hash: "어댑터 요청 해시",
+            result_hash: "결과 해시",
+            result_request_hash: "결과 요청 해시",
+            result_model_hash: "결과 모델 해시",
+            state_hash: "상태 해시",
+            execution_hash: "실행 해시",
+            checkpoint_hash: "체크포인트 해시",
+            legend: "범례: .=원래 요소 *=확대 변형 요소 ==일치 요소 o=원래 층 절점 d=변형 층 절점 X=일치 층 절점 B=고정 기저 @=기타 중첩",
+            coordinates: "선택 프로파일 좌표 (전역 SI):",
+            base_coordinate: "기저 원래/변형",
+            floor_original_coordinate: "층 원래",
+            floor_deformed_coordinate: "층 확대 변형",
+            element: "요소",
+            claim_boundary: "주장 경계",
+            view_hash: "보기 해시",
+        },
+    }
 }
 
 fn validate_scale(scale: f64) -> Result<(), WorkbenchError> {
