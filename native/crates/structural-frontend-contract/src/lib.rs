@@ -8,6 +8,7 @@ mod prototype;
 mod prototype_browser_smoke;
 mod smoke;
 mod verified_publication;
+mod viewer_js_syntax;
 mod viewer_manifest;
 mod viewer_performance_probe;
 mod viewer_readme_capture;
@@ -48,6 +49,11 @@ use prototype_browser_smoke::{
 };
 pub use smoke::{canonical_smoke_receipt_json, run_frontend_smoke, FrontendSmokeReceiptV1};
 use smoke::{validate_frontend_smoke_source, FrontendSmokeSourceV1};
+pub use viewer_js_syntax::{
+    canonical_viewer_js_syntax_receipt_json, run_viewer_js_syntax, ViewerJsSyntaxOptions,
+    ViewerJsSyntaxReceiptV1, ViewerJsSyntaxSourceIdentityV1,
+};
+use viewer_js_syntax::{validate_viewer_js_syntax_source, ViewerJsSyntaxSourceV1};
 pub use viewer_manifest::{
     canonical_viewer_manifest_receipt_json, check_viewer_manifest, ViewerArtifactCountCheckV1,
     ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
@@ -166,6 +172,7 @@ struct FrontendSourceMapV1 {
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
     viewer_browser_smoke_contract: ViewerBrowserSmokeSourceV1,
+    viewer_js_syntax_contract: ViewerJsSyntaxSourceV1,
     viewer_performance_probe_contract: ViewerPerformanceProbeSourceV1,
     viewer_readme_capture_contract: ViewerReadmeCaptureSourceV1,
     viewer_report_pdf_smoke_contract: ViewerReportPdfSmokeSourceV1,
@@ -556,6 +563,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     validate_viewer_browser_smoke_source(&source_map.viewer_browser_smoke_contract)?;
+    validate_viewer_js_syntax_source(&source_map.viewer_js_syntax_contract)?;
     validate_viewer_performance_probe_source(&source_map.viewer_performance_probe_contract)?;
     validate_viewer_readme_capture_source(&source_map.viewer_readme_capture_contract)?;
     validate_viewer_report_pdf_smoke_source(&source_map.viewer_report_pdf_smoke_contract)?;

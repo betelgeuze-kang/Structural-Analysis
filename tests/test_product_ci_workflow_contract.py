@@ -112,6 +112,9 @@ def test_workbench_v2_e2e_routes_through_the_native_orchestrator() -> None:
 
     assert "Rust-orchestrated Workbench v2 E2E" in frontend
     assert "Rust-orchestrated Workbench v2 guarded E2E" in runtime
+    assert "Rust-orchestrated Viewer JavaScript syntax gate" in runtime
+    assert "npm run verify:viewer-js-syntax" in runtime
+    assert "node --check" not in runtime
     assert "Rust-orchestrated Workbench v2 browser regression" in nightly
     assert "Rust-orchestrated Viewer sample workflow" in nightly
     assert "Rust-orchestrated Viewer report PDF contract" in nightly

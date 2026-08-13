@@ -500,10 +500,9 @@ def test_runtime_payload_storage_is_wired_into_viewer_and_ci() -> None:
     assert '"src/structure-viewer/viewer-report-panel-renderer.js"' in workflow
     assert '"src/structure-viewer/index.html"' in workflow
     assert "tests/test_structure_viewer_runtime_ingest_payload_storage.py" in workflow
-    assert (
-        "node --check src/structure-viewer/viewer-runtime-ingest-payload-storage.js"
-        in workflow
-    )
+    assert "Rust-orchestrated Viewer JavaScript syntax gate" in workflow
+    assert "npm run verify:viewer-js-syntax" in workflow
+    assert "node --check" not in workflow
     assert (
         '"src/structure-viewer/viewer-runtime-ingest-payload-storage.js"'
         in frontend_contract

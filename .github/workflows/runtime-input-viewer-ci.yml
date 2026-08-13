@@ -158,18 +158,8 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Check viewer JavaScript syntax
-        run: >-
-          node --check src/structure-viewer/viewer-force-diagram-overlay.js
-          && node --check src/structure-viewer/viewer-contracts.js
-          && node --check src/structure-viewer/viewer-ingest.js
-          && node --check src/structure-viewer/viewer-renderer.js
-          && node --check src/structure-viewer/viewer-report.js
-          && node --check src/structure-viewer/viewer-shell.js
-          && node --check src/structure-viewer/viewer-state.js
-          && node --check src/structure-viewer/viewer-storage.js
-          && node --check src/structure-viewer/viewer-runtime-ingest-payload-storage.js
-          && node --check src/structure-viewer/viewer-story-analysis-panel.js
+      - name: Rust-orchestrated Viewer JavaScript syntax gate
+        run: npm run verify:viewer-js-syntax
 
       - name: Build frontend
         run: npm run build

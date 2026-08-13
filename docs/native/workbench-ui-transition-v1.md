@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -45,6 +45,10 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   Node, Playwright, Chromium, React/TypeScript application code, Viewer JavaScript, and prototype
   JavaScript still own build or rendered behavior and browser-page request authority. Playwright
   still owns inert-input, export, accessibility, and rendered-behavior evidence.
+  Viewer JavaScript syntax gate orchestration is Rust-native: the runtime-input CI enters through
+  one Rust command that freezes the exact ten source identities, owns each `node --check` child,
+  rejects source mutation, and emits a canonical receipt. The retained Node parser and executable
+  identity still own JavaScript parsing; the gate starts no listener and requires no browser.
   The Viewer report PDF verification wrapper is Rust-native: it owns the retained exporter child,
   temporary and explicit-output cleanup, bounded PDF/HTML reads, hashes, PDF header/size checks,
   required report markers, and optional `pdftotext` verification. The retained Node exporter still

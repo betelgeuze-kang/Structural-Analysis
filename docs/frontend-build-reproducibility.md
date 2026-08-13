@@ -42,6 +42,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Checks registered project/drawing/variant counts, OPSTOOL release triples, repo-confined artifact/provenance paths, and locally present artifact-count sources; missing gitignored release outputs remain explicit warnings.
   - Emits a canonical self-hashed receipt with command and network execution counts fixed at zero, without importing or executing the Viewer JavaScript module.
   - Runs before viewer/browser smoke in the PR quality gate so broken drawing registrations fail early.
+- `npm run verify:viewer-js-syntax`
+  - Invokes the Rust-native `structural-frontend-contract viewer-js-syntax` gate used by runtime-input CI. Rust freezes the package/lock/source map and exact ordered SHA-256 identities of ten Viewer JavaScript files, owns every direct child lifetime, rejects mutation between checks, and requires all retained `node --check` invocations to exit zero.
+  - `npm run verify:viewer-js-syntax -- --dry-run` emits a canonical self-hashed plan with no child process. Live checking starts no listener, performs no network access, and requires no browser.
+  - The retained Node parser and executable identity remain outside Rust authority. This is syntax-gate orchestration, not Viewer execution, rendered-behavior parity, C5, or C6 evidence.
 - `npm run serve:viewer`
   - Starts the Rust-native source Viewer server on the fixed IPv4 loopback default `127.0.0.1:8765`; `STRUCTURE_VIEWER_PORT` may select another nonzero port, but non-loopback hosts are rejected.
   - Serves only bounded non-symlink files below explicit Viewer/open-data/visualization prefixes, accepts GET/HEAD only, and rejects traversal, backslashes, dotfiles, and repository-wide access.

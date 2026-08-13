@@ -72,6 +72,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- viewer-readme-capture --root ."
     )
     assert (
+        package_json["scripts"]["verify:viewer-js-syntax"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-js-syntax --root ."
+    )
+    assert (
         package_json["scripts"]["export:viewer-report-pdf"]
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- viewer-report-pdf-export --root ."
@@ -144,6 +149,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "structural-frontend-contract viewer-report-pdf-export" in docs_text
     assert "npm run capture:readme-viewer-image" in docs_text
     assert "structural-frontend-contract viewer-readme-capture" in docs_text
+    assert "npm run verify:viewer-js-syntax" in docs_text
+    assert "structural-frontend-contract viewer-js-syntax" in docs_text
     assert "npm run verify:viewer-performance-probe" in docs_text
     assert "structural-frontend-contract viewer-performance-probe" in docs_text
     assert "npm run verify:viewer-visual-regression" in docs_text

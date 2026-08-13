@@ -7,20 +7,21 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
-    canonical_viewer_report_pdf_export_receipt_json,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
-    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
-    ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
-    ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
+    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
+    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions,
+    ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
+    ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -775,6 +776,119 @@ fn workbench_v2_browser_smoke_checks_delivery_then_requires_pinned_runtime() {
     assert!(value["detail"]
         .as_str()
         .is_some_and(|detail| detail.contains("node_modules/@playwright/test/cli.js")));
+}
+
+#[test]
+fn viewer_js_syntax_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = ViewerJsSyntaxOptions::new(root);
+    options.dry_run = true;
+    let first = run_viewer_js_syntax(&options).expect("Viewer JavaScript syntax dry-run");
+    let second = run_viewer_js_syntax(&options).expect("repeat Viewer JavaScript syntax dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.syntax_source_count, 10);
+    assert_eq!(first.source_identities.len(), 10);
+    assert!(first
+        .source_identities
+        .iter()
+        .all(|source| source.byte_length > 0 && source.sha256.starts_with("sha256:")));
+    assert_eq!(
+        first.logical_command_template,
+        ["node", "--check", "{syntax_source}"]
+    );
+    assert!(first.node_runtime_required);
+    assert!(!first.browser_runtime_required);
+    assert_eq!(first.rust_owned_listener_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert_eq!(
+        first.external_network_access_accounting,
+        "none_syntax_check_only"
+    );
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_js_syntax_receipt_json(&first)
+        .expect("canonical Viewer JavaScript syntax receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer JavaScript syntax JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_js_syntax_owns_all_children_and_emits_verified_receipt() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nif [ \"$1\" != '--check' ] || [ -z \"$2\" ]; then exit 91; fi\nprintf '%s\\n' \"$2\" >> \"$PWD/syntax-invocations.log\"\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-js-syntax", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer JavaScript syntax gate");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let receipt: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer JavaScript syntax receipt");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-viewer-js-syntax-receipt.v1"
+    );
+    assert_eq!(receipt["status"], "verified");
+    assert_eq!(receipt["deterministic_receipt"], false);
+    assert_eq!(receipt["syntax_source_count"], 10);
+    assert_eq!(receipt["direct_processes_spawned"], 10);
+    assert_eq!(
+        receipt["successful_exit_codes"],
+        serde_json::json!([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    );
+    let invocations = std::fs::read_to_string(test.0.join("syntax-invocations.log"))
+        .expect("read syntax invocations");
+    assert_eq!(invocations.lines().count(), 10);
+    assert_eq!(
+        invocations.lines().next(),
+        Some("src/structure-viewer/viewer-force-diagram-overlay.js")
+    );
+    assert_eq!(
+        invocations.lines().last(),
+        Some("src/structure-viewer/viewer-story-analysis-panel.js")
+    );
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_js_syntax_rejects_source_mutation_between_children() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nif [ ! -f \"$PWD/syntax-mutated.flag\" ]; then\n  : > \"$PWD/syntax-mutated.flag\"\n  printf ' ' >> \"$PWD/src/structure-viewer/viewer-story-analysis-panel.js\"\nfi\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-js-syntax", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer JavaScript syntax gate");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer JavaScript syntax error");
+    assert_eq!(error["code"], "viewer_js_syntax_contract_changed");
 }
 
 #[test]

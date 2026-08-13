@@ -373,6 +373,22 @@ def test_native_viewer_readme_capture_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in capture["claim"]
 
 
+def test_native_viewer_js_syntax_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_viewer_js_syntax") is True
+    syntax = payload["capabilities"]["native_viewer_js_syntax"]
+    assert syntax["cutover_gate"] == "C0"
+    assert syntax["owner"] == "structural-frontend-contract"
+    assert "runtime-input-viewer CI" in syntax["claim"]
+    assert "verify:viewer-js-syntax" in syntax["claim"]
+    assert "exact ordered SHA-256 identities" in syntax["claim"]
+    assert "ten Viewer JavaScript sources" in syntax["claim"]
+    assert "retained Node --check" in syntax["claim"]
+    assert "dry-run spawns no process" in syntax["claim"]
+    assert "does not execute Viewer behavior" in syntax["claim"]
+    assert "authorize C6 removal" in syntax["claim"]
+
+
 def test_native_viewer_sample_workflow_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

@@ -199,6 +199,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 product-publication authority only: package capture:readme-viewer-image enters through structural-frontend-contract viewer-readme-capture; Rust hashes the pinned package/lock and three capture sources, replaces inherited camera environment variables with explicit bounded values, owns one direct retained Node child and temporary PNG, rejects source and output mutation, independently validates bounded CRC-correct PNG chunks plus the exact 1600x900 IHDR, and publishes verified bytes through the shared staging/backup/rename rollback contract, while dry-run creates no output, listener or process; the retained capture script, Playwright, Chromium, internal loopback server, Viewer JavaScript rendering, camera behavior, browser requests and screenshot generation remain outside Rust ownership, so human visual approval, customer device parity, clean-machine live execution, native UI parity, C5 and C6 remain open"
     },
+    "native_viewer_js_syntax": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 CI-gate orchestration only: runtime-input-viewer CI and package verify:viewer-js-syntax enter through structural-frontend-contract viewer-js-syntax; Rust freezes the package/lock/source map and exact ordered SHA-256 identities of ten Viewer JavaScript sources, owns each direct child lifetime, rejects input mutation, requires every retained Node --check invocation to exit zero, and emits canonical self-hashed evidence, while dry-run spawns no process; the retained Node parser and executable identity remain outside Rust ownership, and this gate does not execute Viewer behavior, start a listener, access a network, require a browser, prove browser parity, close C5, or authorize C6 removal"
+    },
     "native_viewer_visual_regression": {
       "status": "implemented",
       "cutover_gate": "C0",

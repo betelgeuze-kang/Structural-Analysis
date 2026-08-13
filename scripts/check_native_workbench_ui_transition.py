@@ -26,6 +26,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/verified_publication.rs"),
+    Path("native/crates/structural-frontend-contract/src/viewer_js_syntax.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_performance_probe.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_readme_capture.rs"),
@@ -214,6 +215,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract prototype-browser-smoke",
         "structural-frontend-contract workbench-v2-browser-smoke",
         "structural-frontend-contract browser-smoke",
+        "structural-frontend-contract viewer-js-syntax",
         "structural-frontend-contract viewer-sample-workflow",
         "structural-frontend-contract viewer-performance-probe",
         "structural-frontend-contract viewer-visual-regression",
@@ -236,6 +238,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "workbench_v2_browser_smoke_node_required": True,
         "workbench_v2_browser_smoke_playwright_required": True,
         "workbench_v2_browser_smoke_browser_required": True,
+        "viewer_js_syntax_node_required": True,
+        "viewer_js_syntax_browser_required": False,
+        "viewer_js_syntax_listener_required": False,
+        "viewer_js_syntax_network_required": False,
         "viewer_readme_capture_node_required": True,
         "viewer_readme_capture_playwright_required": True,
         "viewer_readme_capture_browser_required": True,
@@ -404,6 +410,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- workbench-v2-browser-smoke --root ."
     ):
         blockers.append("workbench_ui_workbench_v2_browser_smoke_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("verify:viewer-js-syntax") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-js-syntax --root ."
+    ):
+        blockers.append("workbench_ui_viewer_js_syntax_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get("verify:viewer-report-pdf") != (
         "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- viewer-report-pdf-smoke --root ."
@@ -440,6 +451,16 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- viewer-visual-regression --root ."
     ):
         blockers.append("workbench_ui_viewer_visual_regression_authority_invalid")
+
+    runtime_input_ci = _text(
+        root, Path(".github/workflows/runtime-input-viewer-ci.yml"), blockers
+    )
+    if (
+        "Rust-orchestrated Viewer JavaScript syntax gate" not in runtime_input_ci
+        or "npm run verify:viewer-js-syntax" not in runtime_input_ci
+        or "node --check" in runtime_input_ci
+    ):
+        blockers.append("workbench_ui_viewer_js_syntax_ci_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -482,6 +503,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "create_new",
             "require_unchanged",
             "rollback_publication",
+        ),
+        blockers,
+    )
+    viewer_js_syntax = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/viewer_js_syntax.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/viewer_js_syntax.rs"),
+        viewer_js_syntax,
+        (
+            "pub fn run_viewer_js_syntax",
+            "structural-native-viewer-js-syntax-receipt.v1",
+            "viewer_js_syntax_contract_changed",
+            "Command::new(node_launcher())",
+            '.arg("--check")',
+            "verify_execution_inputs_unchanged",
+            "direct_processes_spawned",
+            "browser_runtime_required",
         ),
         blockers,
     )
@@ -868,9 +909,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
+            "Viewer JavaScript syntax gate orchestration is Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",
             "Viewer performance verifier is Rust-native",
             "Viewer visual-regression verifier is Rust-native",
@@ -918,7 +960,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, retained Node exporter/probe/capture, Playwright, Chromium/browser, and optional pdftotext dependency visible",
+        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, retained Node parser/exporter/probe/capture, Playwright, Chromium/browser, and optional pdftotext dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",
