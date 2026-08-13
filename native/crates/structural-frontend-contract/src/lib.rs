@@ -11,6 +11,7 @@ mod viewer_manifest;
 mod viewer_performance_probe;
 mod viewer_report_pdf_smoke;
 mod viewer_server;
+mod viewer_visual_regression;
 mod workbench_v2_browser_smoke;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -67,6 +68,13 @@ pub use viewer_server::{
     canonical_viewer_server_receipt_json, plan_viewer_server, serve_viewer, ViewerServerReceiptV1,
 };
 use viewer_server::{validate_viewer_server_source, ViewerServerSourceV1};
+pub use viewer_visual_regression::{
+    canonical_viewer_visual_regression_receipt_json, run_viewer_visual_regression,
+    ViewerVisualRegressionOptions, ViewerVisualRegressionReceiptV1,
+};
+use viewer_visual_regression::{
+    validate_viewer_visual_regression_source, ViewerVisualRegressionSourceV1,
+};
 pub use workbench_v2_browser_smoke::{
     canonical_workbench_v2_browser_smoke_receipt_json, run_workbench_v2_browser_smoke,
     WorkbenchV2BrowserSmokeReceiptV1, WorkbenchV2BrowserSmokeSpecificationV1,
@@ -140,6 +148,7 @@ struct FrontendSourceMapV1 {
     viewer_performance_probe_contract: ViewerPerformanceProbeSourceV1,
     viewer_report_pdf_smoke_contract: ViewerReportPdfSmokeSourceV1,
     viewer_server_contract: ViewerServerSourceV1,
+    viewer_visual_regression_contract: ViewerVisualRegressionSourceV1,
     workbench_prototype_contract: WorkbenchPrototypeSourceV1,
     workbench_prototype_browser_smoke_contract: WorkbenchPrototypeBrowserSmokeSourceV1,
     workbench_v2_browser_smoke_contract: WorkbenchV2BrowserSmokeSourceV1,
@@ -527,6 +536,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_viewer_performance_probe_source(&source_map.viewer_performance_probe_contract)?;
     validate_viewer_report_pdf_smoke_source(&source_map.viewer_report_pdf_smoke_contract)?;
     validate_viewer_server_source(&source_map.viewer_server_contract)?;
+    validate_viewer_visual_regression_source(&source_map.viewer_visual_regression_contract)?;
     validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;
     validate_workbench_prototype_browser_smoke_source(
         &source_map.workbench_prototype_browser_smoke_contract,

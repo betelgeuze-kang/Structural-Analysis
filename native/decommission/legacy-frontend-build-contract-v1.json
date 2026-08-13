@@ -30,6 +30,7 @@
     "scripts/measure-structure-viewer-performance.mjs",
     "scripts/structure-viewer-canvas-frame.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
+    "implementation/phase1/structure_viewer_visual_regression_baseline.json",
     "src/structure-viewer/index.html",
     "src/structure-viewer/design-tokens.css",
     "src/structure-viewer/viewer-visual-identity.css",
@@ -70,6 +71,7 @@
     "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
+    "native/crates/structural-frontend-contract/src/viewer_visual_regression.rs",
     "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
   ],
@@ -89,7 +91,7 @@
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:viewer-performance-probe": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .",
     "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
-    "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
+    "verify:viewer-visual-regression": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-visual-regression --root .",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-prototype-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .",
     "verify:workbench-v2-e2e": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- workbench-v2-browser-smoke --root .",
@@ -322,6 +324,59 @@
     ],
     "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen frontend plus four performance inputs, owns the direct Node child and temporary/explicit artifact lifecycle, rejects input mutation, strictly decodes the bounded probe artifact, independently rechecks source-row identities, loopback URL, viewport, browser-error absence, canvas framing, ready-time and RAF budgets, and emits a canonical self-hashed receipt. Dry-run creates no output and spawns no process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, canvas inspection, RAF sampling, and raw payload construction; Node and browser runtime identity, normalized customer-hardware performance, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
+  },
+  "viewer_visual_regression_contract": {
+    "schema_version": "structural-native-viewer-visual-regression-contract.v1",
+    "node_launcher": "node",
+    "probe_path": "scripts/measure-structure-viewer-visual-regression.mjs",
+    "baseline_path": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+    "output_schema_version": "structure-viewer-visual-regression-baseline.v1",
+    "default_timeout_ms": 60000,
+    "default_max_mean_abs_diff": 32.0,
+    "default_max_max_abs_diff": 150.0,
+    "default_max_coverage_delta": 0.16,
+    "default_max_center_delta": 0.12,
+    "case_ids": [
+      "desktop_midas33_optimized",
+      "mobile_midas33_optimized",
+      "desktop_midas33_solid",
+      "desktop_midas33_contour",
+      "desktop_midas33_plan_wireframe",
+      "desktop_midas33_review_member",
+      "desktop_midas33_compare_risk_overlay",
+      "desktop_midas33_evidence_ingest_csv",
+      "desktop_midas33_renderable_json_ingest",
+      "desktop_midas33_section_edit_apply",
+      "desktop_midas33_loadcomb_draft"
+    ],
+    "tracked_sources": [
+      {
+        "label": "viewer_index",
+        "path": "src/structure-viewer/index.html"
+      },
+      {
+        "label": "visual_regression_probe",
+        "path": "scripts/measure-structure-viewer-visual-regression.mjs"
+      },
+      {
+        "label": "canvas_frame_probe",
+        "path": "scripts/structure-viewer-canvas-frame.mjs"
+      },
+      {
+        "label": "frontend_smoke_spec",
+        "path": "tests/frontend/structure-viewer-smoke.spec.ts"
+      }
+    ],
+    "expected_verify_mode": "verify",
+    "expected_visual_regression_mode": "local_canvas_signature_baseline",
+    "expected_probe_claim_boundary": "Local visual signature regression only; not a pixel-perfect customer-device rendering claim.",
+    "residual_live_work": [
+      "Add screenshot image artifacts only when storage and review policy are defined.",
+      "Run the same visual baseline across the customer browser/device matrix.",
+      "Expand visual baselines to customer browser/device matrix and low-memory profiles."
+    ],
+    "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen visual baseline plus four probe inputs, owns the direct Node child and temporary/explicit report lifecycle, rejects baseline or source mutation, strictly decodes bounded duplicate-key-free JSON, independently rechecks the 11-case identity and workflow inventory, IPv4 loopback URLs, browser-error absence, canvas geometry and signature hashes, source identities, baseline deltas, tolerance results, and emits a canonical self-hashed receipt. Dry-run creates no output, listener, or process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, state manipulation, screenshots, canvas sampling, and raw payload construction; explicit baseline refresh remains a direct operator Node command. Node and browser runtime identity, pixel-perfect customer-device rendering, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
   },
   "viewer_report_pdf_smoke_contract": {
     "schema_version": "structural-native-viewer-report-pdf-smoke-contract.v1",

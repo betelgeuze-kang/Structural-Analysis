@@ -312,6 +312,28 @@ def test_native_frontend_contract_capability_is_bounded_c0() -> None:
     assert "close C5/C6" in frontend["claim"]
 
 
+def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "native_viewer_visual_regression"
+        )
+        is True
+    )
+    visual = payload["capabilities"]["native_viewer_visual_regression"]
+    assert visual["cutover_gate"] == "C0"
+    assert visual["owner"] == "structural-frontend-contract"
+    assert "viewer-visual-regression" in visual["claim"]
+    assert "tracked baseline plus four frozen source inputs" in visual["claim"]
+    assert "all 11 ordered workflow cases" in visual["claim"]
+    assert "recomputed baseline deltas" in visual["claim"]
+    assert "dry-run creates no output, listener or process" in visual["claim"]
+    assert "retained Node probe still owns" in visual["claim"]
+    assert "explicit baseline refresh remains a direct operator Node command" in visual["claim"]
+    assert "pixel-perfect rendering" in visual["claim"]
+    assert "C6 remain open" in visual["claim"]
+
+
 def test_native_distribution_capability_is_bounded_c5():
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_distribution") is True

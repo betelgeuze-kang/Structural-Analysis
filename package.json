@@ -30,7 +30,7 @@
     "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
     "verify:viewer-performance-probe": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .",
     "verify:viewer-sample-workflow": "node ./scripts/verify-structure-viewer-sample-workflow.mjs --fail-blocked",
-    "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
+    "verify:viewer-visual-regression": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-visual-regression --root .",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "ai:kiro-design": "./scripts/ai-run-kiro-design.sh",
     "ai:preflight": "bash scripts/ai-preflight.sh",

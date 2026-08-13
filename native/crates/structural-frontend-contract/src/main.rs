@@ -10,13 +10,15 @@ use structural_frontend_contract::{
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
+    canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
     FrontendContractError, ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
+    ViewerVisualRegressionOptions,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -95,6 +97,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_viewer_report_pdf_smoke(&options)?;
         return canonical_viewer_report_pdf_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-visual-regression" {
+        let options = parse_viewer_visual_regression_arguments(&arguments[1..])?;
+        let receipt = run_viewer_visual_regression(&options)?;
+        return canonical_viewer_visual_regression_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "serve" {
         let options = parse_serve_arguments(&arguments[1..])?;
         if options.dry_run {
@@ -129,9 +136,118 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
+}
+
+#[allow(clippy::too_many_lines)] // Keeping the bounded option matrix in one duplicate-aware parser is clearer.
+fn parse_viewer_visual_regression_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerVisualRegressionOptions, CliError> {
+    let mut root = None;
+    let mut baseline = None;
+    let mut case_ids = None;
+    let mut timeout_ms = None;
+    let mut max_mean_abs_diff = None;
+    let mut max_max_abs_diff = None;
+    let mut max_coverage_delta = None;
+    let mut max_center_delta = None;
+    let mut output = None;
+    let mut dry_run = false;
+    let mut keep_temporary_output = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-visual-regression option names must be UTF-8"))?;
+        if matches!(name, "--dry-run" | "--keep") {
+            let flag = if name == "--dry-run" {
+                &mut dry_run
+            } else {
+                &mut keep_temporary_output
+            };
+            if *flag {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            *flag = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-visual-regression value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--baseline" if baseline.is_none() => baseline = Some(PathBuf::from(value)),
+            "--case-id" if case_ids.is_none() => {
+                case_ids = Some(parse_utf8(value, "--case-id")?);
+            }
+            "--timeout-ms" if timeout_ms.is_none() => {
+                timeout_ms = Some(parse_positive_u64(value, "--timeout-ms")?);
+            }
+            "--max-mean-abs-diff" if max_mean_abs_diff.is_none() => {
+                max_mean_abs_diff = Some(parse_nonnegative_f64(value, "--max-mean-abs-diff")?);
+            }
+            "--max-max-abs-diff" if max_max_abs_diff.is_none() => {
+                max_max_abs_diff = Some(parse_nonnegative_f64(value, "--max-max-abs-diff")?);
+            }
+            "--max-coverage-delta" if max_coverage_delta.is_none() => {
+                max_coverage_delta = Some(parse_nonnegative_f64(value, "--max-coverage-delta")?);
+            }
+            "--max-center-delta" if max_center_delta.is_none() => {
+                max_center_delta = Some(parse_nonnegative_f64(value, "--max-center-delta")?);
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--root"
+            | "--baseline"
+            | "--case-id"
+            | "--timeout-ms"
+            | "--max-mean-abs-diff"
+            | "--max-max-abs-diff"
+            | "--max-coverage-delta"
+            | "--max-center-delta"
+            | "--out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-visual-regression options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerVisualRegressionOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    if let Some(value) = baseline {
+        options.baseline = value;
+    }
+    if let Some(value) = case_ids {
+        let parsed = value
+            .split(',')
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(ToOwned::to_owned)
+            .collect::<Vec<_>>();
+        if parsed.is_empty() {
+            return Err(usage_error("--case-id must contain at least one case ID"));
+        }
+        options.case_ids = parsed;
+    }
+    options.timeout_ms = timeout_ms.unwrap_or(options.timeout_ms);
+    options.max_mean_abs_diff = max_mean_abs_diff.unwrap_or(options.max_mean_abs_diff);
+    options.max_max_abs_diff = max_max_abs_diff.unwrap_or(options.max_max_abs_diff);
+    options.max_coverage_delta = max_coverage_delta.unwrap_or(options.max_coverage_delta);
+    options.max_center_delta = max_center_delta.unwrap_or(options.max_center_delta);
+    options.output = output;
+    options.dry_run = dry_run;
+    options.keep_temporary_output = keep_temporary_output;
+    Ok(options)
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -261,6 +377,14 @@ fn parse_positive_f64(value: &OsString, name: &str) -> Result<f64, CliError> {
         .ok()
         .filter(|value| value.is_finite() && *value > 0.0)
         .ok_or_else(|| usage_error(&format!("{name} must be a positive finite number")))
+}
+
+fn parse_nonnegative_f64(value: &OsString, name: &str) -> Result<f64, CliError> {
+    parse_utf8(value, name)?
+        .parse::<f64>()
+        .ok()
+        .filter(|value| value.is_finite() && *value >= 0.0)
+        .ok_or_else(|| usage_error(&format!("{name} must be a finite nonnegative number")))
 }
 
 fn parse_viewer_report_pdf_smoke_arguments(
@@ -566,7 +690,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -576,8 +700,8 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_smoke_arguments, run,
-        BrowserSmokeOptions, ServeOptions,
+        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_smoke_arguments,
+        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -734,6 +858,58 @@ mod tests {
             OsString::from("--root"),
             OsString::from("a"),
             OsString::from("--min-fps"),
+            OsString::from("NaN"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_visual_regression_parser_accepts_complete_and_rejects_invalid_options() {
+        let visual = parse_viewer_visual_regression_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--baseline"),
+            OsString::from("baseline.json"),
+            OsString::from("--case-id"),
+            OsString::from("first, second"),
+            OsString::from("--timeout-ms"),
+            OsString::from("45000"),
+            OsString::from("--max-mean-abs-diff"),
+            OsString::from("24"),
+            OsString::from("--max-max-abs-diff"),
+            OsString::from("120"),
+            OsString::from("--max-coverage-delta"),
+            OsString::from("0.1"),
+            OsString::from("--max-center-delta"),
+            OsString::from("0.08"),
+            OsString::from("--out"),
+            OsString::from("report.json"),
+            OsString::from("--dry-run"),
+            OsString::from("--keep"),
+        ])
+        .expect("valid Viewer visual-regression arguments");
+        assert_eq!(visual.root, PathBuf::from("a"));
+        assert_eq!(visual.baseline, PathBuf::from("baseline.json"));
+        assert_eq!(visual.case_ids, vec!["first", "second"]);
+        assert_eq!(visual.timeout_ms, 45_000);
+        assert_eq!(visual.max_mean_abs_diff.to_bits(), 24.0_f64.to_bits());
+        assert_eq!(visual.max_max_abs_diff.to_bits(), 120.0_f64.to_bits());
+        assert_eq!(visual.max_coverage_delta.to_bits(), 0.1_f64.to_bits());
+        assert_eq!(visual.max_center_delta.to_bits(), 0.08_f64.to_bits());
+        assert_eq!(visual.output, Some(PathBuf::from("report.json")));
+        assert!(visual.dry_run);
+        assert!(visual.keep_temporary_output);
+        assert!(parse_viewer_visual_regression_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--case-id"),
+            OsString::from(","),
+        ])
+        .is_err());
+        assert!(parse_viewer_visual_regression_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--max-center-delta"),
             OsString::from("NaN"),
         ])
         .is_err());

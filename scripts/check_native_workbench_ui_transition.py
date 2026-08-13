@@ -29,6 +29,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/viewer_performance_probe.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_server.rs"),
+    Path("native/crates/structural-frontend-contract/src/viewer_visual_regression.rs"),
     Path("native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"),
     Path("native/crates/structural-evidence/src/lib.rs"),
@@ -42,6 +43,8 @@ REQUIRED_PATHS = (
     Path("prototype/structural-workbench/demo-case.json"),
     Path("prototype/structural-workbench/index.html"),
     Path("scripts/export-structure-viewer-report-pdf.mjs"),
+    Path("scripts/measure-structure-viewer-visual-regression.mjs"),
+    Path("implementation/phase1/structure_viewer_visual_regression_baseline.json"),
     Path("scripts/json-module-loader.mjs"),
     Path("tests/frontend/workbench-prototype-smoke.spec.ts"),
     Path("tests/frontend/workbench-v2-e2e.spec.ts"),
@@ -207,6 +210,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract workbench-v2-browser-smoke",
         "structural-frontend-contract browser-smoke",
         "structural-frontend-contract viewer-performance-probe",
+        "structural-frontend-contract viewer-visual-regression",
         "structural-frontend-contract viewer-report-pdf-smoke",
         "structural-frontend-contract serve",
         "structural-frontend-contract viewer-manifest",
@@ -232,6 +236,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "viewer_performance_probe_playwright_required": True,
         "viewer_performance_probe_browser_required": True,
         "viewer_performance_probe_internal_loopback_required": True,
+        "viewer_visual_regression_node_required": True,
+        "viewer_visual_regression_playwright_required": True,
+        "viewer_visual_regression_browser_required": True,
+        "viewer_visual_regression_internal_loopback_required": True,
     }:
         blockers.append("workbench_ui_native_frontend_runtime_boundary_invalid")
     for field in (
@@ -388,6 +396,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- viewer-performance-probe --root ."
     ):
         blockers.append("workbench_ui_viewer_performance_probe_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get(
+        "verify:viewer-visual-regression"
+    ) != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-visual-regression --root ."
+    ):
+        blockers.append("workbench_ui_viewer_visual_regression_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -625,6 +640,33 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    viewer_visual_regression = _text(
+        root,
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_visual_regression.rs"
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_visual_regression.rs"
+        ),
+        viewer_visual_regression,
+        (
+            "pub fn run_viewer_visual_regression",
+            "scripts/measure-structure-viewer-visual-regression.mjs",
+            "structure_viewer_visual_regression_baseline.json",
+            "decode_json_strict",
+            "viewer_visual_regression_failed",
+            "viewer_visual_regression_contract_changed",
+            "viewer_visual_regression_source_identity_mismatch",
+            "viewer_visual_regression_measurement_failed",
+            "temporary_removed_after_verification",
+            "direct_processes_spawned",
+            "not_instrumented_probe_loopback_and_browser_page_requests",
+        ),
+        blockers,
+    )
     _require_tokens(
         Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
         viewer_manifest,
@@ -700,11 +742,12 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-performance-probe/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",
             "Viewer performance verifier is Rust-native",
+            "Viewer visual-regression verifier is Rust-native",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),

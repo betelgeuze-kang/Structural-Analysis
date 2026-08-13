@@ -13,14 +13,27 @@ def test_structure_viewer_visual_regression_is_wired_to_package_and_full_gate() 
     frontend_contract = (
         ROOT / "native/decommission/legacy-frontend-build-contract-v1.json"
     ).read_text(encoding="utf-8")
+    rust_verifier = (
+        ROOT
+        / "native/crates/structural-frontend-contract/src/viewer_visual_regression.rs"
+    ).read_text(encoding="utf-8")
     quality_gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     viewer_contracts = (ROOT / "scripts" / "verify_structure_viewer_contracts.py").read_text(encoding="utf-8")
 
     assert (
         package_json["scripts"]["verify:viewer-visual-regression"]
-        == "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-visual-regression --root ."
     )
     assert "scripts/measure-structure-viewer-visual-regression.mjs" in frontend_contract
+    assert '"viewer_visual_regression_contract"' in frontend_contract
+    assert "pub fn run_viewer_visual_regression" in rust_verifier
+    assert "decode_json_strict" in rust_verifier
+    assert "viewer_visual_regression_contract_changed" in rust_verifier
+    assert "viewer_visual_regression_source_identity_mismatch" in rust_verifier
+    assert "viewer_visual_regression_measurement_failed" in rust_verifier
+    assert "temporary_removed_after_verification" in rust_verifier
+    assert "direct_processes_spawned" in rust_verifier
     assert "verify:viewer-visual-regression" in quality_gate
     performance_index = quality_gate.index("verify:viewer-performance-probe")
     visual_index = quality_gate.index("verify:viewer-visual-regression")
@@ -89,3 +102,43 @@ def test_structure_viewer_visual_regression_has_dry_run_and_claim_boundary(tmp_p
     assert "ensureWorkspaceChrome" in script_text
     assert "data-si-shell" in script_text
     assert "aria-pressed" in script_text
+
+
+def test_native_visual_regression_dry_run_validates_baseline_without_process() -> None:
+    result = subprocess.run(
+        [
+            "npm",
+            "run",
+            "verify:viewer-visual-regression",
+            "--silent",
+            "--",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == (
+        "structural-native-viewer-visual-regression-receipt.v1"
+    )
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["baseline_sha256"] == (
+        "sha256:85d5150e46dc859042a824e9b98948a0e3476a781a3315b4903e8d9df7dd75be"
+    )
+    assert len(payload["selected_case_ids"]) == 11
+    assert len(payload["tracked_sources"]) == 4
+    assert payload["output_disposition"] == "not_created"
+    assert payload["rust_owned_listener_count"] == 0
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_code"] is None
+    assert payload["runtime_requirements"] == {
+        "node_required": True,
+        "browser_required": True,
+        "retained_node_internal_listener": True,
+    }
+    assert payload["receipt_hash"].startswith("sha256:")

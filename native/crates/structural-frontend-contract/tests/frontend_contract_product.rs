@@ -10,13 +10,14 @@ use structural_frontend_contract::{
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
+    canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
-    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
+    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions, ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -247,6 +248,71 @@ fn write_performance_probe_fixture(root: &Path, output: &Path) {
         ),
     )
     .expect("write performance probe fixture");
+}
+
+#[cfg(unix)]
+fn write_visual_regression_fixture(root: &Path) {
+    let baseline_path =
+        root.join("implementation/phase1/structure_viewer_visual_regression_baseline.json");
+    let mut artifact: Value = serde_json::from_slice(
+        &std::fs::read(&baseline_path).expect("read visual-regression baseline"),
+    )
+    .expect("visual-regression baseline JSON");
+    let rows = artifact["case_rows"]
+        .as_array()
+        .expect("visual-regression case rows")
+        .clone();
+    let compare_rows = rows
+        .iter()
+        .map(|row| {
+            let markers = &row["markers"];
+            serde_json::json!({
+                "id": row["id"],
+                "status": "pass",
+                "blockers": [],
+                "signature_delta": {
+                    "comparable": true,
+                    "mean_abs_diff": 0,
+                    "max_abs_diff": 0,
+                },
+                "coverage_width_delta": 0,
+                "coverage_height_delta": 0,
+                "center_x_delta": 0,
+                "center_y_delta": 0,
+                "expected_render_mode": row["expected_render_mode"],
+                "actual_render_mode": markers["renderMode"],
+                "expected_view_preset": row["expected_view_preset"],
+                "actual_view_preset": markers["viewPreset"],
+                "expected_workflow_state": row["expected_workflow_state"],
+                "expected_selected_member": row["expected_selected_member"],
+                "actual_selected_text": markers["selectedText"],
+                "expected_comparison_filter": row["expected_comparison_filter"],
+                "actual_comparison_filter": markers["comparisonFilter"],
+                "expected_evidence_ingest_kind": row["expected_evidence_ingest_kind"],
+                "actual_evidence_ingest_kind": markers["evidenceIngestKind"],
+                "expected_renderable_payload_kind": row["expected_renderable_payload_kind"],
+                "actual_renderable_payload_kind": markers["renderablePayloadKind"],
+                "expected_section_edit_target": row["expected_section_edit_target"],
+                "actual_section_edit_status": markers["sectionEditStatus"],
+                "expected_loadcomb_draft_target": row["expected_loadcomb_draft_target"],
+                "actual_loadcomb_edit_status": markers["loadcombEditStatus"],
+            })
+        })
+        .collect::<Vec<_>>();
+    artifact["generated_at"] = Value::String("2026-08-13T12:34:56.789Z".to_owned());
+    artifact["mode"] = Value::String("verify".to_owned());
+    artifact["summary_line"] = Value::String(
+        "Structure viewer visual regression: PASS | cases=11/11 | mode=verify".to_owned(),
+    );
+    artifact["compare_rows"] = Value::Array(compare_rows);
+    std::fs::write(
+        root.join("visual-regression-fixture.json"),
+        format!(
+            "{}\n",
+            serde_json::to_string(&artifact).expect("encode visual-regression fixture")
+        ),
+    )
+    .expect("write visual-regression fixture");
 }
 
 fn verify_receipt_hash(value: &Value) {
@@ -933,6 +999,324 @@ fn viewer_performance_probe_rejects_source_mutation_and_removes_output() {
         serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
             .expect("Viewer performance mutation error JSON");
     assert_eq!(error["code"], "viewer_performance_probe_contract_changed");
+    assert!(!output_path.exists());
+}
+
+#[test]
+fn viewer_visual_regression_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = ViewerVisualRegressionOptions::new(root);
+    options.dry_run = true;
+    options.output = Some(PathBuf::from("planned-visual-regression.json"));
+    options.case_ids = vec![
+        "desktop_midas33_loadcomb_draft".to_owned(),
+        "desktop_midas33_optimized".to_owned(),
+    ];
+    let first = run_viewer_visual_regression(&options).expect("Viewer visual-regression dry-run");
+    let second =
+        run_viewer_visual_regression(&options).expect("repeat Viewer visual-regression dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.baseline_bytes, 105_131);
+    assert_eq!(
+        first.baseline_sha256,
+        "sha256:85d5150e46dc859042a824e9b98948a0e3476a781a3315b4903e8d9df7dd75be"
+    );
+    assert_eq!(first.tracked_sources.len(), 4);
+    assert_eq!(
+        first.selected_case_ids,
+        vec![
+            "desktop_midas33_optimized",
+            "desktop_midas33_loadcomb_draft"
+        ]
+    );
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!(first.report_artifact_sha256, None);
+    assert_eq!(first.verified_case_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert!(first.runtime_requirements.node_required);
+    assert!(first.runtime_requirements.browser_required);
+    assert!(first.runtime_requirements.retained_node_internal_listener);
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_visual_regression_receipt_json(&first)
+        .expect("canonical Viewer visual-regression receipt");
+    let value: Value =
+        serde_json::from_str(&encoded).expect("Viewer visual-regression receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn viewer_visual_regression_baseline_is_strict_tamper_evident_and_repo_confined() {
+    let tampered = TestRoot::create();
+    copy_contract_inventory(&tampered.0);
+    let baseline_path = tampered
+        .0
+        .join("implementation/phase1/structure_viewer_visual_regression_baseline.json");
+    let mut baseline: Value = serde_json::from_slice(
+        &std::fs::read(&baseline_path).expect("read visual-regression baseline"),
+    )
+    .expect("visual-regression baseline JSON");
+    baseline["case_rows"][0]["canvas_signature"]["sha256"] = Value::String("0".repeat(64));
+    std::fs::write(
+        &baseline_path,
+        serde_json::to_vec(&baseline).expect("encode tampered visual baseline"),
+    )
+    .expect("write tampered visual baseline");
+    let mut options = ViewerVisualRegressionOptions::new(tampered.0.clone());
+    options.dry_run = true;
+    let error = run_viewer_visual_regression(&options).expect_err("tampered baseline must fail");
+    assert_eq!(error.code, "viewer_visual_regression_baseline_invalid");
+
+    let duplicate = TestRoot::create();
+    copy_contract_inventory(&duplicate.0);
+    let baseline_path = duplicate
+        .0
+        .join("implementation/phase1/structure_viewer_visual_regression_baseline.json");
+    let bytes = std::fs::read(&baseline_path).expect("read visual baseline for duplicate key");
+    let mut forged = b"{\"schema_version\":\"duplicate\",".to_vec();
+    forged.extend_from_slice(bytes.strip_prefix(b"{").expect("visual baseline object"));
+    std::fs::write(&baseline_path, forged).expect("write duplicate-key visual baseline");
+    let mut options = ViewerVisualRegressionOptions::new(duplicate.0.clone());
+    options.dry_run = true;
+    let error = run_viewer_visual_regression(&options).expect_err("duplicate key must fail");
+    assert_eq!(error.code, "viewer_visual_regression_artifact_invalid");
+
+    let mut unsafe_path = ViewerVisualRegressionOptions::new(repository_root());
+    unsafe_path.dry_run = true;
+    unsafe_path.baseline = PathBuf::from("../visual-baseline.json");
+    let error = run_viewer_visual_regression(&unsafe_path).expect_err("path escape must fail");
+    assert_eq!(error.code, "viewer_visual_regression_baseline_invalid");
+}
+
+#[test]
+fn clean_environment_viewer_visual_regression_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&root)
+        .args([
+            "--case-id",
+            "desktop_midas33_contour,desktop_midas33_optimized",
+            "--timeout-ms",
+            "45000",
+            "--max-mean-abs-diff",
+            "24",
+            "--max-max-abs-diff",
+            "120",
+            "--max-coverage-delta",
+            "0.1",
+            "--max-center-delta",
+            "0.08",
+            "--dry-run",
+        ])
+        .env_clear()
+        .output()
+        .expect("run Viewer visual-regression dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer visual-regression CLI receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer visual-regression receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["action"], "viewer_visual_regression");
+    assert_eq!(
+        receipt["selected_case_ids"],
+        serde_json::json!(["desktop_midas33_optimized", "desktop_midas33_contour"])
+    );
+    assert_eq!(receipt["timeout_ms"], 45_000);
+    assert_eq!(receipt["tolerances"]["max_mean_abs_diff"], 24);
+    assert_eq!(receipt["direct_processes_spawned"], 0);
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_visual_regression_owns_child_and_strict_retained_report() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_visual_regression_fixture(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf '%s\n' \"$*\" >> \"$PWD/node-invocations.log\"\nprintf 'probe chatter\n'\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/visual-regression-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("verified-visual-regression.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer visual regression");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer visual-regression live receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer visual-regression receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["execution_mode"], "execute");
+    assert_eq!(receipt["status"], "passed");
+    assert_eq!(receipt["output_disposition"], "operator_path_retained");
+    assert_eq!(receipt["verified_case_count"], 11);
+    assert_eq!(receipt["verified_compare_count"], 11);
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["successful_exit_code"], 0);
+    assert!(receipt["report_artifact_sha256"].is_string());
+    assert!(receipt["case_rows_sha256"].is_string());
+    assert!(receipt["compare_rows_sha256"].is_string());
+    assert!(output_path.is_file());
+    assert!(std::fs::read_to_string(test.0.join("node-invocations.log"))
+        .expect("read Viewer visual-regression invocation")
+        .contains(
+            "scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
+        ));
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_visual_regression_removes_partial_explicit_output_on_failure() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf 'partial' > \"$out\"\nexit 31\n",
+    );
+    let output_path = test.0.join("failed-visual-regression.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute failing Viewer visual regression");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer visual-regression error JSON");
+    assert_eq!(error["code"], "viewer_visual_regression_failed");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_visual_regression_rejects_forged_delta_and_duplicate_json() {
+    let forged = TestRoot::create();
+    copy_contract_inventory(&forged.0);
+    write_visual_regression_fixture(&forged.0);
+    let fixture_path = forged.0.join("visual-regression-fixture.json");
+    let mut fixture: Value = serde_json::from_slice(
+        &std::fs::read(&fixture_path).expect("read visual-regression fixture"),
+    )
+    .expect("visual-regression fixture JSON");
+    fixture["compare_rows"][0]["signature_delta"]["mean_abs_diff"] = serde_json::json!(1);
+    std::fs::write(
+        &fixture_path,
+        format!(
+            "{}\n",
+            serde_json::to_string(&fixture).expect("encode forged fixture")
+        ),
+    )
+    .expect("write forged fixture");
+    let bin = write_fake_executable(
+        &forged.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/visual-regression-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = forged.0.join("forged-visual-regression.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&forged.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute forged Viewer visual regression");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer visual-regression forged error JSON");
+    assert_eq!(error["code"], "viewer_visual_regression_artifact_invalid");
+    assert!(!output_path.exists());
+
+    let duplicate = TestRoot::create();
+    copy_contract_inventory(&duplicate.0);
+    let bin = write_fake_executable(
+        &duplicate.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf '%s\n' '{\"schema_version\":\"first\",\"schema_version\":\"forged\"}' > \"$out\"\nexit 0\n",
+    );
+    let output_path = duplicate.0.join("duplicate-visual-regression.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&duplicate.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute duplicate-key Viewer visual regression");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer visual-regression duplicate-key error JSON");
+    assert_eq!(error["code"], "viewer_visual_regression_artifact_invalid");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_visual_regression_rejects_source_mutation_and_removes_output() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_visual_regression_fixture(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf ' ' >> scripts/structure-viewer-canvas-frame.mjs\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/visual-regression-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("mutated-visual-regression.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-visual-regression", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer visual regression");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer visual-regression mutation error JSON");
+    assert_eq!(error["code"], "viewer_visual_regression_contract_changed");
     assert!(!output_path.exists());
 }
 
