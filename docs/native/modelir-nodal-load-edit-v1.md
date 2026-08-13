@@ -43,6 +43,11 @@ edited model and receipt preserve `analysis_ready: false` and the exact blocker 
 never promotes solver authority. Repeated edits with the same source and arguments produce
 byte-identical artifacts.
 
+CPU static and shared installed-package E2E v17 runs execute the edit twice with an empty `PATH`,
+revalidate and render the edited model, prove the source hash is unchanged, and bind the identical
+edited-model and receipt hashes in the append-only distribution receipt. Frozen v1 through v16
+receipts retain their narrower authority.
+
 ## Claim boundary
 
 This closes only six-component replacement for one existing nodal load. It does not create or

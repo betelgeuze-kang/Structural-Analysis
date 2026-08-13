@@ -344,6 +344,19 @@ def valid_v16_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v17_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v16_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v17",
+            "workbench_nodal_load_edit_surface_passed": True,
+            "workbench_nodal_load_edit_model_sha256": "sha256:" + "f" * 64,
+            "workbench_nodal_load_edit_receipt_sha256": "sha256:" + "0" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -799,6 +812,32 @@ def test_distribution_receipt_rejects_unbound_v16_mgt_model_ir_linear_workbench(
     )
 
 
+def test_distribution_receipt_accepts_nodal_load_edit_v17_contract(tmp_path: Path):
+    receipt, manifest = valid_v17_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v17_nodal_load_edit(tmp_path: Path):
+    receipt, manifest = valid_v17_contract()
+    receipt["workbench_nodal_load_edit_surface_passed"] = False
+    receipt["workbench_nodal_load_edit_receipt_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_nodal_load_edit_surface_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_nodal_load_edit_receipt_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -880,7 +919,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v16" in e2e
+    assert "structural-native-distribution-e2e.v17" in e2e
     assert "workflow-model-linear" in e2e
     assert "model_ir_linear_workbench_restart_passed" in e2e
     assert "model_ir_linear_workbench_direct_parity_passed" in e2e
@@ -913,6 +952,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-edit-node" in e2e
     assert "workbench_model_edit_surface_passed" in e2e
     assert "workbench_model_edit_receipt_sha256" in e2e
+    assert "exercise_nodal_load_edit_surface" in e2e
+    assert "model-edit-nodal-load" in e2e
+    assert "workbench_nodal_load_edit_surface_passed" in e2e
+    assert "workbench_nodal_load_edit_receipt_sha256" in e2e
     assert "exercise_result_view_surface" in e2e
     assert "result-view" in e2e
     assert "workbench_result_view_surface_passed" in e2e

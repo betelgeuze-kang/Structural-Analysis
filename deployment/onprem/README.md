@@ -13,8 +13,8 @@ absent from the runtime image.
 - The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report flow plus
   deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
-  and the provenance-bound `model-edit-node` coordinate command for current semantically valid
-  ModelIR v2 inputs.
+  and provenance-bound `model-edit-node` coordinate plus `model-edit-nodal-load` existing-load
+  component commands for current semantically valid ModelIR v2 inputs.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
   OFL-1.1 redistribution notice; PDF generation itself needs no runtime font lookup.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
@@ -66,6 +66,9 @@ structural-workbench export --workspace /workspace/session
 structural-workbench model-view /workspace/model.json --projection isometric
 structural-workbench model-edit-node /workspace/model.json --node N2 \
   --coordinates 2 1 1 --output-dir /workspace/edited-model
+structural-workbench model-edit-nodal-load /workspace/model.json \
+  --load-pattern LC_WEAK --load L_WEAK_N2 \
+  --components 0 -20000 0 0 0 0 --output-dir /workspace/edited-load-model
 ```
 
 With Compose, override the default `--version` command while retaining the entrypoint:
@@ -80,9 +83,10 @@ docker compose -f deployment/onprem/compose.example.yml run --rm workbench \
 ## Claim Boundary
 
 The checked-in definition proves a Python/Node-free active deployment entrypoint and a fail-closed
-offline runtime shape. The topology surface is read-only inspection; the separate editor changes
-only one existing node's coordinates in a create-new, provenance-bound, C++-revalidated artifact
-set. Neither surface proves visual dragging, broader model editing, solver execution,
+offline runtime shape. The topology surface is read-only inspection; the separate editors change
+only one existing node's coordinates or one existing nodal load's six SI components in a
+create-new, provenance-bound, C++-revalidated artifact set. Neither surface proves visual dragging,
+broader model editing, solver execution,
 deformed/result visualization, or engineering approval. The local rootfs diagnostic is not an OCI
 image receipt. A
 customer-approved image build, vulnerability scan, signature, SBOM

@@ -94,36 +94,39 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 11. runs the installed provenance-bound node-coordinate edit twice, proves byte-identical model and
     receipt output, unchanged source bytes, strict C++ revalidation, analysis readiness and
     deterministic topology rendering with an empty `PATH`;
-12. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+12. runs the installed existing-nodal-load component edit twice, proves byte-identical model and
+    receipt output, unchanged source bytes, exact pattern/load/value bindings, strict C++
+    revalidation, analysis readiness and deterministic topology rendering with an empty `PATH`;
+13. renders all four closed NDTHA response channels twice from the installed Workbench, proves
     exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
     window, and proves the durable session remains unchanged;
-13. renders all four fixed-guided original/deformed projections twice plus an explicit selected
+14. renders all four fixed-guided original/deformed projections twice plus an explicit selected
     step and magnification, proves ANSI-free byte determinism, distinct identities, exact C++
     snapshot/terminal-adapter binding, and durable-session nonmutation;
-14. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
+15. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-15. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
+16. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
     embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
     receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
-16. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
+17. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
     restores the validated session after creating a one-iteration PCG checkpoint to simulate
     process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
     exercises the same non-promoting inspect/review/reopen/export surface;
-17. installs an immutable update, rolls back and re-verifies activation;
-18. emits an append-only v16 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+18. installs an immutable update, rolls back and re-verifies activation;
+19. emits an append-only v17 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
-   view identity, and edited ModelIR
-   plus edit-receipt identities, all four default response views and the explicit-window identity,
+   view identity, node-edited and nodal-load-edited ModelIR plus both edit-receipt identities, all
+   four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v15 receipts without treating them as
-   v16 normalized-MGT-linear package authority.
+   The receipt checker continues to accept frozen v1 through v16 receipts without treating them as
+   v17 installed nodal-load-edit package authority.
 
 The reference command is:
 

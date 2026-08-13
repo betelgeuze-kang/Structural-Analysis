@@ -14,8 +14,9 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate command. Distribution E2E v16 proves repeated edited
-model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history,
+provenance-bound `model-edit-node` coordinate and `model-edit-nodal-load` existing-load component
+commands. Distribution E2E v17 proves repeated edited model/receipt bytes, exact load identity/value
+bindings and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
 same installed-package gate now also executes the ModelIR linear staged/restart/direct Workbench
