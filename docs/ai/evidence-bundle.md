@@ -48,9 +48,8 @@ evidence-bundle: FAIL — source commit mismatch — bundle must be a single
 snapshot. Found 3 commits: c2b1b70d, b883c03e, 380df40d. ...
 ```
 
-This is the current state of the repository: evidence was generated at different
-commits, so a bundle cannot honestly be produced yet. The correct fix is to
-**regenerate all evidence at one commit**, not to relax the gate.
+If the repository sources are mixed, the bundle remains unavailable. The correct
+fix is to **regenerate all evidence at one commit**, not to relax the gate.
 
 Other hard gates:
 
@@ -67,10 +66,11 @@ Other hard gates:
 3. Dry-run the consistency check (writes nothing):
 
    ```bash
-   npm run build:evidence-bundle -- --check
+   cargo run --locked --manifest-path native/Cargo.toml \
+     -p structural-evidence -- check --root .
    ```
 
-   Expect: `evidence-bundle: OK (check) — N sources at commit <sha>`.
+   Expect a self-hashed JSON receipt with `action: "check"`.
 4. Build the bundle:
 
    ```bash
@@ -81,9 +81,9 @@ Other hard gates:
 
 ## Contract test (offline, no network)
 
-`scripts/verify-evidence-bundle-contract.mjs` proves the gates hold without
-touching the repository. It runs the builder with `--check --root <fixture>`
-against synthetic trees:
+`native/crates/structural-evidence/tests/evidence_bundle_product.rs` proves the
+gates without touching protected repository evidence. Cargo tests create isolated
+synthetic trees:
 
 | fixture                | expectation |
 | ---------------------- | ----------- |
@@ -91,14 +91,17 @@ against synthetic trees:
 | mixed-commit           | BLOCKED     |
 | sensitive-data         | BLOCKED     |
 | missing source commit  | BLOCKED     |
-| real repository sources| reported as-is (currently BLOCKED) |
+| duplicate JSON key     | BLOCKED     |
+| symlinked source       | BLOCKED     |
 
 ```bash
 npm run verify:evidence-bundle-contract
 ```
 
-The `--root <dir>` builder option exists for this test only; production builds
-always default to the repository root.
+Production and tests both require an explicit `--root`; the compatibility wrapper
+passes the repository root and a deterministic source-commit timestamp. The wrapper
+accepts exactly zero arguments for a fresh build or `--check` for the read-only gate;
+unknown arguments fail instead of being silently ignored.
 
 ## BASE_URL / GitHub Pages
 

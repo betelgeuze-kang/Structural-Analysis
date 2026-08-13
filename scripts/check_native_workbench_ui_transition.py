@@ -17,7 +17,10 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
+    Path("native/crates/structural-evidence/src/lib.rs"),
+    Path("native/crates/structural-evidence/tests/evidence_bundle_product.rs"),
     Path("native/catalog/benchmark-catalog-v2.json"),
+    Path("native/evidence/workbench-evidence-sources-v1.json"),
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
@@ -143,6 +146,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "evidence-show",
     ]:
         blockers.append("workbench_ui_native_catalog_flow_invalid")
+    if native.get("evidence_bundle_flow") != [
+        "structural-evidence check",
+        "structural-evidence build",
+    ]:
+        blockers.append("workbench_ui_native_evidence_bundle_flow_invalid")
     for field in (
         "runtime_python_required",
         "runtime_node_required",
@@ -208,10 +216,19 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "@vitejs/plugin-react",
     }.issubset(dev_dependencies):
         blockers.append("workbench_ui_typescript_dependency_inventory_invalid")
-    if not isinstance(scripts, dict) or not {"build", "verify:workbench-v2-e2e"}.issubset(
-        scripts
-    ):
+    if not isinstance(scripts, dict) or not {
+        "build",
+        "build:evidence-bundle",
+        "verify:evidence-bundle-contract",
+        "verify:workbench-v2-e2e",
+    }.issubset(scripts):
         blockers.append("workbench_ui_node_script_inventory_invalid")
+    elif not isinstance(scripts["build:evidence-bundle"], str) or (
+        "structural-evidence" not in scripts["build:evidence-bundle"]
+        and "build_native_workbench_evidence_bundle.sh"
+        not in scripts["build:evidence-bundle"]
+    ):
+        blockers.append("workbench_ui_evidence_builder_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -249,6 +266,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    evidence_builder = _text(
+        root, Path("native/crates/structural-evidence/src/lib.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-evidence/src/lib.rs"),
+        evidence_builder,
+        (
+            "structural-native-evidence-bundle-build-receipt.v1",
+            "pub fn check_evidence_sources",
+            "pub fn build_evidence_bundle",
+            "evidence_sensitive_data_detected",
+            "evidence_source_commit_mismatch",
+            "evidence_output_exists",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -260,6 +293,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",
+            "Rust-native evidence-bundle builder",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),

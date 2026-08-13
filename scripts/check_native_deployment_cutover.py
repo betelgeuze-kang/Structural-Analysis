@@ -282,6 +282,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     )
     for token in (
         "structural-workbench",
+        "structural-evidence",
         "structural-installer",
         "cpu-only",
         "static",

@@ -1,5 +1,5 @@
 // The workbench reads evidence from a published, read-only bundle (built by
-// scripts/build-workbench-evidence-bundle.mjs) rather than fetching repository
+// structural-evidence native builder) rather than fetching repository
 // internals directly. URLs resolve against import.meta.env.BASE_URL so the app
 // works under a GitHub Pages subpath.
 

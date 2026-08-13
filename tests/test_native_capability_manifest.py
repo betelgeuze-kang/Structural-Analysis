@@ -226,6 +226,20 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in workbench["claim"]
 
 
+def test_native_evidence_bundle_capability_is_bounded_c5() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_evidence_bundle") is True
+    evidence = payload["capabilities"]["native_evidence_bundle"]
+    assert evidence["cutover_gate"] == "C5"
+    assert evidence["owner"] == "structural-evidence"
+    assert "former Node source list" in evidence["claim"]
+    assert "duplicate keys, mixed commits" in evidence["claim"]
+    assert "atomically publishes" in evidence["claim"]
+    assert "without inferring readiness or approval" in evidence["claim"]
+    assert "Python/Node lookup 0" in evidence["claim"]
+    assert "C6 remain open" in evidence["claim"]
+
+
 def test_native_distribution_capability_is_bounded_c5():
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_distribution") is True
@@ -235,7 +249,8 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "static/shared" in distribution["claim"]
     assert "install/update/rollback" in distribution["claim"]
     assert "Python/Node lookup 0" in distribution["claim"]
-    assert "append-only v4 receipt" in distribution["claim"]
+    assert "append-only v5 receipt" in distribution["claim"]
+    assert "structural-evidence" in distribution["claim"]
     assert "explicit non-promoting review" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]

@@ -82,6 +82,12 @@ non-symlink bundle directory; every artifact is bounded and must match the manif
 explicit `--as-of-unix` makes the 21-day freshness calculation reproducible. Without it,
 timestamp-only freshness is `unknown`, while an explicit stale signal remains stale.
 
+The separately packaged `structural-evidence` Rust binary now owns evidence-bundle `check` and
+`build`. Its embedded language-neutral source map replaces the former Node source list. It requires
+one lowercase source commit across all strict JSON inputs, rejects sensitive-data signals and
+symlinks, preserves exact source bytes, refuses to replace an existing output, and emits a
+self-hashed deterministic build receipt. The npm command is a compatibility wrapper only.
+
 The integration test clears the child environment, executes each stage in a new process, restores
 the pre-Run session after the atomic checkpoint publication to model a crash window, resumes, and
 then compares all 29 ModelIR-flow files against a second one-shot workflow byte for byte. The MGT
@@ -102,8 +108,8 @@ deterministic results summary, explicit human review and handoff export for that
 not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
 MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
 modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
-accessibility/localization, Node-owned evidence-bundle generation, protected HIP C2 receipts, and
-final Python/Node C6 removal remain open.
+accessibility/localization, broader language-neutral fixture/oracle ownership, protected HIP C2
+receipts, and final Python/Node C6 removal remain open.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 

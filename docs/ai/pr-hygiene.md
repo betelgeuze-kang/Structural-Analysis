@@ -87,7 +87,7 @@ into small, reviewable, surface-scoped PRs:
 
 1. `evidence/bundle-builder` — publishable bundle builder + manifest only
    (no readiness-number changes). **Landed** as part of #30
-   (`scripts/build-workbench-evidence-bundle.mjs` + contract test).
+   (now migrated to `structural-evidence` + Cargo contract tests).
 2. `evidence/source-copy-separation` — keep protected source evidence separate
    from the public copy; no edits to protected originals. Documented in
    `docs/ai/evidence-bundle.md` (#30).

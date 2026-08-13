@@ -2362,6 +2362,7 @@ fn validate_payload_contract(
         .collect::<BTreeSet<_>>();
     for required in [
         "bin/structural-cli",
+        "bin/structural-evidence",
         "bin/structural-installer",
         "bin/structural-workbench",
         "include/structural/abi_v1.h",
@@ -2386,6 +2387,7 @@ fn validate_payload_contract(
     }
     for binary in [
         "bin/structural-cli",
+        "bin/structural-evidence",
         "bin/structural-installer",
         "bin/structural-workbench",
     ] {
@@ -2953,6 +2955,7 @@ mod tests {
         }
         for binary in [
             "bin/structural-cli",
+            "bin/structural-evidence",
             "bin/structural-installer",
             "bin/structural-workbench",
         ] {

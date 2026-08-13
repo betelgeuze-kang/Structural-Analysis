@@ -21,20 +21,26 @@ subprocess, or an external renderer. The same Rust binary now also provides:
 - `evidence` / `evidence-show`: bounded read-only browsing of an operator-supplied copied evidence
   bundle. The native reader rejects unsafe paths, symlinks, duplicate IDs/paths, checksum drift and
   malformed JSON, exposes commit mismatch, and never promotes blocked or signal-free sources.
+- `structural-evidence check/build`: a Rust-native evidence-bundle builder driven by the fixed
+  language-neutral source map under `native/evidence`. It rejects mixed commits, duplicate JSON
+  keys, symlinks, oversized input and sensitive-data signals, copies exact source bytes, requires an
+  explicit timestamp, and atomically publishes only to a new output directory.
 
 This closes bounded results inspection, review/export, and catalog and copied-evidence browsing for
 the current native product. The canonical benchmark JSON now lives under `native/catalog`; the
-legacy React browser consumes that native-owned file. It does not provide a general visual model
-editor or 3D result explorer. The evidence-bundle generator remains Node-owned, so language-neutral
-golden ownership is not yet complete.
+legacy React browser consumes that native-owned file. The evidence-bundle generator and its
+contract tests are Rust-native; the legacy npm command is only a wrapper. It does not provide a
+general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
+before language-neutral golden ownership is complete.
 
 ## Legacy authority still active
 
 `native/decommission/workbench-ui-transition-v1.json` freezes the current source and CI inventory.
-The product deployment authority has already left React Pages, but seven active workflows still use
-Node for frontend, viewer, AI-contract, or broader quality verification. React/Vite source,
-TypeScript tests, static JavaScript viewer modules, Node scripts, and their package manifest remain
-active verification or parity material. They are not a deletion target yet.
+The product deployment authority and evidence-bundle generation authority have left React/Node,
+but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
+verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node
+scripts, and their package manifest remain active verification or parity material. They are not a
+deletion target yet.
 
 The checker fails if source counts or active Node workflow inventory drift without an explicit
 ledger update. It also fails if the manifest claims C6 without deriving it from every prerequisite.

@@ -19,7 +19,7 @@ library, prove CPU/HIP FP64 parity, resident operator buffers, deterministic rep
 and bind the installed-backend receipt to the source/device-library-bound full-residual C2 receipt.
 The ROCm runtime itself is a declared host prerequisite rather than copied into the bundle. The
 product ABI records `$ORIGIN` plus the configured `STRUCTURAL_ROCM_ROOT/lib` directory in its
-install RUNPATH, so the three installed Rust binaries remain executable under the lane's empty
+install RUNPATH, so the four installed Rust binaries remain executable under the lane's empty
 environment. Bundle construction fails if that root has no `libamdhip64.so`; the approved E2E also
 fails on any unresolved runtime dependency. This runtime binding is build/package evidence only,
 not device execution or C2 authority.
@@ -63,20 +63,21 @@ increasing the generation. Tests inject process interruption at all three durabl
 The hosted distribution gate builds both CPU profiles and then, from their installed paths:
 
 1. verifies the bundle and installs it;
-2. executes the three Rust binaries with an empty `PATH`;
+2. executes the four Rust binaries with an empty `PATH`;
 3. validates ModelIR and consumes the installed CMake package;
 4. selects and executes the installed ABI backend;
 5. runs stage-by-stage and one-shot Workbench flows from both strict ModelIR and the bounded MGT
    source, then byte-compares every artifact and preserves MGT import-health evidence;
 6. exercises deterministic inspect, immutable explicit `review`, review reopen and handoff export
    from both installed sessions without inferring an engineering approval;
-7. browses the embedded native benchmark catalog and a hash-bound copied evidence fixture without
-   Python, Node, network access, protected-source reads, or command execution from catalog data;
+7. checks and atomically builds a synthetic evidence bundle with the installed `structural-evidence`
+   binary, then browses it and the embedded benchmark catalog without Python, Node, network access,
+   protected-source reads, or command execution from catalog data;
 8. installs an immutable update, rolls back and re-verifies activation;
-9. emits an append-only v4 hash-bound receipt with ModelIR/MGT result, report, MGT source,
-   import-health, review, export, catalog and evidence-view identities, Python/Node lookup count 0
-   and fallback count 0. The receipt checker continues to accept frozen v1/v2/v3 receipts without
-   treating them as v4 catalog/evidence surface evidence.
+9. emits an append-only v5 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+   import-health, review, export, evidence-builder check/build/manifest, catalog and evidence-view
+   identities, Python/Node lookup count 0 and fallback count 0. The receipt checker continues to
+   accept frozen v1/v2/v3/v4 receipts without treating them as v5 builder authority.
 
 The reference command is:
 

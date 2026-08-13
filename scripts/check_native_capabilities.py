@@ -41,6 +41,7 @@ EXPECTED_OWNERS = {
     "external_comparison": "structural-cli",
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
+    "native_evidence_bundle": "structural-evidence",
     "native_distribution": "structural-distribution",
     "native_deployment": "structural-workbench",
     "native_automation_cutover": "structural-distribution",

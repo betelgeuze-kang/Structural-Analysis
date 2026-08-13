@@ -775,6 +775,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "structural-evidence"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "regex",
+ "serde",
+ "serde_json",
+ "structural-contracts",
+ "time",
+]
+
+[[package]]
 name = "structural-ffi"
 version = "0.1.0"
 dependencies = [

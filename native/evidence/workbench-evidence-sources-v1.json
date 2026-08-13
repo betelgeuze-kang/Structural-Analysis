@@ -1,0 +1,35 @@
+{
+  "schema_version": "structural-workbench-evidence-source-map.v1",
+  "artifacts": [
+    {
+      "id": "product_readiness",
+      "label": "Product readiness",
+      "source_path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+      "bundle_path": "readiness/product-readiness.json"
+    },
+    {
+      "id": "p1_benchmark_breadth",
+      "label": "P1 benchmark breadth",
+      "source_path": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
+      "bundle_path": "readiness/benchmark-breadth.json"
+    },
+    {
+      "id": "fresh_full_validation",
+      "label": "Fresh full validation lane",
+      "source_path": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+      "bundle_path": "readiness/fresh-validation.json"
+    },
+    {
+      "id": "evidence_console_scope",
+      "label": "Evidence Console scope",
+      "source_path": "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
+      "bundle_path": "readiness/evidence-console-scope.json"
+    },
+    {
+      "id": "real_project_corpus",
+      "label": "Real project corpus (measured)",
+      "source_path": "implementation/phase1/real_project_corpus_measured_status.json",
+      "bundle_path": "readiness/real-project-corpus.json"
+    }
+  ]
+}
