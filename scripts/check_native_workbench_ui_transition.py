@@ -23,6 +23,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_dev.rs"),
+    Path("native/crates/structural-frontend-contract/src/frontend_install.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_preview.rs"),
     Path("native/crates/structural-frontend-contract/src/playwright.rs"),
     Path("native/crates/structural-frontend-contract/src/playwright_install.rs"),
@@ -73,6 +74,14 @@ REQUIRED_PATHS = (
     Path("src/main.tsx"),
 )
 NODE_WORKFLOW_TOKENS = ("actions/setup-node@", "npm ci", "npm run")
+FRONTEND_INSTALL_WORKFLOW_COMMAND = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- frontend-install --root ."
+)
+PLAYWRIGHT_INSTALL_WORKFLOW_COMMAND = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- playwright-install --root ."
+)
 EXPECTED_FEATURES = {
     "import_validate_run_resume_compare_report": ("c5_implemented", False),
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
@@ -217,6 +226,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract delivery",
         "structural-frontend-contract frontend-build",
         "structural-frontend-contract frontend-dev",
+        "structural-frontend-contract frontend-install",
         "structural-frontend-contract frontend-preview",
         "structural-frontend-contract playwright-install",
         "structural-frontend-contract prototype",
@@ -245,6 +255,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_dev_vite_required": True,
         "frontend_dev_browser_required": False,
         "frontend_dev_retained_vite_listener": True,
+        "frontend_install_node_required": True,
+        "frontend_install_npm_required": True,
+        "frontend_install_browser_required": False,
+        "frontend_install_network_uninstrumented": True,
+        "frontend_install_node_modules_mutation_expected": True,
         "frontend_preview_node_required": False,
         "frontend_preview_browser_required": False,
         "frontend_preview_loopback_required": True,
@@ -397,6 +412,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- frontend-dev --root ."
     ):
         blockers.append("workbench_ui_frontend_dev_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("install:dependencies") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- frontend-install --root ."
+    ):
+        blockers.append("workbench_ui_frontend_install_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get("preview") != (
         "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- frontend-preview --root ."
@@ -517,9 +537,19 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         workflow_path = Path(".github/workflows") / workflow_name
         workflow = _text(root, workflow_path, blockers)
         if (
-            workflow.count("npm run install:browser-runtime") != 1
+            workflow.count(FRONTEND_INSTALL_WORKFLOW_COMMAND) != 1
+            or "Rust-orchestrated frontend dependency install" not in workflow
+            or "run: npm ci" in workflow
+            or "npm run install:dependencies" in workflow
+        ):
+            blockers.append(
+                f"workbench_ui_frontend_install_ci_authority_invalid:{workflow_name}"
+            )
+        if (
+            workflow.count(PLAYWRIGHT_INSTALL_WORKFLOW_COMMAND) != 1
             or "Rust-orchestrated Playwright browser install" not in workflow
             or "npx playwright install" in workflow
+            or "npm run install:browser-runtime" in workflow
         ):
             blockers.append(
                 f"workbench_ui_playwright_install_ci_authority_invalid:{workflow_name}"
@@ -689,6 +719,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "--strictPort",
             "source_mutation_policy",
             "direct_processes_spawned",
+        ),
+        blockers,
+    )
+    frontend_install = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/frontend_install.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/frontend_install.rs"),
+        frontend_install,
+        (
+            "pub fn run_frontend_install",
+            "structural-native-frontend-install-receipt.v1",
+            '"npm"',
+            '"ci"',
+            "frontend_install_contract_changed",
+            '.env_remove("NODE_OPTIONS")',
+            "direct_processes_spawned",
+            "network_access_accounting",
+            "filesystem_mutation_accounting",
+            "environment_accounting",
         ),
         blockers,
     )
@@ -1058,9 +1110,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Frontend TypeScript/Vite build orchestration is Rust-native",
+            "Frontend dependency-install orchestration is Rust-native",
             "Frontend development-server orchestration is Rust-native",
             "Frontend production-delivery preview serving is Rust-native",
             "Playwright browser-install orchestration is Rust-native",
@@ -1113,7 +1166,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite build, development, syntax, installer, exporter, probe, and capture runtimes, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, and optional pdftotext dependency visible",
+        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/cache/lifecycle/configuration and node_modules mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, and optional pdftotext dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

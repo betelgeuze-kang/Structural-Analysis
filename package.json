@@ -13,6 +13,7 @@
     "dev": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-dev --root .",
     "build": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .",
     "install:browser-runtime": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .",
+    "install:dependencies": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .",
     "preview": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-preview --root .",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",

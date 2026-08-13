@@ -77,6 +77,7 @@
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/frontend_build.rs",
     "native/crates/structural-frontend-contract/src/frontend_dev.rs",
+    "native/crates/structural-frontend-contract/src/frontend_install.rs",
     "native/crates/structural-frontend-contract/src/frontend_preview.rs",
     "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/playwright_install.rs",
@@ -105,6 +106,7 @@
     "dev": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-dev --root .",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
     "install:browser-runtime": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .",
+    "install:dependencies": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .",
     "preview": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-preview --root .",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "verify:frontend-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- browser-smoke --root .",
@@ -176,6 +178,17 @@
     "maximum_cli_bytes": 16777216,
     "external_network_access_accounting": "not_instrumented_vite_plugins_environment_hmr_and_page_requests",
     "claim_boundary": "This transitional C0 development receipt proves only that Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint for live execution, removes inherited NODE_OPTIONS, owns one direct Node child with fixed IPv4 loopback and strict-port arguments, and records its successful terminal exit. Dry-run requires no installed packages and spawns no process. Source mutation after launch is intentionally allowed for HMR and is not revalidated; Node executable identity, Vite internals and transitive packages, plugin and environment loading, HMR, listener readiness, page requests, rendered behavior, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
+  },
+  "frontend_install_contract": {
+    "schema_version": "structural-native-frontend-install-contract.v1",
+    "npm_launcher": "npm",
+    "arguments": [
+      "ci"
+    ],
+    "network_access_accounting": "not_instrumented_npm_registry_cache_and_dependency_lifecycle_access",
+    "filesystem_mutation_accounting": "node_modules_replaced_by_npm_ci_package_and_lock_must_remain_unchanged",
+    "environment_accounting": "npm_executable_transitive_package_and_npm_configuration_identity_not_instrumented",
+    "claim_boundary": "This transitional C0 dependency-install receipt proves only that Rust validates the frontend contract, removes inherited NODE_OPTIONS, owns one exact npm ci direct child, rejects package/lock/source-map or required-inventory mutation, and records its successful exit. The direct Rust dry-run requires no installed packages or network/filesystem mutation, resolves neither npm nor Node, and spawns no child; invoking the optional npm package-script convenience itself still requires an outer npm/Node launcher outside the receipt. Live npm registry/cache access, lifecycle scripts, npm configuration and environment, npm/Node executable identity, transitive processes, package extraction bytes, node_modules contents and rollback remain outside Rust authority; clean-machine publication, native UI parity, C5, and C6 remain open."
   },
   "frontend_preview_contract": {
     "schema_version": "structural-native-frontend-preview-contract.v1",

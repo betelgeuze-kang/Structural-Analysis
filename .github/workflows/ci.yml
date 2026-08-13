@@ -115,11 +115,11 @@ jobs:
           python -m pip install numpy==1.26.4 scipy==1.12.0
           python -m pip install -e .[dev]
 
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Rust-orchestrated frontend dependency install
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .
 
       - name: Rust-orchestrated Playwright browser install
-        run: npm run install:browser-runtime
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .
 
       - name: Materialize exact current-source test evidence
         shell: bash

@@ -5,6 +5,14 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
+FRONTEND_INSTALL = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- frontend-install --root ."
+)
+PLAYWRIGHT_INSTALL = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- playwright-install --root ."
+)
 
 
 def _read(name: str) -> str:
@@ -139,9 +147,25 @@ def test_hosted_browser_install_routes_through_the_native_orchestrator() -> None
         "viewer-browser-ci.yml",
     ):
         workflow = _read(name)
-        assert workflow.count("npm run install:browser-runtime") == 1
+        assert workflow.count(PLAYWRIGHT_INSTALL) == 1
         assert "Rust-orchestrated Playwright browser install" in workflow
         assert "npx playwright install" not in workflow
+        assert "npm run install:browser-runtime" not in workflow
+
+
+def test_hosted_dependency_install_routes_through_the_native_orchestrator() -> None:
+    for name in (
+        "ci.yml",
+        "frontend-web-ci.yml",
+        "nightly-full-quality.yml",
+        "runtime-input-viewer-ci.yml",
+        "viewer-browser-ci.yml",
+    ):
+        workflow = _read(name)
+        assert workflow.count(FRONTEND_INSTALL) == 1
+        assert "Rust-orchestrated frontend dependency install" in workflow
+        assert "run: npm ci" not in workflow
+        assert "npm run install:dependencies" not in workflow
 
 
 def test_legacy_evidence_has_independent_hosted_lane() -> None:

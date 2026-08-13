@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -50,6 +50,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   entrypoints, removes inherited `NODE_OPTIONS`, owns two direct Node children, rejects mutation,
   and validates the emitted delivery tree. Node, TypeScript, Vite, plugins, transitive npm bytes,
   and build-time environment/network behavior remain retained and explicitly outside that receipt.
+  Frontend dependency-install orchestration is Rust-native: hosted workflows enter one direct Rust
+  command that validates package/lock/source-map identity, removes inherited `NODE_OPTIONS`, owns
+  the exact `npm ci` child, and rejects contract mutation. npm registry/cache access, lifecycle
+  scripts, configuration/environment, transitive processes, extracted bytes, `node_modules`
+  contents and rollback remain retained and uninstrumented.
   Frontend development-server orchestration is Rust-native: the package development command hashes
   the installed Vite CLI, removes inherited `NODE_OPTIONS`, fixes loopback/strict-port arguments,
   and owns one direct Node child. Vite retains the listener, HMR and source-mutation semantics;
@@ -58,7 +63,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   the frontend and built-delivery receipts, binds only fixed IPv4 loopback, serves `dist/` through
   the confined SPA router, and spawns no Node, Vite, browser, Python, or child process. A valid built
   tree is required, and rendered browser behavior plus clean-machine publication remain open.
-  Playwright browser-install orchestration is Rust-native: hosted workflows enter one command that
+  Playwright browser-install orchestration is Rust-native: hosted workflows enter one direct Rust command that
   hashes the installed Playwright CLI, removes inherited `NODE_OPTIONS`, and owns the exact Chromium
   plus OS-dependency installation child. Playwright retains downloads, caches, elevation and host
   package mutation; downloaded bytes and rollback remain uninstrumented.

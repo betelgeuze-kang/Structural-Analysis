@@ -346,6 +346,24 @@ def test_native_frontend_dev_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in dev["claim"]
 
 
+def test_native_frontend_install_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_install") is True
+    install = payload["capabilities"]["native_frontend_install"]
+    assert install["cutover_gate"] == "C0"
+    assert install["owner"] == "structural-frontend-contract"
+    assert "all five hosted frontend/browser workflows invoke" in install["claim"]
+    assert "instead of direct npm ci or an npm package-script launcher" in install["claim"]
+    assert "package install:dependencies remains only a local launcher convenience" in install["claim"]
+    assert "removes inherited NODE_OPTIONS" in install["claim"]
+    assert "one exact npm ci direct child" in install["claim"]
+    assert "direct Rust dry-run requires no node_modules, network or filesystem mutation" in install["claim"]
+    assert "resolves neither npm nor Node and spawns no child" in install["claim"]
+    assert "registry/cache access, lifecycle scripts" in install["claim"]
+    assert "extracted package bytes, node_modules contents and rollback" in install["claim"]
+    assert "C5 and C6 remain open" in install["claim"]
+
+
 def test_native_frontend_preview_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_preview") is True
@@ -368,8 +386,9 @@ def test_native_playwright_install_capability_is_bounded_c0() -> None:
     install = payload["capabilities"]["native_playwright_install"]
     assert install["cutover_gate"] == "C0"
     assert install["owner"] == "structural-frontend-contract"
-    assert "all five hosted browser workflows" in install["claim"]
-    assert "install:browser-runtime" in install["claim"]
+    assert "all five hosted browser workflows invoke" in install["claim"]
+    assert "instead of npx or an npm package-script launcher" in install["claim"]
+    assert "package install:browser-runtime remains a local convenience" in install["claim"]
     assert "playwright-install" in install["claim"]
     assert "installed Playwright CLI entrypoint" in install["claim"]
     assert "removes inherited NODE_OPTIONS" in install["claim"]

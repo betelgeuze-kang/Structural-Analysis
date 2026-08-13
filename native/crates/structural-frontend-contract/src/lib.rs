@@ -5,6 +5,7 @@
 mod browser_smoke;
 mod frontend_build;
 mod frontend_dev;
+mod frontend_install;
 mod frontend_preview;
 mod playwright;
 mod playwright_install;
@@ -50,6 +51,11 @@ pub use frontend_dev::{
     FrontendDevOptions, FrontendDevReceiptV1, FrontendDevRuntimeRequirementsV1,
 };
 use frontend_dev::{validate_frontend_dev_source, FrontendDevSourceV1};
+pub use frontend_install::{
+    canonical_frontend_install_receipt_json, run_frontend_install, FrontendInstallOptions,
+    FrontendInstallReceiptV1, FrontendInstallRuntimeRequirementsV1,
+};
+use frontend_install::{validate_frontend_install_source, FrontendInstallSourceV1};
 pub use frontend_preview::{
     canonical_frontend_preview_receipt_json, plan_frontend_preview, serve_frontend_preview,
     FrontendPreviewReceiptV1, FrontendPreviewRuntimeRequirementsV1,
@@ -196,6 +202,7 @@ struct FrontendSourceMapV1 {
     expected_dev_dependencies: BTreeMap<String, String>,
     frontend_build_contract: FrontendBuildSourceV1,
     frontend_dev_contract: FrontendDevSourceV1,
+    frontend_install_contract: FrontendInstallSourceV1,
     frontend_preview_contract: FrontendPreviewSourceV1,
     playwright_install_contract: PlaywrightInstallSourceV1,
     delivery_contract: FrontendDeliverySourceV1,
@@ -591,6 +598,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     }
     validate_frontend_build_source(&source_map.frontend_build_contract)?;
     validate_frontend_dev_source(&source_map.frontend_dev_contract)?;
+    validate_frontend_install_source(&source_map.frontend_install_contract)?;
     validate_frontend_preview_source(&source_map.frontend_preview_contract)?;
     validate_playwright_install_source(&source_map.playwright_install_contract)?;
     validate_delivery_source(&source_map.delivery_contract)?;

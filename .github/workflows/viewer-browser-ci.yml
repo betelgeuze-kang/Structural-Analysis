@@ -68,8 +68,8 @@ jobs:
           python-version: "3.10"
           cache: pip
 
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Rust-orchestrated frontend dependency install
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .
 
       - name: Install Python package
         run: python -m pip install -e .[dev]
@@ -81,7 +81,7 @@ jobs:
         run: python scripts/verify_structure_viewer_contracts.py
 
       - name: Rust-orchestrated Playwright browser install
-        run: npm run install:browser-runtime
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .
 
       - name: Rust-orchestrated minimal structure-viewer browser smoke
         run: npm run verify:frontend-browser-smoke -- --mode minimal

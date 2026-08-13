@@ -199,6 +199,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 development process ownership only: package dev enters through structural-frontend-contract frontend-dev; Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint, removes inherited NODE_OPTIONS, fixes IPv4 loopback and strict-port arguments, directly owns one Node child, records a successful terminal exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules and spawns no process; source mutation remains deliberately allowed for HMR and is not revalidated after launch, and Node executable identity, Vite internals and transitive packages, plugin and environment loading, HMR, retained listener readiness, page requests, rendered behavior, clean-machine publication, native UI parity, C5 and C6 remain open"
     },
+    "native_frontend_install": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 dependency-install orchestration only: all five hosted frontend/browser workflows invoke structural-frontend-contract frontend-install directly instead of direct npm ci or an npm package-script launcher; Rust validates the package/lock/source-map contract, removes inherited NODE_OPTIONS, owns one exact npm ci direct child, rejects contract mutation, records the successful exit, and emits a canonical self-hashed receipt; the direct Rust dry-run requires no node_modules, network or filesystem mutation, resolves neither npm nor Node and spawns no child, while optional package install:dependencies remains only a local launcher convenience outside that receipt; live npm registry/cache access, lifecycle scripts, configuration/environment, npm/Node executable identity, transitive processes, extracted package bytes, node_modules contents and rollback remain outside Rust ownership, and clean-machine publication, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_preview": {
       "status": "implemented",
       "cutover_gate": "C0",
@@ -209,7 +215,7 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "structural-frontend-contract",
-      "claim": "bounded transitional C0 browser-install orchestration only: all five hosted browser workflows enter through package install:browser-runtime and structural-frontend-contract playwright-install; Rust validates the frontend contract, hashes the installed Playwright CLI entrypoint, removes inherited NODE_OPTIONS, owns one exact node CLI.js install --with-deps chromium child, rejects package/source-map/CLI mutation, records the successful direct-child exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules, network, host mutation, browser or child process; the retained Playwright installer owns browser and operating-system dependency resolution, downloads, caches, elevation and host-package mutation, and downloaded byte identities, transitive processes, rollback, clean-machine publication, native UI parity, C5 and C6 remain outside this claim"
+      "claim": "bounded transitional C0 browser-install orchestration only: all five hosted browser workflows invoke structural-frontend-contract playwright-install directly instead of npx or an npm package-script launcher, while package install:browser-runtime remains a local convenience; Rust validates the frontend contract, hashes the installed Playwright CLI entrypoint, removes inherited NODE_OPTIONS, owns one exact node CLI.js install --with-deps chromium child, rejects package/source-map/CLI mutation, records the successful direct-child exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules, network, host mutation, browser or Rust-owned child process; the retained Playwright installer owns browser and operating-system dependency resolution, downloads, caches, elevation and host-package mutation, and downloaded byte identities, transitive processes, rollback, clean-machine publication, native UI parity, C5 and C6 remain outside this claim"
     },
     "native_viewer_report_pdf_export": {
       "status": "implemented",

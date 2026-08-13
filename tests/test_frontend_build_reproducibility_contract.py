@@ -44,6 +44,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- playwright-install --root ."
     )
     assert (
+        package_json["scripts"]["install:dependencies"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- frontend-install --root ."
+    )
+    assert (
         package_json["scripts"]["preview"]
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- frontend-preview --root ."
@@ -150,6 +155,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run dev" in docs_text
     assert "structural-frontend-contract frontend-dev" in docs_text
+    assert "npm run install:dependencies" in docs_text
+    assert "structural-frontend-contract frontend-install" in docs_text
     assert "npm run install:browser-runtime" in docs_text
     assert "structural-frontend-contract playwright-install" in docs_text
     assert "npm run build" in docs_text
@@ -234,6 +241,47 @@ def test_native_frontend_build_dry_run_is_process_free_and_self_hashed() -> None
         "browser_required": False,
     }
     assert payload["rust_owned_listener_count"] == 0
+    assert payload["deterministic_receipt"] is True
+    receipt_hash = payload.pop("receipt_hash")
+    canonical = json.dumps(
+        payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")
+    ).encode()
+    assert receipt_hash == f"sha256:{hashlib.sha256(canonical).hexdigest()}"
+
+
+def test_native_frontend_install_dry_run_is_runtime_free_and_self_hashed() -> None:
+    result = subprocess.run(
+        [
+            "npm",
+            "run",
+            "install:dependencies",
+            "--silent",
+            "--",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-frontend-install-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["logical_command"] == ["npm", "ci"]
+    assert payload["process_launcher"] == "npm"
+    assert payload["node_options_disposition"] == "removed_for_direct_child"
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_code"] is None
+    assert payload["runtime_requirements"] == {
+        "required": ["node", "npm"],
+        "node_modules_mutation_expected": False,
+    }
+    assert "not_instrumented" in payload["network_access_accounting"]
+    assert "node_modules_replaced" in payload["filesystem_mutation_accounting"]
+    assert "identity_not_instrumented" in payload["environment_accounting"]
     assert payload["deterministic_receipt"] is True
     receipt_hash = payload.pop("receipt_hash")
     canonical = json.dumps(

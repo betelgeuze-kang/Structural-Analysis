@@ -81,8 +81,8 @@ jobs:
           node-version: "20.19.0"
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Rust-orchestrated frontend dependency install
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-install --root .
 
       - name: Dependency audit
         run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
@@ -103,7 +103,7 @@ jobs:
         run: npm run verify:workbench-prototype-dom-contract
 
       - name: Rust-orchestrated Playwright browser install
-        run: npm run install:browser-runtime
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .
 
       - name: Rust-orchestrated Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke
