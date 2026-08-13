@@ -364,6 +364,23 @@ def test_native_frontend_install_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in install["claim"]
 
 
+def test_native_frontend_ci_entrypoints_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_ci_entrypoints") is True
+    entrypoints = payload["capabilities"]["native_frontend_ci_entrypoints"]
+    assert entrypoints["cutover_gate"] == "C0"
+    assert entrypoints["owner"] == "structural-frontend-contract"
+    assert "frontend-web, nightly-full-quality" in entrypoints["claim"]
+    assert "direct Cargo structural-frontend-contract commands" in entrypoints["claim"]
+    assert "native benchmark-catalog and evidence-bundle Bash wrappers" in entrypoints["claim"]
+    assert "npm run entrypoints 0" in entrypoints["claim"]
+    assert "npx entrypoints 0" in entrypoints["claim"]
+    assert "direct Node entrypoints 0" in entrypoints["claim"]
+    assert "setup-node, npm, Node, TypeScript, Vite, Playwright" in entrypoints["claim"]
+    assert "AI worker contract workflow is intentionally outside" in entrypoints["claim"]
+    assert "C5 and C6 remain open" in entrypoints["claim"]
+
+
 def test_native_frontend_preview_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_preview") is True

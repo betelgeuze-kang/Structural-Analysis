@@ -159,15 +159,15 @@ jobs:
         run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .
 
       - name: Rust-orchestrated Viewer JavaScript syntax gate
-        run: npm run verify:viewer-js-syntax
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-js-syntax --root .
 
       - name: Build frontend
-        run: npm run build
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .
 
       - name: Rust-orchestrated Workbench v2 guarded E2E
         run: |
           set +e
-          npm run verify:workbench-v2-e2e > workbench-v2-e2e.log 2>&1
+          cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- workbench-v2-browser-smoke --root . > workbench-v2-e2e.log 2>&1
           code=$?
           tail -n 200 workbench-v2-e2e.log
           exit "$code"

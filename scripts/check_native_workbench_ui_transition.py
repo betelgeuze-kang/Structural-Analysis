@@ -82,6 +82,35 @@ PLAYWRIGHT_INSTALL_WORKFLOW_COMMAND = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- playwright-install --root ."
 )
+FRONTEND_CONTRACT_WORKFLOW_PREFIX = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- "
+)
+DIRECT_FRONTEND_WORKFLOW_COMMANDS = {
+    "frontend-web-ci.yml": (
+        "frontend-build --root .",
+        "check --root .",
+        "prototype --root .",
+        "prototype-browser-smoke --root .",
+        "workbench-v2-browser-smoke --root .",
+    ),
+    "nightly-full-quality.yml": (
+        "workbench-v2-browser-smoke --root .",
+        "viewer-sample-workflow --root .",
+        "viewer-report-pdf-smoke --root .",
+        "viewer-performance-probe --root .",
+        "viewer-visual-regression --root .",
+    ),
+    "runtime-input-viewer-ci.yml": (
+        "viewer-js-syntax --root .",
+        "frontend-build --root .",
+        "workbench-v2-browser-smoke --root .",
+    ),
+    "viewer-browser-ci.yml": (
+        "viewer-manifest --root .",
+        "browser-smoke --root . --mode minimal",
+    ),
+}
 EXPECTED_FEATURES = {
     "import_validate_run_resume_compare_report": ("c5_implemented", False),
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
@@ -260,6 +289,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_install_browser_required": False,
         "frontend_install_network_uninstrumented": True,
         "frontend_install_node_modules_mutation_expected": True,
+        "hosted_frontend_workflow_npm_script_entrypoints": 0,
+        "hosted_frontend_workflow_direct_rust_entrypoints": True,
+        "hosted_frontend_workflow_native_bash_wrappers_retained": True,
         "frontend_preview_node_required": False,
         "frontend_preview_browser_required": False,
         "frontend_preview_loopback_required": True,
@@ -522,7 +554,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     )
     if (
         "Rust-orchestrated Viewer JavaScript syntax gate" not in runtime_input_ci
-        or "npm run verify:viewer-js-syntax" not in runtime_input_ci
+        or (
+            f"{FRONTEND_CONTRACT_WORKFLOW_PREFIX}viewer-js-syntax --root ."
+            not in runtime_input_ci
+        )
+        or "npm run verify:viewer-js-syntax" in runtime_input_ci
         or "node --check" in runtime_input_ci
     ):
         blockers.append("workbench_ui_viewer_js_syntax_ci_authority_invalid")
@@ -553,6 +589,31 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ):
             blockers.append(
                 f"workbench_ui_playwright_install_ci_authority_invalid:{workflow_name}"
+            )
+
+    for workflow_name, commands in DIRECT_FRONTEND_WORKFLOW_COMMANDS.items():
+        workflow_path = Path(".github/workflows") / workflow_name
+        workflow = _text(root, workflow_path, blockers)
+        if "npm run " in workflow or "npx " in workflow or "run: node " in workflow:
+            blockers.append(
+                f"workbench_ui_frontend_workflow_launcher_invalid:{workflow_name}"
+            )
+        for command in commands:
+            expected = f"{FRONTEND_CONTRACT_WORKFLOW_PREFIX}{command}"
+            if workflow.count(expected) != 1:
+                blockers.append(
+                    f"workbench_ui_frontend_workflow_command_invalid:{workflow_name}:{command}"
+                )
+    frontend_web_ci = _text(
+        root, Path(".github/workflows/frontend-web-ci.yml"), blockers
+    )
+    for wrapper in (
+        "bash ./scripts/build_native_benchmark_catalog.sh --check",
+        "bash ./scripts/build_native_workbench_evidence_bundle.sh",
+    ):
+        if frontend_web_ci.count(wrapper) != 1:
+            blockers.append(
+                f"workbench_ui_frontend_native_wrapper_invalid:{wrapper}"
             )
 
     native_lib = _text(
@@ -1114,6 +1175,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "frontend clean-build orchestration, static contract",
             "Frontend TypeScript/Vite build orchestration is Rust-native",
             "Frontend dependency-install orchestration is Rust-native",
+            "Hosted frontend/browser workflow product entrypoints are Rust-native",
             "Frontend development-server orchestration is Rust-native",
             "Frontend production-delivery preview serving is Rust-native",
             "Playwright browser-install orchestration is Rust-native",
@@ -1166,7 +1228,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/cache/lifecycle/configuration and node_modules mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, and optional pdftotext dependency visible",
+        "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
+        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/cache/lifecycle/configuration and node_modules mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

@@ -26,7 +26,8 @@ def test_viewer_js_syntax_ci_gate_is_rust_owned() -> None:
 
     assert package["scripts"]["verify:viewer-js-syntax"] == SYNTAX_COMMAND
     assert "Rust-orchestrated Viewer JavaScript syntax gate" in workflow
-    assert "npm run verify:viewer-js-syntax" in workflow
+    assert SYNTAX_COMMAND in workflow
+    assert "npm run verify:viewer-js-syntax" not in workflow
     assert "node --check" not in workflow
     contract = source_map["viewer_js_syntax_contract"]
     assert contract["schema_version"] == "structural-native-viewer-js-syntax-contract.v1"

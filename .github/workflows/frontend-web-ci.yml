@@ -88,25 +88,25 @@ jobs:
         run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
 
       - name: Verify native benchmark catalog
-        run: npm run build:benchmark-catalog -- --check
+        run: bash ./scripts/build_native_benchmark_catalog.sh --check
 
       - name: Build evidence bundle (read-only)
-        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
+        run: bash ./scripts/build_native_workbench_evidence_bundle.sh || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
 
       - name: Type-check and build
-        run: npm run build
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .
 
       - name: Frontend build contract
-        run: npm run verify:frontend-contract
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .
 
       - name: Rust-native Workbench prototype static contract
-        run: npm run verify:workbench-prototype-dom-contract
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .
 
       - name: Rust-orchestrated Playwright browser install
         run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- playwright-install --root .
 
       - name: Rust-orchestrated Workbench prototype browser smoke
-        run: npm run verify:workbench-prototype-browser-smoke
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .
 
       - name: Rust-orchestrated Workbench v2 E2E
-        run: npm run verify:workbench-v2-e2e
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- workbench-v2-browser-smoke --root .

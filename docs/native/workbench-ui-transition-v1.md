@@ -55,6 +55,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   the exact `npm ci` child, and rejects contract mutation. npm registry/cache access, lifecycle
   scripts, configuration/environment, transitive processes, extracted bytes, `node_modules`
   contents and rollback remain retained and uninstrumented.
+  Hosted frontend/browser workflow product entrypoints are Rust-native: frontend web, nightly full,
+  runtime-input Viewer, and Viewer-browser jobs call the Cargo commands directly, with no `npm run`,
+  `npx`, or direct Node entrypoint. The two native catalog/evidence Bash wrappers remain because they
+  own repository-root and source-commit timestamp projection; package scripts remain local
+  conveniences and Node/npm still execute retained frontend internals.
   Frontend development-server orchestration is Rust-native: the package development command hashes
   the installed Vite CLI, removes inherited `NODE_OPTIONS`, fixes loopback/strict-port arguments,
   and owns one direct Node child. Vite retains the listener, HMR and source-mutation semantics;

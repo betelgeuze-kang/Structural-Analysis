@@ -57,19 +57,19 @@ jobs:
         run: python -m pytest -q
 
       - name: Rust-orchestrated Workbench v2 browser regression
-        run: npm run verify:workbench-v2-e2e
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- workbench-v2-browser-smoke --root .
 
       - name: Rust-orchestrated Viewer sample workflow
-        run: npm run verify:viewer-sample-workflow
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-sample-workflow --root .
 
       - name: Rust-orchestrated Viewer report PDF contract
-        run: npm run verify:viewer-report-pdf
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .
 
       - name: Rust-orchestrated Viewer performance contract
-        run: npm run verify:viewer-performance-probe
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .
 
       - name: Viewer visual-regression contract
-        run: npm run verify:viewer-visual-regression
+        run: cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-visual-regression --root .
 
       - name: Current Phase 1 evidence contract
         run: python scripts/build_phase1_core_api_contract_artifacts.py --check

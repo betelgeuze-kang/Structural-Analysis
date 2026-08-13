@@ -13,6 +13,10 @@ PLAYWRIGHT_INSTALL = (
     "cargo run --quiet --locked --manifest-path native/Cargo.toml "
     "-p structural-frontend-contract -- playwright-install --root ."
 )
+FRONTEND_CONTRACT_PREFIX = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- "
+)
 
 
 def _read(name: str) -> str:
@@ -121,13 +125,16 @@ def test_workbench_v2_e2e_routes_through_the_native_orchestrator() -> None:
     assert "Rust-orchestrated Workbench v2 E2E" in frontend
     assert "Rust-orchestrated Workbench v2 guarded E2E" in runtime
     assert "Rust-orchestrated Viewer JavaScript syntax gate" in runtime
-    assert "npm run verify:viewer-js-syntax" in runtime
+    assert f"{FRONTEND_CONTRACT_PREFIX}viewer-js-syntax --root ." in runtime
+    assert "npm run verify:viewer-js-syntax" not in runtime
     assert "node --check" not in runtime
     assert "Rust-orchestrated Workbench v2 browser regression" in nightly
     assert "Rust-orchestrated Viewer sample workflow" in nightly
     assert "Rust-orchestrated Viewer report PDF contract" in nightly
     assert "Rust-orchestrated Viewer performance contract" in nightly
     assert "scripts/verify-workbench-v2-e2e.mjs" not in runtime
+    for workflow in (frontend, runtime, nightly):
+        assert "npm run " not in workflow
     for path in (
         "native/Cargo.toml",
         "native/Cargo.lock",
@@ -166,6 +173,45 @@ def test_hosted_dependency_install_routes_through_the_native_orchestrator() -> N
         assert "Rust-orchestrated frontend dependency install" in workflow
         assert "run: npm ci" not in workflow
         assert "npm run install:dependencies" not in workflow
+
+
+def test_frontend_workflow_product_commands_bypass_npm_script_launchers() -> None:
+    expected = {
+        "frontend-web-ci.yml": (
+            "frontend-build --root .",
+            "check --root .",
+            "prototype --root .",
+            "prototype-browser-smoke --root .",
+            "workbench-v2-browser-smoke --root .",
+        ),
+        "nightly-full-quality.yml": (
+            "workbench-v2-browser-smoke --root .",
+            "viewer-sample-workflow --root .",
+            "viewer-report-pdf-smoke --root .",
+            "viewer-performance-probe --root .",
+            "viewer-visual-regression --root .",
+        ),
+        "runtime-input-viewer-ci.yml": (
+            "viewer-js-syntax --root .",
+            "frontend-build --root .",
+            "workbench-v2-browser-smoke --root .",
+        ),
+        "viewer-browser-ci.yml": (
+            "viewer-manifest --root .",
+            "browser-smoke --root . --mode minimal",
+        ),
+    }
+    for name, commands in expected.items():
+        workflow = _read(name)
+        assert "npm run " not in workflow
+        assert "npx " not in workflow
+        assert "run: node " not in workflow
+        for command in commands:
+            assert f"{FRONTEND_CONTRACT_PREFIX}{command}" in workflow
+
+    frontend = _read("frontend-web-ci.yml")
+    assert "bash ./scripts/build_native_benchmark_catalog.sh --check" in frontend
+    assert "bash ./scripts/build_native_workbench_evidence_bundle.sh" in frontend
 
 
 def test_legacy_evidence_has_independent_hosted_lane() -> None:

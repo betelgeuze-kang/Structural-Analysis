@@ -205,6 +205,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 dependency-install orchestration only: all five hosted frontend/browser workflows invoke structural-frontend-contract frontend-install directly instead of direct npm ci or an npm package-script launcher; Rust validates the package/lock/source-map contract, removes inherited NODE_OPTIONS, owns one exact npm ci direct child, rejects contract mutation, records the successful exit, and emits a canonical self-hashed receipt; the direct Rust dry-run requires no node_modules, network or filesystem mutation, resolves neither npm nor Node and spawns no child, while optional package install:dependencies remains only a local launcher convenience outside that receipt; live npm registry/cache access, lifecycle scripts, configuration/environment, npm/Node executable identity, transitive processes, extracted package bytes, node_modules contents and rollback remain outside Rust ownership, and clean-machine publication, native UI parity, C5 and C6 remain open"
     },
+    "native_frontend_ci_entrypoints": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 hosted-entrypoint ownership only: frontend-web, nightly-full-quality, runtime-input-viewer and viewer-browser workflows invoke every frontend product check, build, browser verifier and runtime installer through direct Cargo structural-frontend-contract commands, retain only the native benchmark-catalog and evidence-bundle Bash wrappers for repository-root and source-commit timestamp projection, and contain npm run entrypoints 0, npx entrypoints 0 and direct Node entrypoints 0; setup-node, npm, Node, TypeScript, Vite, Playwright, Chromium, JavaScript application behavior, package-script local conveniences and inner runtime/network/filesystem effects remain retained, while the separate AI worker contract workflow is intentionally outside this product-entrypoint slice; clean-machine live evidence, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_preview": {
       "status": "implemented",
       "cutover_gate": "C0",

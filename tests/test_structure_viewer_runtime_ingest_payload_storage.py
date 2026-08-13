@@ -6,6 +6,10 @@ import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[1]
+VIEWER_JS_SYNTAX_COMMAND = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- viewer-js-syntax --root ."
+)
 
 
 def test_runtime_payload_storage_is_fail_closed_and_preserves_memory() -> None:
@@ -501,7 +505,8 @@ def test_runtime_payload_storage_is_wired_into_viewer_and_ci() -> None:
     assert '"src/structure-viewer/index.html"' in workflow
     assert "tests/test_structure_viewer_runtime_ingest_payload_storage.py" in workflow
     assert "Rust-orchestrated Viewer JavaScript syntax gate" in workflow
-    assert "npm run verify:viewer-js-syntax" in workflow
+    assert VIEWER_JS_SYNTAX_COMMAND in workflow
+    assert "npm run verify:viewer-js-syntax" not in workflow
     assert "node --check" not in workflow
     assert (
         '"src/structure-viewer/viewer-runtime-ingest-payload-storage.js"'

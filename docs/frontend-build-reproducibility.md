@@ -2,6 +2,11 @@
 
 The frontend shell now uses a pinned `package.json` plus a committed `package-lock.json` so clean checkouts can verify the build path deterministically.
 
+Hosted frontend/browser workflows invoke the Rust commands below directly through Cargo, avoiding
+outer npm package-script lifecycle hooks. The documented `npm run` forms remain local launcher
+conveniences; retained npm, Node, TypeScript, Vite, Playwright, and browser internals keep their
+explicit transitional boundaries.
+
 ## Commands
 
 - `npm run dev`
