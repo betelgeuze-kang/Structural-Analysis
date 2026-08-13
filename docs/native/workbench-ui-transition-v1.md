@@ -18,8 +18,9 @@ subprocess, or an external renderer. The same Rust binary now also provides:
 - `model-view`: a deterministic self-hashed ANSI-free terminal topology projection for every
   current semantically valid ModelIR v2 profile. Rust renders only the canonical C++ snapshot in
   fixed isometric/XY/XZ/YZ views, lists full node/element identities and analysis types, and keeps
-  explicit analysis blockers visible; general arbitrary-nodal-field result exploration remains
-  open.
+  explicit analysis blockers visible. Its closed `en-US`/`ko-KR` paths translate fixed labels only
+  and preserve the exact canvas, values, machine tokens and provenance; general localization and
+  arbitrary-nodal-field result exploration remain open.
 - `model-edit-node`: a deterministic provenance-bound edit of one existing node's finite SI
   coordinates. Rust edits only the canonical C++ snapshot, retains upstream provenance, marks the
   status of any matching exact/canonicalized round-trip row as approximated, strictly reparses and

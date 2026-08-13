@@ -49,10 +49,12 @@ and compares three global NDTHA quantities; its tracked source is a language-neu
 golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
 distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A,
 tagged or arbitrary-Unicode PDF output, general accessibility/localization and C6 remain open. The
-bounded Workbench separately provides self-hashed `en-US`/`ko-KR` UTF-8 linear report, bounded
-response-history, and exact-profile deformed-shape views plus fixed-label embedded-font PDF export;
+bounded Workbench separately provides self-hashed `en-US`/`ko-KR` UTF-8 ModelIR topology, linear
+report, bounded response-history, and exact-profile deformed-shape views plus fixed-label
+embedded-font PDF export;
 none is a certification or general UI-parity claim. See
-`docs/native/localized-terminal-result-views-v1.md` for the result-view boundary.
+`docs/native/localized-modelir-topology-view-v1.md` and
+`docs/native/localized-terminal-result-views-v1.md` for the localized view boundaries.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
@@ -172,13 +174,15 @@ C++-verified terminal topology surface without starting an analysis session:
 ~~~bash
 cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
   model-view examples/bounded_planar_frame_alpha.model-ir.v2.json \
-  --projection isometric
+  --locale ko-KR --projection isometric
 ~~~
 
-The closed projection vocabulary is `isometric`, `xy`, `xz`, and `yz`. The fixed ASCII view keeps
-explicit analysis blockers visible and binds its bytes with a final SHA-256; it is topology
-inspection, not an editing interaction or deformed/result explorer. See
-`docs/native/modelir-terminal-topology-view-v1.md` for the exact boundary.
+The closed projection vocabulary is `isometric`, `xy`, `xz`, and `yz`; the closed locale vocabulary
+is `en-US` and `ko-KR`. The fixed ASCII canvas keeps explicit analysis blockers visible and binds
+its bytes with a final SHA-256; localization changes labels only. It is topology inspection, not an
+editing interaction or deformed/result explorer. See
+`docs/native/modelir-terminal-topology-view-v1.md` and
+`docs/native/localized-modelir-topology-view-v1.md` for the exact boundaries.
 
 One existing node's finite SI coordinates can be edited through a create-new, provenance-bound
 artifact flow and revalidated by the C++ semantic core:

@@ -122,7 +122,10 @@ The general ModelIR terminal topology view is a bounded native visual inspection
 fixed ASCII canvas and complete node/element tables are self-hashed, ANSI-free, and derive only
 from the C++-verified canonical snapshot. The view itself is read-only and is not a solver selector,
 deformed-result or modal explorer, graphical accessibility claim, or replacement for the remaining
-3D Workbench surface; see `docs/native/modelir-terminal-topology-view-v1.md`.
+3D Workbench surface. Its closed `en-US`/`ko-KR` paths translate only fixed labels while retaining
+the same canvas, topology, SI values, machine tokens and provenance; omitting `--locale` preserves
+the original English bytes. See `docs/native/modelir-terminal-topology-view-v1.md` and
+`docs/native/localized-modelir-topology-view-v1.md`.
 
 The provenance-bound ModelIR node-coordinate edit changes exactly one existing node's finite SI
 coordinates. It retains upstream provenance, marks any matching exact/canonicalized round-trip

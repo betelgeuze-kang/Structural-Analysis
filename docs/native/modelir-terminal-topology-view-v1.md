@@ -9,9 +9,14 @@ analysis session and supports the eight tracked positive ModelIR profiles.
 ```text
 structural-workbench model-view MODEL.json
 structural-workbench model-view MODEL.json --projection xz
+structural-workbench model-view MODEL.json --locale ko-KR --projection isometric
 ```
 
 The projection vocabulary is closed and case-sensitive: `isometric`, `xy`, `xz`, or `yz`.
+The locale vocabulary is also closed and case-sensitive: `en-US` or `ko-KR`. Omitting it preserves
+the original English bytes. Localization changes fixed labels only; exact canvas, topology,
+machine tokens, numerical data and provenance remain stable. See
+`docs/native/localized-modelir-topology-view-v1.md` for that narrower contract.
 `isometric` uses a rational oblique projection rather than a platform trigonometry routine. The
 fixed 73-by-25-cell canvas uses ASCII only, emits no ANSI escape or color sequence, and is followed
 by complete node coordinates, projected cells, support/load flags, element connectivity, analysis
@@ -28,7 +33,8 @@ ModelIR file of at most 64 MiB.
 
 The output is deterministic UTF-8 text. A final SHA-256 binds every preceding byte. Repetition is
 byte-identical in an empty process environment, and the installed distribution E2E exercises all
-four projections without Python, Node, a browser, network access, or an external renderer.
+four projections plus the explicit-English and Korean isometric paths without Python, Node, a
+browser, network access, or an external renderer.
 
 ## Open boundary
 

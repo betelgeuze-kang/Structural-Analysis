@@ -46,7 +46,9 @@ pub use model_edit::{
     edit_model_node_coordinates, publish_model_node_coordinate_edit, ModelNodeEditOutcomeV1,
 };
 pub use model_view::{
-    render_model_topology_view, render_model_topology_view_file, ModelTopologyProjectionV1,
+    render_model_topology_view, render_model_topology_view_file,
+    render_model_topology_view_file_localized, render_model_topology_view_localized,
+    ModelTopologyProjectionV1,
 };
 pub use report_view::WorkbenchReportLocaleV1;
 pub use result_view::{

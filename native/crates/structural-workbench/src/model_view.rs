@@ -6,7 +6,10 @@ use serde_json::Value;
 use structural_cli::validate_model_bytes;
 use structural_contracts::product_ir::sha256_identity;
 
-use super::{input_error, read_bounded_regular_file, WorkbenchError, MAX_MODEL_BYTES};
+use super::{
+    input_error, read_bounded_regular_file, WorkbenchError, WorkbenchReportLocaleV1,
+    MAX_MODEL_BYTES,
+};
 
 const VIEW_SCHEMA_V1: &str = "structural-native-model-topology-view.v1";
 const VIEW_WIDTH: usize = 73;
@@ -94,6 +97,29 @@ struct ViewMetadata {
     load_pattern_count: u64,
 }
 
+struct ModelViewLabels {
+    title: &'static str,
+    locale: Option<&'static str>,
+    schema: &'static str,
+    model: &'static str,
+    capability_profile: &'static str,
+    projection: &'static str,
+    viewport: &'static str,
+    content_hash: &'static str,
+    semantic_hash: &'static str,
+    provenance_hash: &'static str,
+    semantic_snapshot: &'static str,
+    analysis_ready: &'static str,
+    blocking_features: &'static str,
+    analysis_types: &'static str,
+    inventory: &'static str,
+    legend: &'static str,
+    nodes: &'static str,
+    elements: &'static str,
+    claim_boundary: &'static str,
+    view_hash: &'static str,
+}
+
 /// Read one bounded regular `ModelIR` file and render its verified C++ semantic snapshot.
 ///
 /// # Errors
@@ -104,8 +130,22 @@ pub fn render_model_topology_view_file(
     path: &Path,
     projection: ModelTopologyProjectionV1,
 ) -> Result<String, WorkbenchError> {
+    render_model_topology_view_file_localized(path, WorkbenchReportLocaleV1::EnUs, projection)
+}
+
+/// Read one bounded regular `ModelIR` file and render a localized verified C++ snapshot.
+///
+/// # Errors
+///
+/// Rejects unsafe input files, invalid `ModelIR`, C++ semantic rejection, unsupported projection
+/// inventory sizes, or malformed snapshot fields.
+pub fn render_model_topology_view_file_localized(
+    path: &Path,
+    locale: WorkbenchReportLocaleV1,
+    projection: ModelTopologyProjectionV1,
+) -> Result<String, WorkbenchError> {
     let bytes = read_bounded_regular_file(path, MAX_MODEL_BYTES)?;
-    render_model_topology_view(&bytes, projection)
+    render_model_topology_view_localized(&bytes, locale, projection)
 }
 
 /// Render a deterministic ANSI-free terminal topology view from one `ModelIR` byte stream.
@@ -116,6 +156,20 @@ pub fn render_model_topology_view_file(
 /// missing/mistyped snapshot fields.
 pub fn render_model_topology_view(
     model_ir_bytes: &[u8],
+    projection: ModelTopologyProjectionV1,
+) -> Result<String, WorkbenchError> {
+    render_model_topology_view_localized(model_ir_bytes, WorkbenchReportLocaleV1::EnUs, projection)
+}
+
+/// Render a localized deterministic ANSI-free topology view from one `ModelIR` byte stream.
+///
+/// # Errors
+///
+/// Rejects invalid `ModelIR`, a C++ semantically invalid snapshot, oversized topology inventory, or
+/// missing/mistyped snapshot fields.
+pub fn render_model_topology_view_localized(
+    model_ir_bytes: &[u8],
+    locale: WorkbenchReportLocaleV1,
     projection: ModelTopologyProjectionV1,
 ) -> Result<String, WorkbenchError> {
     let length = u64::try_from(model_ir_bytes.len()).map_err(|_| {
@@ -171,6 +225,7 @@ pub fn render_model_topology_view(
     };
     Ok(format_topology_view(
         &metadata,
+        locale,
         projection,
         &nodes,
         &elements,
@@ -180,9 +235,10 @@ pub fn render_model_topology_view(
     ))
 }
 
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments, clippy::too_many_lines)]
 fn format_topology_view(
     metadata: &ViewMetadata,
+    locale: WorkbenchReportLocaleV1,
     projection: ModelTopologyProjectionV1,
     nodes: &[ViewNode],
     elements: &[ViewElement],
@@ -190,31 +246,53 @@ fn format_topology_view(
     canvas: &[Vec<char>],
     projected_collision_count: usize,
 ) -> String {
+    let labels = model_view_labels(locale);
     let mut output = String::new();
-    writeln!(output, "Structural Native Workbench - Model topology view")
-        .expect("String writes cannot fail");
-    writeln!(output, "Schema: {VIEW_SCHEMA_V1}").expect("String writes cannot fail");
-    writeln!(output, "Model: {}", metadata.model_id).expect("String writes cannot fail");
+    writeln!(output, "{}", labels.title).expect("String writes cannot fail");
+    writeln!(output, "{}: {VIEW_SCHEMA_V1}", labels.schema).expect("String writes cannot fail");
+    if let Some(locale_label) = labels.locale {
+        writeln!(output, "{locale_label}: {}", locale.label()).expect("String writes cannot fail");
+    }
+    writeln!(output, "{}: {}", labels.model, metadata.model_id).expect("String writes cannot fail");
     writeln!(
         output,
-        "Capability profile: {}",
-        metadata.capability_profile
+        "{}: {}",
+        labels.capability_profile, metadata.capability_profile
     )
     .expect("String writes cannot fail");
-    writeln!(output, "Projection: {}", projection.label()).expect("String writes cannot fail");
-    writeln!(output, "Viewport: {VIEW_WIDTH}x{VIEW_HEIGHT} cells")
-        .expect("String writes cannot fail");
-    writeln!(output, "Content hash: {}", metadata.content_hash).expect("String writes cannot fail");
-    writeln!(output, "Semantic hash: {}", metadata.semantic_hash)
-        .expect("String writes cannot fail");
-    writeln!(output, "Provenance hash: {}", metadata.provenance_hash)
-        .expect("String writes cannot fail");
-    writeln!(output, "C++ semantic snapshot: verified").expect("String writes cannot fail");
-    writeln!(output, "Analysis ready: {}", metadata.analysis_ready)
+    writeln!(output, "{}: {}", labels.projection, projection.label())
         .expect("String writes cannot fail");
     writeln!(
         output,
-        "Blocking features: {}",
+        "{}: {VIEW_WIDTH}x{VIEW_HEIGHT} cells",
+        labels.viewport
+    )
+    .expect("String writes cannot fail");
+    writeln!(output, "{}: {}", labels.content_hash, metadata.content_hash)
+        .expect("String writes cannot fail");
+    writeln!(
+        output,
+        "{}: {}",
+        labels.semantic_hash, metadata.semantic_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        output,
+        "{}: {}",
+        labels.provenance_hash, metadata.provenance_hash
+    )
+    .expect("String writes cannot fail");
+    writeln!(output, "{}: verified", labels.semantic_snapshot).expect("String writes cannot fail");
+    writeln!(
+        output,
+        "{}: {}",
+        labels.analysis_ready, metadata.analysis_ready
+    )
+    .expect("String writes cannot fail");
+    writeln!(
+        output,
+        "{}: {}",
+        labels.blocking_features,
         if metadata.blocking_features.is_empty() {
             "none".to_owned()
         } else {
@@ -224,7 +302,8 @@ fn format_topology_view(
     .expect("String writes cannot fail");
     writeln!(
         output,
-        "Analysis types: {}",
+        "{}: {}",
+        labels.analysis_types,
         if analysis_types.is_empty() {
             "none".to_owned()
         } else {
@@ -234,18 +313,15 @@ fn format_topology_view(
     .expect("String writes cannot fail");
     writeln!(
         output,
-        "Inventory: nodes={} elements={} constraints={} load_patterns={} projected_collisions={projected_collision_count}",
+        "{}: nodes={} elements={} constraints={} load_patterns={} projected_collisions={projected_collision_count}",
+        labels.inventory,
         nodes.len(),
         elements.len(),
         metadata.constraint_count,
         metadata.load_pattern_count,
     )
     .expect("String writes cannot fail");
-    writeln!(
-        output,
-        "Legend: o=node #=support ^=load *=support+load @=projected collision"
-    )
-    .expect("String writes cannot fail");
+    writeln!(output, "{}", labels.legend).expect("String writes cannot fail");
     let border = format!("+{}+", "-".repeat(VIEW_WIDTH));
     writeln!(output, "{border}").expect("String writes cannot fail");
     for row in canvas {
@@ -253,8 +329,7 @@ fn format_topology_view(
             .expect("String writes cannot fail");
     }
     writeln!(output, "{border}").expect("String writes cannot fail");
-    writeln!(output, "Nodes (projected column,row; SI coordinates):")
-        .expect("String writes cannot fail");
+    writeln!(output, "{}", labels.nodes).expect("String writes cannot fail");
     for node in nodes {
         writeln!(
             output,
@@ -269,7 +344,7 @@ fn format_topology_view(
         )
         .expect("String writes cannot fail");
     }
-    writeln!(output, "Elements:").expect("String writes cannot fail");
+    writeln!(output, "{}", labels.elements).expect("String writes cannot fail");
     for element in elements {
         writeln!(
             output,
@@ -278,10 +353,60 @@ fn format_topology_view(
         )
         .expect("String writes cannot fail");
     }
-    writeln!(output, "Claim boundary: {CLAIM_BOUNDARY}").expect("String writes cannot fail");
+    writeln!(output, "{}: {CLAIM_BOUNDARY}", labels.claim_boundary)
+        .expect("String writes cannot fail");
     let view_hash = sha256_identity(output.as_bytes());
-    writeln!(output, "View hash: {view_hash}").expect("String writes cannot fail");
+    writeln!(output, "{}: {view_hash}", labels.view_hash).expect("String writes cannot fail");
     output
+}
+
+fn model_view_labels(locale: WorkbenchReportLocaleV1) -> ModelViewLabels {
+    match locale {
+        WorkbenchReportLocaleV1::EnUs => ModelViewLabels {
+            title: "Structural Native Workbench - Model topology view",
+            locale: None,
+            schema: "Schema",
+            model: "Model",
+            capability_profile: "Capability profile",
+            projection: "Projection",
+            viewport: "Viewport",
+            content_hash: "Content hash",
+            semantic_hash: "Semantic hash",
+            provenance_hash: "Provenance hash",
+            semantic_snapshot: "C++ semantic snapshot",
+            analysis_ready: "Analysis ready",
+            blocking_features: "Blocking features",
+            analysis_types: "Analysis types",
+            inventory: "Inventory",
+            legend: "Legend: o=node #=support ^=load *=support+load @=projected collision",
+            nodes: "Nodes (projected column,row; SI coordinates):",
+            elements: "Elements:",
+            claim_boundary: "Claim boundary",
+            view_hash: "View hash",
+        },
+        WorkbenchReportLocaleV1::KoKr => ModelViewLabels {
+            title: "Structural Native Workbench - 모델 위상 뷰",
+            locale: Some("로케일"),
+            schema: "스키마",
+            model: "모델",
+            capability_profile: "기능 프로파일",
+            projection: "투영",
+            viewport: "뷰포트",
+            content_hash: "콘텐츠 해시",
+            semantic_hash: "의미 해시",
+            provenance_hash: "출처 해시",
+            semantic_snapshot: "C++ 의미 스냅샷",
+            analysis_ready: "해석 준비",
+            blocking_features: "차단 기능",
+            analysis_types: "해석 유형",
+            inventory: "재고",
+            legend: "범례: o=절점 #=지지 ^=하중 *=지지+하중 @=투영 중첩",
+            nodes: "절점 (투영 column,row; SI 좌표):",
+            elements: "요소:",
+            claim_boundary: "주장 경계",
+            view_hash: "보기 해시",
+        },
+    }
 }
 
 fn array_field<'a>(value: &'a Value, field: &str) -> Result<&'a [Value], WorkbenchError> {

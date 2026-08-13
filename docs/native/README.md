@@ -27,6 +27,7 @@
 22. [Native Workbench UI Transition v1](workbench-ui-transition-v1.md)
 23. [ModelIR Terminal Topology View v1](modelir-terminal-topology-view-v1.md)
 24. [ModelIR Node-Coordinate Edit v1](modelir-node-coordinate-edit-v1.md)
+25. [Localized ModelIR Terminal Topology View v1](localized-modelir-topology-view-v1.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

@@ -128,6 +128,11 @@ V12_LOCALIZED_RESULT_VIEW_KEYS = {
     "workbench_deformed_view_ko_kr_sha256",
 }
 V12_EXPECTED_KEYS = V11_EXPECTED_KEYS | V12_LOCALIZED_RESULT_VIEW_KEYS
+V13_LOCALIZED_MODEL_VIEW_KEYS = {
+    "workbench_localized_model_view_surface_passed",
+    "workbench_model_view_ko_kr_sha256",
+}
+V13_EXPECTED_KEYS = V12_EXPECTED_KEYS | V13_LOCALIZED_MODEL_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -181,6 +186,7 @@ def validate(
         "structural-native-distribution-e2e.v10": V10_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v11": V11_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v12": V12_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v13": V13_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -217,6 +223,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "mgt_source_sha256",
@@ -249,6 +256,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "mgt_workbench_restart_passed",
@@ -267,6 +275,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "workbench_operator_surface_passed",
@@ -295,6 +304,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "workbench_catalog_surface_passed",
@@ -314,6 +324,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "evidence_builder_check_passed",
@@ -336,6 +347,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         for name in (
             "catalog_builder_check_passed",
@@ -357,6 +369,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         if payload.get("workbench_localized_pdf_surface_passed") is not True:
             errors.append("workbench_localized_pdf_surface_passed must be true")
@@ -381,6 +394,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         if payload.get("workbench_model_view_surface_passed") is not True:
             errors.append("workbench_model_view_surface_passed must be true")
@@ -403,6 +417,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         if payload.get("workbench_model_edit_surface_passed") is not True:
             errors.append("workbench_model_edit_surface_passed must be true")
@@ -416,6 +431,7 @@ def validate(
         "structural-native-distribution-e2e.v10",
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         if payload.get("workbench_result_view_surface_passed") is not True:
             errors.append("workbench_result_view_surface_passed must be true")
@@ -437,6 +453,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v11",
         "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
     }:
         if payload.get("workbench_deformed_view_surface_passed") is not True:
             errors.append("workbench_deformed_view_surface_passed must be true")
@@ -455,7 +472,10 @@ def validate(
                 deformed_view_identities.append(identity)
         if len(deformed_view_identities) == 5 and len(set(deformed_view_identities)) != 5:
             errors.append("all deformed-shape projection and explicit identities must differ")
-    if schema_version == "structural-native-distribution-e2e.v12":
+    if schema_version in {
+        "structural-native-distribution-e2e.v12",
+        "structural-native-distribution-e2e.v13",
+    }:
         if payload.get("workbench_localized_result_views_surface_passed") is not True:
             errors.append("workbench_localized_result_views_surface_passed must be true")
         for name in (
@@ -472,6 +492,18 @@ def validate(
             "workbench_deformed_view_isometric_sha256"
         ):
             errors.append("localized en-US and ko-KR deformed-view identities must differ")
+    if schema_version == "structural-native-distribution-e2e.v13":
+        if payload.get("workbench_localized_model_view_surface_passed") is not True:
+            errors.append("workbench_localized_model_view_surface_passed must be true")
+        localized_model_view_identity = payload.get("workbench_model_view_ko_kr_sha256")
+        if not isinstance(localized_model_view_identity, str) or not SHA256.fullmatch(
+            localized_model_view_identity
+        ):
+            errors.append("workbench_model_view_ko_kr_sha256 must be a lowercase SHA-256 identity")
+        if localized_model_view_identity == payload.get(
+            "workbench_model_view_isometric_sha256"
+        ):
+            errors.append("localized en-US and ko-KR model-view identities must differ")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):
         if type(payload.get(name)) is not int or payload[name] != 0:
             errors.append(f"{name} must be integer zero")

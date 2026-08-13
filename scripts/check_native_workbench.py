@@ -37,6 +37,8 @@ REQUIRED_TOKENS = {
         "fixed_guided_deformed_shape_view_text_localized",
         "export_localized_pdf",
         "render_model_topology_view",
+        "render_model_topology_view_file_localized",
+        "render_model_topology_view_localized",
         "export_json",
         "workbench_review_binding_mismatch",
     ),
@@ -74,7 +76,9 @@ REQUIRED_TOKENS = {
         "structural-native-model-topology-view.v1",
         "ModelTopologyProjectionV1",
         "validate_model_bytes",
-        "C++ semantic snapshot: verified",
+        'semantic_snapshot: "C++ semantic snapshot"',
+        "Structural Native Workbench - 모델 위상 뷰",
+        "C++ 의미 스냅샷",
         "workbench_model_view_semantics_invalid",
         "bounded_general_modelir_semantic_snapshot_terminal_topology_projection",
     ),
@@ -156,6 +160,13 @@ REQUIRED_TOKENS = {
         "append-only distribution v12 receipt",
         "not WCAG conformance",
     ),
+    "docs/native/localized-modelir-topology-view-v1.md": (
+        "en-US",
+        "ko-KR",
+        "Omitting `--locale` preserves the original `en-US` bytes exactly",
+        "append-only distribution v13 receipt",
+        "not general localization",
+    ),
 }
 
 
@@ -188,6 +199,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "English/Korean UTF-8 linear report view",
         "English/Korean embedded-font PDF export",
         "general ModelIR terminal topology view",
+        "closed `en-US`/`ko-KR` paths",
         "provenance-bound ModelIR node-coordinate edit",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",

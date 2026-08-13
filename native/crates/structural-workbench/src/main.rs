@@ -46,6 +46,7 @@ struct EvidenceCommand {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ModelViewCommand {
     model: PathBuf,
+    locale: WorkbenchReportLocaleV1,
     projection: ModelTopologyProjectionV1,
 }
 
@@ -305,7 +306,11 @@ fn run_status(workspace: &Path) -> Result<(), WorkbenchError> {
 fn run_model_view(command: &ModelViewCommand) -> Result<(), WorkbenchError> {
     print!(
         "{}",
-        structural_workbench::render_model_topology_view_file(&command.model, command.projection)?
+        structural_workbench::render_model_topology_view_file_localized(
+            &command.model,
+            command.locale,
+            command.projection,
+        )?
     );
     Ok(())
 }
@@ -511,23 +516,45 @@ fn parse_workspace_only(arguments: &[OsString]) -> Result<PathBuf, WorkbenchErro
 }
 
 fn parse_model_view(arguments: &[OsString]) -> Result<ModelViewCommand, WorkbenchError> {
-    if arguments.len() != 2 && arguments.len() != 4 {
+    if arguments.len() < 2 || arguments.len() > 6 || arguments.len() % 2 != 0 {
         return Err(usage_error(
-            "model-view requires MODEL.json and optional --projection isometric|xy|xz|yz",
+            "model-view requires MODEL.json with optional --locale and --projection values",
         ));
     }
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
     let mut projection = ModelTopologyProjectionV1::Isometric;
-    if arguments.len() == 4 {
-        if arguments[2] != "--projection" {
-            return Err(usage_error("model-view accepts only --projection"));
-        }
-        projection = arguments[3]
+    let mut projection_seen = false;
+    let mut index = 2;
+    while index < arguments.len() {
+        let flag = arguments[index]
             .to_str()
-            .and_then(ModelTopologyProjectionV1::parse)
-            .ok_or_else(|| usage_error("model-view projection must be isometric, xy, xz or yz"))?;
+            .ok_or_else(|| usage_error("model-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| usage_error("model-view locale must be en-US or ko-KR"))?;
+            }
+            "--projection" if !projection_seen => {
+                projection_seen = true;
+                projection = value
+                    .to_str()
+                    .and_then(ModelTopologyProjectionV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("model-view projection must be isometric, xy, xz or yz")
+                    })?;
+            }
+            _ => return Err(usage_error("duplicate or unknown model-view option")),
+        }
+        index += 2;
     }
     Ok(ModelViewCommand {
         model: PathBuf::from(&arguments[1]),
+        locale,
         projection,
     })
 }
@@ -1014,7 +1041,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -1050,10 +1077,11 @@ mod tests {
     }
 
     #[test]
-    fn model_view_parser_defaults_to_isometric_and_rejects_unknown_projection() {
+    fn model_view_parser_has_closed_locale_and_projection_options() {
         let default = [OsString::from("model-view"), OsString::from("model.json")];
         let parsed = parse_model_view(&default).expect("default model view");
         assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.locale.label(), "en-US");
         assert_eq!(parsed.projection.label(), "isometric");
 
         let xz = [
@@ -1072,6 +1100,42 @@ mod tests {
         let mut invalid = xz;
         invalid[3] = OsString::from("perspective");
         assert!(parse_model_view(&invalid).is_err());
+
+        let korean = [
+            OsString::from("model-view"),
+            OsString::from("model.json"),
+            OsString::from("--projection"),
+            OsString::from("yz"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+        ];
+        let parsed = parse_model_view(&korean).expect("Korean YZ model view");
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.projection.label(), "yz");
+        let mut invalid_locale = korean;
+        invalid_locale[5] = OsString::from("ko-kr");
+        assert!(parse_model_view(&invalid_locale).is_err());
+
+        for invalid in [
+            [
+                OsString::from("model-view"),
+                OsString::from("model.json"),
+                OsString::from("--locale"),
+                OsString::from("en-US"),
+                OsString::from("--locale"),
+                OsString::from("ko-KR"),
+            ],
+            [
+                OsString::from("model-view"),
+                OsString::from("model.json"),
+                OsString::from("--format"),
+                OsString::from("json"),
+                OsString::from("--projection"),
+                OsString::from("xy"),
+            ],
+        ] {
+            assert!(parse_model_view(&invalid).is_err());
+        }
     }
 
     #[test]

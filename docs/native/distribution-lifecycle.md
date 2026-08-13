@@ -86,28 +86,32 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 9. runs all four fixed projections of the installed C++-verified general ModelIR terminal topology
    view twice, proving byte determinism, distinct projection identities, ANSI-free output, and
    Python/Node-free empty-`PATH` execution;
-10. runs the installed provenance-bound node-coordinate edit twice, proves byte-identical model and
+10. proves the default topology view and explicit `en-US` are byte-identical, runs the `ko-KR`
+    isometric view twice, and proves deterministic UTF-8/ANSI-free bytes, verified C++ semantics,
+    analysis readiness, and English/Korean identity separation;
+11. runs the installed provenance-bound node-coordinate edit twice, proves byte-identical model and
     receipt output, unchanged source bytes, strict C++ revalidation, analysis readiness and
     deterministic topology rendering with an empty `PATH`;
-11. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+12. renders all four closed NDTHA response channels twice from the installed Workbench, proves
     exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
     window, and proves the durable session remains unchanged;
-12. renders all four fixed-guided original/deformed projections twice plus an explicit selected
+13. renders all four fixed-guided original/deformed projections twice plus an explicit selected
     step and magnification, proves ANSI-free byte determinism, distinct identities, exact C++
     snapshot/terminal-adapter binding, and durable-session nonmutation;
-13. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
+14. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-14. installs an immutable update, rolls back and re-verifies activation;
-15. emits an append-only v12 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+15. installs an immutable update, rolls back and re-verifies activation;
+16. emits an append-only v13 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
-   installed font/license/provenance, all four topology projection identities, and edited ModelIR
+   installed font/license/provenance, all four topology projection identities, the Korean topology
+   view identity, and edited ModelIR
    plus edit-receipt identities, all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, Python/Node lookup count 0 and fallback count 0. The receipt
-   checker continues to accept frozen v1 through v11 receipts without treating them as v12
-   localized-result-view authority.
+   checker continues to accept frozen v1 through v12 receipts without treating them as v13
+   localized-model-view authority.
 
 The reference command is:
 

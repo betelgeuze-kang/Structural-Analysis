@@ -227,6 +227,7 @@ fn assert_rejected_node_edit(
 }
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
     const FIXTURES: [&str; 8] = [
         "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json",
@@ -266,6 +267,57 @@ fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed()
 
     let temporary = TestDirectory::create();
     let source = root.join(FIXTURES[0]);
+    let default_english = run_workbench(&[text("model-view"), source.as_os_str()]);
+    let explicit_english = run_workbench(&[
+        text("model-view"),
+        source.as_os_str(),
+        text("--locale"),
+        text("en-US"),
+    ]);
+    assert_success(&default_english);
+    assert_success(&explicit_english);
+    assert_eq!(default_english.stdout, explicit_english.stdout);
+    let korean_arguments = [
+        text("model-view"),
+        source.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ];
+    let korean_first = run_workbench(&korean_arguments);
+    let korean_second = run_workbench(&korean_arguments);
+    assert_success(&korean_first);
+    assert_eq!(korean_first.stdout, korean_second.stdout);
+    assert!(!korean_first.stdout.contains(&0x1b));
+    let english = String::from_utf8(default_english.stdout).expect("English model topology view");
+    let korean = String::from_utf8(korean_first.stdout).expect("Korean model topology view");
+    assert!(korean.starts_with("Structural Native Workbench - 모델 위상 뷰\n"));
+    assert!(korean.contains("로케일: ko-KR\n"));
+    assert!(korean.contains("투영: isometric\n"));
+    assert!(korean.contains("C++ 의미 스냅샷: verified\n"));
+    let document = parse_model_ir_v2(&std::fs::read(&source).expect("ModelIR fixture"))
+        .expect("strict ModelIR fixture");
+    for identity in [
+        document.content_hash(),
+        document.semantic_hash(),
+        document.provenance_hash(),
+    ] {
+        assert!(korean.contains(identity));
+    }
+    let english_geometry = english
+        .lines()
+        .filter(|line| line.starts_with('|') || line.starts_with('+') || line.starts_with("  "))
+        .collect::<Vec<_>>();
+    let korean_geometry = korean
+        .lines()
+        .filter(|line| line.starts_with('|') || line.starts_with('+') || line.starts_with("  "))
+        .collect::<Vec<_>>();
+    assert_eq!(korean_geometry, english_geometry);
+    let (unsigned, hash_line) = korean
+        .rsplit_once("보기 해시: ")
+        .expect("Korean model topology view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    assert_ne!(korean, english);
+
     let mut three_dimensional: Value =
         serde_json::from_slice(&std::fs::read(&source).expect("source ModelIR fixture"))
             .expect("source ModelIR JSON");

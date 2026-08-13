@@ -17,6 +17,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
     Path("native/crates/structural-workbench/src/deformed_view.rs"),
+    Path("native/crates/structural-workbench/src/model_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
     Path("native/crates/structural-workbench/src/result_view.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
@@ -78,6 +79,7 @@ REQUIRED_PATHS = (
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/benchmark-catalog-v1.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
+    Path("docs/native/localized-modelir-topology-view-v1.md"),
     Path("docs/native/localized-terminal-result-views-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
@@ -131,6 +133,10 @@ EXPECTED_FEATURES = {
     "import_validate_run_resume_compare_report": ("c5_implemented", False),
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
     "bounded_general_modelir_terminal_topology_view": ("c5_implemented", False),
+    "bounded_terminal_utf8_modelir_topology_view_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
     "bounded_ndtha_terminal_response_history_view": ("c5_implemented", False),
     "bounded_fixed_guided_ndtha_deformed_shape_view": ("c5_implemented", False),
@@ -422,6 +428,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         blockers.append("workbench_ui_native_localized_pdf_locales_invalid")
     if native.get("localized_result_view_locales") != ["en-US", "ko-KR"]:
         blockers.append("workbench_ui_native_localized_result_view_locales_invalid")
+    if native.get("localized_model_view_locales") != ["en-US", "ko-KR"]:
+        blockers.append("workbench_ui_native_localized_model_view_locales_invalid")
 
     legacy = manifest.get("legacy_surface")
     if not isinstance(legacy, dict):
@@ -734,6 +742,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn ndtha_response_view_text_localized",
             "pub fn fixed_guided_deformed_shape_view_text",
             "pub fn fixed_guided_deformed_shape_view_text_localized",
+            "render_model_topology_view_file_localized",
+            "render_model_topology_view_localized",
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
@@ -789,6 +799,24 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "C++ 고정-가이드 어댑터 실행",
             'semantic_snapshot_value: "verified"',
             "not_general_nodal_displacement_3d_modal_contour",
+        ),
+        blockers,
+    )
+    native_model_view = _text(
+        root, Path("native/crates/structural-workbench/src/model_view.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/model_view.rs"),
+        native_model_view,
+        (
+            "structural-native-model-topology-view.v1",
+            "render_model_topology_view_file_localized",
+            "render_model_topology_view_localized",
+            "WorkbenchReportLocaleV1::EnUs",
+            "WorkbenchReportLocaleV1::KoKr",
+            "Structural Native Workbench - 모델 위상 뷰",
+            "C++ 의미 스냅샷",
+            "보기 해시",
         ),
         blockers,
     )
