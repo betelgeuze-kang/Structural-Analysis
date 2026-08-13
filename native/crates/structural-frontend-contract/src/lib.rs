@@ -2,6 +2,8 @@
 
 #![forbid(unsafe_code)]
 
+mod viewer_manifest;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::fs::{self, OpenOptions};
@@ -12,6 +14,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 use structural_contracts::product_ir::sha256_identity;
+
+pub use viewer_manifest::{
+    canonical_viewer_manifest_receipt_json, check_viewer_manifest, ViewerArtifactCountCheckV1,
+    ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
+};
+use viewer_manifest::{validate_viewer_manifest_source, ViewerManifestSourceV1};
 
 const SOURCE_MAP_SCHEMA_V1: &str = "structural-legacy-frontend-build-contract.v1";
 const RECEIPT_SCHEMA_V1: &str = "structural-native-frontend-contract-receipt.v1";
@@ -72,6 +80,7 @@ struct FrontendSourceMapV1 {
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
     delivery_contract: FrontendDeliverySourceV1,
+    viewer_manifest_contract: ViewerManifestSourceV1,
     claim_boundary: String,
 }
 
@@ -450,6 +459,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
         }
     }
     validate_delivery_source(&source_map.delivery_contract)?;
+    validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     Ok(())
 }
 

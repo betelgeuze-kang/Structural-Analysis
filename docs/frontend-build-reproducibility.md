@@ -22,7 +22,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
   - Assumes Chromium is already available to Playwright; browser installation is an environment setup step, not part of the smoke command.
 - `npm run verify:viewer-manifest`
-  - Checks the structure-viewer project manifest schema, registered drawing/variant counts, OPSTOOL release triples, and repo-local artifact/provenance paths.
+  - Invokes the Rust-native `structural-frontend-contract viewer-manifest` checker over the strict language-neutral JSON source and its byte-exact generated JavaScript projection.
+  - Checks registered project/drawing/variant counts, OPSTOOL release triples, repo-confined artifact/provenance paths, and locally present artifact-count sources; missing gitignored release outputs remain explicit warnings.
+  - Emits a canonical self-hashed receipt with command and network execution counts fixed at zero, without importing or executing the Viewer JavaScript module.
   - Runs before viewer/browser smoke in the PR quality gate so broken drawing registrations fail early.
 - `npm run verify:viewer-report-pdf`
   - Uses Playwright to export the active MIDAS33 engineer-in-loop report to PDF and checks that the PDF is non-empty with a valid `%PDF-` header.

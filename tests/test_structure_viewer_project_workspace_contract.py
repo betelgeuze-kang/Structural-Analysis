@@ -27,7 +27,6 @@ import {
   buildProjectBrowserModel,
   buildDrawingArtifactCountVerification,
   buildProjectManifestFromRows,
-  buildReleaseVisualizationDrawings,
   buildRuntimeProjectManifest,
   buildWorkspaceUrl,
   normalizeProjectManifest,
@@ -79,7 +78,6 @@ const releaseBrowser = buildProjectBrowserModel(manifest, {
 const releaseDrawing = releaseProject.drawings.find((drawing) => drawing.drawing_id === 'opstool_606m_megatall_model_00020');
 const releaseCompare = releaseDrawing.variants.find((variant) => variant.variant === 'compare');
 const releaseOptimized = releaseDrawing.variants.find((variant) => variant.variant === 'optimized');
-const releaseSpecs = buildReleaseVisualizationDrawings();
 const summary = summarizeProjectManifest(manifest);
 const importedManifest = buildProjectManifestFromRows([
   {
@@ -235,7 +233,6 @@ console.log(JSON.stringify({
   releaseFilteredCount: releaseBrowser.drawings.length,
   releaseComparePath: releaseCompare.artifact_path,
   releaseOptimizedPath: releaseOptimized.artifact_path,
-  releaseSpecCount: releaseSpecs.length,
   summary,
   importedStatuses: importedRows.map((drawing) => ({
     id: drawing.drawing_id,
@@ -319,7 +316,6 @@ console.log(JSON.stringify({
     assert payload["releaseFilteredCount"] == 1
     assert payload["releaseComparePath"].endswith("opstool_606m_megatall_model_00020_ai_compare.json")
     assert payload["releaseOptimizedPath"].endswith("opstool_606m_megatall_model_00020_after_only.json")
-    assert payload["releaseSpecCount"] == payload["releaseDrawingCount"]
     assert payload["summary"]["projectCount"] >= 3
     assert payload["summary"]["drawingCount"] >= 11
     assert payload["summary"]["variantCount"] >= 30

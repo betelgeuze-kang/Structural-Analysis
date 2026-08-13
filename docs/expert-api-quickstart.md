@@ -35,7 +35,7 @@ The source/export boundary is documented in `docs/viewer-contract.md` and checke
 
 ```bash
 python3 scripts/verify_structure_viewer_contracts.py --dry-run
-node scripts/verify-structure-viewer-project-manifest.mjs
+npm run verify:viewer-manifest
 ```
 
 ## 1. Model Data Format (`model.json`)

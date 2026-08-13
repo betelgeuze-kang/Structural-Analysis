@@ -260,8 +260,11 @@ def test_native_frontend_contract_capability_is_bounded_c0() -> None:
     frontend = payload["capabilities"]["native_frontend_contract"]
     assert frontend["cutover_gate"] == "C0"
     assert frontend["owner"] == "structural-frontend-contract"
-    assert "former Node static manifest and built Vite delivery verifiers" in frontend["claim"]
+    assert "former Node static package, built Vite delivery, and Viewer project-manifest verifiers" in frontend["claim"]
     assert "bounded non-symlink required-file and emitted-asset inventories" in frontend["claim"]
+    assert "exact neutral-JSON-to-JavaScript runtime projection" in frontend["claim"]
+    assert "confine Viewer artifact paths to the declared repo" in frontend["claim"]
+    assert "locally present artifact-count parity" in frontend["claim"]
     assert "delivery consumes an already-built tree" in frontend["claim"]
     assert "command and network execution counts 0" in frontend["claim"]
     assert "do not build or execute React/Vite or JavaScript" in frontend["claim"]

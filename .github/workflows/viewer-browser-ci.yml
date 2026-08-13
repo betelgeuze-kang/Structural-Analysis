@@ -10,7 +10,10 @@ on:
       - "tests/frontend/structure-viewer-smoke.spec.ts"
       - "scripts/verify-frontend-browser-smoke.mjs"
       - "scripts/structure-viewer-*.mjs"
-      - "scripts/verify-structure-viewer-project-manifest.mjs"
+      - "native/Cargo.toml"
+      - "native/Cargo.lock"
+      - "native/crates/structural-frontend-contract/**"
+      - "native/decommission/legacy-frontend-build-contract-v1.json"
       - "scripts/verify_structure_viewer_contracts.py"
       - "tests/test_structure_viewer_*.py"
       - "tests/test_viewer_shared_selection_contract.py"
@@ -25,7 +28,10 @@ on:
       - "tests/frontend/structure-viewer-smoke.spec.ts"
       - "scripts/verify-frontend-browser-smoke.mjs"
       - "scripts/structure-viewer-*.mjs"
-      - "scripts/verify-structure-viewer-project-manifest.mjs"
+      - "native/Cargo.toml"
+      - "native/Cargo.lock"
+      - "native/crates/structural-frontend-contract/**"
+      - "native/decommission/legacy-frontend-build-contract-v1.json"
       - "scripts/verify_structure_viewer_contracts.py"
       - "tests/test_structure_viewer_*.py"
       - "tests/test_viewer_shared_selection_contract.py"
@@ -68,7 +74,7 @@ jobs:
       - name: Install Python package
         run: python -m pip install -e .[dev]
 
-      - name: Verify viewer manifest
+      - name: Verify Rust-native viewer manifest
         run: npm run verify:viewer-manifest
 
       - name: Verify viewer contracts

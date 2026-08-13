@@ -6,11 +6,25 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+VIEWER_MANIFEST_COMMAND = [
+    "cargo",
+    "run",
+    "--quiet",
+    "--locked",
+    "--manifest-path",
+    "native/Cargo.toml",
+    "-p",
+    "structural-frontend-contract",
+    "--",
+    "viewer-manifest",
+    "--root",
+    ".",
+]
 
 
 def test_structure_viewer_project_manifest_verifier_reports_registered_release_triples() -> None:
     result = subprocess.run(
-        ["node", "scripts/verify-structure-viewer-project-manifest.mjs", "--json"],
+        VIEWER_MANIFEST_COMMAND,
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -26,6 +40,10 @@ def test_structure_viewer_project_manifest_verifier_reports_registered_release_t
     assert payload["releaseTripleCount"] >= 8
     assert payload["artifactCountCheckCount"] >= 9
     assert payload["errors"] == []
+    assert payload["commands_executed"] == 0
+    assert payload["network_access_count"] == 0
+    assert payload["manifest_sha256"].startswith("sha256:")
+    assert payload["javascript_projection_sha256"].startswith("sha256:")
 
     # Generated release artifacts under implementation/phase1/release/ are
     # gitignored and absent on clean checkouts (CI). Path/count assertions that
@@ -36,8 +54,6 @@ def test_structure_viewer_project_manifest_verifier_reports_registered_release_t
     )
 
     if midas_artifact.exists():
-        assert payload["missingPathCount"] == 0
-        assert payload["artifactCountMismatchCount"] == 0
         assert {
             "baselineManifest": 11334,
             "optimizedManifest": 2242,
@@ -71,11 +87,14 @@ def test_structure_viewer_project_manifest_verifier_is_wired_to_package_script_a
 
     assert (
         package_json["scripts"]["verify:viewer-manifest"]
-        == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-manifest --root ."
     )
     assert "verify:viewer-manifest" in gate
     assert gate.index("verify:viewer-manifest") < gate.index("scripts/verify_structure_viewer_contracts.py")
-    assert "scripts/verify-structure-viewer-project-manifest.mjs" in contract
+    assert "scripts/verify-structure-viewer-project-manifest.mjs" not in contract
+    assert "src/structure-viewer/viewer-project-manifest.v1.json" in contract
+    assert "src/structure-viewer/viewer-project-manifest-data.js" in contract
 
 
 def test_structure_viewer_project_manifest_verifier_tolerates_absent_generated_release_artifacts() -> None:
@@ -91,7 +110,7 @@ def test_structure_viewer_project_manifest_verifier_tolerates_absent_generated_r
         moved = True
     try:
         result = subprocess.run(
-            ["node", "scripts/verify-structure-viewer-project-manifest.mjs", "--json"],
+            VIEWER_MANIFEST_COMMAND,
             cwd=ROOT,
             check=False,
             capture_output=True,

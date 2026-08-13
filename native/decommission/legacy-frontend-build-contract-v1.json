@@ -16,7 +16,6 @@
     "src/App.tsx",
     "scripts/verify-frontend-smoke.mjs",
     "scripts/verify-frontend-browser-smoke.mjs",
-    "scripts/verify-structure-viewer-project-manifest.mjs",
     "scripts/verify-structure-viewer-callout-docking.mjs",
     "scripts/verify-structure-viewer-critical-callout-focus.mjs",
     "scripts/verify-structure-viewer-drawing-handoff-preview.mjs",
@@ -32,6 +31,9 @@
     "src/structure-viewer/viewer-viewport-hud.js",
     "src/structure-viewer/viewer-callout-layout.js",
     "src/structure-viewer/commercial-cockpit-polish.css",
+    "src/structure-viewer/viewer-project-manifest.v1.json",
+    "src/structure-viewer/viewer-project-manifest-data.js",
+    "src/structure-viewer/viewer-project-workspace.js",
     "src/structure-viewer/viewer-drawing-handoff-panel-renderer.js",
     "src/structure-viewer/viewer-drawing-review-model.js",
     "src/structure-viewer/viewer-member-comparison-model.js",
@@ -60,7 +62,7 @@
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
-    "verify:viewer-manifest": "node ./scripts/verify-structure-viewer-project-manifest.mjs",
+    "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
@@ -98,6 +100,31 @@
       "release-gap-review-state"
     ],
     "claim_boundary": "This read-only transitional C0 check proves only that one already-built local Vite tree has the two expected HTML entries, bounded regular local assets, an eager Workbench graph without legacy ownership markers, and exactly one referenced lazy legacy App chunk containing all frozen markers. It does not execute JavaScript or a browser, prove runtime UI behavior, promote native UI parity, or authorize React/TypeScript/Node removal."
+  },
+  "viewer_manifest_contract": {
+    "contract": "structure-viewer-project-manifest-verification.v1",
+    "manifest_path": "src/structure-viewer/viewer-project-manifest.v1.json",
+    "javascript_projection_path": "src/structure-viewer/viewer-project-manifest-data.js",
+    "workspace_module_path": "src/structure-viewer/viewer-project-workspace.js",
+    "project_schema_version": "structure-viewer-project-manifest.v1",
+    "release_project_id": "release_visualization",
+    "status_order": [
+      "ready",
+      "needs_review",
+      "blocked"
+    ],
+    "default_minimums": {
+      "projects": 3,
+      "drawings": 11,
+      "variants": 32,
+      "release_triples": 8
+    },
+    "workspace_required_markers": [
+      "import { DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST } from './viewer-project-manifest-data.js';",
+      "export { DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST };"
+    ],
+    "generated_release_path_fragment": "implementation/phase1/release/",
+    "claim_boundary": "This read-only transitional C0 check proves only that the strict language-neutral default Viewer project manifest, its exact generated JavaScript projection, registered project/drawing/variant inventory, repo-confined path dispositions, and any locally present artifact-count sources satisfy the frozen static contract. Missing gitignored generated release artifacts remain explicit warnings. It does not execute JavaScript or a browser, prove runtime rendering, validate engineering results, promote native UI parity, or authorize React/TypeScript/Node removal."
   },
   "claim_boundary": "This transitional Rust-native check proves only that the still-active legacy React/Vite package and lock metadata plus required source inventory match their pinned repository contract. It does not build or execute the frontend, prove browser behavior, promote native UI parity, or authorize React/TypeScript/Node removal."
 }

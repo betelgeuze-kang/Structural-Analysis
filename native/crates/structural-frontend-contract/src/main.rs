@@ -6,8 +6,9 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_receipt_json, check_frontend_contract,
-    check_frontend_delivery, FrontendContractError,
+    canonical_delivery_receipt_json, canonical_receipt_json,
+    canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
+    check_viewer_manifest, FrontendContractError,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -67,7 +68,14 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             let receipt = check_frontend_delivery(&required_path(&options, "--root")?)?;
             canonical_delivery_receipt_json(&receipt).map_err(Into::into)
         }
-        _ => Err(usage_error("command must be check or delivery")),
+        "viewer-manifest" => {
+            require_exact_options(&options, &["--root"])?;
+            let receipt = check_viewer_manifest(&required_path(&options, "--root")?)?;
+            canonical_viewer_manifest_receipt_json(&receipt).map_err(Into::into)
+        }
+        _ => Err(usage_error(
+            "command must be check, delivery, or viewer-manifest",
+        )),
     }
 }
 
@@ -128,7 +136,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery --root DIR"
+    "usage: structural-frontend-contract check|delivery|viewer-manifest --root DIR"
 }
 
 #[cfg(test)]

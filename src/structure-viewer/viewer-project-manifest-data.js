@@ -1,0 +1,557 @@
+/* Generated from viewer-project-manifest.v1.json; checked by structural-frontend-contract. */
+export const DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST = {
+  "schema_version": "structure-viewer-project-manifest.v1",
+  "generated_at": "2026-05-17T00:00:00Z",
+  "projects": [
+    {
+      "project_id": "midas33_release",
+      "project_title": "MIDAS33 Release Models",
+      "drawings": [
+        {
+          "drawing_id": "midas33_optimized",
+          "drawing_title": "MIDAS33 Optimized Roundtrip",
+          "source_family": "midas_mgt",
+          "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+          "viewer_preset": "midas33_optimized",
+          "baseline_ref": "midas33",
+          "optimized_ref": "midas33_optimized",
+          "optimization_summary": {
+            "baseline_member_count": 11334,
+            "optimized_member_count": 2242,
+            "evidence_level": "repo exact roundtrip release counts",
+            "risk_delta_label": "D/C movement requires engineer-in-loop review",
+            "source": "implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json"
+          },
+          "quality_flags": [],
+          "commercial_review_status": "ready",
+          "provenance": {
+            "source_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+            "report_path": "implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json",
+            "evidence_level": "repo exact roundtrip"
+          },
+          "solver_receipts": [
+            {
+              "schema_version": "structure-viewer-solver-receipt.v1",
+              "project_id": "midas33_release",
+              "drawing_id": "midas33_optimized",
+              "member_id": "911",
+              "source_tool": "MIDAS Gen",
+              "load_combo": "KDS_ULS_1",
+              "dcr_before": 0.91,
+              "dcr_after": 0.88,
+              "governing_constraint": "story drift limit",
+              "status": "verified",
+              "receipt_path": "implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json",
+              "evidence_level": "repo exact roundtrip receipt slot"
+            }
+          ],
+          "lineage": [
+            {
+              "stage": "source_model",
+              "label": "MIDAS33 baseline",
+              "path": "implementation/phase1/open_data/midas/midas_generator_33.json"
+            },
+            {
+              "stage": "optimized_model",
+              "label": "MIDAS33 optimized roundtrip",
+              "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+            },
+            {
+              "stage": "viewer_report",
+              "label": "Release viewer evidence",
+              "path": "implementation/phase1/release/visualization/entries/midas33_optimized_roundtrip.json"
+            }
+          ],
+          "ingest_summary": {
+            "source_formats": [
+              "midas_mgt",
+              "json"
+            ],
+            "receipt_slots": 1,
+            "status": "viewer-first evidence hub ready"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "viewer_preset": "midas33",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "Optimized",
+              "viewer_preset": "midas33_optimized",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "viewer_preset": "midas33_optimized",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "midas33_pr_recheck",
+          "drawing_title": "MIDAS33 PR Recheck Baseline",
+          "source_family": "midas_mgt",
+          "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+          "viewer_preset": "midas33_pr",
+          "baseline_ref": "midas33_pr",
+          "optimized_ref": "midas33_optimized",
+          "optimization_summary": {
+            "baseline_member_count": 11334,
+            "optimized_member_count": 2242,
+            "evidence_level": "derived from paired MIDAS33 roundtrip counts",
+            "risk_delta_label": "PR recheck needs baseline-specific D/C review",
+            "source": "implementation/phase1/release/visualization/entries/midas33_pr_recheck_baseline.json",
+            "artifact_count_source": ""
+          },
+          "quality_flags": [
+            "optimization_pair_available"
+          ],
+          "commercial_review_status": "needs_review",
+          "provenance": {
+            "source_path": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json",
+            "report_path": "implementation/phase1/release/visualization/entries/midas33_pr_recheck_baseline.json",
+            "evidence_level": "repo exact roundtrip"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "PR Recheck",
+              "viewer_preset": "midas33_pr",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "Optimized",
+              "viewer_preset": "midas33_optimized",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "viewer_preset": "midas33_optimized",
+              "artifact_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "real_drawing_private",
+      "project_title": "Real Drawing Derived Topology",
+      "drawings": [
+        {
+          "drawing_id": "real_drawing_private_gallery",
+          "drawing_title": "Private Real Drawing Gallery",
+          "source_family": "ifc_midas_mixed",
+          "artifact_path": "implementation/phase1/release/visualization/structural_optimization_viewer.json",
+          "viewer_preset": "real_drawing_private_3d",
+          "baseline_ref": "real_drawing_private_3d",
+          "optimized_ref": "real_drawing_private_3d",
+          "quality_flags": [
+            "load_model_missing",
+            "proxy_assets_present"
+          ],
+          "commercial_review_status": "needs_review",
+          "provenance": {
+            "source_path": "src/structure-viewer/index.real_drawing_private.data.js",
+            "report_path": "src/structure-viewer/index.real_drawing_private.data.js",
+            "evidence_level": "derived private topology"
+          },
+          "variants": [
+            {
+              "variant": "optimized",
+              "label": "Gallery",
+              "viewer_preset": "real_drawing_private_3d",
+              "artifact_path": "implementation/phase1/release/visualization/structural_optimization_viewer.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Review",
+              "viewer_preset": "real_drawing_private_3d",
+              "artifact_path": "implementation/phase1/release/visualization/structural_optimization_viewer.json"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "project_id": "release_visualization",
+      "project_title": "Release Visualization Entries",
+      "drawings": [
+        {
+          "drawing_id": "opstool_606m_outrigger",
+          "drawing_title": "OpenSTOOL 606m Outrigger Compare",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_outrigger_baseline",
+          "optimized_ref": "opstool_606m_outrigger_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_outrigger",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_outrigger_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_outrigger_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_outrigger_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00001",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00001",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00001_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00001_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00001_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00005",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00005",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00005_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00005_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00005_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00008",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00008",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00008_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00008_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00008_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00015",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00015",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00015_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00015_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00015_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00017",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00017",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00017_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00017_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00017_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00020",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00020",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00020_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00020_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00020_ai_compare.json"
+            }
+          ]
+        },
+        {
+          "drawing_id": "opstool_606m_megatall_model_00023",
+          "drawing_title": "OpenSTOOL 606m Megatall Model 00023",
+          "source_family": "json_interactive_3d",
+          "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.json",
+          "viewer_preset": "",
+          "baseline_ref": "opstool_606m_megatall_model_00023_baseline",
+          "optimized_ref": "opstool_606m_megatall_model_00023_after_only",
+          "optimization_summary": {
+            "baseline_member_count": 800,
+            "optimized_member_count": 96,
+            "evidence_level": "release interactive artifact counts",
+            "risk_delta_label": "risk movement pending external receipt",
+            "source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.json",
+            "artifact_count_source": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.json"
+          },
+          "quality_flags": [
+            "large_release_artifact",
+            "synthetic_compare",
+            "external_receipt_pending"
+          ],
+          "commercial_review_status": "needs_review",
+          "release_family": "opstool_606m_megatall",
+          "provenance": {
+            "source_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.json",
+            "report_path": "implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.html",
+            "evidence_level": "release interactive artifact"
+          },
+          "variants": [
+            {
+              "variant": "baseline",
+              "label": "Baseline",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_baseline.json"
+            },
+            {
+              "variant": "optimized",
+              "label": "After",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_after_only.json"
+            },
+            {
+              "variant": "compare",
+              "label": "Compare",
+              "artifact_path": "../../implementation/phase1/release/visualization/entries/opstool_606m_megatall_model_00023_ai_compare.json"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+};

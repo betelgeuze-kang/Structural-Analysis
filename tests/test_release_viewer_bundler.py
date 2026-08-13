@@ -10,6 +10,9 @@ from implementation.phase1.release_viewer_bundler import (
 )
 
 
+ROOT = Path(__file__).resolve().parents[1]
+
+
 def test_release_bundler_rejects_a_missing_reachable_module(tmp_path: Path) -> None:
     (tmp_path / "index.html").write_text(
         "<script type='module'>import {x} from './viewer-shell.js';</script>",
@@ -47,3 +50,12 @@ def test_release_bundler_fails_if_a_root_import_was_not_replaced() -> None:
 
     with pytest.raises(RuntimeError, match="Failed to inline viewer module imports"):
         inline_local_viewer_module_imports(html, {})
+
+
+def test_release_bundler_inlines_the_neutral_viewer_manifest_projection() -> None:
+    urls = build_inline_viewer_module_import_urls(ROOT / "src/structure-viewer")
+
+    assert "./viewer-project-manifest-data.js" in urls
+    assert urls["./viewer-project-manifest-data.js"].startswith(
+        "data:text/javascript;base64,"
+    )

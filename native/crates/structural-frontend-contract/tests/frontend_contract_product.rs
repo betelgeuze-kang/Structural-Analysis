@@ -6,8 +6,9 @@ use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_receipt_json, check_frontend_contract,
-    check_frontend_delivery,
+    canonical_delivery_receipt_json, canonical_receipt_json,
+    canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
+    check_viewer_manifest,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -95,6 +96,18 @@ fn write_delivery_fixture(root: &Path) {
     .expect("write legacy chunk");
 }
 
+fn write_viewer_manifest_and_projection(root: &Path, manifest: &str) {
+    let body = manifest.strip_suffix('\n').expect("manifest trailing LF");
+    assert!(!body.ends_with('\n'));
+    let manifest_path = root.join("src/structure-viewer/viewer-project-manifest.v1.json");
+    let projection_path = root.join("src/structure-viewer/viewer-project-manifest-data.js");
+    std::fs::write(&manifest_path, manifest).expect("write Viewer manifest");
+    let projection = format!(
+        "/* Generated from viewer-project-manifest.v1.json; checked by structural-frontend-contract. */\nexport const DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST = {body};\n"
+    );
+    std::fs::write(&projection_path, projection).expect("write Viewer manifest projection");
+}
+
 fn verify_receipt_hash(value: &Value) {
     let mut unsigned = value.clone();
     let expected = unsigned
@@ -119,6 +132,7 @@ fn tracked_frontend_contract_is_canonical_self_hashed_and_read_only() {
     assert_eq!(first.lockfile_version, 3);
     assert_eq!(first.commands_executed, 0);
     assert_eq!(first.network_access_count, 0);
+    assert!(first.source_map_sha256.starts_with("sha256:"));
     assert!(first.required_file_count >= 40);
     assert_eq!(
         before,
@@ -198,6 +212,108 @@ fn delivery_check_is_deterministic_hash_bound_and_preserves_the_v1_contract() {
         bytes
     );
     assert_eq!(cli_value, value);
+}
+
+#[test]
+fn tracked_viewer_manifest_is_neutral_deterministic_and_self_hashed() {
+    let root = repository_root();
+    let first = check_viewer_manifest(&root).expect("tracked Viewer manifest");
+    let second = check_viewer_manifest(&root).expect("repeated Viewer manifest");
+    assert_eq!(first, second);
+    assert!(first.contract_pass);
+    assert_eq!(first.reason_code, "PASS");
+    assert_eq!(first.summary.project_count, 3);
+    assert_eq!(first.summary.drawing_count, 11);
+    assert_eq!(first.summary.variant_count, 32);
+    assert_eq!(first.release_triple_count, 8);
+    assert_eq!(first.path_check_count, 65);
+    assert_eq!(first.artifact_count_check_count, 9);
+    assert!(first.missing_path_count > 0);
+    assert_eq!(first.commands_executed, 0);
+    assert_eq!(first.network_access_count, 0);
+    assert!(first.errors.is_empty());
+    assert!(first
+        .warnings
+        .iter()
+        .any(|warning| warning.contains("generated release artifact")));
+    let encoded = canonical_viewer_manifest_receipt_json(&first).expect("canonical Viewer receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer receipt JSON");
+    verify_receipt_hash(&value);
+
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-manifest", "--root", "."])
+        .current_dir(&root)
+        .env_clear()
+        .output()
+        .expect("run Viewer manifest CLI");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let cli_value: Value = serde_json::from_slice(bytes).expect("CLI Viewer receipt");
+    assert_eq!(
+        canonicalize_model_ir_v2(&cli_value)
+            .expect("canonical CLI Viewer receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(cli_value, value);
+}
+
+#[test]
+fn viewer_manifest_duplicate_projection_and_repo_escape_fail_closed() {
+    let duplicate = TestRoot::create();
+    copy_contract_inventory(&duplicate.0);
+    write_viewer_manifest_and_projection(
+        &duplicate.0,
+        "{\"schema_version\":\"structure-viewer-project-manifest.v1\",\"schema_version\":\"forged\"}\n",
+    );
+    assert_eq!(
+        check_viewer_manifest(&duplicate.0)
+            .expect_err("duplicate manifest key must fail")
+            .code,
+        "viewer_manifest_json_invalid"
+    );
+
+    let projection = TestRoot::create();
+    copy_contract_inventory(&projection.0);
+    std::fs::write(
+        projection
+            .0
+            .join("src/structure-viewer/viewer-project-manifest-data.js"),
+        b"export const DEFAULT_STRUCTURE_VIEWER_PROJECT_MANIFEST = {};\n",
+    )
+    .expect("write forged projection");
+    assert_eq!(
+        check_viewer_manifest(&projection.0)
+            .expect_err("projection drift must fail")
+            .code,
+        "viewer_manifest_javascript_projection_drift"
+    );
+
+    let escaped = TestRoot::create();
+    copy_contract_inventory(&escaped.0);
+    let path = escaped
+        .0
+        .join("src/structure-viewer/viewer-project-manifest.v1.json");
+    let mut manifest: Value =
+        serde_json::from_slice(&std::fs::read(&path).expect("read Viewer manifest"))
+            .expect("Viewer manifest JSON");
+    manifest["projects"][2]["drawings"][0]["artifact_path"] =
+        Value::String("../../../outside.json".to_owned());
+    let text = format!(
+        "{}\n",
+        serde_json::to_string_pretty(&manifest).expect("encode escaped manifest")
+    );
+    write_viewer_manifest_and_projection(&escaped.0, &text);
+    let error = check_viewer_manifest(&escaped.0).expect_err("repo escape must fail");
+    assert_eq!(error.code, "viewer_manifest_contract_drift");
+    assert!(error
+        .detail
+        .contains("escapes or violates the repo boundary"));
 }
 
 #[test]
