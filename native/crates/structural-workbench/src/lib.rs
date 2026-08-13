@@ -395,6 +395,43 @@ impl NativeWorkbench {
         )
     }
 
+    /// Read an original MGT source, retain its import-health evidence, and initialize the opt-in
+    /// `ModelIR` linear CPU profile from the exact normalized model.
+    ///
+    /// # Errors
+    ///
+    /// Rejects a blocked/unsupported MGT import, an identity-mismatched linear request, unsafe
+    /// input paths, or any durable publication failure.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initialize_model_ir_linear_from_mgt_paths(
+        root: &Path,
+        source_mgt_path: &Path,
+        model_id: &str,
+        analysis_request_path: &Path,
+        external_result_path: &Path,
+        source_artifact_path: &Path,
+        executable_artifact_path: Option<&Path>,
+    ) -> Result<Self, WorkbenchError> {
+        let source_mgt = read_bounded_regular_file(source_mgt_path, MAX_MODEL_BYTES)?;
+        let analysis_request = read_bounded_regular_file(analysis_request_path, MAX_REQUEST_BYTES)?;
+        let external_result =
+            read_bounded_regular_file(external_result_path, MAX_EXTERNAL_RESULT_BYTES)?;
+        let source_artifact =
+            read_bounded_regular_file(source_artifact_path, MAX_EXTERNAL_ARTIFACT_BYTES)?;
+        let executable_artifact = executable_artifact_path
+            .map(|path| read_bounded_regular_file(path, MAX_EXTERNAL_ARTIFACT_BYTES))
+            .transpose()?;
+        Self::initialize_model_ir_linear_from_mgt(
+            root,
+            &source_mgt,
+            model_id,
+            &analysis_request,
+            &external_result,
+            &source_artifact,
+            executable_artifact.as_deref(),
+        )
+    }
+
     /// Normalize one bounded MGT source through Rust/C++ product owners and create a durable
     /// Workbench import stage containing the original bytes and complete import evidence.
     ///
@@ -411,6 +448,57 @@ impl NativeWorkbench {
         external_result: &[u8],
         source_artifact: &[u8],
         executable_artifact: Option<&[u8]>,
+    ) -> Result<Self, WorkbenchError> {
+        Self::initialize_from_mgt_with_profile(
+            root,
+            source_mgt,
+            model_id,
+            analysis_request,
+            external_result,
+            source_artifact,
+            executable_artifact,
+            None,
+        )
+    }
+
+    /// Normalize one bounded MGT source and create a durable `ModelIR` linear CPU Workbench.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable Workbench error for blocked import health, missing normalized artifacts,
+    /// linear identity mismatch, or publication failure.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initialize_model_ir_linear_from_mgt(
+        root: &Path,
+        source_mgt: &[u8],
+        model_id: &str,
+        analysis_request: &[u8],
+        external_result: &[u8],
+        source_artifact: &[u8],
+        executable_artifact: Option<&[u8]>,
+    ) -> Result<Self, WorkbenchError> {
+        Self::initialize_from_mgt_with_profile(
+            root,
+            source_mgt,
+            model_id,
+            analysis_request,
+            external_result,
+            source_artifact,
+            executable_artifact,
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1),
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn initialize_from_mgt_with_profile(
+        root: &Path,
+        source_mgt: &[u8],
+        model_id: &str,
+        analysis_request: &[u8],
+        external_result: &[u8],
+        source_artifact: &[u8],
+        executable_artifact: Option<&[u8]>,
+        analysis_profile: Option<WorkbenchAnalysisProfileV1>,
     ) -> Result<Self, WorkbenchError> {
         verify_slice_bound(source_mgt, MAX_MODEL_BYTES, "MGT source")?;
         let imported = execute_native_mgt_import(source_mgt, model_id)
@@ -438,7 +526,7 @@ impl NativeWorkbench {
             external_result,
             source_artifact,
             executable_artifact,
-            None,
+            analysis_profile,
             Some(MgtImportEvidence {
                 source: imported.source_bytes(),
                 health: imported.health_json(),
@@ -768,7 +856,9 @@ impl NativeWorkbench {
             "session_id": session_id,
             "status": "imported",
             "artifacts": inventory,
-            "claim_boundary": if analysis_profile.is_some() {
+            "claim_boundary": if analysis_profile.is_some() && mgt.is_some() {
+                "bounded_original_mgt_import_health_normalized_modelir_cpp_snapshot_and_linear_input_ingestion_only_not_solver_execution_or_external_acceptance"
+            } else if analysis_profile.is_some() {
                 "strict_language_neutral_model_ir_linear_input_ingestion_only_not_cpp_validation_solver_execution_or_external_acceptance"
             } else if mgt.is_some() {
                 "bounded_original_mgt_import_health_normalized_modelir_and_cpp_snapshot_bound_to_one_native_workbench_profile"

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -109,3 +110,47 @@ def test_workbench_numeric_fixture_has_independent_solver_profile() -> None:
     assert request["base_node_id"] == "N_1"
     assert request["floor_node_id"] == "N_2"
     assert request["load_pattern_id"] == "LP_PUSH"
+
+
+def test_workbench_linear_cantilever_fixture_has_independent_closed_form_profile() -> None:
+    case = next(
+        row
+        for row in _golden_cases()
+        if row["case_id"] == "workbench-linear-cantilever-frame3d-x"
+    )
+    parsed = parse_midas_mgt(ROOT / str(case["source_path"]))
+    nodes = [split_csv_like(row) for row in parsed.section("NODE")]
+    material = split_csv_like(parsed.section("MATERIAL")[0])
+    section = split_csv_like(parsed.section("SECTION")[0])
+    height_m = parse_float_token(nodes[1][3]) - parse_float_token(nodes[0][3])
+    elastic_modulus_pa = parse_float_token(material[2])
+    iy_m4 = parse_float_token(section[3])
+    force_n = parse_float_token(split_csv_like(parsed.section("CONLOAD")[0])[1])
+
+    assert [split_csv_like(row) for row in parsed.section("CONSTRAINT")] == [
+        ["1", "111111"]
+    ]
+    assert force_n == 200_000.0
+    assert force_n * height_m**3 / (3.0 * elastic_modulus_pa * iy_m4) == pytest.approx(
+        0.016, rel=0.0, abs=1.0e-15
+    )
+
+    fixture_root = ROOT / "native/tests/fixtures/model_ir_linear"
+    request = json.loads(
+        (fixture_root / "mgt_cantilever_request.json").read_text(encoding="utf-8")
+    )
+    assert request["model_identity"] == case["native_expected"]["normalized_model"]
+    assert request["case_id"] == "mgt-cantilever-linear-c5"
+    assert request["load_pattern_id"] == "LP_PUSH"
+
+    source = (fixture_root / "mgt_cantilever_language_neutral_oracle_v1.txt").read_bytes()
+    external = json.loads(
+        (fixture_root / "mgt_cantilever_external_v1.json").read_text(encoding="utf-8")
+    )
+    assert external["source"]["source_artifact_hash"] == (
+        f"sha256:{hashlib.sha256(source).hexdigest()}"
+    )
+    assert external["binding"]["model_identity"] == request["model_identity"]
+    assert external["binding"]["case_id"] == request["case_id"]
+    assert external["binding"]["load_pattern_id"] == request["load_pattern_id"]
+    assert external["observations"][0]["value"] == 0.016

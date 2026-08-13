@@ -1,0 +1,18 @@
+{
+  "schema_version": "structural-model-ir-linear-analysis-request.v1",
+  "operation": "solve_model_ir_linear_static",
+  "case_id": "mgt-cantilever-linear-c5",
+  "backend": "cpu",
+  "model_identity": {
+    "content_hash": "sha256:e994159f48929d90f35a3d4c7e70acfe9e1855b10240d2956c4d578690ca8b31",
+    "semantic_hash": "sha256:3a6c3c677e1a36247750f4db4c34984b15063c6fc4f7a242a83016c9dd5f0ae5",
+    "provenance_hash": "sha256:c9dade5162cc208f8d707ae8a33143b32ac93d6425a72d81ec283a46309aaa0d"
+  },
+  "load_pattern_id": "LP_PUSH",
+  "config": {
+    "max_iterations": 20,
+    "absolute_residual_tolerance": 1e-12,
+    "relative_residual_tolerance": 1e-13,
+    "maximum_increment": 0.0
+  }
+}

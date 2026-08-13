@@ -5,7 +5,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Value};
-use structural_cli::execute_model_ir_linear_analysis;
+use structural_cli::{execute_model_ir_linear_analysis, execute_native_mgt_import};
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
@@ -70,6 +70,14 @@ fn verify_self_hash(bytes: &[u8], field: &str) -> Value {
 
 struct Inputs {
     model: PathBuf,
+    request: PathBuf,
+    external: PathBuf,
+    source: PathBuf,
+}
+
+struct MgtInputs {
+    source_mgt: PathBuf,
+    model_id: String,
     request: PathBuf,
     external: PathBuf,
     source: PathBuf,
@@ -141,6 +149,49 @@ fn prepare_inputs(root: &Path) -> Inputs {
     }
 }
 
+fn prepare_mgt_inputs() -> MgtInputs {
+    let repository = repository_root();
+    let source_mgt =
+        repository.join("native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt");
+    let model_id = "workbench-mgt-linear-cantilever-v1";
+    let mgt_bytes = fs::read(&source_mgt).expect("MGT fixture");
+    let imported = execute_native_mgt_import(&mgt_bytes, model_id).expect("normalized MGT import");
+    assert!(imported.is_normalized());
+    let model_bytes = imported
+        .model_ir_json()
+        .expect("normalized ModelIR")
+        .as_bytes();
+    let request =
+        repository.join("native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json");
+    let external =
+        repository.join("native/tests/fixtures/model_ir_linear/mgt_cantilever_external_v1.json");
+    let source = repository.join(
+        "native/tests/fixtures/model_ir_linear/mgt_cantilever_language_neutral_oracle_v1.txt",
+    );
+    let request_bytes = fs::read(&request).expect("MGT linear request bytes");
+    let direct = execute_model_ir_linear_analysis(model_bytes, &request_bytes, None, u32::MAX)
+        .expect("MGT linear direct terminal result");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("MGT linear recovery IR"),
+    )
+    .expect("MGT linear recovery JSON");
+    let displacement = recovery["global_displacement"][6]
+        .as_f64()
+        .expect("cantilever floor UX displacement");
+    assert!((displacement - 0.016).abs() <= 1e-14);
+
+    MgtInputs {
+        source_mgt,
+        model_id: model_id.to_owned(),
+        request,
+        external,
+        source,
+    }
+}
+
 fn import_arguments<'a>(inputs: &'a Inputs, workspace: &'a Path) -> Vec<&'a OsStr> {
     vec![
         text("import-model-linear"),
@@ -155,8 +206,61 @@ fn import_arguments<'a>(inputs: &'a Inputs, workspace: &'a Path) -> Vec<&'a OsSt
     ]
 }
 
+fn mgt_import_arguments<'a>(
+    command: &'a str,
+    inputs: &'a MgtInputs,
+    workspace: &'a Path,
+    workflow: bool,
+) -> Vec<&'a OsStr> {
+    let mut arguments = vec![
+        text(command),
+        inputs.source_mgt.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--model-id"),
+        OsStr::new(&inputs.model_id),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ];
+    if workflow {
+        arguments.extend([text("--step-budget"), text("1")]);
+    }
+    arguments
+}
+
 fn stage_arguments<'a>(command: &'a str, workspace: &'a Path) -> [&'a OsStr; 3] {
     [text(command), text("--workspace"), workspace.as_os_str()]
+}
+
+fn collect_files(root: &Path) -> Vec<PathBuf> {
+    fn visit(root: &Path, directory: &Path, output: &mut Vec<PathBuf>) {
+        let mut entries = fs::read_dir(directory)
+            .expect("read Workbench directory")
+            .map(|entry| entry.expect("read Workbench entry"))
+            .collect::<Vec<_>>();
+        entries.sort_by_key(fs::DirEntry::file_name);
+        for entry in entries {
+            let path = entry.path();
+            let metadata = entry.metadata().expect("Workbench artifact metadata");
+            if metadata.is_dir() {
+                visit(root, &path, output);
+            } else if metadata.is_file() {
+                output.push(
+                    path.strip_prefix(root)
+                        .expect("artifact below Workbench root")
+                        .to_path_buf(),
+                );
+            } else {
+                panic!("Workbench output must contain only regular files and directories");
+            }
+        }
+    }
+    let mut output = Vec::new();
+    visit(root, root, &mut output);
+    output
 }
 
 #[test]
@@ -367,6 +471,126 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(!rejected.status.success());
     assert!(
         String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_identity() {
+    let root = temporary_root("mgt-restart");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_mgt_inputs();
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    assert_success(&run_workbench(&mgt_import_arguments(
+        "import-mgt-model-linear",
+        &inputs,
+        &restarted,
+        false,
+    )));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    let validated_session =
+        fs::read(restarted.join("workbench-session.json")).expect("validated MGT linear session");
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert!(restarted.join("03-run/checkpoint.mlpcp").is_file());
+    fs::write(restarted.join("workbench-session.json"), validated_session)
+        .expect("simulate MGT linear process death before session persistence");
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&mgt_import_arguments(
+        "workflow-mgt-model-linear",
+        &inputs,
+        &direct,
+        true,
+    )));
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted MGT linear artifact"),
+            fs::read(direct.join(&relative)).expect("direct MGT linear artifact"),
+            "MGT linear restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let session = verify_self_hash(
+        &fs::read(restarted.join("workbench-session.json")).expect("MGT linear session"),
+        "session_hash",
+    );
+    assert_eq!(session["stage"], "reported");
+    assert_eq!(session["analysis_profile"], "model_ir_linear_cpu_v1");
+    assert_eq!(session["terminal_status"], "completed");
+    assert_eq!(session["comparison_passed"], true);
+    assert_eq!(
+        session["mgt_source_hash"],
+        sha256_identity(&fs::read(&inputs.source_mgt).expect("original MGT source"))
+    );
+    let import_receipt = verify_self_hash(
+        &fs::read(restarted.join("01-import/import-receipt.json")).expect("MGT import receipt"),
+        "receipt_hash",
+    );
+    assert_eq!(import_receipt["analysis_profile"], "model_ir_linear_cpu_v1");
+    assert_eq!(
+        import_receipt["claim_boundary"],
+        "bounded_original_mgt_import_health_normalized_modelir_cpp_snapshot_and_linear_input_ingestion_only_not_solver_execution_or_external_acceptance"
+    );
+    let health: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/import-health.json")).expect("MGT import health"),
+    )
+    .expect("MGT import health JSON");
+    assert_eq!(health["status"], "normalized");
+    assert_eq!(
+        fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT source"),
+        fs::read(&inputs.source_mgt).expect("original MGT source")
+    );
+    assert_eq!(
+        fs::read(restarted.join("01-import/model-ir.json")).expect("normalized ModelIR"),
+        fs::read(restarted.join("01-import/mgt-native-snapshot.json")).expect("C++ snapshot")
+    );
+    let recovery: Value = serde_json::from_slice(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("MGT linear recovery"),
+    )
+    .expect("MGT linear recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "LP_PUSH");
+    assert!(
+        (recovery["global_displacement"][6]
+            .as_f64()
+            .expect("MGT floor UX")
+            - 0.016)
+            .abs()
+            <= 1e-14
+    );
+    validate_deterministic_pdf_v1(
+        &fs::read(restarted.join("06-report/report.pdf")).expect("MGT linear PDF"),
+    )
+    .expect("MGT linear deterministic PDF");
+
+    let mut tampered =
+        fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT source");
+    tampered[0] ^= 1;
+    fs::write(restarted.join("01-import/source.mgt"), tampered).expect("tamper MGT source");
+    let rejected = run_workbench(&stage_arguments("status", &restarted));
+    assert!(!rejected.status.success());
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_binding_mismatch")
     );
 
     fs::remove_dir_all(root).expect("cleanup");

@@ -56,9 +56,9 @@ data rather than a parser crash.
 
 ## Evidence and authority boundary
 
-The language-neutral oracle covers two exact profiles and all four existing
+The language-neutral oracle covers three exact profiles and all four existing
 `foundation_realish/*.mgt` fixtures. Python independently freezes original byte hashes, line counts,
-section counts and the original exact profile's closed-form structural inputs. Rust consumes that golden,
+section counts and the exact profiles' closed-form structural inputs. Rust consumes that golden,
 checks every disposition/count/diagnostic, rejects duplicate and dangling identities, and binds
 source mutation into health and ModelIR hashes. A clean-environment Rust CLI test proves C++
 validation/snapshot equality, frozen artifact hashes, policy behavior, symlink rejection and
@@ -70,6 +70,14 @@ health JSON, MGT receipt and C++ snapshot in its immutable import stage, then ex
 Import -> Validate -> Run -> Resume -> Compare -> Report. Separate-process restart and one-shot
 flows are byte-identical, and reopening the workspace deterministically reproduces the import and
 C++ snapshot before trusting any later stage.
+
+The third exact profile removes only the guided top constraint so its independently checked
+cantilever displacement is `P L^3 / (3 E Iy) = 0.016 m`. The additive
+`import-mgt-model-linear` and `workflow-mgt-model-linear` commands bind the original source,
+import health, canonical normalized ModelIR, C++ snapshot, typed linear request, real one-iteration
+PCG checkpoint, recovered global DOFs, external comparison, ReportIR and deterministic PDF. A
+clean-environment process-death test proves the restarted and direct artifact trees are byte
+identical, and source tampering fails before any later stage is trusted.
 
 This is not general MGT authority. CP949 and other encodings, repeated `USE-STLD` association,
 self-weight, load combinations, shell/wall/solid elements, offsets, links, thickness, writeback,

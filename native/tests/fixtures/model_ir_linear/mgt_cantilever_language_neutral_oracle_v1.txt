@@ -1,0 +1,6 @@
+language-neutral cantilever MGT linear oracle v1
+P = 200000 N
+L = 3.2 m
+E = 200000000000 Pa
+Iy = 0.0006826666666666668 m4
+ux = P L^3 / (3 E Iy) = 0.016 m

@@ -14,12 +14,13 @@ either strict ModelIR or the exact numeric frame MGT profile normalized by the R
 
 A second explicit `model_ir_linear_cpu_v1` profile now owns the same durable
 Import -> Validate -> Run -> Resume -> Compare -> Report sequence for the bounded typed-ModelIR
-frame3d/truss3d CPU linear-static product. Its Run publishes a real `checkpoint.mlpcp`; Resume
+frame3d/truss3d CPU linear-static product from strict ModelIR or one exact normalized MGT
+cantilever. Its Run publishes a real `checkpoint.mlpcp`; Resume
 publishes sparse ResultIR plus strictly typed global-DOF/element recovery IR; Compare consumes an
 explicit language-neutral global-DOF mapping; and Report publishes verified ReportIR plus
 PDF-ready Markdown and a deterministic single-page sparse PDF. Inspect, English/Korean
-Report-view, explicit Review, and Export are profile-aware. Result-view, Result-deformed-view, and
-localized embedded-font PDF export remain NDTHA-only and fail with
+Report-view, localized embedded-font PDF export, explicit Review, and Export are profile-aware.
+Result-view and Result-deformed-view remain NDTHA-only and fail with
 `workbench_profile_unsupported` on the linear profile. See
 `docs/native/modelir-linear-workbench-v1.md`.
 
@@ -108,9 +109,15 @@ structural-workbench export --workspace SESSION
 structural-workbench import-model-linear MODEL.json MODEL-LINEAR-REQUEST.json \
   --external-result LINEAR-EXTERNAL.json --source-artifact SOURCE \
   --workspace LINEAR-SESSION
+structural-workbench import-mgt-model-linear SOURCE.mgt MODEL-LINEAR-REQUEST.json \
+  --model-id MODEL-ID --external-result LINEAR-EXTERNAL.json \
+  --source-artifact SOURCE --workspace LINEAR-SESSION
 structural-workbench workflow-model-linear MODEL.json MODEL-LINEAR-REQUEST.json \
   --external-result LINEAR-EXTERNAL.json --source-artifact SOURCE \
   --workspace LINEAR-SESSION --step-budget 1
+structural-workbench workflow-mgt-model-linear SOURCE.mgt MODEL-LINEAR-REQUEST.json \
+  --model-id MODEL-ID --external-result LINEAR-EXTERNAL.json \
+  --source-artifact SOURCE --workspace LINEAR-SESSION --step-budget 1
 structural-workbench catalog --truth geometry_only --size large
 structural-workbench catalog-show --case peer_spd_rc_column_rectangular_seed_01
 structural-workbench evidence --bundle EVIDENCE-DIR --as-of-unix 1786579200
@@ -120,9 +127,10 @@ structural-workbench evidence-show --bundle EVIDENCE-DIR \
 
 `interactive` advances the same durable state machine one action at a time. `workflow` is the
 headless clean-machine form and performs the complete sequence; `workflow-mgt` does the same from
-original MGT bytes; `workflow-model-linear` performs the bounded typed-ModelIR linear sequence.
-Run must stop before the terminal step so Resume is a real checkpoint transition; the current
-fixtures use a budget of one.
+original MGT bytes; `workflow-model-linear` performs the bounded typed-ModelIR linear sequence;
+`workflow-mgt-model-linear` composes the exact MGT import evidence with that linear sequence. Run
+must stop before the terminal step so Resume is a real checkpoint transition; the current fixtures
+use a budget of one.
 
 The review is deliberately immutable. Revising a disposition requires a new Workbench session
 instead of silently overwriting history. Reviewer and comment text are bounded and reject terminal

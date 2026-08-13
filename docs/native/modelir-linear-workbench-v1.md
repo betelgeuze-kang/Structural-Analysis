@@ -18,7 +18,9 @@ The restart proof models process death after atomic checkpoint publication.
    `structural-model-ir-linear-analysis-request.v1` request, the
    `structural-model-ir-linear-external-result.v1` comparison input, and exact external source or
    executable bytes. Content, semantic, provenance, request, source, and executable identities are
-   immutable session inputs.
+   immutable session inputs. Its additive `import-mgt-model-linear` form first retains the exact
+   original MGT bytes, import-health diagnostics, normalized ModelIR, C++ validation report and
+   canonical snapshot, then applies the same typed linear input contract.
 2. `validate` crosses Rust -> C ABI -> C++ and retains the exact semantic report and snapshot.
 3. `run` performs a real bounded C++ assembly and PCG advance. It must stop at an `active`
    `checkpoint.mlpcp`; a terminal first advance is rejected so Resume remains a real transition.
@@ -44,11 +46,18 @@ structural-workbench workflow-model-linear MODEL.json MODEL-LINEAR-REQUEST.json 
   --source-artifact EXTERNAL-SOURCE \
   --workspace SESSION \
   --step-budget 1
+
+structural-workbench workflow-mgt-model-linear SOURCE.mgt MODEL-LINEAR-REQUEST.json \
+  --model-id MODEL_ID \
+  --external-result LINEAR-EXTERNAL.json \
+  --source-artifact EXTERNAL-SOURCE \
+  --workspace SESSION \
+  --step-budget 1
 ```
 
-The stage-by-stage entrypoint starts with `import-model-linear`; all subsequent commands use the
-same `validate`, `run`, `resume`, `compare`, `report`, `inspect`, `report-view`, `review`, and
-`export` verbs as the legacy NDTHA profile.
+The stage-by-stage entrypoint starts with `import-model-linear` or `import-mgt-model-linear`; all
+subsequent commands use the same `validate`, `run`, `resume`, `compare`, `report`, `inspect`,
+`report-view`, `review`, and `export` verbs as the legacy NDTHA profile.
 
 ## Recovery and comparison contract
 
@@ -96,8 +105,9 @@ byte-stable; the original 14-test Workbench E2E remains the compatibility gate.
 ## Claim boundary
 
 This closes only the bounded typed-ModelIR frame3d/truss3d CPU linear Workbench composition and its
-single-page standard-font PDF and embedded-font localized sparse PDF at C5. It does not close
-PDF/A or accessibility conformance, ModelIR linear MGT ingestion, live
+single-page standard-font PDF and embedded-font localized sparse PDF at C5. The exact normalized
+MGT cantilever profile additionally preserves import-health evidence and crosses the same flow. It
+does not close PDF/A or accessibility conformance, broader MGT linear ingestion, live
 MIDAS/OpenSees/CalculiX execution, general
 nonlinear-static/modal/buckling/transient Workbench profiles, arbitrary result visualization,
 React/TypeScript removal, protected-runner HIP C2, authoritative numerical C2/C3, package

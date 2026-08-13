@@ -1,0 +1,39 @@
+{
+  "schema_version": "structural-model-ir-linear-external-result.v1",
+  "comparison_id": "workbench-mgt-model-linear-c5",
+  "source": {
+    "solver_family": "reference_oracle",
+    "solver_version": "language-neutral-cantilever-v1",
+    "run_id": "workbench-mgt-model-linear-run",
+    "evidence_kind": "language_neutral_golden",
+    "source_artifact_hash": "sha256:f5114fee2591c65e6d8f701ca9cdb1a6c6c90d81551d01f330669c26accb8d24",
+    "executable_hash": null
+  },
+  "binding": {
+    "analysis_kind": "model_ir_linear_static",
+    "case_id": "mgt-cantilever-linear-c5",
+    "model_identity": {
+      "content_hash": "sha256:e994159f48929d90f35a3d4c7e70acfe9e1855b10240d2956c4d578690ca8b31",
+      "semantic_hash": "sha256:3a6c3c677e1a36247750f4db4c34984b15063c6fc4f7a242a83016c9dd5f0ae5",
+      "provenance_hash": "sha256:c9dade5162cc208f8d707ae8a33143b32ac93d6425a72d81ec283a46309aaa0d"
+    },
+    "analysis_request_hash": "sha256:6c964f932be6991fcf1226f8391e29e65a17a80d6467c0181cea46845deb03ee",
+    "load_pattern_id": "LP_PUSH",
+    "coordinate_frame": "model_global"
+  },
+  "observations": [
+    {
+      "observation_id": "mgt-cantilever-floor-ux",
+      "external_location_id": "node/N_2/UX",
+      "global_dof_index": 6,
+      "dof": "UX",
+      "native_result_path": "/global_displacement/6",
+      "unit": "m",
+      "value": 0.016,
+      "tolerance": {
+        "absolute": 1e-14,
+        "relative": 0.0
+      }
+    }
+  ]
+}

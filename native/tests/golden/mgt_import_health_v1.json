@@ -66,6 +66,38 @@
       }
     },
     {
+      "case_id": "workbench-linear-cantilever-frame3d-x",
+      "model_id": "workbench-mgt-linear-cantilever-v1",
+      "source_path": "native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt",
+      "source_hash": "sha256:782e59ce3c9c43dafe6e82c228c33a5e692ae15cf40a100bea28ce566ac765bf",
+      "line_count": 27,
+      "section_counts": {
+        "CONLOAD": 1,
+        "CONSTRAINT": 1,
+        "ELEMENT": 1,
+        "MATERIAL": 1,
+        "NODE": 2,
+        "SECTION": 1,
+        "STLDCASE": 1,
+        "UNIT": 1,
+        "VERSION": 1
+      },
+      "native_expected": {
+        "status": "normalized",
+        "mapped_row_count": 9,
+        "preserved_only_row_count": 1,
+        "dropped_row_count": 0,
+        "unsupported_row_count": 0,
+        "blocker_count": 0,
+        "diagnostic_codes": [],
+        "normalized_model": {
+          "content_hash": "sha256:e994159f48929d90f35a3d4c7e70acfe9e1855b10240d2956c4d578690ca8b31",
+          "semantic_hash": "sha256:3a6c3c677e1a36247750f4db4c34984b15063c6fc4f7a242a83016c9dd5f0ae5",
+          "provenance_hash": "sha256:c9dade5162cc208f8d707ae8a33143b32ac93d6425a72d81ec283a46309aaa0d"
+        }
+      }
+    },
+    {
       "case_id": "foundation-deep-small",
       "model_id": "foundation-deep-small-health-v1",
       "source_path": "tests/fixtures/foundation_realish/foundation_deep_small.mgt",
