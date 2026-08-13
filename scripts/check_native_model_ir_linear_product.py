@@ -32,6 +32,13 @@ REQUIRED_TOKENS = {
         "SparseLinearCheckpointV1::from_bytes",
         "CHECKPOINT_MISMATCH",
     ),
+    "native/crates/structural-runtime/src/model_linear_product.rs": (
+        "prepare_model_ir_linear_product",
+        "recover_model_ir_linear_product",
+        "generated_sparse_request",
+        "structural-model-ir-linear-assembly-receipt.v1",
+        "structural-model-ir-linear-result-recovery-ir.v1",
+    ),
     "native/crates/structural-runtime/src/lib.rs": (
         "assemble_model_ir_linear",
         "assemble_model_ir_linear_state",
@@ -41,8 +48,8 @@ REQUIRED_TOKENS = {
     "native/crates/structural-cli/src/model_linear_product.rs": (
         "execute_model_ir_linear_analysis",
         "publish_model_ir_linear_analysis",
-        "generated_sparse_request",
-        "recover_terminal_result",
+        "prepare_model_ir_linear_product",
+        "recover_model_ir_linear_product",
         "checkpoint.mlpcp",
         "result-recovery-ir.json",
         "receipt_hash",

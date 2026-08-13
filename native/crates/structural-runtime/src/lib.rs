@@ -6,6 +6,7 @@ mod checkpoint;
 mod job;
 mod model_checkpoint;
 mod model_linear_checkpoint;
+mod model_linear_product;
 mod sparse_checkpoint;
 mod spectral_checkpoint;
 mod static_checkpoint;
@@ -23,6 +24,7 @@ pub use model_checkpoint::{
 pub use model_linear_checkpoint::{
     ModelIrLinearCheckpointBindingsV1, ModelIrLinearCheckpointReceiptV1, ModelIrLinearCheckpointV1,
 };
+pub use model_linear_product::PreparedModelIrLinearProductV1;
 pub use sparse_checkpoint::{SparseLinearCheckpointReceiptV1, SparseLinearCheckpointV1};
 pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
 pub use static_checkpoint::{NonlinearStaticCheckpointReceiptV1, NonlinearStaticCheckpointV1};
