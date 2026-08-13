@@ -12,7 +12,8 @@ absent from the runtime image.
 - `/workspace` is the only operator-mounted working directory; the root filesystem is read-only.
 - The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report flow plus
   deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
-  export.
+  export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
+  for current semantically valid ModelIR v2 inputs.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
   OFL-1.1 redistribution notice; PDF generation itself needs no runtime font lookup.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
@@ -61,6 +62,7 @@ structural-workbench review --workspace /workspace/session --decision review \
   --reviewer "Engineer A" --comment "Check connection assumptions."
 structural-workbench review-show --workspace /workspace/session
 structural-workbench export --workspace /workspace/session
+structural-workbench model-view /workspace/model.json --projection isometric
 ```
 
 With Compose, override the default `--version` command while retaining the entrypoint:
@@ -75,7 +77,9 @@ docker compose -f deployment/onprem/compose.example.yml run --rm workbench \
 ## Claim Boundary
 
 The checked-in definition proves a Python/Node-free active deployment entrypoint and a fail-closed
-offline runtime shape. The local rootfs diagnostic is not an OCI image receipt. A
+offline runtime shape. The topology surface is read-only inspection, not model editing,
+solver execution, deformed/result visualization, or engineering approval. The local rootfs
+diagnostic is not an OCI image receipt. A
 customer-approved image build, vulnerability scan, signature, SBOM
 attestation, registry transfer, and site import drill require environment receipts. The archived
 React Pages and Python control-plane definitions remain rollback-only until their deprecation

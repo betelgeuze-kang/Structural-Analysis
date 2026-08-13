@@ -164,6 +164,20 @@ Without `--require-analysis-ready`, a contract-valid document with explicit bloc
 while preserving `analysis_ready: false` in the report. Semantic or wire invalidity exits 2;
 runtime/input transfer failure exits 1.
 
+Any current semantically valid ModelIR v2 profile can be inspected through the deterministic,
+C++-verified terminal topology surface without starting an analysis session:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  model-view examples/bounded_planar_frame_alpha.model-ir.v2.json \
+  --projection isometric
+~~~
+
+The closed projection vocabulary is `isometric`, `xy`, `xz`, and `yz`. The fixed ASCII view keeps
+explicit analysis blockers visible and binds its bytes with a final SHA-256; it is topology
+inspection, not a model editor or deformed/result explorer. See
+`docs/native/modelir-terminal-topology-view-v1.md` for the exact boundary.
+
 The bounded native MGT import-health command is:
 
 ~~~bash

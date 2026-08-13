@@ -7,8 +7,8 @@ use serde_json::json;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
-    BenchmarkTruthClassV1, NativeWorkbench, WorkbenchError, WorkbenchReportLocaleV1,
-    WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    BenchmarkTruthClassV1, ModelTopologyProjectionV1, NativeWorkbench, WorkbenchError,
+    WorkbenchReportLocaleV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -41,6 +41,12 @@ struct EvidenceCommand {
     as_of_unix_seconds: Option<i64>,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelViewCommand {
+    model: PathBuf,
+    projection: ModelTopologyProjectionV1,
+}
+
 fn main() -> ExitCode {
     let arguments = std::env::args_os().skip(1).collect::<Vec<_>>();
     run(&arguments)
@@ -63,6 +69,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
         Some("workflow-mgt") => {
             parse_import(arguments, true, true).and_then(|command| run_workflow(&command))
+        }
+        Some("model-view") => {
+            parse_model_view(arguments).and_then(|command| run_model_view(&command))
         }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
@@ -218,6 +227,14 @@ fn initialize(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError
 fn run_status(workspace: &Path) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(workspace)?;
     print_session(&workbench)
+}
+
+fn run_model_view(command: &ModelViewCommand) -> Result<(), WorkbenchError> {
+    print!(
+        "{}",
+        structural_workbench::render_model_topology_view_file(&command.model, command.projection)?
+    );
+    Ok(())
 }
 
 fn run_inspect(workspace: &Path) -> Result<(), WorkbenchError> {
@@ -407,6 +424,28 @@ fn parse_workspace_only(arguments: &[OsString]) -> Result<PathBuf, WorkbenchErro
     } else {
         Err(usage_error("command requires exactly --workspace DIR"))
     }
+}
+
+fn parse_model_view(arguments: &[OsString]) -> Result<ModelViewCommand, WorkbenchError> {
+    if arguments.len() != 2 && arguments.len() != 4 {
+        return Err(usage_error(
+            "model-view requires MODEL.json and optional --projection isometric|xy|xz|yz",
+        ));
+    }
+    let mut projection = ModelTopologyProjectionV1::Isometric;
+    if arguments.len() == 4 {
+        if arguments[2] != "--projection" {
+            return Err(usage_error("model-view accepts only --projection"));
+        }
+        projection = arguments[3]
+            .to_str()
+            .and_then(ModelTopologyProjectionV1::parse)
+            .ok_or_else(|| usage_error("model-view projection must be isometric, xy, xz or yz"))?;
+    }
+    Ok(ModelViewCommand {
+        model: PathBuf::from(&arguments[1]),
+        projection,
+    })
 }
 
 fn parse_report_view(
@@ -716,7 +755,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -727,8 +766,8 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_report_pdf_export,
-        parse_report_view, parse_review, parse_stage_command,
+        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_model_view,
+        parse_report_pdf_export, parse_report_view, parse_review, parse_stage_command,
     };
 
     #[test]
@@ -748,6 +787,31 @@ mod tests {
         assert_eq!(parsed.workspace, PathBuf::from("session"));
         assert_eq!(parsed.step_budget, 1);
         assert_eq!(parsed.mgt_model_id, None);
+    }
+
+    #[test]
+    fn model_view_parser_defaults_to_isometric_and_rejects_unknown_projection() {
+        let default = [OsString::from("model-view"), OsString::from("model.json")];
+        let parsed = parse_model_view(&default).expect("default model view");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.projection.label(), "isometric");
+
+        let xz = [
+            OsString::from("model-view"),
+            OsString::from("model.json"),
+            OsString::from("--projection"),
+            OsString::from("xz"),
+        ];
+        assert_eq!(
+            parse_model_view(&xz)
+                .expect("explicit XZ projection")
+                .projection
+                .label(),
+            "xz"
+        );
+        let mut invalid = xz;
+        invalid[3] = OsString::from("perspective");
+        assert!(parse_model_view(&invalid).is_err());
     }
 
     #[test]

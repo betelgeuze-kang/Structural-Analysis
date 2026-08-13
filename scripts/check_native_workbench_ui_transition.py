@@ -127,6 +127,7 @@ DIRECT_FRONTEND_WORKFLOW_COMMANDS = {
 EXPECTED_FEATURES = {
     "import_validate_run_resume_compare_report": ("c5_implemented", False),
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
+    "bounded_general_modelir_terminal_topology_view": ("c5_implemented", False),
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
     "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),

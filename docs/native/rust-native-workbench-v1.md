@@ -12,6 +12,11 @@ decommission.
 the exact fixed-guided one-story frame3d global-X `ModelIR` NDTHA slice. It accepts either strict
 ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
 
+The independent `model-view` read-only surface is broader than that analysis profile. It strictly
+parses any current ModelIR v2 document, crosses Rust -> C ABI -> C++ validation, and renders the
+verified semantic snapshot in deterministic isometric/XY/XZ/YZ terminal projections. It preserves
+an explicit analysis blocker instead of treating visibility as solver readiness.
+
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
    validation/snapshot and the MGT import receipt are retained alongside the normalized ModelIR.
@@ -49,6 +54,7 @@ invalid transition, or future session without matching artifacts fails closed.
 ## Commands
 
 ```text
+structural-workbench model-view MODEL.json --projection isometric
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -92,6 +98,12 @@ human-review state, avoid terminal escape bytes, and bind the pre-hash bytes wit
 hash. This is not a WCAG, PDF/UA, assistive-technology, or general localization certification; the
 durable fixed-font v1 PDF remains ASCII-only. The separate v2 export embeds only printable ASCII
 plus fixed English/Korean labels and is not arbitrary-Unicode coverage.
+
+The general ModelIR terminal topology view is a bounded native visual inspection alternative. Its
+fixed ASCII canvas and complete node/element tables are self-hashed, ANSI-free, and derive only
+from the C++-verified canonical snapshot. It is not a model editor, solver selector, deformed-result
+or modal explorer, graphical accessibility claim, or replacement for the remaining 3D Workbench
+surface; see `docs/native/modelir-terminal-topology-view-v1.md`.
 
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real

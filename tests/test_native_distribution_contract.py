@@ -200,6 +200,21 @@ def valid_v7_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v8_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v7_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v8",
+            "workbench_model_view_surface_passed": True,
+            "workbench_model_view_isometric_sha256": "sha256:" + "8" * 64,
+            "workbench_model_view_xy_sha256": "sha256:" + "9" * 64,
+            "workbench_model_view_xz_sha256": "sha256:" + "a" * 64,
+            "workbench_model_view_yz_sha256": "sha256:" + "b" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -322,6 +337,41 @@ def test_distribution_receipt_rejects_equal_v7_locale_pdf_identities(tmp_path: P
     assert any("PDF identities must differ" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_model_topology_view_v8_contract(tmp_path: Path):
+    receipt, manifest = valid_v8_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_missing_v8_model_view_authority(tmp_path: Path):
+    receipt, manifest = valid_v8_contract()
+    receipt["workbench_model_view_surface_passed"] = False
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_model_view_surface_passed" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_duplicate_v8_projection_identity(tmp_path: Path):
+    receipt, manifest = valid_v8_contract()
+    receipt["workbench_model_view_yz_sha256"] = receipt[
+        "workbench_model_view_xz_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model topology projection identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -395,11 +445,15 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v7" in e2e
+    assert "structural-native-distribution-e2e.v8" in e2e
     assert "exercise_localized_pdf_surface" in e2e
     assert "report-export-pdf" in e2e
     assert "workbench_localized_pdf_surface_passed" in e2e
     assert "localized_report_font_license_sha256" in e2e
+    assert "exercise_model_view_surface" in e2e
+    assert "model-view" in e2e
+    assert "workbench_model_view_surface_passed" in e2e
+    assert "workbench_model_view_yz_sha256" in e2e
     assert "structural-catalog" in e2e
     assert "catalog_builder_build_passed" in e2e
     assert "structural-evidence" in e2e
@@ -421,11 +475,15 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert "exercise_operator_surface" in rocm_e2e
     assert "workbench_operator_surface_passed" in rocm_e2e
-    assert "structural-native-distribution-e2e.v7" in rocm_e2e
+    assert "structural-native-distribution-e2e.v8" in rocm_e2e
     assert "exercise_localized_pdf_surface" in rocm_e2e
     assert "report-export-pdf" in rocm_e2e
     assert "workbench_localized_pdf_surface_passed" in rocm_e2e
     assert "localized_report_font_license_sha256" in rocm_e2e
+    assert "exercise_model_view_surface" in rocm_e2e
+    assert "model-view" in rocm_e2e
+    assert "workbench_model_view_surface_passed" in rocm_e2e
+    assert "workbench_model_view_yz_sha256" in rocm_e2e
     assert "structural-catalog" in rocm_e2e
     assert "catalog_builder_build_passed" in rocm_e2e
     assert "structural-evidence" in rocm_e2e

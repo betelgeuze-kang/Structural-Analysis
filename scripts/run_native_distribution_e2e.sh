@@ -231,6 +231,42 @@ exercise_localized_pdf_surface() {
 }
 exercise_localized_pdf_surface "$direct"
 
+exercise_model_view_surface() {
+  local topology_model="$repository_root/examples/bounded_planar_frame_alpha.model-ir.v2.json"
+  local projections=(isometric xy xz yz)
+  local projection
+  for projection in "${projections[@]}"; do
+    local first="$e2e_root/model-view-$projection-first.txt"
+    local second="$e2e_root/model-view-$projection-second.txt"
+    local output
+    for output in "$first" "$second"; do
+      env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+        "$topology_model" --projection "$projection" > "$output"
+      grep -Fq 'Schema: structural-native-model-topology-view.v1' "$output"
+      grep -Fq "Projection: $projection" "$output"
+      grep -Fq 'C++ semantic snapshot: verified' "$output"
+      grep -Fq 'Analysis ready: true' "$output"
+      if LC_ALL=C grep -q $'\033' "$output"; then
+        echo "installed model topology view contains an ANSI escape" >&2
+        exit 1
+      fi
+    done
+    cmp "$first" "$second"
+  done
+  local left right
+  for ((left = 0; left < ${#projections[@]}; left++)); do
+    for ((right = left + 1; right < ${#projections[@]}; right++)); do
+      if cmp -s \
+        "$e2e_root/model-view-${projections[$left]}-first.txt" \
+        "$e2e_root/model-view-${projections[$right]}-first.txt"; then
+        echo "installed model topology projections must have distinct identities" >&2
+        exit 1
+      fi
+    done
+  done
+}
+exercise_model_view_surface
+
 catalog_source="$repository_root/native/catalog/benchmark-catalog-v2.json"
 env -i PATH="$empty_path" "$active/bin/structural-catalog" check \
   --root "$repository_root" --catalog "$catalog_source" \
@@ -322,10 +358,14 @@ localized_pdf_en_us_hash="$(sha256sum "$e2e_root/localized-pdf-en-US-first/repor
 localized_pdf_ko_kr_hash="$(sha256sum "$e2e_root/localized-pdf-ko-KR-first/report.pdf" | awk '{print $1}')"
 localized_pdf_en_us_receipt_hash="$(sha256sum "$e2e_root/localized-pdf-en-US-first/pdf-receipt.json" | awk '{print $1}')"
 localized_pdf_ko_kr_receipt_hash="$(sha256sum "$e2e_root/localized-pdf-ko-KR-first/pdf-receipt.json" | awk '{print $1}')"
+model_view_isometric_hash="$(sha256sum "$e2e_root/model-view-isometric-first.txt" | awk '{print $1}')"
+model_view_xy_hash="$(sha256sum "$e2e_root/model-view-xy-first.txt" | awk '{print $1}')"
+model_view_xz_hash="$(sha256sum "$e2e_root/model-view-xz-first.txt" | awk '{print $1}')"
+model_view_yz_hash="$(sha256sum "$e2e_root/model-view-yz-first.txt" | awk '{print $1}')"
 installed_backend_hash="$(sha256sum "$e2e_root/installed-backend-receipt.json" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
 printf '%s\n' \
-  "{\"schema_version\":\"structural-native-distribution-e2e.v7\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"workbench_localized_pdf_surface_passed\":true,\"workbench_localized_pdf_en_us_sha256\":\"sha256:$localized_pdf_en_us_hash\",\"workbench_localized_pdf_ko_kr_sha256\":\"sha256:$localized_pdf_ko_kr_hash\",\"workbench_localized_pdf_en_us_receipt_sha256\":\"sha256:$localized_pdf_en_us_receipt_hash\",\"workbench_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$localized_pdf_ko_kr_receipt_hash\",\"localized_report_font_sha256\":\"sha256:$localized_report_font_hash\",\"localized_report_font_license_sha256\":\"sha256:$localized_report_font_license_hash\",\"localized_report_font_provenance_sha256\":\"sha256:$localized_report_font_provenance_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
+  "{\"schema_version\":\"structural-native-distribution-e2e.v8\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"workbench_localized_pdf_surface_passed\":true,\"workbench_localized_pdf_en_us_sha256\":\"sha256:$localized_pdf_en_us_hash\",\"workbench_localized_pdf_ko_kr_sha256\":\"sha256:$localized_pdf_ko_kr_hash\",\"workbench_localized_pdf_en_us_receipt_sha256\":\"sha256:$localized_pdf_en_us_receipt_hash\",\"workbench_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$localized_pdf_ko_kr_receipt_hash\",\"localized_report_font_sha256\":\"sha256:$localized_report_font_hash\",\"localized_report_font_license_sha256\":\"sha256:$localized_report_font_license_hash\",\"localized_report_font_provenance_sha256\":\"sha256:$localized_report_font_provenance_hash\",\"workbench_model_view_surface_passed\":true,\"workbench_model_view_isometric_sha256\":\"sha256:$model_view_isometric_hash\",\"workbench_model_view_xy_sha256\":\"sha256:$model_view_xy_hash\",\"workbench_model_view_xz_sha256\":\"sha256:$model_view_xz_hash\",\"workbench_model_view_yz_sha256\":\"sha256:$model_view_yz_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
 cp "$e2e_root/installed-backend-receipt.json" "$backend_output_stage"

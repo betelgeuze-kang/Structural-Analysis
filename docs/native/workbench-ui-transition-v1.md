@@ -15,6 +15,10 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   comparison IR, and PDF. Solver completion or comparison success never infers this decision;
 - `export`: a deterministic self-hashed handoff manifest containing relative artifact names,
   lengths, and hashes.
+- `model-view`: a deterministic self-hashed ANSI-free terminal topology projection for every
+  current semantically valid ModelIR v2 profile. Rust renders only the canonical C++ snapshot in
+  fixed isometric/XY/XZ/YZ views, lists full node/element identities and analysis types, and keeps
+  explicit analysis blockers visible; editing and deformed/result exploration remain open.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -154,11 +158,17 @@ checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It d
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
 
-The bounded terminal UTF-8 linear report view is C5-implemented for English and Korean. General
-The bounded embedded-font PDF export is C5-implemented for English and Korean fixed labels. General
-graphical accessibility, full application localization, assistive-technology validation, tagged
-PDF and arbitrary-Unicode PDF input remain an explicit removal blocker; the composite parity row
-stays open.
+The bounded terminal UTF-8 linear report view is C5-implemented for English and Korean.
+The bounded embedded-font PDF export is C5-implemented
+for English and Korean fixed labels. General graphical
+accessibility, full application localization, assistive-technology validation, tagged PDF and
+arbitrary-Unicode PDF input remain an explicit removal blocker; the composite parity row stays
+open.
+
+The bounded general-ModelIR terminal topology view is C5-implemented for the eight current positive
+profiles and all four fixed projections. It closes native semantic-snapshot geometry inspection,
+not model editing, solver selection/execution, perspective interaction, or deformed/modal/contour
+result exploration; the composite visual parity row therefore stays open.
 
 ## Legacy authority still active
 

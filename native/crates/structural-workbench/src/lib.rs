@@ -28,6 +28,7 @@ use structural_contracts::product_ir::{
 
 mod catalog;
 mod evidence;
+mod model_view;
 mod report_view;
 
 pub use catalog::{
@@ -35,6 +36,9 @@ pub use catalog::{
     BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
+pub use model_view::{
+    render_model_topology_view, render_model_topology_view_file, ModelTopologyProjectionV1,
+};
 pub use report_view::WorkbenchReportLocaleV1;
 
 const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";

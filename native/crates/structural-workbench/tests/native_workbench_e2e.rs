@@ -4,7 +4,7 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::Value;
-use structural_contracts::model_ir::canonicalize_model_ir_v2;
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::product_ir::sha256_identity;
 use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
 
@@ -99,6 +99,124 @@ fn copy_evidence_fixture(destination: &Path) {
         )
         .expect("copy evidence artifact");
     }
+}
+
+fn assert_blocked_model_remains_viewable(temporary: &Path, model: &Value) {
+    let mut blocked = model.clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.blocked",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Requires a solver capability outside this slice.",
+        "extensions": {}
+    }]);
+    let blocked_path = temporary.join("blocked.model-ir.json");
+    std::fs::write(
+        &blocked_path,
+        serde_json::to_vec(&blocked).expect("blocked ModelIR bytes"),
+    )
+    .expect("write blocked ModelIR");
+    let visible_blocker = run_workbench(&[text("model-view"), blocked_path.as_os_str()]);
+    assert_success(&visible_blocker);
+    let view = String::from_utf8(visible_blocker.stdout).expect("blocked model view");
+    assert!(view.contains("Analysis ready: false\n"));
+    assert!(view.contains("Blocking features: feature.blocked\n"));
+}
+
+#[test]
+fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
+    const FIXTURES: [&str; 8] = [
+        "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json",
+        "examples/bounded_planar_frame_alpha.model-ir.v2.json",
+        "examples/bounded_planar_settlement.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_ry_bending.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_rz_bending.model-ir.v2.json",
+        "examples/bounded_frame3d_direct_control_torsion.model-ir.v2.json",
+    ];
+    let root = repository_root();
+    for relative in FIXTURES {
+        let model = root.join(relative);
+        let first = run_workbench(&[text("model-view"), model.as_os_str()]);
+        let second = run_workbench(&[text("model-view"), model.as_os_str()]);
+        assert_success(&first);
+        assert_success(&second);
+        assert_eq!(first.stdout, second.stdout, "model view drift: {relative}");
+        let view = String::from_utf8(first.stdout).expect("UTF-8 model topology view");
+        let document = parse_model_ir_v2(&std::fs::read(&model).expect("ModelIR fixture"))
+            .expect("strict ModelIR fixture");
+        assert!(view.starts_with("Structural Native Workbench - Model topology view\n"));
+        assert!(view.contains("Schema: structural-native-model-topology-view.v1\n"));
+        assert!(view.contains("Projection: isometric\n"));
+        assert!(view.contains("C++ semantic snapshot: verified\n"));
+        assert!(view.contains("Analysis ready: true\n"));
+        assert!(view.contains(document.content_hash()));
+        assert!(view.contains(document.semantic_hash()));
+        assert!(view.contains(document.provenance_hash()));
+        assert!(!view.contains('\u{1b}'));
+        let (unsigned, hash_line) = view
+            .rsplit_once("View hash: ")
+            .expect("model topology view hash line");
+        assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    }
+
+    let temporary = TestDirectory::create();
+    let source = root.join(FIXTURES[0]);
+    let mut three_dimensional: Value =
+        serde_json::from_slice(&std::fs::read(&source).expect("source ModelIR fixture"))
+            .expect("source ModelIR JSON");
+    three_dimensional["nodes"][1]["coordinates_m"] = serde_json::json!([2.0, 1.0, 1.0]);
+    let three_dimensional_path = temporary.0.join("three-dimensional.model-ir.json");
+    std::fs::write(
+        &three_dimensional_path,
+        serde_json::to_vec(&three_dimensional).expect("3D ModelIR bytes"),
+    )
+    .expect("write 3D ModelIR");
+    let mut projections = Vec::new();
+    for projection in ["isometric", "xy", "xz", "yz"] {
+        let output = run_workbench(&[
+            text("model-view"),
+            three_dimensional_path.as_os_str(),
+            text("--projection"),
+            text(projection),
+        ]);
+        assert_success(&output);
+        assert!(String::from_utf8_lossy(&output.stdout)
+            .contains(&format!("Projection: {projection}\n")));
+        projections.push(output.stdout);
+    }
+    for left in 0..projections.len() {
+        for right in (left + 1)..projections.len() {
+            assert_ne!(projections[left], projections[right]);
+        }
+    }
+
+    assert_blocked_model_remains_viewable(&temporary.0, &three_dimensional);
+
+    let mut dangling = three_dimensional;
+    dangling["elements"][0]["node_ids"][1] = Value::String("MISSING".to_owned());
+    let dangling_path = temporary.0.join("dangling.model-ir.json");
+    std::fs::write(
+        &dangling_path,
+        serde_json::to_vec(&dangling).expect("dangling ModelIR bytes"),
+    )
+    .expect("write dangling ModelIR");
+    let rejected = run_workbench(&[text("model-view"), dangling_path.as_os_str()]);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_view_semantics_invalid"));
+
+    let invalid_projection = run_workbench(&[
+        text("model-view"),
+        source.as_os_str(),
+        text("--projection"),
+        text("perspective"),
+    ]);
+    assert_eq!(invalid_projection.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&invalid_projection.stdout).contains("workbench_usage_error"));
 }
 
 fn import_arguments<'a>(

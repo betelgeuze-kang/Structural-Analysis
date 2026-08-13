@@ -210,6 +210,12 @@
       "removal_blocker": false
     },
     {
+      "feature": "bounded_general_modelir_terminal_topology_view",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
       "feature": "general_visual_model_editing_and_3d_result_exploration",
       "native_status": "open",
       "legacy_status": "prototype_and_evidence_surface",
