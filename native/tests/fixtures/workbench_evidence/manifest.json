@@ -1,0 +1,31 @@
+{
+  "schema_version": "workbench-evidence-manifest.v1",
+  "generated_at": "2026-08-01T00:00:00Z",
+  "source_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "artifacts": [
+    {
+      "id": "product_readiness",
+      "label": "Product readiness",
+      "path": "readiness/ready.json",
+      "source_path": "fixtures/source/product-readiness.json",
+      "sha256": "sha256:739f96820e3b68f282bc2dd8dce12bef5c74e803457f658d152b5d08fc01177a",
+      "read_only": true
+    },
+    {
+      "id": "approval_status",
+      "label": "Approval status",
+      "path": "readiness/blocked.json",
+      "source_path": "fixtures/source/approval-status.json",
+      "sha256": "sha256:3466c36660655a4f44a66ce289504e90ee522b64d7a3eff8acfb1a8a3416ae51",
+      "read_only": true
+    },
+    {
+      "id": "candidate_status",
+      "label": "Candidate status",
+      "path": "readiness/unavailable.json",
+      "source_path": "fixtures/source/candidate-status.json",
+      "sha256": "sha256:70c41355d0f2bde2eae0162e2098bd089edb6c7843527a50e9a4b7e45a0079f7",
+      "read_only": true
+    }
+  ]
+}

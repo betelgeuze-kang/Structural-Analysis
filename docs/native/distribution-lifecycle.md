@@ -70,11 +70,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    source, then byte-compares every artifact and preserves MGT import-health evidence;
 6. exercises deterministic inspect, immutable explicit `review`, review reopen and handoff export
    from both installed sessions without inferring an engineering approval;
-7. installs an immutable update, rolls back and re-verifies activation;
-8. emits an append-only v3 hash-bound receipt with ModelIR/MGT result, report, MGT source,
-   import-health, review and export identities, Python/Node lookup count 0 and fallback count 0.
-   The receipt checker continues to accept frozen v1/v2 receipts without treating them as v3
-   operator-surface evidence.
+7. browses the embedded native benchmark catalog and a hash-bound copied evidence fixture without
+   Python, Node, network access, protected-source reads, or command execution from catalog data;
+8. installs an immutable update, rolls back and re-verifies activation;
+9. emits an append-only v4 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+   import-health, review, export, catalog and evidence-view identities, Python/Node lookup count 0
+   and fallback count 0. The receipt checker continues to accept frozen v1/v2/v3 receipts without
+   treating them as v4 catalog/evidence surface evidence.
 
 The reference command is:
 
@@ -93,12 +95,14 @@ On Linux hosts that permit unprivileged namespaces, the rootfs harness executes 
 profiles from the verified CPU bundle as UID/GID 65532 with an empty lookup path, a read-only root
 and payload, a writable operator workspace, and only loopback networking. Both profiles also run
 inspect, an explicit non-promoting `review`, review reopen, post-review inspect and handoff export.
-`structural-installer` verifies each operator artifact's canonical self-hash, session binding,
-ResultIR/comparison/PDF binding and fixed `review` decision before it creates and validates the v2
-self-hashed receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that
-neither an OCI image nor a customer image receipt or engineering approval was created.
-The installer continues to verify frozen v1 rootfs receipts against their original bundle and
-claim boundary, while only newly generated v2 receipts carry operator-surface evidence.
+It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
+each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
+fixed `review` decision, conservative geometry/no-runner catalog projection, and
+ready/blocked/unavailable evidence projection before it creates and validates the v3 self-hashed
+receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
+OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
+The installer continues to verify frozen v1 and v2 rootfs receipts against their original bundles
+and claim boundaries; only newly generated v3 receipts carry catalog/evidence surface evidence.
 
 The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to-NDTHA Workbench
 profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver

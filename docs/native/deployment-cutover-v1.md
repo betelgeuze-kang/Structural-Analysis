@@ -42,7 +42,10 @@ under a read-only bind mount, unshares user/mount/network namespaces, maps the r
 emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact receipt requires
 `EROFS` from both root and payload write probes, a writable operator workspace, only `lo`, zero
 IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
-artifacts. Its contract fixes `container_image_built=false` and `customer_image_receipt=false`.
+artifacts. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
+non-promoting geometry/no-runner and ready/blocked/unavailable boundaries. Its contract fixes
+`container_image_built=false` and `customer_image_receipt=false`; browsing does not generate or
+approve evidence.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

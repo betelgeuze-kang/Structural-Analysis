@@ -22,6 +22,15 @@ use structural_contracts::model_ir::{
 };
 use structural_contracts::product_ir::{parse_model_ir_ndtha_analysis_request_v1, sha256_identity};
 
+mod catalog;
+mod evidence;
+
+pub use catalog::{
+    browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,
+    BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,
+};
+pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
+
 const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";
 const IMPORT_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-import-receipt.v1";
 const VALIDATION_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-validation-receipt.v1";

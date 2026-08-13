@@ -56,6 +56,13 @@ V3_WORKBENCH_KEYS = {
     "mgt_workbench_export_sha256",
 }
 V3_EXPECTED_KEYS = V2_EXPECTED_KEYS | V3_WORKBENCH_KEYS
+V4_CATALOG_EVIDENCE_KEYS = {
+    "workbench_catalog_surface_passed",
+    "workbench_catalog_sha256",
+    "workbench_evidence_surface_passed",
+    "workbench_evidence_sha256",
+}
+V4_EXPECTED_KEYS = V3_EXPECTED_KEYS | V4_CATALOG_EVIDENCE_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -100,6 +107,7 @@ def validate(
         "structural-native-distribution-e2e.v1": V1_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v2": V2_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v3": V3_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v4": V4_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -127,6 +135,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v2",
         "structural-native-distribution-e2e.v3",
+        "structural-native-distribution-e2e.v4",
     }:
         for name in (
             "mgt_source_sha256",
@@ -150,6 +159,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v2",
         "structural-native-distribution-e2e.v3",
+        "structural-native-distribution-e2e.v4",
     }:
         for name in (
             "mgt_workbench_restart_passed",
@@ -157,7 +167,10 @@ def validate(
         ):
             if payload.get(name) is not True:
                 errors.append(f"{name} must be true")
-    if schema_version == "structural-native-distribution-e2e.v3":
+    if schema_version in {
+        "structural-native-distribution-e2e.v3",
+        "structural-native-distribution-e2e.v4",
+    }:
         for name in (
             "workbench_operator_surface_passed",
             "mgt_workbench_operator_surface_passed",
@@ -173,6 +186,16 @@ def validate(
             "mgt_workbench_review_sha256",
             "mgt_workbench_export_sha256",
         ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if schema_version == "structural-native-distribution-e2e.v4":
+        for name in (
+            "workbench_catalog_surface_passed",
+            "workbench_evidence_surface_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in ("workbench_catalog_sha256", "workbench_evidence_sha256"):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):

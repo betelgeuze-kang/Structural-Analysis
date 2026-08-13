@@ -18,11 +18,17 @@
       "review",
       "export"
     ],
+    "catalog_flow": [
+      "catalog",
+      "catalog-show",
+      "evidence",
+      "evidence-show"
+    ],
     "runtime_python_required": false,
     "runtime_node_required": false,
     "runtime_browser_required": false,
     "human_review_inferred": false,
-    "profile_scope": "exact_fixed_guided_modelir_or_normalized_mgt_ndtha"
+    "profile_scope": "exact_fixed_guided_modelir_or_normalized_mgt_ndtha_plus_read_only_benchmark_and_copied_evidence_browsing"
   },
   "legacy_surface": {
     "product_entrypoint": "src/main.tsx",
@@ -81,9 +87,9 @@
     },
     {
       "feature": "benchmark_and_evidence_catalog_browsing",
-      "native_status": "open",
+      "native_status": "c5_implemented",
       "legacy_status": "implemented",
-      "removal_blocker": true
+      "removal_blocker": false
     },
     {
       "feature": "accessibility_localization_and_unicode_report_ui",
@@ -103,5 +109,5 @@
     "native_result_error_checksum_parity_complete": false
   },
   "c6_complete": false,
-  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review and export surface while keeping every active React/TypeScript/JavaScript and Node verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog and copied-evidence browsing surfaces while keeping every active React/TypeScript/JavaScript and Node verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

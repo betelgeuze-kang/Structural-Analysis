@@ -5,7 +5,10 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use structural_workbench::{
-    NativeWorkbench, WorkbenchError, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
+    show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
+    BenchmarkTruthClassV1, NativeWorkbench, WorkbenchError, WorkbenchReviewDecisionV1,
+    WorkbenchStageV1,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -29,6 +32,13 @@ struct ReviewCommand {
     decision: WorkbenchReviewDecisionV1,
     reviewer: String,
     comment: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct EvidenceCommand {
+    bundle: PathBuf,
+    artifact_id: Option<String>,
+    as_of_unix_seconds: Option<i64>,
 }
 
 fn main() -> ExitCode {
@@ -98,11 +108,25 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("export") => {
             parse_workspace_only(arguments).and_then(|workspace| run_export(&workspace))
         }
+        Some("catalog") => parse_catalog(arguments).and_then(|filter| run_catalog(&filter)),
+        Some("catalog-show") => {
+            parse_catalog_show(arguments).and_then(|case_id| run_catalog_show(&case_id))
+        }
+        Some("evidence") => {
+            parse_evidence(arguments, false).and_then(|command| run_evidence(&command))
+        }
+        Some("evidence-show") => {
+            parse_evidence(arguments, true).and_then(|command| run_evidence_show(&command))
+        }
         Some("interactive") => {
             parse_workspace_only(arguments).and_then(|workspace| run_interactive(&workspace))
         }
         _ => Err(usage_error("unknown or incomplete Workbench command")),
     };
+    finish(result)
+}
+
+fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
     match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
@@ -119,6 +143,12 @@ fn run(arguments: &[OsString]) -> ExitCode {
                 "workbench_usage_error"
                     | "workbench_transition_invalid"
                     | "workbench_comparison_diverged"
+                    | "workbench_catalog_case_id_invalid"
+                    | "workbench_catalog_case_not_found"
+                    | "workbench_catalog_filter_invalid"
+                    | "workbench_evidence_artifact_id_invalid"
+                    | "workbench_evidence_artifact_not_found"
+                    | "workbench_evidence_as_of_invalid"
             ) {
                 EXIT_USAGE_OR_POLICY
             } else {
@@ -199,6 +229,39 @@ fn run_review_show(workspace: &Path) -> Result<(), WorkbenchError> {
 fn run_export(workspace: &Path) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(workspace)?;
     println!("{}", workbench.export_json()?);
+    Ok(())
+}
+
+fn run_catalog(filter: &BenchmarkCatalogFilterV1) -> Result<(), WorkbenchError> {
+    println!("{}", browse_embedded_benchmark_catalog(filter)?);
+    Ok(())
+}
+
+fn run_catalog_show(case_id: &str) -> Result<(), WorkbenchError> {
+    println!("{}", show_embedded_benchmark_case(case_id)?);
+    Ok(())
+}
+
+fn run_evidence(command: &EvidenceCommand) -> Result<(), WorkbenchError> {
+    println!(
+        "{}",
+        browse_evidence_bundle(&command.bundle, command.as_of_unix_seconds)?
+    );
+    Ok(())
+}
+
+fn run_evidence_show(command: &EvidenceCommand) -> Result<(), WorkbenchError> {
+    println!(
+        "{}",
+        show_evidence_artifact(
+            &command.bundle,
+            command
+                .artifact_id
+                .as_deref()
+                .expect("show parser requires an artifact ID"),
+            command.as_of_unix_seconds,
+        )?
+    );
     Ok(())
 }
 
@@ -429,6 +492,131 @@ fn parse_review(arguments: &[OsString]) -> Result<ReviewCommand, WorkbenchError>
     })
 }
 
+fn parse_catalog(arguments: &[OsString]) -> Result<BenchmarkCatalogFilterV1, WorkbenchError> {
+    let mut filter = BenchmarkCatalogFilterV1::default();
+    let mut truth_seen = false;
+    let mut size_seen = false;
+    let mut lifecycle_seen = false;
+    let mut query_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("catalog option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("catalog option names must be valid UTF-8"))?;
+        let value = arguments[index + 1]
+            .to_str()
+            .ok_or_else(|| usage_error("catalog option values must be valid UTF-8"))?;
+        match flag {
+            "--truth" if !truth_seen => {
+                truth_seen = true;
+                filter.truth_class = if value == "all" {
+                    None
+                } else {
+                    Some(BenchmarkTruthClassV1::parse(value).ok_or_else(|| {
+                        usage_error("catalog truth must be all or a supported truth class")
+                    })?)
+                };
+            }
+            "--size" if !size_seen => {
+                size_seen = true;
+                filter.size_class = if value == "all" {
+                    None
+                } else {
+                    Some(BenchmarkSizeClassV1::parse(value).ok_or_else(|| {
+                        usage_error("catalog size must be all, small, medium, large or unknown")
+                    })?)
+                };
+            }
+            "--lifecycle" if !lifecycle_seen => {
+                lifecycle_seen = true;
+                if value == "all" {
+                    filter.lifecycle = None;
+                } else if value == "first-targets" {
+                    filter.first_targets_only = true;
+                } else {
+                    filter.lifecycle = Some(BenchmarkLifecycleV1::parse(value).ok_or_else(|| {
+                        usage_error("catalog lifecycle must be all, first-targets or a supported lifecycle")
+                    })?);
+                }
+            }
+            "--query" if !query_seen => {
+                query_seen = true;
+                filter.query = Some(value.to_owned());
+            }
+            _ => return Err(usage_error("duplicate or unknown catalog option")),
+        }
+        index += 2;
+    }
+    Ok(filter)
+}
+
+fn parse_catalog_show(arguments: &[OsString]) -> Result<String, WorkbenchError> {
+    if arguments.len() == 3 && arguments[1] == "--case" {
+        arguments[2]
+            .to_str()
+            .filter(|value| !value.is_empty())
+            .map(ToOwned::to_owned)
+            .ok_or_else(|| usage_error("catalog case ID must be non-empty UTF-8"))
+    } else {
+        Err(usage_error("catalog-show requires exactly --case ID"))
+    }
+}
+
+fn parse_evidence(arguments: &[OsString], show: bool) -> Result<EvidenceCommand, WorkbenchError> {
+    let mut bundle = None;
+    let mut artifact_id = None;
+    let mut as_of_unix_seconds = None;
+    let mut as_of_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("evidence option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("evidence option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--bundle" if bundle.is_none() => bundle = Some(PathBuf::from(value)),
+            "--artifact" if show && artifact_id.is_none() => {
+                artifact_id = Some(
+                    value
+                        .to_str()
+                        .filter(|text| !text.is_empty())
+                        .ok_or_else(|| usage_error("evidence artifact ID must be non-empty UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--as-of-unix" if !as_of_seen => {
+                as_of_seen = true;
+                as_of_unix_seconds = Some(
+                    value
+                        .to_str()
+                        .and_then(|text| text.parse::<i64>().ok())
+                        .ok_or_else(|| usage_error("evidence as-of must be signed Unix seconds"))?,
+                );
+            }
+            _ => return Err(usage_error("duplicate or unknown evidence option")),
+        }
+        index += 2;
+    }
+    if !show && artifact_id.is_some() {
+        return Err(usage_error("evidence browse does not accept --artifact"));
+    }
+    Ok(EvidenceCommand {
+        bundle: bundle.ok_or_else(|| usage_error("--bundle is required"))?,
+        artifact_id: if show {
+            Some(artifact_id.ok_or_else(|| usage_error("--artifact is required"))?)
+        } else {
+            None
+        },
+        as_of_unix_seconds,
+    })
+}
+
 fn usage_error(detail: &str) -> WorkbenchError {
     WorkbenchError {
         code: "workbench_usage_error",
@@ -437,7 +625,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
+    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
 }
 
 #[cfg(test)]
@@ -445,7 +633,10 @@ mod tests {
     use std::ffi::OsString;
     use std::path::PathBuf;
 
-    use super::{parse_import, parse_review, parse_stage_command};
+    use super::{
+        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_review,
+        parse_stage_command,
+    };
 
     #[test]
     fn parser_requires_explicit_provenance_inputs() {
@@ -529,5 +720,64 @@ mod tests {
         let mut invalid = arguments;
         invalid[4] = OsString::from("inferred-pass");
         assert!(parse_review(&invalid).is_err());
+    }
+
+    #[test]
+    fn catalog_parser_preserves_explicit_filters() {
+        let arguments = [
+            OsString::from("catalog"),
+            OsString::from("--truth"),
+            OsString::from("geometry_only"),
+            OsString::from("--size"),
+            OsString::from("large"),
+            OsString::from("--lifecycle"),
+            OsString::from("first-targets"),
+            OsString::from("--query"),
+            OsString::from("PEER"),
+        ];
+        let parsed = parse_catalog(&arguments).expect("catalog filters");
+        assert!(parsed.truth_class.is_some());
+        assert!(parsed.size_class.is_some());
+        assert!(parsed.first_targets_only);
+        assert_eq!(parsed.query.as_deref(), Some("PEER"));
+        assert!(parse_catalog(&[arguments[0].clone(), arguments[1].clone()]).is_err());
+
+        let show = [
+            OsString::from("catalog-show"),
+            OsString::from("--case"),
+            OsString::from("case-a"),
+        ];
+        assert_eq!(parse_catalog_show(&show).expect("show case"), "case-a");
+    }
+
+    #[test]
+    fn evidence_parser_requires_an_explicit_bundle_and_show_id() {
+        let browse = [
+            OsString::from("evidence"),
+            OsString::from("--bundle"),
+            OsString::from("bundle"),
+            OsString::from("--as-of-unix"),
+            OsString::from("1786579200"),
+        ];
+        let parsed = parse_evidence(&browse, false).expect("evidence browse");
+        assert_eq!(parsed.bundle, PathBuf::from("bundle"));
+        assert_eq!(parsed.as_of_unix_seconds, Some(1_786_579_200));
+        assert_eq!(parsed.artifact_id, None);
+
+        let show = [
+            OsString::from("evidence-show"),
+            OsString::from("--bundle"),
+            OsString::from("bundle"),
+            OsString::from("--artifact"),
+            OsString::from("product_readiness"),
+        ];
+        assert_eq!(
+            parse_evidence(&show, true)
+                .expect("evidence show")
+                .artifact_id
+                .as_deref(),
+            Some("product_readiness")
+        );
+        assert!(parse_evidence(&show[..3], true).is_err());
     }
 }

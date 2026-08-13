@@ -5,7 +5,7 @@
 // - a run command is offered ONLY for cases with a registered runnerId;
 // - the lifecycle reflects what is actually verified, not what we hope.
 
-import catalogRaw from './benchmarkCatalog.json'
+import catalogRaw from '../../../../native/catalog/benchmark-catalog-v2.json'
 
 export type TruthClass =
   | 'analytic'

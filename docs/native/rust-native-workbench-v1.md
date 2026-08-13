@@ -29,6 +29,9 @@ ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
    one immutable explicit human `pass`/`review`/`fail` disposition that is hash-bound to the exact
    session, ResultIR, comparison IR, and PDF; it is never inferred from a successful run or
    comparison. `Export` emits a self-hashed handoff manifest for those exact relative artifacts.
+8. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
+   acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
+   it never reads protected source evidence or generates a readiness verdict.
 
 Every stage is an atomically renamed directory with a self-hashed receipt and complete artifact
 inventory. `workbench-session.json` contains no machine-specific paths. On open, the Workbench
@@ -56,6 +59,11 @@ structural-workbench review --workspace SESSION --decision review \
   --reviewer "Engineer A" --comment "Check connection assumptions."
 structural-workbench review-show --workspace SESSION
 structural-workbench export --workspace SESSION
+structural-workbench catalog --truth geometry_only --size large
+structural-workbench catalog-show --case peer_spd_rc_column_rectangular_seed_01
+structural-workbench evidence --bundle EVIDENCE-DIR --as-of-unix 1786579200
+structural-workbench evidence-show --bundle EVIDENCE-DIR \
+  --artifact product_readiness --as-of-unix 1786579200
 ```
 
 `interactive` advances the same durable state machine one action at a time. `workflow` is the
@@ -68,6 +76,12 @@ instead of silently overwriting history. Reviewer and comment text are bounded a
 control characters. The export is a manifest, not a signature or archive; the listed PDF and JSON
 files remain independently verifiable product artifacts.
 
+Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
+unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
+non-symlink bundle directory; every artifact is bounded and must match the manifest SHA-256. An
+explicit `--as-of-unix` makes the 21-day freshness calculation reproducible. Without it,
+timestamp-only freshness is `unknown`, while an explicit stale signal remains stale.
+
 The integration test clears the child environment, executes each stage in a new process, restores
 the pre-Run session after the atomic checkpoint publication to model a crash window, resumes, and
 then compares all 29 ModelIR-flow files against a second one-shot workflow byte for byte. The MGT
@@ -77,7 +91,9 @@ advance. The tests also freeze the terminal ResultIR and PDF hashes and prove in
 imported-input tamper rejection. A separate clean-process test publishes the same explicit review
 in two workspaces, proves byte-identical inspect/review/export JSON, verifies that a passed external
 comparison does not infer the human decision, blocks review overwrite, and rejects a one-byte
-review mutation on reopen.
+review mutation on reopen. Catalog/evidence E2E repeats byte-identically in a cleared environment,
+freezes conservative ready/blocked/unavailable projections, verifies self-hashes, and rejects
+evidence checksum tampering.
 
 ## Claim boundary
 
@@ -86,7 +102,8 @@ deterministic results summary, explicit human review and handoff export for that
 not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
 MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
 modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
-accessibility/localization, protected HIP C2 receipts, and final Python/Node C6 removal remain open.
+accessibility/localization, Node-owned evidence-bundle generation, protected HIP C2 receipts, and
+final Python/Node C6 removal remain open.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 

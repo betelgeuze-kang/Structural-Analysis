@@ -17,6 +17,8 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
+    Path("native/catalog/benchmark-catalog-v2.json"),
+    Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
@@ -29,7 +31,7 @@ EXPECTED_FEATURES = {
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
-    "benchmark_and_evidence_catalog_browsing": ("open", True),
+    "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),
     "accessibility_localization_and_unicode_report_ui": ("open", True),
 }
 EXPECTED_PREREQUISITES = {
@@ -134,6 +136,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         blockers.append("workbench_ui_native_core_flow_invalid")
     if native.get("operator_flow") != ["inspect", "review", "export"]:
         blockers.append("workbench_ui_native_operator_flow_invalid")
+    if native.get("catalog_flow") != [
+        "catalog",
+        "catalog-show",
+        "evidence",
+        "evidence-show",
+    ]:
+        blockers.append("workbench_ui_native_catalog_flow_invalid")
     for field in (
         "runtime_python_required",
         "runtime_node_required",
@@ -218,6 +227,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
+            "browse_embedded_benchmark_catalog",
+            "browse_evidence_bundle",
         ),
         blockers,
     )
@@ -227,7 +238,15 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     _require_tokens(
         Path("native/crates/structural-workbench/src/main.rs"),
         native_main,
-        ('Some("inspect")', 'Some("review")', 'Some("export")'),
+        (
+            'Some("inspect")',
+            'Some("review")',
+            'Some("export")',
+            'Some("catalog")',
+            'Some("catalog-show")',
+            'Some("evidence")',
+            'Some("evidence-show")',
+        ),
         blockers,
     )
     transition_doc = _text(
@@ -240,6 +259,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "not a C6 removal receipt",
             "never infers this decision",
             "seven active workflows",
+            "catalog and copied-evidence browsing",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),

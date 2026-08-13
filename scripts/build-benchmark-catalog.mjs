@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const reportsDir = path.join(rootDir, 'implementation/phase1/open_data/irregular/collected/reports')
 const peerDir = path.join(rootDir, 'implementation/phase1/open_data/pbd_hinge/peer_spd_specimens')
-const outFile = path.join(rootDir, 'src/workbench-v2/model/benchmark/benchmarkCatalog.json')
+const outFile = path.join(rootDir, 'native/catalog/benchmark-catalog-v2.json')
 
 const TRUTH_BY_FORMAT = {
   ifc: 'geometry_only',
@@ -141,7 +141,7 @@ function main() {
     generated_at: new Date().toISOString(),
     generated_by: 'scripts/build-benchmark-catalog.mjs',
     disclaimer:
-      'Candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses, most truth classes, reference results, and runners are UNVERIFIED. A run command is only offered for cases with a registered runnerId. geometry_only cases must not be used for numerical-accuracy averaging.',
+      'Shared language-neutral candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses, most truth classes, reference results, and runners are UNVERIFIED. A run command is only offered for cases with a registered runnerId. geometry_only cases must not be used for numerical-accuracy averaging.',
     accuracy_exclusion_rule:
       'geometry_only data is used only for import / topology / rendering / GUI performance / model health, never in numerical-accuracy averages.',
     lifecycle_states: ['DISCOVERED', 'ACQUIRED', 'NORMALIZED', 'REFERENCE_ATTACHED', 'RUNNABLE', 'VALIDATED'],

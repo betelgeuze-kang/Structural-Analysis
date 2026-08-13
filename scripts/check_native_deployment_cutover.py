@@ -313,6 +313,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "review-show --workspace",
         "export --workspace",
         "--workbench-inspect-before-review",
+        "structural-native-benchmark-catalog-view.v1",
+        "structural-native-evidence-bundle-view.v1",
+        "--workbench-catalog",
+        "--workbench-evidence",
         "runtime-probe",
         "runtime-receipt-verify",
     ):

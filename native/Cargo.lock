@@ -819,6 +819,7 @@ dependencies = [
  "structural-cli",
  "structural-contracts",
  "structural-report",
+ "time",
 ]
 
 [[package]]

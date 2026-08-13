@@ -165,6 +165,8 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-workbench-review-show",
             "--mgt-workbench-inspect-after-review",
             "--mgt-workbench-export",
+            "--workbench-catalog",
+            "--workbench-evidence",
             "--receipt",
         ],
     )?;
@@ -185,6 +187,8 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
     let mgt_workbench_inspect_after_review =
         required_path(options, "--mgt-workbench-inspect-after-review")?;
     let mgt_workbench_export = required_path(options, "--mgt-workbench-export")?;
+    let workbench_catalog = required_path(options, "--workbench-catalog")?;
+    let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
     let result = create_rootfs_isolation_receipt(&RootfsIsolationProbeRequest {
         bundle: &bundle,
@@ -200,6 +204,8 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         mgt_workbench_review_show: &mgt_workbench_review_show,
         mgt_workbench_inspect_after_review: &mgt_workbench_inspect_after_review,
         mgt_workbench_export: &mgt_workbench_export,
+        workbench_catalog: &workbench_catalog,
+        workbench_evidence: &workbench_evidence,
         receipt: &receipt,
     })?;
     json_result("runtime_probe", result)

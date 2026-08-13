@@ -190,6 +190,19 @@ exercise_operator_surface() {
 exercise_operator_surface workbench "$direct"
 exercise_operator_surface mgt-workbench "$mgt_direct"
 
+evidence_bundle="$repository_root/native/tests/fixtures/workbench_evidence"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" catalog \
+  --truth geometry_only --size large > "$e2e_root/workbench-catalog.json"
+grep -Fq '"schema_version":"structural-native-benchmark-catalog-view.v1"' \
+  "$e2e_root/workbench-catalog.json"
+grep -Fq '"matched_case_count":4' "$e2e_root/workbench-catalog.json"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" evidence \
+  --bundle "$evidence_bundle" --as-of-unix 1786579200 \
+  > "$e2e_root/workbench-evidence.json"
+grep -Fq '"schema_version":"structural-native-evidence-bundle-view.v1"' \
+  "$e2e_root/workbench-evidence.json"
+grep -Fq '"blocked_count":1' "$e2e_root/workbench-evidence.json"
+
 updated_release="$release_id-update"
 updated_bundle="$e2e_root/bundle-update"
 "$installer" bundle-create --payload "$bundle/payload" --output "$updated_bundle" \
@@ -213,8 +226,10 @@ workbench_review_hash="$(sha256sum "$direct/07-review/review.json" | awk '{print
 workbench_export_hash="$(sha256sum "$e2e_root/workbench-export.json" | awk '{print $1}')"
 mgt_workbench_review_hash="$(sha256sum "$mgt_direct/07-review/review.json" | awk '{print $1}')"
 mgt_workbench_export_hash="$(sha256sum "$e2e_root/mgt-workbench-export.json" | awk '{print $1}')"
+workbench_catalog_hash="$(sha256sum "$e2e_root/workbench-catalog.json" | awk '{print $1}')"
+workbench_evidence_hash="$(sha256sum "$e2e_root/workbench-evidence.json" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
-printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v3\",\"backend_profile\":\"rocm\",\"linkage\":\"shared\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":\"sha256:$c2_hash\",\"approved_device_runner\":true,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"approved_rocm_c5\"}" > "$temporary_receipt"
+printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v4\",\"backend_profile\":\"rocm\",\"linkage\":\"shared\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":\"sha256:$c2_hash\",\"approved_device_runner\":true,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"approved_rocm_c5\"}" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$installed_backend_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

@@ -15,9 +15,18 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   comparison IR, and PDF. Solver completion or comparison success never infers this decision;
 - `export`: a deterministic self-hashed handoff manifest containing relative artifact names,
   lengths, and hashes.
+- `catalog` / `catalog-show`: strict, self-hashed browsing of the 26-case language-neutral native
+  benchmark catalog, including lifecycle, truth, size, first-target and text filters. Geometry-only
+  cases remain excluded from accuracy and no runner/acquisition string is executed.
+- `evidence` / `evidence-show`: bounded read-only browsing of an operator-supplied copied evidence
+  bundle. The native reader rejects unsafe paths, symlinks, duplicate IDs/paths, checksum drift and
+  malformed JSON, exposes commit mismatch, and never promotes blocked or signal-free sources.
 
-This closes bounded results inspection and review/export behavior for the current native profile. It
-does not provide a general visual model editor or 3D result explorer.
+This closes bounded results inspection, review/export, and catalog and copied-evidence browsing for
+the current native product. The canonical benchmark JSON now lives under `native/catalog`; the
+legacy React browser consumes that native-owned file. It does not provide a general visual model
+editor or 3D result explorer. The evidence-bundle generator remains Node-owned, so language-neutral
+golden ownership is not yet complete.
 
 ## Legacy authority still active
 

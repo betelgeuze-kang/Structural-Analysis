@@ -60,6 +60,7 @@ external="$repository_root/native/tests/fixtures/external_comparison/reference_o
 source_artifact="$repository_root/native/tests/fixtures/solver_cpu/nonlinear_ndtha_one_story_elastic_python_c1.json"
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
+evidence_bundle="$repository_root/native/tests/fixtures/workbench_evidence"
 
 unshare -Urn bwrap \
   --ro-bind / / \
@@ -108,6 +109,14 @@ unshare -Urn bwrap \
       > /mnt/mgt-inspect-after-review.json
     /opt/payload/bin/structural-workbench export --workspace /mnt/mgt-workbench \
       > /mnt/mgt-export.json
+    /opt/payload/bin/structural-workbench catalog --truth geometry_only --size large \
+      > /mnt/workbench-catalog.json
+    grep -Fq '"'"'"schema_version"'"'":"'"'"structural-native-benchmark-catalog-view.v1"'"'"' \
+      /mnt/workbench-catalog.json
+    /opt/payload/bin/structural-workbench evidence --bundle "$7" \
+      --as-of-unix 1786579200 > /mnt/workbench-evidence.json
+    grep -Fq '"'"'"schema_version"'"'":"'"'"structural-native-evidence-bundle-view.v1"'"'"' \
+      /mnt/workbench-evidence.json
     /opt/payload/bin/structural-installer runtime-probe \
       --bundle /opt --payload-root /opt/payload --workspace /mnt \
       --workbench-root /mnt/modelir-workbench \
@@ -120,10 +129,13 @@ unshare -Urn bwrap \
       --mgt-workbench-review-show /mnt/mgt-review-show.json \
       --mgt-workbench-inspect-after-review /mnt/mgt-inspect-after-review.json \
       --mgt-workbench-export /mnt/mgt-export.json \
+      --workbench-catalog /mnt/workbench-catalog.json \
+      --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \
       > /mnt/runtime-probe-result.json
   ' structural-rootfs-e2e \
-    "$model" "$request" "$external" "$source_artifact" "$mgt_source" "$mgt_request"
+    "$model" "$request" "$external" "$source_artifact" "$mgt_source" "$mgt_request" \
+    "$evidence_bundle"
 
 "$installer" runtime-receipt-verify \
   --receipt "$e2e_root/rootfs-isolation-receipt.json" \

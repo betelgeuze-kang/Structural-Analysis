@@ -81,6 +81,26 @@ fn mgt_inputs() -> (PathBuf, PathBuf, PathBuf, PathBuf) {
     )
 }
 
+fn evidence_fixture() -> PathBuf {
+    repository_root().join("native/tests/fixtures/workbench_evidence")
+}
+
+fn copy_evidence_fixture(destination: &Path) {
+    std::fs::create_dir_all(destination.join("readiness")).expect("create evidence fixture copy");
+    std::fs::copy(
+        evidence_fixture().join("manifest.json"),
+        destination.join("manifest.json"),
+    )
+    .expect("copy evidence manifest");
+    for name in ["ready.json", "blocked.json", "unavailable.json"] {
+        std::fs::copy(
+            evidence_fixture().join("readiness").join(name),
+            destination.join("readiness").join(name),
+        )
+        .expect("copy evidence artifact");
+    }
+}
+
 fn import_arguments<'a>(
     command: &'a str,
     model: &'a Path,
@@ -194,6 +214,191 @@ fn verify_session(workspace: &Path) -> Value {
 fn output_json(output: &Output) -> Value {
     assert_success(output);
     serde_json::from_slice(&output.stdout).expect("Workbench canonical JSON stdout")
+}
+
+fn verify_output_self_hash(value: &Value, hash_field: &str) {
+    let mut unsigned = value.clone();
+    let expected = unsigned
+        .as_object_mut()
+        .expect("self-hashed output object")
+        .remove(hash_field)
+        .and_then(|hash| hash.as_str().map(ToOwned::to_owned))
+        .expect("self-hashed output field");
+    let canonical = canonicalize_model_ir_v2(&unsigned).expect("canonical self-hashed output");
+    assert_eq!(expected, sha256_identity(canonical.as_bytes()));
+}
+
+#[test]
+fn native_catalog_browse_and_exact_case_view_are_deterministic_and_non_promoting() {
+    let browse_arguments = [
+        text("catalog"),
+        text("--truth"),
+        text("geometry_only"),
+        text("--size"),
+        text("large"),
+    ];
+    let first = run_workbench(&browse_arguments);
+    let second = run_workbench(&browse_arguments);
+    assert_success(&first);
+    assert_eq!(first.stdout, second.stdout);
+    let view = output_json(&first);
+    assert_eq!(
+        view["schema_version"],
+        "structural-native-benchmark-catalog-view.v1"
+    );
+    assert_eq!(view["source_schema_version"], "benchmark-catalog.v2");
+    assert_eq!(
+        view["source_content_hash"],
+        "sha256:58601994beeabc8dfec557a0ae12ea483c0390685af9257179abfdaad0d990da"
+    );
+    assert_eq!(view["summary"]["total_case_count"], 26);
+    assert_eq!(view["summary"]["matched_case_count"], 4);
+    assert_eq!(view["summary"]["accuracy_comparable_count"], 5);
+    assert_eq!(view["summary"]["runnable_count"], 0);
+    assert!(view["cases"]
+        .as_array()
+        .expect("filtered cases")
+        .iter()
+        .all(|case| case["accuracyComparable"] == false
+            && case["runCommand"].is_null()
+            && case["runBlockedReason"] == "No benchmark runner registered"));
+    verify_output_self_hash(&view, "catalog_view_hash");
+
+    let show = run_workbench(&[
+        text("catalog-show"),
+        text("--case"),
+        text("peer_spd_rc_column_rectangular_seed_01"),
+    ]);
+    let case_view = output_json(&show);
+    assert_eq!(
+        case_view["schema_version"],
+        "structural-native-benchmark-case-view.v1"
+    );
+    assert_eq!(
+        case_view["case"]["id"],
+        "peer_spd_rc_column_rectangular_seed_01"
+    );
+    assert_eq!(case_view["case"]["lifecycle"], "REFERENCE_ATTACHED");
+    assert_eq!(case_view["case"]["accuracyComparable"], true);
+    assert_eq!(case_view["case"]["runCommand"], Value::Null);
+    verify_output_self_hash(&case_view, "case_view_hash");
+
+    let missing = run_workbench(&[
+        text("catalog-show"),
+        text("--case"),
+        text("not-a-registered-case"),
+    ]);
+    assert_eq!(missing.status.code(), Some(2));
+    let failure: Value = serde_json::from_slice(&missing.stdout).expect("failure JSON");
+    assert_eq!(failure["code"], "workbench_catalog_case_not_found");
+}
+
+#[test]
+fn native_evidence_bundle_view_is_deterministic_and_fails_closed_on_hash_drift() {
+    let fixture = evidence_fixture();
+    let browse_arguments = [
+        text("evidence"),
+        text("--bundle"),
+        fixture.as_os_str(),
+        text("--as-of-unix"),
+        text("1786579200"),
+    ];
+    let first = run_workbench(&browse_arguments);
+    let second = run_workbench(&browse_arguments);
+    assert_success(&first);
+    assert_eq!(first.stdout, second.stdout);
+    let view = output_json(&first);
+    assert_eq!(
+        view["schema_version"],
+        "structural-native-evidence-bundle-view.v1"
+    );
+    assert_eq!(view["commit_mismatch"], false);
+    assert_eq!(view["bundle_consistent"], true);
+    assert_eq!(view["summary"]["artifact_count"], 3);
+    assert_eq!(view["summary"]["ready_count"], 1);
+    assert_eq!(view["summary"]["blocked_count"], 1);
+    assert_eq!(view["summary"]["unavailable_count"], 1);
+    assert_eq!(view["summary"]["stale_count"], 1);
+    assert_eq!(view["summary"]["product_release_ready"], true);
+    assert_eq!(view["artifacts"][0]["facts"]["gate_state"], "ready");
+    assert_eq!(view["artifacts"][1]["facts"]["gate_state"], "blocked");
+    assert_eq!(view["artifacts"][2]["facts"]["gate_state"], "unavailable");
+    verify_output_self_hash(&view, "evidence_view_hash");
+
+    let show = run_workbench(&[
+        text("evidence-show"),
+        text("--bundle"),
+        fixture.as_os_str(),
+        text("--artifact"),
+        text("approval_status"),
+        text("--as-of-unix"),
+        text("1786579200"),
+    ]);
+    let artifact = output_json(&show);
+    assert_eq!(
+        artifact["schema_version"],
+        "structural-native-evidence-artifact-view.v1"
+    );
+    assert_eq!(artifact["artifact"]["id"], "approval_status");
+    assert_eq!(artifact["artifact"]["facts"]["blocker_count"], 1);
+    verify_output_self_hash(&artifact, "evidence_artifact_view_hash");
+
+    let temporary = TestDirectory::create();
+    let tampered = temporary.0.join("evidence");
+    copy_evidence_fixture(&tampered);
+    std::fs::write(
+        tampered.join("readiness/ready.json"),
+        b"{\"source_commit_sha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}\n",
+    )
+    .expect("tamper copied evidence");
+    let rejected = run_workbench(&[text("evidence"), text("--bundle"), tampered.as_os_str()]);
+    assert_eq!(rejected.status.code(), Some(1));
+    let failure: Value = serde_json::from_slice(&rejected.stdout).expect("failure JSON");
+    assert_eq!(failure["code"], "workbench_evidence_checksum_mismatch");
+
+    let uppercase = temporary.0.join("uppercase-evidence");
+    copy_evidence_fixture(&uppercase);
+    let manifest_path = uppercase.join("manifest.json");
+    let mut manifest: Value = serde_json::from_slice(
+        &std::fs::read(&manifest_path).expect("read copied evidence manifest"),
+    )
+    .expect("decode copied evidence manifest");
+    let uppercase_hash = manifest["artifacts"][0]["sha256"]
+        .as_str()
+        .expect("fixture SHA-256")
+        .to_ascii_uppercase();
+    manifest["artifacts"][0]["sha256"] = Value::String(uppercase_hash);
+    std::fs::write(
+        &manifest_path,
+        serde_json::to_vec(&manifest).expect("encode uppercase manifest"),
+    )
+    .expect("write uppercase evidence manifest");
+    let rejected = run_workbench(&[text("evidence"), text("--bundle"), uppercase.as_os_str()]);
+    assert_eq!(rejected.status.code(), Some(1));
+    let failure: Value = serde_json::from_slice(&rejected.stdout).expect("failure JSON");
+    assert_eq!(
+        failure["code"],
+        "workbench_evidence_manifest_contract_invalid"
+    );
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::symlink;
+
+        let symlinked = temporary.0.join("symlinked-evidence");
+        copy_evidence_fixture(&symlinked);
+        std::fs::remove_file(symlinked.join("readiness/ready.json"))
+            .expect("remove copied evidence artifact");
+        symlink(
+            evidence_fixture().join("readiness/ready.json"),
+            symlinked.join("readiness/ready.json"),
+        )
+        .expect("create evidence artifact symlink");
+        let rejected = run_workbench(&[text("evidence"), text("--bundle"), symlinked.as_os_str()]);
+        assert_eq!(rejected.status.code(), Some(1));
+        let failure: Value = serde_json::from_slice(&rejected.stdout).expect("failure JSON");
+        assert_eq!(failure["code"], "workbench_evidence_io_error");
+    }
 }
 
 #[test]
