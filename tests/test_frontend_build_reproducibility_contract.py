@@ -82,6 +82,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- viewer-visual-regression --root ."
     )
+    assert (
+        package_json["scripts"]["verify:viewer-sample-workflow"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-sample-workflow --root ."
+    )
     assert package_json["dependencies"] == {
         "react": "18.2.0",
         "react-dom": "18.2.0",
@@ -129,6 +134,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "structural-frontend-contract viewer-performance-probe" in docs_text
     assert "npm run verify:viewer-visual-regression" in docs_text
     assert "structural-frontend-contract viewer-visual-regression" in docs_text
+    assert "npm run verify:viewer-sample-workflow" in docs_text
+    assert "structural-frontend-contract viewer-sample-workflow" in docs_text
     assert "package-lock.json" in docs_text
 
 

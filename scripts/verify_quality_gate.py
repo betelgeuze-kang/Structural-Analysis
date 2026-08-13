@@ -575,6 +575,7 @@ def _command_groups(mode: str) -> list[list[str]]:
         _lane_command("molecular_quarantine"),
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],
+        [_npm(), "run", "verify:viewer-sample-workflow"],
         [_npm(), "run", "verify:viewer-report-pdf"],
         [_npm(), "run", "verify:viewer-performance-probe"],
         [_npm(), "run", "verify:viewer-visual-regression"],

@@ -59,6 +59,9 @@ jobs:
       - name: Rust-orchestrated Workbench v2 browser regression
         run: npm run verify:workbench-v2-e2e
 
+      - name: Rust-orchestrated Viewer sample workflow
+        run: npm run verify:viewer-sample-workflow
+
       - name: Rust-orchestrated Viewer report PDF contract
         run: npm run verify:viewer-report-pdf
 

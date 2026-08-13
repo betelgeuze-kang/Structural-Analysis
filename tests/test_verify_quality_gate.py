@@ -141,10 +141,14 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         in output
     )
     assert "-m pytest -q" in output
+    assert "verify:viewer-sample-workflow" in output
     assert "verify:viewer-report-pdf" in output
     assert "verify:viewer-performance-probe" in output
     assert "verify:viewer-visual-regression" in output
     assert output.index("verify:frontend-browser-smoke") < output.index(
+        "verify:viewer-sample-workflow"
+    )
+    assert output.index("verify:viewer-sample-workflow") < output.index(
         "verify:viewer-report-pdf"
     )
     assert output.index("verify:viewer-report-pdf") < output.index(

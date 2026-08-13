@@ -9,15 +9,16 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
-    canonical_viewer_visual_regression_receipt_json,
+    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
+    canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
-    FrontendContractError, ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, serve_viewer, FrontendContractError,
+    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
     ViewerVisualRegressionOptions,
 };
 
@@ -97,6 +98,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_viewer_report_pdf_smoke(&options)?;
         return canonical_viewer_report_pdf_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-sample-workflow" {
+        let options = parse_viewer_sample_workflow_arguments(&arguments[1..])?;
+        let receipt = run_viewer_sample_workflow(&options)?;
+        return canonical_viewer_sample_workflow_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "viewer-visual-regression" {
         let options = parse_viewer_visual_regression_arguments(&arguments[1..])?;
         let receipt = run_viewer_visual_regression(&options)?;
@@ -136,9 +142,69 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
+}
+
+fn parse_viewer_sample_workflow_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerSampleWorkflowOptions, CliError> {
+    let mut root = None;
+    let mut max_minutes = None;
+    let mut output = None;
+    let mut dry_run = false;
+    let mut keep_temporary_output = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-sample-workflow option names must be UTF-8"))?;
+        if matches!(name, "--dry-run" | "--keep") {
+            let flag = if name == "--dry-run" {
+                &mut dry_run
+            } else {
+                &mut keep_temporary_output
+            };
+            if *flag {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            *flag = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-sample-workflow value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--max-minutes" if max_minutes.is_none() => {
+                max_minutes = Some(parse_positive_f64(value, "--max-minutes")?);
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--root" | "--max-minutes" | "--out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-sample-workflow options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerSampleWorkflowOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    options.max_sample_completion_minutes =
+        max_minutes.unwrap_or(options.max_sample_completion_minutes);
+    options.output = output;
+    options.dry_run = dry_run;
+    options.keep_temporary_output = keep_temporary_output;
+    Ok(options)
 }
 
 #[allow(clippy::too_many_lines)] // Keeping the bounded option matrix in one duplicate-aware parser is clearer.
@@ -690,7 +756,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -701,7 +767,8 @@ mod tests {
     use super::{
         parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
         parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_smoke_arguments,
-        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
+        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -859,6 +926,43 @@ mod tests {
             OsString::from("a"),
             OsString::from("--min-fps"),
             OsString::from("NaN"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_sample_workflow_parser_accepts_complete_and_rejects_invalid_options() {
+        let workflow = parse_viewer_sample_workflow_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--max-minutes"),
+            OsString::from("12.5"),
+            OsString::from("--out"),
+            OsString::from("workflow.json"),
+            OsString::from("--dry-run"),
+            OsString::from("--keep"),
+        ])
+        .expect("valid Viewer sample-workflow arguments");
+        assert_eq!(workflow.root, PathBuf::from("a"));
+        assert_eq!(
+            workflow.max_sample_completion_minutes.to_bits(),
+            12.5_f64.to_bits()
+        );
+        assert_eq!(workflow.output, Some(PathBuf::from("workflow.json")));
+        assert!(workflow.dry_run);
+        assert!(workflow.keep_temporary_output);
+        assert!(parse_viewer_sample_workflow_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--max-minutes"),
+            OsString::from("NaN"),
+        ])
+        .is_err());
+        assert!(parse_viewer_sample_workflow_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--root"),
+            OsString::from("b"),
         ])
         .is_err());
     }

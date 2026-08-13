@@ -9,15 +9,16 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
-    canonical_viewer_visual_regression_receipt_json,
+    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
+    canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
-    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions, ViewerVisualRegressionOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
+    ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -313,6 +314,15 @@ fn write_visual_regression_fixture(root: &Path) {
         ),
     )
     .expect("write visual-regression fixture");
+}
+
+#[cfg(unix)]
+fn write_sample_workflow_fixture(root: &Path) {
+    std::fs::copy(
+        repository_root().join("implementation/phase1/structure_viewer_sample_workflow_smoke.json"),
+        root.join("sample-workflow-fixture.json"),
+    )
+    .expect("copy tracked sample-workflow fixture");
 }
 
 fn verify_receipt_hash(value: &Value) {
@@ -999,6 +1009,263 @@ fn viewer_performance_probe_rejects_source_mutation_and_removes_output() {
         serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
             .expect("Viewer performance mutation error JSON");
     assert_eq!(error["code"], "viewer_performance_probe_contract_changed");
+    assert!(!output_path.exists());
+}
+
+#[test]
+fn viewer_sample_workflow_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = ViewerSampleWorkflowOptions::new(root);
+    options.dry_run = true;
+    options.output = Some(PathBuf::from("planned-sample-workflow.json"));
+    let first = run_viewer_sample_workflow(&options).expect("Viewer sample-workflow dry-run");
+    let second =
+        run_viewer_sample_workflow(&options).expect("repeat Viewer sample-workflow dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.tracked_sources.len(), 3);
+    assert!(first
+        .tracked_sources
+        .iter()
+        .all(|source| source.sha256.starts_with("sha256:") && source.bytes > 0));
+    assert_eq!(
+        first.max_sample_completion_minutes.to_bits(),
+        30.0_f64.to_bits()
+    );
+    assert_eq!(
+        first.requested_output.as_deref(),
+        Some("planned-sample-workflow.json")
+    );
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!(first.artifact_sha256, None);
+    assert_eq!(first.verified_step_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert!(first.runtime_requirements.node_required);
+    assert!(first.runtime_requirements.browser_required);
+    assert!(first.runtime_requirements.retained_node_internal_listener);
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_sample_workflow_receipt_json(&first)
+        .expect("canonical Viewer sample-workflow receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer sample-workflow receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_viewer_sample_workflow_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&root)
+        .args([
+            "--max-minutes",
+            "12.5",
+            "--out",
+            "planned-workflow.json",
+            "--dry-run",
+        ])
+        .env_clear()
+        .output()
+        .expect("run Viewer sample-workflow dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer sample-workflow CLI receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer sample-workflow receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["action"], "viewer_sample_workflow");
+    assert_eq!(receipt["max_sample_completion_minutes"], 12.5);
+    assert_eq!(receipt["requested_output"], "planned-workflow.json");
+    assert_eq!(receipt["direct_processes_spawned"], 0);
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_sample_workflow_owns_child_and_strict_retained_artifact() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_sample_workflow_fixture(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf '%s\n' \"$*\" >> \"$PWD/node-invocations.log\"\nprintf 'probe chatter\n'\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/sample-workflow-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("verified-sample-workflow.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer sample workflow");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer sample-workflow live receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer sample-workflow receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["execution_mode"], "execute");
+    assert_eq!(receipt["status"], "passed");
+    assert_eq!(receipt["output_disposition"], "operator_path_retained");
+    assert_eq!(receipt["verified_step_count"], 4);
+    assert_eq!(receipt["significant_pixel_count"], 7134);
+    assert_eq!(receipt["browser_error_count"], 0);
+    assert_eq!(receipt["browser_warning_count"], 3);
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["successful_exit_code"], 0);
+    assert!(receipt["artifact_sha256"].is_string());
+    assert!(receipt["step_rows_sha256"].is_string());
+    assert!(output_path.is_file());
+    assert!(std::fs::read_to_string(test.0.join("node-invocations.log"))
+        .expect("read Viewer sample-workflow invocation")
+        .contains("scripts/verify-structure-viewer-sample-workflow.mjs --fail-blocked --out"));
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_sample_workflow_removes_partial_explicit_output_on_failure() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf 'partial' > \"$out\"\nexit 37\n",
+    );
+    let output_path = test.0.join("failed-sample-workflow.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute failing Viewer sample workflow");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer sample-workflow error JSON");
+    assert_eq!(error["code"], "viewer_sample_workflow_failed");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_sample_workflow_rejects_forged_aggregate_and_duplicate_json() {
+    let forged = TestRoot::create();
+    copy_contract_inventory(&forged.0);
+    write_sample_workflow_fixture(&forged.0);
+    let fixture_path = forged.0.join("sample-workflow-fixture.json");
+    let mut fixture: Value = serde_json::from_slice(
+        &std::fs::read(&fixture_path).expect("read sample-workflow fixture"),
+    )
+    .expect("sample-workflow fixture JSON");
+    fixture["browser_warning_count"] = serde_json::json!(99);
+    std::fs::write(
+        &fixture_path,
+        format!(
+            "{}\n",
+            serde_json::to_string(&fixture).expect("encode forged workflow fixture")
+        ),
+    )
+    .expect("write forged workflow fixture");
+    let bin = write_fake_executable(
+        &forged.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/sample-workflow-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = forged.0.join("forged-sample-workflow.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&forged.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute forged Viewer sample workflow");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer sample-workflow aggregate error JSON");
+    assert_eq!(error["code"], "viewer_sample_workflow_aggregate_mismatch");
+    assert!(!output_path.exists());
+
+    let duplicate = TestRoot::create();
+    copy_contract_inventory(&duplicate.0);
+    let bin = write_fake_executable(
+        &duplicate.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf '%s\n' '{\"schema_version\":\"first\",\"schema_version\":\"forged\"}' > \"$out\"\nexit 0\n",
+    );
+    let output_path = duplicate.0.join("duplicate-sample-workflow.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&duplicate.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute duplicate-key Viewer sample workflow");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer sample-workflow duplicate-key error JSON");
+    assert_eq!(error["code"], "viewer_sample_workflow_artifact_invalid");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_sample_workflow_rejects_source_mutation_and_removes_output() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_sample_workflow_fixture(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf ' ' >> scripts/structure-viewer-canvas-frame.mjs\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/sample-workflow-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("mutated-sample-workflow.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-sample-workflow", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer sample workflow");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer sample-workflow mutation error JSON");
+    assert_eq!(error["code"], "viewer_sample_workflow_contract_changed");
     assert!(!output_path.exists());
 }
 

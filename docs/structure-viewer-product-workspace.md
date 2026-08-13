@@ -89,6 +89,7 @@ not close this gate with synthetic customer cases.
 - Drawing sheet package: selected members now carry an explicit `structure-viewer-drawing-sheet-package.v1` bridge into the report/panel. It preserves SVG sheet links, drawing revision, callout id/label, and the viewer deep-link, so a review package can move from 3D selection to plan/elevation/isometric SVG evidence without relying on a live browser state.
 - Static performance budget: `scripts/build_structure_viewer_performance_budget_manifest.py` records the wall/slab instancing, surface LOD, BVH picking, deformed pick refresh, Playwright canvas smoke, and pick-candidate cap contract in `implementation/phase1/structure_viewer_performance_budget_manifest.json`. This is a regression contract only; measured FPS/latency remains separate follow-up evidence.
 - Browser performance probe: `scripts/measure-structure-viewer-performance.mjs` starts the source viewer under Playwright, waits for a nonblank well-framed canvas, samples `requestAnimationFrame`, and writes `implementation/phase1/structure_viewer_browser_performance_probe.json`. The npm verifier now enters through the Rust-native `structural-frontend-contract viewer-performance-probe` command, which owns the Node child and temporary artifact, verifies source hashes and strictly rechecks the canvas/ready/RAF budgets, so full quality gates do not dirty the repo. The retained Node probe still owns browser measurement. This remains local-browser smoke evidence, not a normalized customer-hardware FPS claim.
+- Sample workflow rehearsal: `npm run verify:viewer-sample-workflow` now enters through Rust-native `structural-frontend-contract viewer-sample-workflow`. Rust owns the retained Node child and temporary artifact, freezes the package/lock and three workflow inputs, then strictly checks the exact four MIDAS33/real-drawing steps, completion budget, error/warning aggregates, and nonblank significant-pixel canvases. Playwright, Chromium, Viewer navigation/input/rendering, the internal loopback server, and raw artifact construction remain in the retained Node probe. This automated rehearsal is not a human new-user observation or release approval.
 - Visual regression baseline: `scripts/measure-structure-viewer-visual-regression.mjs --update-baseline` captures 11 desktop/mobile render-mode and workflow signatures, including plan view, review member selection, compare overlay, CSV evidence ingest, renderable JSON ingest, section edit apply, and load-combination draft markers in `implementation/phase1/structure_viewer_visual_regression_baseline.json`. The npm verifier now enters through Rust-native `structural-frontend-contract viewer-visual-regression`: Rust owns the Node child and temporary report, strictly verifies the tracked baseline/source identities, ordered case metadata, loopback URLs, browser-error absence, canvas geometry/signature hashes, recomputed deltas, and tolerances. The retained Node probe still performs browser measurement, and explicit baseline refresh stays operator-invoked. This is local visual-signature regression evidence, not a pixel-perfect customer-device rendering claim.
 
 ```bash
@@ -113,6 +114,7 @@ python3 -m pytest -q tests/test_structure_viewer_project_workspace_contract.py \
   tests/test_structure_viewer_local_ops_state_contract.py
 npm run verify:viewer-manifest
 npm run verify:frontend-browser-smoke -- --mode minimal
+npm run verify:viewer-sample-workflow
 python3 scripts/build_structure_viewer_performance_budget_manifest.py --json
 npm run verify:viewer-performance-probe
 npm run verify:viewer-visual-regression
@@ -124,6 +126,7 @@ Full viewer verification:
 python3 -m pytest -q tests/test_structure_viewer_*
 npm run verify:viewer-manifest
 npm run verify:frontend-browser-smoke
+npm run verify:viewer-sample-workflow
 npm run verify:viewer-report-pdf
 npm run verify:viewer-performance-probe
 npm run verify:viewer-visual-regression

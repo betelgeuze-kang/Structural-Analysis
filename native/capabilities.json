@@ -193,6 +193,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 verification only: structural-frontend-contract viewer-visual-regression validates and hashes the tracked baseline plus four frozen source inputs, owns one direct retained Node child and temporary or explicit report cleanup, rejects baseline or source mutation, strictly decodes bounded duplicate-key-free JSON, independently checks all 11 ordered workflow cases, IPv4 loopback URLs, browser-error absence, canvas geometry and signature hashes, exact workflow markers, source identities, recomputed baseline deltas and requested tolerances, and emits a canonical self-hashed receipt; dry-run creates no output, listener or process; the retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript state manipulation and rendering, browser page requests, screenshots, canvas sampling and raw report construction, while explicit baseline refresh remains a direct operator Node command; customer browser/device matrix evidence, pixel-perfect rendering, clean-machine live execution, native UI parity and C6 remain open"
     },
+    "native_viewer_sample_workflow": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 verification only: structural-frontend-contract viewer-sample-workflow validates and hashes the pinned package/lock plus three frozen Viewer workflow inputs, owns one direct retained Node child and temporary or explicit artifact cleanup, rejects source mutation, strictly decodes bounded duplicate-key-free JSON, independently checks the exact four ordered MIDAS33/real-drawing rehearsal steps, recomputes completion-time and browser warning/error aggregates, requires nonblank canvases and significant-pixel evidence, and emits a canonical self-hashed receipt; dry-run creates no output, listener or process; the retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript navigation/input/rendering, browser page requests, canvas inspection and raw artifact construction; this automated smoke is not human new-user observation, engineering acceptance or release approval, and hosted live execution, native UI parity and C6 remain open"
+    },
     "native_distribution": {
       "status": "implemented",
       "cutover_gate": "C5",

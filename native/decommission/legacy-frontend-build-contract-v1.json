@@ -28,6 +28,7 @@
     "scripts/verify-workstation-delivery-viewer-smoke.mjs",
     "scripts/export-structure-viewer-report-pdf.mjs",
     "scripts/measure-structure-viewer-performance.mjs",
+    "scripts/verify-structure-viewer-sample-workflow.mjs",
     "scripts/structure-viewer-canvas-frame.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json",
@@ -70,6 +71,7 @@
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
+    "native/crates/structural-frontend-contract/src/viewer_sample_workflow.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
     "native/crates/structural-frontend-contract/src/viewer_visual_regression.rs",
     "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
@@ -91,6 +93,7 @@
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:viewer-performance-probe": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .",
     "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
+    "verify:viewer-sample-workflow": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-sample-workflow --root .",
     "verify:viewer-visual-regression": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-visual-regression --root .",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-prototype-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .",
@@ -324,6 +327,40 @@
     ],
     "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen frontend plus four performance inputs, owns the direct Node child and temporary/explicit artifact lifecycle, rejects input mutation, strictly decodes the bounded probe artifact, independently rechecks source-row identities, loopback URL, viewport, browser-error absence, canvas framing, ready-time and RAF budgets, and emits a canonical self-hashed receipt. Dry-run creates no output and spawns no process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, canvas inspection, RAF sampling, and raw payload construction; Node and browser runtime identity, normalized customer-hardware performance, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
+  },
+  "viewer_sample_workflow_contract": {
+    "schema_version": "structural-native-viewer-sample-workflow-contract.v1",
+    "node_launcher": "node",
+    "probe_path": "scripts/verify-structure-viewer-sample-workflow.mjs",
+    "output_schema_version": "structure-viewer-sample-workflow-smoke.v1",
+    "default_max_sample_completion_minutes": 30.0,
+    "expected_reason_code": "PASS",
+    "step_labels": [
+      "midas33 optimized sample project",
+      "midas33 search and selection input",
+      "real drawing sample project",
+      "real drawing search input"
+    ],
+    "measured_queries": [
+      "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "preset=real_drawing_private_3d&member=RD-001&drawing_asset=RD-001"
+    ],
+    "tracked_sources": [
+      {
+        "label": "viewer_index",
+        "path": "src/structure-viewer/index.html"
+      },
+      {
+        "label": "sample_workflow_probe",
+        "path": "scripts/verify-structure-viewer-sample-workflow.mjs"
+      },
+      {
+        "label": "canvas_frame_probe",
+        "path": "scripts/structure-viewer-canvas-frame.mjs"
+      }
+    ],
+    "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen package/lock plus three sample-workflow inputs, owns the direct Node child and temporary/explicit artifact lifecycle, rejects input mutation, strictly decodes bounded duplicate-key-free JSON, independently rechecks the exact four-step MIDAS33/real-drawing rehearsal, 30-minute budget, browser-error and warning aggregates, nonblank canvases and significant-pixel evidence, and emits a canonical self-hashed receipt. Dry-run creates no output, listener, or process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, navigation, input, canvas inspection, and raw payload construction. This automated smoke is not human new-user observation, engineering acceptance, or release approval; Node/browser runtime identity, hosted live execution, native UI parity, and C6 removal remain outside Rust authority."
   },
   "viewer_visual_regression_contract": {
     "schema_version": "structural-native-viewer-visual-regression-contract.v1",

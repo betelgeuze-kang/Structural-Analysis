@@ -334,6 +334,24 @@ def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
     assert "C6 remain open" in visual["claim"]
 
 
+def test_native_viewer_sample_workflow_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(payload, "native_viewer_sample_workflow")
+        is True
+    )
+    workflow = payload["capabilities"]["native_viewer_sample_workflow"]
+    assert workflow["cutover_gate"] == "C0"
+    assert workflow["owner"] == "structural-frontend-contract"
+    assert "viewer-sample-workflow" in workflow["claim"]
+    assert "exact four ordered MIDAS33/real-drawing rehearsal steps" in workflow["claim"]
+    assert "browser warning/error aggregates" in workflow["claim"]
+    assert "dry-run creates no output, listener or process" in workflow["claim"]
+    assert "retained Node probe still owns" in workflow["claim"]
+    assert "not human new-user observation" in workflow["claim"]
+    assert "C6 remain open" in workflow["claim"]
+
+
 def test_native_distribution_capability_is_bounded_c5():
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_distribution") is True

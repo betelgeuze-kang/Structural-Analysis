@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -53,6 +53,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   artifact lifecycle, strict JSON decoding, frozen source identities, and independent ready-time,
   RAF, browser-error, and canvas checks. The retained Node probe still owns its internal loopback
   server, Playwright/Chromium, Viewer rendering, canvas inspection, and RAF sampling.
+  The Viewer sample-workflow verifier is Rust-native: it owns the retained probe child and artifact
+  cleanup, strictly parses bounded duplicate-key-free JSON, and independently rechecks the exact
+  four ordered MIDAS33/real-drawing steps, completion-time budget, browser error/warning aggregates,
+  and nonblank significant-pixel canvas evidence. The retained Node probe still owns its internal
+  loopback server, Playwright/Chromium, Viewer navigation/input/rendering, canvas inspection, and raw
+  artifact construction. This automated rehearsal is not human new-user observation or approval.
   The Viewer visual-regression verifier is Rust-native: it freezes the baseline plus four source
   identities, owns the retained probe child and output cleanup, strictly parses duplicate-key-free
   bounded JSON, and independently checks all 11 ordered workflow cases, loopback URLs, canvas
@@ -70,7 +76,7 @@ Both catalog and evidence-bundle generators and their contract tests are Rust-na
 npm commands are wrappers only. The legacy frontend clean-build orchestration, static contract,
 and built-tree delivery are Rust-native. Loopback Viewer serving and default Viewer
 project-manifest checks and Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native as
-well. Viewer report PDF verification plus Viewer performance and visual-regression
+well. Viewer report PDF verification plus Viewer sample-workflow, performance, and visual-regression
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It does not provide a
@@ -83,7 +89,8 @@ before language-neutral golden ownership is complete.
 The product deployment, benchmark-catalog generation, and evidence-bundle generation authorities
 have left React/Node, and the frontend smoke orchestration, static/delivery, prototype-static,
 Viewer-server, Viewer manifest, Viewer/prototype/Workbench v2 browser-smoke, Viewer PDF verification
-wrapper, Viewer performance process/artifact verifier, and Viewer visual-regression verifier
+wrapper, Viewer sample-workflow/process artifact verifier, Viewer performance process/artifact
+verifier, and Viewer visual-regression verifier
 authorities have
 left Node, but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
 verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node

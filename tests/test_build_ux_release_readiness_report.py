@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 
@@ -17,6 +18,138 @@ def _write(path: Path, payload: object) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
     return path
+
+
+def test_native_sample_workflow_receipt_is_extracted_from_npm_stdout() -> None:
+    receipt = {
+        "schema_version": "structural-native-viewer-sample-workflow-receipt.v1",
+        "action": "viewer_sample_workflow",
+        "execution_mode": "execute",
+        "status": "passed",
+        "source_map_sha256": "sha256:" + "1" * 64,
+        "frontend_contract_receipt_hash": "sha256:" + "2" * 64,
+        "tracked_sources": [
+            {
+                "label": "viewer_index",
+                "path": "src/structure-viewer/index.html",
+                "bytes": 1,
+                "sha256": "sha256:" + "3" * 64,
+            },
+            {
+                "label": "sample_workflow_probe",
+                "path": "scripts/verify-structure-viewer-sample-workflow.mjs",
+                "bytes": 1,
+                "sha256": "sha256:" + "4" * 64,
+            },
+            {
+                "label": "canvas_frame_probe",
+                "path": "scripts/structure-viewer-canvas-frame.mjs",
+                "bytes": 1,
+                "sha256": "sha256:" + "5" * 64,
+            },
+        ],
+        "max_sample_completion_minutes": 30.0,
+        "requested_output": None,
+        "published_output_path": None,
+        "output_disposition": "temporary_removed_after_verification",
+        "logical_command_template": [
+            "node",
+            "scripts/verify-structure-viewer-sample-workflow.mjs",
+            "--fail-blocked",
+            "--out",
+            "{workflow_output}",
+            "--max-minutes",
+            "30",
+        ],
+        "artifact_schema_version": "structure-viewer-sample-workflow-smoke.v1",
+        "artifact_sha256": "sha256:" + "6" * 64,
+        "artifact_generated_at": "2026-08-13T12:34:56.789Z",
+        "verified_step_count": 4,
+        "sample_completion_minutes": 0.25,
+        "step_rows_sha256": "sha256:" + "7" * 64,
+        "significant_pixel_count": 1,
+        "browser_error_count": 0,
+        "browser_warning_count": 0,
+        "runtime_requirements": {
+            "node_required": True,
+            "browser_required": True,
+            "retained_node_internal_listener": True,
+        },
+        "rust_owned_listener_count": 0,
+        "direct_processes_spawned": 1,
+        "successful_exit_code": 0,
+        "external_network_access_accounting": (
+            "not_instrumented_probe_loopback_and_browser_page_requests"
+        ),
+        "deterministic_receipt": False,
+        "claim_boundary": "bounded automated rehearsal",
+    }
+    canonical = json.dumps(
+        receipt,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    receipt["receipt_hash"] = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    stdout = "npm banner\n" + json.dumps(receipt, separators=(",", ":")) + "\n"
+
+    assert (
+        build_ux_release_readiness_report._native_sample_workflow_receipt(stdout)
+        == receipt
+    )
+    forged = {**receipt, "verified_step_count": 3}
+    assert (
+        build_ux_release_readiness_report._native_sample_workflow_receipt(
+            json.dumps(forged)
+        )
+        == {}
+    )
+    assert (
+        build_ux_release_readiness_report._native_sample_workflow_receipt(
+            '{"schema_version":"first","schema_version":"forged"}'
+        )
+        == {}
+    )
+    assert (
+        build_ux_release_readiness_report._native_sample_workflow_receipt(
+            '{"sample_completion_minutes":NaN}'
+        )
+        == {}
+    )
+
+
+def test_ux_release_readiness_rejects_missing_native_receipt_after_run(
+    tmp_path: Path,
+) -> None:
+    viewer_quality = _write(
+        tmp_path / "viewer_quality.json",
+        {
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "commercial_viewer_ready": True,
+            "summary": {"hard_blocker_count": 0, "review_item_count": 0},
+            "review_queue": [],
+        },
+    )
+    viewer_perf = _write(
+        tmp_path / "viewer_perf.json",
+        {"contract_pass": True, "reason_code": "PASS"},
+    )
+
+    payload = build_ux_release_readiness_report.build_report(
+        viewer_quality_path=viewer_quality,
+        viewer_performance_path=viewer_perf,
+        max_sample_minutes=30.0,
+        browser_smoke={
+            "return_code": 0,
+            "elapsed_seconds": 1,
+            "native_receipt_valid": False,
+        },
+    )
+
+    assert payload["contract_pass"] is False
+    assert "browser_sample_rehearsal_pass" in payload["blockers"]
+    assert payload["artifacts"]["sample_workflow_smoke"] == ""
 
 
 def test_ux_release_readiness_accepts_claim_scoped_review_queue(tmp_path: Path) -> None:
