@@ -8,7 +8,7 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
     canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
@@ -16,11 +16,12 @@ use structural_frontend_contract::{
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
-    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
+    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
-    FrontendContractError, ViewerPerformanceProbeOptions, ViewerReportPdfExportOptions,
-    ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
+    FrontendContractError, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
+    ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
+    ViewerVisualRegressionOptions,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -94,6 +95,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_viewer_performance_probe(&options)?;
         return canonical_viewer_performance_probe_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-readme-capture" {
+        let options = parse_viewer_readme_capture_arguments(&arguments[1..])?;
+        let receipt = run_viewer_readme_capture(&options)?;
+        return canonical_viewer_readme_capture_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "viewer-report-pdf-smoke" {
         let options = parse_viewer_report_pdf_smoke_arguments(&arguments[1..])?;
         let receipt = run_viewer_report_pdf_smoke(&options)?;
@@ -148,7 +154,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -457,6 +463,91 @@ fn parse_nonnegative_f64(value: &OsString, name: &str) -> Result<f64, CliError> 
         .ok()
         .filter(|value| value.is_finite() && *value >= 0.0)
         .ok_or_else(|| usage_error(&format!("{name} must be a finite nonnegative number")))
+}
+
+fn parse_finite_f64(value: &OsString, name: &str) -> Result<f64, CliError> {
+    parse_utf8(value, name)?
+        .parse::<f64>()
+        .ok()
+        .filter(|value| value.is_finite())
+        .ok_or_else(|| usage_error(&format!("{name} must be a finite number")))
+}
+
+fn parse_viewer_readme_capture_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerReadmeCaptureOptions, CliError> {
+    let mut root = None;
+    let mut output = None;
+    let mut view_preset = None;
+    let mut camera_x = None;
+    let mut camera_y = None;
+    let mut camera_z = None;
+    let mut dry_run = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-readme-capture option names must be UTF-8"))?;
+        if name == "--dry-run" {
+            if dry_run {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            dry_run = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-readme-capture value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--view-preset" if view_preset.is_none() => {
+                view_preset = Some(parse_utf8(value, "--view-preset")?);
+            }
+            "--camera-x" if camera_x.is_none() => {
+                camera_x = Some(parse_finite_f64(value, "--camera-x")?);
+            }
+            "--camera-y" if camera_y.is_none() => {
+                camera_y = Some(parse_finite_f64(value, "--camera-y")?);
+            }
+            "--camera-z" if camera_z.is_none() => {
+                camera_z = Some(parse_finite_f64(value, "--camera-z")?);
+            }
+            "--root" | "--out" | "--view-preset" | "--camera-x" | "--camera-y" | "--camera-z" => {
+                return Err(usage_error("duplicate options are not allowed"))
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-readme-capture options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerReadmeCaptureOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    if let Some(output) = output {
+        options.output = output;
+    }
+    if let Some(view_preset) = view_preset {
+        options.view_preset = view_preset;
+    }
+    if let Some(camera_x) = camera_x {
+        options.camera_x = camera_x;
+    }
+    if let Some(camera_y) = camera_y {
+        options.camera_y = camera_y;
+    }
+    if let Some(camera_z) = camera_z {
+        options.camera_z = camera_z;
+    }
+    options.dry_run = dry_run;
+    Ok(options)
 }
 
 fn parse_viewer_report_pdf_export_arguments(
@@ -839,7 +930,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -849,9 +940,10 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_export_arguments,
-        parse_viewer_report_pdf_smoke_arguments, parse_viewer_sample_workflow_arguments,
-        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
+        parse_viewer_performance_probe_arguments, parse_viewer_readme_capture_arguments,
+        parse_viewer_report_pdf_export_arguments, parse_viewer_report_pdf_smoke_arguments,
+        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -937,6 +1029,50 @@ mod tests {
             OsString::from("a"),
             OsString::from("--port"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_readme_capture_parser_preserves_defaults_and_accepts_camera() {
+        let defaults =
+            parse_viewer_readme_capture_arguments(&[OsString::from("--root"), OsString::from("a")])
+                .expect("default Viewer README capture arguments");
+        assert_eq!(
+            defaults.output,
+            PathBuf::from("docs/assets/commercialization-status-card.png")
+        );
+        assert_eq!(defaults.view_preset, "review");
+        assert_eq!(defaults.camera_x.to_bits(), (-0.55_f64).to_bits());
+        assert!(!defaults.dry_run);
+
+        let capture = parse_viewer_readme_capture_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--out"),
+            OsString::from("capture.png"),
+            OsString::from("--view-preset"),
+            OsString::from("review_alt"),
+            OsString::from("--camera-x"),
+            OsString::from("-1.25"),
+            OsString::from("--camera-y"),
+            OsString::from("2.5"),
+            OsString::from("--camera-z"),
+            OsString::from("0"),
+            OsString::from("--dry-run"),
+        ])
+        .expect("complete Viewer README capture arguments");
+        assert_eq!(capture.output, PathBuf::from("capture.png"));
+        assert_eq!(capture.view_preset, "review_alt");
+        assert_eq!(capture.camera_x.to_bits(), (-1.25_f64).to_bits());
+        assert_eq!(capture.camera_y.to_bits(), 2.5_f64.to_bits());
+        assert_eq!(capture.camera_z.to_bits(), 0.0_f64.to_bits());
+        assert!(capture.dry_run);
+        assert!(parse_viewer_readme_capture_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--camera-x"),
+            OsString::from("NaN"),
         ])
         .is_err());
     }

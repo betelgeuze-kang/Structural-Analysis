@@ -193,6 +193,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 product-publication authority only: package export:viewer-report-pdf enters through structural-frontend-contract viewer-report-pdf-export; Rust resolves and hashes bounded existing regular-file destinations, rejects symlinks and PDF/HTML aliasing before launch, owns the retained exporter child through the strict PDF smoke verifier, verifies PDF and HTML identities, detects destination mutation during generation, and stages verified bytes before backup/rename publication with rollback, while dry-run creates no output or process and optional --html-out preserves the legacy interface; the retained Node exporter, Playwright, Chromium, internal loopback server, Viewer JavaScript rendering, browser requests and raw PDF generation remain outside Rust ownership, so browser/PDF-generation parity, clean-machine live execution, native UI parity, C5 and C6 remain open"
     },
+    "native_viewer_readme_capture": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 product-publication authority only: package capture:readme-viewer-image enters through structural-frontend-contract viewer-readme-capture; Rust hashes the pinned package/lock and three capture sources, replaces inherited camera environment variables with explicit bounded values, owns one direct retained Node child and temporary PNG, rejects source and output mutation, independently validates bounded CRC-correct PNG chunks plus the exact 1600x900 IHDR, and publishes verified bytes through the shared staging/backup/rename rollback contract, while dry-run creates no output, listener or process; the retained capture script, Playwright, Chromium, internal loopback server, Viewer JavaScript rendering, camera behavior, browser requests and screenshot generation remain outside Rust ownership, so human visual approval, customer device parity, clean-machine live execution, native UI parity, C5 and C6 remain open"
+    },
     "native_viewer_visual_regression": {
       "status": "implemented",
       "cutover_gate": "C0",

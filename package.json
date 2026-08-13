@@ -25,7 +25,7 @@
     "verify:workbench-viewer-delivery": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
     "build:evidence-bundle": "bash ./scripts/build_native_workbench_evidence_bundle.sh",
     "verify:evidence-bundle-contract": "cargo test --locked --manifest-path native/Cargo.toml -p structural-evidence",
-    "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",
+    "capture:readme-viewer-image": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-readme-capture --root .",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
     "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
     "verify:viewer-performance-probe": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .",

@@ -8,7 +8,7 @@ use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
     canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
@@ -16,11 +16,11 @@ use structural_frontend_contract::{
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
-    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
+    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
-    ViewerPerformanceProbeOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
-    ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
+    ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
+    ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -1587,6 +1587,183 @@ fn viewer_visual_regression_rejects_source_mutation_and_removes_output() {
             .expect("Viewer visual-regression mutation error JSON");
     assert_eq!(error["code"], "viewer_visual_regression_contract_changed");
     assert!(!output_path.exists());
+}
+
+#[test]
+fn viewer_readme_capture_dry_run_is_process_free_canonical_and_self_hashed() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let mut options = ViewerReadmeCaptureOptions::new(test.0.clone());
+    options.output = PathBuf::from("planned.png");
+    options.dry_run = true;
+    let first = run_viewer_readme_capture(&options).expect("Viewer README capture dry-run");
+    let second = run_viewer_readme_capture(&options).expect("repeat Viewer README capture dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.requested_output, "planned.png");
+    assert_eq!(first.published_output_path, None);
+    assert_eq!(first.previous_output_state, "absent");
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!((first.viewport_width, first.viewport_height), (1600, 900));
+    assert_eq!(first.view_preset, "review");
+    assert_eq!(first.source_identities.len(), 3);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert!(first.deterministic_receipt);
+    assert!(!test.0.join("planned.png").exists());
+    let encoded = canonical_viewer_readme_capture_receipt_json(&first)
+        .expect("canonical Viewer README capture receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer README capture JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_readme_capture_replaces_existing_png_with_explicit_environment() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let fixture = test.0.join("fixture.png");
+    std::fs::copy(
+        repository_root().join("docs/assets/commercialization-status-card.png"),
+        &fixture,
+    )
+    .expect("copy tracked PNG fixture");
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf '%s|%s|%s|%s\n' \"$README_CAPTURE_VIEW_PRESET\" \"$README_CAPTURE_CAMERA_X\" \"$README_CAPTURE_CAMERA_Y\" \"$README_CAPTURE_CAMERA_Z\" > \"$PWD/capture-env.log\"\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\n/bin/cp \"$PWD/fixture.png\" \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("readme.png");
+    std::fs::write(&output_path, b"old-image").expect("write old image");
+    let old_sha = sha256_identity(b"old-image");
+    let fixture_sha = sha256_identity(&std::fs::read(&fixture).expect("read fixture"));
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-readme-capture", "--root"])
+        .arg(&test.0)
+        .args([
+            "--out",
+            output_path.to_str().expect("UTF-8 output"),
+            "--view-preset",
+            "review_alt",
+            "--camera-x",
+            "-1.25",
+            "--camera-y",
+            "2.5",
+            "--camera-z",
+            "0.125",
+        ])
+        .env_clear()
+        .env("PATH", &bin)
+        .env("README_CAPTURE_VIEW_PRESET", "inherited-must-not-win")
+        .env("README_CAPTURE_CAMERA_X", "999")
+        .output()
+        .expect("execute Viewer README capture");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let receipt: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer README capture receipt");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-viewer-readme-capture-receipt.v1"
+    );
+    assert_eq!(receipt["status"], "published");
+    assert_eq!(receipt["previous_output_state"], "regular_file");
+    assert_eq!(receipt["previous_output_sha256"], old_sha);
+    assert_eq!(receipt["png_sha256"], fixture_sha);
+    assert_eq!(receipt["png_width"], 1600);
+    assert_eq!(receipt["png_height"], 900);
+    assert_eq!(receipt["png_bit_depth"], 8);
+    assert!(matches!(receipt["png_color_type"].as_u64(), Some(2 | 6)));
+    assert!(receipt["png_chunk_count"]
+        .as_u64()
+        .is_some_and(|value| value > 2));
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["successful_exit_codes"], serde_json::json!([0]));
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("capture-env.log")).expect("read environment log"),
+        "review_alt|-1.25|2.5|0.125\n"
+    );
+    assert_eq!(
+        sha256_identity(&std::fs::read(&output_path).expect("read published PNG")),
+        fixture_sha
+    );
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_readme_capture_preserves_existing_output_when_png_is_invalid() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf 'not-a-png' > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("preserved.png");
+    std::fs::write(&output_path, b"old-image").expect("write old image");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-readme-capture", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute invalid Viewer README capture");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer README capture error");
+    assert_eq!(error["code"], "viewer_readme_capture_png_invalid");
+    assert_eq!(
+        std::fs::read(&output_path).expect("read preserved image"),
+        b"old-image"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_readme_capture_rejects_source_mutation_before_publication() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let fixture = test.0.join("fixture.png");
+    std::fs::copy(
+        repository_root().join("docs/assets/commercialization-status-card.png"),
+        &fixture,
+    )
+    .expect("copy tracked PNG fixture");
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf ' ' >> scripts/capture-readme-viewer-image.mjs\n/bin/cp \"$PWD/fixture.png\" \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("unchanged.png");
+    std::fs::write(&output_path, b"old-image").expect("write old image");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-readme-capture", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer README capture");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer README mutation error");
+    assert_eq!(error["code"], "viewer_readme_capture_contract_changed");
+    assert_eq!(
+        std::fs::read(&output_path).expect("read unchanged image"),
+        b"old-image"
+    );
 }
 
 #[test]

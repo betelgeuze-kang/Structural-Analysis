@@ -25,8 +25,10 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/prototype.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
+    Path("native/crates/structural-frontend-contract/src/verified_publication.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_performance_probe.rs"),
+    Path("native/crates/structural-frontend-contract/src/viewer_readme_capture.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_sample_workflow.rs"),
@@ -215,6 +217,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract viewer-sample-workflow",
         "structural-frontend-contract viewer-performance-probe",
         "structural-frontend-contract viewer-visual-regression",
+        "structural-frontend-contract viewer-readme-capture",
         "structural-frontend-contract viewer-report-pdf-export",
         "structural-frontend-contract viewer-report-pdf-smoke",
         "structural-frontend-contract serve",
@@ -233,6 +236,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "workbench_v2_browser_smoke_node_required": True,
         "workbench_v2_browser_smoke_playwright_required": True,
         "workbench_v2_browser_smoke_browser_required": True,
+        "viewer_readme_capture_node_required": True,
+        "viewer_readme_capture_playwright_required": True,
+        "viewer_readme_capture_browser_required": True,
+        "viewer_readme_capture_internal_loopback_required": True,
         "viewer_report_pdf_export_node_required": True,
         "viewer_report_pdf_export_playwright_required": True,
         "viewer_report_pdf_export_browser_required": True,
@@ -407,6 +414,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- viewer-report-pdf-export --root ."
     ):
         blockers.append("workbench_ui_viewer_report_pdf_export_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("capture:readme-viewer-image") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-readme-capture --root ."
+    ):
+        blockers.append("workbench_ui_viewer_readme_capture_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get(
         "verify:viewer-performance-probe"
     ) != (
@@ -455,6 +467,44 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    verified_publication = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/verified_publication.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/verified_publication.rs"),
+        verified_publication,
+        (
+            "pub(crate) fn prepare_verified_publication_target",
+            "pub(crate) fn publish_verified_outputs",
+            "bounded_staging_then_backup_rename_with_rollback",
+            "create_new",
+            "require_unchanged",
+            "rollback_publication",
+        ),
+        blockers,
+    )
+    viewer_readme_capture = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/viewer_readme_capture.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/viewer_readme_capture.rs"),
+        viewer_readme_capture,
+        (
+            "pub fn run_viewer_readme_capture",
+            "scripts/capture-readme-viewer-image.mjs",
+            "viewer_readme_capture_contract_changed",
+            "viewer_readme_capture_png_invalid",
+            "png_crc32",
+            "README_CAPTURE_VIEW_PRESET",
+            "publish_verified_outputs",
+            "direct_processes_spawned",
+        ),
+        blockers,
+    )
     _require_tokens(
         Path(
             "native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs"
@@ -465,8 +515,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "run_viewer_report_pdf_smoke",
             "viewer_report_pdf_export_output_changed",
             "viewer_report_pdf_export_publish_failed",
-            "rollback_publication",
-            "bounded_staging_then_backup_rename_with_rollback",
+            "publish_verified_outputs",
+            "VERIFIED_PUBLICATION_STRATEGY",
             "direct_processes_spawned",
             "retained Node exporter",
         ),
@@ -818,7 +868,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",
@@ -868,7 +918,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, Node exporter/probe, Playwright, Chromium/browser, and optional pdftotext dependency visible",
+        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, retained Node exporter/probe/capture, Playwright, Chromium/browser, and optional pdftotext dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

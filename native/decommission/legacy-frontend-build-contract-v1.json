@@ -26,6 +26,7 @@
     "scripts/verify-structure-viewer-drawing-handoff-preview.mjs",
     "scripts/verify-structure-viewer-multi-selection-hud.mjs",
     "scripts/verify-workstation-delivery-viewer-smoke.mjs",
+    "scripts/capture-readme-viewer-image.mjs",
     "scripts/export-structure-viewer-report-pdf.mjs",
     "scripts/measure-structure-viewer-performance.mjs",
     "scripts/verify-structure-viewer-sample-workflow.mjs",
@@ -69,7 +70,9 @@
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
+    "native/crates/structural-frontend-contract/src/verified_publication.rs",
     "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs",
+    "native/crates/structural-frontend-contract/src/viewer_readme_capture.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_sample_workflow.rs",
@@ -84,6 +87,7 @@
   ],
   "expected_scripts": {
     "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
+    "capture:readme-viewer-image": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-readme-capture --root .",
     "dev": "vite",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
     "preview": "vite preview",
@@ -415,6 +419,41 @@
     ],
     "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen visual baseline plus four probe inputs, owns the direct Node child and temporary/explicit report lifecycle, rejects baseline or source mutation, strictly decodes bounded duplicate-key-free JSON, independently rechecks the 11-case identity and workflow inventory, IPv4 loopback URLs, browser-error absence, canvas geometry and signature hashes, source identities, baseline deltas, tolerance results, and emits a canonical self-hashed receipt. Dry-run creates no output, listener, or process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, state manipulation, screenshots, canvas sampling, and raw payload construction; explicit baseline refresh remains a direct operator Node command. Node and browser runtime identity, pixel-perfect customer-device rendering, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
+  },
+  "viewer_readme_capture_contract": {
+    "schema_version": "structural-native-viewer-readme-capture-contract.v1",
+    "node_launcher": "node",
+    "capture_path": "scripts/capture-readme-viewer-image.mjs",
+    "default_output_path": "docs/assets/commercialization-status-card.png",
+    "viewer_path": "/src/structure-viewer/index.html?preset=midas33_optimized",
+    "viewport_width": 1600,
+    "viewport_height": 900,
+    "default_view_preset": "review",
+    "default_camera_x": -0.55,
+    "default_camera_y": 0.85,
+    "default_camera_z": 0.35,
+    "minimum_png_bytes": 10000,
+    "maximum_png_bytes": 67108864,
+    "allowed_png_color_types": [
+      2,
+      6
+    ],
+    "tracked_sources": [
+      {
+        "label": "viewer_index",
+        "path": "src/structure-viewer/index.html"
+      },
+      {
+        "label": "readme_capture",
+        "path": "scripts/capture-readme-viewer-image.mjs"
+      },
+      {
+        "label": "canvas_frame_probe",
+        "path": "scripts/structure-viewer-canvas-frame.mjs"
+      }
+    ],
+    "external_network_access_accounting": "not_instrumented_capture_loopback_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen frontend and three README capture inputs, replaces inherited camera environment with explicit bounded values, owns one direct retained Node child and temporary output, rejects source or destination mutation, independently validates bounded CRC-correct PNG chunks plus the exact 1600x900 IHDR, and publishes verified bytes through staging, backup, rename, and rollback. Dry-run creates no output, listener, or process. The retained script still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, camera application, canvas checks, and screenshot generation; clean-machine live execution, human visual approval, customer browser/device parity, native UI parity, C5, and C6 remain outside Rust authority."
   },
   "viewer_report_pdf_smoke_contract": {
     "schema_version": "structural-native-viewer-report-pdf-smoke-contract.v1",

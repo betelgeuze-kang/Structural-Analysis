@@ -353,6 +353,26 @@ def test_native_viewer_report_pdf_export_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in export["claim"]
 
 
+def test_native_viewer_readme_capture_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(payload, "native_viewer_readme_capture")
+        is True
+    )
+    capture = payload["capabilities"]["native_viewer_readme_capture"]
+    assert capture["cutover_gate"] == "C0"
+    assert capture["owner"] == "structural-frontend-contract"
+    assert "capture:readme-viewer-image" in capture["claim"]
+    assert "viewer-readme-capture" in capture["claim"]
+    assert "replaces inherited camera environment variables" in capture["claim"]
+    assert "CRC-correct PNG chunks" in capture["claim"]
+    assert "exact 1600x900 IHDR" in capture["claim"]
+    assert "shared staging/backup/rename rollback contract" in capture["claim"]
+    assert "dry-run creates no output, listener or process" in capture["claim"]
+    assert "retained capture script" in capture["claim"]
+    assert "C5 and C6 remain open" in capture["claim"]
+
+
 def test_native_viewer_sample_workflow_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

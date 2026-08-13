@@ -7,8 +7,10 @@ mod playwright;
 mod prototype;
 mod prototype_browser_smoke;
 mod smoke;
+mod verified_publication;
 mod viewer_manifest;
 mod viewer_performance_probe;
+mod viewer_readme_capture;
 mod viewer_report_pdf_export;
 mod viewer_report_pdf_smoke;
 mod viewer_sample_workflow;
@@ -59,6 +61,11 @@ pub use viewer_performance_probe::{
 use viewer_performance_probe::{
     validate_viewer_performance_probe_source, ViewerPerformanceProbeSourceV1,
 };
+pub use viewer_readme_capture::{
+    canonical_viewer_readme_capture_receipt_json, run_viewer_readme_capture,
+    ViewerReadmeCaptureOptions, ViewerReadmeCaptureReceiptV1, ViewerReadmeCaptureSourceIdentityV1,
+};
+use viewer_readme_capture::{validate_viewer_readme_capture_source, ViewerReadmeCaptureSourceV1};
 pub use viewer_report_pdf_export::{
     canonical_viewer_report_pdf_export_receipt_json, run_viewer_report_pdf_export,
     ViewerReportPdfExportOptions, ViewerReportPdfExportReceiptV1,
@@ -160,6 +167,7 @@ struct FrontendSourceMapV1 {
     viewer_manifest_contract: ViewerManifestSourceV1,
     viewer_browser_smoke_contract: ViewerBrowserSmokeSourceV1,
     viewer_performance_probe_contract: ViewerPerformanceProbeSourceV1,
+    viewer_readme_capture_contract: ViewerReadmeCaptureSourceV1,
     viewer_report_pdf_smoke_contract: ViewerReportPdfSmokeSourceV1,
     viewer_sample_workflow_contract: ViewerSampleWorkflowSourceV1,
     viewer_server_contract: ViewerServerSourceV1,
@@ -549,6 +557,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     validate_viewer_browser_smoke_source(&source_map.viewer_browser_smoke_contract)?;
     validate_viewer_performance_probe_source(&source_map.viewer_performance_probe_contract)?;
+    validate_viewer_readme_capture_source(&source_map.viewer_readme_capture_contract)?;
     validate_viewer_report_pdf_smoke_source(&source_map.viewer_report_pdf_smoke_contract)?;
     validate_viewer_sample_workflow_source(&source_map.viewer_sample_workflow_contract)?;
     validate_viewer_server_source(&source_map.viewer_server_contract)?;

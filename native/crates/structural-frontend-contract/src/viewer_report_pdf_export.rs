@@ -1,6 +1,5 @@
-use std::fs::{self, OpenOptions};
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::fs;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde::Serialize;
@@ -12,13 +11,24 @@ use super::{
     verify_real_directory, FrontendContractError, ViewerReportPdfSmokeOptions,
     ViewerReportPdfSmokeReceiptV1,
 };
+use crate::verified_publication::{
+    portable_publication_path, prepare_verified_publication_target, publish_verified_outputs,
+    VerifiedOutput, VerifiedPublicationCodes, VerifiedPublicationTarget,
+    VERIFIED_PUBLICATION_STRATEGY,
+};
 
 const RECEIPT_SCHEMA_V1: &str = "structural-native-viewer-report-pdf-export-receipt.v1";
 const DEFAULT_PDF_OUTPUT: &str = "structure_viewer_report.pdf";
 const MAX_PDF_BYTES: u64 = 128 * 1024 * 1024;
 const MAX_HTML_BYTES: u64 = 32 * 1024 * 1024;
-const MAX_PATH_BYTES: usize = 4096;
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
+const PUBLICATION_CODES: VerifiedPublicationCodes = VerifiedPublicationCodes {
+    output_invalid: "viewer_report_pdf_export_output_invalid",
+    output_changed: "viewer_report_pdf_export_output_changed",
+    stage_failed: "viewer_report_pdf_export_stage_failed",
+    publish_failed: "viewer_report_pdf_export_publish_failed",
+    backup_cleanup_failed: "viewer_report_pdf_export_backup_cleanup_failed",
+};
 
 /// Inputs for one safely published Viewer report PDF export.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -89,24 +99,9 @@ pub struct ViewerReportPdfExportReceiptV1 {
     pub receipt_hash: String,
 }
 
-#[derive(Clone)]
-struct OutputTarget {
-    requested: String,
-    path: PathBuf,
-    maximum_previous_bytes: u64,
-    snapshot: TargetSnapshot,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct TargetSnapshot {
-    state: &'static str,
-    byte_length: Option<u64>,
-    sha256: Option<String>,
-}
-
 struct PreparedExport {
-    pdf: OutputTarget,
-    html: Option<OutputTarget>,
+    pdf: VerifiedPublicationTarget,
+    html: Option<VerifiedPublicationTarget>,
 }
 
 struct GeneratedWorkspace {
@@ -160,19 +155,6 @@ struct GeneratedArtifacts {
     html: Vec<u8>,
 }
 
-struct StagedTarget {
-    target: OutputTarget,
-    staged_path: PathBuf,
-    backup_path: Option<PathBuf>,
-    published: bool,
-}
-
-impl Drop for StagedTarget {
-    fn drop(&mut self) {
-        let _ignored = fs::remove_file(&self.staged_path);
-    }
-}
-
 /// Plan or execute a Viewer report PDF export with verified-before-publish semantics.
 ///
 /// The retained exporter still owns Playwright, Chromium, its loopback server, Viewer JavaScript
@@ -223,16 +205,25 @@ fn prepare_export(
             format!("canonicalize Viewer report PDF export root failed: {error}"),
         )
     })?;
-    let pdf = prepare_target(
+    let pdf = prepare_verified_publication_target(
         &root,
         &options.output,
         MAX_PDF_BYTES,
         "Viewer report PDF output",
+        PUBLICATION_CODES,
     )?;
     let html = options
         .html_output
         .as_ref()
-        .map(|path| prepare_target(&root, path, MAX_HTML_BYTES, "Viewer report HTML output"))
+        .map(|path| {
+            prepare_verified_publication_target(
+                &root,
+                path,
+                MAX_HTML_BYTES,
+                "Viewer report HTML output",
+                PUBLICATION_CODES,
+            )
+        })
         .transpose()?;
     if html.as_ref().is_some_and(|value| value.path == pdf.path) {
         return Err(FrontendContractError::new(
@@ -241,104 +232,6 @@ fn prepare_export(
         ));
     }
     Ok(PreparedExport { pdf, html })
-}
-
-fn prepare_target(
-    root: &Path,
-    requested: &Path,
-    maximum_previous_bytes: u64,
-    label: &str,
-) -> Result<OutputTarget, FrontendContractError> {
-    let requested_string = portable_path(requested, label)?;
-    let unresolved = if requested.is_absolute() {
-        requested.to_path_buf()
-    } else {
-        root.join(requested)
-    };
-    let parent = unresolved.parent().ok_or_else(|| {
-        FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("{label} has no parent directory"),
-        )
-    })?;
-    verify_real_directory(parent, &format!("{label} parent"))?;
-    let parent = parent.canonicalize().map_err(|error| {
-        FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("canonicalize {label} parent failed: {error}"),
-        )
-    })?;
-    let file_name = unresolved.file_name().ok_or_else(|| {
-        FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("{label} has no file name"),
-        )
-    })?;
-    let path = parent.join(file_name);
-    let snapshot = inspect_target(&path, maximum_previous_bytes, label)?;
-    Ok(OutputTarget {
-        requested: requested_string,
-        path,
-        maximum_previous_bytes,
-        snapshot,
-    })
-}
-
-fn portable_path(path: &Path, label: &str) -> Result<String, FrontendContractError> {
-    let value = path.to_str().ok_or_else(|| {
-        FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("{label} must be UTF-8"),
-        )
-    })?;
-    if value.is_empty() || value.len() > MAX_PATH_BYTES || value.chars().any(char::is_control) {
-        return Err(FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("{label} is empty, too long, or contains control characters"),
-        ));
-    }
-    Ok(value.to_owned())
-}
-
-fn inspect_target(
-    path: &Path,
-    maximum_bytes: u64,
-    label: &str,
-) -> Result<TargetSnapshot, FrontendContractError> {
-    match fs::symlink_metadata(path) {
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(TargetSnapshot {
-            state: "absent",
-            byte_length: None,
-            sha256: None,
-        }),
-        Err(error) => Err(FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("inspect {label} failed: {error}"),
-        )),
-        Ok(metadata) if metadata.file_type().is_file() => {
-            let bytes = read_bounded_regular_file(path, maximum_bytes, label).map_err(|error| {
-                FrontendContractError::new(
-                    "viewer_report_pdf_export_output_invalid",
-                    format!("read existing {label} failed bounded validation: {error}"),
-                )
-            })?;
-            let byte_length = u64::try_from(bytes.len()).map_err(|_| {
-                FrontendContractError::new(
-                    "viewer_report_pdf_export_output_invalid",
-                    format!("existing {label} length is not addressable"),
-                )
-            })?;
-            Ok(TargetSnapshot {
-                state: "regular_file",
-                byte_length: Some(byte_length),
-                sha256: Some(sha256_identity(&bytes)),
-            })
-        }
-        Ok(_) => Err(FrontendContractError::new(
-            "viewer_report_pdf_export_output_invalid",
-            format!("{label} must be absent or an existing non-symlink regular file"),
-        )),
-    }
 }
 
 fn run_verification(
@@ -408,184 +301,20 @@ fn publish_verified_artifacts(
     prepared: &PreparedExport,
     artifacts: &GeneratedArtifacts,
 ) -> Result<(), FrontendContractError> {
-    let mut staged = Vec::with_capacity(if prepared.html.is_some() { 2 } else { 1 });
+    let mut outputs = Vec::with_capacity(if prepared.html.is_some() { 2 } else { 1 });
     if let Some(html) = &prepared.html {
-        staged.push(stage_target(html.clone(), &artifacts.html, "html")?);
+        outputs.push(VerifiedOutput {
+            target: html.clone(),
+            bytes: &artifacts.html,
+            suffix: "html",
+        });
     }
-    staged.push(stage_target(prepared.pdf.clone(), &artifacts.pdf, "pdf")?);
-
-    for target in &staged {
-        let current = inspect_target(
-            &target.target.path,
-            target.target.maximum_previous_bytes,
-            "Viewer report publication output",
-        )?;
-        if current != target.target.snapshot {
-            return Err(FrontendContractError::new(
-                "viewer_report_pdf_export_output_changed",
-                format!(
-                    "Viewer report output changed during generation: {}",
-                    target.target.path.display()
-                ),
-            ));
-        }
-    }
-
-    for index in 0..staged.len() {
-        let current = inspect_target(
-            &staged[index].target.path,
-            staged[index].target.maximum_previous_bytes,
-            "Viewer report publication output",
-        );
-        let publish = match current {
-            Ok(snapshot) if snapshot == staged[index].target.snapshot => {
-                publish_one(&mut staged[index]).map_err(|error| error.to_string())
-            }
-            Ok(_) => Err(format!(
-                "Viewer report output changed immediately before publication: {}",
-                staged[index].target.path.display()
-            )),
-            Err(error) => Err(error.to_string()),
-        };
-        if let Err(error) = publish {
-            let rollback = rollback_publication(&mut staged);
-            let detail = match rollback {
-                Ok(()) => format!("publish verified Viewer report output failed: {error}"),
-                Err(rollback_error) => format!(
-                    "publish verified Viewer report output failed: {error}; rollback also failed: {rollback_error}"
-                ),
-            };
-            return Err(FrontendContractError::new(
-                "viewer_report_pdf_export_publish_failed",
-                detail,
-            ));
-        }
-    }
-    for target in &mut staged {
-        if let Some(backup) = target.backup_path.take() {
-            fs::remove_file(&backup).map_err(|error| {
-                FrontendContractError::new(
-                    "viewer_report_pdf_export_backup_cleanup_failed",
-                    format!(
-                        "verified output was published but old output backup cleanup failed: {error}"
-                    ),
-                )
-            })?;
-        }
-    }
-    Ok(())
-}
-
-fn stage_target(
-    target: OutputTarget,
-    bytes: &[u8],
-    suffix: &str,
-) -> Result<StagedTarget, FrontendContractError> {
-    let parent = target.path.parent().ok_or_else(|| {
-        FrontendContractError::new(
-            "viewer_report_pdf_export_stage_failed",
-            "Viewer report publication target has no parent",
-        )
-    })?;
-    for _ in 0..1024 {
-        let sequence = TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed);
-        let path = parent.join(format!(
-            ".structural-viewer-report-pdf-{}-{sequence}.{suffix}.part",
-            std::process::id()
-        ));
-        match OpenOptions::new().write(true).create_new(true).open(&path) {
-            Ok(mut file) => {
-                if let Err(error) = file.write_all(bytes).and_then(|()| file.sync_all()) {
-                    let _ignored = fs::remove_file(&path);
-                    return Err(FrontendContractError::new(
-                        "viewer_report_pdf_export_stage_failed",
-                        format!("stage verified Viewer report output failed: {error}"),
-                    ));
-                }
-                return Ok(StagedTarget {
-                    target,
-                    staged_path: path,
-                    backup_path: None,
-                    published: false,
-                });
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => {}
-            Err(error) => {
-                return Err(FrontendContractError::new(
-                    "viewer_report_pdf_export_stage_failed",
-                    format!("create Viewer report staging file failed: {error}"),
-                ));
-            }
-        }
-    }
-    Err(FrontendContractError::new(
-        "viewer_report_pdf_export_stage_failed",
-        "could not allocate a unique Viewer report staging file",
-    ))
-}
-
-fn publish_one(target: &mut StagedTarget) -> Result<(), std::io::Error> {
-    if target.target.snapshot.state == "regular_file" {
-        let backup = unique_unused_sibling(&target.target.path, "backup")?;
-        fs::rename(&target.target.path, &backup)?;
-        target.backup_path = Some(backup);
-    }
-    fs::rename(&target.staged_path, &target.target.path)?;
-    target.published = true;
-    Ok(())
-}
-
-fn unique_unused_sibling(path: &Path, suffix: &str) -> Result<PathBuf, std::io::Error> {
-    let parent = path.parent().ok_or_else(|| {
-        std::io::Error::new(std::io::ErrorKind::InvalidInput, "output has no parent")
-    })?;
-    for _ in 0..1024 {
-        let sequence = TEMP_SEQUENCE.fetch_add(1, Ordering::Relaxed);
-        let candidate = parent.join(format!(
-            ".structural-viewer-report-pdf-{}-{sequence}.{suffix}",
-            std::process::id()
-        ));
-        match fs::symlink_metadata(&candidate) {
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(candidate),
-            Ok(_) => {}
-            Err(error) => return Err(error),
-        }
-    }
-    Err(std::io::Error::new(
-        std::io::ErrorKind::AlreadyExists,
-        "could not allocate a unique Viewer report backup path",
-    ))
-}
-
-fn rollback_publication(targets: &mut [StagedTarget]) -> Result<(), String> {
-    let mut failures = Vec::new();
-    for target in targets.iter_mut().rev() {
-        if target.published {
-            if let Err(error) = fs::remove_file(&target.target.path) {
-                failures.push(format!(
-                    "remove new {} failed: {error}",
-                    target.target.path.display()
-                ));
-                continue;
-            }
-            target.published = false;
-        }
-        if let Some(backup) = target.backup_path.take() {
-            if let Err(error) = fs::rename(&backup, &target.target.path) {
-                failures.push(format!(
-                    "restore {} failed: {error}; backup retained at {}",
-                    target.target.path.display(),
-                    backup.display()
-                ));
-                target.backup_path = Some(backup);
-            }
-        }
-    }
-    if failures.is_empty() {
-        Ok(())
-    } else {
-        Err(failures.join("; "))
-    }
+    outputs.push(VerifiedOutput {
+        target: prepared.pdf.clone(),
+        bytes: &artifacts.pdf,
+        suffix: "pdf",
+    });
+    publish_verified_outputs(outputs, PUBLICATION_CODES)
 }
 
 fn build_receipt(
@@ -609,13 +338,25 @@ fn build_receipt(
         requested_pdf_output: prepared.pdf.requested.clone(),
         requested_html_output: prepared.html.as_ref().map(|value| value.requested.clone()),
         published_pdf_path: executed
-            .then(|| portable_path(&prepared.pdf.path, "published Viewer report PDF"))
+            .then(|| {
+                portable_publication_path(
+                    &prepared.pdf.path,
+                    "published Viewer report PDF",
+                    PUBLICATION_CODES,
+                )
+            })
             .transpose()?,
         published_html_path: if executed {
             prepared
                 .html
                 .as_ref()
-                .map(|value| portable_path(&value.path, "published Viewer report HTML"))
+                .map(|value| {
+                    portable_publication_path(
+                        &value.path,
+                        "published Viewer report HTML",
+                        PUBLICATION_CODES,
+                    )
+                })
                 .transpose()?
         } else {
             None
@@ -645,7 +386,7 @@ fn build_receipt(
             "not_created"
         }
         .to_owned(),
-        publication_strategy: "bounded_staging_then_backup_rename_with_rollback".to_owned(),
+        publication_strategy: VERIFIED_PUBLICATION_STRATEGY.to_owned(),
         logical_command_template: verification.logical_command_template.clone(),
         pdf_byte_length: artifacts
             .map(|value| u64::try_from(value.pdf.len()))
