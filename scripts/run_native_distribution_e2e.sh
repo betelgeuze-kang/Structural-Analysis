@@ -1521,9 +1521,9 @@ exercise_frame_section_add_surface() {
     grep -Fq '"parameter_set_version":"1"' \
       "$section_directory/edit-receipt.json"
     grep -Fq '"area_m2":0.01' "$section_directory/edit-receipt.json"
-    grep -Fq '"iy_m4":0.00004' "$section_directory/edit-receipt.json"
-    grep -Fq '"iz_m4":0.000025' "$section_directory/edit-receipt.json"
-    grep -Fq '"torsional_constant_m4":0.000005' \
+    grep -Fq '"iy_m4":4e-05' "$section_directory/edit-receipt.json"
+    grep -Fq '"iz_m4":2.5e-05' "$section_directory/edit-receipt.json"
+    grep -Fq '"torsional_constant_m4":5e-06' \
       "$section_directory/edit-receipt.json"
     grep -Fq '"shear_area_y_m2":0.008' "$section_directory/edit-receipt.json"
     grep -Fq '"shear_area_z_m2":0.008' "$section_directory/edit-receipt.json"
