@@ -32,6 +32,7 @@ DEFAULT_OUT_BY_PLATFORM = {
     "windows": PRODUCTIZATION / "phase6_windows_platform_replay_receipt.json",
 }
 SUPPORTED_PLATFORMS = tuple(DEFAULT_OUT_BY_PLATFORM)
+NODE_RUNTIME_DISPOSITION = "not_required_for_phase3_seed_replay_contract"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -95,17 +96,6 @@ def _git_dirty_paths(repo_root: Path) -> list[str]:
     except Exception:
         return ["git_status_unavailable"]
     return [line.rstrip() for line in output.splitlines() if line.strip()]
-
-
-def _node_version() -> str:
-    try:
-        return subprocess.check_output(
-            ["node", "--version"],
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return "not_available"
 
 
 def _command_env(replay_root: Path) -> dict[str, str]:
@@ -314,7 +304,7 @@ def build_phase6_platform_replay_receipt(
         "os_name": platform_module.system(),
         "os_version": platform_module.platform(),
         "python_version": platform_module.python_version(),
-        "node_version": _node_version(),
+        "node_version": NODE_RUNTIME_DISPOSITION,
         "source_commit_sha": source_commit_sha,
         "platform_identity": {
             "platform": requested_platform,
@@ -341,7 +331,9 @@ def build_phase6_platform_replay_receipt(
             "This platform replay receipt is valid only for the OS that executed "
             "the replay commands. It cannot be copied across platforms, cannot "
             "close Linux/Windows parity alone, and does not promote Developer "
-            "Preview RC readiness until the aggregate parity status passes."
+            "Preview RC readiness until the aggregate parity status passes. The "
+            "Phase 3 seed replay is Python-only, so Node is neither invoked nor "
+            "required by this receipt."
         ),
     }
 

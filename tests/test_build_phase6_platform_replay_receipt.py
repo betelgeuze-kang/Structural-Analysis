@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 import sys
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts" / "build_phase6_platform_replay_receipt.py"
@@ -34,6 +36,20 @@ def _passing_commands() -> list[dict]:
     ]
 
 
+@pytest.fixture(autouse=True)
+def _phase3_repro_bundle(monkeypatch: pytest.MonkeyPatch) -> None:
+    payload = {
+        "source_commit_sha": "a" * 40,
+        "expected_scorecard": {"case_count": 30},
+        "stable_artifact_checksums": {
+            "manifest": "sha256:" + "1" * 64,
+            "scorecard": "sha256:" + "2" * 64,
+            "summary": "sha256:" + "3" * 64,
+        },
+    }
+    monkeypatch.setattr(module, "_load_json", lambda *_args, **_kwargs: payload)
+
+
 def test_windows_platform_replay_receipt_can_pass_with_matching_clean_platform() -> None:
     receipt = module.build_phase6_platform_replay_receipt(
         repo_root=REPO_ROOT,
@@ -59,6 +75,7 @@ def test_windows_platform_replay_receipt_can_pass_with_matching_clean_platform()
     assert receipt["platform_identity"]["platform"] == "windows"
     assert receipt["platform_identity"]["commands_return_code_zero"] is True
     assert receipt["platform_identity"]["replay_environment"] == "unit_test_windows_replay"
+    assert receipt["node_version"] == module.NODE_RUNTIME_DISPOSITION
     assert receipt["source_commit_sha"]
     assert receipt["receipt_builder_source_commit_sha"]
     assert receipt["expected_scorecard"]["case_count"] == 30
@@ -66,6 +83,15 @@ def test_windows_platform_replay_receipt_can_pass_with_matching_clean_platform()
     assert receipt["generated_output_checksums"]["manifest"] == "sha256:generated-manifest"
     assert receipt["developer_preview_release_candidate_claim"] is False
     assert "cannot be copied across platforms" in receipt["claim_boundary"]
+    assert "Node is neither invoked nor required" in receipt["claim_boundary"]
+
+
+def test_platform_replay_source_has_no_node_process_probe() -> None:
+    source = SCRIPT_PATH.read_text(encoding="utf-8")
+
+    assert "def _node_version" not in source
+    assert '["node", "--version"]' not in source
+    assert "NODE_RUNTIME_DISPOSITION" in source
 
 
 def test_platform_replay_receipt_blocks_on_platform_mismatch() -> None:
