@@ -72,8 +72,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 2. executes the five Rust binaries with an empty `PATH`;
 3. validates ModelIR and consumes the installed CMake package;
 4. selects and executes the installed ABI backend;
-5. runs stage-by-stage and one-shot Workbench flows from both strict ModelIR and the bounded MGT
-   source, then byte-compares every artifact and preserves MGT import-health evidence;
+5. runs stage-by-stage and one-shot Workbench flows from strict ModelIR, the bounded MGT source and
+   the ModelIR linear product path, then byte-compares every direct/restarted artifact; the MGT path
+   preserves import-health evidence, while the linear path binds the language-neutral external
+   oracle, typed recovery, comparison, deterministic sparse-linear PDF and both PDF/report receipts;
 6. exercises deterministic inspect, immutable explicit `review`, review reopen and handoff export
    from both installed sessions without inferring an engineering approval;
 7. checks and rebuilds the tracked 26-case catalog with the installed `structural-catalog` binary,
@@ -102,16 +104,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
 15. installs an immutable update, rolls back and re-verifies activation;
-16. emits an append-only v13 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+16. emits an append-only v14 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
    view identity, and edited ModelIR
    plus edit-receipt identities, all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
-   response/deformed-view identities, Python/Node lookup count 0 and fallback count 0. The receipt
-   checker continues to accept frozen v1 through v12 receipts without treating them as v13
-   localized-model-view authority.
+   response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
+   ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
+   count 0. The receipt checker continues to accept frozen v1 through v13 receipts without treating
+   them as v14 ModelIR-linear Workbench authority.
 
 The reference command is:
 

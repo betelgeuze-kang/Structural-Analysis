@@ -9,7 +9,8 @@ or sparse PCG numerical gates beyond C1.
 The profile runs the complete native product sequence with
 no Python, Node, browser, CLI subprocess, or external renderer lookup.
 
-Report authority ends at verified PDF-ready Markdown. The restart proof models process death after atomic checkpoint publication.
+Report authority includes verified PDF-ready Markdown and one deterministic single-page sparse PDF.
+The restart proof models process death after atomic checkpoint publication.
 
 `Import -> Validate -> Run -> Resume -> Compare -> Report` is the durable stage order.
 
@@ -27,10 +28,11 @@ Report authority ends at verified PDF-ready Markdown. The restart proof models p
    global DOFs. Each row binds global index, fixed six-DOF label, JSON path, SI unit, and tolerance.
    A tolerance miss publishes `diverged`; it is not erased as an exception.
 6. `report` strictly re-parses and re-projects the ResultIR, recovery IR, ReportIR, and PDF-ready
-   Markdown into a new self-hashed stage. This profile does not claim deterministic PDF rendering.
+   Markdown, then renders a deterministic PDF 1.7 page through the native sparse-report renderer.
+   The stage receipt binds the source artifacts, PDF, renderer receipt, and all six hashes.
 7. `inspect`, English/Korean `report-view`, immutable explicit `review`, and `export` bind the exact
-   session, result, recovery, comparison, ReportIR, and document source. Export labels Markdown as
-   `pdf_ready_document_source`, never as a PDF.
+   session, result, recovery, comparison, ReportIR, document source, and PDF. Export preserves both
+   `sparse_linear_pdf_report` and `pdf_ready_document_source` as distinct artifacts.
 
 The one-shot equivalent is:
 
@@ -62,14 +64,25 @@ must be `/global_displacement/<index>`. Model content/semantic/provenance identi
 request, load pattern, source ResultIR, recovery, source artifact, and optional executable are all
 verified before comparison arithmetic.
 
+## Deterministic sparse PDF
+
+`structural-report` exposes `render_sparse_linear_pdf_v1`, and the public CLI exposes
+`structural-cli report render-sparse-pdf`. Both rebuild the exact sparse ReportIR and Markdown from
+ResultIR before accepting the inputs. The fixed A4 PDF 1.7 object graph contains the matrix order,
+nonzero count, PCG iterations, true residual, backend policy, fallback count, and ResultIR,
+ReportIR, document, request, model, state, execution, and checkpoint hashes. Its standard-font
+ASCII path performs no host-font lookup, subprocess, browser, office-suite, or external-renderer
+call. A self-hashed sparse PDF receipt and the Workbench report-stage receipt independently bind
+the bytes.
+
 ## Restart and compatibility proof
 
 The clean-environment E2E starts a new process for each command, advances exactly one real PCG
 iteration, restores the pre-Run session file to model process death after atomic checkpoint
 publication, reopens and reconciles the stage, then completes Resume -> Compare -> Report. Every
-terminal result, recovery, report, comparison, and receipt byte is identical to a separate direct
-one-shot workflow. The same test exercises inspect, Korean report view, explicit review, export,
-and fail-closed NDTHA-only result-view access.
+terminal result, recovery, report, comparison, PDF, and receipt byte is identical to a separate
+direct one-shot workflow. The same test exercises inspect, Korean report view, explicit review,
+export, PDF tamper rejection, and fail-closed NDTHA-only result-view access.
 
 The session profile field is optional and omitted for the existing fixed-guided NDTHA profile.
 Existing NDTHA session, import, review, export, PDF, and stage receipt shapes therefore remain
@@ -77,8 +90,9 @@ byte-stable; the original 14-test Workbench E2E remains the compatibility gate.
 
 ## Claim boundary
 
-This closes only the bounded typed-ModelIR frame3d/truss3d CPU linear Workbench composition at C5.
-It does not close deterministic PDF rendering for this profile, ModelIR linear MGT ingestion, live
-MIDAS/OpenSees/CalculiX execution, general nonlinear-static/modal/buckling/transient Workbench
-profiles, arbitrary result visualization, React/TypeScript removal, protected-runner HIP C2,
-authoritative numerical C2/C3, packaging receipts, or C6 decommission.
+This closes only the bounded typed-ModelIR frame3d/truss3d CPU linear Workbench composition and its
+single-page standard-font PDF at C5. It does not close localized sparse PDF, PDF/A or accessibility
+conformance, ModelIR linear MGT ingestion, live MIDAS/OpenSees/CalculiX execution, general
+nonlinear-static/modal/buckling/transient Workbench profiles, arbitrary result visualization,
+React/TypeScript removal, protected-runner HIP C2, authoritative numerical C2/C3, packaging
+receipts, or C6 decommission.

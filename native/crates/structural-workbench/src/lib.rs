@@ -14,8 +14,8 @@ use serde_json::{json, Value};
 use structural_cli::{
     execute_external_comparison, execute_localized_pdf_report, execute_model_ir_linear_analysis,
     execute_model_ir_linear_external_comparison, execute_model_ir_native_analysis,
-    execute_native_mgt_import, execute_pdf_report, publish_external_comparison,
-    publish_localized_pdf_report, publish_model_ir_linear_analysis,
+    execute_native_mgt_import, execute_pdf_report, execute_sparse_linear_pdf_report,
+    publish_external_comparison, publish_localized_pdf_report, publish_model_ir_linear_analysis,
     publish_model_ir_linear_external_comparison, publish_model_ir_native_analysis,
     publish_pdf_report, validate_model_bytes, PdfReportLocaleV2,
 };
@@ -69,7 +69,7 @@ const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";
 const IMPORT_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-import-receipt.v1";
 const VALIDATION_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-validation-receipt.v1";
 const CLAIM_BOUNDARY: &str = "bounded_terminal_rust_native_workbench_for_one_fixed_guided_model_ir_ndtha_profile_not_general_gui_live_external_solver_rocm_package_or_c6_decommission";
-const MODEL_IR_LINEAR_CLAIM_BOUNDARY: &str = "bounded_terminal_rust_native_workbench_for_one_model_ir_linear_cpu_profile_with_recovered_global_dof_comparison_and_pdf_ready_document_source_not_general_gui_live_external_solver_rocm_package_or_c6_decommission";
+const MODEL_IR_LINEAR_CLAIM_BOUNDARY: &str = "bounded_terminal_rust_native_workbench_for_one_model_ir_linear_cpu_profile_with_recovered_global_dof_comparison_and_deterministic_pdf_not_general_gui_live_external_solver_rocm_package_or_c6_decommission";
 const SESSION_FILE: &str = "workbench-session.json";
 const IMPORT_DIRECTORY: &str = "01-import";
 const VALIDATION_DIRECTORY: &str = "02-validate";
@@ -83,7 +83,7 @@ const REVIEW_SCHEMA_V1: &str = "structural-native-workbench-review.v1";
 const VIEW_SCHEMA_V1: &str = "structural-native-workbench-view.v1";
 const EXPORT_SCHEMA_V1: &str = "structural-native-workbench-export.v1";
 const REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_native_result_comparison_and_pdf_not_an_automated_engineering_verdict_or_signature";
-const MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_and_document_source_not_an_automated_engineering_verdict_or_signature";
+const MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature";
 const MAX_MODEL_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 4 * 1024 * 1024;
@@ -930,6 +930,7 @@ impl NativeWorkbench {
                         &self.root.join(REPORT_DIRECTORY).join("report-receipt.json"),
                     )?;
                     json!({
+                        "pdf_hash": receipt.get("pdf_hash").cloned().unwrap_or(Value::Null),
                         "document_source_hash": receipt.get("document_source_hash").cloned().unwrap_or(Value::Null),
                         "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
                         "source_recovery_hash": receipt.get("source_recovery_hash").cloned().unwrap_or(Value::Null),
@@ -1049,7 +1050,10 @@ impl NativeWorkbench {
                     None,
                 ),
                 Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
-                    None,
+                    Some(sha256_identity(&read_bounded_regular_file(
+                        &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+                        MAX_PRODUCT_ARTIFACT_BYTES,
+                    )?)),
                     Some(sha256_identity(&read_bounded_regular_file(
                         &self
                             .root
@@ -1183,10 +1187,20 @@ impl NativeWorkbench {
                 )?);
             }
             Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let pdf = read_bounded_regular_file(
+                    &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
                 let document = read_bounded_regular_file(
                     &self.root.join(REPORT_DIRECTORY).join("report.md"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?;
+                artifacts.push(artifact_entry(
+                    "sparse_linear_pdf_report",
+                    "06-report/report.pdf",
+                    "application/pdf",
+                    &pdf,
+                )?);
                 artifacts.push(artifact_entry(
                     "pdf_ready_document_source",
                     "06-report/report.md",
@@ -1208,7 +1222,7 @@ impl NativeWorkbench {
             "review_hash": review.review_hash,
             "artifacts": artifacts,
             "claim_boundary": if self.session.analysis_profile.is_some() {
-                "deterministic_model_ir_linear_native_handoff_manifest_with_pdf_ready_document_source_not_an_archive_pdf_signature_or_engineering_acceptance"
+                "deterministic_model_ir_linear_native_handoff_manifest_with_pdf_and_document_source_not_an_archive_signature_or_engineering_acceptance"
             } else {
                 "deterministic_native_handoff_manifest_not_an_archive_signature_or_engineering_acceptance"
             },
@@ -1327,6 +1341,7 @@ impl NativeWorkbench {
         )
     }
 
+    #[allow(clippy::too_many_lines)]
     fn model_ir_linear_report_text(
         &self,
         locale: WorkbenchReportLocaleV1,
@@ -1348,6 +1363,25 @@ impl NativeWorkbench {
             &report_directory.join("report.md"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
+        let pdf_bytes = read_bounded_regular_file(
+            &report_directory.join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let pdf_receipt_bytes = read_bounded_regular_file(
+            &report_directory.join("pdf-receipt.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reproduced =
+            execute_sparse_linear_pdf_report(&result_bytes, &report_bytes, &document_bytes)
+                .map_err(|error| input_error("workbench_linear_report_pdf_invalid", &error))?;
+        if reproduced.pdf_bytes() != pdf_bytes
+            || reproduced.receipt_json().as_bytes() != pdf_receipt_bytes
+        {
+            return Err(WorkbenchError::new(
+                "workbench_linear_report_pdf_mismatch",
+                "stored sparse PDF or receipt differs from the exact ResultIR/ReportIR/Markdown projection",
+            ));
+        }
         let result = parse_sparse_linear_result_ir_v1(&result_bytes)
             .map_err(|error| input_error("workbench_linear_report_result_invalid", &error))?;
         let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
@@ -1396,16 +1430,16 @@ impl NativeWorkbench {
                     "Case",
                     "Terminal status",
                     "External comparison",
-                    "Verified PDF-ready document source",
-                    "This is a bounded CPU candidate view, not engineering acceptance, PDF rendering, or design-code compliance.",
+                    "Verified PDF document source",
+                    "This is a bounded CPU candidate view, not engineering acceptance, PDF/A, accessibility conformance, or design-code compliance.",
                 ),
                 WorkbenchReportLocaleV1::KoKr => (
                     "구조 ModelIR 선형 Workbench 보고서",
                     "케이스",
                     "종료 상태",
                     "외부 비교",
-                    "검증된 PDF용 문서 원본",
-                    "이 결과는 제한된 CPU 후보 뷰이며, 공학적 승인·PDF 렌더링·설계기준 적합성을 의미하지 않습니다.",
+                    "검증된 PDF 문서 원본",
+                    "이 결과는 제한된 CPU 후보 뷰이며, 공학적 승인·PDF/A·접근성 적합성·설계기준 적합성을 의미하지 않습니다.",
                 ),
             };
         let source = std::str::from_utf8(&document_bytes).map_err(|_| {
@@ -1415,7 +1449,7 @@ impl NativeWorkbench {
             )
         })?;
         let mut output = format!(
-            "{title}\nSchema: structural-native-workbench-model-ir-linear-report-view.v1\nLocale: {}\n{case_label}: {}\n{status_label}: completed\n{comparison_label}: {comparison_status}\nMatrix order: {}\nPCG iterations: {}\nMaximum absolute global displacement: {:.17e}\nActive residual infinity norm: {:.17e}\nResult hash: {}\nRecovery hash: {}\nReport hash: {}\nComparison hash: {comparison_hash}\nBoundary: {boundary}\n\n{source_label}\n\n",
+            "{title}\nSchema: structural-native-workbench-model-ir-linear-report-view.v1\nLocale: {}\n{case_label}: {}\n{status_label}: completed\n{comparison_label}: {comparison_status}\nMatrix order: {}\nPCG iterations: {}\nMaximum absolute global displacement: {:.17e}\nActive residual infinity norm: {:.17e}\nResult hash: {}\nRecovery hash: {}\nReport hash: {}\nPDF hash: {}\nComparison hash: {comparison_hash}\nBoundary: {boundary}\n\n{source_label}\n\n",
             locale.label(),
             result.result().case_id,
             result.result().summary.order,
@@ -1425,6 +1459,7 @@ impl NativeWorkbench {
             result.result_hash(),
             recovery.recovery_hash(),
             report.report_hash(),
+            sha256_identity(&pdf_bytes),
         );
         output.push_str(source);
         Ok(output)
@@ -1867,7 +1902,7 @@ impl NativeWorkbench {
     pub fn report(&mut self) -> Result<(), WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Compared)?;
         if self.session.analysis_profile.is_some() {
-            return self.publish_model_ir_linear_report_source();
+            return self.publish_model_ir_linear_pdf_report();
         }
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result = read_bounded_regular_file(
@@ -1888,7 +1923,7 @@ impl NativeWorkbench {
         self.persist()
     }
 
-    fn publish_model_ir_linear_report_source(&mut self) -> Result<(), WorkbenchError> {
+    fn publish_model_ir_linear_pdf_report(&mut self) -> Result<(), WorkbenchError> {
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -1922,21 +1957,27 @@ impl NativeWorkbench {
                 "terminal recovery, ReportIR, or document source is not the exact sparse ResultIR projection",
             ));
         }
+        let pdf = execute_sparse_linear_pdf_report(&result_bytes, &report_bytes, &document_bytes)
+            .map_err(|error| input_error("workbench_report_pdf_failed", &error))?;
         let receipt = canonical_self_hashed(json!({
-            "schema_version": "structural-native-model-ir-linear-report-source-receipt.v1",
+            "schema_version": "structural-native-model-ir-linear-pdf-report-receipt.v1",
             "session_id": self.session.session_id,
             "status": "reported",
             "source_result_hash": result.result_hash(),
             "source_recovery_hash": recovery.recovery_hash(),
             "source_report_hash": report.report_hash(),
             "document_source_hash": sha256_identity(&document_bytes),
+            "pdf_hash": sha256_identity(pdf.pdf_bytes()),
+            "pdf_receipt_hash": sha256_identity(pdf.receipt_json().as_bytes()),
             "artifacts": [
                 artifact_entry("result_ir", "result-ir.json", "application/json", &result_bytes)?,
                 artifact_entry("result_recovery_ir", "result-recovery-ir.json", "application/json", &recovery_bytes)?,
                 artifact_entry("report_ir", "report-ir.json", "application/json", &report_bytes)?,
                 artifact_entry("pdf_ready_document_source", "report.md", "text/markdown; charset=utf-8", &document_bytes)?,
+                artifact_entry("sparse_linear_pdf_report", "report.pdf", "application/pdf", pdf.pdf_bytes())?,
+                artifact_entry("sparse_linear_pdf_receipt", "pdf-receipt.json", "application/json", pdf.receipt_json().as_bytes())?,
             ],
-            "claim_boundary": "verified_deterministic_sparse_report_ir_and_pdf_ready_markdown_source_not_pdf_rendering_engineering_acceptance_or_design_code_compliance",
+            "claim_boundary": "verified_deterministic_sparse_report_ir_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance",
         }))?;
         publish_new_directory(
             &self.root.join(REPORT_DIRECTORY),
@@ -1945,6 +1986,8 @@ impl NativeWorkbench {
                 ("result-recovery-ir.json", &recovery_bytes),
                 ("report-ir.json", &report_bytes),
                 ("report.md", &document_bytes),
+                ("report.pdf", pdf.pdf_bytes()),
+                ("pdf-receipt.json", pdf.receipt_json().as_bytes()),
                 ("report-receipt.json", receipt.as_bytes()),
             ],
         )?;
@@ -2137,7 +2180,10 @@ fn verify_review_binding(
             None,
         ),
         Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
-            None,
+            Some(sha256_identity(&read_bounded_regular_file(
+                &root.join(REPORT_DIRECTORY).join("report.pdf"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?)),
             Some(sha256_identity(&read_bounded_regular_file(
                 &root.join(RESUME_DIRECTORY).join("result-recovery-ir.json"),
                 MAX_PRODUCT_ARTIFACT_BYTES,

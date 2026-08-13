@@ -7,10 +7,17 @@ use structural_contracts::product_ir::{
     NonlinearNdthaTerminalStatusV1, ResultIdentityV1,
 };
 use structural_contracts::solver_cpu::parse_nonlinear_ndtha_cpu_case_v1;
+use structural_contracts::sparse_product::{
+    build_sparse_linear_request_v1, build_sparse_linear_result_ir_v1,
+    sparse_linear_execution_hash_v1, sparse_linear_model_hash_v1, SparseLinearAnalysisRequestV1,
+    SparseLinearBackendV1, SparseLinearConfigV1, SparseLinearResultIrDocumentV1,
+    SparseLinearResultSummaryV1, SPARSE_LINEAR_REQUEST_V1,
+};
 use structural_report::{
     build_nonlinear_ndtha_report_v1, render_nonlinear_ndtha_localized_pdf_v2,
-    render_nonlinear_ndtha_pdf_v1, validate_deterministic_localized_pdf_v2,
-    validate_deterministic_pdf_v1, PdfRenderError, PdfReportLocaleV2,
+    render_nonlinear_ndtha_pdf_v1, render_sparse_linear_pdf_v1,
+    validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1, PdfRenderError,
+    PdfReportLocaleV2,
 };
 
 fn repository_root() -> PathBuf {
@@ -79,6 +86,83 @@ fn result_document() -> NonlinearNdthaResultIrDocumentV1 {
         result.response,
     )
     .expect("bounded ResultIR")
+}
+
+fn sparse_result_document() -> SparseLinearResultIrDocumentV1 {
+    let request = build_sparse_linear_request_v1(SparseLinearAnalysisRequestV1 {
+        schema_version: SPARSE_LINEAR_REQUEST_V1.to_owned(),
+        operation: "solve_sparse_spd_pcg".to_owned(),
+        case_id: "sparse-pdf-c5".to_owned(),
+        backend: SparseLinearBackendV1::Cpu,
+        order: 2,
+        row_offsets: vec![0, 2, 4],
+        column_indices: vec![0, 1, 0, 1],
+        values: vec![2.0, -1.0, -1.0, 2.0],
+        right_hand_side: vec![0.0, 3.0],
+        initial_guess: Vec::new(),
+        config: SparseLinearConfigV1 {
+            max_iterations: 8,
+            absolute_residual_tolerance: 1.0e-14,
+            relative_residual_tolerance: 1.0e-14,
+            maximum_increment: 0.0,
+        },
+    })
+    .expect("sparse request");
+    build_sparse_linear_result_ir_v1(
+        &request,
+        ResultIdentityV1 {
+            request_hash: request.request_hash().to_owned(),
+            model_hash: sparse_linear_model_hash_v1(&request).expect("sparse model hash"),
+            state_hash: format!("sha256:{}", "4".repeat(64)),
+            execution_hash: sparse_linear_execution_hash_v1(&request)
+                .expect("sparse execution hash"),
+            checkpoint_hash: format!("sha256:{}", "5".repeat(64)),
+        },
+        SparseLinearResultSummaryV1 {
+            order: 2,
+            nonzero_count: 4,
+            iterations: 2,
+            initial_residual_inf: 3.0,
+            final_residual_inf: 0.0,
+            final_residual_l2: 0.0,
+            last_increment_inf: 1.0,
+        },
+        vec![1.0, 2.0],
+    )
+    .expect("sparse result")
+}
+
+#[test]
+fn sparse_linear_pdf_is_deterministic_and_exactly_projection_bound() {
+    let result = sparse_result_document();
+    let report = structural_report::build_sparse_linear_report_v1(&result)
+        .expect("deterministic sparse report");
+    let first = render_sparse_linear_pdf_v1(
+        &result,
+        &report.report_ir,
+        report.document_source.as_bytes(),
+    )
+    .expect("sparse PDF");
+    let second = render_sparse_linear_pdf_v1(
+        &result,
+        &report.report_ir,
+        report.document_source.as_bytes(),
+    )
+    .expect("repeated sparse PDF");
+    assert_eq!(first, second);
+    assert_eq!(first.source_result_hash(), result.result_hash());
+    assert_eq!(first.source_report_hash(), report.report_ir.report_hash());
+    validate_deterministic_pdf_v1(first.as_bytes()).expect("valid sparse PDF structure");
+    assert!(first
+        .as_bytes()
+        .windows(b"sparse-report-pdf.v1".len())
+        .any(|window| window == b"sparse-report-pdf.v1"));
+
+    assert!(matches!(
+        render_sparse_linear_pdf_v1(&result, &report.report_ir, b"forged document"),
+        Err(PdfRenderError::Binding { ref code, .. })
+            if code == "pdf_document_source_projection_mismatch"
+    ));
 }
 
 #[test]

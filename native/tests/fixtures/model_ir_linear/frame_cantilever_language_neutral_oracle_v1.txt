@@ -1,0 +1,11 @@
+structural-model-ir-linear-language-neutral-oracle.v1
+case_id=model-frame-linear-c5
+model=two-node 2 m Euler-Bernoulli cantilever
+load_pattern_id=LC_WEAK
+tip_load_fy_n=-10000
+elastic_modulus_pa=200000000000
+bending_inertia_z_m4=0.00005
+tip_uy_m=-0.0026666666666666666
+tip_rz_rad=-0.002
+derivation=uy=P*L^3/(3*E*Iz);rz=P*L^2/(2*E*Iz)
+authority=language_neutral_closed_form_fixture_not_engineering_acceptance

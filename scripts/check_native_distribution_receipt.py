@@ -133,6 +133,20 @@ V13_LOCALIZED_MODEL_VIEW_KEYS = {
     "workbench_model_view_ko_kr_sha256",
 }
 V13_EXPECTED_KEYS = V12_EXPECTED_KEYS | V13_LOCALIZED_MODEL_VIEW_KEYS
+V14_MODEL_IR_LINEAR_WORKBENCH_KEYS = {
+    "model_ir_linear_workbench_restart_passed",
+    "model_ir_linear_workbench_direct_parity_passed",
+    "model_ir_linear_workbench_operator_surface_passed",
+    "model_ir_linear_workbench_review_decision",
+    "model_ir_linear_workbench_review_sha256",
+    "model_ir_linear_workbench_export_sha256",
+    "model_ir_linear_result_ir_sha256",
+    "model_ir_linear_result_recovery_ir_sha256",
+    "model_ir_linear_report_pdf_sha256",
+    "model_ir_linear_pdf_receipt_sha256",
+    "model_ir_linear_report_receipt_sha256",
+}
+V14_EXPECTED_KEYS = V13_EXPECTED_KEYS | V14_MODEL_IR_LINEAR_WORKBENCH_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -173,6 +187,7 @@ def validate(
 ) -> list[str]:
     errors: list[str] = []
     schema_version = payload.get("schema_version")
+    receipt_schema_version = schema_version
     expected_keys = {
         "structural-native-distribution-e2e.v1": V1_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v2": V2_EXPECTED_KEYS,
@@ -187,11 +202,14 @@ def validate(
         "structural-native-distribution-e2e.v11": V11_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v12": V12_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v13": V13_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v14": V14_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v14":
+        schema_version = "structural-native-distribution-e2e.v13"
     backend = payload.get("backend_profile")
     if backend not in {"cpu_only", "rocm"}:
         errors.append("backend_profile must be cpu_only or rocm")
@@ -504,6 +522,29 @@ def validate(
             "workbench_model_view_isometric_sha256"
         ):
             errors.append("localized en-US and ko-KR model-view identities must differ")
+    if receipt_schema_version == "structural-native-distribution-e2e.v14":
+        for name in (
+            "model_ir_linear_workbench_restart_passed",
+            "model_ir_linear_workbench_direct_parity_passed",
+            "model_ir_linear_workbench_operator_surface_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        if payload.get("model_ir_linear_workbench_review_decision") != "review":
+            errors.append(
+                "model_ir_linear_workbench_review_decision must preserve the non-promoting review decision"
+            )
+        for name in (
+            "model_ir_linear_workbench_review_sha256",
+            "model_ir_linear_workbench_export_sha256",
+            "model_ir_linear_result_ir_sha256",
+            "model_ir_linear_result_recovery_ir_sha256",
+            "model_ir_linear_report_pdf_sha256",
+            "model_ir_linear_pdf_receipt_sha256",
+            "model_ir_linear_report_receipt_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):
         if type(payload.get(name)) is not int or payload[name] != 0:
             errors.append(f"{name} must be integer zero")

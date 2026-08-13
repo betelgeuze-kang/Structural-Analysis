@@ -47,9 +47,9 @@ pub use product::{
     NativeAnalysisRunOutcomeV1,
 };
 pub use report::{
-    execute_localized_pdf_report, execute_pdf_report, publish_localized_pdf_report,
-    publish_pdf_report, NativeLocalizedPdfReportOutcomeV2, NativePdfReportError,
-    NativePdfReportOutcomeV1,
+    execute_localized_pdf_report, execute_pdf_report, execute_sparse_linear_pdf_report,
+    publish_localized_pdf_report, publish_pdf_report, NativeLocalizedPdfReportOutcomeV2,
+    NativePdfReportError, NativePdfReportOutcomeV1,
 };
 pub use service::{
     load_native_job_api_credentials, NativeJobApiCredentialsV1, NativeJobApiError,

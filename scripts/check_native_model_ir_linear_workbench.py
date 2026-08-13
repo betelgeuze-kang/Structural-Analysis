@@ -38,6 +38,17 @@ REQUIRED_TOKENS = {
         "parse_model_ir_linear_result_recovery_ir_v1",
         "result-recovery-ir.json",
     ),
+    "native/crates/structural-report/src/pdf.rs": (
+        "render_sparse_linear_pdf_v1",
+        "build_sparse_linear_pdf_bytes",
+        "sparse-report-pdf.v1",
+        "validate_deterministic_pdf_v1",
+    ),
+    "native/crates/structural-cli/src/report.rs": (
+        "execute_sparse_linear_pdf_report",
+        "structural-native-sparse-linear-pdf-report-receipt.v1",
+        "sparse_linear_pdf_report",
+    ),
     "native/crates/structural-workbench/src/lib.rs": (
         "WorkbenchAnalysisProfileV1",
         "ModelIrLinearCpuV1",
@@ -45,7 +56,10 @@ REQUIRED_TOKENS = {
         "execute_model_ir_linear_analysis",
         "checkpoint.mlpcp",
         "execute_model_ir_linear_external_comparison",
-        "publish_model_ir_linear_report_source",
+        "publish_model_ir_linear_pdf_report",
+        "execute_sparse_linear_pdf_report",
+        "structural-native-model-ir-linear-pdf-report-receipt.v1",
+        "sparse_linear_pdf_report",
         "pdf_ready_document_source",
         "workbench_profile_unsupported",
     ),
@@ -65,12 +79,17 @@ REQUIRED_TOKENS = {
         'command.env("PATH", "/nonexistent")',
         "simulate crash before session persistence",
         "restart drift",
+        "validate_deterministic_pdf_v1",
+        "tampered_pdf",
+        "sparse_linear_pdf_report",
         "pdf_ready_document_source",
         "workbench_profile_unsupported",
     ),
     "docs/native/modelir-linear-workbench-v1.md": (
         "Import -> Validate -> Run -> Resume -> Compare -> Report",
         "PDF-ready Markdown",
+        "deterministic single-page sparse PDF",
+        "render_sparse_linear_pdf_v1",
         "process death after atomic checkpoint publication",
         "no Python, Node, browser, CLI subprocess",
         "protected-runner HIP C2",
@@ -106,10 +125,11 @@ def check_model_ir_linear_workbench(repo_root: Path = ROOT) -> dict[str, object]
         "real PCG checkpoint.mlpcp",
         "typed recovered global-DOF",
         "PDF-ready Markdown",
+        "deterministic single-page sparse PDF",
         "clean-environment process restart",
         "no Python, Node, browser, CLI subprocess",
         "existing fixed-guided NDTHA session and receipt bytes",
-        "deterministic PDF rendering",
+        "localized sparse PDF",
         "approved protected-runner HIP C2",
         "authoritative numerical C2/C3",
         "C6",
@@ -156,7 +176,8 @@ def check_model_ir_linear_workbench(repo_root: Path = ROOT) -> dict[str, object]
         "blockers": blockers,
         "claim_boundary": (
             "This check closes only bounded typed-ModelIR CPU linear Workbench C5 composition. "
-            "It cannot promote numerical C2, authoritative C3, HIP C2, PDF authority, or C6."
+            "It includes one deterministic sparse PDF but cannot promote numerical C2, "
+            "authoritative C3, HIP C2, localized/general PDF authority, or C6."
         ),
     }
 

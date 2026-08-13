@@ -17,6 +17,8 @@ EMBEDDED_FONT_ASSET = (
 REQUIRED_TOKENS = {
     "native/crates/structural-report/src/pdf.rs": (
         "render_nonlinear_ndtha_pdf_v1",
+        "render_sparse_linear_pdf_v1",
+        "build_sparse_linear_pdf_bytes",
         "validate_deterministic_pdf_v1",
         "pdf_document_source_projection_mismatch",
         "pdf_report_ir_projection_mismatch",
@@ -56,13 +58,16 @@ REQUIRED_TOKENS = {
         "xref_tamper_is_detected_without_a_pdf_parser_dependency",
         "embedded_font_localized_pdfs_are_deterministic_distinct_and_extractable",
         "localized_pdf_rejects_projection_and_embedded_font_tampering",
+        "sparse_linear_pdf_is_deterministic_and_exactly_projection_bound",
     ),
     "native/crates/structural-cli/src/report.rs": (
         "execute_pdf_report",
         "publish_pdf_report",
         "execute_localized_pdf_report",
+        "execute_sparse_linear_pdf_report",
         "publish_localized_pdf_report",
         "structural-native-localized-pdf-report-receipt.v2",
+        "structural-native-sparse-linear-pdf-report-receipt.v1",
         "report.pdf",
         "pdf-receipt.json",
         "receipt_hash",
@@ -72,6 +77,7 @@ REQUIRED_TOKENS = {
         "command.env_clear()",
         "forged_markdown_and_existing_destination_fail_without_overwrite",
         "localized_embedded_font_pdf_is_clean_environment_deterministic_and_closed",
+        "sparse_linear_pdf_cli_is_clean_environment_deterministic_and_profile_typed",
         "sha256:35f2bebb41411b31cba9e0c395ba74f914097498e8da63e4b14d72704f06c197",
         "sha256:b807334630bb3c98398efcec4451e44ba23e3e538a1938b1c284bc781a677877",
     ),
@@ -92,6 +98,16 @@ REQUIRED_TOKENS = {
         "arbitrary Unicode",
         "PDF/UA",
         "Poppler",
+    ),
+    "docs/native/pdf-report-sparse-v1.md": (
+        "render-sparse-pdf",
+        "structural-native-sparse-linear-pdf-report-receipt.v1",
+        "structural-native-model-ir-linear-pdf-report-receipt.v1",
+        "no clock metadata",
+        "localized sparse-linear PDF",
+        "PDF/UA",
+        "HIP C2",
+        "C6 decommission",
     ),
 }
 
@@ -121,6 +137,7 @@ def check_pdf_report_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "OFL-1.1",
         "en-US",
         "ko-KR",
+        "sparse-linear",
         "arbitrary Unicode",
         "PDF/A",
         "tagged accessibility",

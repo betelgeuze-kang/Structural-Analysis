@@ -285,6 +285,27 @@ def valid_v13_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v14_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v13_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v14",
+            "model_ir_linear_workbench_restart_passed": True,
+            "model_ir_linear_workbench_direct_parity_passed": True,
+            "model_ir_linear_workbench_operator_surface_passed": True,
+            "model_ir_linear_workbench_review_decision": "review",
+            "model_ir_linear_workbench_review_sha256": "sha256:" + "b" * 64,
+            "model_ir_linear_workbench_export_sha256": "sha256:" + "c" * 64,
+            "model_ir_linear_result_ir_sha256": "sha256:" + "d" * 64,
+            "model_ir_linear_result_recovery_ir_sha256": "sha256:" + "e" * 64,
+            "model_ir_linear_report_pdf_sha256": "sha256:" + "f" * 64,
+            "model_ir_linear_pdf_receipt_sha256": "sha256:" + "0" * 64,
+            "model_ir_linear_report_receipt_sha256": "sha256:" + "1" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -629,6 +650,50 @@ def test_distribution_receipt_rejects_duplicate_v13_localized_model_view_identit
     assert any("model-view identities must differ" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_model_ir_linear_workbench_v14_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v14_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_missing_v14_linear_workbench_authority(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v14_contract()
+    receipt["model_ir_linear_workbench_direct_parity_passed"] = False
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_linear_workbench_direct_parity_passed" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_promoting_or_unbound_v14_linear_report(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v14_contract()
+    receipt["model_ir_linear_workbench_review_decision"] = "pass"
+    receipt["model_ir_linear_report_pdf_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_linear_workbench_review_decision" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "model_ir_linear_report_pdf_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -702,7 +767,15 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v13" in e2e
+    assert "structural-native-distribution-e2e.v14" in e2e
+    assert "workflow-model-linear" in e2e
+    assert "model_ir_linear_workbench_restart_passed" in e2e
+    assert "model_ir_linear_workbench_direct_parity_passed" in e2e
+    assert "model_ir_linear_workbench_operator_surface_passed" in e2e
+    assert "model_ir_linear_result_recovery_ir_sha256" in e2e
+    assert "model_ir_linear_report_pdf_sha256" in e2e
+    assert "structural-native-sparse-linear-pdf-report-receipt.v1" in e2e
+    assert "frame_cantilever_language_neutral_oracle_v1.txt" in e2e
     assert "exercise_localized_pdf_surface" in e2e
     assert "report-export-pdf" in e2e
     assert "workbench_localized_pdf_surface_passed" in e2e

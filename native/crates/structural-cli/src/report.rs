@@ -6,9 +6,12 @@ use structural_contracts::product_ir::{
     parse_nonlinear_ndtha_report_ir_v1, parse_nonlinear_ndtha_result_ir_v1, sha256_identity,
     ProductIrContractError,
 };
+use structural_contracts::sparse_product::{
+    parse_sparse_linear_report_ir_v1, parse_sparse_linear_result_ir_v1,
+};
 use structural_report::{
-    render_nonlinear_ndtha_localized_pdf_v2, render_nonlinear_ndtha_pdf_v1, PdfRenderError,
-    PdfReportLocaleV2,
+    render_nonlinear_ndtha_localized_pdf_v2, render_nonlinear_ndtha_pdf_v1,
+    render_sparse_linear_pdf_v1, PdfRenderError, PdfReportLocaleV2,
 };
 
 use crate::product::{
@@ -114,6 +117,35 @@ pub fn execute_pdf_report(
     let report = parse_nonlinear_ndtha_report_ir_v1(report_ir_bytes)?;
     let pdf = render_nonlinear_ndtha_pdf_v1(&result, &report, document_source_bytes)?;
     let receipt_json = build_pdf_receipt(
+        result.result().case_id.as_str(),
+        pdf.source_result_hash(),
+        pdf.source_report_hash(),
+        pdf.document_source_hash(),
+        pdf.pdf_hash(),
+        pdf.claim_boundary(),
+        pdf.as_bytes(),
+    )?;
+    Ok(NativePdfReportOutcomeV1 {
+        pdf_bytes: pdf.as_bytes().to_vec(),
+        receipt_json,
+    })
+}
+
+/// Verify exact sparse ResultIR/ReportIR/Markdown bindings and render a deterministic native PDF.
+///
+/// # Errors
+///
+/// Rejects malformed or forged sparse inputs, projection mismatch, PDF structure failure, and
+/// receipt canonicalization errors.
+pub fn execute_sparse_linear_pdf_report(
+    result_ir_bytes: &[u8],
+    report_ir_bytes: &[u8],
+    document_source_bytes: &[u8],
+) -> Result<NativePdfReportOutcomeV1, NativePdfReportError> {
+    let result = parse_sparse_linear_result_ir_v1(result_ir_bytes)?;
+    let report = parse_sparse_linear_report_ir_v1(report_ir_bytes)?;
+    let pdf = render_sparse_linear_pdf_v1(&result, &report, document_source_bytes)?;
+    let receipt_json = build_sparse_pdf_receipt(
         result.result().case_id.as_str(),
         pdf.source_result_hash(),
         pdf.source_report_hash(),
@@ -245,6 +277,48 @@ fn build_pdf_receipt(
             Value::String(sha256_identity(unsigned.as_bytes())),
         );
     canonicalize_value(&receipt, "pdf_receipt_canonicalization_failed").map_err(Into::into)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn build_sparse_pdf_receipt(
+    case_id: &str,
+    source_result_hash: &str,
+    source_report_hash: &str,
+    document_source_hash: &str,
+    pdf_hash: &str,
+    pdf_claim_boundary: &str,
+    pdf_bytes: &[u8],
+) -> Result<String, NativePdfReportError> {
+    let mut receipt = json!({
+        "schema_version": "structural-native-sparse-linear-pdf-report-receipt.v1",
+        "case_id": case_id,
+        "source_result_hash": source_result_hash,
+        "source_report_hash": source_report_hash,
+        "document_source_hash": document_source_hash,
+        "pdf_hash": pdf_hash,
+        "pdf_claim_boundary": pdf_claim_boundary,
+        "artifacts": [artifact_entry(
+            "sparse_linear_pdf_report",
+            "report.pdf",
+            "application/pdf",
+            pdf_bytes,
+        )?],
+        "claim_boundary": "inventory_for_one_deterministic_bounded_sparse_linear_candidate_pdf_not_pdf_a_accessibility_or_engineering_acceptance",
+        "receipt_hash": ""
+    });
+    receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .ok_or_else(|| receipt_error("sparse PDF receipt is not an object"))?;
+    let unsigned = canonicalize_value(&receipt, "sparse_pdf_receipt_canonicalization_failed")?;
+    receipt
+        .as_object_mut()
+        .expect("sparse PDF receipt object was checked above")
+        .insert(
+            "receipt_hash".to_owned(),
+            Value::String(sha256_identity(unsigned.as_bytes())),
+        );
+    canonicalize_value(&receipt, "sparse_pdf_receipt_canonicalization_failed").map_err(Into::into)
 }
 
 #[allow(clippy::too_many_arguments)]

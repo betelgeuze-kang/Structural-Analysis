@@ -17,9 +17,10 @@ Import -> Validate -> Run -> Resume -> Compare -> Report sequence for the bounde
 frame3d/truss3d CPU linear-static product. Its Run publishes a real `checkpoint.mlpcp`; Resume
 publishes sparse ResultIR plus strictly typed global-DOF/element recovery IR; Compare consumes an
 explicit language-neutral global-DOF mapping; and Report publishes verified ReportIR plus
-PDF-ready Markdown without claiming PDF bytes. Inspect, English/Korean Report-view, explicit
-Review, and Export are profile-aware. Result-view, Result-deformed-view, and PDF export remain
-NDTHA-only and fail with `workbench_profile_unsupported` on the linear profile. See
+PDF-ready Markdown and a deterministic single-page sparse PDF. Inspect, English/Korean
+Report-view, explicit Review, and Export are profile-aware. Result-view, Result-deformed-view, and
+localized embedded-font PDF export remain NDTHA-only and fail with
+`workbench_profile_unsupported` on the linear profile. See
 `docs/native/modelir-linear-workbench-v1.md`.
 
 The independent `model-view` read-only surface is broader than that analysis profile. It strictly
@@ -210,9 +211,10 @@ The ModelIR linear integration test likewise clears the child environment and PA
 real PCG iteration, restores the validated session to model process death after checkpoint
 publication, reconciles `03-run`, and completes Resume -> Compare -> Report. It compares the
 terminal ResultIR, recovery IR, ReportIR, Markdown, comparison, report-source receipts, and session
-bytes against a separate one-shot workflow. It also exercises Korean report view, immutable review,
-handoff export, and fail-closed NDTHA-only command dispatch. The original 14-test NDTHA E2E remains
-the compatibility gate for omitted-profile session and receipt bytes.
+bytes against a separate one-shot workflow, including the deterministic PDF and both PDF receipts.
+It also exercises Korean report view, immutable review, handoff export, PDF tamper rejection, and
+fail-closed NDTHA-only command dispatch. The original 14-test NDTHA E2E remains the compatibility
+gate for omitted-profile session and receipt bytes.
 
 ## Claim boundary
 

@@ -143,6 +143,37 @@ env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow "$model" "
 grep -Fq '"stage":"reported"' "$e2e_root/workflow.json"
 diff -r "$restarted" "$direct" > "$e2e_root/workbench-diff.txt"
 
+linear_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+linear_request="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
+linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
+linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
+linear_restarted="$e2e_root/model-ir-linear-workbench-restarted"
+linear_direct="$e2e_root/model-ir-linear-workbench-direct"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" import-model-linear \
+  "$linear_model" "$linear_request" --external-result "$linear_external" \
+  --source-artifact "$linear_source_artifact" --workspace "$linear_restarted" \
+  > "$e2e_root/model-ir-linear-import.json"
+for stage in validate run resume compare report; do
+  stage_arguments=("$stage" --workspace "$linear_restarted")
+  if [[ "$stage" == "run" ]]; then
+    stage_arguments+=(--step-budget 1)
+  elif [[ "$stage" == "compare" ]]; then
+    stage_arguments+=(--require-pass)
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" "${stage_arguments[@]}" \
+    > "$e2e_root/model-ir-linear-$stage.json"
+done
+env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-model-linear \
+  "$linear_model" "$linear_request" --external-result "$linear_external" \
+  --source-artifact "$linear_source_artifact" --workspace "$linear_direct" --step-budget 1 \
+  > "$e2e_root/model-ir-linear-workflow.json"
+grep -Fq '"stage":"reported"' "$e2e_root/model-ir-linear-workflow.json"
+grep -Fq '"schema_version":"structural-native-sparse-linear-pdf-report-receipt.v1"' \
+  "$linear_direct/06-report/pdf-receipt.json"
+grep -Fq '"schema_version":"structural-native-model-ir-linear-pdf-report-receipt.v1"' \
+  "$linear_direct/06-report/report-receipt.json"
+diff -r "$linear_restarted" "$linear_direct" > "$e2e_root/model-ir-linear-workbench-diff.txt"
+
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 mgt_restarted="$e2e_root/mgt-workbench-restarted"
@@ -189,6 +220,7 @@ exercise_operator_surface() {
   grep -Fq '"decision":"review"' "$e2e_root/$label-export.json"
 }
 exercise_operator_surface workbench "$direct"
+exercise_operator_surface model-ir-linear-workbench "$linear_direct"
 exercise_operator_surface mgt-workbench "$mgt_direct"
 
 exercise_localized_pdf_surface() {
@@ -557,6 +589,13 @@ grep -Fq "\"current_release\":\"$release_id\"" "$e2e_root/rollback.json"
 manifest_hash="$(sha256sum "$bundle/structural-distribution.json" | awk '{print $1}')"
 result_hash="$(sha256sum "$direct/04-resume/result-ir.json" | awk '{print $1}')"
 report_hash="$(sha256sum "$direct/06-report/report.pdf" | awk '{print $1}')"
+linear_result_hash="$(sha256sum "$linear_direct/04-resume/result-ir.json" | awk '{print $1}')"
+linear_recovery_hash="$(sha256sum "$linear_direct/04-resume/result-recovery-ir.json" | awk '{print $1}')"
+linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
+linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
+linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
+linear_workbench_review_hash="$(sha256sum "$linear_direct/07-review/review.json" | awk '{print $1}')"
+linear_workbench_export_hash="$(sha256sum "$e2e_root/model-ir-linear-workbench-export.json" | awk '{print $1}')"
 mgt_source_hash="$(sha256sum "$mgt_direct/01-import/source.mgt" | awk '{print $1}')"
 mgt_health_hash="$(sha256sum "$mgt_direct/01-import/import-health.json" | awk '{print $1}')"
 mgt_result_hash="$(sha256sum "$mgt_direct/04-resume/result-ir.json" | awk '{print $1}')"
@@ -600,6 +639,12 @@ installed_backend_hash="$(sha256sum "$e2e_root/installed-backend-receipt.json" |
 temporary_receipt="$e2e_root/distribution-receipt.json"
 printf '%s\n' \
   "{\"schema_version\":\"structural-native-distribution-e2e.v13\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"workbench_localized_pdf_surface_passed\":true,\"workbench_localized_pdf_en_us_sha256\":\"sha256:$localized_pdf_en_us_hash\",\"workbench_localized_pdf_ko_kr_sha256\":\"sha256:$localized_pdf_ko_kr_hash\",\"workbench_localized_pdf_en_us_receipt_sha256\":\"sha256:$localized_pdf_en_us_receipt_hash\",\"workbench_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$localized_pdf_ko_kr_receipt_hash\",\"localized_report_font_sha256\":\"sha256:$localized_report_font_hash\",\"localized_report_font_license_sha256\":\"sha256:$localized_report_font_license_hash\",\"localized_report_font_provenance_sha256\":\"sha256:$localized_report_font_provenance_hash\",\"workbench_model_view_surface_passed\":true,\"workbench_model_view_isometric_sha256\":\"sha256:$model_view_isometric_hash\",\"workbench_model_view_xy_sha256\":\"sha256:$model_view_xy_hash\",\"workbench_model_view_xz_sha256\":\"sha256:$model_view_xz_hash\",\"workbench_model_view_yz_sha256\":\"sha256:$model_view_yz_hash\",\"workbench_localized_model_view_surface_passed\":true,\"workbench_model_view_ko_kr_sha256\":\"sha256:$model_view_ko_kr_hash\",\"workbench_model_edit_surface_passed\":true,\"workbench_model_edit_model_sha256\":\"sha256:$model_edit_model_hash\",\"workbench_model_edit_receipt_sha256\":\"sha256:$model_edit_receipt_hash\",\"workbench_result_view_surface_passed\":true,\"workbench_result_view_top_displacement_sha256\":\"sha256:$result_view_top_displacement_hash\",\"workbench_result_view_drift_ratio_sha256\":\"sha256:$result_view_drift_ratio_hash\",\"workbench_result_view_base_shear_sha256\":\"sha256:$result_view_base_shear_hash\",\"workbench_result_view_residual_inf_sha256\":\"sha256:$result_view_residual_inf_hash\",\"workbench_result_view_window_sha256\":\"sha256:$result_view_window_hash\",\"workbench_localized_result_views_surface_passed\":true,\"workbench_result_view_ko_kr_sha256\":\"sha256:$result_view_ko_kr_hash\",\"workbench_deformed_view_ko_kr_sha256\":\"sha256:$deformed_view_ko_kr_hash\",\"workbench_deformed_view_surface_passed\":true,\"workbench_deformed_view_isometric_sha256\":\"sha256:$deformed_view_isometric_hash\",\"workbench_deformed_view_xy_sha256\":\"sha256:$deformed_view_xy_hash\",\"workbench_deformed_view_xz_sha256\":\"sha256:$deformed_view_xz_hash\",\"workbench_deformed_view_yz_sha256\":\"sha256:$deformed_view_yz_hash\",\"workbench_deformed_view_explicit_sha256\":\"sha256:$deformed_view_explicit_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
+v13_receipt_json="$(<"$temporary_receipt")"
+v14_receipt_json="${v13_receipt_json/structural-native-distribution-e2e.v13/structural-native-distribution-e2e.v14}"
+linear_receipt_fields="\"model_ir_linear_workbench_restart_passed\":true,\"model_ir_linear_workbench_direct_parity_passed\":true,\"model_ir_linear_workbench_operator_surface_passed\":true,\"model_ir_linear_workbench_review_decision\":\"review\",\"model_ir_linear_workbench_review_sha256\":\"sha256:$linear_workbench_review_hash\",\"model_ir_linear_workbench_export_sha256\":\"sha256:$linear_workbench_export_hash\",\"model_ir_linear_result_ir_sha256\":\"sha256:$linear_result_hash\",\"model_ir_linear_result_recovery_ir_sha256\":\"sha256:$linear_recovery_hash\",\"model_ir_linear_report_pdf_sha256\":\"sha256:$linear_report_hash\",\"model_ir_linear_pdf_receipt_sha256\":\"sha256:$linear_pdf_receipt_hash\",\"model_ir_linear_report_receipt_sha256\":\"sha256:$linear_report_receipt_hash\","
+v14_receipt_json="${v14_receipt_json/\"mgt_workbench_restart_passed\":true,/${linear_receipt_fields}\"mgt_workbench_restart_passed\":true,}"
+printf '%s\n' "$v14_receipt_json" > "$temporary_receipt"
+
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
 cp "$e2e_root/installed-backend-receipt.json" "$backend_output_stage"

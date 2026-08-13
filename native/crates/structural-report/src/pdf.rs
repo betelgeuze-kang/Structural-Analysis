@@ -5,8 +5,11 @@ use structural_contracts::product_ir::{
     sha256_identity, NonlinearNdthaReportIrDocumentV1, NonlinearNdthaResultIrDocumentV1,
     NonlinearNdthaTerminalStatusV1, ProductIrContractError,
 };
+use structural_contracts::sparse_product::{
+    SparseLinearReportIrDocumentV1, SparseLinearResultIrDocumentV1,
+};
 
-use crate::build_nonlinear_ndtha_report_v1;
+use crate::{build_nonlinear_ndtha_report_v1, build_sparse_linear_report_v1};
 
 const PDF_MEDIA_TYPE: &str = "application/pdf";
 const PDF_CLAIM_BOUNDARY: &str = "deterministic_single_page_projection_of_one_bounded_candidate_report_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance";
@@ -96,6 +99,13 @@ impl NonlinearNdthaPdfDocumentV1 {
     }
 }
 
+/// Exact deterministic PDF projection for one bounded sparse-linear result.
+///
+/// The wire metadata is intentionally identical to the frozen nonlinear-NDTHA PDF document. The
+/// distinct alias keeps the accepted source profile explicit at compile time without changing the
+/// v1 byte-level PDF container contract.
+pub type SparseLinearPdfDocumentV1 = NonlinearNdthaPdfDocumentV1;
+
 /// Render one deterministic, single-page PDF from an exact bounded report projection.
 ///
 /// The supplied `ReportIR` and Markdown bytes must be byte-identical to a fresh projection from
@@ -126,6 +136,46 @@ pub fn render_nonlinear_ndtha_pdf_v1(
         ));
     }
     let bytes = build_pdf_bytes(result, report)?;
+    validate_deterministic_pdf_v1(&bytes)?;
+    Ok(NonlinearNdthaPdfDocumentV1 {
+        pdf_hash: sha256_identity(&bytes),
+        source_result_hash: result.result_hash().to_owned(),
+        source_report_hash: report.report_hash().to_owned(),
+        document_source_hash: sha256_identity(document_source),
+        bytes,
+    })
+}
+
+/// Render one deterministic, single-page PDF from an exact sparse-linear report projection.
+///
+/// The supplied `ReportIR` and Markdown bytes must be byte-identical to a fresh projection from
+/// `result`; a separately self-consistent report is not sufficient.
+///
+/// # Errors
+///
+/// Rejects report/document projection drift, non-ASCII printable identifiers, PDF construction
+/// overflow, and any invalid generated xref/object structure.
+pub fn render_sparse_linear_pdf_v1(
+    result: &SparseLinearResultIrDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    document_source: &[u8],
+) -> Result<SparseLinearPdfDocumentV1, PdfRenderError> {
+    let expected = build_sparse_linear_report_v1(result)?;
+    if expected.document_source.as_bytes() != document_source {
+        return Err(binding_error(
+            "pdf_document_source_projection_mismatch",
+            "/document_source",
+            "PDF source bytes are not the deterministic projection of the supplied sparse ResultIR",
+        ));
+    }
+    if expected.report_ir.canonical_json() != report.canonical_json() {
+        return Err(binding_error(
+            "pdf_report_ir_projection_mismatch",
+            "/report_ir",
+            "ReportIR bytes are not the deterministic projection of the supplied sparse ResultIR and document source",
+        ));
+    }
+    let bytes = build_sparse_linear_pdf_bytes(result, report)?;
     validate_deterministic_pdf_v1(&bytes)?;
     Ok(NonlinearNdthaPdfDocumentV1 {
         pdf_hash: sha256_identity(&bytes),
@@ -452,6 +502,230 @@ fn build_pdf_bytes(
         .collect::<Vec<_>>();
     let title = pdf_literal("Structural Analysis Report")?;
     let subject = pdf_literal("Bounded nonlinear NDTHA deterministic report")?;
+    let producer = pdf_literal("structural-report 0.1.0 native PDF renderer")?;
+    let objects = vec![
+        b"<< /Type /Catalog /Pages 2 0 R /ViewerPreferences << /DisplayDocTitle true >> >>\n".to_vec(),
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>\n".to_vec(),
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R /F2 6 0 R /F3 7 0 R >> >> /Contents 4 0 R >>\n".to_vec(),
+        content_object,
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n".to_vec(),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\n".to_vec(),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>\n".to_vec(),
+        format!("<< /Title ({title}) /Subject ({subject}) /Creator ({producer}) /Producer ({producer}) /Trapped /False >>\n").into_bytes(),
+    ];
+    assemble_pdf(&objects, result.result_hash())
+}
+
+#[allow(clippy::too_many_lines)]
+fn build_sparse_linear_pdf_bytes(
+    result: &SparseLinearResultIrDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+) -> Result<Vec<u8>, PdfRenderError> {
+    let source = result.result();
+    let report_source = report.report();
+    let case_id = pdf_literal(&source.case_id)?;
+
+    let mut content = String::new();
+    writeln!(&mut content, "q").expect("String writes cannot fail");
+    writeln!(&mut content, "0.055 0.118 0.204 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 742 595 100 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "0.129 0.588 0.953 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 734 595 8 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "Q").expect("String writes cannot fail");
+    text_line(
+        &mut content,
+        "F2",
+        21.0,
+        1.0,
+        1.0,
+        1.0,
+        48.0,
+        794.0,
+        "Structural Analysis Report",
+    )?;
+    text_line(
+        &mut content,
+        "F1",
+        10.0,
+        0.82,
+        0.88,
+        0.95,
+        48.0,
+        773.0,
+        "Bounded sparse linear static - deterministic native PDF v1",
+    )?;
+
+    panel(&mut content, 48.0, 550.0, 499.0, 154.0)?;
+    text_line(
+        &mut content,
+        "F2",
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        678.0,
+        "Analysis summary",
+    )?;
+    label_value(&mut content, 66.0, 653.0, "Case", &case_id)?;
+    label_value(
+        &mut content,
+        66.0,
+        633.0,
+        "Matrix order",
+        &source.summary.order.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        613.0,
+        "Canonical nonzeros",
+        &source.summary.nonzero_count.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        593.0,
+        "PCG iterations",
+        &source.summary.iterations.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        573.0,
+        "Final residual infinity norm",
+        &format!("{:.8e}", source.summary.final_residual_inf),
+    )?;
+
+    panel(&mut content, 48.0, 315.0, 499.0, 215.0)?;
+    text_line(
+        &mut content,
+        "F2",
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        504.0,
+        "Provenance",
+    )?;
+    let provenance = [
+        ("Result", source.result_hash.as_str()),
+        ("Report", report_source.report_hash.as_str()),
+        ("Document", report_source.document_source_hash.as_str()),
+        ("Request", source.identity.request_hash.as_str()),
+        ("Model", source.identity.model_hash.as_str()),
+        ("State", source.identity.state_hash.as_str()),
+        ("Execution", source.identity.execution_hash.as_str()),
+        ("Checkpoint", source.identity.checkpoint_hash.as_str()),
+    ];
+    for (index, (label, hash)) in provenance.iter().enumerate() {
+        let index = u32::try_from(index).map_err(|_| {
+            pdf_error(
+                "pdf_layout_overflow",
+                "provenance row index exceeded the bounded page layout",
+            )
+        })?;
+        let y = 480.0 - f64::from(index) * 20.0;
+        text_line(&mut content, "F2", 7.2, 0.29, 0.35, 0.43, 66.0, y, label)?;
+        text_line(&mut content, "F3", 7.2, 0.08, 0.12, 0.18, 126.0, y, hash)?;
+    }
+
+    panel(&mut content, 48.0, 170.0, 499.0, 120.0)?;
+    text_line(
+        &mut content,
+        "F2",
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        264.0,
+        "Execution receipt",
+    )?;
+    label_value(&mut content, 66.0, 239.0, "Backend", "cpu / fp64")?;
+    label_value(
+        &mut content,
+        66.0,
+        219.0,
+        "Determinism",
+        &source.backend_receipt.deterministic_policy,
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        199.0,
+        "Fallback count",
+        &source.backend_receipt.fallback_count.to_string(),
+    )?;
+
+    text_line(
+        &mut content,
+        "F2",
+        9.0,
+        0.55,
+        0.16,
+        0.10,
+        48.0,
+        136.0,
+        "Authority boundary",
+    )?;
+    text_line(
+        &mut content,
+        "F1",
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        119.0,
+        "Bounded CPU candidate. Not engineering acceptance or design-code compliance.",
+    )?;
+    text_line(
+        &mut content,
+        "F1",
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        103.0,
+        "Verify ResultIR, recovery, ReportIR and receipt hashes before redistribution.",
+    )?;
+    writeln!(&mut content, "0.78 0.81 0.85 RG 0.5 w 48 72 m 547 72 l S")
+        .expect("String writes cannot fail");
+    text_line(
+        &mut content,
+        "F1",
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        48.0,
+        54.0,
+        "structural-native / sparse-report-pdf.v1",
+    )?;
+    text_line(
+        &mut content,
+        "F1",
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        505.0,
+        54.0,
+        "Page 1 / 1",
+    )?;
+
+    let content_bytes = content.into_bytes();
+    let content_object = format!("<< /Length {} >>\nstream\n", content_bytes.len())
+        .into_bytes()
+        .into_iter()
+        .chain(content_bytes)
+        .chain(b"endstream\n".iter().copied())
+        .collect::<Vec<_>>();
+    let title = pdf_literal("Structural Analysis Report")?;
+    let subject = pdf_literal("Bounded sparse linear deterministic report")?;
     let producer = pdf_literal("structural-report 0.1.0 native PDF renderer")?;
     let objects = vec![
         b"<< /Type /Catalog /Pages 2 0 R /ViewerPreferences << /DisplayDocTitle true >> >>\n".to_vec(),

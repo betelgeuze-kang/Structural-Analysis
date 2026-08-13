@@ -14,10 +14,12 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate command. Distribution E2E v13 proves repeated edited
-model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history and
-exact-profile selected-step deformed-shape views plus Korean UTF-8 response/deformed projections
-and an English-compatible/Korean localized topology projection for CPU static and shared packages.
+provenance-bound `model-edit-node` coordinate command. Distribution E2E v14 proves repeated edited
+model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history,
+exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
+English-compatible/Korean localized topology projection for CPU static and shared packages. The
+same installed-package gate now also executes the ModelIR linear staged/restart/direct Workbench
+path and binds typed recovery, external comparison, deterministic PDF and both report receipts.
 This does not
 promote the rootfs diagnostic into general
 visual-editing, 3D result exploration, or customer-image evidence.

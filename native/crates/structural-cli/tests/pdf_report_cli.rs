@@ -66,10 +66,42 @@ fn build_analysis(directory: &Path) {
     );
 }
 
+fn build_model_linear_analysis(directory: &Path) {
+    let root = repository_root();
+    let model = root.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let request =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let output = run_cli(&[
+        text("analysis"),
+        text("model-linear-run"),
+        &model,
+        &request,
+        text("--output-dir"),
+        directory,
+    ]);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+}
+
 fn render_pdf(analysis: &Path, output_directory: &Path) -> Output {
     run_cli(&[
         text("report"),
         text("render-pdf"),
+        &analysis.join("result-ir.json"),
+        &analysis.join("report-ir.json"),
+        &analysis.join("report.md"),
+        text("--output-dir"),
+        output_directory,
+    ])
+}
+
+fn render_sparse_pdf(analysis: &Path, output_directory: &Path) -> Output {
+    run_cli(&[
+        text("report"),
+        text("render-sparse-pdf"),
         &analysis.join("result-ir.json"),
         &analysis.join("report-ir.json"),
         &analysis.join("report.md"),
@@ -158,6 +190,41 @@ fn python_node_and_external_renderer_free_pdf_is_bitwise_deterministic() {
         assert_eq!(bytes.len(), length, "PDF length drift: {file}");
         assert_eq!(sha256_identity(&bytes), hash, "PDF hash drift: {file}");
     }
+}
+
+#[test]
+fn sparse_linear_pdf_cli_is_clean_environment_deterministic_and_profile_typed() {
+    let temporary = TestDirectory::create();
+    let analysis = temporary.0.join("model-linear-analysis");
+    build_model_linear_analysis(&analysis);
+    let first = temporary.0.join("sparse-pdf-first");
+    let second = temporary.0.join("sparse-pdf-second");
+    for output_directory in [&first, &second] {
+        let output = render_sparse_pdf(&analysis, output_directory);
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stdout)
+        );
+        let receipt: Value =
+            serde_json::from_slice(&output.stdout).expect("sparse PDF receipt stdout");
+        assert_eq!(
+            receipt["schema_version"],
+            "structural-native-sparse-linear-pdf-report-receipt.v1"
+        );
+        verify_receipt(output_directory);
+    }
+    for file in ["report.pdf", "pdf-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(file)).expect("first sparse PDF artifact"),
+            std::fs::read(second.join(file)).expect("second sparse PDF artifact"),
+            "sparse PDF artifact drift: {file}"
+        );
+    }
+
+    let wrong_profile = render_pdf(&analysis, &temporary.0.join("wrong-profile"));
+    assert_eq!(wrong_profile.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&wrong_profile.stdout).contains("result_ir"));
 }
 
 #[test]

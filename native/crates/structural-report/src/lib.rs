@@ -13,8 +13,8 @@ pub use localized_pdf::{
     NonlinearNdthaLocalizedPdfDocumentV2, PdfReportLocaleV2,
 };
 pub use pdf::{
-    render_nonlinear_ndtha_pdf_v1, validate_deterministic_pdf_v1, NonlinearNdthaPdfDocumentV1,
-    PdfRenderError,
+    render_nonlinear_ndtha_pdf_v1, render_sparse_linear_pdf_v1, validate_deterministic_pdf_v1,
+    NonlinearNdthaPdfDocumentV1, PdfRenderError, SparseLinearPdfDocumentV1,
 };
 
 use structural_contracts::product_ir::{

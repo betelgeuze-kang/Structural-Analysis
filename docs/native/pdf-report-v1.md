@@ -40,3 +40,5 @@ design-code compliance. HIP C2 source-result parity and final C6 decommission al
 The Workbench's separately verified `en-US`/`ko-KR` UTF-8 linear report view is a terminal text
 alternative. A separate opt-in embedded-font v2 renderer now provides fixed-label `en-US`/`ko-KR`
 PDF export without changing this frozen default; see `docs/native/pdf-report-v2.md`.
+An additive sparse-linear standard-font renderer also preserves these frozen bytes; see
+`docs/native/pdf-report-sparse-v1.md`.

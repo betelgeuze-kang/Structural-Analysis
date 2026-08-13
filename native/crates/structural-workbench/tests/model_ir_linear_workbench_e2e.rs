@@ -8,6 +8,7 @@ use serde_json::{json, Value};
 use structural_cli::execute_model_ir_linear_analysis;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
+use structural_report::validate_deterministic_pdf_v1;
 
 fn repository_root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -219,6 +220,8 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         "06-report/result-recovery-ir.json",
         "06-report/report-ir.json",
         "06-report/report.md",
+        "06-report/report.pdf",
+        "06-report/pdf-receipt.json",
         "06-report/report-receipt.json",
     ] {
         assert_eq!(
@@ -241,7 +244,13 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         "receipt_hash",
     );
     assert_eq!(report_receipt["status"], "reported");
-    assert!(!restarted.join("06-report/report.pdf").exists());
+    assert_eq!(
+        report_receipt["schema_version"],
+        "structural-native-model-ir-linear-pdf-report-receipt.v1"
+    );
+    let pdf = fs::read(restarted.join("06-report/report.pdf")).expect("linear PDF");
+    validate_deterministic_pdf_v1(&pdf).expect("linear PDF structure");
+    assert_eq!(report_receipt["pdf_hash"], sha256_identity(&pdf));
 
     let inspected = run_workbench(&stage_arguments("inspect", &restarted));
     assert_success(&inspected);
@@ -300,8 +309,18 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         .map(|artifact| artifact["role"].as_str().expect("artifact role"))
         .collect::<Vec<_>>();
     assert!(roles.contains(&"result_recovery_ir"));
+    assert!(roles.contains(&"sparse_linear_pdf_report"));
     assert!(roles.contains(&"pdf_ready_document_source"));
     assert!(!roles.contains(&"pdf_report"));
+
+    let mut tampered_pdf = pdf;
+    tampered_pdf[32] ^= 1;
+    fs::write(restarted.join("06-report/report.pdf"), tampered_pdf).expect("tamper PDF");
+    let rejected = run_workbench(&stage_arguments("inspect", &restarted));
+    assert!(!rejected.status.success());
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
 
     fs::remove_dir_all(root).expect("cleanup");
 }
