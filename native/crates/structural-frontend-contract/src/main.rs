@@ -8,10 +8,11 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_server_receipt_json, canonical_workbench_prototype_receipt_json,
-    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    serve_viewer, FrontendContractError,
+    canonical_viewer_server_receipt_json, canonical_workbench_prototype_browser_smoke_receipt_json,
+    canonical_workbench_prototype_receipt_json, check_frontend_contract, check_frontend_delivery,
+    check_viewer_manifest, check_workbench_prototype, plan_viewer_server, run_frontend_smoke,
+    run_viewer_browser_smoke, run_workbench_prototype_browser_smoke, serve_viewer,
+    FrontendContractError,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -69,6 +70,12 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_viewer_browser_smoke(&options.root, &options.mode, options.dry_run)?;
         return canonical_viewer_browser_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "prototype-browser-smoke" {
+        let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
+        let receipt = run_workbench_prototype_browser_smoke(&root, dry_run)?;
+        return canonical_workbench_prototype_browser_smoke_receipt_json(&receipt)
+            .map_err(Into::into);
+    }
     if command == "serve" {
         let options = parse_serve_arguments(&arguments[1..])?;
         if options.dry_run {
@@ -103,7 +110,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, serve, smoke, or viewer-manifest",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, or viewer-manifest",
         )),
     }
 }
@@ -347,7 +354,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke --root DIR [--dry-run]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]

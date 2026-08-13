@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test'
 
-// Browser smoke for the Structural Workbench demo prototype. The runner
-// (scripts/verify-workbench-prototype-browser-smoke.mjs) serves the prototype
-// directory so ./demo-case.json and ./styles/* resolve.
+// Browser smoke for the Structural Workbench demo prototype. The Rust-native
+// structural-frontend-contract runner serves the scoped prototype directory so
+// ./demo-case.json and ./styles/* resolve.
 
 const baseUrl = process.env.WORKBENCH_PROTOTYPE_BASE_URL ?? 'http://127.0.0.1:4273'
 const pageUrl = `${baseUrl}/index.html`

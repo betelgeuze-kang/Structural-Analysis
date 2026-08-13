@@ -21,7 +21,9 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
+    Path("native/crates/structural-frontend-contract/src/playwright.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype.rs"),
+    Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_server.rs"),
@@ -36,6 +38,7 @@ REQUIRED_PATHS = (
     Path("prototype/structural-workbench/app.js"),
     Path("prototype/structural-workbench/demo-case.json"),
     Path("prototype/structural-workbench/index.html"),
+    Path("tests/frontend/workbench-prototype-smoke.spec.ts"),
     Path("native/evidence/workbench-evidence-sources-v1.json"),
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/benchmark-catalog-v1.md"),
@@ -128,6 +131,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     for relative in REQUIRED_PATHS:
         if not (root / relative).is_file():
             blockers.append(f"workbench_ui_file_missing:{relative.as_posix()}")
+    removed_prototype_wrapper = Path(
+        "scripts/verify-workbench-prototype-browser-smoke.mjs"
+    )
+    if (root / removed_prototype_wrapper).exists():
+        blockers.append("workbench_ui_removed_prototype_browser_wrapper_present")
 
     manifest = _json(root, MANIFEST, blockers)
     for field, expected in (
@@ -178,6 +186,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
         "structural-frontend-contract prototype",
+        "structural-frontend-contract prototype-browser-smoke",
         "structural-frontend-contract browser-smoke",
         "structural-frontend-contract serve",
         "structural-frontend-contract viewer-manifest",
@@ -188,6 +197,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "browser_smoke_node_required": True,
         "browser_smoke_playwright_required": True,
         "browser_smoke_browser_required": True,
+        "prototype_browser_smoke_node_required": True,
+        "prototype_browser_smoke_playwright_required": True,
+        "prototype_browser_smoke_browser_required": True,
     }:
         blockers.append("workbench_ui_native_frontend_runtime_boundary_invalid")
     for field in (
@@ -320,6 +332,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- browser-smoke --root ."
     ):
         blockers.append("workbench_ui_viewer_browser_smoke_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get(
+        "verify:workbench-prototype-browser-smoke"
+    ) != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- prototype-browser-smoke --root ."
+    ):
+        blockers.append("workbench_ui_prototype_browser_smoke_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -414,7 +433,51 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "direct_processes_spawned",
             "frontend_contract_receipt_hash",
             "playwright_cli_sha256",
+            "execute_playwright",
+        ),
+        blockers,
+    )
+    playwright = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/playwright.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/playwright.rs"),
+        playwright,
+        (
+            "pub(crate) fn execute_playwright",
+            "pub(crate) fn validate_playwright_plan",
+            "TcpListener::bind",
+            "Command::new",
+            "playwright_failed",
             "viewer_browser_smoke_failed",
+            "workbench_prototype_browser_smoke_failed",
+            "validate_scoped_policy",
+        ),
+        blockers,
+    )
+    prototype_browser_smoke = _text(
+        root,
+        Path(
+            "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path(
+            "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"
+        ),
+        prototype_browser_smoke,
+        (
+            "pub fn run_workbench_prototype_browser_smoke",
+            "prototype/structural-workbench/",
+            "WORKBENCH_PROTOTYPE_BASE_URL",
+            "prototype_contract_receipt_hash",
+            "loopback_listener_count",
+            "direct_processes_spawned",
+            "playwright_cli_sha256",
+            "not_instrumented_browser_page_requests",
         ),
         blockers,
     )
@@ -428,6 +491,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "allowed_path_prefixes",
             "loopback_only",
             "external_network_access_count",
+            "validate_scoped_policy",
         ),
         blockers,
     )
@@ -506,9 +570,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/browser-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/browser-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
-            "project-manifest checks and source Viewer browser-smoke orchestration are Rust-native",
+            "both Viewer and prototype browser-smoke orchestration are Rust-native",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),

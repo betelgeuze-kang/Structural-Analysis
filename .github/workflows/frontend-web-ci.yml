@@ -105,7 +105,7 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Workbench prototype browser smoke
+      - name: Rust-orchestrated Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke
 
       - name: Workbench v2 E2E

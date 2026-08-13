@@ -3,7 +3,9 @@
 #![forbid(unsafe_code)]
 
 mod browser_smoke;
+mod playwright;
 mod prototype;
+mod prototype_browser_smoke;
 mod smoke;
 mod viewer_manifest;
 mod viewer_server;
@@ -29,6 +31,13 @@ pub use prototype::{
     WorkbenchPrototypeReceiptV1,
 };
 use prototype::{validate_workbench_prototype_source, WorkbenchPrototypeSourceV1};
+pub use prototype_browser_smoke::{
+    canonical_workbench_prototype_browser_smoke_receipt_json,
+    run_workbench_prototype_browser_smoke, WorkbenchPrototypeBrowserSmokeReceiptV1,
+};
+use prototype_browser_smoke::{
+    validate_workbench_prototype_browser_smoke_source, WorkbenchPrototypeBrowserSmokeSourceV1,
+};
 pub use smoke::{canonical_smoke_receipt_json, run_frontend_smoke, FrontendSmokeReceiptV1};
 use smoke::{validate_frontend_smoke_source, FrontendSmokeSourceV1};
 pub use viewer_manifest::{
@@ -105,6 +114,7 @@ struct FrontendSourceMapV1 {
     viewer_browser_smoke_contract: ViewerBrowserSmokeSourceV1,
     viewer_server_contract: ViewerServerSourceV1,
     workbench_prototype_contract: WorkbenchPrototypeSourceV1,
+    workbench_prototype_browser_smoke_contract: WorkbenchPrototypeBrowserSmokeSourceV1,
     claim_boundary: String,
 }
 
@@ -488,6 +498,9 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_viewer_browser_smoke_source(&source_map.viewer_browser_smoke_contract)?;
     validate_viewer_server_source(&source_map.viewer_server_contract)?;
     validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;
+    validate_workbench_prototype_browser_smoke_source(
+        &source_map.workbench_prototype_browser_smoke_contract,
+    )?;
     Ok(())
 }
 

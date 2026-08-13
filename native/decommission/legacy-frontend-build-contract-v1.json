@@ -17,6 +17,10 @@
     "prototype/structural-workbench/app.js",
     "prototype/structural-workbench/demo-case.json",
     "prototype/structural-workbench/index.html",
+    "prototype/structural-workbench/styles/components.css",
+    "prototype/structural-workbench/styles/layout.css",
+    "prototype/structural-workbench/styles/responsive.css",
+    "prototype/structural-workbench/styles/tokens.css",
     "scripts/verify-structure-viewer-callout-docking.mjs",
     "scripts/verify-structure-viewer-critical-callout-focus.mjs",
     "scripts/verify-structure-viewer-drawing-handoff-preview.mjs",
@@ -46,12 +50,15 @@
     "src/structure-viewer/viewer-selection-inspector-renderer.js",
     "src/structure-viewer/viewer-stage-result-callouts-renderer.js",
     "tests/frontend/structure-viewer-smoke.spec.ts",
+    "tests/frontend/workbench-prototype-smoke.spec.ts",
     "docs/frontend-build-reproducibility.md",
     "native/decommission/legacy-frontend-build-contract-v1.json",
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
+    "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
+    "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
@@ -74,6 +81,7 @@
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
+    "verify:workbench-prototype-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .",
     "verify:workbench-viewer-delivery": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root ."
   },
   "expected_dependencies": {
@@ -186,6 +194,17 @@
       "<script type=\"module\" src=\"./app.js\"></script>"
     ],
     "claim_boundary": "This read-only transitional C0 check proves only that the bounded strict demo fixture, conservative six-state status projection, app source safety/ownership markers, and prototype HTML attachment points match the frozen offline contract without Node or a DOM shim. It does not execute JavaScript or a browser; the retained Playwright smoke owns rendered state, inert user-input, download, accessibility, and runtime behavior evidence. It does not validate engineering results, provide native UI parity, or authorize React/TypeScript/Node removal."
+  },
+  "workbench_prototype_browser_smoke_contract": {
+    "schema_version": "structural-native-workbench-prototype-browser-smoke-contract.v1",
+    "node_launcher": "node",
+    "playwright_cli_path": "node_modules/@playwright/test/cli.js",
+    "spec_path": "tests/frontend/workbench-prototype-smoke.spec.ts",
+    "server_path_prefix": "prototype/structural-workbench/",
+    "server_entry_path": "prototype/structural-workbench/index.html",
+    "base_url_environment": "WORKBENCH_PROTOTYPE_BASE_URL",
+    "external_network_access_accounting": "not_instrumented_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates the frozen package, lock, static prototype, specification, command, environment, and scoped server inputs and either plans or owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI. The server exposes only the prototype/structural-workbench prefix. Live execution hashes the installed Playwright launcher script; dry-run has no installed-runtime hash, binds no listener, and spawns no process. Node executable identity, Playwright transitive runtime bytes, Chromium, the prototype JavaScript, browser page requests, rendered behavior, clean-machine execution, and native UI parity remain outside Rust authority; live evidence requires a host that permits loopback sockets and has the pinned browser runtime installed."
   },
   "viewer_manifest_contract": {
     "contract": "structure-viewer-project-manifest-verification.v1",

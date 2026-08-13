@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/prototype/browser-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/browser-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -38,10 +38,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   inventories, eager/lazy chunk separation, a fixed stop-on-failure `npm ci` / `npm run build`
   process sequence, and canonical self-hashed receipts. npm/Vite/TypeScript still perform the
   actual legacy install and build; the native prototype check is static. Rust now owns the source
-  Viewer browser-smoke wrapper, loopback server, and direct child-process lifetime, while retained
-  Node, Playwright, Chromium, and Viewer JavaScript still own rendered behavior and browser-page
-  request authority. The separate prototype Playwright smoke still owns inert-input, export, and
-  accessibility evidence.
+  Viewer and Workbench prototype browser-smoke wrappers, scoped loopback servers, and direct
+  child-process lifetimes, while retained Node, Playwright, Chromium, Viewer JavaScript, and
+  prototype JavaScript still own rendered behavior and browser-page request authority. The
+  prototype browser smoke is now Rust-orchestrated, but Playwright still owns inert-input, export,
+  and accessibility evidence.
   The local source-Viewer server is also Rust-native and fixed to an allowlisted IPv4 loopback
   surface, but the JavaScript Viewer it serves is still legacy runtime authority.
 
@@ -51,9 +52,9 @@ builder now live under `native/catalog`; the legacy React browser consumes that 
 Both catalog and evidence-bundle generators and their contract tests are Rust-native; the legacy
 npm commands are wrappers only. The legacy frontend clean-build orchestration, static contract,
 and built-tree delivery are Rust-native. Loopback Viewer serving and default Viewer
-project-manifest checks and source Viewer browser-smoke orchestration are Rust-native as well; npm
-package installation, Vite/TypeScript execution, Playwright/Chromium execution, browser checks
-(including the prototype), and viewer runtime remain Node/browser-owned. It does not provide a
+project-manifest checks and both Viewer and prototype browser-smoke orchestration are Rust-native as
+well; npm package installation, Vite/TypeScript execution, Playwright/Chromium execution, browser
+checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It does not provide a
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
 
@@ -62,8 +63,8 @@ before language-neutral golden ownership is complete.
 `native/decommission/workbench-ui-transition-v1.json` freezes the current source and CI inventory.
 The product deployment, benchmark-catalog generation, and evidence-bundle generation authorities
 have left React/Node, and the frontend smoke orchestration, static/delivery, prototype-static,
-Viewer-server, Viewer manifest, and source Viewer browser-smoke wrapper authorities have left Node,
-but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
+Viewer-server, Viewer manifest, and both Viewer and prototype browser-smoke wrapper authorities have
+left Node, but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
 verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node
 scripts, and their package manifest remain active verification or parity material. They are not a
 deletion target yet.

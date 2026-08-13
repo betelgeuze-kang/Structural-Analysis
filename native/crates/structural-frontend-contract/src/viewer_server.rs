@@ -137,6 +137,56 @@ pub fn serve_viewer(
 pub(crate) fn handle_stream(
     root: &Path,
     source: &ViewerServerSourceV1,
+    stream: TcpStream,
+) -> Result<(), FrontendContractError> {
+    let root_redirect = format!("{}?{}", source.viewer_entry, source.default_query);
+    handle_stream_with_policy(root, &source.allowed_path_prefixes, &root_redirect, stream)
+}
+
+pub(crate) fn handle_scoped_stream(
+    root: &Path,
+    allowed_path_prefix: &str,
+    root_redirect: &str,
+    stream: TcpStream,
+) -> Result<(), FrontendContractError> {
+    validate_scoped_policy(allowed_path_prefix, root_redirect)?;
+    handle_stream_with_policy(
+        root,
+        &[allowed_path_prefix.to_owned()],
+        root_redirect,
+        stream,
+    )
+}
+
+pub(crate) fn validate_scoped_policy(
+    allowed_path_prefix: &str,
+    root_redirect: &str,
+) -> Result<(), FrontendContractError> {
+    let redirect_path = root_redirect.trim_start_matches('/');
+    if !allowed_path_prefix.ends_with('/')
+        || !root_redirect.starts_with('/')
+        || redirect_path.len() <= allowed_path_prefix.len()
+        || !redirect_path.starts_with(allowed_path_prefix)
+        || allowed_path_prefix
+            .bytes()
+            .any(|byte| matches!(byte, b'?' | b'#' | b'%'))
+        || redirect_path
+            .bytes()
+            .any(|byte| matches!(byte, b'?' | b'#' | b'%'))
+    {
+        return Err(FrontendContractError::new(
+            "viewer_server_scoped_policy_invalid",
+            "Scoped static-server prefix and redirect are inconsistent",
+        ));
+    }
+    validate_relative_path(allowed_path_prefix.trim_end_matches('/'))?;
+    validate_relative_path(redirect_path)
+}
+
+fn handle_stream_with_policy(
+    root: &Path,
+    allowed_path_prefixes: &[String],
+    root_redirect: &str,
     mut stream: TcpStream,
 ) -> Result<(), FrontendContractError> {
     stream.set_nonblocking(false).map_err(|error| {
@@ -161,11 +211,12 @@ pub(crate) fn handle_stream(
                 format!("set Viewer response timeout failed: {error}"),
             )
         })?;
-    let response =
-        match read_request(&mut stream).and_then(|request| route_request(root, source, &request)) {
-            Ok(response) => response,
-            Err(error) => error_response(400, "Bad Request", &error.detail),
-        };
+    let response = match read_request(&mut stream).and_then(|request| {
+        route_request_with_policy(root, allowed_path_prefixes, root_redirect, &request)
+    }) {
+        Ok(response) => response,
+        Err(error) => error_response(400, "Bad Request", &error.detail),
+    };
     write_response(&mut stream, &response)
 }
 
@@ -314,9 +365,20 @@ fn read_request(stream: &mut TcpStream) -> Result<Vec<u8>, FrontendContractError
     Ok(request)
 }
 
+#[cfg(test)]
 fn route_request(
     root: &Path,
     source: &ViewerServerSourceV1,
+    request: &[u8],
+) -> Result<HttpResponse, FrontendContractError> {
+    let root_redirect = format!("{}?{}", source.viewer_entry, source.default_query);
+    route_request_with_policy(root, &source.allowed_path_prefixes, &root_redirect, request)
+}
+
+fn route_request_with_policy(
+    root: &Path,
+    allowed_path_prefixes: &[String],
+    root_redirect: &str,
     request: &[u8],
 ) -> Result<HttpResponse, FrontendContractError> {
     let text = std::str::from_utf8(request).map_err(|error| {
@@ -351,17 +413,14 @@ fn route_request(
         return Ok(HttpResponse {
             status: 302,
             reason: "Found",
-            headers: vec![(
-                "Location".to_owned(),
-                format!("{}?{}", source.viewer_entry, source.default_query),
-            )],
+            headers: vec![("Location".to_owned(), root_redirect.to_owned())],
             body: Vec::new(),
             head_only: method == "HEAD",
         });
     }
     let decoded = percent_decode_path(raw_path)?;
     let relative = decoded.trim_start_matches('/');
-    if !allowed_relative_path(relative, &source.allowed_path_prefixes) {
+    if !allowed_relative_path(relative, allowed_path_prefixes) {
         return Ok(error_response(403, "Forbidden", "Forbidden"));
     }
     let path = match resolve_required_file(root, relative) {
@@ -552,7 +611,8 @@ mod tests {
 
     use super::{
         allowed_relative_path, content_type, percent_decode_path, route_request,
-        validate_viewer_server_source, ViewerServerSourceV1,
+        route_request_with_policy, validate_scoped_policy, validate_viewer_server_source,
+        ViewerServerSourceV1,
     };
 
     static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -662,5 +722,57 @@ mod tests {
         }
 
         std::fs::remove_dir_all(root).expect("remove Viewer router fixture");
+    }
+
+    #[test]
+    fn scoped_router_cannot_serve_outside_the_prototype_prefix() {
+        let root = std::env::temp_dir().join(format!(
+            "structural-prototype-server-router-test-{}-{}",
+            std::process::id(),
+            TEST_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
+        let prototype = root.join("prototype/structural-workbench");
+        std::fs::create_dir_all(&prototype).expect("create prototype fixture");
+        std::fs::write(prototype.join("index.html"), b"<html>prototype</html>\n")
+            .expect("write prototype fixture");
+        std::fs::write(root.join("secret.txt"), b"secret\n").expect("write forbidden fixture");
+        let prefix = "prototype/structural-workbench/";
+        let redirect = "/prototype/structural-workbench/index.html";
+        assert!(validate_scoped_policy(prefix, redirect).is_ok());
+        assert!(validate_scoped_policy("prototype/other/", redirect).is_err());
+
+        let prefixes = vec![prefix.to_owned()];
+        let get = route_request_with_policy(
+            &root,
+            &prefixes,
+            redirect,
+            b"GET /prototype/structural-workbench/index.html HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        )
+        .expect("route scoped GET");
+        assert_eq!(get.status, 200);
+        assert_eq!(get.body, b"<html>prototype</html>\n");
+
+        let root_request = route_request_with_policy(
+            &root,
+            &prefixes,
+            redirect,
+            b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        )
+        .expect("route scoped redirect");
+        assert_eq!(root_request.status, 302);
+        assert!(root_request
+            .headers
+            .iter()
+            .any(|(name, value)| name == "Location" && value == redirect));
+
+        for target in ["/secret.txt", "/src/structure-viewer/index.html"] {
+            let request = format!("GET {target} HTTP/1.1\r\nHost: localhost\r\n\r\n");
+            let response =
+                route_request_with_policy(&root, &prefixes, redirect, request.as_bytes())
+                    .expect("route scoped forbidden path");
+            assert_eq!(response.status, 403);
+        }
+
+        std::fs::remove_dir_all(root).expect("remove prototype router fixture");
     }
 }
