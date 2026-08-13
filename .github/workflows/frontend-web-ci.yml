@@ -102,8 +102,8 @@ jobs:
       - name: Rust-native Workbench prototype static contract
         run: npm run verify:workbench-prototype-dom-contract
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Rust-orchestrated Playwright browser install
+        run: npm run install:browser-runtime
 
       - name: Rust-orchestrated Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke

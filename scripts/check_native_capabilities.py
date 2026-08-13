@@ -45,6 +45,7 @@ EXPECTED_OWNERS = {
     "native_frontend_build": "structural-frontend-contract",
     "native_frontend_dev": "structural-frontend-contract",
     "native_frontend_preview": "structural-frontend-contract",
+    "native_playwright_install": "structural-frontend-contract",
     "native_frontend_contract": "structural-frontend-contract",
     "native_viewer_js_syntax": "structural-frontend-contract",
     "native_viewer_readme_capture": "structural-frontend-contract",

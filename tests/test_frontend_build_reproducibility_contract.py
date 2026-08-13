@@ -39,6 +39,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- frontend-build --root ."
     )
     assert (
+        package_json["scripts"]["install:browser-runtime"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- playwright-install --root ."
+    )
+    assert (
         package_json["scripts"]["preview"]
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- frontend-preview --root ."
@@ -145,6 +150,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run dev" in docs_text
     assert "structural-frontend-contract frontend-dev" in docs_text
+    assert "npm run install:browser-runtime" in docs_text
+    assert "structural-frontend-contract playwright-install" in docs_text
     assert "npm run build" in docs_text
     assert "structural-frontend-contract frontend-build" in docs_text
     assert "npm run preview" in docs_text
@@ -272,6 +279,53 @@ def test_native_frontend_dev_dry_run_is_runtime_free_and_self_hashed() -> None:
         "allowed_after_launch_for_hmr_not_revalidated"
     )
     assert payload["receipt_hash"].startswith("sha256:")
+    assert payload["deterministic_receipt"] is True
+    receipt_hash = payload.pop("receipt_hash")
+    canonical = json.dumps(
+        payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")
+    ).encode()
+    assert receipt_hash == f"sha256:{hashlib.sha256(canonical).hexdigest()}"
+
+
+def test_native_playwright_install_dry_run_is_runtime_free_and_self_hashed() -> None:
+    result = subprocess.run(
+        [
+            "npm",
+            "run",
+            "install:browser-runtime",
+            "--silent",
+            "--",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-playwright-install-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["playwright_cli_identity"] is None
+    assert payload["logical_command"] == [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "install",
+        "--with-deps",
+        "chromium",
+    ]
+    assert payload["node_options_disposition"] == "removed_for_direct_child"
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_code"] is None
+    assert payload["runtime_requirements"] == {
+        "required": ["node", "playwright"],
+        "browser_process_required": False,
+        "elevated_host_package_mutation_may_be_required": True,
+    }
+    assert "not_instrumented" in payload["external_network_access_accounting"]
+    assert "may_mutate_host_packages" in payload["system_mutation_accounting"]
     assert payload["deterministic_receipt"] is True
     receipt_hash = payload.pop("receipt_hash")
     canonical = json.dumps(

@@ -8,21 +8,23 @@ use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_frontend_build_receipt_json,
     canonical_frontend_dev_receipt_json, canonical_frontend_preview_receipt_json,
-    canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
+    canonical_playwright_install_receipt_json, canonical_receipt_json,
+    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
+    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_build,
-    run_frontend_dev, run_frontend_smoke, run_viewer_browser_smoke, run_viewer_js_syntax,
-    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
-    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendBuildOptions,
-    FrontendDevOptions, ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions,
+    run_frontend_dev, run_frontend_smoke, run_playwright_install, run_viewer_browser_smoke,
+    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
+    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, FrontendBuildOptions, FrontendDevOptions,
+    PlaywrightInstallOptions, ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions,
     ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
     ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
@@ -137,6 +139,13 @@ fn write_frontend_build_runtime(root: &Path) {
         .expect("create Vite CLI parent");
     std::fs::write(typescript, b"typescript-cli-entry\n").expect("write TypeScript CLI");
     std::fs::write(vite, b"vite-cli-entry\n").expect("write Vite CLI");
+}
+
+fn write_playwright_install_runtime(root: &Path) {
+    let cli = root.join("node_modules/@playwright/test/cli.js");
+    std::fs::create_dir_all(cli.parent().expect("Playwright CLI parent"))
+        .expect("create Playwright CLI parent");
+    std::fs::write(cli, b"playwright-cli-entry\n").expect("write Playwright CLI");
 }
 
 fn write_delivery_fixture(root: &Path) {
@@ -2594,6 +2603,90 @@ fn frontend_dev_owns_exact_child_removes_node_options_and_hashes_vite_cli() {
     assert_eq!(value["successful_exit_code"], 0);
     assert_eq!(value["port"], 5174);
     assert!(value["vite_cli_identity"]["sha256"]
+        .as_str()
+        .is_some_and(|hash| hash.starts_with("sha256:")));
+    assert_eq!(
+        value["node_options_disposition"],
+        "removed_for_direct_child"
+    );
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn playwright_install_dry_run_is_deterministic_runtime_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = PlaywrightInstallOptions::new(root);
+    options.dry_run = true;
+    let first = run_playwright_install(&options).expect("Playwright install dry-run");
+    let second = run_playwright_install(&options).expect("repeat Playwright install dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.playwright_cli_identity, None);
+    assert_eq!(
+        first.logical_command,
+        [
+            "node",
+            "node_modules/@playwright/test/cli.js",
+            "install",
+            "--with-deps",
+            "chromium",
+        ]
+    );
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert_eq!(first.runtime_requirements.required, ["node", "playwright"]);
+    assert!(!first.runtime_requirements.browser_process_required);
+    assert!(
+        first
+            .runtime_requirements
+            .elevated_host_package_mutation_may_be_required
+    );
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_playwright_install_receipt_json(&first)
+        .expect("canonical Playwright install receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Playwright install receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn playwright_install_owns_exact_child_removes_node_options_and_hashes_cli() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_playwright_install_runtime(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nif [ \"${NODE_OPTIONS+x}\" = x ]; then exit 91; fi\nprintf '%s\\n' \"$*\" > \"$PLAYWRIGHT_INSTALL_TEST_LOG\"\nexit 0\n",
+    );
+    let log = test.0.join("playwright-install-invocation.log");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["playwright-install", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .env("NODE_OPTIONS", "--inspect")
+        .env("PLAYWRIGHT_INSTALL_TEST_LOG", &log)
+        .output()
+        .expect("run Playwright install with fake Node");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(log).expect("Playwright install invocation log"),
+        "node_modules/@playwright/test/cli.js install --with-deps chromium\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("Playwright install receipt JSON");
+    assert_eq!(value["execution_mode"], "execute");
+    assert_eq!(value["status"], "installed");
+    assert_eq!(value["direct_processes_spawned"], 1);
+    assert_eq!(value["successful_exit_code"], 0);
+    assert!(value["playwright_cli_identity"]["sha256"]
         .as_str()
         .is_some_and(|hash| hash.starts_with("sha256:")));
     assert_eq!(

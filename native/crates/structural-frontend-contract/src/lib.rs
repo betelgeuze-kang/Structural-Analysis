@@ -7,6 +7,7 @@ mod frontend_build;
 mod frontend_dev;
 mod frontend_preview;
 mod playwright;
+mod playwright_install;
 mod prototype;
 mod prototype_browser_smoke;
 mod smoke;
@@ -54,6 +55,12 @@ pub use frontend_preview::{
     FrontendPreviewReceiptV1, FrontendPreviewRuntimeRequirementsV1,
 };
 use frontend_preview::{validate_frontend_preview_source, FrontendPreviewSourceV1};
+pub use playwright_install::{
+    canonical_playwright_install_receipt_json, run_playwright_install,
+    PlaywrightInstallCliIdentityV1, PlaywrightInstallOptions, PlaywrightInstallReceiptV1,
+    PlaywrightInstallRuntimeRequirementsV1,
+};
+use playwright_install::{validate_playwright_install_source, PlaywrightInstallSourceV1};
 pub use prototype::{
     canonical_workbench_prototype_receipt_json, check_workbench_prototype,
     WorkbenchPrototypeReceiptV1,
@@ -190,6 +197,7 @@ struct FrontendSourceMapV1 {
     frontend_build_contract: FrontendBuildSourceV1,
     frontend_dev_contract: FrontendDevSourceV1,
     frontend_preview_contract: FrontendPreviewSourceV1,
+    playwright_install_contract: PlaywrightInstallSourceV1,
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
@@ -584,6 +592,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_frontend_build_source(&source_map.frontend_build_contract)?;
     validate_frontend_dev_source(&source_map.frontend_dev_contract)?;
     validate_frontend_preview_source(&source_map.frontend_preview_contract)?;
+    validate_playwright_install_source(&source_map.playwright_install_contract)?;
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;

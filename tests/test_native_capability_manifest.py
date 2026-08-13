@@ -362,6 +362,24 @@ def test_native_frontend_preview_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in preview["claim"]
 
 
+def test_native_playwright_install_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_playwright_install") is True
+    install = payload["capabilities"]["native_playwright_install"]
+    assert install["cutover_gate"] == "C0"
+    assert install["owner"] == "structural-frontend-contract"
+    assert "all five hosted browser workflows" in install["claim"]
+    assert "install:browser-runtime" in install["claim"]
+    assert "playwright-install" in install["claim"]
+    assert "installed Playwright CLI entrypoint" in install["claim"]
+    assert "removes inherited NODE_OPTIONS" in install["claim"]
+    assert "one exact node CLI.js install --with-deps chromium child" in install["claim"]
+    assert "dry-run requires no node_modules, network, host mutation" in install["claim"]
+    assert "downloads, caches, elevation and host-package mutation" in install["claim"]
+    assert "downloaded byte identities, transitive processes, rollback" in install["claim"]
+    assert "C5 and C6 remain outside" in install["claim"]
+
+
 def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

@@ -80,8 +80,8 @@ jobs:
       - name: Verify viewer contracts
         run: python scripts/verify_structure_viewer_contracts.py
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Rust-orchestrated Playwright browser install
+        run: npm run install:browser-runtime
 
       - name: Rust-orchestrated minimal structure-viewer browser smoke
         run: npm run verify:frontend-browser-smoke -- --mode minimal

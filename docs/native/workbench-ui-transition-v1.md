@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-preview/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -58,6 +58,10 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   the frontend and built-delivery receipts, binds only fixed IPv4 loopback, serves `dist/` through
   the confined SPA router, and spawns no Node, Vite, browser, Python, or child process. A valid built
   tree is required, and rendered browser behavior plus clean-machine publication remain open.
+  Playwright browser-install orchestration is Rust-native: hosted workflows enter one command that
+  hashes the installed Playwright CLI, removes inherited `NODE_OPTIONS`, and owns the exact Chromium
+  plus OS-dependency installation child. Playwright retains downloads, caches, elevation and host
+  package mutation; downloaded bytes and rollback remain uninstrumented.
   Viewer JavaScript syntax gate orchestration is Rust-native: the runtime-input CI enters through
   one Rust command that freezes the exact ten source identities, owns each `node --check` child,
   rejects source mutation, and emits a canonical receipt. The retained Node parser and executable

@@ -47,8 +47,8 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - name: Rust-orchestrated Playwright browser install
+        run: npm run install:browser-runtime
 
       - name: Deterministic repository quality gate
         run: python scripts/verify_quality_gate.py --mode full

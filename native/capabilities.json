@@ -205,6 +205,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 local serving only: package preview enters through structural-frontend-contract frontend-preview; Rust validates the pinned frontend contract and already-built delivery receipt, confines the delivery root and SPA fallback, permits only one fixed IPv4 loopback listener plus bounded GET/HEAD requests, rejects traversal, dotfiles and symlinks, spawns zero child processes, and emits a canonical self-hashed startup receipt, while dry-run validates the delivery and binds zero listeners; the npm package script remains a launcher convenience but the preview server requires no Node, Vite, browser or Python, and rendered behavior, clean-machine publication, native UI parity, C5 and C6 remain open"
     },
+    "native_playwright_install": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 browser-install orchestration only: all five hosted browser workflows enter through package install:browser-runtime and structural-frontend-contract playwright-install; Rust validates the frontend contract, hashes the installed Playwright CLI entrypoint, removes inherited NODE_OPTIONS, owns one exact node CLI.js install --with-deps chromium child, rejects package/source-map/CLI mutation, records the successful direct-child exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules, network, host mutation, browser or child process; the retained Playwright installer owns browser and operating-system dependency resolution, downloads, caches, elevation and host-package mutation, and downloaded byte identities, transitive processes, rollback, clean-machine publication, native UI parity, C5 and C6 remain outside this claim"
+    },
     "native_viewer_report_pdf_export": {
       "status": "implemented",
       "cutover_gate": "C0",

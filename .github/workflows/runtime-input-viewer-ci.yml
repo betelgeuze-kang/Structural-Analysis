@@ -155,8 +155,8 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
 
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Rust-orchestrated Playwright browser install
+        run: npm run install:browser-runtime
 
       - name: Rust-orchestrated Viewer JavaScript syntax gate
         run: npm run verify:viewer-js-syntax
