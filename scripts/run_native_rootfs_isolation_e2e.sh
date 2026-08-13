@@ -61,6 +61,10 @@ source_artifact="$repository_root/native/tests/fixtures/solver_cpu/nonlinear_ndt
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 evidence_bundle="$repository_root/native/tests/fixtures/workbench_evidence"
+linear_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+linear_request="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
+linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
+linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
 
 unshare -Urn bwrap \
   --ro-bind / / \
@@ -109,6 +113,22 @@ unshare -Urn bwrap \
       > /mnt/mgt-inspect-after-review.json
     /opt/payload/bin/structural-workbench export --workspace /mnt/mgt-workbench \
       > /mnt/mgt-export.json
+    /opt/payload/bin/structural-workbench workflow-model-linear "$8" "$9" \
+      --external-result "${10}" --source-artifact "${11}" \
+      --workspace /mnt/model-ir-linear-workbench --step-budget 1 \
+      > /mnt/model-ir-linear-workflow.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/model-ir-linear-workbench \
+      > /mnt/model-ir-linear-inspect-before-review.json
+    /opt/payload/bin/structural-workbench review --workspace /mnt/model-ir-linear-workbench \
+      --decision review --reviewer native-rootfs-c5 \
+      --comment "Explicit isolated C5 handoff review; no engineering approval is inferred." \
+      > /mnt/model-ir-linear-review-publish.json
+    /opt/payload/bin/structural-workbench review-show --workspace /mnt/model-ir-linear-workbench \
+      > /mnt/model-ir-linear-review-show.json
+    /opt/payload/bin/structural-workbench inspect --workspace /mnt/model-ir-linear-workbench \
+      > /mnt/model-ir-linear-inspect-after-review.json
+    /opt/payload/bin/structural-workbench export --workspace /mnt/model-ir-linear-workbench \
+      > /mnt/model-ir-linear-export.json
     /opt/payload/bin/structural-workbench catalog --truth geometry_only --size large \
       > /mnt/workbench-catalog.json
     IFS= read -r catalog_line < /mnt/workbench-catalog.json
@@ -127,6 +147,7 @@ unshare -Urn bwrap \
       --bundle /opt --payload-root /opt/payload --workspace /mnt \
       --workbench-root /mnt/modelir-workbench \
       --mgt-workbench-root /mnt/mgt-workbench \
+      --model-ir-linear-workbench-root /mnt/model-ir-linear-workbench \
       --workbench-inspect-before-review /mnt/modelir-inspect-before-review.json \
       --workbench-review-show /mnt/modelir-review-show.json \
       --workbench-inspect-after-review /mnt/modelir-inspect-after-review.json \
@@ -135,13 +156,20 @@ unshare -Urn bwrap \
       --mgt-workbench-review-show /mnt/mgt-review-show.json \
       --mgt-workbench-inspect-after-review /mnt/mgt-inspect-after-review.json \
       --mgt-workbench-export /mnt/mgt-export.json \
+      --model-ir-linear-workbench-inspect-before-review \
+        /mnt/model-ir-linear-inspect-before-review.json \
+      --model-ir-linear-workbench-review-show /mnt/model-ir-linear-review-show.json \
+      --model-ir-linear-workbench-inspect-after-review \
+        /mnt/model-ir-linear-inspect-after-review.json \
+      --model-ir-linear-workbench-export /mnt/model-ir-linear-export.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \
       > /mnt/runtime-probe-result.json
   ' structural-rootfs-e2e \
     "$model" "$request" "$external" "$source_artifact" "$mgt_source" "$mgt_request" \
-    "$evidence_bundle"
+    "$evidence_bundle" "$linear_model" "$linear_request" "$linear_external" \
+    "$linear_source_artifact"
 
 "$installer" runtime-receipt-verify \
   --receipt "$e2e_root/rootfs-isolation-receipt.json" \

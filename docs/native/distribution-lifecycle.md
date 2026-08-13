@@ -129,21 +129,26 @@ scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> \
   --receipt <ROOTFS-E2E.json>
 ```
 
-On Linux hosts that permit unprivileged namespaces, the rootfs harness executes both Workbench
-profiles from the verified CPU bundle as UID/GID 65532 with an empty lookup path, a read-only root
+On Linux hosts that permit unprivileged namespaces, the rootfs harness executes the bounded
+ModelIR/NDTHA, normalized-MGT-to-NDTHA and ModelIR-linear Workbench profiles from the verified CPU
+bundle as UID/GID 65532 with an empty lookup path, a read-only root
 and payload, a writable operator workspace, and only loopback networking. Both profiles also run
 inspect, an explicit non-promoting `review`, review reopen, post-review inspect and handoff export.
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v3 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v4 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
-The installer continues to verify frozen v1 and v2 rootfs receipts against their original bundles
-and claim boundaries; only newly generated v3 receipts carry catalog/evidence surface evidence.
+The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
+deterministic PDF, document source, PDF/report receipts and inspect/review/export identities. The
+installer continues to verify frozen v1 through v3 rootfs receipts against their original bundles
+and claim boundaries; v3 first carried catalog/evidence surface evidence, and only v4 carries the
+ModelIR-linear surface.
 
-The installed flows remain the exact bounded ModelIR/NDTHA and normalized-MGT-to-NDTHA Workbench
-profiles. General native UI/MGT coverage, React/TypeScript deletion, live external-solver
+The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA and
+frame3d/truss3d ModelIR-linear Workbench profiles. General native UI/MGT coverage,
+React/TypeScript deletion, live external-solver
 execution, signing, cross-platform installers, remote update transport, release retention and
 final C6 removal remain open.
 

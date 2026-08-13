@@ -667,6 +667,8 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "bounded English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
     assert "distribution v14 E2E" in deployment["claim"]
+    assert "v4 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "frozen v1 through v3 rootfs receipts" in deployment["claim"]
     assert "outside .github/workflows" in deployment["claim"]
     assert "final C6 remain open" in deployment["claim"]
 

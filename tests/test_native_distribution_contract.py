@@ -713,6 +713,9 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
     for token in (
         "structural-distribution.v1",
         "structural-install-transaction.v1",
+        "structural-native-rootfs-isolation-e2e.v4",
+        "model_ir_linear_result_recovery_ir_sha256",
+        "model_ir_linear_pdf_receipt_sha256",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -861,6 +864,13 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "review-show --workspace /mnt/modelir-workbench" in rootfs_e2e
     assert "export --workspace /mnt/modelir-workbench" in rootfs_e2e
     assert "inspect --workspace /mnt/mgt-workbench" in rootfs_e2e
+    assert "workflow-model-linear" in rootfs_e2e
+    assert "inspect --workspace /mnt/model-ir-linear-workbench" in rootfs_e2e
+    assert "review-show --workspace /mnt/model-ir-linear-workbench" in rootfs_e2e
+    assert "export --workspace /mnt/model-ir-linear-workbench" in rootfs_e2e
+    assert "--model-ir-linear-workbench-root" in rootfs_e2e
+    assert "--model-ir-linear-workbench-inspect-before-review" in rootfs_e2e
+    assert "frame_cantilever_language_neutral_oracle_v1.txt" in rootfs_e2e
     assert "--workbench-inspect-before-review" in rootfs_e2e
     assert "--workbench-catalog" in rootfs_e2e
     assert "--workbench-evidence" in rootfs_e2e

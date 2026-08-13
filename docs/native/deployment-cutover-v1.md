@@ -49,11 +49,13 @@ scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> --receipt <RECEIPT.
 
 The last command is a Docker-independent Linux diagnostic harness. It places the verified bundle
 under a read-only bind mount, unshares user/mount/network namespaces, maps the runtime to UID/GID
-65532, clears `PATH`, runs the ModelIR and MGT Workbench workflows, and asks the Rust installer to
+65532, clears `PATH`, runs the ModelIR, MGT and ModelIR-linear Workbench workflows, and asks the Rust installer to
 emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact receipt requires
 `EROFS` from both root and payload write probes, a writable operator workspace, only `lo`, zero
 IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
-artifacts. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
+artifacts. Its append-only v4 adds typed linear recovery, external comparison, deterministic PDF,
+document source, PDF/report receipts and inspect/review/export identities while preserving frozen
+v1 through v3 verification. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
 non-promoting geometry/no-runner and ready/blocked/unavailable boundaries. Its contract fixes
 `container_image_built=false` and `customer_image_receipt=false`; browsing does not generate or
 approve evidence.

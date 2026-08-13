@@ -321,11 +321,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--gid 65532",
         "--setenv PATH /nonexistent",
         "workflow-mgt",
+        "workflow-model-linear",
         "inspect --workspace",
         "--decision review",
         "review-show --workspace",
         "export --workspace",
         "--workbench-inspect-before-review",
+        "--model-ir-linear-workbench-root",
+        "--model-ir-linear-workbench-inspect-before-review",
         "structural-native-benchmark-catalog-view.v1",
         "structural-native-evidence-bundle-view.v1",
         "--workbench-catalog",
@@ -394,6 +397,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         for token in (
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
+            "ModelIR/MGT/ModelIR-linear flows",
+            "v4 self-hashed local_rootfs_diagnostic_c5 receipt",
             "final C6 remain open",
         ):
             if token not in capability_claim:
