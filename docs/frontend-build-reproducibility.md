@@ -49,8 +49,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - The server removes the Node HTTP runtime from this local launch boundary; the served Viewer application and browser remain JavaScript-owned.
   - Sandboxes that deny loopback sockets can verify routing and startup plans but cannot issue a live-listener receipt; that check remains for a hosted or clean-machine lane with loopback permission.
 - `npm run verify:viewer-report-pdf`
-  - Uses Playwright to export the active MIDAS33 engineer-in-loop report to PDF and checks that the PDF is non-empty with a valid `%PDF-` header.
-  - Runs in the full quality gate because it is a release-output smoke rather than a fast PR contract.
+  - Invokes the Rust-native `structural-frontend-contract viewer-report-pdf-smoke` verifier. Rust validates and hashes the frontend contract and retained exporter, owns its direct Node child and output cleanup, rejects package/lock/exporter mutation, and verifies bounded non-symlink PDF/HTML outputs, the `%PDF-` header, minimum size, and required report markers. If `pdftotext` is installed, Rust also requires the three frozen PDF text markers.
+  - `npm run verify:viewer-report-pdf -- --dry-run` emits a canonical self-hashed plan without creating output or spawning a process. `--out FILE` retains an explicit PDF plus `FILE.html`; otherwise live output is temporary unless `--keep` is supplied.
+  - The retained Node exporter still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript rendering, and PDF generation. Browser page requests are uninstrumented, so this remains a transitional C0 full-quality smoke and not native PDF/UI parity or C6 evidence.
 - `npm run verify:viewer-performance-probe`
   - Starts the source viewer in a local browser, waits for a nonblank well-framed canvas, and samples `requestAnimationFrame`.
   - Runs in `--verify` mode in the full quality gate and writes to the OS temp directory, so the gate does not dirty tracked artifacts.

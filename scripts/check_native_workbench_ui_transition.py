@@ -26,6 +26,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
+    Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_server.rs"),
     Path("native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"),
@@ -39,6 +40,7 @@ REQUIRED_PATHS = (
     Path("prototype/structural-workbench/app.js"),
     Path("prototype/structural-workbench/demo-case.json"),
     Path("prototype/structural-workbench/index.html"),
+    Path("scripts/export-structure-viewer-report-pdf.mjs"),
     Path("scripts/json-module-loader.mjs"),
     Path("tests/frontend/workbench-prototype-smoke.spec.ts"),
     Path("tests/frontend/workbench-v2-e2e.spec.ts"),
@@ -147,6 +149,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     removed_workbench_v2_wrapper = Path("scripts/verify-workbench-v2-e2e.mjs")
     if (root / removed_workbench_v2_wrapper).exists():
         blockers.append("workbench_ui_removed_workbench_v2_browser_wrapper_present")
+    removed_viewer_pdf_wrapper = Path("scripts/verify-structure-viewer-report-pdf.mjs")
+    if (root / removed_viewer_pdf_wrapper).exists():
+        blockers.append("workbench_ui_removed_viewer_pdf_wrapper_present")
 
     manifest = _json(root, MANIFEST, blockers)
     for field, expected in (
@@ -200,6 +205,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract prototype-browser-smoke",
         "structural-frontend-contract workbench-v2-browser-smoke",
         "structural-frontend-contract browser-smoke",
+        "structural-frontend-contract viewer-report-pdf-smoke",
         "structural-frontend-contract serve",
         "structural-frontend-contract viewer-manifest",
     ]:
@@ -216,6 +222,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "workbench_v2_browser_smoke_node_required": True,
         "workbench_v2_browser_smoke_playwright_required": True,
         "workbench_v2_browser_smoke_browser_required": True,
+        "viewer_report_pdf_smoke_node_required": True,
+        "viewer_report_pdf_smoke_playwright_required": True,
+        "viewer_report_pdf_smoke_browser_required": True,
+        "viewer_report_pdf_smoke_pdftotext_optional": True,
     }:
         blockers.append("workbench_ui_native_frontend_runtime_boundary_invalid")
     for field in (
@@ -360,6 +370,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- workbench-v2-browser-smoke --root ."
     ):
         blockers.append("workbench_ui_workbench_v2_browser_smoke_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("verify:viewer-report-pdf") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-report-pdf-smoke --root ."
+    ):
+        blockers.append("workbench_ui_viewer_report_pdf_smoke_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -545,6 +560,32 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    viewer_report_pdf_smoke = _text(
+        root,
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"
+        ),
+        viewer_report_pdf_smoke,
+        (
+            "pub fn run_viewer_report_pdf_smoke",
+            "scripts/export-structure-viewer-report-pdf.mjs",
+            "viewer_report_pdf_smoke_export_failed",
+            "viewer_report_pdf_smoke_contract_changed",
+            "viewer_report_pdf_smoke_pdf_invalid",
+            "viewer_report_pdf_smoke_html_invalid",
+            "pdftotext",
+            "temporary_removed_after_verification",
+            "direct_processes_spawned",
+            "not_instrumented_exporter_loopback_and_browser_page_requests",
+        ),
+        blockers,
+    )
     _require_tokens(
         Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
         viewer_manifest,
@@ -620,9 +661,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
+            "Viewer report PDF verification wrapper is Rust-native",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),
@@ -667,7 +709,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, Playwright, browser, and Node dependency visible",
+        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, Node exporter, Playwright, Chromium/browser, and optional pdftotext dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

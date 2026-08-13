@@ -8,6 +8,7 @@ mod prototype;
 mod prototype_browser_smoke;
 mod smoke;
 mod viewer_manifest;
+mod viewer_report_pdf_smoke;
 mod viewer_server;
 mod workbench_v2_browser_smoke;
 
@@ -46,6 +47,13 @@ pub use viewer_manifest::{
     ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
 };
 use viewer_manifest::{validate_viewer_manifest_source, ViewerManifestSourceV1};
+pub use viewer_report_pdf_smoke::{
+    canonical_viewer_report_pdf_smoke_receipt_json, run_viewer_report_pdf_smoke,
+    ViewerReportPdfSmokeOptions, ViewerReportPdfSmokeReceiptV1,
+};
+use viewer_report_pdf_smoke::{
+    validate_viewer_report_pdf_smoke_source, ViewerReportPdfSmokeSourceV1,
+};
 pub use viewer_server::{
     canonical_viewer_server_receipt_json, plan_viewer_server, serve_viewer, ViewerServerReceiptV1,
 };
@@ -120,6 +128,7 @@ struct FrontendSourceMapV1 {
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
     viewer_browser_smoke_contract: ViewerBrowserSmokeSourceV1,
+    viewer_report_pdf_smoke_contract: ViewerReportPdfSmokeSourceV1,
     viewer_server_contract: ViewerServerSourceV1,
     workbench_prototype_contract: WorkbenchPrototypeSourceV1,
     workbench_prototype_browser_smoke_contract: WorkbenchPrototypeBrowserSmokeSourceV1,
@@ -505,6 +514,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     validate_viewer_browser_smoke_source(&source_map.viewer_browser_smoke_contract)?;
+    validate_viewer_report_pdf_smoke_source(&source_map.viewer_report_pdf_smoke_contract)?;
     validate_viewer_server_source(&source_map.viewer_server_contract)?;
     validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;
     validate_workbench_prototype_browser_smoke_source(

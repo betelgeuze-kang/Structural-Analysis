@@ -17,9 +17,12 @@ def test_structure_viewer_pdf_export_smoke_is_wired_to_package_and_full_gate() -
 
     assert (
         package_json["scripts"]["verify:viewer-report-pdf"]
-        == "node ./scripts/verify-structure-viewer-report-pdf.mjs"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-report-pdf-smoke --root ."
     )
-    assert "scripts/verify-structure-viewer-report-pdf.mjs" in frontend_contract
+    assert "scripts/verify-structure-viewer-report-pdf.mjs" not in frontend_contract
+    assert "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs" in frontend_contract
+    assert "scripts/export-structure-viewer-report-pdf.mjs" in frontend_contract
     assert "verify:viewer-report-pdf" in quality_gate
     assert quality_gate.index("verify:frontend-browser-smoke") < quality_gate.index("verify:viewer-report-pdf")
     assert quality_gate.index("verify:viewer-report-pdf") < quality_gate.index("report_commercialization_level.py")
@@ -29,8 +32,18 @@ def test_structure_viewer_pdf_export_smoke_has_dry_run_contract(tmp_path: Path) 
     out = tmp_path / "viewer-report.pdf"
     result = subprocess.run(
         [
-            "node",
-            "scripts/verify-structure-viewer-report-pdf.mjs",
+            "cargo",
+            "run",
+            "--quiet",
+            "--locked",
+            "--manifest-path",
+            "native/Cargo.toml",
+            "-p",
+            "structural-frontend-contract",
+            "--",
+            "viewer-report-pdf-smoke",
+            "--root",
+            ".",
             "--dry-run",
             "--query",
             "project=midas33_release&drawing=midas33_optimized&variant=optimized",
@@ -44,6 +57,12 @@ def test_structure_viewer_pdf_export_smoke_has_dry_run_contract(tmp_path: Path) 
     )
 
     assert result.returncode == 0, result.stderr
-    assert "scripts/export-structure-viewer-report-pdf.mjs" in result.stdout
-    assert "project=midas33_release&drawing=midas33_optimized&variant=optimized" in result.stdout
-    assert str(out) in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-viewer-report-pdf-smoke-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["query"] == "project=midas33_release&drawing=midas33_optimized&variant=optimized"
+    assert payload["requested_output"] == str(out)
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["pdf_sha256"] is None
+    assert payload["html_sha256"] is None
+    assert payload["logical_command_template"][1] == "scripts/export-structure-viewer-report-pdf.mjs"

@@ -8,12 +8,14 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_server_receipt_json, canonical_workbench_prototype_browser_smoke_receipt_json,
+    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
+    canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
-    FrontendContractError,
+    run_viewer_report_pdf_smoke, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, serve_viewer, FrontendContractError,
+    ViewerReportPdfSmokeOptions,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -82,6 +84,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_workbench_v2_browser_smoke(&root, dry_run)?;
         return canonical_workbench_v2_browser_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-report-pdf-smoke" {
+        let options = parse_viewer_report_pdf_smoke_arguments(&arguments[1..])?;
+        let receipt = run_viewer_report_pdf_smoke(&options)?;
+        return canonical_viewer_report_pdf_smoke_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "serve" {
         let options = parse_serve_arguments(&arguments[1..])?;
         if options.dry_run {
@@ -116,7 +123,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-report-pdf-smoke, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -134,6 +141,85 @@ struct BrowserSmokeOptions {
     root: PathBuf,
     mode: String,
     dry_run: bool,
+}
+
+fn parse_viewer_report_pdf_smoke_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerReportPdfSmokeOptions, CliError> {
+    let mut root = None;
+    let mut query = None;
+    let mut minimum_pdf_bytes = None;
+    let mut output = None;
+    let mut dry_run = false;
+    let mut keep_temporary_output = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-report-pdf-smoke option names must be UTF-8"))?;
+        if matches!(name, "--dry-run" | "--keep") {
+            let flag = if name == "--dry-run" {
+                &mut dry_run
+            } else {
+                &mut keep_temporary_output
+            };
+            if *flag {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            *flag = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-report-pdf-smoke value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--query" if query.is_none() => {
+                query = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("--query must be UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--min-bytes" if minimum_pdf_bytes.is_none() => {
+                minimum_pdf_bytes = Some(
+                    value
+                        .to_str()
+                        .and_then(|value| value.parse::<u64>().ok())
+                        .filter(|value| *value > 0)
+                        .ok_or_else(|| usage_error("--min-bytes must be a positive integer"))?,
+                );
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--root" | "--query" | "--min-bytes" | "--out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-report-pdf-smoke options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerReportPdfSmokeOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    if let Some(query) = query {
+        options.query = query;
+    }
+    if let Some(minimum_pdf_bytes) = minimum_pdf_bytes {
+        options.minimum_pdf_bytes = minimum_pdf_bytes;
+    }
+    options.output = output;
+    options.dry_run = dry_run;
+    options.keep_temporary_output = keep_temporary_output;
+    Ok(options)
 }
 
 fn parse_browser_smoke_arguments(arguments: &[OsString]) -> Result<BrowserSmokeOptions, CliError> {
@@ -360,7 +446,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -369,8 +455,8 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments, run,
-        BrowserSmokeOptions, ServeOptions,
+        parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
+        parse_viewer_report_pdf_smoke_arguments, run, BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -455,6 +541,36 @@ mod tests {
             OsString::from("--root"),
             OsString::from("a"),
             OsString::from("--port"),
+            OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_report_pdf_parser_accepts_complete_and_rejects_invalid_options() {
+        let pdf = parse_viewer_report_pdf_smoke_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--query"),
+            OsString::from("project=p&drawing=d&variant=v"),
+            OsString::from("--min-bytes"),
+            OsString::from("42"),
+            OsString::from("--out"),
+            OsString::from("report.pdf"),
+            OsString::from("--dry-run"),
+            OsString::from("--keep"),
+        ])
+        .expect("valid Viewer report PDF smoke arguments");
+        assert_eq!(pdf.root, PathBuf::from("a"));
+        assert_eq!(pdf.query, "project=p&drawing=d&variant=v");
+        assert_eq!(pdf.minimum_pdf_bytes, 42);
+        assert_eq!(pdf.output, Some(PathBuf::from("report.pdf")));
+        assert!(pdf.dry_run);
+        assert!(pdf.keep_temporary_output);
+        assert!(parse_viewer_report_pdf_smoke_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--min-bytes"),
             OsString::from("0"),
         ])
         .is_err());

@@ -8,11 +8,13 @@ use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_server_receipt_json, canonical_workbench_prototype_browser_smoke_receipt_json,
+    canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
+    canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
+    run_viewer_report_pdf_smoke, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, ViewerReportPdfSmokeOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -114,17 +116,22 @@ fn write_viewer_manifest_and_projection(root: &Path, manifest: &str) {
 
 #[cfg(unix)]
 fn write_fake_npm(root: &Path, script: &[u8]) -> PathBuf {
+    write_fake_executable(root, "npm", script)
+}
+
+#[cfg(unix)]
+fn write_fake_executable(root: &Path, name: &str, script: &[u8]) -> PathBuf {
     use std::os::unix::fs::PermissionsExt;
 
     let bin = root.join("fake-bin");
-    std::fs::create_dir(&bin).expect("create fake bin");
-    let npm = bin.join("npm");
-    std::fs::write(&npm, script).expect("write fake npm");
-    let mut permissions = std::fs::metadata(&npm)
-        .expect("fake npm metadata")
+    std::fs::create_dir_all(&bin).expect("create fake bin");
+    let executable = bin.join(name);
+    std::fs::write(&executable, script).expect("write fake executable");
+    let mut permissions = std::fs::metadata(&executable)
+        .expect("fake executable metadata")
         .permissions();
     permissions.set_mode(0o700);
-    std::fs::set_permissions(&npm, permissions).expect("make fake npm executable");
+    std::fs::set_permissions(&executable, permissions).expect("make fake executable runnable");
     bin
 }
 
@@ -576,6 +583,218 @@ fn workbench_v2_browser_smoke_checks_delivery_then_requires_pinned_runtime() {
     assert!(value["detail"]
         .as_str()
         .is_some_and(|detail| detail.contains("node_modules/@playwright/test/cli.js")));
+}
+
+#[test]
+fn viewer_report_pdf_smoke_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = ViewerReportPdfSmokeOptions::new(root);
+    options.dry_run = true;
+    options.output = Some(PathBuf::from("report.pdf"));
+    let first = run_viewer_report_pdf_smoke(&options).expect("Viewer report PDF smoke dry-run");
+    let second =
+        run_viewer_report_pdf_smoke(&options).expect("repeat Viewer report PDF smoke dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert!(first.frontend_contract_receipt_hash.starts_with("sha256:"));
+    assert!(first.exporter_sha256.starts_with("sha256:"));
+    assert_eq!(
+        first.query,
+        "project=midas33_release&drawing=midas33_optimized&variant=optimized"
+    );
+    assert_eq!(first.minimum_pdf_bytes, 12_000);
+    assert_eq!(first.requested_output.as_deref(), Some("report.pdf"));
+    assert_eq!(first.published_output_path, None);
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!(
+        first.logical_command_template,
+        vec![
+            "node".to_owned(),
+            "scripts/export-structure-viewer-report-pdf.mjs".to_owned(),
+            "--query".to_owned(),
+            "project=midas33_release&drawing=midas33_optimized&variant=optimized".to_owned(),
+            "--out".to_owned(),
+            "{pdf_output}".to_owned(),
+            "--html-out".to_owned(),
+            "{html_output}".to_owned(),
+        ]
+    );
+    assert_eq!(first.pdf_byte_length, None);
+    assert_eq!(first.pdf_sha256, None);
+    assert_eq!(first.html_byte_length, None);
+    assert_eq!(first.html_sha256, None);
+    assert_eq!(first.pdf_text_status, "not_executed");
+    assert_eq!(first.pdf_text_sha256, None);
+    assert!(first.node_runtime_required);
+    assert!(first.browser_runtime_required);
+    assert_eq!(first.rust_owned_listener_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_report_pdf_smoke_receipt_json(&first)
+        .expect("canonical Viewer report PDF smoke receipt");
+    let value: Value =
+        serde_json::from_str(&encoded).expect("Viewer report PDF smoke receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_viewer_report_pdf_smoke_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-smoke", "--root"])
+        .arg(&root)
+        .args([
+            "--query",
+            "project=p&drawing=d&variant=v",
+            "--min-bytes",
+            "17",
+            "--out",
+            "planned.pdf",
+            "--dry-run",
+        ])
+        .env_clear()
+        .output()
+        .expect("run Viewer report PDF smoke dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("Viewer report PDF smoke receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "viewer_report_pdf_smoke");
+    assert_eq!(value["execution_mode"], "dry_run");
+    assert_eq!(value["query"], "project=p&drawing=d&variant=v");
+    assert_eq!(value["minimum_pdf_bytes"], 17);
+    assert_eq!(value["requested_output"], "planned.pdf");
+    assert_eq!(value["direct_processes_spawned"], 0);
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_smoke_owns_processes_and_verifies_retained_artifacts() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        "#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$PWD/node-invocations.log\"\nprintf 'exporter chatter\\n'\nout=''\nhtml=''\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    --out) shift; out=$1 ;;\n    --html-out) shift; html=$1 ;;\n  esac\n  shift\ndone\nprintf '%%PDF-fake-report\\n' > \"$out\"\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'viewer screenshot marker' 'Engineer-in-loop Checklist' '상용 검토 가능' > \"$html\"\nexit 0\n".as_bytes(),
+    );
+    write_fake_executable(
+        &test.0,
+        "pdftotext",
+        b"#!/bin/sh\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'Engineer-in-loop Checklist'\nexit 0\n",
+    );
+    let output_path = test.0.join("verified-report.pdf");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-smoke", "--root"])
+        .arg(&test.0)
+        .args(["--min-bytes", "5", "--out"])
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer report PDF smoke");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value = serde_json::from_slice(bytes).expect("Viewer report PDF receipt JSON");
+    assert_eq!(receipt["execution_mode"], "execute");
+    assert_eq!(receipt["status"], "passed");
+    assert_eq!(receipt["output_disposition"], "operator_path_retained");
+    assert_eq!(
+        receipt["published_output_path"].as_str(),
+        output_path.to_str(),
+    );
+    assert!(receipt["pdf_byte_length"]
+        .as_u64()
+        .is_some_and(|length| length >= 5));
+    assert!(receipt["pdf_sha256"].is_string());
+    assert!(receipt["html_sha256"].is_string());
+    assert_eq!(receipt["pdf_text_status"], "verified");
+    assert!(receipt["pdf_text_sha256"].is_string());
+    assert_eq!(receipt["direct_processes_spawned"], 2);
+    assert_eq!(receipt["successful_exit_codes"], serde_json::json!([0, 0]));
+    assert!(output_path.is_file());
+    assert!(PathBuf::from(format!("{}.html", output_path.display())).is_file());
+    assert!(std::fs::read_to_string(test.0.join("node-invocations.log"))
+        .expect("read Node invocation")
+        .contains("scripts/export-structure-viewer-report-pdf.mjs"));
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_smoke_removes_partial_explicit_outputs_on_failure() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf 'partial' > \"$out\"\nexit 23\n",
+    );
+    let output_path = test.0.join("failed-report.pdf");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-smoke", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute failing Viewer report PDF smoke");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF error JSON");
+    assert_eq!(error["code"], "viewer_report_pdf_smoke_export_failed");
+    assert!(!output_path.exists());
+    assert!(!PathBuf::from(format!("{}.html", output_path.display())).exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_smoke_rejects_exporter_mutation_and_removes_outputs() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        "#!/bin/sh\nprintf ' ' >> scripts/export-structure-viewer-report-pdf.mjs\nout=''\nhtml=''\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    --out) shift; out=$1 ;;\n    --html-out) shift; html=$1 ;;\n  esac\n  shift\ndone\nprintf '%%PDF-fake-report\\n' > \"$out\"\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'viewer screenshot marker' 'Engineer-in-loop Checklist' '상용 검토 가능' > \"$html\"\nexit 0\n".as_bytes(),
+    );
+    let output_path = test.0.join("mutated-report.pdf");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-smoke", "--root"])
+        .arg(&test.0)
+        .args(["--min-bytes", "5", "--out"])
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer report PDF smoke");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF mutation error JSON");
+    assert_eq!(error["code"], "viewer_report_pdf_smoke_contract_changed");
+    assert!(!output_path.exists());
+    assert!(!PathBuf::from(format!("{}.html", output_path.display())).exists());
 }
 
 #[test]

@@ -27,7 +27,6 @@
     "scripts/verify-structure-viewer-multi-selection-hud.mjs",
     "scripts/verify-workstation-delivery-viewer-smoke.mjs",
     "scripts/export-structure-viewer-report-pdf.mjs",
-    "scripts/verify-structure-viewer-report-pdf.mjs",
     "scripts/measure-structure-viewer-performance.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
     "src/structure-viewer/index.html",
@@ -67,6 +66,7 @@
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
+    "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
     "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
@@ -86,7 +86,7 @@
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
-    "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
+    "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-prototype-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .",
@@ -281,6 +281,28 @@
     ],
     "external_network_access_accounting": "not_instrumented_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates the frozen package/lock/source Viewer browser-smoke inputs and either plans or owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI and specification. Live execution hashes the installed Playwright launcher script; dry-run has no installed-runtime hash, binds no listener, and spawns no process. Node executable identity, Playwright transitive runtime bytes, Chromium, the JavaScript Viewer, browser page requests, rendered behavior, clean-machine execution, and native UI parity remain outside Rust authority; live evidence requires a host that permits loopback sockets and has the pinned browser runtime installed."
+  },
+  "viewer_report_pdf_smoke_contract": {
+    "schema_version": "structural-native-viewer-report-pdf-smoke-contract.v1",
+    "node_launcher": "node",
+    "exporter_path": "scripts/export-structure-viewer-report-pdf.mjs",
+    "default_query": "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "default_minimum_bytes": 12000,
+    "required_html_snippets": [
+      "Drawing Review",
+      "Before / After Member Comparison",
+      "viewer screenshot marker",
+      "Engineer-in-loop Checklist",
+      "상용 검토 가능"
+    ],
+    "optional_pdf_text_launcher": "pdftotext",
+    "required_pdf_text_snippets": [
+      "Drawing Review",
+      "Before / After Member Comparison",
+      "Engineer-in-loop Checklist"
+    ],
+    "external_network_access_accounting": "not_instrumented_exporter_loopback_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen frontend and retained Node exporter, owns the exporter child process and temporary/output lifecycle, rejects package/lock/exporter mutation, and verifies bounded regular non-symlink PDF and HTML artifacts, the PDF header and minimum size, five HTML markers, plus three PDF text markers when the optional pdftotext executable is installed. Dry-run creates no output and spawns no process. The exporter itself still owns one internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, rendering, and PDF generation; Node and browser runtime identity, pdftotext availability, clean-machine execution, engineering validity, native UI parity, and C6 removal remain outside Rust authority."
   },
   "viewer_server_contract": {
     "contract": "structural-native-viewer-server-contract.v1",
