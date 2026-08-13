@@ -25,18 +25,24 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/evidence`. It rejects mixed commits, duplicate JSON
   keys, symlinks, oversized input and sensitive-data signals, copies exact source bytes, requires an
   explicit timestamp, and atomically publishes only to a new output directory.
+- `structural-catalog check/build`: a Rust-native benchmark-catalog builder driven by the
+  language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
+  and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
+  never fetches or executes a catalog string.
 
 This closes bounded results inspection, review/export, and catalog and copied-evidence browsing for
-the current native product. The canonical benchmark JSON now lives under `native/catalog`; the
-legacy React browser consumes that native-owned file. The evidence-bundle generator and its
-contract tests are Rust-native; the legacy npm command is only a wrapper. It does not provide a
+the current native product. The canonical benchmark JSON and its Rust-native benchmark-catalog
+builder now live under `native/catalog`; the legacy React browser consumes that native-owned file.
+Both catalog and evidence-bundle generators and their contract tests are Rust-native; the legacy
+npm commands are wrappers only. It does not provide a
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
 
 ## Legacy authority still active
 
 `native/decommission/workbench-ui-transition-v1.json` freezes the current source and CI inventory.
-The product deployment authority and evidence-bundle generation authority have left React/Node,
+The product deployment, benchmark-catalog generation, and evidence-bundle generation authorities
+have left React/Node,
 but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
 verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node
 scripts, and their package manifest remain active verification or parity material. They are not a

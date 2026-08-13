@@ -1,0 +1,25 @@
+{
+  "schema_version": "structural-benchmark-catalog-source-map.v1",
+  "report_directory": "implementation/phase1/open_data/irregular/collected/reports",
+  "report_suffix": ".json",
+  "peer_specimen_directory": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens",
+  "peer_specimen_suffix": ".specimen_page.json",
+  "first_validation_targets": [
+    {
+      "kind": "exact_id",
+      "value": "luxinzheng_megatall_tcl_model1_local"
+    },
+    {
+      "kind": "id_prefix",
+      "value": "peer_spd_rc_column_rectangular"
+    },
+    {
+      "kind": "exact_id",
+      "value": "midas_multifamily_building_meb_local"
+    },
+    {
+      "kind": "source_format",
+      "value": "ifc"
+    }
+  ]
+}

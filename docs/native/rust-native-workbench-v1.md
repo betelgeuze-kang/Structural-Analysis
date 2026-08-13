@@ -88,6 +88,12 @@ one lowercase source commit across all strict JSON inputs, rejects sensitive-dat
 symlinks, preserves exact source bytes, refuses to replace an existing output, and emits a
 self-hashed deterministic build receipt. The npm command is a compatibility wrapper only.
 
+The separately packaged `structural-catalog` Rust binary likewise owns benchmark-catalog `check`
+and `build`. Its language-neutral source map freezes the two input directories and ordered
+first-target rules. It reads strict bounded metadata, reproduces the prior 26 case projections,
+never fetches a URL or executes an acquisition/runner string, preserves every unverified field,
+and emits a self-hashed deterministic build receipt. The legacy npm command is a wrapper only.
+
 The integration test clears the child environment, executes each stage in a new process, restores
 the pre-Run session after the atomic checkpoint publication to model a crash window, resumes, and
 then compares all 29 ModelIR-flow files against a second one-shot workflow byte for byte. The MGT

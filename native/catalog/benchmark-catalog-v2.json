@@ -2,7 +2,7 @@
   "schema_version": "benchmark-catalog.v2",
   "catalog_kind": "candidate",
   "generated_at": "2026-06-25T04:44:48.312Z",
-  "generated_by": "scripts/build-benchmark-catalog.mjs",
+  "generated_by": "structural-catalog",
   "disclaimer": "Shared language-neutral candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses, most truth classes, reference results, and runners are UNVERIFIED. A run command is only offered for cases with a registered runnerId. geometry_only cases must not be used for numerical-accuracy averaging.",
   "accuracy_exclusion_rule": "geometry_only data is used only for import / topology / rendering / GUI performance / model health, never in numerical-accuracy averages.",
   "lifecycle_states": [

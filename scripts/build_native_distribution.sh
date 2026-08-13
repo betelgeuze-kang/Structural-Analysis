@@ -136,13 +136,14 @@ cmake --install "$cmake_build" --prefix "$payload"
 if [[ "$linkage" == "shared" ]]; then
   STRUCTURAL_NATIVE_PREFIX="$payload" \
     cargo build --manifest-path native/Cargo.toml --release --locked \
-      -p structural-cli -p structural-evidence -p structural-workbench -p structural-distribution
+      -p structural-cli -p structural-catalog -p structural-evidence -p structural-workbench -p structural-distribution
 else
   env -u STRUCTURAL_NATIVE_PREFIX \
     cargo build --manifest-path native/Cargo.toml --release --locked \
-      -p structural-cli -p structural-evidence -p structural-workbench -p structural-distribution
+      -p structural-cli -p structural-catalog -p structural-evidence -p structural-workbench -p structural-distribution
 fi
 cmake -E copy native/target/release/structural-cli "$payload/bin/structural-cli"
+cmake -E copy native/target/release/structural-catalog "$payload/bin/structural-catalog"
 cmake -E copy native/target/release/structural-evidence "$payload/bin/structural-evidence"
 cmake -E copy native/target/release/structural-workbench "$payload/bin/structural-workbench"
 cmake -E copy native/target/release/structural-installer "$payload/bin/structural-installer"

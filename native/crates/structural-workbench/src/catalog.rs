@@ -669,7 +669,7 @@ mod tests {
         assert_eq!(parsed.catalog.cases.len(), 26);
         assert_eq!(
             sha256_identity(EMBEDDED_CATALOG),
-            "sha256:58601994beeabc8dfec557a0ae12ea483c0390685af9257179abfdaad0d990da"
+            "sha256:235a463ccd9508440b8cba9e7e793396b8635b0a761cfdb645e120a756d60736"
         );
     }
 

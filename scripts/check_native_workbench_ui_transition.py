@@ -17,11 +17,15 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
+    Path("native/crates/structural-catalog/src/lib.rs"),
+    Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-evidence/src/lib.rs"),
     Path("native/crates/structural-evidence/tests/evidence_bundle_product.rs"),
     Path("native/catalog/benchmark-catalog-v2.json"),
+    Path("native/catalog/benchmark-catalog-sources-v1.json"),
     Path("native/evidence/workbench-evidence-sources-v1.json"),
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
+    Path("docs/native/benchmark-catalog-v1.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
@@ -151,6 +155,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-evidence build",
     ]:
         blockers.append("workbench_ui_native_evidence_bundle_flow_invalid")
+    if native.get("benchmark_catalog_flow") != [
+        "structural-catalog check",
+        "structural-catalog build",
+    ]:
+        blockers.append("workbench_ui_native_benchmark_catalog_flow_invalid")
     for field in (
         "runtime_python_required",
         "runtime_node_required",
@@ -229,6 +238,17 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         not in scripts["build:evidence-bundle"]
     ):
         blockers.append("workbench_ui_evidence_builder_authority_invalid")
+    if not isinstance(scripts, dict) or not {
+        "build:benchmark-catalog",
+        "verify:benchmark-catalog-contract",
+    }.issubset(scripts):
+        blockers.append("workbench_ui_catalog_script_inventory_invalid")
+    elif not isinstance(scripts["build:benchmark-catalog"], str) or (
+        "structural-catalog" not in scripts["build:benchmark-catalog"]
+        and "build_native_benchmark_catalog.sh"
+        not in scripts["build:benchmark-catalog"]
+    ):
+        blockers.append("workbench_ui_catalog_builder_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -282,6 +302,23 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    catalog_builder = _text(
+        root, Path("native/crates/structural-catalog/src/lib.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-catalog/src/lib.rs"),
+        catalog_builder,
+        (
+            "structural-native-benchmark-catalog-build-receipt.v1",
+            "pub fn check_benchmark_catalog",
+            "pub fn build_benchmark_catalog",
+            "catalog_duplicate_case_id",
+            "catalog_source_checksum_invalid",
+            "commands_executed",
+            "network_access_count",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -294,6 +331,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "seven active workflows",
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
+            "Rust-native benchmark-catalog builder",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),

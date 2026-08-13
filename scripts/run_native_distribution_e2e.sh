@@ -77,7 +77,7 @@ mkdir "$empty_path"
 "$installer" bundle-verify --bundle "$bundle" > "$e2e_root/bundle-verify.json"
 "$installer" install --bundle "$bundle" --root "$install_root" > "$e2e_root/install.json"
 active="$install_root/releases/$release_id/payload"
-for executable in structural-cli structural-evidence structural-installer structural-workbench; do
+for executable in structural-cli structural-catalog structural-evidence structural-installer structural-workbench; do
   test -x "$active/bin/$executable"
   env -i PATH="$empty_path" "$active/bin/$executable" --version > "$e2e_root/$executable-version.json"
 done
@@ -174,6 +174,20 @@ exercise_operator_surface() {
 exercise_operator_surface workbench "$direct"
 exercise_operator_surface mgt-workbench "$mgt_direct"
 
+catalog_source="$repository_root/native/catalog/benchmark-catalog-v2.json"
+env -i PATH="$empty_path" "$active/bin/structural-catalog" check \
+  --root "$repository_root" --catalog "$catalog_source" \
+  > "$e2e_root/catalog-builder-check.json"
+grep -Fq '"schema_version":"structural-native-benchmark-catalog-build-receipt.v1"' \
+  "$e2e_root/catalog-builder-check.json"
+grep -Fq '"action":"check"' "$e2e_root/catalog-builder-check.json"
+generated_catalog="$e2e_root/generated-benchmark-catalog.json"
+env -i PATH="$empty_path" "$active/bin/structural-catalog" build \
+  --root "$repository_root" --out "$generated_catalog" \
+  --generated-at 2026-08-13T00:00:00Z > "$e2e_root/catalog-builder-build.json"
+grep -Fq '"action":"build"' "$e2e_root/catalog-builder-build.json"
+test -f "$generated_catalog"
+
 evidence_sources="$repository_root/native/tests/fixtures/evidence_builder_sources"
 env -i PATH="$empty_path" "$active/bin/structural-evidence" check \
   --root "$evidence_sources" > "$e2e_root/evidence-builder-check.json"
@@ -241,12 +255,15 @@ mgt_workbench_review_hash="$(sha256sum "$mgt_direct/07-review/review.json" | awk
 mgt_workbench_export_hash="$(sha256sum "$e2e_root/mgt-workbench-export.json" | awk '{print $1}')"
 workbench_catalog_hash="$(sha256sum "$e2e_root/workbench-catalog.json" | awk '{print $1}')"
 workbench_evidence_hash="$(sha256sum "$e2e_root/workbench-evidence.json" | awk '{print $1}')"
+catalog_builder_check_hash="$(sha256sum "$e2e_root/catalog-builder-check.json" | awk '{print $1}')"
+catalog_builder_build_hash="$(sha256sum "$e2e_root/catalog-builder-build.json" | awk '{print $1}')"
+catalog_builder_output_hash="$(sha256sum "$generated_catalog" | awk '{print $1}')"
 evidence_builder_check_hash="$(sha256sum "$e2e_root/evidence-builder-check.json" | awk '{print $1}')"
 evidence_builder_build_hash="$(sha256sum "$e2e_root/evidence-builder-build.json" | awk '{print $1}')"
 evidence_builder_manifest_hash="$(sha256sum "$evidence_bundle/manifest.json" | awk '{print $1}')"
 installed_backend_hash="$(sha256sum "$e2e_root/installed-backend-receipt.json" | awk '{print $1}')"
 temporary_receipt="$e2e_root/distribution-receipt.json"
-printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v5\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
+printf '%s\n' "{\"schema_version\":\"structural-native-distribution-e2e.v6\",\"backend_profile\":\"cpu_only\",\"linkage\":\"$linkage\",\"release_id\":\"$release_id\",\"source_sha256\":\"$source_sha256\",\"bundle_manifest_sha256\":\"sha256:$manifest_hash\",\"installed_backend_receipt_sha256\":\"sha256:$installed_backend_hash\",\"c2_receipt_sha256\":null,\"approved_device_runner\":false,\"single_product_abi\":true,\"python_lookup_count\":0,\"node_lookup_count\":0,\"install_passed\":true,\"update_passed\":true,\"rollback_passed\":true,\"package_consumer_passed\":true,\"workbench_restart_passed\":true,\"workbench_direct_parity_passed\":true,\"mgt_workbench_restart_passed\":true,\"mgt_workbench_direct_parity_passed\":true,\"workbench_operator_surface_passed\":true,\"workbench_review_decision\":\"review\",\"workbench_review_sha256\":\"sha256:$workbench_review_hash\",\"workbench_export_sha256\":\"sha256:$workbench_export_hash\",\"mgt_workbench_operator_surface_passed\":true,\"mgt_workbench_review_decision\":\"review\",\"mgt_workbench_review_sha256\":\"sha256:$mgt_workbench_review_hash\",\"mgt_workbench_export_sha256\":\"sha256:$mgt_workbench_export_hash\",\"workbench_catalog_surface_passed\":true,\"workbench_catalog_sha256\":\"sha256:$workbench_catalog_hash\",\"workbench_evidence_surface_passed\":true,\"workbench_evidence_sha256\":\"sha256:$workbench_evidence_hash\",\"catalog_builder_check_passed\":true,\"catalog_builder_check_sha256\":\"sha256:$catalog_builder_check_hash\",\"catalog_builder_build_passed\":true,\"catalog_builder_build_sha256\":\"sha256:$catalog_builder_build_hash\",\"catalog_builder_output_sha256\":\"sha256:$catalog_builder_output_hash\",\"evidence_builder_check_passed\":true,\"evidence_builder_check_sha256\":\"sha256:$evidence_builder_check_hash\",\"evidence_builder_build_passed\":true,\"evidence_builder_build_sha256\":\"sha256:$evidence_builder_build_hash\",\"evidence_builder_manifest_sha256\":\"sha256:$evidence_builder_manifest_hash\",\"mgt_source_sha256\":\"sha256:$mgt_source_hash\",\"mgt_import_health_sha256\":\"sha256:$mgt_health_hash\",\"result_ir_sha256\":\"sha256:$result_hash\",\"report_pdf_sha256\":\"sha256:$report_hash\",\"mgt_result_ir_sha256\":\"sha256:$mgt_result_hash\",\"mgt_report_pdf_sha256\":\"sha256:$mgt_report_hash\",\"fallback_count\":0,\"authority\":\"hosted_cpu_c5\"}" > "$temporary_receipt"
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
 cp "$e2e_root/installed-backend-receipt.json" "$backend_output_stage"

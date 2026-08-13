@@ -71,6 +71,14 @@ V5_EVIDENCE_BUILDER_KEYS = {
     "evidence_builder_manifest_sha256",
 }
 V5_EXPECTED_KEYS = V4_EXPECTED_KEYS | V5_EVIDENCE_BUILDER_KEYS
+V6_CATALOG_BUILDER_KEYS = {
+    "catalog_builder_check_passed",
+    "catalog_builder_check_sha256",
+    "catalog_builder_build_passed",
+    "catalog_builder_build_sha256",
+    "catalog_builder_output_sha256",
+}
+V6_EXPECTED_KEYS = V5_EXPECTED_KEYS | V6_CATALOG_BUILDER_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -117,6 +125,7 @@ def validate(
         "structural-native-distribution-e2e.v3": V3_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v4": V4_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v5": V5_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v6": V6_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -146,6 +155,7 @@ def validate(
         "structural-native-distribution-e2e.v3",
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
+        "structural-native-distribution-e2e.v6",
     }:
         for name in (
             "mgt_source_sha256",
@@ -171,6 +181,7 @@ def validate(
         "structural-native-distribution-e2e.v3",
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
+        "structural-native-distribution-e2e.v6",
     }:
         for name in (
             "mgt_workbench_restart_passed",
@@ -182,6 +193,7 @@ def validate(
         "structural-native-distribution-e2e.v3",
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
+        "structural-native-distribution-e2e.v6",
     }:
         for name in (
             "workbench_operator_surface_passed",
@@ -203,6 +215,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
+        "structural-native-distribution-e2e.v6",
     }:
         for name in (
             "workbench_catalog_surface_passed",
@@ -213,7 +226,10 @@ def validate(
         for name in ("workbench_catalog_sha256", "workbench_evidence_sha256"):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if schema_version == "structural-native-distribution-e2e.v5":
+    if schema_version in {
+        "structural-native-distribution-e2e.v5",
+        "structural-native-distribution-e2e.v6",
+    }:
         for name in (
             "evidence_builder_check_passed",
             "evidence_builder_build_passed",
@@ -224,6 +240,20 @@ def validate(
             "evidence_builder_check_sha256",
             "evidence_builder_build_sha256",
             "evidence_builder_manifest_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if schema_version == "structural-native-distribution-e2e.v6":
+        for name in (
+            "catalog_builder_check_passed",
+            "catalog_builder_build_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "catalog_builder_check_sha256",
+            "catalog_builder_build_sha256",
+            "catalog_builder_output_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

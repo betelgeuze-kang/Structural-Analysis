@@ -240,6 +240,20 @@ def test_native_evidence_bundle_capability_is_bounded_c5() -> None:
     assert "C6 remain open" in evidence["claim"]
 
 
+def test_native_benchmark_catalog_capability_is_bounded_c5() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_benchmark_catalog") is True
+    catalog = payload["capabilities"]["native_benchmark_catalog"]
+    assert catalog["cutover_gate"] == "C5"
+    assert catalog["owner"] == "structural-catalog"
+    assert "former Node directory and first-target rules" in catalog["claim"]
+    assert "21 tracked open-data reports and five PEER" in catalog["claim"]
+    assert "reproduces all 26 prior case projections exactly" in catalog["claim"]
+    assert "network and command execution counts 0" in catalog["claim"]
+    assert "Python/Node lookup 0" in catalog["claim"]
+    assert "C6 remain open" in catalog["claim"]
+
+
 def test_native_distribution_capability_is_bounded_c5():
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_distribution") is True
@@ -249,7 +263,8 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "static/shared" in distribution["claim"]
     assert "install/update/rollback" in distribution["claim"]
     assert "Python/Node lookup 0" in distribution["claim"]
-    assert "append-only v5 receipt" in distribution["claim"]
+    assert "append-only v6 receipt" in distribution["claim"]
+    assert "structural-catalog" in distribution["claim"]
     assert "structural-evidence" in distribution["claim"]
     assert "explicit non-promoting review" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]

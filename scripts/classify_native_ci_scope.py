@@ -39,12 +39,15 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         ".github/workflows/native-pr-fast.yml",
         ".github/workflows/native-nightly-quality.yml",
         "scripts/build_native_distribution.sh",
+        "scripts/build_native_benchmark_catalog.sh",
+        "scripts/build_native_workbench_evidence_bundle.sh",
         "scripts/build_onprem_deployment_packaging_manifest.py",
         "scripts/check_native_ci_contract.py",
         "scripts/check_native_automation_cutover.py",
         "scripts/check_native_capabilities.py",
         "scripts/check_native_checkpoint_restart.py",
         "scripts/check_native_deployment_cutover.py",
+        "scripts/check_native_distribution_receipt.py",
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
         "scripts/check_native_external_comparison.py",
@@ -70,6 +73,8 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_structural_runtime_ffi_r4.py",
         "scripts/classify_native_ci_scope.py",
         "scripts/run_native_distribution_e2e.sh",
+        "scripts/run_native_rocm_distribution_e2e.sh",
+        "scripts/run_native_rootfs_isolation_e2e.sh",
         "scripts/dispatch_release_publish_workflow.py",
         "scripts/publish_github_release_assets.py",
         "tests/test_native_ci_scope.py",
@@ -79,6 +84,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_automation_cutover.py",
         "tests/test_native_dependency_license.py",
         "tests/test_native_deployment_cutover.py",
+        "tests/test_native_distribution_contract.py",
         "tests/test_native_external_comparison_contract.py",
         "tests/test_native_generalized_eigen_contract.py",
         "tests/test_native_generalized_eigen_hip_contract.py",
@@ -116,6 +122,11 @@ NATIVE_DEPLOYMENT_PREFIXES = (
     "deployment/legacy-python-onprem/",
     "deployment/legacy-react-pages/",
     "deployment/legacy-python-release-publication/",
+)
+
+NATIVE_CATALOG_SOURCE_PREFIXES = (
+    "implementation/phase1/open_data/irregular/collected/reports/",
+    "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/",
 )
 
 LEGACY_WORKBENCH_UI_PREFIXES = (
@@ -243,6 +254,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
         or path in LEGACY_REPLAY_COMPAT_PATHS
         or _starts_with_any(path, NATIVE_DEPLOYMENT_PREFIXES)
+        or _starts_with_any(path, NATIVE_CATALOG_SOURCE_PREFIXES)
         or _starts_with_any(path, LEGACY_WORKBENCH_UI_PREFIXES)
         or path in LEGACY_WORKBENCH_UI_PATHS
         or (path.startswith("scripts/") and path.endswith((".js", ".mjs")))

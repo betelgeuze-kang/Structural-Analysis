@@ -73,6 +73,21 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_catalog_metadata_routes_through_native_product_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "implementation/phase1/open_data/irregular/collected/reports/case.json",
+            "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/case.specimen_page.json",
+            "scripts/build_native_benchmark_catalog.sh",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["protected_evidence"] is False
+
+
 def test_legacy_workbench_ui_changes_route_through_native_transition_gate() -> None:
     payload = scope.classify_paths(
         [

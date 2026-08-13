@@ -6,6 +6,7 @@ members = [
   "crates/structural-ffi",
   "crates/structural-runtime",
   "crates/structural-report",
+  "crates/structural-catalog",
   "crates/structural-evidence",
   "crates/structural-distribution",
   "crates/structural-cli",

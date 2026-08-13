@@ -27,5 +27,6 @@ names fail closed. Outputs are self-hashed
 
 The distribution E2E runs the installed binary with an empty PATH against synthetic
 language-neutral sources, builds a bundle, browses it with `structural-workbench evidence`, and
-binds all three builder receipt/manifest identities into the append-only v5 distribution receipt.
+binds all three builder receipt/manifest identities beginning with the append-only v5 distribution
+receipt; v6 preserves them and adds native catalog-builder authority.
 Actual protected productization evidence is not read by unit or hosted distribution tests.

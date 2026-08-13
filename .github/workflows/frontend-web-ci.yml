@@ -16,10 +16,15 @@ on:
       - "tests/frontend/**"
       - "scripts/*.mjs"
       - "scripts/build_native_workbench_evidence_bundle.sh"
+      - "scripts/build_native_benchmark_catalog.sh"
       - "native/Cargo.toml"
       - "native/Cargo.lock"
+      - "native/crates/structural-catalog/**"
       - "native/crates/structural-evidence/**"
+      - "native/catalog/**"
       - "native/evidence/**"
+      - "implementation/phase1/open_data/irregular/collected/reports/**"
+      - "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/**"
       - "package.json"
       - "package-lock.json"
       - "tsconfig.json"
@@ -35,10 +40,15 @@ on:
       - "tests/frontend/**"
       - "scripts/*.mjs"
       - "scripts/build_native_workbench_evidence_bundle.sh"
+      - "scripts/build_native_benchmark_catalog.sh"
       - "native/Cargo.toml"
       - "native/Cargo.lock"
+      - "native/crates/structural-catalog/**"
       - "native/crates/structural-evidence/**"
+      - "native/catalog/**"
       - "native/evidence/**"
+      - "implementation/phase1/open_data/irregular/collected/reports/**"
+      - "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/**"
       - "package.json"
       - "package-lock.json"
       - "tsconfig.json"
@@ -72,6 +82,9 @@ jobs:
 
       - name: Dependency audit
         run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
+
+      - name: Verify native benchmark catalog
+        run: npm run build:benchmark-catalog -- --check
 
       - name: Build evidence bundle (read-only)
         run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."

@@ -28,11 +28,15 @@
       "structural-evidence check",
       "structural-evidence build"
     ],
+    "benchmark_catalog_flow": [
+      "structural-catalog check",
+      "structural-catalog build"
+    ],
     "runtime_python_required": false,
     "runtime_node_required": false,
     "runtime_browser_required": false,
     "human_review_inferred": false,
-    "profile_scope": "exact_fixed_guided_modelir_or_normalized_mgt_ndtha_plus_native_evidence_build_and_read_only_benchmark_and_copied_evidence_browsing"
+    "profile_scope": "exact_fixed_guided_modelir_or_normalized_mgt_ndtha_plus_native_catalog_and_evidence_build_and_read_only_browsing"
   },
   "legacy_surface": {
     "product_entrypoint": "src/main.tsx",
@@ -47,7 +51,7 @@
       "src_ts_tsx_files": 43,
       "src_js_mjs_files": 82,
       "frontend_ts_tsx_test_files": 9,
-      "node_js_mjs_script_files": 24,
+      "node_js_mjs_script_files": 23,
       "js_mjs_test_files": 2
     },
     "active_node_workflows": [
@@ -113,5 +117,5 @@
     "native_result_error_checksum_parity_complete": false
   },
   "c6_complete": false,
-  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, evidence-bundle build, benchmark-catalog and copied-evidence browsing surfaces while keeping every active React/TypeScript/JavaScript and Node verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript and Node verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

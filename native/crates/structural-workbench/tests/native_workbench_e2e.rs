@@ -249,7 +249,7 @@ fn native_catalog_browse_and_exact_case_view_are_deterministic_and_non_promoting
     assert_eq!(view["source_schema_version"], "benchmark-catalog.v2");
     assert_eq!(
         view["source_content_hash"],
-        "sha256:58601994beeabc8dfec557a0ae12ea483c0390685af9257179abfdaad0d990da"
+        "sha256:235a463ccd9508440b8cba9e7e793396b8635b0a761cfdb645e120a756d60736"
     );
     assert_eq!(view["summary"]["total_case_count"], 26);
     assert_eq!(view["summary"]["matched_case_count"], 4);

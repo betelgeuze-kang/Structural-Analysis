@@ -167,6 +167,21 @@ def valid_v5_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v6_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v5_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v6",
+            "catalog_builder_check_passed": True,
+            "catalog_builder_check_sha256": "sha256:" + "e" * 64,
+            "catalog_builder_build_passed": True,
+            "catalog_builder_build_sha256": "sha256:" + "f" * 64,
+            "catalog_builder_output_sha256": "sha256:" + "0" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -239,6 +254,24 @@ def test_distribution_receipt_rejects_missing_v5_builder_authority(tmp_path: Pat
     assert any("evidence_builder_build_passed" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_native_catalog_builder_v6_contract(tmp_path: Path):
+    receipt, manifest = valid_v6_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_missing_v6_catalog_authority(tmp_path: Path):
+    receipt, manifest = valid_v6_contract()
+    receipt["catalog_builder_check_passed"] = False
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("catalog_builder_check_passed" in error for error in validation["errors"])
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -272,6 +305,9 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
 
 def test_build_and_e2e_scripts_enforce_split_native_packages():
     build = BUILD.read_text(encoding="utf-8")
+    catalog_wrapper = (ROOT / "scripts/build_native_benchmark_catalog.sh").read_text(
+        encoding="utf-8"
+    )
     evidence_wrapper = (
         ROOT / "scripts/build_native_workbench_evidence_bundle.sh"
     ).read_text(encoding="utf-8")
@@ -286,12 +322,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert '"-DCMAKE_INSTALL_RPATH=$install_rpath"' in build
     assert "STRUCTURAL_NATIVE_PREFIX" in build
     assert "cargo build --manifest-path native/Cargo.toml --release --locked" in build
+    assert "-p structural-catalog" in build
+    assert 'structural-catalog "$payload/bin/structural-catalog"' in build
     assert "-p structural-evidence" in build
     assert 'structural-evidence "$payload/bin/structural-evidence"' in build
     assert '"$1" == "--check"' in evidence_wrapper
     assert "structural-evidence -- check --root" in evidence_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in evidence_wrapper
     assert "structural-evidence -- build" in evidence_wrapper
+    assert '"$1" == "--check"' in catalog_wrapper
+    assert "structural-catalog -- check --root" in catalog_wrapper
+    assert 'if [[ "$#" -ne 0 ]]' in catalog_wrapper
+    assert "structural-catalog -- build" in catalog_wrapper
     assert "PATH=\"$empty_path\"" in e2e
     assert "diff -r \"$restarted\" \"$direct\"" in e2e
     assert "workflow-mgt" in e2e
@@ -299,7 +341,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v5" in e2e
+    assert "structural-native-distribution-e2e.v6" in e2e
+    assert "structural-catalog" in e2e
+    assert "catalog_builder_build_passed" in e2e
     assert "structural-evidence" in e2e
     assert "evidence_builder_build_passed" in e2e
     assert "structural-native-benchmark-catalog-view.v1" in e2e
@@ -319,7 +363,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert "exercise_operator_surface" in rocm_e2e
     assert "workbench_operator_surface_passed" in rocm_e2e
-    assert "structural-native-distribution-e2e.v5" in rocm_e2e
+    assert "structural-native-distribution-e2e.v6" in rocm_e2e
+    assert "structural-catalog" in rocm_e2e
+    assert "catalog_builder_build_passed" in rocm_e2e
     assert "structural-evidence" in rocm_e2e
     assert "evidence_builder_build_passed" in rocm_e2e
     assert "workbench_catalog_surface_passed" in rocm_e2e

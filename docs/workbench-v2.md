@@ -172,6 +172,8 @@ npm ci
 npm run dev                      # local preview
 npm run build                    # type-check + both production entries + delivery contract
 npm run verify:workbench-viewer-delivery
+npm run build:benchmark-catalog -- --check # native metadata/catalog parity
+npm run verify:benchmark-catalog-contract  # offline native catalog contract
 npm run build:evidence-bundle -- --check   # consistency check (no write)
 npm run verify:evidence-bundle-contract    # offline gate contract test
 ```
