@@ -42,6 +42,15 @@ fn v1_13_safe_wrapper_preserves_identity_and_canonical_csr() {
         0
     );
     let model = api.create_model_ir(&source).expect("native model");
+    let sizes = model.linear_assembly_sizes().expect("checked exact sizes");
+    assert_eq!(sizes.global_dof_count, 12);
+    assert_eq!(sizes.active_dof_count, 6);
+    assert_eq!(sizes.row_offset_count, 7);
+    assert_eq!(sizes.structural_entry_count, 36);
+    assert_eq!(sizes.recovery_record_count, 1);
+    assert_eq!(sizes.recovery_offset_count, 2);
+    assert_eq!(sizes.recovery_value_count, 12);
+    assert_eq!(sizes.model_identity_length, 71);
     let first = model
         .assemble_linear_reference(&axial_request())
         .expect("bounded assembly");

@@ -5,6 +5,7 @@
 mod checkpoint;
 mod job;
 mod model_checkpoint;
+mod model_linear_checkpoint;
 mod sparse_checkpoint;
 mod spectral_checkpoint;
 mod static_checkpoint;
@@ -19,6 +20,9 @@ pub use job::{
 pub use model_checkpoint::{
     ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
 };
+pub use model_linear_checkpoint::{
+    ModelIrLinearCheckpointBindingsV1, ModelIrLinearCheckpointReceiptV1, ModelIrLinearCheckpointV1,
+};
 pub use sparse_checkpoint::{SparseLinearCheckpointReceiptV1, SparseLinearCheckpointV1};
 pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
 pub use static_checkpoint::{NonlinearStaticCheckpointReceiptV1, NonlinearStaticCheckpointV1};
@@ -26,6 +30,7 @@ use structural_contracts::legacy_runtime::{
     NdthaResponseV3, NdthaStoryInputsV3, NonlinearNdthaConfigV3,
 };
 use structural_contracts::model_ir::ModelIrV2Document;
+use structural_contracts::model_linear_product::MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS;
 use structural_contracts::product_ir::{
     average_step_iterations, build_nonlinear_ndtha_result_ir_v1, NativeAnalysisRequestDocumentV1,
     NonlinearNdthaResultIrDocumentV1, NonlinearNdthaResultSummaryV1,
@@ -34,7 +39,8 @@ use structural_contracts::product_ir::{
 use structural_contracts::sparse_product::{
     build_sparse_linear_result_ir_v1, sparse_linear_execution_hash_v1, sparse_linear_model_hash_v1,
     SparseLinearAnalysisRequestDocumentV1, SparseLinearAnalysisRequestV1, SparseLinearConfigV1,
-    SparseLinearResultIrDocumentV1, SparseLinearResultSummaryV1,
+    SparseLinearResultIrDocumentV1, SparseLinearResultSummaryV1, SPARSE_LINEAR_MAXIMUM_NONZEROS,
+    SPARSE_LINEAR_MAXIMUM_ORDER,
 };
 use structural_contracts::spectral_product::{
     build_dense_spectral_result_ir_v1, dense_spectral_execution_hash_v1,
@@ -50,7 +56,8 @@ use structural_contracts::static_product::{
 use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
-    DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrNdthaAdaptedProblem,
+    DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrLinearAssembly,
+    ModelIrLinearAssemblyRequest, ModelIrLinearAssemblySizes, ModelIrNdthaAdaptedProblem,
     ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
     ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
     NonlinearStaticExecutionStatus, NonlinearStaticRestartState, SparseCsrMatrix,
@@ -460,6 +467,51 @@ impl Runtime {
             .map_err(RuntimeError::from)
     }
 
+    /// Assemble the exact initial typed-ModelIR linear graph through ABI v1.13.
+    ///
+    /// C++ remains the sole owner of graph sizing, constraint reduction, element kernels,
+    /// deterministic scatter, loads, recovery layout, and model identities.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable runtime error for an unavailable v1.13 table, invalid model/profile,
+    /// selector failure, allocation failure, or any native output-contract violation.
+    pub fn assemble_model_ir_linear(
+        &self,
+        document: &ModelIrV2Document,
+        load_pattern_id: &str,
+    ) -> Result<ModelIrLinearAssembly, RuntimeError> {
+        let model = Api::load_model_ir_linear_assembly()
+            .map_err(RuntimeError::from)?
+            .create_model_ir(document)
+            .map_err(RuntimeError::from)?;
+        validate_model_ir_linear_product_sizes(model.linear_assembly_sizes()?)?;
+        model
+            .assemble_linear_zero_state(load_pattern_id)
+            .map_err(RuntimeError::from)
+    }
+
+    /// Assemble and recover one explicit typed-ModelIR linear state through ABI v1.13.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same stable runtime boundary as [`Self::assemble_model_ir_linear`], including
+    /// exact vector-size and constrained-DOF validation.
+    pub fn assemble_model_ir_linear_state(
+        &self,
+        document: &ModelIrV2Document,
+        request: &ModelIrLinearAssemblyRequest,
+    ) -> Result<ModelIrLinearAssembly, RuntimeError> {
+        let model = Api::load_model_ir_linear_assembly()
+            .map_err(RuntimeError::from)?
+            .create_model_ir(document)
+            .map_err(RuntimeError::from)?;
+        validate_model_ir_linear_product_sizes(model.linear_assembly_sizes()?)?;
+        model
+            .assemble_linear_reference(request)
+            .map_err(RuntimeError::from)
+    }
+
     /// Create a validated zero state for a bounded nonlinear NDTHA execution.
     ///
     /// # Errors
@@ -688,6 +740,23 @@ impl Runtime {
     }
 }
 
+fn validate_model_ir_linear_product_sizes(
+    sizes: ModelIrLinearAssemblySizes,
+) -> Result<(), RuntimeError> {
+    let bounded = sizes.active_dof_count <= SPARSE_LINEAR_MAXIMUM_ORDER as usize
+        && sizes.structural_entry_count <= SPARSE_LINEAR_MAXIMUM_NONZEROS
+        && sizes.recovery_record_count <= MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS;
+    if bounded {
+        Ok(())
+    } else {
+        Err(RuntimeError {
+            code: 1100,
+            message: "ModelIR linear graph exceeds the bounded sparse product allocation limits"
+                .to_owned(),
+        })
+    }
+}
+
 fn sparse_linear_problem(
     value: &SparseLinearAnalysisRequestV1,
 ) -> (SparseCsrMatrix, SparseLinearConfig) {
@@ -879,11 +948,52 @@ fn max_component_normalized(values: &[f64]) -> Result<Vec<f64>, RuntimeError> {
 
 #[cfg(test)]
 mod tests {
-    use super::Runtime;
+    use super::{
+        validate_model_ir_linear_product_sizes, ModelIrLinearAssemblySizes, Runtime,
+        MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS, SPARSE_LINEAR_MAXIMUM_NONZEROS,
+        SPARSE_LINEAR_MAXIMUM_ORDER,
+    };
 
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
         assert_eq!(runtime.native_capabilities(), 255);
+    }
+
+    #[test]
+    fn model_ir_linear_product_limits_apply_before_output_allocation() {
+        let maximum = ModelIrLinearAssemblySizes {
+            global_dof_count: 1_000_000,
+            active_dof_count: SPARSE_LINEAR_MAXIMUM_ORDER as usize,
+            row_offset_count: SPARSE_LINEAR_MAXIMUM_ORDER as usize + 1,
+            structural_entry_count: SPARSE_LINEAR_MAXIMUM_NONZEROS,
+            recovery_record_count: MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS,
+            recovery_offset_count: MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS + 1,
+            recovery_value_count: MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS * 12,
+            model_identity_length: 71,
+        };
+        assert_eq!(validate_model_ir_linear_product_sizes(maximum), Ok(()));
+
+        for oversized in [
+            ModelIrLinearAssemblySizes {
+                active_dof_count: maximum.active_dof_count + 1,
+                ..maximum
+            },
+            ModelIrLinearAssemblySizes {
+                structural_entry_count: maximum.structural_entry_count + 1,
+                ..maximum
+            },
+            ModelIrLinearAssemblySizes {
+                recovery_record_count: maximum.recovery_record_count + 1,
+                ..maximum
+            },
+        ] {
+            assert_eq!(
+                validate_model_ir_linear_product_sizes(oversized)
+                    .expect_err("oversized product graph fails")
+                    .code,
+                1100
+            );
+        }
     }
 }

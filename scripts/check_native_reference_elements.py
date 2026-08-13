@@ -222,7 +222,8 @@ def check_native_reference_elements(repo_root: Path = ROOT) -> dict[str, object]
         "claim_boundary": (
             "This is bounded CPU reference C1 evidence with an ABI/Rust C3 integration "
             "candidate. It does not close HIP C2, sequential C3 promotion, general "
-            "elements/assembly, product E2E, or C6."
+            "elements/assembly, broader product E2E, or C6; the bounded typed-ModelIR "
+            "linear C4/C5 composition is checked separately."
         ),
     }
 

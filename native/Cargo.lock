@@ -758,6 +758,7 @@ dependencies = [
  "libc",
  "serde",
  "serde_json",
+ "sha2",
  "structural-contracts",
  "structural-report",
  "structural-runtime",

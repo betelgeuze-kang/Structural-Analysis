@@ -61,9 +61,12 @@ implemented C3 integration candidate, not a promoted sequential C3 gate.
 The projection rejects non-linear material or formulation state, frame2d, shell, rigid offsets,
 end releases, member loads, nonzero prescribed constraints, self-weight, load combinations, time
 functions, construction stages, and declared unsupported features. It does not solve the assembled
-operator, compute reactions, reorder DOFs, propagate constitutive epochs, create a checkpoint,
-publish ResultIR, or claim sparse-performance or product authority.
+operator by itself, compute constrained reactions, reorder DOFs, or propagate constitutive epochs.
+The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
+to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,
+and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
+does not promote this numerical family past C1.
 
 Still open: those excluded formulations and load semantics, shell graph support, stateful
-trial/commit/rollback aggregation, authoritative sequential C2/C3 promotion, restart C4, product
-E2E C5, and C6 decommission.
+trial/commit/rollback aggregation, constrained reactions, authoritative sequential C2/C3
+promotion, durable job/service integration for this profile, and C6 decommission.

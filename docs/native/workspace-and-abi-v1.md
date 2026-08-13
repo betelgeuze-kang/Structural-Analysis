@@ -248,6 +248,13 @@ ModelIR identity를 독립적으로 다시 검증한다.
 있으면 `SA_ERR_STATE_CONFLICT`로 닫힌다. 이 경계는 현재 C3 integration candidate이며,
 전용 ROCm receipt의 C2가 열려 있으므로 순차 gate 상태는 C1을 유지한다.
 
+별도의 bounded CPU 조합은 이 v1.13 zero-state output을 v1.10 real-iteration PCG에
+전달한다. Rust `SAMLPC01` envelope은 ModelIR 3중 identity, analysis request,
+assembly receipt, generated sparse request와 완전한 inner `SAPCGC01` state를 결합하며,
+public `model-linear-run`/`model-linear-resume`은 C4 checkpoint와 C5 ResultIR/ReportIR,
+Markdown 및 terminal active-DOF/element recovery를 원자적으로 게시한다. 이는 별도
+implementation capability일 뿐 sequential C2/C3 권한을 우회하지 않는다.
+
 ### 5.6 Stable status taxonomy
 
 | Code | Symbol | 의미 |

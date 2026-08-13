@@ -152,6 +152,7 @@ def test_merge_oracle_gate_runs_all_native_solver_python_c1_matrices() -> None:
     assert "check_native_generalized_eigen.py" in workflow
     assert "check_native_generalized_eigen_product.py" in workflow
     assert "check_native_sparse_linear_product.py" in workflow
+    assert "check_native_model_ir_linear_product.py" in workflow
     assert "check_native_nonlinear_static_product.py" in workflow
     assert "structural_sparse_linear_abi_tests" in workflow
 

@@ -76,6 +76,11 @@ pub struct SparseLinearRunOutcomeV1 {
 
 impl SparseLinearRunOutcomeV1 {
     #[must_use]
+    pub const fn checkpoint(&self) -> &SparseLinearCheckpointV1 {
+        &self.checkpoint
+    }
+
+    #[must_use]
     pub fn checkpoint_bytes(&self) -> &[u8] {
         self.checkpoint.as_bytes()
     }
@@ -95,6 +100,11 @@ impl SparseLinearRunOutcomeV1 {
         self.result_ir
             .as_ref()
             .map(SparseLinearResultIrDocumentV1::canonical_json)
+    }
+
+    #[must_use]
+    pub const fn result_ir(&self) -> Option<&SparseLinearResultIrDocumentV1> {
+        self.result_ir.as_ref()
     }
 
     #[must_use]

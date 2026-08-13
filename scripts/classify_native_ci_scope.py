@@ -57,6 +57,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_generalized_eigen_product.py",
         "scripts/check_native_job_service_api.py",
         "scripts/check_native_mgt_import.py",
+        "scripts/check_native_model_ir_linear_product.py",
         "scripts/check_native_nonlinear_static_hip.py",
         "scripts/check_native_nonlinear_ndtha_hip.py",
         "scripts/check_native_pdf_report.py",
@@ -94,6 +95,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_job_service_api_contract.py",
         "tests/test_native_mgt_import_contract.py",
         "tests/test_native_mgt_import_health_python_parity.py",
+        "tests/test_native_model_ir_linear_product_contract.py",
         "tests/test_native_pdf_report_contract.py",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
         "tests/test_native_nonlinear_static_hip_contract.py",
@@ -319,6 +321,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         for path in native_paths
         if path == "native/capabilities.json"
         or "model_ir" in path
+        or "model_linear" in path.lower()
         or "modelir" in path.lower()
         or "mgt_import" in path.lower()
         or path.startswith("native/crates/structural-contracts/")

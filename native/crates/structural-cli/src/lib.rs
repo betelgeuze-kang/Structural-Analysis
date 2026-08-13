@@ -5,6 +5,7 @@
 mod comparison;
 mod job;
 mod mgt_product;
+mod model_linear_product;
 mod model_product;
 mod product;
 mod report;
@@ -27,6 +28,10 @@ pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandErr
 pub use mgt_product::{
     execute_native_mgt_import, publish_native_mgt_import, NativeMgtImportOutcomeV1,
     NativeMgtImportProductError,
+};
+pub use model_linear_product::{
+    execute_model_ir_linear_analysis, publish_model_ir_linear_analysis,
+    ModelIrLinearAnalysisOutcomeV1, ModelIrLinearProductError,
 };
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,

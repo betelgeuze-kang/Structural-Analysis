@@ -135,8 +135,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   and emits reduced tangent, mass, internal/external/equilibrium residual, JVP and per-element
   recovery. Its three-node mixed graph independently matches NumPy for all 43 structural entries.
   This is not general ModelIR assembly: nonzero constraints, offsets/releases, self-weight,
-  combinations/stages, shell/nonlinear formulations, reordering, stateful epoch propagation, Rust
-  FFI and product integration remain open. The same product-owned HIP candidate assembles a 38-DOF
+  combinations/stages, shell/nonlinear formulations, reordering and stateful epoch propagation
+  remain open. ABI v1.13 and safe Rust now provide a bounded C3 integration candidate. A separate
+  CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,
+  `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts and terminal
+  active-DOF/element recovery; direct and resumed 14-file terminal directories are byte-identical
+  without Python/Node lookup. Neither separate capability promotes D3 beyond sequential C1. The
+  same product-owned HIP candidate assembles a 38-DOF
   overlapping five-element graph without atomics in stable order and matches CPU with zero error
   while retaining element outputs on device; protected-runner C2 promotion remains open.
   Probe/replay and Python-managed HIPRTC paths are not product authority.
@@ -216,7 +221,8 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   request/model/real-state/execution identities, and public linear-run/linear-resume publish typed
   active/failure receipts or self-hashed ResultIR/ReportIR/Markdown artifacts. Direct and
   real-iteration resumed terminal directories are byte-identical with Python/Node lookup removed.
-  Arbitrary ModelIR sparse assembly, durable jobs, PDF projection, protected C2 and C6 remain open.
+  Arbitrary ModelIR sparse assembly beyond the separately bounded frame3d/truss3d composition,
+  durable jobs, PDF projection, protected C2 and C6 remain open.
 - A bounded dense symmetric generalized-eigen reference family is C1. C++20 owns modal
   `K phi = omega^2 M phi` and linear-buckling `K phi = lambda Kg phi` for at most 128 DOFs,
   including strict definiteness/semidefiniteness, rigid and infinite-mode filtering, stable

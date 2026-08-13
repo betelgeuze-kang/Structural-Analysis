@@ -62,10 +62,11 @@ constitutive state. The CSR result is a bounded serial reference projection of c
 local contributions and homogeneous constrained-DOF indices. The separate typed ModelIR
 composition accepts arbitrary topology only within its linear frame3d/truss3d, zero-offset,
 zero-release, direct-nodal-load subset. Neither path applies nonzero prescribed-displacement load
-corrections, reorders DOFs, propagates constitutive epochs, crosses the Rust FFI, or claims a sparse
-performance backend.
+corrections, reorders DOFs, propagates constitutive epochs, or claims a sparse performance backend.
+The typed path now crosses ABI v1.13 through safe Rust and a separately bounded C4/C5 CPU
+composition; the caller-supplied dense/CSR reference path itself remains outside product execution.
 
 Still open: protected-runner C2 promotion, broader formulation/material parity,
 element-state aggregation, general ModelIR graph assembly beyond the bounded linear subset,
-nonzero constraint handling, self-weight/combinations/stages, sparse resident execution, Rust FFI,
-checkpoint/restart, ResultIR recovery, product E2E and C6 decommission.
+nonzero constraint handling, self-weight/combinations/stages, sparse resident execution, broader
+checkpoint/restart and product E2E, and C6 decommission.

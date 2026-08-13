@@ -110,6 +110,19 @@ pub struct ModelIrLinearAssemblyRequest {
     pub direction: Vec<f64>,
 }
 
+/// Exact immutable output extents returned before any linear assembly buffer allocation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ModelIrLinearAssemblySizes {
+    pub global_dof_count: usize,
+    pub active_dof_count: usize,
+    pub row_offset_count: usize,
+    pub structural_entry_count: usize,
+    pub recovery_record_count: usize,
+    pub recovery_offset_count: usize,
+    pub recovery_value_count: usize,
+    pub model_identity_length: usize,
+}
+
 /// Canonical caller-owned CPU output from the ABI v1.13 typed-ModelIR assembly surface.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ModelIrLinearAssembly {
@@ -3315,6 +3328,53 @@ impl ModelIr {
         )
     }
 
+    /// Assemble the initial linear operator and load without duplicating native DOF sizing.
+    ///
+    /// This product convenience path obtains the immutable graph extent from C++, allocates two
+    /// exact all-zero state vectors, and then enters the same fully checked v1.13 operation as an
+    /// explicit state request.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable native, allocation, selector, or output-contract error.
+    pub fn assemble_linear_zero_state(
+        &self,
+        load_pattern_id: &str,
+    ) -> Result<ModelIrLinearAssembly, Error> {
+        let counts = self.linear_assembly_counts()?;
+        self.assemble_linear_reference(&ModelIrLinearAssemblyRequest {
+            load_pattern_id: try_clone_str(
+                load_pattern_id,
+                "ModelIR linear load-pattern selector",
+            )?,
+            displacement: allocate_f64_output(counts.global_dof_count)?,
+            direction: allocate_f64_output(counts.global_dof_count)?,
+        })
+    }
+
+    /// Query checked immutable graph extents without allocating numerical output buffers.
+    ///
+    /// Product layers use this boundary to impose their smaller allocation limits before entering
+    /// the general ABI v1.13 output arena.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable native or output-contract error for an unsupported table or invalid model
+    /// graph extent.
+    pub fn linear_assembly_sizes(&self) -> Result<ModelIrLinearAssemblySizes, Error> {
+        let counts = self.linear_assembly_counts()?;
+        Ok(ModelIrLinearAssemblySizes {
+            global_dof_count: counts.global_dof_count,
+            active_dof_count: counts.active_dof_count,
+            row_offset_count: counts.row_offset_count,
+            structural_entry_count: counts.structural_entry_count,
+            recovery_record_count: counts.recovery_record_count,
+            recovery_offset_count: counts.recovery_offset_count,
+            recovery_value_count: counts.recovery_value_count,
+            model_identity_length: counts.model_identity_length,
+        })
+    }
+
     /// Assemble the bounded linear-elastic frame3d/truss3d graph behind this immutable handle.
     ///
     /// The safe wrapper queries exact sizes, performs bounded caller-owned allocations, executes
@@ -3342,24 +3402,7 @@ impl ModelIr {
                 message: "ModelIR linear load-pattern selector is invalid".to_owned(),
             });
         }
-        let size_operation = self
-            .api
-            .table
-            .model_ir_linear_assembly_sizes
-            .ok_or_else(invalid_table)?;
-        let mut raw_sizes = sys::SaModelIrLinearAssemblySizesV1 {
-            abi_version: sys::SA_ABI_V1_13,
-            struct_size: abi_size::<sys::SaModelIrLinearAssemblySizesV1>(),
-            ..sys::SaModelIrLinearAssemblySizesV1::default()
-        };
-        let mut storage = [0_i8; ERROR_CAPACITY];
-        let mut error = error_buffer(sys::SA_ABI_V1_13, &mut storage);
-        // SAFETY: the immutable RAII handle and caller-owned exact-size descriptor remain live.
-        let status = unsafe { size_operation(self.handle.as_ptr(), &mut raw_sizes, &mut error) };
-        if status != sys::SA_OK {
-            return Err(error_from_buffer(status, &storage));
-        }
-        let counts = validate_model_ir_linear_sizes(&raw_sizes)?;
+        let counts = self.linear_assembly_counts()?;
         if request.displacement.len() != counts.global_dof_count
             || request.direction.len() != counts.global_dof_count
             || !request.displacement.iter().all(|value| value.is_finite())
@@ -3418,6 +3461,33 @@ impl ModelIr {
                 .iter()
                 .find_map(|(id, index)| (id == &request.load_pattern_id).then_some(*index)),
         )
+    }
+
+    fn linear_assembly_counts(&self) -> Result<ModelIrLinearCounts, Error> {
+        if self.api.abi_version() < sys::SA_ABI_V1_13 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "ModelIR linear assembly requires ABI v1.13".to_owned(),
+            });
+        }
+        let size_operation = self
+            .api
+            .table
+            .model_ir_linear_assembly_sizes
+            .ok_or_else(invalid_table)?;
+        let mut raw_sizes = sys::SaModelIrLinearAssemblySizesV1 {
+            abi_version: sys::SA_ABI_V1_13,
+            struct_size: abi_size::<sys::SaModelIrLinearAssemblySizesV1>(),
+            ..sys::SaModelIrLinearAssemblySizesV1::default()
+        };
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(sys::SA_ABI_V1_13, &mut storage);
+        // SAFETY: the immutable RAII handle and caller-owned exact-size descriptor remain live.
+        let status = unsafe { size_operation(self.handle.as_ptr(), &mut raw_sizes, &mut error) };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        validate_model_ir_linear_sizes(&raw_sizes)
     }
 
     /// Derive one fixed-guided global-X story problem from immutable typed `ModelIR` state.

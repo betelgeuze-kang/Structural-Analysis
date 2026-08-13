@@ -69,6 +69,10 @@ Jobs:
    - ABI v1.13 append-only typed-ModelIR linear exact-sizes/execute slots, 16 disjoint caller-owned
      outputs, failure atomicity, canonical CSR/recovery/identity validation and concurrent safe Rust
      immutable execution
+   - typed-ModelIR linear CPU composition C4/C5 contract: strict request/model identities, ABI
+     v1.13 assembly -> ABI v1.10 real-iteration PCG, `SAMLPC01` outer checkpoint, terminal recovery,
+     every-byte tamper rejection and clean-environment direct/resume 14-artifact byte equality;
+     numerical authority remains C1 pending protected HIP C2
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -215,6 +219,10 @@ Required jobs:
      checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared linear-run/
      linear-resume byte parity, durable numerical-terminal receipts and explicit preservation of
      the open protected-runner C2 gate
+   - bounded typed-ModelIR frame3d/truss3d request -> ABI v1.13 assembly -> generated canonical
+     CSR -> ABI v1.10 PCG -> SAMLPC01 outer checkpoint -> terminal active-DOF/element recovery,
+     with environment-cleared model-linear-run/model-linear-resume 14-artifact byte parity and
+     explicit preservation of the sequential C1/protected C2 boundary
    - bounded story-frame strict request -> ABI v1.11 real Newton iteration begin/advance ->
      SASTAC01 checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared
      static-run/static-resume byte parity, durable nonconvergence receipts and explicit

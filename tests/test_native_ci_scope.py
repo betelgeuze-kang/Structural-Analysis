@@ -221,6 +221,24 @@ def test_sparse_linear_sources_route_through_cpp_and_oracle_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_model_ir_linear_product_routes_through_rust_runtime_and_ci_control() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/crates/structural-runtime/src/model_linear_checkpoint.rs",
+            "native/crates/structural-cli/src/model_linear_product.rs",
+            "scripts/check_native_model_ir_linear_product.py",
+            "tests/test_native_model_ir_linear_product_contract.py",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["rust"] is True
+    assert payload["modelir"] is True
+    assert payload["runtime"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_sparse_linear_hip_sources_route_through_protected_oracle_gates() -> None:
     payload = scope.classify_paths(
         [

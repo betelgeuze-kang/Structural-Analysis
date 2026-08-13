@@ -97,9 +97,15 @@ recovery layout, selected load-pattern index and all three ModelIR identities. T
 C3 integration candidate,
 not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
 does not cover nonzero constraints, offsets/releases, self-weight, combinations/stages,
-shell/nonlinear graphs or product execution. See
+shell/nonlinear graphs or constrained reactions. A separate Rust composition path binds this exact
+assembly to the ABI v1.10 resumable PCG operation, `SAMLPC01` ModelIR provenance envelope,
+self-hashed ResultIR/ReportIR/Markdown, and terminal active-DOF plus element recovery. Public
+`model-linear-run`/`model-linear-resume` direct and real-iteration resumed directories are
+byte-identical in a clean environment, providing bounded CPU C4/C5 implementation evidence
+without changing the sequential C1 numerical gate. See
 `docs/native/reference-elements-assembly-v1.md` and
-`docs/native/modelir-linear-reference-assembly-v1.md`.
+`docs/native/modelir-linear-reference-assembly-v1.md`, and
+`docs/native/modelir-linear-product-e2e-v1.md`.
 
 With `STRUCTURAL_ENABLE_HIP=ON`, `structural_elements_hip` evaluates the same five-profile FP64
 reference batch and performs stable-order non-atomic dense assembly without an intermediate host
