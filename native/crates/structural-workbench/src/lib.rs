@@ -52,8 +52,9 @@ pub use deformed_view::{
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
-    edit_model_nodal_load_components, edit_model_node_coordinates,
-    publish_model_nodal_load_components_edit, publish_model_node_coordinate_edit,
+    edit_model_constraint_value, edit_model_nodal_load_components, edit_model_node_coordinates,
+    publish_model_constraint_value_edit, publish_model_nodal_load_components_edit,
+    publish_model_node_coordinate_edit, ModelConstraintValueEditOutcomeV1,
     ModelNodalLoadEditOutcomeV1, ModelNodeEditOutcomeV1,
 };
 pub use model_view::{

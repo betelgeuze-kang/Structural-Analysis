@@ -13,10 +13,14 @@ use super::{
 const EDIT_SCHEMA_V1: &str = "structural-native-model-edit-receipt.v1";
 const NODE_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node.v1";
 const NODAL_LOAD_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-nodal-load.v1";
+const CONSTRAINT_VALUE_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-constraint-value.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
+const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
+const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
 /// Complete deterministic artifact pair produced by one bounded node-coordinate edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -28,6 +32,13 @@ pub struct ModelNodeEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded nodal-load edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodalLoadEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded constraint-value edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelConstraintValueEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -72,6 +83,31 @@ pub fn publish_model_nodal_load_components_edit(
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome =
         edit_model_nodal_load_components(&source, load_pattern_id, nodal_load_id, components_si)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Edit one prescribed value for an existing restrained DOF and atomically publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe input/output paths, unknown DOFs, non-finite values, invalid source or edited
+/// semantics, missing constraint identities, unrestrained DOFs, no-op edits, or publication failure.
+pub fn publish_model_constraint_value_edit(
+    source_path: &Path,
+    constraint_id: &str,
+    dof: &str,
+    value_si: f64,
+    output_directory: &Path,
+) -> Result<ModelConstraintValueEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_constraint_value(&source, constraint_id, dof, value_si)?;
     publish_new_directory(
         output_directory,
         &[
@@ -283,6 +319,100 @@ pub fn edit_model_nodal_load_components(
     })
 }
 
+/// Produce one provenance-bound, C++-revalidated prescribed-constraint-value edit in memory.
+///
+/// # Errors
+///
+/// Rejects an unknown DOF, non-finite value, invalid source model, missing constraint, unrestrained
+/// DOF, no-op edit, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_constraint_value(
+    source_bytes: &[u8],
+    constraint_id: &str,
+    dof: &str,
+    value_si: f64,
+) -> Result<ModelConstraintValueEditOutcomeV1, WorkbenchError> {
+    validate_constraint_value_edit_request(source_bytes.len(), constraint_id, dof, value_si)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let previous_value_si = replace_constraint_value(&mut edited, constraint_id, dof, value_si)?;
+    if normalized_number_bits(previous_value_si) == normalized_number_bits(value_si) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "edited prescribed value is canonically identical to the source constraint",
+        ));
+    }
+    bind_constraint_value_edit_provenance(
+        &mut edited,
+        constraint_id,
+        dof,
+        previous_value_si,
+        value_si,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "constraint", constraint_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "constraint_prescribed_value",
+        "model_id": edited_validation.report.model_id,
+        "constraint_id": constraint_id,
+        "dof": dof,
+        "unit": constraint_value_unit(dof),
+        "previous_value_si": previous_value_si,
+        "edited_value_si": value_si,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": CONSTRAINT_VALUE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelConstraintValueEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 fn validate_edit_request(
     source_length: usize,
     node_id: &str,
@@ -340,6 +470,39 @@ fn validate_nodal_load_edit_request(
         return Err(WorkbenchError::new(
             "workbench_model_edit_load_component_invalid",
             "edited nodal-load components must be finite SI values",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_constraint_value_edit_request(
+    source_length: usize,
+    constraint_id: &str,
+    dof: &str,
+    value_si: f64,
+) -> Result<(), WorkbenchError> {
+    if source_length > usize::try_from(MAX_MODEL_BYTES).unwrap_or(usize::MAX) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_input_too_large",
+            "ModelIR exceeds the bounded editor input limit",
+        ));
+    }
+    if constraint_id.is_empty() || constraint_id.len() > 128 {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_id_invalid",
+            "edited constraint identity must contain 1 through 128 bytes",
+        ));
+    }
+    if !DOF_KEYS.contains(&dof) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_dof_invalid",
+            "edited constraint DOF must be UX, UY, UZ, RX, RY, or RZ",
+        ));
+    }
+    if !value_si.is_finite() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_value_invalid",
+            "edited prescribed value must be a finite SI value",
         ));
     }
     Ok(())
@@ -429,6 +592,50 @@ fn replace_nodal_load_components(
         .ok_or_else(|| snapshot_error("nodal load"))?
         .insert("components_si".to_owned(), components_object(components_si));
     Ok(previous_components_si)
+}
+
+fn replace_constraint_value(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+    value_si: f64,
+) -> Result<f64, WorkbenchError> {
+    let constraints = model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    let constraint = constraints
+        .iter_mut()
+        .find(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    let restrained = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraint dofs"))?
+        .iter()
+        .any(|candidate| candidate.as_str() == Some(dof));
+    if !restrained {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_dof_not_restrained",
+            format!("constraint {constraint_id} does not restrain DOF {dof}"),
+        ));
+    }
+    let prescribed = constraint
+        .get_mut("prescribed_values_si")
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?;
+    let previous_value_si = prescribed
+        .get(dof)
+        .map(|value| finite_number(value, "constraint prescribed value"))
+        .transpose()?
+        .unwrap_or(0.0);
+    prescribed.insert(dof.to_owned(), json!(value_si));
+    Ok(previous_value_si)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -571,6 +778,78 @@ fn bind_nodal_load_edit_provenance(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_constraint_value_edit_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+    previous_value_si: f64,
+    edited_value_si: f64,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    let model_id = model
+        .get("model_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("model_id"))?
+        .to_owned();
+    let object = model
+        .as_object_mut()
+        .ok_or_else(|| snapshot_error("root object"))?;
+    let upstream_provenance = object
+        .get("provenance")
+        .cloned()
+        .ok_or_else(|| snapshot_error("provenance"))?;
+    object.insert(
+        "provenance".to_owned(),
+        json!({
+            "source_format": "neutral_json",
+            "source_ref": format!("modelir-edit:{model_id}"),
+            "source_sha256": source_content_hash,
+            "normalizer_id": "structural-native-model-editor",
+            "normalizer_version": "1",
+            "source_units": {
+                "length": "m",
+                "force": "N",
+                "mass": "kg",
+                "time": "s",
+                "rotation": "rad"
+            },
+            "unit_scales_to_si": {
+                "length_to_m": 1.0,
+                "force_to_n": 1.0,
+                "mass_to_kg": 1.0,
+                "time_to_s": 1.0,
+                "rotation_to_rad": 1.0
+            },
+            "extensions": {
+                UPSTREAM_PROVENANCE_KEY: upstream_provenance
+            }
+        }),
+    );
+    let extensions = object
+        .get_mut("extensions")
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("root extensions"))?;
+    extensions.insert(
+        CONSTRAINT_VALUE_EDIT_EXTENSION_KEY.to_owned(),
+        json!({
+            "operation": "constraint_prescribed_value",
+            "constraint_id": constraint_id,
+            "dof": dof,
+            "unit": constraint_value_unit(dof),
+            "previous_value_si": previous_value_si,
+            "edited_value_si": edited_value_si,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": CONSTRAINT_VALUE_CLAIM_BOUNDARY
+        }),
+    );
+    Ok(())
+}
+
 fn mark_roundtrip_node_approximated(
     model: &mut Value,
     node_id: &str,
@@ -617,6 +896,14 @@ fn components_object(components_si: [f64; 6]) -> Value {
     })
 }
 
+fn constraint_value_unit(dof: &str) -> &'static str {
+    if matches!(dof, "UX" | "UY" | "UZ") {
+        "m"
+    } else {
+        "rad"
+    }
+}
+
 fn normalized_number_bits(value: f64) -> u64 {
     let bits = value.to_bits();
     if bits.trailing_zeros() >= 63 {
@@ -645,9 +932,10 @@ mod tests {
     use serde_json::json;
 
     use super::{
-        mark_roundtrip_entity_approximated, mark_roundtrip_node_approximated,
-        normalized_number_bits, validate_edit_request, validate_nodal_load_edit_request,
-        MAX_MODEL_BYTES,
+        constraint_value_unit, mark_roundtrip_entity_approximated,
+        mark_roundtrip_node_approximated, normalized_number_bits,
+        validate_constraint_value_edit_request, validate_edit_request,
+        validate_nodal_load_edit_request, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -750,5 +1038,29 @@ mod tests {
         assert_eq!(model["roundtrip_map"][0]["mapping_status"], "approximated");
         assert_eq!(model["roundtrip_map"][1]["mapping_status"], "canonicalized");
         assert_eq!(model["roundtrip_map"][2]["mapping_status"], "exact");
+    }
+
+    #[test]
+    fn constraint_value_request_has_closed_dofs_units_and_error_taxonomy() {
+        assert_eq!(constraint_value_unit("UX"), "m");
+        assert_eq!(constraint_value_unit("RZ"), "rad");
+        assert_eq!(
+            validate_constraint_value_edit_request(0, "", "UX", 0.0)
+                .expect_err("empty constraint identity")
+                .code,
+            "workbench_model_edit_constraint_id_invalid"
+        );
+        assert_eq!(
+            validate_constraint_value_edit_request(0, "BC1", "QX", 0.0)
+                .expect_err("unknown constraint DOF")
+                .code,
+            "workbench_model_edit_constraint_dof_invalid"
+        );
+        assert_eq!(
+            validate_constraint_value_edit_request(0, "BC1", "UX", f64::NAN)
+                .expect_err("non-finite constraint value")
+                .code,
+            "workbench_model_edit_constraint_value_invalid"
+        );
     }
 }

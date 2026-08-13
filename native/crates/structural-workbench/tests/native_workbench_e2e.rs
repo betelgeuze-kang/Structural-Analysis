@@ -352,6 +352,106 @@ fn assert_rejected_nodal_load_edit(
     assert!(!destination.exists());
 }
 
+fn run_constraint_value_edit(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    dof: &str,
+    value_si: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-constraint-value"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--dof"),
+        text(dof),
+        text("--value"),
+        text(value_si),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn assert_published_constraint_value_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let constraint = edited
+        .value()
+        .get("constraints")
+        .and_then(Value::as_array)
+        .and_then(|constraints| {
+            constraints
+                .iter()
+                .find(|constraint| constraint.get("id").and_then(Value::as_str) == Some("BC2"))
+        })
+        .expect("edited constraint");
+    assert_eq!(
+        constraint["prescribed_values_si"]["UY"]
+            .as_f64()
+            .expect("finite prescribed value")
+            .to_bits(),
+        (-0.0002_f64).to_bits()
+    );
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-constraint-value.v1")
+        .is_some());
+
+    let receipt_bytes = std::fs::read(destination.join("edit-receipt.json")).expect("edit receipt");
+    let mut receipt: Value = serde_json::from_slice(&receipt_bytes).expect("edit receipt JSON");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-model-edit-receipt.v1"
+    );
+    assert_eq!(receipt["operation"], "constraint_prescribed_value");
+    assert_eq!(receipt["constraint_id"], "BC2");
+    assert_eq!(receipt["dof"], "UY");
+    assert_eq!(receipt["unit"], "m");
+    assert_eq!(receipt["previous_value_si"], -0.0001);
+    assert_eq!(receipt["edited_value_si"], -0.0002);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    let expected_receipt_hash = receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .and_then(|value| value.as_str().map(ToOwned::to_owned))
+        .expect("receipt self-hash");
+    let unsigned = canonicalize_model_ir_v2(&receipt).expect("unsigned canonical receipt");
+    assert_eq!(expected_receipt_hash, sha256_identity(unsigned.as_bytes()));
+}
+
+fn assert_rejected_constraint_value_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    constraint_id: &str,
+    dof: &str,
+    value_si: &str,
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_constraint_value_edit(source, &destination, constraint_id, dof, value_si);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
 #[test]
 #[allow(clippy::too_many_lines)]
 fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
@@ -803,6 +903,153 @@ fn nodal_load_edit_preserves_analysis_blockers_without_promotion() {
         "edited round-trip map: {}",
         edited["roundtrip_map"]
     );
+}
+
+#[test]
+fn constraint_value_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
+    let temporary = TestDirectory::create();
+    let source = repository_root().join("examples/bounded_planar_settlement.model-ir.v2.json");
+    let source_before = std::fs::read(&source).expect("source settlement ModelIR bytes");
+    let first = temporary.0.join("constraint-edit-first");
+    let second = temporary.0.join("constraint-edit-second");
+    for destination in [&first, &second] {
+        let output = run_constraint_value_edit(&source, destination, "BC2", "UY", "-0.0002");
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("published edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after constraint edit"),
+        source_before
+    );
+    assert_published_constraint_value_edit(&first);
+
+    let repeated = run_constraint_value_edit(&source, &first, "BC2", "UY", "-0.0002");
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, constraint_id, dof, value_si, expected_code) in [
+        (
+            "missing-constraint",
+            "MISSING",
+            "UY",
+            "-0.0002",
+            "workbench_model_edit_constraint_missing",
+        ),
+        (
+            "unrestrained-dof",
+            "BC2",
+            "UX",
+            "-0.0002",
+            "workbench_model_edit_constraint_dof_not_restrained",
+        ),
+        (
+            "constraint-no-op",
+            "BC2",
+            "UY",
+            "-0.0001",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "constraint-signed-zero-no-op",
+            "BC1",
+            "UX",
+            "-0",
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        assert_rejected_constraint_value_edit(
+            &source,
+            &temporary.0,
+            name,
+            constraint_id,
+            dof,
+            value_si,
+            expected_code,
+        );
+    }
+
+    let mut invalid_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for invalid constraint edit");
+    invalid_source["constraints"][1]["node_id"] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary.0.join("invalid-constraint-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid constraint source bytes"),
+    )
+    .expect("write invalid constraint edit source");
+    assert_rejected_constraint_value_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-constraint-source-edit",
+        "BC2",
+        "UY",
+        "-0.0002",
+        "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+fn constraint_value_edit_preserves_source_analysis_blockers_without_promotion() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let mut blocked: Value = serde_json::from_slice(
+        &std::fs::read(fixture).expect("source ModelIR fixture for blocked constraint edit"),
+    )
+    .expect("source ModelIR JSON for blocked constraint edit");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.constraint-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Editing a constraint must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:BC1",
+        "entity_kind": "constraint",
+        "model_ir_entity_id": "BC1",
+        "mapping_status": "canonicalized",
+        "extensions": {}
+    }]);
+    let source = temporary.0.join("blocked-constraint-source.model-ir.json");
+    std::fs::write(
+        &source,
+        serde_json::to_vec(&blocked).expect("blocked constraint edit source bytes"),
+    )
+    .expect("write blocked constraint edit source");
+    let destination = temporary.0.join("blocked-constraint-edit");
+    let output = run_constraint_value_edit(&source, &destination, "BC1", "UX", "0.001");
+    assert_success(&output);
+
+    let receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json"))
+            .expect("blocked constraint edit receipt"),
+    )
+    .expect("blocked constraint edit receipt JSON");
+    assert_eq!(receipt["analysis_ready"], false);
+    let blockers = receipt["blocking_feature_ids"]
+        .as_array()
+        .expect("constraint edit blockers");
+    assert!(blockers
+        .iter()
+        .any(|value| { value.as_str() == Some("feature.constraint-edit-visible-not-runnable") }));
+    let edited: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("model-ir.json")).expect("blocked constraint edited model"),
+    )
+    .expect("blocked constraint edited ModelIR JSON");
+    assert_eq!(edited["roundtrip_map"][0]["mapping_status"], "approximated");
 }
 
 fn import_arguments<'a>(

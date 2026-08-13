@@ -82,6 +82,7 @@ REQUIRED_PATHS = (
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/localized-modelir-topology-view-v1.md"),
     Path("docs/native/localized-terminal-result-views-v1.md"),
+    Path("docs/native/modelir-constraint-value-edit-v1.md"),
     Path("docs/native/modelir-nodal-load-edit-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
@@ -141,6 +142,10 @@ EXPECTED_FEATURES = {
     ),
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
     "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_existing_modelir_constraint_prescribed_value_edit": (
         "c5_implemented",
         False,
     ),
@@ -275,6 +280,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-view",
         "model-edit-node",
         "model-edit-nodal-load",
+        "model-edit-constraint-value",
     ]:
         blockers.append("workbench_ui_native_model_flow_invalid")
     if native.get("operator_flow") != [
@@ -1446,6 +1452,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "fixed-guided deformed-shape view is C5-implemented",
             "localized NDTHA result views are C5-implemented",
             "model-edit-nodal-load",
+            "model-edit-constraint-value",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

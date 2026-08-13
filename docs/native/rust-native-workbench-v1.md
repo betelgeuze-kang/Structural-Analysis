@@ -35,6 +35,8 @@ strictly reparses and C++-revalidates the result, and publishes only to a new ar
 The sibling nodal-load edit replaces the six finite SI components of one existing load inside one
 named pattern under the same source-validation, provenance, create-new, and C++ revalidation rules.
 It cannot create, delete, retarget, or combine loads.
+The constraint-value editor changes one finite prescribed value only when the named DOF is already
+restrained by the named existing constraint. It cannot add/remove restraints or retarget a node.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -88,6 +90,9 @@ structural-workbench model-edit-node MODEL.json --node N2 \
 structural-workbench model-edit-nodal-load MODEL.json \
   --load-pattern LC_WEAK --load L_WEAK_N2 \
   --components 0 -20000 0 0 0 0 --output-dir EDITED-LOAD-MODEL
+structural-workbench model-edit-constraint-value MODEL.json \
+  --constraint BC2 --dof UY --value -0.0002 \
+  --output-dir EDITED-CONSTRAINT-MODEL
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -165,10 +170,13 @@ mapping as approximated, and binds the source and edited content/semantic/proven
 into a self-hashed receipt.
 The sibling nodal-load edit replaces exactly six SI force/moment components for one existing load
 inside one named pattern under the same provenance and C++ revalidation policy; its matching
-load-pattern round-trip row is conservatively marked approximated. Neither command provides visual
-dragging, creation/deletion, retargeting, combinations, or general property, constraint, topology,
-or solver editing; see `docs/native/modelir-node-coordinate-edit-v1.md` and
-`docs/native/modelir-nodal-load-edit-v1.md`.
+load-pattern round-trip row is conservatively marked approximated. The constraint-value editor
+changes one existing restrained DOF's finite prescribed metre/radian value and similarly degrades a
+matching constraint row. None of the commands provides visual dragging, entity creation/deletion,
+load/constraint retargeting, combinations, restraint-mask changes, or general property, topology,
+or solver editing; see `docs/native/modelir-node-coordinate-edit-v1.md`,
+`docs/native/modelir-nodal-load-edit-v1.md`, and
+`docs/native/modelir-constraint-value-edit-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is
