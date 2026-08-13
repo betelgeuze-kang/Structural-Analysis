@@ -18,6 +18,17 @@ struct ModelIrElementRecovery final {
     std::vector<double> values;
 };
 
+struct ModelIrLinearAssemblySizes final {
+    std::size_t global_dof_count {};
+    std::size_t active_dof_count {};
+    std::size_t row_offset_count {};
+    std::size_t structural_entry_count {};
+    std::size_t recovery_record_count {};
+    std::size_t recovery_offset_count {};
+    std::size_t recovery_value_count {};
+    std::size_t model_identity_length {};
+};
+
 /// Bounded C1 output for one explicit linear-static ModelIR load pattern.
 ///
 /// `operator_result.residual` is the assembled internal force. `external_load` and
@@ -33,6 +44,10 @@ struct ModelIrLinearAssemblyResult final {
     std::vector<double> equilibrium_residual;
     std::vector<ModelIrElementRecovery> element_recovery;
 };
+
+/// Return exact caller-owned output lengths for the immutable bounded ModelIR graph.
+[[nodiscard]] ModelIrLinearAssemblySizes model_ir_linear_reference_sizes(
+    const model_ir::Model& model);
 
 /// Project a validated typed ModelIR graph through the reference frame/truss sources and assemble
 /// one canonical homogeneous-constraint-reduced operator.

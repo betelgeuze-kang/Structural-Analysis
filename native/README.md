@@ -91,9 +91,13 @@ sorted active-DOF map, canonical structure and the same four numerical channels.
 `structural_model_assembly` target now resolves a bounded typed ModelIR linear frame3d/truss3d
 graph, selected nodal loads and element recovery through those exact sources; its mixed
 three-node/18-DOF graph matches an independent NumPy oracle after reduction to seven active DOFs
-and 43 structural entries. It does not cover nonzero constraints, offsets/releases, self-weight,
-combinations/stages, shell/nonlinear graphs, ABI/Rust integration or product execution. Because HIP C2 is
-still open, these capabilities remain at C1. See
+and 43 structural entries. ABI v1.13 exposes an immutable exact-size query and failure-atomic
+assembly operation, and the safe Rust wrapper independently revalidates the canonical CSR,
+recovery layout, selected load-pattern index and all three ModelIR identities. That boundary is a
+C3 integration candidate,
+not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
+does not cover nonzero constraints, offsets/releases, self-weight, combinations/stages,
+shell/nonlinear graphs or product execution. See
 `docs/native/reference-elements-assembly-v1.md` and
 `docs/native/modelir-linear-reference-assembly-v1.md`.
 
@@ -341,18 +345,21 @@ or links ROCm.
 
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
-library symbol remains `sa_get_api_v1`; ModelIR stays on ABI v1.1, track CPU occupies the ABI v1.2
-slot, nonlinear static CPU occupies the ABI v1.3 slot and nonlinear NDTHA CPU occupies the ABI
-v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned NDTHA state advancement. ABI v1.6
+library symbol remains `sa_get_api_v1`; ModelIR create/report/snapshot stays on its ABI v1.1 core,
+track CPU occupies the ABI v1.2 slot, nonlinear static CPU occupies the ABI v1.3 slot and
+nonlinear NDTHA CPU occupies the ABI v1.4 slot. ABI v1.5 uses offset 96 for bounded caller-owned
+NDTHA state advancement. ABI v1.6
 uses the former reserved slot at offset 104 for the bounded ModelIR-to-NDTHA adapter. ABI v1.7
 uses the next append-only slot at offset 112 for bounded CPU reference elements. ABI v1.8 adds
 canonical-CSR sparse PCG at offset 120. ABI v1.9 consumes offsets 128 and 136 for bounded modal
 and linear-buckling CPU operations. ABI v1.10 appends sparse PCG begin and advance operations at
 offsets 144 and 152. ABI v1.11 appends nonlinear-static Newton begin and advance operations at
 offsets 160 and 168. ABI v1.12 preserves that 176-byte prefix and appends one backend-selector
-slot at offset 176; the current table is 184 bytes. The selected CPU/HIP table owns the bounded
-full-residual context, telemetry, and no-fallback device choice. Existing callers may continue to provide
-their older struct size, and every request exposes later-minor slots as null.
+slot at offset 176. ABI v1.13 preserves the resulting 184-byte prefix and appends immutable
+typed-ModelIR linear exact-sizes and failure-atomic 16-buffer execute slots at offsets 184 and
+192; the current table is 200 bytes. The selected CPU/HIP table owns the bounded full-residual
+context, telemetry, and no-fallback device choice. Existing callers may continue to provide their
+older struct size, and every request exposes later-minor slots as null.
 
 `structural_runtime_ffi` is the R4 standalone compatibility package retaining the existing
 package name, cdylib name, deprecated Python bridge output location and rollback lockfile. It is

@@ -157,6 +157,10 @@ symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
   `backend_get_api`를 append한다. CPU-only library는 CPU full-residual table을 제공하고 HIP
   요청을 `SA_ERR_BACKEND_UNAVAILABLE`로 닫는다. HIP build는 explicit device 0만 선택하며
   fallback 없이 resident operator/evaluation telemetry를 게시한다.
+- v1.13은 0x0001000d이며 v1.12의 184-byte prefix를 보존하고 offset 184와 192에 bounded
+  typed-ModelIR linear assembly exact-sizes/execute operation을 append한다. execute는 16개
+  disjoint caller-owned host buffer에 canonical CSR, internal/external/equilibrium residual,
+  JVP, element recovery와 세 ModelIR identity를 complete-success 뒤에만 게시한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -196,8 +200,9 @@ serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 ### 5.4 ModelIR v1.1 table extension
 
 과거 v1.0-v1.6 consumer가 제공하던 128-byte table, v1.7의 136-byte table, v1.8-v1.9의
-144-byte table, v1.10의 160-byte table과 첫 24-byte prefix는 계속 지원한다. 현재 header의
-table은 v1.11 nonlinear-static restart tail을 포함해 176 bytes이며 caller의
+144-byte table, v1.10의 160-byte table, v1.11의 176-byte table과 v1.12의 184-byte table을
+계속 지원한다. 현재 header의 table은 v1.13 ModelIR linear assembly tail을 포함해 200
+bytes이며 caller의
 `struct_size`까지만 쓴다.
 v1.0 요청에는 이후 slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability
 bit를 제공한다.
@@ -217,7 +222,33 @@ create는 descriptor/ABI 구조 실패만 status error로 반환한다. dangling
 unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. 따라서
 `semantics_valid`, `contract_valid`와 `analysis_ready`를 서로 독립적으로 판정할 수 있다.
 
-### 5.5 Stable status taxonomy
+### 5.5 ModelIR linear assembly v1.13 extension
+
+v1.13의 `model_ir_linear_assembly_sizes`는 immutable ModelIR handle에서 global/active DOF,
+CSR row/entry, recovery record/offset/value와 세 ModelIR identity의 정확한 길이를 구한다.
+`model_ir_linear_assemble`는 반드시 그 길이와 일치하는 16개의 disjoint caller-owned host
+buffer를 받고 다음을 한 번에 게시한다.
+공개 bound는 global DOF 1,000,000, structural entry 100,000,000, recovery record
+1,000,000이며 C++ sizes query와 Rust 배당 경계가 같은 header 상수를 사용한다.
+
+- sorted active-DOF map과 canonical duplicate-free CSR structure
+- tangent, consistent mass, internal force, external load, equilibrium residual, JVP
+- stable element index/type/offset과 element recovery values
+- content, semantic, provenance identity bytes
+- CPU backend, fallback zero, selected load-pattern index와 exact result counts
+
+길이 부족·과다, type/stride/memory-space/device/alignment 오류, descriptor/output alias,
+output 상호 alias, reserved/flag 오염과 overflow는 모두 복사 전에 거부한다. 조립·회복
+결과와 identity를 private staging에서 완전히 검증한 후에만 output/result를 변경하므로
+실패는 caller state에 대해 atomic이다. safe Rust wrapper는 배당 전 product bound를
+적용하고, 성공 후 counts, CSR, finite values, residual identity, recovery offsets·types와
+ModelIR identity를 독립적으로 다시 검증한다.
+
+동일 immutable handle의 sizes/assemble read는 병렬 호출할 수 있다. destroy는 in-flight read가
+있으면 `SA_ERR_STATE_CONFLICT`로 닫힌다. 이 경계는 현재 C3 integration candidate이며,
+전용 ROCm receipt의 C2가 열려 있으므로 순차 gate 상태는 C1을 유지한다.
+
+### 5.6 Stable status taxonomy
 
 | Code | Symbol | 의미 |
 | ---: | --- | --- |
@@ -254,6 +285,8 @@ program control flow는 code와 typed report만 사용한다.
 2. Caller-owned output
    - 일반 descriptor는 capacity 0/data null 호출로 required를 조회할 수 있다.
    - ModelIR report/snapshot은 명시적인 size operation으로 필요한 byte 수를 조회한다.
+   - v1.13 ModelIR linear assembly는 sizes operation이 반환한 모든 길이와 output
+     descriptor의 길이가 정확히 같아야 한다.
    - capacity가 부족하면 SA_ERR_BUFFER_TOO_SMALL과 required를 반환한다.
    - 부분 serialization이나 부분 array를 성공으로 반환하지 않는다.
 3. Library-owned opaque handle

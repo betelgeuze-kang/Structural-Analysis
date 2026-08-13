@@ -74,6 +74,12 @@ REQUIRED_TOKENS = {
         "SA_ABI_V1_7",
         "SA_CAPABILITY_REFERENCE_ELEMENTS_CPU",
         "reference_element_evaluate",
+        "SA_ABI_V1_13",
+        "SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU",
+        "SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT",
+        "SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES",
+        "model_ir_linear_assembly_sizes",
+        "model_ir_linear_assemble",
     ),
     "native/cpp/tests/abi/reference_elements_contract_test.cpp": (
         "table_is_append_only",
@@ -82,16 +88,53 @@ REQUIRED_TOKENS = {
     ),
     "native/cpp/tests/CMakeLists.txt": (
         "structural_model_ir_assembly_cpu_tests",
+        "structural_model_ir_linear_assembly_abi_tests",
         "structural_model_assembly",
+    ),
+    "native/cpp/tests/abi/model_ir_linear_assembly_contract_test.cpp": (
+        "table_is_append_only",
+        "successful_assembly_is_canonical_and_deterministic",
+        "failures_are_atomic_and_aliases_fail_closed",
+        "immutable_calls_are_concurrent",
+    ),
+    "native/cpp/tests/fuzz/CMakeLists.txt": (
+        "structural_model_ir_linear_assembly_abi_fuzz",
+        "structural_model_ir_linear_assembly_abi_fuzz_smoke",
+    ),
+    "native/cpp/tests/fuzz/model_ir_linear_assembly_abi_fuzz.cpp": (
+        "LLVMFuzzerTestOneInput",
+        "model_ir_linear_assembly_sizes",
+        "model_ir_linear_assemble",
+        "storage == storage_before",
+    ),
+    "native/cpp/tests/package_consumer/main.c": (
+        "SA_ABI_V1_13",
+        "SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU",
+        "model_ir_linear_assembly_sizes",
+        "model_ir_linear_assemble",
+    ),
+    "native/crates/structural-ffi-sys/src/model_ir_linear_assembly.rs": (
+        "SA_ABI_V1_13",
+        "SaModelIrLinearAssemblySizesV1",
+        "SaModelIrLinearAssemblyOutputsV1",
+        "SaModelIrLinearAssembleFnV1",
     ),
     "native/crates/structural-ffi/src/lib.rs": (
         "load_reference_elements",
         "evaluate_reference_element",
         "native reference element violated the v1.7 output contract",
+        "load_model_ir_linear_assembly",
+        "assemble_linear_reference",
+        "native ModelIR linear assembly violated the v1.13 output contract",
     ),
     "native/crates/structural-ffi/tests/reference_elements_parity.rs": (
         "immutable_reference_operation_is_reentrant_and_deterministic",
         "fallback_count",
+    ),
+    "native/crates/structural-ffi/tests/model_ir_linear_assembly.rs": (
+        "v1_13_safe_wrapper_preserves_identity_and_canonical_csr",
+        "older_model_ir_table_cannot_claim_the_appended_operation",
+        "immutable_model_assembly_is_safe_for_concurrent_reads",
     ),
     "tests/test_native_reference_elements_python_parity.py": (
         "independent_numpy_oracle",
@@ -117,7 +160,8 @@ REQUIRED_TOKENS = {
         "18-DOF graph",
         "43 structural entries",
         "equilibrium_residual = internal_force - external_load",
-        "no stable ABI or Rust",
+        "ABI v1.13",
+        "C3 integration candidate",
         "C6",
     ),
 }
@@ -151,6 +195,12 @@ def check_native_reference_elements(repo_root: Path = ROOT) -> dict[str, object]
         for token in ("NumPy", "HIP C2", "C6"):
             if token not in claim:
                 blockers.append(f"reference_capability_scope_token_missing:{capability}:{token}")
+        if capability == "dense_assembly_cpu":
+            for token in ("ABI v1.13", "C3 integration candidate"):
+                if token not in claim:
+                    blockers.append(
+                        f"reference_capability_scope_token_missing:{capability}:{token}"
+                    )
 
     for relative, tokens in REQUIRED_TOKENS.items():
         try:
@@ -170,8 +220,9 @@ def check_native_reference_elements(repo_root: Path = ROOT) -> dict[str, object]
         "cutover_gate": "C1" if not blockers else None,
         "blockers": blockers,
         "claim_boundary": (
-            "This is bounded CPU reference C1 evidence. It does not close HIP C2, "
-            "general elements/assembly, product E2E, or C6."
+            "This is bounded CPU reference C1 evidence with an ABI/Rust C3 integration "
+            "candidate. It does not close HIP C2, sequential C3 promotion, general "
+            "elements/assembly, product E2E, or C6."
         ),
     }
 

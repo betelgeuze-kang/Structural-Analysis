@@ -14,6 +14,8 @@ mod model_ir;
 pub use model_ir::*;
 mod model_ir_ndtha_adapter;
 pub use model_ir_ndtha_adapter::*;
+mod model_ir_linear_assembly;
+pub use model_ir_linear_assembly::*;
 mod nonlinear_static;
 pub use nonlinear_static::*;
 mod nonlinear_ndtha;
@@ -28,7 +30,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_12;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_13;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -132,6 +134,8 @@ pub struct SaApiV1 {
     pub nonlinear_static_begin: Option<SaNonlinearStaticBeginFnV1>,
     pub nonlinear_static_advance: Option<SaNonlinearStaticAdvanceFnV1>,
     pub backend_get_api: Option<SaBackendGetApiFnV1>,
+    pub model_ir_linear_assembly_sizes: Option<SaModelIrLinearAssemblySizesFnV1>,
+    pub model_ir_linear_assemble: Option<SaModelIrLinearAssembleFnV1>,
 }
 
 impl Default for SaApiV1 {
@@ -161,6 +165,8 @@ impl Default for SaApiV1 {
             nonlinear_static_begin: None,
             nonlinear_static_advance: None,
             backend_get_api: None,
+            model_ir_linear_assembly_sizes: None,
+            model_ir_linear_assemble: None,
         }
     }
 }
@@ -178,7 +184,9 @@ mod tests {
     use super::{
         SaApiRequestV1, SaApiV1, SaBackendApiV1, SaBackendRequestV1, SaBufferViewV1,
         SaErrorBufferV1, SaFullResidualEvalConfigV1, SaFullResidualOperatorV1,
-        SaFullResidualStatusV1, SaHeaderV1, SA_ERR_NONCONVERGENCE,
+        SaFullResidualStatusV1, SaHeaderV1, SaModelIrLinearAssemblyConfigV1,
+        SaModelIrLinearAssemblyOutputsV1, SaModelIrLinearAssemblyResultV1,
+        SaModelIrLinearAssemblySizesV1, SA_ERR_NONCONVERGENCE,
     };
     use core::mem::{align_of, offset_of, size_of};
 
@@ -194,7 +202,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 184);
+        assert_eq!(size_of::<SaApiV1>(), 200);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -212,6 +220,12 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_begin), 160);
         assert_eq!(offset_of!(SaApiV1, nonlinear_static_advance), 168);
         assert_eq!(offset_of!(SaApiV1, backend_get_api), 176);
+        assert_eq!(offset_of!(SaApiV1, model_ir_linear_assembly_sizes), 184);
+        assert_eq!(offset_of!(SaApiV1, model_ir_linear_assemble), 192);
+        assert_eq!(size_of::<SaModelIrLinearAssemblySizesV1>(), 88);
+        assert_eq!(size_of::<SaModelIrLinearAssemblyConfigV1>(), 144);
+        assert_eq!(size_of::<SaModelIrLinearAssemblyOutputsV1>(), 792);
+        assert_eq!(size_of::<SaModelIrLinearAssemblyResultV1>(), 88);
         assert_eq!(size_of::<SaBackendRequestV1>(), 40);
         assert_eq!(offset_of!(SaBackendRequestV1, flags), 16);
         assert_eq!(size_of::<SaFullResidualOperatorV1>(), 544);

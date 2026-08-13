@@ -403,6 +403,7 @@ target_link_libraries(
   PUBLIC
     structural_model_ir
     structural_elements
+    structural_model_assembly
     structural_solver_cpu
 )
 target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_C_ABI_V1_BUILD=1)

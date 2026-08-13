@@ -105,7 +105,7 @@ struct Fixture {
 
 [[nodiscard]] bool selector_is_append_only_and_fail_closed() {
     CHECK(SA_API_V1_11_MIN_SIZE == offsetof(sa_api_v1, backend_get_api));
-    CHECK(SA_API_V1_12_MIN_SIZE == sizeof(sa_api_v1));
+    CHECK(SA_API_V1_12_MIN_SIZE == offsetof(sa_api_v1, model_ir_linear_assembly_sizes));
     const auto prior = load_main(SA_ABI_V1_11);
     CHECK(prior.abi_version == SA_ABI_V1_11);
     CHECK(prior.backend_get_api == nullptr);

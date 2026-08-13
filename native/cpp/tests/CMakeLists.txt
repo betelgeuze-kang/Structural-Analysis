@@ -97,6 +97,32 @@ set_tests_properties(
 )
 
 add_executable(
+  structural_model_ir_linear_assembly_abi_tests
+  abi/model_ir_linear_assembly_contract_test.cpp
+)
+target_include_directories(
+  structural_model_ir_linear_assembly_abi_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/tests/assembly
+)
+target_link_libraries(
+  structural_model_ir_linear_assembly_abi_tests
+  PRIVATE
+    structural_c_abi_v1
+    Threads::Threads
+)
+structural_set_warnings(structural_model_ir_linear_assembly_abi_tests)
+structural_enable_sanitizers(structural_model_ir_linear_assembly_abi_tests)
+add_test(
+  NAME structural_model_ir_linear_assembly_abi_tests
+  COMMAND structural_model_ir_linear_assembly_abi_tests
+)
+set_tests_properties(
+  structural_model_ir_linear_assembly_abi_tests
+  PROPERTIES LABELS "abi;assembly;modelir;elements;materials;solver_cpu"
+)
+
+add_executable(
   structural_sparse_linear_abi_tests
   abi/sparse_linear_contract_test.cpp
 )

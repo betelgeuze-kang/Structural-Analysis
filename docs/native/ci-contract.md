@@ -66,6 +66,9 @@ Jobs:
      idempotence
    - ABI v1.12 append-only backend selector, CPU deterministic full-residual context, CPU-only HIP
      rejection, safe Rust RAII ownership and the frozen adapter's single `sa_get_api_v1` lookup
+   - ABI v1.13 append-only typed-ModelIR linear exact-sizes/execute slots, 16 disjoint caller-owned
+     outputs, failure atomicity, canonical CSR/recovery/identity validation and concurrent safe Rust
+     immutable execution
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
    - bounded MGT original-byte/encoding/hash ownership, row disposition and blocked-versus-
@@ -111,6 +114,8 @@ Jobs:
    - all solver operations run in ABI CTest; unavailable v1.0-v1.5 table tails remain null
    - the v1.12 backend table has fixed layouts, caller-owned failure atomicity, opaque-context
      lifetime checks, exclusive mutable execution and concurrent immutable device-name reads
+   - the v1.13 ModelIR linear table preserves the 184-byte v1.12 prefix and fixes exact size,
+     pointer/stride/overflow/alias, failure-atomic output and immutable concurrency contracts
    - replay/worker executables link `structural_c_abi_v1` and use the backend table instead of
      owning device kernels, allocations or transfers
 5. modelir-golden
@@ -331,7 +336,8 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
   protected-evidence path included in a native change set.
 - `.github/workflows/native-nightly-quality.yml` owns ASan/UBSan, bounded libFuzzer smoke and
   locked dependency/SPDX policy checks. Once `native/Cargo.toml` exists, missing sanitizer,
-  fuzz or dependency-policy ownership fails closed.
+  fuzz or dependency-policy ownership fails closed. The bounded fuzzer set includes the v1.13
+  ModelIR exact-sizes/execute descriptors and checks rejected-call output/result atomicity.
 - no hosted workflow invokes HIP/ROCm. `hip-dedicated` owns the product reference-element,
   sparse-PCG, generalized-eigen, nonlinear-static Newton and nonlinear-NDTHA Newmark/Newton live
   targets and source-bound receipt schemas, while protected execution remains a manual external

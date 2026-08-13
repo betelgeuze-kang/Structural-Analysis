@@ -35,7 +35,8 @@ extern "C" {
 #define SA_ABI_V1_10 UINT32_C(0x0001000a)
 #define SA_ABI_V1_11 UINT32_C(0x0001000b)
 #define SA_ABI_V1_12 UINT32_C(0x0001000c)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_12
+#define SA_ABI_V1_13 UINT32_C(0x0001000d)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_13
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -92,6 +93,7 @@ enum {
 #define SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU UINT64_C(2048)
 #define SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU UINT64_C(4096)
 #define SA_CAPABILITY_BACKEND_SELECTOR UINT64_C(8192)
+#define SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU UINT64_C(16384)
 #define SA_BACKEND_CAPABILITY_FULL_RESIDUAL UINT64_C(1)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
@@ -99,6 +101,9 @@ enum {
 #define SA_NONLINEAR_NDTHA_MAX_STEP_COUNT UINT32_C(1000000)
 #define SA_SPARSE_LINEAR_MAX_ORDER UINT64_C(1000000)
 #define SA_SPARSE_LINEAR_MAX_NONZEROS UINT64_C(100000000)
+#define SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT UINT64_C(1000000)
+#define SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES UINT64_C(100000000)
+#define SA_MODEL_IR_LINEAR_MAX_RECOVERY_RECORD_COUNT UINT64_C(1000000)
 #define SA_GENERALIZED_EIGEN_MAX_ORDER UINT64_C(128)
 #define SA_GENERALIZED_EIGEN_MAX_SWEEPS UINT32_C(4096)
 
@@ -591,6 +596,73 @@ typedef struct sa_reference_element_result_v1 {
     uint64_t reserved[2];
 } sa_reference_element_result_v1;
 
+/*
+ * v1.13 exposes the bounded typed ModelIR linear frame3d/truss3d graph through the existing
+ * reference element and canonical CSR sources. The immutable sizes query returns exact lengths;
+ * execute requires caller-owned disjoint host buffers with exactly those lengths and publishes
+ * them only after the complete operation succeeds.
+ */
+typedef struct sa_model_ir_linear_assembly_sizes_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t global_dof_count;
+    uint64_t active_dof_count;
+    uint64_t row_offset_count;
+    uint64_t structural_entry_count;
+    uint64_t recovery_record_count;
+    uint64_t recovery_offset_count;
+    uint64_t recovery_value_count;
+    uint64_t model_identity_length;
+    uint64_t reserved[2];
+} sa_model_ir_linear_assembly_sizes_v1;
+
+typedef struct sa_model_ir_linear_assembly_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_string_view_v1 load_pattern_id;
+    sa_buffer_view_v1 displacement;
+    sa_buffer_view_v1 direction;
+    uint64_t flags;
+    uint64_t reserved[2];
+} sa_model_ir_linear_assembly_config_v1;
+
+typedef struct sa_model_ir_linear_assembly_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 active_dof_indices;
+    sa_mut_buffer_view_v1 row_offsets;
+    sa_mut_buffer_view_v1 column_indices;
+    sa_mut_buffer_view_v1 tangent;
+    sa_mut_buffer_view_v1 consistent_mass;
+    sa_mut_buffer_view_v1 internal_force;
+    sa_mut_buffer_view_v1 external_load;
+    sa_mut_buffer_view_v1 equilibrium_residual;
+    sa_mut_buffer_view_v1 jvp;
+    sa_mut_buffer_view_v1 recovery_stable_indices;
+    sa_mut_buffer_view_v1 recovery_element_types;
+    sa_mut_buffer_view_v1 recovery_offsets;
+    sa_mut_buffer_view_v1 recovery_values;
+    sa_mut_buffer_view_v1 model_content_hash;
+    sa_mut_buffer_view_v1 model_semantic_hash;
+    sa_mut_buffer_view_v1 model_provenance_hash;
+    uint64_t reserved[2];
+} sa_model_ir_linear_assembly_outputs_v1;
+
+typedef struct sa_model_ir_linear_assembly_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t global_dof_count;
+    uint64_t active_dof_count;
+    uint64_t row_offset_count;
+    uint64_t structural_entry_count;
+    uint64_t recovery_record_count;
+    uint64_t recovery_value_count;
+    uint64_t load_pattern_index;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_model_ir_linear_assembly_result_v1;
+
 /* v1.8 bounded canonical-CSR symmetric-positive-definite CPU solve. */
 typedef struct sa_sparse_csr_matrix_v1 {
     uint32_t abi_version;
@@ -853,6 +925,18 @@ typedef sa_status_code_v1 (*sa_reference_element_evaluate_fn_v1)(
     sa_reference_element_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_model_ir_linear_assembly_sizes_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    sa_model_ir_linear_assembly_sizes_v1* sizes,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_linear_assemble_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    const sa_model_ir_linear_assembly_config_v1* config,
+    const sa_model_ir_linear_assembly_outputs_v1* outputs,
+    sa_model_ir_linear_assembly_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef sa_status_code_v1 (*sa_sparse_linear_solve_fn_v1)(
     const sa_sparse_linear_config_v1* config,
     const sa_sparse_csr_matrix_v1* matrix,
@@ -973,6 +1057,8 @@ typedef struct sa_api_v1 {
     sa_nonlinear_static_begin_fn_v1 nonlinear_static_begin;
     sa_nonlinear_static_advance_fn_v1 nonlinear_static_advance;
     sa_backend_get_api_fn_v1 backend_get_api;
+    sa_model_ir_linear_assembly_sizes_fn_v1 model_ir_linear_assembly_sizes;
+    sa_model_ir_linear_assemble_fn_v1 model_ir_linear_assemble;
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -988,7 +1074,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_9_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, sparse_linear_begin))
 #define SA_API_V1_10_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, nonlinear_static_begin))
 #define SA_API_V1_11_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, backend_get_api))
-#define SA_API_V1_12_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
+#define SA_API_V1_12_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_linear_assembly_sizes))
+#define SA_API_V1_13_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

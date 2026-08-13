@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -73,6 +74,93 @@ template <std::size_t Size>
 }
 
 }  // namespace
+
+ModelIrLinearAssemblySizes model_ir_linear_reference_sizes(const model_ir::Model& model) {
+    const auto graph = model.project_linear_reference_graph();
+    if (graph.global_dof_count > SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT
+        || graph.elements.size() > SA_MODEL_IR_LINEAR_MAX_RECOVERY_RECORD_COUNT) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference graph exceeds the public ABI size bounds");
+    }
+    std::vector<bool> constrained(graph.global_dof_count, false);
+    for (const auto dof : graph.constrained_dof_indices) {
+        constrained[dof] = true;
+    }
+    const auto active_dof_count = graph.global_dof_count - graph.constrained_dof_indices.size();
+    if (active_dof_count == 0U) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference assembly requires at least one active DOF");
+    }
+    std::vector<std::uint32_t> global_to_reduced(
+        graph.global_dof_count, std::numeric_limits<std::uint32_t>::max());
+    auto reduced_dof = std::uint32_t {0U};
+    for (std::size_t global_dof_index = 0U; global_dof_index < graph.global_dof_count;
+         ++global_dof_index) {
+        if (!constrained[global_dof_index]) {
+            global_to_reduced[global_dof_index] = reduced_dof;
+            ++reduced_dof;
+        }
+    }
+
+    std::vector<std::uint64_t> structural_keys;
+    auto recovery_value_count = std::size_t {0U};
+    for (const auto& element : graph.elements) {
+        std::vector<std::uint32_t> dofs;
+        if (element.type == SA_ELEMENT_FRAME_3D) {
+            dofs = frame_dofs(element);
+            recovery_value_count += 12U;
+        } else if (element.type == SA_ELEMENT_TRUSS_3D) {
+            dofs = truss_dofs(element);
+            recovery_value_count += 3U;
+        } else {
+            throw model_ir::Error(
+                SA_ERR_INTERNAL,
+                "projected ModelIR reference element kind became unsupported");
+        }
+        for (const auto global_row : dofs) {
+            const auto row = global_to_reduced[global_row];
+            if (row == std::numeric_limits<std::uint32_t>::max()) {
+                continue;
+            }
+            for (const auto global_column : dofs) {
+                const auto column = global_to_reduced[global_column];
+                if (column == std::numeric_limits<std::uint32_t>::max()) {
+                    continue;
+                }
+                if (structural_keys.size() == SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES) {
+                    throw model_ir::Error(
+                        SA_ERR_ANALYSIS_NOT_READY,
+                        "ModelIR linear reference structure exceeds the bounded entry count");
+                }
+                structural_keys.push_back(
+                    static_cast<std::uint64_t>(row)
+                        * static_cast<std::uint64_t>(active_dof_count)
+                    + column);
+            }
+        }
+    }
+    std::sort(structural_keys.begin(), structural_keys.end());
+    structural_keys.erase(
+        std::unique(structural_keys.begin(), structural_keys.end()), structural_keys.end());
+    constexpr auto kSha256IdentityLength = std::size_t {71U};
+    if (graph.content_hash.size() != kSha256IdentityLength
+        || graph.semantic_hash.size() != kSha256IdentityLength
+        || graph.provenance_hash.size() != kSha256IdentityLength) {
+        throw model_ir::Error(SA_ERR_INTERNAL, "validated ModelIR identity length became invalid");
+    }
+    return {
+        graph.global_dof_count,
+        active_dof_count,
+        active_dof_count + 1U,
+        structural_keys.size(),
+        graph.elements.size(),
+        graph.elements.size() + 1U,
+        recovery_value_count,
+        kSha256IdentityLength,
+    };
+}
 
 ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     const model_ir::Model& model,

@@ -257,6 +257,7 @@ jobs:
             structural_nonlinear_static_abi_tests \
             structural_nonlinear_ndtha_abi_tests \
             structural_reference_elements_abi_tests \
+            structural_model_ir_linear_assembly_abi_tests \
             structural_sparse_linear_abi_tests \
             structural_generalized_eigen_abi_tests \
             structural_legacy_frame_force_replay_consumer \
@@ -458,7 +459,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x0001000c"
+          assert payload["abi_version"] == "0x0001000d"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY

@@ -7,7 +7,16 @@ _Static_assert(offsetof(sa_buffer_view_v1, data) == 8U, "buffer data offset chan
 _Static_assert(offsetof(sa_buffer_view_v1, flags) == 44U, "buffer flags offset changed");
 _Static_assert(sizeof(sa_error_buffer_v1) == 32U, "sa_error_buffer_v1 layout changed");
 _Static_assert(sizeof(sa_api_request_v1) == 40U, "sa_api_request_v1 layout changed");
-_Static_assert(sizeof(sa_api_v1) == 184U, "sa_api_v1 layout changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT == UINT64_C(1000000),
+    "ModelIR linear global-DOF bound changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES == UINT64_C(100000000),
+    "ModelIR linear structural-entry bound changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_RECOVERY_RECORD_COUNT == UINT64_C(1000000),
+    "ModelIR linear recovery-record bound changed");
+_Static_assert(sizeof(sa_api_v1) == 200U, "sa_api_v1 layout changed");
 _Static_assert(sizeof(sa_backend_request_v1) == 40U, "backend request layout changed");
 _Static_assert(sizeof(sa_full_residual_operator_v1) == 544U, "full residual operator layout changed");
 _Static_assert(sizeof(sa_full_residual_eval_config_v1) == 40U, "full residual config layout changed");
@@ -35,6 +44,18 @@ _Static_assert(
 _Static_assert(sizeof(sa_reference_element_config_v1) == 248U, "reference config layout changed");
 _Static_assert(sizeof(sa_reference_element_outputs_v1) == 264U, "reference outputs layout changed");
 _Static_assert(sizeof(sa_reference_element_result_v1) == 56U, "reference result layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_assembly_sizes_v1) == 88U,
+    "ModelIR linear sizes layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_assembly_config_v1) == 144U,
+    "ModelIR linear config layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_assembly_outputs_v1) == 792U,
+    "ModelIR linear outputs layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_assembly_result_v1) == 88U,
+    "ModelIR linear result layout changed");
 _Static_assert(sizeof(sa_sparse_csr_matrix_v1) == 176U, "sparse CSR layout changed");
 _Static_assert(sizeof(sa_sparse_linear_config_v1) == 56U, "sparse config layout changed");
 _Static_assert(sizeof(sa_sparse_linear_result_v1) == 80U, "sparse result layout changed");
@@ -61,6 +82,12 @@ _Static_assert(offsetof(sa_api_v1, sparse_linear_advance) == 152U, "sparse advan
 _Static_assert(offsetof(sa_api_v1, nonlinear_static_begin) == 160U, "static begin slot offset changed");
 _Static_assert(offsetof(sa_api_v1, nonlinear_static_advance) == 168U, "static advance slot offset changed");
 _Static_assert(offsetof(sa_api_v1, backend_get_api) == 176U, "backend selector slot offset changed");
+_Static_assert(
+    offsetof(sa_api_v1, model_ir_linear_assembly_sizes) == 184U,
+    "ModelIR linear sizes slot offset changed");
+_Static_assert(
+    offsetof(sa_api_v1, model_ir_linear_assemble) == 192U,
+    "ModelIR linear execute slot offset changed");
 _Static_assert(sizeof(sa_sparse_linear_state_v1) == 280U, "sparse restart state layout changed");
 _Static_assert(sizeof(sa_string_view_v1) == 16U, "sa_string_view_v1 layout changed");
 _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor layout changed");
