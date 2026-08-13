@@ -19,7 +19,8 @@ absent from the runtime image.
   `model-edit-frame-section` parameter replacement for an existing v1 linear-elastic material or
   `frame_3d` section, plus `model-edit-frame-element-orientation` rotation replacement for one
   existing `frame_3d` element and `model-edit-element-connectivity` endpoint retargeting for one
-  existing two-node element.
+  existing two-node element. The `model-create-linear-analysis-request` surface binds one existing
+  linear-static pattern and bounded PCG controls through C++ assembly preflight.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
   OFL-1.1 redistribution notice; PDF generation itself needs no runtime font lookup.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
@@ -92,6 +93,10 @@ structural-workbench model-edit-frame-element-orientation /workspace/model.json 
 structural-workbench model-edit-element-connectivity /workspace/model.json \
   --element E1 --nodes N1 N3 \
   --output-dir /workspace/edited-connectivity-model
+structural-workbench model-create-linear-analysis-request /workspace/model.json \
+  --case case-1 --load-pattern LC_WEAK --max-iterations 100 \
+  --absolute-residual-tolerance 1e-11 --relative-residual-tolerance 1e-13 \
+  --maximum-increment 0 --output-dir /workspace/linear-request
 ```
 
 With Compose, override the default `--version` command while retaining the entrypoint:
@@ -116,7 +121,9 @@ one existing `frame_3d` element; it cannot change type, formulation, connectivit
 releases, identity, topology, or references. The element-connectivity editor retargets only the
 ordered endpoint pair of one existing two-node element and leaves every other element/entity field
 intact; C++ rejects invalid resulting geometry, references, graphs, or profile constraints. None
-proves visual dragging, broader model editing,
+The model-bound CPU linear request creator performs ABI v1.13 C++ assembly preflight but neither
+starts execution nor supplies arbitrary solver/backend selection. None proves visual dragging,
+broader model editing,
 solver execution,
 deformed/result visualization, or engineering approval. The local rootfs diagnostic is not an OCI
 image receipt. A

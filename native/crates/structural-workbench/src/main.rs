@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use serde_json::json;
+use structural_contracts::sparse_product::SparseLinearConfigV1;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
@@ -109,6 +110,15 @@ struct ModelEditElementConnectivityCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelCreateLinearAnalysisRequestCommand {
+    model: PathBuf,
+    case_id: String,
+    load_pattern_id: String,
+    config: SparseLinearConfigV1,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ResultViewCommand {
     workspace: PathBuf,
@@ -178,6 +188,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
         Some("model-edit-element-connectivity") => parse_model_edit_element_connectivity(arguments)
             .and_then(|command| run_model_edit_element_connectivity(&command)),
+        Some("model-create-linear-analysis-request") => {
+            parse_model_create_linear_analysis_request(arguments)
+                .and_then(|command| run_model_create_linear_analysis_request(&command))
+        }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
         }
@@ -509,6 +523,20 @@ fn run_model_edit_element_connectivity(
         &command.model,
         &command.element_id,
         [&command.node_ids[0], &command.node_ids[1]],
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_create_linear_analysis_request(
+    command: &ModelCreateLinearAnalysisRequestCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_linear_analysis_request(
+        &command.model,
+        &command.case_id,
+        &command.load_pattern_id,
+        command.config,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -1020,6 +1048,68 @@ fn parse_model_edit_element_connectivity(
     })
 }
 
+fn parse_model_create_linear_analysis_request(
+    arguments: &[OsString],
+) -> Result<ModelCreateLinearAnalysisRequestCommand, WorkbenchError> {
+    if arguments.len() != 16
+        || arguments[2] != "--case"
+        || arguments[4] != "--load-pattern"
+        || arguments[6] != "--max-iterations"
+        || arguments[8] != "--absolute-residual-tolerance"
+        || arguments[10] != "--relative-residual-tolerance"
+        || arguments[12] != "--maximum-increment"
+        || arguments[14] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-create-linear-analysis-request requires MODEL.json --case ID --load-pattern ID --max-iterations N --absolute-residual-tolerance VALUE --relative-residual-tolerance VALUE --maximum-increment VALUE --output-dir DIR",
+        ));
+    }
+    let max_iterations = arguments[7]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=1_000_000).contains(value))
+        .ok_or_else(|| usage_error("max iterations must be an integer from 1 through 1000000"))?;
+    let absolute_residual_tolerance = parse_finite_edit_number(
+        &arguments[9],
+        "model-create-linear-analysis-request absolute residual tolerance",
+    )?;
+    let relative_residual_tolerance = parse_finite_edit_number(
+        &arguments[11],
+        "model-create-linear-analysis-request relative residual tolerance",
+    )?;
+    let maximum_increment = parse_finite_edit_number(
+        &arguments[13],
+        "model-create-linear-analysis-request maximum increment",
+    )?;
+    if absolute_residual_tolerance < 0.0
+        || relative_residual_tolerance < 0.0
+        || (absolute_residual_tolerance == 0.0 && relative_residual_tolerance == 0.0)
+        || maximum_increment < 0.0
+    {
+        return Err(usage_error(
+            "linear request tolerances must be nonnegative with at least one positive, and maximum increment must be nonnegative",
+        ));
+    }
+    Ok(ModelCreateLinearAnalysisRequestCommand {
+        model: PathBuf::from(&arguments[1]),
+        case_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-create-linear-analysis-request case ID",
+        )?,
+        load_pattern_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-create-linear-analysis-request load-pattern ID",
+        )?,
+        config: SparseLinearConfigV1 {
+            max_iterations,
+            absolute_residual_tolerance,
+            relative_residual_tolerance,
+            maximum_increment,
+        },
+        output_directory: PathBuf::from(&arguments[15]),
+    })
+}
+
 fn parse_bounded_edit_id(argument: &OsString, name: &str) -> Result<String, WorkbenchError> {
     argument
         .to_str()
@@ -1488,7 +1578,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 fn usage() -> &'static str {
     concat!(
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
-        "\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
+        "\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
 
@@ -1499,11 +1589,12 @@ mod tests {
 
     use super::{
         parse_catalog, parse_catalog_show, parse_deformed_view, parse_evidence, parse_import,
-        parse_model_edit_constraint_value, parse_model_edit_element_connectivity,
-        parse_model_edit_frame_element_orientation, parse_model_edit_frame_section,
-        parse_model_edit_linear_material, parse_model_edit_nodal_load, parse_model_edit_node,
-        parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
-        parse_review, parse_stage_command,
+        parse_model_create_linear_analysis_request, parse_model_edit_constraint_value,
+        parse_model_edit_element_connectivity, parse_model_edit_frame_element_orientation,
+        parse_model_edit_frame_section, parse_model_edit_linear_material,
+        parse_model_edit_nodal_load, parse_model_edit_node, parse_model_view,
+        parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
+        parse_stage_command,
     };
 
     #[test]
@@ -1812,6 +1903,49 @@ mod tests {
         let mut empty = arguments;
         empty[5] = OsString::new();
         assert!(parse_model_edit_element_connectivity(&empty).is_err());
+    }
+
+    #[test]
+    fn model_create_linear_request_parser_enforces_bounded_pcg_controls() {
+        let arguments = [
+            OsString::from("model-create-linear-analysis-request"),
+            OsString::from("model.json"),
+            OsString::from("--case"),
+            OsString::from("case-1"),
+            OsString::from("--load-pattern"),
+            OsString::from("LC1"),
+            OsString::from("--max-iterations"),
+            OsString::from("100"),
+            OsString::from("--absolute-residual-tolerance"),
+            OsString::from("1e-11"),
+            OsString::from("--relative-residual-tolerance"),
+            OsString::from("1e-13"),
+            OsString::from("--maximum-increment"),
+            OsString::from("0"),
+            OsString::from("--output-dir"),
+            OsString::from("request"),
+        ];
+        let parsed = parse_model_create_linear_analysis_request(&arguments)
+            .expect("valid ModelIR linear request creation command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.case_id, "case-1");
+        assert_eq!(parsed.load_pattern_id, "LC1");
+        assert_eq!(parsed.config.max_iterations, 100);
+        assert_eq!(
+            parsed.config.absolute_residual_tolerance.to_bits(),
+            1.0e-11_f64.to_bits()
+        );
+        assert_eq!(parsed.output_directory, PathBuf::from("request"));
+
+        for (index, value) in [(7, "0"), (9, "-1"), (11, "NaN"), (13, "-1")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_model_create_linear_analysis_request(&invalid).is_err());
+        }
+        let mut zero_tolerances = arguments;
+        zero_tolerances[9] = OsString::from("0");
+        zero_tolerances[11] = OsString::from("0");
+        assert!(parse_model_create_linear_analysis_request(&zero_tolerances).is_err());
     }
 
     #[test]

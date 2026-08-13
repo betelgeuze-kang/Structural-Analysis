@@ -204,6 +204,12 @@ V21_ELEMENT_CONNECTIVITY_EDIT_KEYS = {
     "workbench_element_connectivity_edit_receipt_sha256",
 }
 V21_EXPECTED_KEYS = V20_EXPECTED_KEYS | V21_ELEMENT_CONNECTIVITY_EDIT_KEYS
+V22_MODEL_LINEAR_REQUEST_CREATE_KEYS = {
+    "workbench_model_linear_request_create_surface_passed",
+    "workbench_model_linear_request_create_request_sha256",
+    "workbench_model_linear_request_create_receipt_sha256",
+}
+V22_EXPECTED_KEYS = V21_EXPECTED_KEYS | V22_MODEL_LINEAR_REQUEST_CREATE_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -267,6 +273,7 @@ def validate(
         "structural-native-distribution-e2e.v19": V19_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v20": V20_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v21": V21_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v22": V22_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -281,6 +288,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         schema_version = "structural-native-distribution-e2e.v13"
     backend = payload.get("backend_profile")
@@ -604,6 +612,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         for name in (
             "model_ir_linear_workbench_restart_passed",
@@ -635,6 +644,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         if payload.get("model_ir_linear_localized_pdf_surface_passed") is not True:
             errors.append("model_ir_linear_localized_pdf_surface_passed must be true")
@@ -657,6 +667,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         for name in (
             "mgt_model_ir_linear_workbench_restart_passed",
@@ -688,6 +699,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         if payload.get("workbench_nodal_load_edit_surface_passed") is not True:
             errors.append("workbench_nodal_load_edit_surface_passed must be true")
@@ -702,6 +714,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         if payload.get("workbench_constraint_value_edit_surface_passed") is not True:
             errors.append("workbench_constraint_value_edit_surface_passed must be true")
@@ -715,6 +728,7 @@ def validate(
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         for name in (
             "workbench_linear_material_edit_surface_passed",
@@ -733,6 +747,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
     }:
         if payload.get("workbench_frame_element_orientation_edit_surface_passed") is not True:
             errors.append("workbench_frame_element_orientation_edit_surface_passed must be true")
@@ -742,12 +757,24 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v21":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v21",
+        "structural-native-distribution-e2e.v22",
+    }:
         if payload.get("workbench_element_connectivity_edit_surface_passed") is not True:
             errors.append("workbench_element_connectivity_edit_surface_passed must be true")
         for name in (
             "workbench_element_connectivity_edit_model_sha256",
             "workbench_element_connectivity_edit_receipt_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v22":
+        if payload.get("workbench_model_linear_request_create_surface_passed") is not True:
+            errors.append("workbench_model_linear_request_create_surface_passed must be true")
+        for name in (
+            "workbench_model_linear_request_create_request_sha256",
+            "workbench_model_linear_request_create_receipt_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

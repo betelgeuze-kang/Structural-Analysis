@@ -5,6 +5,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::Value;
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
+use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
 use structural_contracts::product_ir::sha256_identity;
 use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
 
@@ -540,6 +541,32 @@ fn run_element_connectivity_edit(
         text("--nodes"),
         text(node_ids[0]),
         text(node_ids[1]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn run_model_linear_request_create(
+    source: &Path,
+    destination: &Path,
+    case_id: &str,
+    load_pattern_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-create-linear-analysis-request"),
+        source.as_os_str(),
+        text("--case"),
+        text(case_id),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--max-iterations"),
+        text("100"),
+        text("--absolute-residual-tolerance"),
+        text("1e-11"),
+        text("--relative-residual-tolerance"),
+        text("1e-13"),
+        text("--maximum-increment"),
+        text("0"),
         text("--output-dir"),
         destination.as_os_str(),
     ])
@@ -1981,6 +2008,163 @@ fn element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_bloc
         blocked_edited["roundtrip_map"][1]["mapping_status"],
         "exact"
     );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable() {
+    let temporary = TestDirectory::create();
+    let root = repository_root();
+    let model = root.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let fixture_request =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let external =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json");
+    let source_artifact = root.join(
+        "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt",
+    );
+    let source_before = std::fs::read(&model).expect("linear request source ModelIR");
+    let first = temporary.0.join("linear-request-first");
+    let second = temporary.0.join("linear-request-second");
+    for destination in [&first, &second] {
+        let output = run_model_linear_request_create(
+            &model,
+            destination,
+            "model-frame-linear-c5",
+            "LC_WEAK",
+        );
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("request-receipt.json"))
+            .expect("linear request creation receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["analysis-request.json", "request-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first request artifact"),
+            std::fs::read(second.join(artifact)).expect("second request artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&model).expect("source after request creation"),
+        source_before
+    );
+
+    let generated = parse_model_ir_linear_analysis_request_v1(
+        &std::fs::read(first.join("analysis-request.json")).expect("generated request"),
+    )
+    .expect("strict generated request");
+    let fixture = parse_model_ir_linear_analysis_request_v1(
+        &std::fs::read(&fixture_request).expect("fixture request"),
+    )
+    .expect("strict fixture request");
+    assert_eq!(generated.canonical_json(), fixture.canonical_json());
+    assert_eq!(generated.request_hash(), fixture.request_hash());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("request-receipt.json")).expect("request receipt"),
+    )
+    .expect("request receipt JSON");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-model-linear-request-create-receipt.v1"
+    );
+    assert_eq!(
+        receipt["operation"],
+        "create_model_ir_linear_analysis_request"
+    );
+    assert_eq!(receipt["backend"], "cpu");
+    assert_eq!(receipt["load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["analysis_request_hash"], generated.request_hash());
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["cpp_linear_assembly_preflight_verified"], true);
+    assert_eq!(receipt["execution_started"], false);
+    for field in ["assembly_hash", "generated_sparse_request_hash"] {
+        assert!(receipt[field]
+            .as_str()
+            .is_some_and(|value| value.starts_with("sha256:")));
+    }
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let existing =
+        run_model_linear_request_create(&model, &first, "model-frame-linear-c5", "LC_WEAK");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let missing_destination = temporary.0.join("linear-request-missing-load-pattern");
+    let missing = run_model_linear_request_create(
+        &model,
+        &missing_destination,
+        "model-frame-linear-c5",
+        "MISSING",
+    );
+    assert_eq!(missing.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&missing.stdout)
+        .contains("workbench_model_linear_request_load_pattern_missing"));
+    assert!(!missing_destination.exists());
+
+    let planar = root.join("examples/bounded_planar_frame_alpha.model-ir.v2.json");
+    let unsupported_destination = temporary.0.join("linear-request-nonlinear-pattern");
+    let unsupported =
+        run_model_linear_request_create(&planar, &unsupported_destination, "case-1", "LP1");
+    assert_eq!(unsupported.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&unsupported.stdout)
+        .contains("workbench_model_linear_request_load_pattern_unsupported"));
+    assert!(!unsupported_destination.exists());
+
+    let mut blocked: Value = serde_json::from_slice(&source_before).expect("source ModelIR JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.linear-request-blocked",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Blocked models cannot receive an executable request receipt.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-linear-request-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked source bytes"),
+    )
+    .expect("write blocked request source");
+    let blocked_destination = temporary.0.join("blocked-linear-request");
+    let blocked_output = run_model_linear_request_create(
+        &blocked_source,
+        &blocked_destination,
+        "model-frame-linear-c5",
+        "LC_WEAK",
+    );
+    assert_eq!(blocked_output.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&blocked_output.stdout)
+        .contains("workbench_model_linear_request_source_not_ready"));
+    assert!(!blocked_destination.exists());
+
+    let workspace = temporary.0.join("generated-request-workflow");
+    let generated_request_path = first.join("analysis-request.json");
+    let workflow = run_workbench(&[
+        text("workflow-model-linear"),
+        model.as_os_str(),
+        generated_request_path.as_os_str(),
+        text("--external-result"),
+        external.as_os_str(),
+        text("--source-artifact"),
+        source_artifact.as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]);
+    assert_success(&workflow);
+    let session: Value = serde_json::from_slice(
+        &std::fs::read(workspace.join("workbench-session.json"))
+            .expect("generated-request Workbench session"),
+    )
+    .expect("generated-request session JSON");
+    assert_eq!(session["stage"], "reported");
+    assert_eq!(session["analysis_profile"], "model_ir_linear_cpu_v1");
+    assert_eq!(session["analysis_request_hash"], generated.request_hash());
 }
 
 #[test]

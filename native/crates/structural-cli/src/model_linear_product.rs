@@ -102,6 +102,13 @@ pub struct ModelIrLinearAnalysisOutcomeV1 {
     run_receipt_json: String,
 }
 
+/// Identity receipt for an assembled, execution-compatible typed-ModelIR linear request.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelIrLinearCompatibilityV1 {
+    pub assembly_hash: String,
+    pub generated_request_hash: String,
+}
+
 impl ModelIrLinearAnalysisOutcomeV1 {
     #[must_use]
     pub fn checkpoint_bytes(&self) -> &[u8] {
@@ -152,6 +159,31 @@ impl ModelIrLinearAnalysisOutcomeV1 {
 struct AssemblyReceipt {
     canonical_json: String,
     assembly_hash: String,
+}
+
+/// Verify exact model/request identities and construct the authoritative C++ linear operator.
+///
+/// This performs the same ABI v1.13 assembly and generated-PCG-request preparation used by
+/// execution, but does not begin a solver iteration or publish artifacts.
+///
+/// # Errors
+///
+/// Returns a strict contract error before FFI or a native/runtime error when the selected model,
+/// load pattern, element graph, constraints, or generated sparse request is not executable by the
+/// bounded CPU linear product.
+pub fn validate_model_ir_linear_analysis_compatibility(
+    model_ir_bytes: &[u8],
+    analysis_request_bytes: &[u8],
+) -> Result<ModelIrLinearCompatibilityV1, ModelIrLinearProductError> {
+    let document =
+        parse_model_ir_v2(model_ir_bytes).map_err(|error| model_contract_error(&error))?;
+    let request = parse_model_ir_linear_analysis_request_v1(analysis_request_bytes)?;
+    verify_model_identity(&document, &request)?;
+    let prepared = Runtime::new()?.prepare_model_ir_linear_product(&document, &request)?;
+    Ok(ModelIrLinearCompatibilityV1 {
+        assembly_hash: prepared.assembly_hash,
+        generated_request_hash: prepared.generated_request.request_hash().to_owned(),
+    })
 }
 
 /// Assemble an exact typed `ModelIR` graph, advance its derived PCG problem, and recover results.

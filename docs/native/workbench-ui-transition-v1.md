@@ -63,6 +63,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   before create-new publication. Node/element creation or deletion, identity/type/formulation/
   property/offset/release changes, broad topology authoring, visual manipulation, and solver
   selection remain open.
+- `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
+  load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
+  same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before
+  publishing a canonical request and self-hashed receipt. It starts no iteration and does not
+  imply arbitrary backend/preconditioner/nonlinear/modal/buckling/transient solver selection.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -215,6 +220,7 @@ bounded command-level node-coordinate edit, one bounded existing-nodal-load comp
 bounded existing-constraint prescribed-value edit, one bounded existing-linear-material parameter
 edit, one bounded existing-frame-section parameter edit, one bounded existing-frame-element
 orientation edit, one bounded existing-two-node-element connectivity edit, one
+bounded C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
@@ -238,6 +244,12 @@ visual dragging, entity creation/deletion, broad retargeting, formulation/type/v
 restraint-mask changes,
 and general property/material/section/load-combination/constraint-topology editing remain open, so
 the composite visual parity row stays open.
+
+The model-bound CPU linear request creator additionally closes selection of one existing
+`linear_static` pattern and the four bounded PCG controls, with authoritative C++ assembly
+preflight and direct consumption by the existing linear Workbench flow. Arbitrary solver family,
+backend, preconditioner and analysis-type selection remain open, so the composite topology/solver
+selection row stays open.
 
 The bounded NDTHA response-history view is C5-implemented for four closed response channels and
 arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table

@@ -4,7 +4,9 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Value};
-use structural_cli::execute_model_ir_linear_analysis;
+use structural_cli::{
+    execute_model_ir_linear_analysis, validate_model_ir_linear_analysis_compatibility,
+};
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_contracts::sparse_product::{
@@ -92,6 +94,34 @@ fn verify_receipt(directory: &Path, expected_status: &str) -> Value {
         );
     }
     value
+}
+
+#[test]
+fn compatibility_preflight_is_deterministic_and_uses_cpp_assembly() {
+    let model = model_bytes();
+    let request = request_bytes(100);
+    let first = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("compatible typed ModelIR linear request");
+    let second = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("deterministic compatibility preflight");
+    assert_eq!(first, second);
+    assert!(first.assembly_hash.starts_with("sha256:"));
+    assert!(first.generated_request_hash.starts_with("sha256:"));
+
+    let planar =
+        fs::read(repository_root().join("examples/bounded_planar_frame_alpha.model-ir.v2.json"))
+            .expect("unsupported planar ModelIR");
+    let mut rebound: Value = serde_json::from_slice(&request).expect("request JSON");
+    let planar_document =
+        structural_contracts::model_ir::parse_model_ir_v2(&planar).expect("strict planar ModelIR");
+    rebound["model_identity"] = json!({
+        "content_hash": planar_document.content_hash(),
+        "semantic_hash": planar_document.semantic_hash(),
+        "provenance_hash": planar_document.provenance_hash(),
+    });
+    rebound["load_pattern_id"] = json!("LP1");
+    let unsupported = serde_json::to_vec(&rebound).expect("rebound request");
+    assert!(validate_model_ir_linear_analysis_compatibility(&planar, &unsupported).is_err());
 }
 
 #[test]

@@ -45,6 +45,9 @@ existing `frame_3d` element. The element-connectivity editor retargets only the 
 of one existing two-node element and delegates all resulting geometry, graph, reference, and
 profile checks to the C++ validator. None creates/deletes entities or changes identities,
 families/laws, versions, formulation, property references, offsets, or releases.
+The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
+bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
+assembly and generated sparse-request preflight used by execution before publishing.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -116,6 +119,11 @@ structural-workbench model-edit-frame-element-orientation MODEL.json \
 structural-workbench model-edit-element-connectivity MODEL.json \
   --element E1 --nodes N1 N3 \
   --output-dir EDITED-CONNECTIVITY-MODEL
+structural-workbench model-create-linear-analysis-request MODEL.json \
+  --case model-frame-linear-c5 --load-pattern LC_WEAK \
+  --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+  --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+  --output-dir LINEAR-REQUEST
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -212,7 +220,10 @@ C++ validator. See
 `docs/native/modelir-linear-material-edit-v1.md`,
 `docs/native/modelir-frame-section-edit-v1.md`,
 `docs/native/modelir-frame-element-orientation-edit-v1.md`, and
-`docs/native/modelir-element-connectivity-edit-v1.md`.
+`docs/native/modelir-element-connectivity-edit-v1.md`. The separate model-bound CPU linear request
+creator does not edit the model; it validates the selection/config, performs authoritative C++
+assembly preflight without starting execution, and publishes a canonical request plus receipt. See
+`docs/native/modelir-linear-analysis-request-create-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is

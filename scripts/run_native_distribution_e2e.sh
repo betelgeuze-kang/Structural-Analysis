@@ -144,7 +144,52 @@ grep -Fq '"stage":"reported"' "$e2e_root/workflow.json"
 diff -r "$restarted" "$direct" > "$e2e_root/workbench-diff.txt"
 
 linear_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
-linear_request="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
+exercise_model_linear_request_create_surface() {
+  local linear_model_before_hash label linear_request_directory
+  linear_model_before_hash="$(sha256sum "$linear_model" | awk '{print $1}')"
+  for label in first second; do
+    linear_request_directory="$e2e_root/model-linear-request-create-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$linear_model" \
+      --case model-frame-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$linear_request_directory" \
+      > "$e2e_root/model-linear-request-create-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-request-create-receipt.v1"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq '"operation":"create_model_ir_linear_analysis_request"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_WEAK"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Eq '"assembly_hash":"sha256:[0-9a-f]{64}"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Eq '"generated_sparse_request_hash":"sha256:[0-9a-f]{64}"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$linear_request_directory/request-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$linear_model_before_hash\"" \
+      "$linear_request_directory/request-receipt.json"
+  done
+  diff -r "$e2e_root/model-linear-request-create-first" \
+    "$e2e_root/model-linear-request-create-second" \
+    > "$e2e_root/model-linear-request-create-diff.txt"
+  cmp "$e2e_root/model-linear-request-create-first.stdout.json" \
+    "$e2e_root/model-linear-request-create-second.stdout.json"
+  if [[ "$(sha256sum "$linear_model" | awk '{print $1}')" != "$linear_model_before_hash" ]]; then
+    echo "installed ModelIR linear request creation mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+
+exercise_model_linear_request_create_surface
+linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
 linear_restarted="$e2e_root/model-ir-linear-workbench-restarted"
@@ -1100,6 +1145,8 @@ frame_element_orientation_edit_model_hash="$(sha256sum "$e2e_root/frame-element-
 frame_element_orientation_edit_receipt_hash="$(sha256sum "$e2e_root/frame-element-orientation-edit-first/edit-receipt.json" | awk '{print $1}')"
 element_connectivity_edit_model_hash="$(sha256sum "$e2e_root/element-connectivity-edit-first/model-ir.json" | awk '{print $1}')"
 element_connectivity_edit_receipt_hash="$(sha256sum "$e2e_root/element-connectivity-edit-first/edit-receipt.json" | awk '{print $1}')"
+model_linear_request_create_request_hash="$(sha256sum "$e2e_root/model-linear-request-create-first/analysis-request.json" | awk '{print $1}')"
+model_linear_request_create_receipt_hash="$(sha256sum "$e2e_root/model-linear-request-create-first/request-receipt.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1149,6 +1196,10 @@ v21_receipt_json="${v20_receipt_json/structural-native-distribution-e2e.v20/stru
 element_connectivity_edit_receipt_fields="\"workbench_element_connectivity_edit_surface_passed\":true,\"workbench_element_connectivity_edit_model_sha256\":\"sha256:$element_connectivity_edit_model_hash\",\"workbench_element_connectivity_edit_receipt_sha256\":\"sha256:$element_connectivity_edit_receipt_hash\","
 v21_receipt_json="${v21_receipt_json/\"workbench_result_view_surface_passed\":true,/${element_connectivity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v21_receipt_json" > "$temporary_receipt"
+v22_receipt_json="${v21_receipt_json/structural-native-distribution-e2e.v21/structural-native-distribution-e2e.v22}"
+model_linear_request_create_receipt_fields="\"workbench_model_linear_request_create_surface_passed\":true,\"workbench_model_linear_request_create_request_sha256\":\"sha256:$model_linear_request_create_request_hash\",\"workbench_model_linear_request_create_receipt_sha256\":\"sha256:$model_linear_request_create_receipt_hash\","
+v22_receipt_json="${v22_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_linear_request_create_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v22_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

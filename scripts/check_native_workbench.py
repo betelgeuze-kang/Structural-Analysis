@@ -111,6 +111,14 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit",
         "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit",
     ),
+    "native/crates/structural-workbench/src/analysis_request.rs": (
+        "structural-native-model-linear-request-create-receipt.v1",
+        "create_model_linear_analysis_request",
+        "build_model_ir_linear_analysis_request_v1",
+        "validate_model_ir_linear_analysis_compatibility",
+        "cpp_linear_assembly_preflight_verified",
+        "bounded_cpp_assembly_preflighted_modelir_linear_cpu_request_creation",
+    ),
     "native/crates/structural-workbench/src/main.rs": (
         'Some("model-view")',
         'Some("model-edit-node")',
@@ -120,6 +128,7 @@ REQUIRED_TOKENS = {
         'Some("model-edit-frame-section")',
         'Some("model-edit-frame-element-orientation")',
         'Some("model-edit-element-connectivity")',
+        'Some("model-create-linear-analysis-request")',
         'Some("import")',
         'Some("import-mgt")',
         'Some("import-mgt-model-linear")',
@@ -166,6 +175,7 @@ REQUIRED_TOKENS = {
         "frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blockers",
         "element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers",
+        "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
         'view["human_review"]["automatically_inferred"]',
@@ -260,6 +270,13 @@ REQUIRED_TOKENS = {
         "element` round-trip row",
         "C6 remain open",
     ),
+    "docs/native/modelir-linear-analysis-request-create-v1.md": (
+        "model-create-linear-analysis-request",
+        "Rust -> C ABI -> C++",
+        "structural-model-ir-linear-analysis-request.v1",
+        "ABI v1.13",
+        "C6 remain open",
+    ),
 }
 
 
@@ -300,6 +317,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "frame-section editor",
         "frame-element orientation editor",
         "element-connectivity editor",
+        "model-bound CPU linear request",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",

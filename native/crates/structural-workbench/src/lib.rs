@@ -35,6 +35,7 @@ use structural_contracts::sparse_product::{
 };
 use structural_report::build_sparse_linear_report_v1;
 
+mod analysis_request;
 mod catalog;
 mod deformed_view;
 mod evidence;
@@ -43,6 +44,10 @@ mod model_view;
 mod report_view;
 mod result_view;
 
+pub use analysis_request::{
+    create_model_linear_analysis_request, publish_model_linear_analysis_request,
+    ModelLinearAnalysisRequestCreateOutcomeV1,
+};
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,
     BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,

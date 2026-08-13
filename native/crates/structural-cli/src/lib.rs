@@ -36,7 +36,8 @@ pub use model_linear_comparison::{
 };
 pub use model_linear_product::{
     execute_model_ir_linear_analysis, publish_model_ir_linear_analysis,
-    ModelIrLinearAnalysisOutcomeV1, ModelIrLinearProductError,
+    validate_model_ir_linear_analysis_compatibility, ModelIrLinearAnalysisOutcomeV1,
+    ModelIrLinearCompatibilityV1, ModelIrLinearProductError,
 };
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,

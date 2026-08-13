@@ -19,7 +19,8 @@ provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-
 `model-edit-linear-material`, `model-edit-frame-section`, and
 `model-edit-frame-element-orientation` existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
-Distribution E2E v21 proves repeated edited model/receipt bytes, exact
+The same installed payload creates one model-bound CPU linear request after authoritative C++
+assembly preflight. Distribution E2E v22 proves repeated edited/request artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings,
 and source nonmutation plus deterministic bounded NDTHA response-history,

@@ -93,8 +93,34 @@ pub fn parse_model_ir_linear_analysis_request_v1(
                 "request has unknown, missing, or mistyped fields",
             )
         })?;
+    finish(request, &value)
+}
+
+/// Validate, canonicalize, and hash one typed `ModelIR` linear analysis request.
+///
+/// # Errors
+///
+/// Returns the same stable product-contract errors as the strict parser when a typed field is
+/// outside the bounded CPU product domain or canonical serialization fails.
+pub fn build_model_ir_linear_analysis_request_v1(
+    request: ModelIrLinearAnalysisRequestV1,
+) -> Result<ModelIrLinearAnalysisRequestDocumentV1, ProductIrContractError> {
+    let value = serde_json::to_value(&request).map_err(|_| {
+        error(
+            "model_ir_linear_request_encode_failed",
+            "/",
+            "typed request could not be represented as JSON",
+        )
+    })?;
+    finish(request, &value)
+}
+
+fn finish(
+    request: ModelIrLinearAnalysisRequestV1,
+    value: &serde_json::Value,
+) -> Result<ModelIrLinearAnalysisRequestDocumentV1, ProductIrContractError> {
     validate_request(&request)?;
-    let canonical_json = canonicalize_model_ir_v2(&value).map_err(|source| {
+    let canonical_json = canonicalize_model_ir_v2(value).map_err(|source| {
         error(
             "model_ir_linear_request_canonicalization_failed",
             &source.path,
@@ -231,7 +257,9 @@ fn error(code: &str, path: &str, detail: &str) -> ProductIrContractError {
 mod tests {
     use serde_json::json;
 
-    use super::parse_model_ir_linear_analysis_request_v1;
+    use super::{
+        build_model_ir_linear_analysis_request_v1, parse_model_ir_linear_analysis_request_v1,
+    };
 
     fn request() -> Vec<u8> {
         serde_json::to_vec(&json!({
@@ -258,10 +286,14 @@ mod tests {
     #[test]
     fn strict_request_is_canonical_and_self_identified() {
         let first = parse_model_ir_linear_analysis_request_v1(&request()).expect("request");
+        let built = build_model_ir_linear_analysis_request_v1(first.request().clone())
+            .expect("typed request build");
         let repeated = parse_model_ir_linear_analysis_request_v1(first.canonical_bytes())
             .expect("canonical request");
         assert_eq!(first.canonical_json(), repeated.canonical_json());
         assert_eq!(first.request_hash(), repeated.request_hash());
+        assert_eq!(first.canonical_json(), built.canonical_json());
+        assert_eq!(first.request_hash(), built.request_hash());
         assert_eq!(first.request().load_pattern_id, "LC_WEAK");
     }
 
