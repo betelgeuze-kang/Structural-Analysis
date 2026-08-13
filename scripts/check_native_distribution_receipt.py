@@ -177,6 +177,12 @@ V17_NODAL_LOAD_EDIT_KEYS = {
     "workbench_nodal_load_edit_receipt_sha256",
 }
 V17_EXPECTED_KEYS = V16_EXPECTED_KEYS | V17_NODAL_LOAD_EDIT_KEYS
+V18_CONSTRAINT_VALUE_EDIT_KEYS = {
+    "workbench_constraint_value_edit_surface_passed",
+    "workbench_constraint_value_edit_model_sha256",
+    "workbench_constraint_value_edit_receipt_sha256",
+}
+V18_EXPECTED_KEYS = V17_EXPECTED_KEYS | V18_CONSTRAINT_VALUE_EDIT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -236,6 +242,7 @@ def validate(
         "structural-native-distribution-e2e.v15": V15_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v16": V16_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v17": V17_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v18": V18_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -246,6 +253,7 @@ def validate(
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
+        "structural-native-distribution-e2e.v18",
     }:
         schema_version = "structural-native-distribution-e2e.v13"
     backend = payload.get("backend_profile")
@@ -565,6 +573,7 @@ def validate(
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
+        "structural-native-distribution-e2e.v18",
     }:
         for name in (
             "model_ir_linear_workbench_restart_passed",
@@ -592,6 +601,7 @@ def validate(
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
+        "structural-native-distribution-e2e.v18",
     }:
         if payload.get("model_ir_linear_localized_pdf_surface_passed") is not True:
             errors.append("model_ir_linear_localized_pdf_surface_passed must be true")
@@ -610,6 +620,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
+        "structural-native-distribution-e2e.v18",
     }:
         for name in (
             "mgt_model_ir_linear_workbench_restart_passed",
@@ -635,12 +646,24 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v17":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v17",
+        "structural-native-distribution-e2e.v18",
+    }:
         if payload.get("workbench_nodal_load_edit_surface_passed") is not True:
             errors.append("workbench_nodal_load_edit_surface_passed must be true")
         for name in (
             "workbench_nodal_load_edit_model_sha256",
             "workbench_nodal_load_edit_receipt_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v18":
+        if payload.get("workbench_constraint_value_edit_surface_passed") is not True:
+            errors.append("workbench_constraint_value_edit_surface_passed must be true")
+        for name in (
+            "workbench_constraint_value_edit_model_sha256",
+            "workbench_constraint_value_edit_receipt_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
