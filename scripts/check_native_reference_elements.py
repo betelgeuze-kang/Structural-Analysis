@@ -11,6 +11,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_TOKENS = {
+    "native/cpp/CMakeLists.txt": (
+        "add_library(structural_model_assembly",
+        "structural_model_ir",
+        "structural_elements",
+        "structural_assembly",
+    ),
     "native/cpp/src/materials/materials.cpp": (
         "BilinearUniaxialPoint::trial",
         "BilinearUniaxialPoint::commit",
@@ -38,6 +44,32 @@ REQUIRED_TOKENS = {
         "constraint reduction must retain at least one active DOF",
         "sparse assembly accumulation exceeds the finite numerical domain",
     ),
+    "native/cpp/src/model_ir/model_ir.hpp": (
+        "LinearReferenceGraph",
+        "project_linear_reference_graph",
+    ),
+    "native/cpp/src/model_ir/model_ir.cpp": (
+        "Model::project_linear_reference_graph",
+        "linear frame3d/truss3d reference slice",
+        "supports homogeneous constraints only",
+        "zero-self-weight linear-static patterns",
+    ),
+    "native/cpp/src/assembly/model_ir_assembly.hpp": (
+        "ModelIrLinearAssemblyResult",
+        "model_content_hash",
+        "model_semantic_hash",
+        "model_provenance_hash",
+        "equilibrium_residual",
+        "element_recovery",
+        "assemble_model_ir_linear_reference",
+    ),
+    "native/cpp/src/assembly/model_ir_assembly.cpp": (
+        "evaluate_frame3d",
+        "evaluate_truss3d",
+        "assemble_reduced_csr_deterministic",
+        "homogeneous constrained DOFs require zero state and direction",
+        "nodal-load accumulation exceeds the finite numerical domain",
+    ),
     "native/cpp/include/structural/abi_v1.h": (
         "SA_ABI_V1_7",
         "SA_CAPABILITY_REFERENCE_ELEMENTS_CPU",
@@ -47,6 +79,10 @@ REQUIRED_TOKENS = {
         "table_is_append_only",
         "failures_do_not_publish_partial_outputs",
         "SA_EXECUTION_BACKEND_CPU",
+    ),
+    "native/cpp/tests/CMakeLists.txt": (
+        "structural_model_ir_assembly_cpu_tests",
+        "structural_model_assembly",
     ),
     "native/crates/structural-ffi/src/lib.rs": (
         "load_reference_elements",
@@ -65,10 +101,23 @@ REQUIRED_TOKENS = {
         "assembly_csr.row_offsets",
         "assembly_csr.column_indices",
     ),
+    "tests/test_native_model_ir_assembly_python_parity.py": (
+        "typed_model_ir_mixed_graph_assembly_matches_independent_numpy_oracle",
+        "model_assembly.equilibrium_residual",
+        "model_assembly.frame_recovery",
+        "model_assembly.truss_recovery",
+    ),
     "docs/native/reference-elements-assembly-v1.md": (
         "C0",
         "C1",
         "authoritatively closed",
+        "C6",
+    ),
+    "docs/native/modelir-linear-reference-assembly-v1.md": (
+        "18-DOF graph",
+        "43 structural entries",
+        "equilibrium_residual = internal_force - external_load",
+        "no stable ABI or Rust",
         "C6",
     ),
 }

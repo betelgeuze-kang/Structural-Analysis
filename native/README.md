@@ -87,11 +87,15 @@ linear truss3d, Euler-Bernoulli frame3d and a three-node plane-stress membrane. 
 element operation publishes complete tangent, consistent mass, residual, JVP and recovery
 buffers through one safe Rust wrapper; deterministic dense plus homogeneous-constraint-reduced
 canonical CSR assembly remains a separate C++ reference target. The CSR projection publishes the
-sorted active-DOF map, canonical structure and the same four numerical channels without yet
-deriving an arbitrary ModelIR graph. An independent NumPy oracle compares every output value.
-Because HIP C2 is
+sorted active-DOF map, canonical structure and the same four numerical channels. A separate
+`structural_model_assembly` target now resolves a bounded typed ModelIR linear frame3d/truss3d
+graph, selected nodal loads and element recovery through those exact sources; its mixed
+three-node/18-DOF graph matches an independent NumPy oracle after reduction to seven active DOFs
+and 43 structural entries. It does not cover nonzero constraints, offsets/releases, self-weight,
+combinations/stages, shell/nonlinear graphs, ABI/Rust integration or product execution. Because HIP C2 is
 still open, these capabilities remain at C1. See
-`docs/native/reference-elements-assembly-v1.md`.
+`docs/native/reference-elements-assembly-v1.md` and
+`docs/native/modelir-linear-reference-assembly-v1.md`.
 
 With `STRUCTURAL_ENABLE_HIP=ON`, `structural_elements_hip` evaluates the same five-profile FP64
 reference batch and performs stable-order non-atomic dense assembly without an intermediate host

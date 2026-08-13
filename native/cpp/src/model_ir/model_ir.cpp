@@ -2575,6 +2575,195 @@ std::string_view Model::snapshot() const noexcept {
     return impl_->model.canonical_json;
 }
 
+LinearReferenceGraph Model::project_linear_reference_graph() const {
+    if (!impl_->issues.empty()) {
+        fail(
+            SA_ERR_SEMANTIC_INVALID,
+            "ModelIR linear reference assembly requires a semantically valid model");
+    }
+    if (!impl_->declared.empty() || !impl_->derived.empty()) {
+        fail(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference assembly requires an analysis-ready model");
+    }
+
+    const auto& model = impl_->model;
+    constexpr auto kDofsPerNode = std::size_t {6U};
+    constexpr auto kMaximumGlobalDofCount = std::size_t {1'000'000U};
+    if (model.nodes.empty() || model.elements.empty() || model.load_patterns.empty()
+        || model.nodes.size() > kMaximumGlobalDofCount / kDofsPerNode) {
+        fail(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference assembly graph size is outside the bounded domain");
+    }
+    if (!model.load_combinations.empty() || !model.time_functions.empty()
+        || !model.construction_stages.empty() || !model.unsupported_features.empty()) {
+        fail(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference assembly does not consume combinations, time functions, stages, or unsupported features");
+    }
+
+    struct NodeProjection final {
+        std::uint32_t stable_index {};
+        std::array<double, 3> coordinates {};
+    };
+    std::unordered_map<std::string, NodeProjection> nodes;
+    nodes.reserve(model.nodes.size());
+    for (const auto& node : model.nodes) {
+        nodes.emplace(
+            node.identity.id,
+            NodeProjection {
+                static_cast<std::uint32_t>(node.identity.index),
+                node.coordinates,
+            });
+    }
+    std::unordered_map<std::string, const Material*> materials;
+    materials.reserve(model.materials.size());
+    for (const auto& material : model.materials) {
+        materials.emplace(material.identity.id, &material);
+    }
+    std::unordered_map<std::string, const Section*> sections;
+    sections.reserve(model.sections.size());
+    for (const auto& section : model.sections) {
+        sections.emplace(section.identity.id, &section);
+    }
+
+    const auto all_zero = [](const auto& values) {
+        return std::all_of(values.begin(), values.end(), [](const double value) {
+            return value == 0.0;
+        });
+    };
+    LinearReferenceGraph output;
+    output.content_hash = model.content_hash;
+    output.semantic_hash = model.semantic_hash;
+    output.provenance_hash = model.provenance_hash;
+    output.global_dof_count = model.nodes.size() * kDofsPerNode;
+    output.elements.reserve(model.elements.size());
+    for (const auto& element : model.elements) {
+        if (!element.material_id.has_value() || !all_zero(element.offset_i)
+            || !all_zero(element.offset_j) || !element.releases_i.empty()
+            || !element.releases_j.empty() || element.integration_order.has_value()
+            || element.uniform_load.has_value()) {
+            fail(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference element has unsupported state, offsets, releases, or member loading");
+        }
+        const auto node_i = nodes.find(element.node_ids[0]);
+        const auto node_j = nodes.find(element.node_ids[1]);
+        const auto material = materials.find(*element.material_id);
+        const auto section = sections.find(element.section_id);
+        if (node_i == nodes.end() || node_j == nodes.end()
+            || material == materials.end() || section == sections.end()) {
+            fail(SA_ERR_INTERNAL, "validated ModelIR graph reference became unavailable");
+        }
+        if (material->second->law != SA_MATERIAL_LINEAR_ELASTIC_ISOTROPIC) {
+            fail(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference assembly requires linear isotropic material");
+        }
+        const auto* const linear = std::get_if<sa_linear_material_parameters_v1>(
+            &material->second->parameters);
+        if (linear == nullptr) {
+            fail(SA_ERR_INTERNAL, "validated linear ModelIR material has inconsistent parameters");
+        }
+
+        LinearReferenceElement projected {
+            element.identity.index,
+            element.type,
+            node_i->second.stable_index,
+            node_j->second.stable_index,
+            node_i->second.coordinates,
+            node_j->second.coordinates,
+            linear->elastic_modulus_pa,
+            linear->poisson_ratio,
+            linear->density_kg_m3,
+        };
+        if (element.type == SA_ELEMENT_FRAME_3D
+            && element.formulation == SA_FORMULATION_EULER_BERNOULLI_3D
+            && section->second->family == SA_SECTION_FRAME_3D
+            && element.local_axis_rotation_rad.has_value()) {
+            const auto* const frame = std::get_if<sa_frame_section_parameters_v1>(
+                &section->second->parameters);
+            if (frame == nullptr) {
+                fail(SA_ERR_INTERNAL, "validated frame section has inconsistent parameters");
+            }
+            projected.area_m2 = frame->area_m2;
+            projected.iy_m4 = frame->iy_m4;
+            projected.iz_m4 = frame->iz_m4;
+            projected.torsional_constant_m4 = frame->torsional_constant_m4;
+            projected.local_axis_rotation_rad = *element.local_axis_rotation_rad;
+        } else if (element.type == SA_ELEMENT_TRUSS_3D
+            && element.formulation == SA_FORMULATION_LINEAR_TRUSS_3D
+            && section->second->family == SA_SECTION_TRUSS_3D
+            && !element.local_axis_rotation_rad.has_value()) {
+            const auto* const truss = std::get_if<sa_truss_section_parameters_v1>(
+                &section->second->parameters);
+            if (truss == nullptr) {
+                fail(SA_ERR_INTERNAL, "validated truss section has inconsistent parameters");
+            }
+            projected.area_m2 = truss->area_m2;
+        } else {
+            fail(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR element formulation is outside the linear frame3d/truss3d reference slice");
+        }
+        output.elements.push_back(projected);
+    }
+
+    for (const auto& constraint : model.constraints) {
+        const auto node = nodes.find(constraint.node_id);
+        if (node == nodes.end()) {
+            fail(SA_ERR_INTERNAL, "validated ModelIR constraint node became unavailable");
+        }
+        if (std::any_of(
+                constraint.prescribed_values.begin(),
+                constraint.prescribed_values.end(),
+                [](const PrescribedValue& value) { return value.value != 0.0; })) {
+            fail(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference assembly supports homogeneous constraints only");
+        }
+        for (const auto dof : constraint.dofs) {
+            const auto global_dof = static_cast<std::size_t>(node->second.stable_index)
+                    * kDofsPerNode
+                + static_cast<std::size_t>(dof - SA_DOF_UX);
+            output.constrained_dof_indices.push_back(static_cast<std::uint32_t>(global_dof));
+        }
+    }
+    std::sort(output.constrained_dof_indices.begin(), output.constrained_dof_indices.end());
+    if (std::adjacent_find(
+            output.constrained_dof_indices.begin(), output.constrained_dof_indices.end())
+        != output.constrained_dof_indices.end()) {
+        fail(SA_ERR_INTERNAL, "validated ModelIR contains a duplicate constrained DOF");
+    }
+
+    output.load_patterns.reserve(model.load_patterns.size());
+    for (const auto& pattern : model.load_patterns) {
+        if (pattern.analysis_type != SA_ANALYSIS_LINEAR_STATIC || !all_zero(pattern.self_weight)) {
+            fail(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference assembly requires zero-self-weight linear-static patterns");
+        }
+        LinearReferenceLoadPattern projected {
+            pattern.identity.id,
+            pattern.identity.index,
+            pattern.analysis_type,
+            pattern.self_weight,
+            {},
+        };
+        projected.nodal_loads.reserve(pattern.nodal_loads.size());
+        for (const auto& load : pattern.nodal_loads) {
+            const auto node = nodes.find(load.node_id);
+            if (node == nodes.end()) {
+                fail(SA_ERR_INTERNAL, "validated ModelIR nodal-load node became unavailable");
+            }
+            projected.nodal_loads.push_back({node->second.stable_index, load.components});
+        }
+        output.load_patterns.push_back(std::move(projected));
+    }
+    return output;
+}
+
 NdthaAdapterProperties Model::adapt_fixed_guided_frame3d_x(
     const std::string_view element_id,
     const std::string_view base_node_id,

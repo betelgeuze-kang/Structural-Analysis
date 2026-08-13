@@ -3,10 +3,14 @@
 
 #include "structural/abi_v1.h"
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
+#include <string>
 #include <string_view>
+#include <vector>
 
 namespace structural::model_ir {
 
@@ -21,6 +25,48 @@ struct NdthaAdapterProperties final {
     double story_mass_kg {};
     double story_damping_n_s_per_m {};
     double floor_load_base_n {};
+};
+
+/// One typed, resolved element admitted by the bounded linear reference-assembly projection.
+struct LinearReferenceElement final {
+    std::uint64_t stable_index {};
+    std::uint32_t type {};
+    std::uint32_t node_i_index {};
+    std::uint32_t node_j_index {};
+    std::array<double, 3> node_i_m {};
+    std::array<double, 3> node_j_m {};
+    double youngs_modulus_pa {};
+    double poisson_ratio {};
+    double density_kg_per_m3 {};
+    double area_m2 {};
+    double iy_m4 {};
+    double iz_m4 {};
+    double torsional_constant_m4 {};
+    double local_axis_rotation_rad {};
+};
+
+struct LinearReferenceNodalLoad final {
+    std::uint32_t node_index {};
+    std::array<double, 6> components_si {};
+};
+
+struct LinearReferenceLoadPattern final {
+    std::string id;
+    std::uint64_t stable_index {};
+    std::uint32_t analysis_type {};
+    std::array<double, 3> self_weight {};
+    std::vector<LinearReferenceNodalLoad> nodal_loads;
+};
+
+/// Deep, pointer-free projection from validated ModelIR into the bounded linear C1 graph slice.
+struct LinearReferenceGraph final {
+    std::string content_hash;
+    std::string semantic_hash;
+    std::string provenance_hash;
+    std::size_t global_dof_count {};
+    std::vector<LinearReferenceElement> elements;
+    std::vector<std::uint32_t> constrained_dof_indices;
+    std::vector<LinearReferenceLoadPattern> load_patterns;
 };
 
 class Error final : public std::runtime_error {
@@ -45,6 +91,7 @@ public:
 
     [[nodiscard]] std::string_view validation_report() const noexcept;
     [[nodiscard]] std::string_view snapshot() const noexcept;
+    [[nodiscard]] LinearReferenceGraph project_linear_reference_graph() const;
     [[nodiscard]] NdthaAdapterProperties adapt_fixed_guided_frame3d_x(
         std::string_view element_id,
         std::string_view base_node_id,

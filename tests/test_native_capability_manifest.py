@@ -69,7 +69,13 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "constraint-reduced canonical-CSR" in assembly["claim"]
     assert "sorted active-DOF map" in assembly["claim"]
     assert "irregular constrained three-element CSR graph" in assembly["claim"]
+    assert "typed ModelIR linear-graph" in assembly["claim"]
+    assert "six canonical DOFs per node" in assembly["claim"]
+    assert "content/semantic/provenance identities" in assembly["claim"]
+    assert "seven active DOFs and 43 structural entries" in assembly["claim"]
+    assert "internal/external/equilibrium residual" in assembly["claim"]
     assert "nonzero prescribed constraints" in assembly["claim"]
+    assert "shell/nonlinear ModelIR graphs" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
     assert capabilities.capability_is_enabled(payload, "sparse_linear_solver_cpu") is True
     sparse = payload["capabilities"]["sparse_linear_solver_cpu"]

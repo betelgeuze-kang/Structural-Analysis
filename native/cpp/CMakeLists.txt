@@ -109,6 +109,33 @@ target_include_directories(
 structural_set_warnings(structural_assembly)
 structural_enable_sanitizers(structural_assembly)
 
+add_library(structural_model_assembly STATIC src/assembly/model_ir_assembly.cpp)
+add_library(Structural::model_assembly ALIAS structural_model_assembly)
+set_target_properties(
+  structural_model_assembly
+  PROPERTIES
+    EXPORT_NAME model_assembly
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
+target_include_directories(
+  structural_model_assembly
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/assembly
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/elements
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/materials
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/model_ir
+)
+target_link_libraries(
+  structural_model_assembly
+  PUBLIC
+    structural_model_ir
+    structural_elements
+    structural_assembly
+)
+structural_set_warnings(structural_model_assembly)
+structural_enable_sanitizers(structural_model_assembly)
+
 if(STRUCTURAL_ENABLE_HIP)
   set(STRUCTURAL_REFERENCE_HIP_SOURCE src/hip/reference_elements_hip.hip.cpp)
   set(STRUCTURAL_SPARSE_HIP_SOURCE src/hip/sparse_linear_hip.hip.cpp)
@@ -425,6 +452,7 @@ set(
   structural_materials
   structural_elements
   structural_assembly
+  structural_model_assembly
   structural_solver_cpu
   structural_c_abi_v1
 )

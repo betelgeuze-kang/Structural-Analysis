@@ -16,6 +16,10 @@ This slice moves one deliberately small numerical source into C++20:
 - homogeneous-Dirichlet constraint reduction of the same contributions into a canonical CSR
   active-DOF operator with sorted row columns and explicit global-to-reduced mapping.
 
+A separate C1 composition target now projects a bounded typed ModelIR linear frame3d/truss3d
+graph into this exact element and CSR source. Its load and recovery contract is documented in
+`modelir-linear-reference-assembly-v1.md`; it does not change the ABI v1.7 element surface.
+
 The three stateless elements compute residual, tangent, JVP and result recovery
 from the same element response source. All coordinates and values use SI base
 units. The ABI result records CPU execution and fallback count zero.
@@ -34,6 +38,10 @@ units. The ABI result records CPU execution and fallback count zero.
   graph, removes one constrained DOF, constructs the structural pattern and compares the exact
   active mapping, row offsets, column indices, tangent, mass, residual and JVP. Python is only the
   oracle harness and is not linked or invoked by native product code.
+- ModelIR graph C0/C1: `structural_model_ir_assembly_cpu_tests` and
+  `tests/test_native_model_ir_assembly_python_parity.py` cover a typed three-node mixed
+  frame/truss graph, selected nodal loads, 18-to-7 DOF constraint reduction, 43 canonical
+  structural entries, internal/external/equilibrium residuals, JVP, and element recovery.
 - ABI integration: ABI v1.7 adds one append-only optional table slot. It uses
   exact-length immutable inputs, disjoint caller-owned outputs, stable errors,
   failure-atomic publication and a reentrant safe Rust wrapper.
@@ -51,11 +59,13 @@ The shell profile is membrane-only. It has no bending, drilling, transverse
 shear, nonlinear material, offset, opening or general shell claim. The frame
 profile has no rigid offsets, releases, geometric stiffness or nonlinear
 constitutive state. The CSR result is a bounded serial reference projection of caller-supplied
-local contributions and homogeneous constrained-DOF indices. It does not derive an arbitrary
-ModelIR operator graph, apply nonzero prescribed-displacement load corrections, reorder DOFs,
-propagate constitutive epochs, cross the Rust FFI, or claim a sparse performance backend.
+local contributions and homogeneous constrained-DOF indices. The separate typed ModelIR
+composition accepts arbitrary topology only within its linear frame3d/truss3d, zero-offset,
+zero-release, direct-nodal-load subset. Neither path applies nonzero prescribed-displacement load
+corrections, reorders DOFs, propagates constitutive epochs, crosses the Rust FFI, or claims a sparse
+performance backend.
 
 Still open: protected-runner C2 promotion, broader formulation/material parity,
-element-state aggregation, arbitrary ModelIR graph assembly, nonzero constraint handling,
-sparse resident execution, Rust FFI, checkpoint/restart, ResultIR recovery, product E2E and C6
-decommission.
+element-state aggregation, general ModelIR graph assembly beyond the bounded linear subset,
+nonzero constraint handling, self-weight/combinations/stages, sparse resident execution, Rust FFI,
+checkpoint/restart, ResultIR recovery, product E2E and C6 decommission.

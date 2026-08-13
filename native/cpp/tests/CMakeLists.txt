@@ -283,6 +283,32 @@ set_tests_properties(
   PROPERTIES LABELS "assembly;solver_cpu"
 )
 
+add_executable(
+  structural_model_ir_assembly_cpu_tests
+  assembly/model_ir_assembly_test.cpp
+)
+target_include_directories(
+  structural_model_ir_assembly_cpu_tests
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/src/assembly
+    ${PROJECT_SOURCE_DIR}/src/model_ir
+)
+target_link_libraries(
+  structural_model_ir_assembly_cpu_tests
+  PRIVATE
+    structural_model_assembly
+)
+structural_set_warnings(structural_model_ir_assembly_cpu_tests)
+structural_enable_sanitizers(structural_model_ir_assembly_cpu_tests)
+add_test(
+  NAME structural_model_ir_assembly_cpu_tests
+  COMMAND structural_model_ir_assembly_cpu_tests
+)
+set_tests_properties(
+  structural_model_ir_assembly_cpu_tests
+  PROPERTIES LABELS "assembly;modelir;elements;materials;solver_cpu"
+)
+
 set(
   STRUCTURAL_LEGACY_REPLAY_ROOT
   "${PROJECT_SOURCE_DIR}/../../implementation/phase1"

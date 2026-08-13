@@ -118,6 +118,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - tests/test_mgt_residual_jacobian_consistency_probe.py
   - tests/test_engine_v2_hip_current_tangent_operator.py
   - tests/test_native_reference_elements_python_parity.py
+  - tests/test_native_model_ir_assembly_python_parity.py
 - Stable errors to preserve
   - DOF/reference/layout mismatch, CSR invalid, state epoch mismatch
   - fallback forbidden, backend unavailable와 device mismatch
@@ -128,13 +129,17 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   constraints, then scatters tangent, consistent mass, residual and JVP in stable-index order.
   It also emits sorted active-DOF mapping and canonical CSR structure independent of contribution
   and constraint input order. The complete dense three-DOF/two-contribution output and an irregular
-  constrained three-element CSR graph match an independent NumPy oracle. This is not arbitrary
-  ModelIR assembly, nonzero prescribed-displacement correction, reordering, stateful epoch
-  propagation, Rust FFI or product integration. The same product-owned HIP candidate assembles a
-  38-DOF overlapping five-element graph without atomics in stable order and matches CPU with zero
-  error while retaining element outputs on device; protected-runner C2 promotion remains open.
-  Arbitrary ModelIR graph assembly and other paths remain open; probe/replay and Python-managed
-  HIPRTC paths are not product authority.
+  constrained three-element CSR graph match an independent NumPy oracle. A separate C++
+  composition target now resolves every element in a bounded typed ModelIR linear
+  frame3d/truss3d graph, maps six canonical DOFs per node, selects one direct nodal-load pattern,
+  and emits reduced tangent, mass, internal/external/equilibrium residual, JVP and per-element
+  recovery. Its three-node mixed graph independently matches NumPy for all 43 structural entries.
+  This is not general ModelIR assembly: nonzero constraints, offsets/releases, self-weight,
+  combinations/stages, shell/nonlinear formulations, reordering, stateful epoch propagation, Rust
+  FFI and product integration remain open. The same product-owned HIP candidate assembles a 38-DOF
+  overlapping five-element graph without atomics in stable order and matches CPU with zero error
+  while retaining element outputs on device; protected-runner C2 promotion remains open.
+  Probe/replay and Python-managed HIPRTC paths are not product authority.
 
 ### D4. Linear, nonlinear, eigen and dynamic solvers
 

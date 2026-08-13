@@ -80,16 +80,18 @@ owner다. distribution은 계산 graph 밖에서 이미 빌드된 product payloa
 | structural_elements | static | element kinematics와 recovery source | 아니오 |
 | structural_materials | static | accepted/trial/commit/rollback constitutive source | 아니오 |
 | structural_assembly | static | DOF graph, residual/tangent/JVP assembly | 아니오 |
+| structural_model_assembly | static | typed ModelIR linear graph to reference elements and canonical CSR composition | 아니오 |
 | structural_solver_cpu | static | bounded track point-load reference kernel; later CPU solvers | 아니오 |
 | structural_solver_hip | static | resident HIP operators와 solver | 예 |
 | structural_c_abi_v1 | shared/static | sa_get_api_v1 table과 exception boundary | 선택 |
 | structural_native_tests | executable set | C++ unit, C ABI와 parity test | 기본 아니오 |
 
-현재 dependency 방향은 `structural_materials -> structural_elements`이며 reference assembly는
-element contribution contract만 소비하도록 독립되어 있다. 이후 ModelIR graph adapter가
-elements/assembly를 composition한다. `structural_c_abi_v1`은 필요한 lower target을 composition하지만
-lower target은 ABI나 Rust를 알지 못한다. structural_solver_hip는 CPU target에 fallback하지 않고
-동일 operator contract만 공유한다.
+현재 dependency 방향은 `structural_materials -> structural_elements`이며 low-level reference
+assembly는 element contribution contract만 소비하도록 독립되어 있다. 별도
+`structural_model_assembly`가 typed ModelIR, elements, assembly를 조합하므로 lower numerical target은
+ModelIR이나 ABI를 알지 못한다. `structural_c_abi_v1`은 필요한 lower target을 composition하지만 lower
+target은 ABI나 Rust를 알지 못한다. structural_solver_hip는 CPU target에 fallback하지 않고 동일
+operator contract만 공유한다.
 
 ## 4. Build ownership
 
