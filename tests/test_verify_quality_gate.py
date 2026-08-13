@@ -14,6 +14,11 @@ verify_quality_gate = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(verify_quality_gate)
 
+FRONTEND_CONTRACT_PREFIX = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- "
+)
+
 
 def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     exit_code = verify_quality_gate.main(["--mode", "pr", "--dry-run"])
@@ -25,14 +30,24 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert (
         "scripts/check_p1_benchmark_breadth_status.py --json --fail-core-open" in output
     )
-    assert "npm audit --audit-level high" in output
-    assert output.index("npm ci") < output.index("npm audit --audit-level high")
-    assert "verify:viewer-manifest" in output
+    frontend_install = f"{FRONTEND_CONTRACT_PREFIX}frontend-install --root ."
+    frontend_audit = (
+        f"{FRONTEND_CONTRACT_PREFIX}frontend-audit --root . --fail-on-nonzero"
+    )
+    viewer_manifest = f"{FRONTEND_CONTRACT_PREFIX}viewer-manifest --root ."
+    assert frontend_install in output
+    assert frontend_audit in output
+    assert output.index(frontend_install) < output.index(frontend_audit)
+    assert "npm " not in output
+    assert "npm.cmd " not in output
+    assert viewer_manifest in output
     assert "scripts/verify_structure_viewer_contracts.py" in output
-    assert output.index("verify:viewer-manifest") < output.index(
+    assert output.index(viewer_manifest) < output.index(
         "scripts/verify_structure_viewer_contracts.py"
     )
-    assert "verify:frontend-browser-smoke -- --mode minimal" in output
+    assert (
+        f"{FRONTEND_CONTRACT_PREFIX}browser-smoke --root . --mode minimal" in output
+    )
     assert "scripts/report_source_boundary_footprint.py --check" in output
     scope_line = next(
         line
@@ -141,29 +156,24 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         in output
     )
     assert "-m pytest -q" in output
-    assert "verify:viewer-sample-workflow" in output
-    assert "verify:viewer-report-pdf" in output
-    assert "verify:viewer-performance-probe" in output
-    assert "verify:viewer-visual-regression" in output
-    assert output.index("verify:frontend-browser-smoke") < output.index(
-        "verify:viewer-sample-workflow"
-    )
-    assert output.index("verify:viewer-sample-workflow") < output.index(
-        "verify:viewer-report-pdf"
-    )
-    assert output.index("verify:viewer-report-pdf") < output.index(
-        "verify:viewer-performance-probe"
-    )
-    assert output.index("verify:viewer-performance-probe") < output.index(
-        "verify:viewer-visual-regression"
-    )
+    browser_smoke = f"{FRONTEND_CONTRACT_PREFIX}browser-smoke --root ."
+    sample_workflow = f"{FRONTEND_CONTRACT_PREFIX}viewer-sample-workflow --root ."
+    report_pdf = f"{FRONTEND_CONTRACT_PREFIX}viewer-report-pdf-smoke --root ."
+    performance = f"{FRONTEND_CONTRACT_PREFIX}viewer-performance-probe --root ."
+    visual = f"{FRONTEND_CONTRACT_PREFIX}viewer-visual-regression --root ."
+    for command in (browser_smoke, sample_workflow, report_pdf, performance, visual):
+        assert command in output
+    assert "npm " not in output
+    assert "npm.cmd " not in output
+    assert output.index(browser_smoke) < output.index(sample_workflow)
+    assert output.index(sample_workflow) < output.index(report_pdf)
+    assert output.index(report_pdf) < output.index(performance)
+    assert output.index(performance) < output.index(visual)
     assert (
         "scripts/report_commercialization_level.py --closure-mode conditional" in output
     )
     assert "--fail-below 9.0" not in output
-    assert output.index("verify:viewer-visual-regression") < output.index(
-        "scripts/report_commercialization_level.py"
-    )
+    assert output.index(visual) < output.index("scripts/report_commercialization_level.py")
     assert "scripts/build_developer_preview_readiness.py --check" in output
     assert output.index("scripts/report_commercialization_level.py") < output.index(
         "scripts/build_developer_preview_readiness.py"
@@ -348,7 +358,10 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
         "scripts/check_p1_benchmark_breadth_status.py --json --fail-blocked" in output
     )
     assert "-m pytest -q" in output
-    assert "verify:viewer-visual-regression" in output
+    visual = f"{FRONTEND_CONTRACT_PREFIX}viewer-visual-regression --root ."
+    assert visual in output
+    assert "npm " not in output
+    assert "npm.cmd " not in output
     assert "scripts/check_generated_worktree_clean.py --show-ok" in output
     assert (
         "scripts/report_commercialization_level.py --closure-mode conditional --fail-below 9.0"
@@ -386,7 +399,7 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     )
     assert " --check" in snapshot_gate_line
     assert " --fail-blocked" in snapshot_gate_line
-    assert output.index("verify:viewer-visual-regression") < output.index(
+    assert output.index(visual) < output.index(
         "scripts/check_github_actions_runner_policy.py"
     )
     assert output.index(

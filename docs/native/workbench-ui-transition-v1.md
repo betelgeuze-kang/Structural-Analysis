@@ -62,6 +62,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `advisory_or_tool_failure`; npm findings, registry/network/configuration/tool-failure
   classification, dependency/license clearance, and external cache mutation remain outside the
   receipt.
+  Quality-gate frontend entrypoints are Rust-native: `scripts/verify_quality_gate.py` still owns
+  Python sequencing of the broader repository checks, but its frontend install, strict audit,
+  contract, build, manifest and browser verifiers call direct Cargo commands with npm package-script
+  entrypoints zero. Strict audit publishes the canonical unclassified receipt before returning
+  failure on numeric nonzero, preserving the prior gate behavior; all retained inner runtimes and
+  Python sequencing remain visible.
   Hosted frontend/browser workflow product entrypoints are Rust-native: frontend web, nightly full,
   runtime-input Viewer, and Viewer-browser jobs call the Cargo commands directly, with no `npm run`,
   `npx`, direct Node, or direct `npm audit` entrypoint. The two native catalog/evidence Bash wrappers remain because they

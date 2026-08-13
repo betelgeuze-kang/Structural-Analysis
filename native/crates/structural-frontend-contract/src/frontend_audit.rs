@@ -16,6 +16,7 @@ const RECEIPT_SCHEMA_V1: &str = "structural-native-frontend-audit-receipt.v1";
 const EXPECTED_NPM_LAUNCHER: &str = "npm";
 const EXPECTED_ARGUMENTS: [&str; 3] = ["audit", "--audit-level", "high"];
 const EXPECTED_WORKFLOW_FAILURE_POLICY: &str = "record_numeric_nonzero_without_failing_workflow";
+const EXPECTED_STRICT_FAILURE_POLICY: &str = "fail_command_after_recording_numeric_nonzero";
 const EXPECTED_FINDINGS_INTERPRETATION: &str =
     "nonzero_not_classified_as_vulnerability_network_or_tool_failure";
 const EXPECTED_NETWORK_ACCOUNTING: &str =
@@ -32,6 +33,7 @@ pub(crate) struct FrontendAuditSourceV1 {
     npm_launcher: String,
     arguments: Vec<String>,
     workflow_failure_policy: String,
+    strict_failure_policy: String,
     findings_interpretation: String,
     network_access_accounting: String,
     filesystem_mutation_accounting: String,
@@ -44,6 +46,7 @@ pub(crate) struct FrontendAuditSourceV1 {
 pub struct FrontendAuditOptions {
     pub root: PathBuf,
     pub dry_run: bool,
+    pub fail_on_nonzero: bool,
 }
 
 impl FrontendAuditOptions {
@@ -52,6 +55,7 @@ impl FrontendAuditOptions {
         Self {
             root,
             dry_run: false,
+            fail_on_nonzero: false,
         }
     }
 }
@@ -93,13 +97,15 @@ struct PreparedFrontendAudit {
     source: FrontendAuditSourceV1,
     root: PathBuf,
     frontend_contract_receipt_hash: String,
+    fail_on_nonzero: bool,
 }
 
-/// Plan or directly run the fixed non-blocking `npm audit --audit-level high` child.
+/// Plan or directly run the fixed `npm audit --audit-level high` child.
 ///
-/// A numeric nonzero child exit is recorded in the receipt and deliberately does not make this
-/// function fail. The contract cannot distinguish an advisory from registry, network, or npm
-/// failure without taking ownership of npm's output schema.
+/// A numeric nonzero child exit is always recorded in the receipt. The selected policy tells the
+/// CLI whether to remain non-blocking or fail after publishing that receipt. The contract cannot
+/// distinguish an advisory from registry, network, or npm failure without taking ownership of
+/// npm's output schema.
 ///
 /// # Errors
 ///
@@ -145,6 +151,7 @@ fn prepare_frontend_audit(
         source,
         root,
         frontend_contract_receipt_hash,
+        fail_on_nonzero: options.fail_on_nonzero,
     })
 }
 
@@ -196,6 +203,7 @@ pub(crate) fn validate_frontend_audit_source(
         && source.npm_launcher == EXPECTED_NPM_LAUNCHER
         && source.arguments == EXPECTED_ARGUMENTS
         && source.workflow_failure_policy == EXPECTED_WORKFLOW_FAILURE_POLICY
+        && source.strict_failure_policy == EXPECTED_STRICT_FAILURE_POLICY
         && source.findings_interpretation == EXPECTED_FINDINGS_INTERPRETATION
         && source.network_access_accounting == EXPECTED_NETWORK_ACCOUNTING
         && source.filesystem_mutation_accounting == EXPECTED_FILESYSTEM_MUTATION_ACCOUNTING
@@ -227,6 +235,11 @@ fn build_receipt(
     let logical_command = std::iter::once("npm".to_owned())
         .chain(prepared.source.arguments.iter().cloned())
         .collect();
+    let workflow_failure_policy = if prepared.fail_on_nonzero {
+        prepared.source.strict_failure_policy.clone()
+    } else {
+        prepared.source.workflow_failure_policy.clone()
+    };
     let mut receipt = FrontendAuditReceiptV1 {
         schema_version: RECEIPT_SCHEMA_V1.to_owned(),
         action: "frontend_audit".to_owned(),
@@ -239,7 +252,7 @@ fn build_receipt(
         node_options_disposition: "removed_for_direct_child".to_owned(),
         direct_processes_spawned: u64::from(executed),
         observed_exit_code: exit_code,
-        workflow_failure_policy: prepared.source.workflow_failure_policy,
+        workflow_failure_policy,
         findings_interpretation: prepared.source.findings_interpretation,
         runtime_requirements: FrontendAuditRuntimeRequirementsV1 {
             required: vec!["node".to_owned(), "npm".to_owned()],
@@ -292,6 +305,7 @@ mod tests {
                 .map(|value| (*value).to_owned())
                 .collect(),
             workflow_failure_policy: super::EXPECTED_WORKFLOW_FAILURE_POLICY.to_owned(),
+            strict_failure_policy: super::EXPECTED_STRICT_FAILURE_POLICY.to_owned(),
             findings_interpretation: super::EXPECTED_FINDINGS_INTERPRETATION.to_owned(),
             network_access_accounting: super::EXPECTED_NETWORK_ACCOUNTING.to_owned(),
             filesystem_mutation_accounting: super::EXPECTED_FILESYSTEM_MUTATION_ACCOUNTING
@@ -316,5 +330,9 @@ mod tests {
         let mut policy = source();
         policy.workflow_failure_policy = "always_pass_without_receipt".to_owned();
         assert!(validate_frontend_audit_source(&policy).is_err());
+
+        let mut strict_policy = source();
+        strict_policy.strict_failure_policy = "fail_without_receipt".to_owned();
+        assert!(validate_frontend_audit_source(&strict_policy).is_err());
     }
 }

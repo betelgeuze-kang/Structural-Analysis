@@ -2839,6 +2839,38 @@ fn frontend_audit_records_numeric_nonzero_without_failing_or_overclassifying() {
 
 #[cfg(unix)]
 #[test]
+fn frontend_audit_strict_policy_fails_only_after_publishing_nonzero_receipt() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(&test.0, b"#!/bin/sh\nexit 7\n");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit", "--root"])
+        .arg(&test.0)
+        .arg("--fail-on-nonzero")
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run strict nonzero frontend audit");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let value: Value = serde_json::from_slice(
+        output
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one strict frontend audit receipt line"),
+    )
+    .expect("strict frontend audit nonzero receipt JSON");
+    assert_eq!(value["status"], "advisory_or_tool_failure");
+    assert_eq!(value["observed_exit_code"], 7);
+    assert_eq!(
+        value["workflow_failure_policy"],
+        "fail_command_after_recording_numeric_nonzero"
+    );
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
 fn frontend_audit_rejects_package_mutation_even_after_numeric_nonzero() {
     let test = TestRoot::create();
     copy_contract_inventory(&test.0);

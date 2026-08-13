@@ -205,6 +205,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 dependency-audit orchestration only: frontend-web invokes structural-frontend-contract frontend-audit directly instead of retaining direct npm audit shell authority; Rust validates the package/lock/source-map contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects repository-contract mutation, records every numeric exit in a canonical self-hashed receipt, and preserves the hosted workflow's non-blocking numeric-exit policy; exit zero is only npm's audit-clean exit and numeric nonzero is deliberately advisory_or_tool_failure because Rust does not parse or independently classify vulnerability, registry, network, configuration or tool failure, while direct dry-run resolves neither npm nor Node and spawns no child; live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identities, external-cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5 and C6 remain open"
     },
+    "native_quality_gate_frontend_entrypoints": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 quality-gate frontend-entrypoint ownership only: scripts/verify_quality_gate.py retains overall Python sequencing but invokes frontend install, strict dependency audit, contract check, build, Viewer manifest, browser smoke, sample workflow, PDF smoke, performance probe and visual regression through direct Cargo structural-frontend-contract commands with npm and npm package-script entrypoints 0; strict audit publishes the same canonical advisory_or_tool_failure receipt and then fails the Rust command on numeric nonzero, preserving the prior quality-gate stop-on-failure behavior, while frontend-web retains its separate non-blocking audit policy; npm, Node, TypeScript, Vite, Playwright, Chromium, Python sequencing, registry/network/configuration effects and rendered behavior remain retained, and clean-machine live evidence, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_install": {
       "status": "implemented",
       "cutover_gate": "C0",

@@ -49,6 +49,10 @@ fn main() -> ExitCode {
             print_error(error.code, &error.detail);
             ExitCode::from(EXIT_FAILURE)
         }
+        Err(CliError::RecordedAuditFailure(receipt)) => {
+            println!("{receipt}");
+            ExitCode::from(EXIT_FAILURE)
+        }
     }
 }
 
@@ -56,6 +60,7 @@ fn main() -> ExitCode {
 enum CliError {
     Usage(String),
     Contract(FrontendContractError),
+    RecordedAuditFailure(String),
 }
 
 impl From<FrontendContractError> for CliError {
@@ -78,11 +83,21 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         .and_then(|value| value.to_str())
         .ok_or_else(|| usage_error("missing or non-UTF-8 command"))?;
     if command == "frontend-audit" {
-        let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
+        let (root, dry_run, fail_on_nonzero) = parse_frontend_audit_arguments(&arguments[1..])?;
         let mut options = FrontendAuditOptions::new(root);
         options.dry_run = dry_run;
+        options.fail_on_nonzero = fail_on_nonzero;
         let receipt = run_frontend_audit(&options)?;
-        return canonical_frontend_audit_receipt_json(&receipt).map_err(Into::into);
+        let strict_failure = fail_on_nonzero
+            && receipt
+                .observed_exit_code
+                .is_some_and(|exit_code| exit_code != 0);
+        let encoded = canonical_frontend_audit_receipt_json(&receipt)?;
+        return if strict_failure {
+            Err(CliError::RecordedAuditFailure(encoded))
+        } else {
+            Ok(encoded)
+        };
     }
     if command == "frontend-build" {
         let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
@@ -1057,6 +1072,53 @@ fn parse_smoke_arguments(arguments: &[OsString]) -> Result<(PathBuf, bool), CliE
     ))
 }
 
+fn parse_frontend_audit_arguments(
+    arguments: &[OsString],
+) -> Result<(PathBuf, bool, bool), CliError> {
+    let mut root = None;
+    let mut dry_run = false;
+    let mut fail_on_nonzero = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("frontend-audit option names must be UTF-8"))?;
+        match name {
+            "--dry-run" => {
+                if dry_run {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                dry_run = true;
+                index += 1;
+            }
+            "--fail-on-nonzero" => {
+                if fail_on_nonzero {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                fail_on_nonzero = true;
+                index += 1;
+            }
+            "--root" => {
+                if root.is_some() {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                let value = arguments
+                    .get(index + 1)
+                    .filter(|value| !value.is_empty())
+                    .ok_or_else(|| usage_error("--root must have one non-empty value"))?;
+                root = Some(PathBuf::from(value));
+                index += 2;
+            }
+            _ => return Err(usage_error("frontend-audit options are missing or unknown")),
+        }
+    }
+    Ok((
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        dry_run,
+        fail_on_nonzero,
+    ))
+}
+
 fn parse_options(arguments: &[OsString]) -> Result<BTreeMap<String, OsString>, CliError> {
     if arguments.len() % 2 != 0 {
         return Err(usage_error("every option must have one value"));
@@ -1114,7 +1176,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit|frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit --root DIR [--dry-run] [--fail-on-nonzero]; structural-frontend-contract frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -1123,8 +1185,9 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_browser_smoke_arguments, parse_frontend_dev_arguments, parse_preview_arguments,
-        parse_serve_arguments, parse_smoke_arguments, parse_viewer_js_syntax_arguments,
+        parse_browser_smoke_arguments, parse_frontend_audit_arguments,
+        parse_frontend_dev_arguments, parse_preview_arguments, parse_serve_arguments,
+        parse_smoke_arguments, parse_viewer_js_syntax_arguments,
         parse_viewer_performance_probe_arguments, parse_viewer_readme_capture_arguments,
         parse_viewer_report_pdf_export_arguments, parse_viewer_report_pdf_smoke_arguments,
         parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
@@ -1155,6 +1218,23 @@ mod tests {
             OsString::from("a"),
             OsString::from("--dry-run"),
             OsString::from("--dry-run"),
+        ])
+        .is_err());
+        assert_eq!(
+            parse_frontend_audit_arguments(&[
+                OsString::from("--fail-on-nonzero"),
+                OsString::from("--root"),
+                OsString::from("a"),
+                OsString::from("--dry-run"),
+            ])
+            .expect("valid strict frontend audit arguments"),
+            (PathBuf::from("a"), true, true)
+        );
+        assert!(parse_frontend_audit_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--fail-on-nonzero"),
+            OsString::from("--fail-on-nonzero"),
         ])
         .is_err());
         assert!(parse_browser_smoke_arguments(&[]).is_err());

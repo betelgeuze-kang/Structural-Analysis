@@ -16,8 +16,22 @@ def _python() -> str:
     return sys.executable
 
 
-def _npm() -> str:
-    return "npm.cmd" if sys.platform == "win32" else "npm"
+def _frontend_contract(command: str, *arguments: str) -> list[str]:
+    return [
+        "cargo",
+        "run",
+        "--quiet",
+        "--locked",
+        "--manifest-path",
+        "native/Cargo.toml",
+        "-p",
+        "structural-frontend-contract",
+        "--",
+        command,
+        "--root",
+        ".",
+        *arguments,
+    ]
 
 
 def _lane_command(lane: str) -> list[str]:
@@ -311,8 +325,8 @@ def _pr_commands(
             "--json",
             p1_failure_flag,
         ],
-        [_npm(), "ci"],
-        [_npm(), "audit", "--audit-level", "high"],
+        _frontend_contract("frontend-install"),
+        _frontend_contract("frontend-audit", "--fail-on-nonzero"),
         [
             _python(),
             "scripts/verify_release_artifacts_manifest.py",
@@ -327,11 +341,11 @@ def _pr_commands(
             "implementation/phase1/open_data_external_artifacts_manifest.json",
             "--structure-only",
         ],
-        [_npm(), "run", "verify:frontend-contract"],
-        [_npm(), "run", "build"],
-        [_npm(), "run", "verify:viewer-manifest"],
+        _frontend_contract("check"),
+        _frontend_contract("frontend-build"),
+        _frontend_contract("viewer-manifest"),
         [_python(), "scripts/verify_structure_viewer_contracts.py"],
-        [_npm(), "run", "verify:frontend-browser-smoke", "--", "--mode", "minimal"],
+        _frontend_contract("browser-smoke", "--mode", "minimal"),
         [
             _python(),
             "-m",
@@ -574,11 +588,11 @@ def _command_groups(mode: str) -> list[list[str]]:
         _lane_command("legacy_evidence"),
         _lane_command("molecular_quarantine"),
         [_python(), "-m", "pytest", "-q"],
-        [_npm(), "run", "verify:frontend-browser-smoke"],
-        [_npm(), "run", "verify:viewer-sample-workflow"],
-        [_npm(), "run", "verify:viewer-report-pdf"],
-        [_npm(), "run", "verify:viewer-performance-probe"],
-        [_npm(), "run", "verify:viewer-visual-regression"],
+        _frontend_contract("browser-smoke"),
+        _frontend_contract("viewer-sample-workflow"),
+        _frontend_contract("viewer-report-pdf-smoke"),
+        _frontend_contract("viewer-performance-probe"),
+        _frontend_contract("viewer-visual-regression"),
         [
             _python(),
             "scripts/report_commercialization_level.py",

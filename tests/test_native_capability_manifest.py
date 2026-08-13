@@ -381,6 +381,27 @@ def test_native_frontend_audit_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in audit["claim"]
 
 
+def test_native_quality_gate_frontend_entrypoints_are_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "native_quality_gate_frontend_entrypoints"
+        )
+        is True
+    )
+    gate = payload["capabilities"]["native_quality_gate_frontend_entrypoints"]
+    assert gate["cutover_gate"] == "C0"
+    assert gate["owner"] == "structural-frontend-contract"
+    assert "retains overall Python sequencing" in gate["claim"]
+    assert "direct Cargo structural-frontend-contract commands" in gate["claim"]
+    assert "npm and npm package-script entrypoints 0" in gate["claim"]
+    assert "publishes the same canonical advisory_or_tool_failure receipt" in gate["claim"]
+    assert "fails the Rust command on numeric nonzero" in gate["claim"]
+    assert "frontend-web retains its separate non-blocking audit policy" in gate["claim"]
+    assert "Python sequencing" in gate["claim"]
+    assert "C5 and C6 remain open" in gate["claim"]
+
+
 def test_native_frontend_ci_entrypoints_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_ci_entrypoints") is True

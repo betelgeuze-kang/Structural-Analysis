@@ -32,6 +32,7 @@
     "scripts/verify-structure-viewer-sample-workflow.mjs",
     "scripts/structure-viewer-canvas-frame.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
+    "scripts/verify_quality_gate.py",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json",
     "src/structure-viewer/index.html",
     "src/structure-viewer/design-tokens.css",
@@ -146,11 +147,12 @@
       "high"
     ],
     "workflow_failure_policy": "record_numeric_nonzero_without_failing_workflow",
+    "strict_failure_policy": "fail_command_after_recording_numeric_nonzero",
     "findings_interpretation": "nonzero_not_classified_as_vulnerability_network_or_tool_failure",
     "network_access_accounting": "not_instrumented_npm_registry_advisory_service_and_cache_access",
     "filesystem_mutation_accounting": "repository_contract_must_remain_unchanged_external_cache_mutation_not_instrumented",
     "environment_accounting": "npm_executable_configuration_registry_response_and_transitive_process_identity_not_instrumented",
-    "claim_boundary": "This transitional C0 dependency-audit receipt proves only that Rust validates the frontend contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects package/lock/source-map or required-inventory mutation, records its numeric exit, and preserves the hosted workflow's non-blocking numeric-exit policy. Exit zero is recorded as npm's audit-clean exit; a numeric nonzero is deliberately classified only as advisory_or_tool_failure because Rust does not parse or independently validate npm findings and cannot distinguish a vulnerability from registry, network, configuration, or tool failure. Direct dry-run resolves neither npm nor Node and spawns no child. Live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identity, external cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
+    "claim_boundary": "This transitional C0 dependency-audit receipt proves only that Rust validates the frontend contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects package/lock/source-map or required-inventory mutation, and records its numeric exit. The default policy preserves the hosted workflow's non-blocking numeric-exit behavior; the explicit strict policy publishes the same receipt and then returns command failure on numeric nonzero for the quality gate. Exit zero is recorded as npm's audit-clean exit; a numeric nonzero is deliberately classified only as advisory_or_tool_failure because Rust does not parse or independently validate npm findings and cannot distinguish a vulnerability from registry, network, configuration, or tool failure. Direct dry-run resolves neither npm nor Node and spawns no child. Live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identity, external cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
   },
   "frontend_build_contract": {
     "schema_version": "structural-native-frontend-build-contract.v1",

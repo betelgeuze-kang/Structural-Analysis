@@ -56,6 +56,7 @@ REQUIRED_PATHS = (
     Path("scripts/export-structure-viewer-report-pdf.mjs"),
     Path("scripts/measure-structure-viewer-visual-regression.mjs"),
     Path("scripts/verify-structure-viewer-sample-workflow.mjs"),
+    Path("scripts/verify_quality_gate.py"),
     Path("implementation/phase1/structure_viewer_visual_regression_baseline.json"),
     Path("scripts/json-module-loader.mjs"),
     Path("tests/frontend/workbench-prototype-smoke.spec.ts"),
@@ -302,6 +303,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_audit_numeric_nonzero_non_blocking": True,
         "frontend_audit_findings_not_independently_classified": True,
         "frontend_audit_network_uninstrumented": True,
+        "quality_gate_frontend_npm_entrypoints": 0,
+        "quality_gate_frontend_direct_rust_entrypoints": True,
+        "quality_gate_frontend_strict_audit_policy": True,
         "hosted_frontend_workflow_npm_script_entrypoints": 0,
         "hosted_frontend_workflow_direct_rust_entrypoints": True,
         "hosted_frontend_workflow_native_bash_wrappers_retained": True,
@@ -626,6 +630,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         or "run: npm audit" in frontend_web_ci
     ):
         blockers.append("workbench_ui_frontend_audit_ci_authority_invalid")
+    quality_gate = _text(root, Path("scripts/verify_quality_gate.py"), blockers)
+    _require_tokens(
+        Path("scripts/verify_quality_gate.py"),
+        quality_gate,
+        (
+            "def _frontend_contract",
+            '_frontend_contract("frontend-install")',
+            '_frontend_contract("frontend-audit", "--fail-on-nonzero")',
+            '_frontend_contract("check")',
+            '_frontend_contract("frontend-build")',
+            '_frontend_contract("viewer-manifest")',
+            '_frontend_contract("browser-smoke", "--mode", "minimal")',
+            '_frontend_contract("browser-smoke")',
+            '_frontend_contract("viewer-sample-workflow")',
+            '_frontend_contract("viewer-report-pdf-smoke")',
+            '_frontend_contract("viewer-performance-probe")',
+            '_frontend_contract("viewer-visual-regression")',
+        ),
+        blockers,
+    )
+    if "def _npm" in quality_gate or "_npm()" in quality_gate or '["npm"' in quality_gate:
+        blockers.append("workbench_ui_quality_gate_frontend_launcher_invalid")
     for wrapper in (
         "bash ./scripts/build_native_benchmark_catalog.sh --check",
         "bash ./scripts/build_native_workbench_evidence_bundle.sh",
@@ -842,6 +868,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             '.env_remove("NODE_OPTIONS")',
             "observed_exit_code",
             "record_numeric_nonzero_without_failing_workflow",
+            "fail_command_after_recording_numeric_nonzero",
             "nonzero_not_classified_as_vulnerability_network_or_tool_failure",
             "network_access_accounting",
             "filesystem_mutation_accounting",
@@ -1220,6 +1247,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "Frontend TypeScript/Vite build orchestration is Rust-native",
             "Frontend dependency-install orchestration is Rust-native",
             "Frontend dependency-audit orchestration is Rust-native",
+            "Quality-gate frontend entrypoints are Rust-native",
             "Hosted frontend/browser workflow product entrypoints are Rust-native",
             "Frontend development-server orchestration is Rust-native",
             "Frontend production-delivery preview serving is Rust-native",
@@ -1274,7 +1302,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
-        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, and the native catalog/evidence Bash launcher conveniences visible",
+        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",
