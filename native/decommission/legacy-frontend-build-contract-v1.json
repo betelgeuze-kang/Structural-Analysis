@@ -76,6 +76,7 @@
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/frontend_build.rs",
+    "native/crates/structural-frontend-contract/src/frontend_dev.rs",
     "native/crates/structural-frontend-contract/src/frontend_preview.rs",
     "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
@@ -100,7 +101,7 @@
   "expected_scripts": {
     "build": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .",
     "capture:readme-viewer-image": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-readme-capture --root .",
-    "dev": "vite",
+    "dev": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-dev --root .",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
     "preview": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-preview --root .",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
@@ -162,6 +163,17 @@
     "maximum_cli_bytes": 16777216,
     "external_network_access_accounting": "not_instrumented_vite_plugins_transitive_runtime_and_environment",
     "claim_boundary": "This transitional C0 receipt proves only that Rust freezes the package/lock/source map and a bounded complete inventory of the configured frontend source roots, hashes the installed TypeScript and Vite CLI entrypoint bytes for live execution, removes inherited NODE_OPTIONS, owns the two direct Node children, rejects source or CLI entrypoint mutation, and validates the resulting bounded delivery tree. Dry-run requires no installed packages and spawns no process. Node executable identity, transitive npm package bytes, TypeScript/Vite internals, plugins, environment and build-time network behavior remain outside Rust authority; browser behavior, clean-machine publication, native UI parity, C5, and C6 remain open."
+  },
+  "frontend_dev_contract": {
+    "schema_version": "structural-native-frontend-dev-contract.v1",
+    "node_launcher": "node",
+    "vite_cli_path": "node_modules/vite/bin/vite.js",
+    "default_host": "127.0.0.1",
+    "default_port": 5173,
+    "strict_port": true,
+    "maximum_cli_bytes": 16777216,
+    "external_network_access_accounting": "not_instrumented_vite_plugins_environment_hmr_and_page_requests",
+    "claim_boundary": "This transitional C0 development receipt proves only that Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint for live execution, removes inherited NODE_OPTIONS, owns one direct Node child with fixed IPv4 loopback and strict-port arguments, and records its successful terminal exit. Dry-run requires no installed packages and spawns no process. Source mutation after launch is intentionally allowed for HMR and is not revalidated; Node executable identity, Vite internals and transitive packages, plugin and environment loading, HMR, listener readiness, page requests, rendered behavior, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
   },
   "frontend_preview_contract": {
     "schema_version": "structural-native-frontend-preview-contract.v1",

@@ -329,6 +329,23 @@ def test_native_frontend_build_capability_is_bounded_c0() -> None:
     assert "C5, or C6" in frontend["claim"]
 
 
+def test_native_frontend_dev_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_dev") is True
+    dev = payload["capabilities"]["native_frontend_dev"]
+    assert dev["cutover_gate"] == "C0"
+    assert dev["owner"] == "structural-frontend-contract"
+    assert "package dev" in dev["claim"]
+    assert "frontend-dev" in dev["claim"]
+    assert "launch-time frontend contract" in dev["claim"]
+    assert "installed Vite CLI entrypoint" in dev["claim"]
+    assert "removes inherited NODE_OPTIONS" in dev["claim"]
+    assert "IPv4 loopback and strict-port" in dev["claim"]
+    assert "source mutation remains deliberately allowed for HMR" in dev["claim"]
+    assert "listener readiness" in dev["claim"]
+    assert "C5 and C6 remain open" in dev["claim"]
+
+
 def test_native_frontend_preview_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_preview") is True

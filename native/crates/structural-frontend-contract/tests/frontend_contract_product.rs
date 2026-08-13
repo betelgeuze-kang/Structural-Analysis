@@ -7,7 +7,8 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_frontend_build_receipt_json,
-    canonical_frontend_preview_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
+    canonical_frontend_dev_receipt_json, canonical_frontend_preview_receipt_json,
+    canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
     canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
     canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
@@ -17,13 +18,13 @@ use structural_frontend_contract::{
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_build,
-    run_frontend_smoke, run_viewer_browser_smoke, run_viewer_js_syntax,
+    run_frontend_dev, run_frontend_smoke, run_viewer_browser_smoke, run_viewer_js_syntax,
     run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
     run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
     run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendBuildOptions,
-    ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
-    ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
-    ViewerVisualRegressionOptions,
+    FrontendDevOptions, ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions,
+    ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
+    ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -2504,6 +2505,101 @@ fn clean_environment_prototype_cli_emits_one_canonical_receipt() {
         bytes
     );
     assert_eq!(value["action"], "workbench_prototype_check");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn frontend_dev_dry_run_is_deterministic_runtime_free_and_loopback_only() {
+    let root = repository_root();
+    let mut options = FrontendDevOptions::new(root);
+    options.dry_run = true;
+    let first = run_frontend_dev(&options).expect("frontend dev dry-run");
+    let second = run_frontend_dev(&options).expect("repeat frontend dev dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.vite_cli_identity, None);
+    assert_eq!(
+        first.logical_command,
+        [
+            "node",
+            "node_modules/vite/bin/vite.js",
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "5173",
+            "--strictPort",
+        ]
+    );
+    assert_eq!(first.dev_url, "http://127.0.0.1:5173/");
+    assert!(first.loopback_only);
+    assert_eq!(first.rust_owned_listener_count, 0);
+    assert_eq!(
+        first.retained_listener_ownership,
+        "vite_child_uninstrumented"
+    );
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert_eq!(first.runtime_requirements.required, ["node", "vite"]);
+    assert!(!first.runtime_requirements.browser_required);
+    assert!(first.deterministic_receipt);
+    let encoded =
+        canonical_frontend_dev_receipt_json(&first).expect("canonical frontend dev receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("frontend dev receipt JSON");
+    verify_receipt_hash(&value);
+
+    let mut remote = options;
+    remote.host = "0.0.0.0".to_owned();
+    let error = run_frontend_dev(&remote).expect_err("remote frontend dev host must fail");
+    assert_eq!(error.code, "frontend_dev_host_forbidden");
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_dev_owns_exact_child_removes_node_options_and_hashes_vite_cli() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_frontend_build_runtime(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nif [ \"${NODE_OPTIONS+x}\" = x ]; then exit 91; fi\nprintf '%s\\n' \"$*\" > \"$FRONTEND_DEV_TEST_LOG\"\nexit 0\n",
+    );
+    let log = test.0.join("frontend-dev-invocation.log");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-dev", "--root"])
+        .arg(&test.0)
+        .args(["--port", "5174"])
+        .env_clear()
+        .env("PATH", &bin)
+        .env("NODE_OPTIONS", "--inspect")
+        .env("FRONTEND_DEV_TEST_LOG", &log)
+        .output()
+        .expect("run frontend dev with fake Node");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(log).expect("frontend dev invocation log"),
+        "node_modules/vite/bin/vite.js --host 127.0.0.1 --port 5174 --strictPort\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("frontend dev receipt JSON");
+    assert_eq!(value["execution_mode"], "execute");
+    assert_eq!(value["status"], "stopped");
+    assert_eq!(value["direct_processes_spawned"], 1);
+    assert_eq!(value["successful_exit_code"], 0);
+    assert_eq!(value["port"], 5174);
+    assert!(value["vite_cli_identity"]["sha256"]
+        .as_str()
+        .is_some_and(|hash| hash.starts_with("sha256:")));
+    assert_eq!(
+        value["node_options_disposition"],
+        "removed_for_direct_child"
+    );
     verify_receipt_hash(&value);
 }
 

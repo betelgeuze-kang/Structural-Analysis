@@ -4,6 +4,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 
 ## Commands
 
+- `npm run dev`
+  - Invokes Rust-native `structural-frontend-contract frontend-dev` instead of a direct `vite` entrypoint. Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint, removes inherited `NODE_OPTIONS`, and owns one direct Node child with fixed IPv4 loopback and strict-port arguments (default port 5173).
+  - `npm run dev -- --dry-run` emits a deterministic plan without `node_modules`, a listener, or a child process. Live mode preserves Vite HMR semantics, so source mutation after launch is intentionally allowed and is not revalidated; the final receipt is emitted only after a successful child exit and does not claim listener readiness.
+  - Node/Vite internals, transitive packages, plugin/environment loading, HMR, page requests, rendered behavior, and build-time network behavior remain transitional and uninstrumented. This is process ownership only, not native UI parity, C5, or C6 evidence.
 - `npm run verify:frontend-contract`
   - Invokes the Rust-native `structural-frontend-contract` checker directly through Cargo.
   - Reads only repo files and strictly checks the expected manifest, lockfile, scripts, and build entrypoints against `native/decommission/legacy-frontend-build-contract-v1.json`.

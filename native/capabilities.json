@@ -193,6 +193,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 build orchestration only: package build enters through structural-frontend-contract frontend-build; Rust freezes package/lock/source-map identity plus a bounded complete inventory of the configured frontend source files and roots, hashes installed TypeScript and Vite CLI entrypoint bytes for live execution, removes inherited NODE_OPTIONS, owns the two direct Node children, rejects source or CLI entrypoint mutation, validates the resulting bounded delivery tree, and emits a canonical self-hashed receipt, while dry-run requires no node_modules and spawns no process; Node executable identity, transitive npm package bytes, TypeScript/Vite internals, plugins, build environment and build-time network behavior remain outside Rust ownership, and no browser behavior, clean-machine publication, native UI parity, C5, or C6 is claimed"
     },
+    "native_frontend_dev": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 development process ownership only: package dev enters through structural-frontend-contract frontend-dev; Rust validates the launch-time frontend contract, hashes the installed Vite CLI entrypoint, removes inherited NODE_OPTIONS, fixes IPv4 loopback and strict-port arguments, directly owns one Node child, records a successful terminal exit, and emits a canonical self-hashed receipt, while dry-run requires no node_modules and spawns no process; source mutation remains deliberately allowed for HMR and is not revalidated after launch, and Node executable identity, Vite internals and transitive packages, plugin and environment loading, HMR, retained listener readiness, page requests, rendered behavior, clean-machine publication, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_preview": {
       "status": "implemented",
       "cutover_gate": "C0",

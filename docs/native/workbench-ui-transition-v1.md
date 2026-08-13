@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-preview/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-build/frontend-dev/frontend-preview/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -50,6 +50,10 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   entrypoints, removes inherited `NODE_OPTIONS`, owns two direct Node children, rejects mutation,
   and validates the emitted delivery tree. Node, TypeScript, Vite, plugins, transitive npm bytes,
   and build-time environment/network behavior remain retained and explicitly outside that receipt.
+  Frontend development-server orchestration is Rust-native: the package development command hashes
+  the installed Vite CLI, removes inherited `NODE_OPTIONS`, fixes loopback/strict-port arguments,
+  and owns one direct Node child. Vite retains the listener, HMR and source-mutation semantics;
+  listener readiness, plugins, environment loading and rendered behavior remain uninstrumented.
   Frontend production-delivery preview serving is Rust-native: the package preview command validates
   the frontend and built-delivery receipts, binds only fixed IPv4 loopback, serves `dist/` through
   the confined SPA router, and spawns no Node, Vite, browser, Python, or child process. A valid built

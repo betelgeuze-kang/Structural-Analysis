@@ -4,6 +4,7 @@
 
 mod browser_smoke;
 mod frontend_build;
+mod frontend_dev;
 mod frontend_preview;
 mod playwright;
 mod prototype;
@@ -43,6 +44,11 @@ pub use frontend_build::{
     FrontendBuildSourceIdentityV1,
 };
 use frontend_build::{validate_frontend_build_source, FrontendBuildSourceV1};
+pub use frontend_dev::{
+    canonical_frontend_dev_receipt_json, run_frontend_dev, FrontendDevCliIdentityV1,
+    FrontendDevOptions, FrontendDevReceiptV1, FrontendDevRuntimeRequirementsV1,
+};
+use frontend_dev::{validate_frontend_dev_source, FrontendDevSourceV1};
 pub use frontend_preview::{
     canonical_frontend_preview_receipt_json, plan_frontend_preview, serve_frontend_preview,
     FrontendPreviewReceiptV1, FrontendPreviewRuntimeRequirementsV1,
@@ -182,6 +188,7 @@ struct FrontendSourceMapV1 {
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
     frontend_build_contract: FrontendBuildSourceV1,
+    frontend_dev_contract: FrontendDevSourceV1,
     frontend_preview_contract: FrontendPreviewSourceV1,
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
@@ -575,6 +582,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
         }
     }
     validate_frontend_build_source(&source_map.frontend_build_contract)?;
+    validate_frontend_dev_source(&source_map.frontend_dev_contract)?;
     validate_frontend_preview_source(&source_map.frontend_preview_contract)?;
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
