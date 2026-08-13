@@ -627,6 +627,35 @@ fn run_fixed_constraint_add(
     ])
 }
 
+fn run_linear_load_pattern_add(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components: [&str; 6],
+) -> Output {
+    run_workbench(&[
+        text("model-add-linear-load-pattern"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--load"),
+        text(nodal_load_id),
+        text("--node"),
+        text(node_id),
+        text("--components"),
+        text(components[0]),
+        text(components[1]),
+        text(components[2]),
+        text(components[3]),
+        text(components[4]),
+        text(components[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -1005,6 +1034,51 @@ fn assert_published_fixed_constraint_add(destination: &Path) {
         receipt["prescribed_values_si"],
         constraint["prescribed_values_si"]
     );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_linear_load_pattern_add(destination: &Path) {
+    let edited_bytes =
+        std::fs::read(destination.join("model-ir.json")).expect("pattern-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict pattern-added ModelIR");
+    let patterns = edited.value()["load_patterns"]
+        .as_array()
+        .expect("load patterns");
+    assert_eq!(patterns.len(), 5);
+    let pattern = &patterns[4];
+    assert_eq!(pattern["id"], "LC_CUSTOM");
+    assert_eq!(pattern["index"], 4);
+    assert_eq!(pattern["analysis_type"], "linear_static");
+    assert_eq!(pattern["self_weight"], serde_json::json!([0, 0, 0]));
+    assert_eq!(pattern["source_id"], Value::Null);
+    let loads = pattern["nodal_loads"].as_array().expect("nodal loads");
+    assert_eq!(loads.len(), 1);
+    assert_eq!(loads[0]["id"], "L_CUSTOM_N2");
+    assert_eq!(loads[0]["index"], 0);
+    assert_eq!(loads[0]["node_id"], "N2");
+    assert_eq!(loads[0]["components_si"]["FX"], 2_500.0);
+    assert_eq!(loads[0]["source_id"], Value::Null);
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-linear-load-pattern.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-load-pattern add receipt"),
+    )
+    .expect("linear-load-pattern add receipt JSON");
+    assert_eq!(receipt["operation"], "linear_load_pattern_add");
+    assert_eq!(receipt["load_pattern_id"], "LC_CUSTOM");
+    assert_eq!(receipt["load_pattern_index"], 4);
+    assert_eq!(receipt["analysis_type"], "linear_static");
+    assert_eq!(receipt["self_weight"], serde_json::json!([0, 0, 0]));
+    assert_eq!(receipt["nodal_load_id"], "L_CUSTOM_N2");
+    assert_eq!(receipt["nodal_load_index"], 0);
+    assert_eq!(receipt["node_id"], "N2");
+    assert_eq!(receipt["components_si"]["FX"], 2_500.0);
     assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
     assert_eq!(receipt["analysis_ready"], true);
     assert_eq!(receipt["edited_content_hash"], edited.content_hash());
@@ -2899,6 +2973,245 @@ fn fixed_constraint_add_is_deterministic_cpp_revalidated_and_changes_linear_exec
     )
     .expect("blocked constraint-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], blocked["roundtrip_map"]);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("pattern-add-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("pattern-add-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let constraint_directory = temporary.0.join("pattern-add-constraint-source");
+    assert_success(&run_fixed_constraint_add(
+        &load_directory.join("model-ir.json"),
+        &constraint_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let constrained_source = constraint_directory.join("model-ir.json");
+    let constrained_source_before =
+        std::fs::read(&constrained_source).expect("constrained source bytes");
+
+    let first = temporary.0.join("linear-load-pattern-add-first");
+    let second = temporary.0.join("linear-load-pattern-add-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_pattern_add(
+            &constrained_source,
+            destination,
+            "LC_CUSTOM",
+            "L_CUSTOM_N2",
+            "N2",
+            ["2500", "0", "0", "0", "0", "0"],
+        );
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-load-pattern add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first pattern-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second pattern-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&constrained_source).expect("source after pattern addition"),
+        constrained_source_before
+    );
+    assert_published_linear_load_pattern_add(&first);
+
+    let view = run_workbench(&[text("model-view"), first.join("model-ir.json").as_os_str()]);
+    assert_success(&view);
+    assert!(String::from_utf8_lossy(&view.stdout).contains("load_patterns=5"));
+
+    let baseline_request_directory = temporary.0.join("pattern-add-baseline-request");
+    let custom_request_directory = temporary.0.join("pattern-add-custom-request");
+    assert_success(&run_model_linear_request_create(
+        &constrained_source,
+        &baseline_request_directory,
+        "added-linear-load-pattern-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &custom_request_directory,
+        "added-linear-load-pattern-c5",
+        "LC_CUSTOM",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &constrained_source_before,
+        &std::fs::read(baseline_request_directory.join("analysis-request.json"))
+            .expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline constrained-model execution");
+    let custom_model = std::fs::read(first.join("model-ir.json")).expect("pattern-added model");
+    let custom = execute_model_ir_linear_analysis(
+        &custom_model,
+        &std::fs::read(custom_request_directory.join("analysis-request.json"))
+            .expect("custom-pattern request"),
+        None,
+        u32::MAX,
+    )
+    .expect("custom-pattern native linear execution");
+    assert!(baseline.is_complete());
+    assert!(custom.is_complete());
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline result recovery"),
+    )
+    .expect("baseline recovery JSON");
+    let custom_recovery: Value = serde_json::from_str(
+        custom
+            .result_recovery_ir_json()
+            .expect("custom-pattern result recovery"),
+    )
+    .expect("custom-pattern recovery JSON");
+    assert_eq!(
+        custom_recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        custom_recovery["active_external_load"],
+        serde_json::json!([2500, 0, 0, 0, 0, 0])
+    );
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        custom_recovery["global_displacement"]
+    );
+    assert_eq!(custom_recovery["fallback_count"], 0);
+
+    let existing = run_linear_load_pattern_add(
+        &constrained_source,
+        &first,
+        "LC_CUSTOM",
+        "L_CUSTOM_N2",
+        "N2",
+        ["2500", "0", "0", "0", "0", "0"],
+    );
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, pattern, load, node, components, code) in [
+        (
+            "pattern-add-duplicate-pattern",
+            "LC_WEAK",
+            "L_CUSTOM_N2",
+            "N2",
+            ["2500", "0", "0", "0", "0", "0"],
+            "workbench_model_add_linear_load_pattern_identity_exists",
+        ),
+        (
+            "pattern-add-duplicate-load",
+            "LC_CUSTOM",
+            "L_AXIAL_N2",
+            "N2",
+            ["2500", "0", "0", "0", "0", "0"],
+            "workbench_model_add_linear_load_pattern_load_identity_exists",
+        ),
+        (
+            "pattern-add-missing-node",
+            "LC_CUSTOM",
+            "L_CUSTOM_N2",
+            "MISSING",
+            ["2500", "0", "0", "0", "0", "0"],
+            "workbench_model_add_linear_load_pattern_node_missing",
+        ),
+        (
+            "pattern-add-zero",
+            "LC_CUSTOM",
+            "L_CUSTOM_N2",
+            "N2",
+            ["0", "0", "0", "0", "0", "0"],
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_linear_load_pattern_add(
+            &constrained_source,
+            &destination,
+            pattern,
+            load,
+            node,
+            components,
+        );
+        let expected_status = if code == "workbench_usage_error" {
+            2
+        } else {
+            1
+        };
+        assert_eq!(rejected.status.code(), Some(expected_status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value =
+        serde_json::from_slice(&constrained_source_before).expect("pattern source JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.linear-load-pattern-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Load-pattern authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let original_roundtrip_map = blocked["roundtrip_map"].clone();
+    let blocked_source = temporary.0.join("blocked-pattern-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked pattern-add source bytes"),
+    )
+    .expect("write blocked pattern-add source");
+    let blocked_destination = temporary.0.join("blocked-pattern-add");
+    assert_success(&run_linear_load_pattern_add(
+        &blocked_source,
+        &blocked_destination,
+        "LC_CUSTOM",
+        "L_CUSTOM_N2",
+        "N2",
+        ["2500", "0", "0", "0", "0", "0"],
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked pattern-add receipt"),
+    )
+    .expect("blocked pattern-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.linear-load-pattern-add-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked pattern-added model"),
+    )
+    .expect("blocked pattern-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
 }
 
 #[test]

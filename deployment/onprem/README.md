@@ -23,7 +23,8 @@ absent from the runtime image.
   frame3d member using existing compatible material/section identities. `model-add-nodal-load`
   adds one nonzero six-component SI load to an existing linear-static pattern and node.
   `model-add-fixed-constraint` adds one homogeneous six-DOF zero constraint to an existing
-  unconstrained node. The
+  unconstrained node. `model-add-linear-load-pattern` atomically adds one zero-self-weight
+  linear-static pattern and its first nonzero nodal load on an existing node. The
   `model-create-linear-analysis-request` surface binds one existing linear-static pattern and
   bounded PCG controls through C++ assembly preflight.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
@@ -106,8 +107,11 @@ structural-workbench model-add-nodal-load /workspace/added-member-model/model-ir
   --components 0 -1000 0 0 0 0 --output-dir /workspace/added-load-model
 structural-workbench model-add-fixed-constraint /workspace/added-load-model/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir /workspace/added-constraint-model
-structural-workbench model-create-linear-analysis-request /workspace/added-constraint-model/model-ir.json \
-  --case case-1 --load-pattern LC_WEAK --max-iterations 100 \
+structural-workbench model-add-linear-load-pattern /workspace/added-constraint-model/model-ir.json \
+  --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
+  --components 2500 0 0 0 0 0 --output-dir /workspace/added-pattern-model
+structural-workbench model-create-linear-analysis-request /workspace/added-pattern-model/model-ir.json \
+  --case case-1 --load-pattern LC_CUSTOM --max-iterations 100 \
   --absolute-residual-tolerance 1e-11 --relative-residual-tolerance 1e-13 \
   --maximum-increment 0 --output-dir /workspace/linear-request
 ```
@@ -143,6 +147,10 @@ add other load families, or alter combinations.
 The fixed-constraint creator appends only one homogeneous six-DOF zero restraint to an existing
 unconstrained node; partial/nonzero restraints, overlap, MPC/contact/support sets, retargeting and
 deletion remain outside the command.
+The linear-load-pattern creator atomically appends one zero-self-weight `linear_static` pattern and
+one globally unique nonzero nodal load on an existing node; empty patterns, self-weight,
+combinations, time functions, other load families, editing, deletion and retargeting remain
+outside the command.
 The model-bound CPU linear request creator performs ABI v1.13 C++ assembly preflight but neither
 starts execution nor supplies arbitrary solver/backend selection. None proves visual dragging,
 broader model editing,

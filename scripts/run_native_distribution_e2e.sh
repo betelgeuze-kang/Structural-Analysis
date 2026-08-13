@@ -1176,6 +1176,112 @@ exercise_fixed_constraint_add_surface() {
 }
 exercise_fixed_constraint_add_surface
 
+exercise_linear_load_pattern_add_surface() {
+  local source_model="$e2e_root/fixed-constraint-add-first/model-ir.json"
+  local source_before_hash baseline_recovery baseline_maximum_displacement
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  baseline_recovery="$e2e_root/fixed-constraint-add-first-linear-run/result-recovery-ir.json"
+  baseline_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_recovery")"
+  if [[ -z "$baseline_maximum_displacement" ]]; then
+    echo "installed fixed-constraint baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+  local label added_directory request_directory run_directory custom_maximum_displacement
+  for label in first second; do
+    added_directory="$e2e_root/linear-load-pattern-add-$label"
+    request_directory="$e2e_root/linear-load-pattern-add-$label-linear-request"
+    run_directory="$e2e_root/linear-load-pattern-add-$label-linear-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-linear-load-pattern "$source_model" \
+      --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
+      --components 2500 0 0 0 0 0 --output-dir "$added_directory" \
+      > "$e2e_root/linear-load-pattern-add-$label.stdout.json"
+    test -s "$added_directory/model-ir.json"
+    test -s "$added_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"operation":"linear_load_pattern_add"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_CUSTOM"' "$added_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_index":4' "$added_directory/edit-receipt.json"
+    grep -Fq '"analysis_type":"linear_static"' "$added_directory/edit-receipt.json"
+    grep -Fq '"self_weight":[0,0,0]' "$added_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_id":"L_CUSTOM_N2"' "$added_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_index":0' "$added_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N2"' "$added_directory/edit-receipt.json"
+    grep -Fq '"components_si":{"FX":2500,"FY":0,"FZ":0,"MX":0,"MY":0,"MZ":0}' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$added_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-linear-load-pattern.v1"' \
+      "$added_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$added_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-load-pattern-add-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$added_directory/model-ir.json" \
+      > "$e2e_root/linear-load-pattern-add-$label-view.txt"
+    grep -Fq 'load_patterns=5' "$e2e_root/linear-load-pattern-add-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$added_directory/model-ir.json" \
+      --case added-linear-load-pattern-c5 --load-pattern LC_CUSTOM \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-load-pattern-add-$label-linear-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$added_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/linear-load-pattern-add-$label-linear-run.stdout.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[2500,0,0,0,0,0]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+    custom_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$run_directory/result-recovery-ir.json")"
+    if [[ -z "$custom_maximum_displacement" \
+      || "$custom_maximum_displacement" == "$baseline_maximum_displacement" ]]; then
+      echo "installed linear-load-pattern addition did not change recovered displacement" >&2
+      exit 1
+    fi
+  done
+  diff -r "$e2e_root/linear-load-pattern-add-first" \
+    "$e2e_root/linear-load-pattern-add-second" \
+    > "$e2e_root/linear-load-pattern-add-diff.txt"
+  diff -r "$e2e_root/linear-load-pattern-add-first-linear-request" \
+    "$e2e_root/linear-load-pattern-add-second-linear-request" \
+    > "$e2e_root/linear-load-pattern-add-linear-request-diff.txt"
+  diff -r "$e2e_root/linear-load-pattern-add-first-linear-run" \
+    "$e2e_root/linear-load-pattern-add-second-linear-run" \
+    > "$e2e_root/linear-load-pattern-add-linear-run-diff.txt"
+  cmp "$e2e_root/linear-load-pattern-add-first.stdout.json" \
+    "$e2e_root/linear-load-pattern-add-second.stdout.json"
+  cmp "$e2e_root/linear-load-pattern-add-first-validation.json" \
+    "$e2e_root/linear-load-pattern-add-second-validation.json"
+  cmp "$e2e_root/linear-load-pattern-add-first-view.txt" \
+    "$e2e_root/linear-load-pattern-add-second-view.txt"
+  cmp "$e2e_root/linear-load-pattern-add-first-linear-request.stdout.json" \
+    "$e2e_root/linear-load-pattern-add-second-linear-request.stdout.json"
+  cmp "$e2e_root/linear-load-pattern-add-first-linear-run.stdout.json" \
+    "$e2e_root/linear-load-pattern-add-second-linear-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear-load-pattern addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_linear_load_pattern_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1470,6 +1576,11 @@ fixed_constraint_add_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-add-f
 fixed_constraint_add_request_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 fixed_constraint_add_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 fixed_constraint_add_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+linear_load_pattern_add_model_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first/model-ir.json" | awk '{print $1}')"
+linear_load_pattern_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first/edit-receipt.json" | awk '{print $1}')"
+linear_load_pattern_add_request_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
+linear_load_pattern_add_result_ir_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+linear_load_pattern_add_recovery_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1535,6 +1646,10 @@ v25_receipt_json="${v24_receipt_json/structural-native-distribution-e2e.v24/stru
 fixed_constraint_add_receipt_fields="\"workbench_fixed_constraint_add_surface_passed\":true,\"workbench_fixed_constraint_add_model_sha256\":\"sha256:$fixed_constraint_add_model_hash\",\"workbench_fixed_constraint_add_receipt_sha256\":\"sha256:$fixed_constraint_add_receipt_hash\",\"workbench_fixed_constraint_add_request_sha256\":\"sha256:$fixed_constraint_add_request_hash\",\"workbench_fixed_constraint_add_result_ir_sha256\":\"sha256:$fixed_constraint_add_result_ir_hash\",\"workbench_fixed_constraint_add_recovery_sha256\":\"sha256:$fixed_constraint_add_recovery_hash\","
 v25_receipt_json="${v25_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v25_receipt_json" > "$temporary_receipt"
+v26_receipt_json="${v25_receipt_json/structural-native-distribution-e2e.v25/structural-native-distribution-e2e.v26}"
+linear_load_pattern_add_receipt_fields="\"workbench_linear_load_pattern_add_surface_passed\":true,\"workbench_linear_load_pattern_add_model_sha256\":\"sha256:$linear_load_pattern_add_model_hash\",\"workbench_linear_load_pattern_add_receipt_sha256\":\"sha256:$linear_load_pattern_add_receipt_hash\",\"workbench_linear_load_pattern_add_request_sha256\":\"sha256:$linear_load_pattern_add_request_hash\",\"workbench_linear_load_pattern_add_result_ir_sha256\":\"sha256:$linear_load_pattern_add_result_ir_hash\",\"workbench_linear_load_pattern_add_recovery_sha256\":\"sha256:$linear_load_pattern_add_recovery_hash\","
+v26_receipt_json="${v26_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_pattern_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v26_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

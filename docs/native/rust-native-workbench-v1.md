@@ -57,6 +57,13 @@ The bounded fixed-constraint creator appends one unique contiguous-index homogen
 `fixed_dofs` row with zero prescribed values to one existing unconstrained node, preserves every
 existing round-trip row and blocker, and revalidates through C++. It does not support partial or
 nonzero restraints, overlapping constraints, MPC/contact/support sets, deletion, or retargeting.
+The bounded linear-load-pattern creator atomically appends one contiguous-index `linear_static`
+pattern with zero self-weight and one globally unique, nonzero index-zero nodal load on an existing
+node. It preserves every existing round-trip row and blocker and revalidates through C++; no empty
+pattern is published. Self-weight, combinations, time functions, other load families, pattern
+editing/deletion, and retargeting remain outside the command.
+See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
+boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -139,6 +146,9 @@ structural-workbench model-add-nodal-load ADDED-MEMBER-MODEL/model-ir.json \
   --components 0 -1000 0 0 0 0 --output-dir ADDED-LOAD-MODEL
 structural-workbench model-add-fixed-constraint ADDED-LOAD-MODEL/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir ADDED-CONSTRAINT-MODEL
+structural-workbench model-add-linear-load-pattern ADDED-CONSTRAINT-MODEL/model-ir.json \
+  --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
+  --components 2500 0 0 0 0 0 --output-dir ADDED-PATTERN-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \

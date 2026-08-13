@@ -25,12 +25,15 @@ The installed `model-add-nodal-load` command appends one nonzero six-component S
 existing linear-static pattern and existing node with strict C++ revalidation.
 The installed `model-add-fixed-constraint` command appends one homogeneous six-DOF zero constraint
 to an existing unconstrained node with strict C++ revalidation.
+The installed `model-add-linear-load-pattern` command atomically appends one zero-self-weight
+linear-static pattern and its first nonzero nodal load on an existing node with strict C++
+revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v25 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v26 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
-value/endpoint bindings, contiguous new topology/load/constraint indices, exact added N3-UY
-external load, six-DOF N3 fixation, active-DOF reduction, changed displacement, and added-model
-linear execution,
+value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
+N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
+displacement, and added-model linear execution,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
