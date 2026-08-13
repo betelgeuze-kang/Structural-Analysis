@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
+    "build": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .",
     "preview": "vite preview",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",

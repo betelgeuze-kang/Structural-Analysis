@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 from pathlib import Path
@@ -27,8 +28,10 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- delivery --root ."
     )
-    assert package_json["scripts"]["build"].endswith(
-        "structural-frontend-contract -- delivery --root ."
+    assert (
+        package_json["scripts"]["build"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- frontend-build --root ."
     )
     assert (
         package_json["scripts"]["verify:frontend-smoke"]
@@ -130,6 +133,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert package_lock["packages"][""]["dependencies"] == package_json["dependencies"]
     assert package_lock["packages"][""]["devDependencies"] == package_json["devDependencies"]
     assert "npm run verify:frontend-contract" in docs_text
+    assert "npm run build" in docs_text
+    assert "structural-frontend-contract frontend-build" in docs_text
     assert "npm run verify:frontend-smoke" in docs_text
     assert "structural-frontend-contract delivery" in docs_text
     assert "npm run verify:frontend-browser-smoke" in docs_text
@@ -174,6 +179,46 @@ def test_native_frontend_contract_helper_runs_without_installed_packages() -> No
     assert payload["schema_version"] == "structural-native-frontend-contract-receipt.v1"
     assert payload["commands_executed"] == 0
     assert payload["network_access_count"] == 0
+
+
+def test_native_frontend_build_dry_run_is_process_free_and_self_hashed() -> None:
+    result = subprocess.run(
+        ["npm", "run", "build", "--silent", "--", "--dry-run"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-frontend-build-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["source_file_count"] == len(payload["source_identities"])
+    assert payload["source_file_count"] > 100
+    assert payload["source_total_bytes"] > 0
+    assert payload["installed_cli_identities"] == []
+    assert payload["installed_cli_entrypoint_hashes_present"] is False
+    assert payload["logical_commands"] == [
+        ["node", "node_modules/typescript/bin/tsc", "--noEmit"],
+        ["node", "node_modules/vite/bin/vite.js", "build"],
+    ]
+    assert payload["node_options_disposition"] == "removed_for_direct_children"
+    assert payload["delivery_receipt_hash"] is None
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_codes"] == []
+    assert payload["runtime_requirements"] == {
+        "required": ["node", "typescript", "vite"],
+        "browser_required": False,
+    }
+    assert payload["rust_owned_listener_count"] == 0
+    assert payload["deterministic_receipt"] is True
+    receipt_hash = payload.pop("receipt_hash")
+    canonical = json.dumps(
+        payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":")
+    ).encode()
+    assert receipt_hash == f"sha256:{hashlib.sha256(canonical).hexdigest()}"
 
 
 def test_native_frontend_smoke_dry_run_is_process_free_and_self_hashed() -> None:

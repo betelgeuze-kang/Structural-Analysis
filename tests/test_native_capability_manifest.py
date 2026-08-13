@@ -312,6 +312,23 @@ def test_native_frontend_contract_capability_is_bounded_c0() -> None:
     assert "close C5/C6" in frontend["claim"]
 
 
+def test_native_frontend_build_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_build") is True
+    frontend = payload["capabilities"]["native_frontend_build"]
+    assert frontend["cutover_gate"] == "C0"
+    assert frontend["owner"] == "structural-frontend-contract"
+    assert "package build" in frontend["claim"]
+    assert "frontend-build" in frontend["claim"]
+    assert "bounded complete inventory" in frontend["claim"]
+    assert "TypeScript and Vite CLI entrypoint bytes" in frontend["claim"]
+    assert "removes inherited NODE_OPTIONS" in frontend["claim"]
+    assert "two direct Node children" in frontend["claim"]
+    assert "dry-run requires no node_modules" in frontend["claim"]
+    assert "build-time network behavior remain outside" in frontend["claim"]
+    assert "C5, or C6" in frontend["claim"]
+
+
 def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

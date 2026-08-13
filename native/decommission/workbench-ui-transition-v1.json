@@ -36,6 +36,7 @@
       "structural-frontend-contract check",
       "structural-frontend-contract smoke",
       "structural-frontend-contract delivery",
+      "structural-frontend-contract frontend-build",
       "structural-frontend-contract prototype",
       "structural-frontend-contract prototype-browser-smoke",
       "structural-frontend-contract workbench-v2-browser-smoke",
@@ -52,6 +53,11 @@
     ],
     "legacy_frontend_runtime": {
       "build_smoke_node_required": true,
+      "frontend_build_node_required": true,
+      "frontend_build_typescript_required": true,
+      "frontend_build_vite_required": true,
+      "frontend_build_browser_required": false,
+      "frontend_build_listener_required": false,
       "browser_smoke_node_required": true,
       "browser_smoke_playwright_required": true,
       "browser_smoke_browser_required": true,
@@ -176,5 +182,5 @@
     "native_result_error_checksum_parity_complete": false
   },
   "c6_complete": false,
-  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build orchestration, offline prototype static contract, Viewer/Workbench prototype/Workbench v2 browser-smoke wrappers, Viewer JavaScript syntax-gate orchestration, Viewer README verified-before-publish capture, Viewer PDF verified-before-publish export and verification wrappers, Viewer sample-workflow, performance and visual-regression process/artifact verifiers, process and output lifetimes, scoped loopback and SPA serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript, npm/Vite/TypeScript build, retained Node parser/exporter/probe/capture, Playwright, Chromium/browser, and optional pdftotext dependency visible. The automated syntax gate, sample workflow and README capture are not runtime behavior or human approval. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build and direct TypeScript/Vite build orchestration, offline prototype static contract, Viewer/Workbench prototype/Workbench v2 browser-smoke wrappers, Viewer JavaScript syntax-gate orchestration, Viewer README verified-before-publish capture, Viewer PDF verified-before-publish export and verification wrappers, Viewer sample-workflow, performance and visual-regression process/artifact verifiers, process and output lifetimes, scoped loopback and SPA serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite build, syntax, exporter, probe, and capture runtimes, Playwright, Chromium/browser, and optional pdftotext dependency visible. The automated build and syntax gates, sample workflow and README capture are not runtime behavior or human approval. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

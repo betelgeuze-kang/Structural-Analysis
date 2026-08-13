@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 mod browser_smoke;
+mod frontend_build;
 mod playwright;
 mod prototype;
 mod prototype_browser_smoke;
@@ -35,6 +36,12 @@ pub use browser_smoke::{
     ViewerBrowserSmokeReceiptV1,
 };
 use browser_smoke::{validate_viewer_browser_smoke_source, ViewerBrowserSmokeSourceV1};
+pub use frontend_build::{
+    canonical_frontend_build_receipt_json, run_frontend_build, FrontendBuildCliIdentityV1,
+    FrontendBuildOptions, FrontendBuildReceiptV1, FrontendBuildRuntimeRequirementsV1,
+    FrontendBuildSourceIdentityV1,
+};
+use frontend_build::{validate_frontend_build_source, FrontendBuildSourceV1};
 pub use prototype::{
     canonical_workbench_prototype_receipt_json, check_workbench_prototype,
     WorkbenchPrototypeReceiptV1,
@@ -168,6 +175,7 @@ struct FrontendSourceMapV1 {
     expected_scripts: BTreeMap<String, String>,
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
+    frontend_build_contract: FrontendBuildSourceV1,
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
@@ -559,6 +567,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
             ));
         }
     }
+    validate_frontend_build_source(&source_map.frontend_build_contract)?;
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;

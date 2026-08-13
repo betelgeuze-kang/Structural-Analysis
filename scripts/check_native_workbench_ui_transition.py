@@ -21,6 +21,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
+    Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
     Path("native/crates/structural-frontend-contract/src/playwright.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs"),
@@ -211,6 +212,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract check",
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
+        "structural-frontend-contract frontend-build",
         "structural-frontend-contract prototype",
         "structural-frontend-contract prototype-browser-smoke",
         "structural-frontend-contract workbench-v2-browser-smoke",
@@ -228,6 +230,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         blockers.append("workbench_ui_native_frontend_contract_flow_invalid")
     if native.get("legacy_frontend_runtime") != {
         "build_smoke_node_required": True,
+        "frontend_build_node_required": True,
+        "frontend_build_typescript_required": True,
+        "frontend_build_vite_required": True,
+        "frontend_build_browser_required": False,
+        "frontend_build_listener_required": False,
         "browser_smoke_node_required": True,
         "browser_smoke_playwright_required": True,
         "browser_smoke_browser_required": True,
@@ -362,6 +369,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- check --root ."
     ):
         blockers.append("workbench_ui_frontend_contract_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("build") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- frontend-build --root ."
+    ):
+        blockers.append("workbench_ui_frontend_build_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get("verify:frontend-smoke") != (
         "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- smoke --root ."
@@ -584,6 +596,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     viewer_manifest = _text(
         root,
         Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
+        blockers,
+    )
+    frontend_build = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
+        frontend_build,
+        (
+            "pub fn run_frontend_build",
+            "structural-native-frontend-build-receipt.v1",
+            "node_modules/typescript/bin/tsc",
+            "node_modules/vite/bin/vite.js",
+            "frontend_build_source_changed",
+            "frontend_build_runtime_changed",
+            '.env_remove("NODE_OPTIONS")',
+            "check_frontend_delivery",
+            "direct_processes_spawned",
+            "delivery_receipt_hash",
+        ),
         blockers,
     )
     frontend_smoke = _text(
@@ -909,8 +943,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/frontend-build/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
+            "Frontend TypeScript/Vite build orchestration is Rust-native",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
             "Viewer JavaScript syntax gate orchestration is Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",
@@ -960,7 +995,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript, npm/Vite/TypeScript build, retained Node parser/exporter/probe/capture, Playwright, Chromium/browser, and optional pdftotext dependency visible",
+        "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite build, syntax, exporter, probe, and capture runtimes, Playwright, Chromium/browser, and optional pdftotext dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

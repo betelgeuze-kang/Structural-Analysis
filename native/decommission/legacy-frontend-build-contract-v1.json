@@ -75,6 +75,7 @@
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
+    "native/crates/structural-frontend-contract/src/frontend_build.rs",
     "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
@@ -96,7 +97,7 @@
     "src/app.tsx"
   ],
   "expected_scripts": {
-    "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
+    "build": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- frontend-build --root .",
     "capture:readme-viewer-image": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-readme-capture --root .",
     "dev": "vite",
     "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
@@ -128,6 +129,38 @@
     "postcss": "8.5.26",
     "typescript": "5.0.2",
     "vite": "8.0.16"
+  },
+  "frontend_build_contract": {
+    "schema_version": "structural-native-frontend-build-contract.v1",
+    "node_launcher": "node",
+    "typescript_cli_path": "node_modules/typescript/bin/tsc",
+    "typescript_arguments": [
+      "--noEmit"
+    ],
+    "vite_cli_path": "node_modules/vite/bin/vite.js",
+    "vite_arguments": [
+      "build"
+    ],
+    "source_files": [
+      "index.html",
+      "tsconfig.json",
+      "vite.config.ts",
+      "src/main.tsx",
+      "src/App.tsx",
+      "src/index.css",
+      "src/vite-env.d.ts"
+    ],
+    "source_directories": [
+      "src/workbench",
+      "src/workbench-v2",
+      "src/structure-viewer"
+    ],
+    "maximum_source_files": 4096,
+    "maximum_source_bytes": 33554432,
+    "maximum_total_source_bytes": 268435456,
+    "maximum_cli_bytes": 16777216,
+    "external_network_access_accounting": "not_instrumented_vite_plugins_transitive_runtime_and_environment",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust freezes the package/lock/source map and a bounded complete inventory of the configured frontend source roots, hashes the installed TypeScript and Vite CLI entrypoint bytes for live execution, removes inherited NODE_OPTIONS, owns the two direct Node children, rejects source or CLI entrypoint mutation, and validates the resulting bounded delivery tree. Dry-run requires no installed packages and spawns no process. Node executable identity, transitive npm package bytes, TypeScript/Vite internals, plugins, environment and build-time network behavior remain outside Rust authority; browser behavior, clean-machine publication, native UI parity, C5, and C6 remain open."
   },
   "delivery_contract": {
     "contract": "workbench_viewer_production_delivery_v1",

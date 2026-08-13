@@ -6,22 +6,24 @@ use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
+    canonical_delivery_receipt_json, canonical_frontend_build_receipt_json, canonical_receipt_json,
+    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
+    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
-    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
-    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions,
-    ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
-    ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
+    check_workbench_prototype, plan_viewer_server, run_frontend_build, run_frontend_smoke,
+    run_viewer_browser_smoke, run_viewer_js_syntax, run_viewer_performance_probe,
+    run_viewer_readme_capture, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
+    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendBuildOptions,
+    ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
+    ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
+    ViewerVisualRegressionOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -77,6 +79,63 @@ fn copy_contract_inventory(destination: &Path) {
             .expect("create target parent");
         std::fs::copy(root.join(relative), target).expect("copy required file");
     }
+}
+
+fn copy_frontend_build_sources(destination: &Path) {
+    fn copy_tree(source: &Path, destination: &Path) {
+        std::fs::create_dir_all(destination).expect("create frontend build source directory");
+        for entry in std::fs::read_dir(source).expect("read frontend build source directory") {
+            let entry = entry.expect("frontend build source entry");
+            let source_path = entry.path();
+            let target_path = destination.join(entry.file_name());
+            let metadata =
+                std::fs::symlink_metadata(&source_path).expect("frontend build source metadata");
+            assert!(!metadata.file_type().is_symlink());
+            if metadata.is_dir() {
+                copy_tree(&source_path, &target_path);
+            } else {
+                assert!(metadata.is_file());
+                std::fs::copy(source_path, target_path).expect("copy frontend build source file");
+            }
+        }
+    }
+
+    let root = repository_root();
+    let source_map: Value = serde_json::from_slice(
+        &std::fs::read(root.join("native/decommission/legacy-frontend-build-contract-v1.json"))
+            .expect("read source map"),
+    )
+    .expect("source-map JSON");
+    for relative in source_map["frontend_build_contract"]["source_files"]
+        .as_array()
+        .expect("frontend build source files")
+        .iter()
+        .map(|value| value.as_str().expect("frontend build source file"))
+    {
+        let target = destination.join(relative);
+        std::fs::create_dir_all(target.parent().expect("source file parent"))
+            .expect("create source file parent");
+        std::fs::copy(root.join(relative), target).expect("copy frontend build source file");
+    }
+    for relative in source_map["frontend_build_contract"]["source_directories"]
+        .as_array()
+        .expect("frontend build source directories")
+        .iter()
+        .map(|value| value.as_str().expect("frontend build source directory"))
+    {
+        copy_tree(&root.join(relative), &destination.join(relative));
+    }
+}
+
+fn write_frontend_build_runtime(root: &Path) {
+    let typescript = root.join("node_modules/typescript/bin/tsc");
+    let vite = root.join("node_modules/vite/bin/vite.js");
+    std::fs::create_dir_all(typescript.parent().expect("TypeScript CLI parent"))
+        .expect("create TypeScript CLI parent");
+    std::fs::create_dir_all(vite.parent().expect("Vite CLI parent"))
+        .expect("create Vite CLI parent");
+    std::fs::write(typescript, b"typescript-cli-entry\n").expect("write TypeScript CLI");
+    std::fs::write(vite, b"vite-cli-entry\n").expect("write Vite CLI");
 }
 
 fn write_delivery_fixture(root: &Path) {
@@ -2374,6 +2433,142 @@ fn clean_environment_prototype_cli_emits_one_canonical_receipt() {
     );
     assert_eq!(value["action"], "workbench_prototype_check");
     verify_receipt_hash(&value);
+}
+
+#[test]
+fn frontend_build_dry_run_is_deterministic_runtime_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = FrontendBuildOptions::new(root);
+    options.dry_run = true;
+    let first = run_frontend_build(&options).expect("frontend build dry-run");
+    let second = run_frontend_build(&options).expect("repeat frontend build dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert!(first.source_file_count > 100);
+    assert_eq!(
+        first.source_file_count,
+        u64::try_from(first.source_identities.len()).expect("source count")
+    );
+    assert!(first.source_total_bytes > 0);
+    assert!(first.source_inventory_sha256.starts_with("sha256:"));
+    assert!(first.installed_cli_identities.is_empty());
+    assert!(!first.installed_cli_entrypoint_hashes_present);
+    assert_eq!(
+        first.logical_commands,
+        [
+            ["node", "node_modules/typescript/bin/tsc", "--noEmit"],
+            ["node", "node_modules/vite/bin/vite.js", "build"],
+        ]
+    );
+    assert_eq!(first.delivery_receipt_hash, None);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert_eq!(
+        first.runtime_requirements.required,
+        ["node", "typescript", "vite"]
+    );
+    assert!(!first.runtime_requirements.browser_required);
+    assert_eq!(first.rust_owned_listener_count, 0);
+    assert!(first.deterministic_receipt);
+    let encoded =
+        canonical_frontend_build_receipt_json(&first).expect("canonical frontend build receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("frontend build receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_build_owns_two_children_removes_node_options_and_checks_delivery() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    copy_frontend_build_sources(&test.0);
+    write_frontend_build_runtime(&test.0);
+    write_delivery_fixture(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nif [ \"${NODE_OPTIONS+x}\" = x ]; then exit 91; fi\nprintf '%s|%s\\n' \"$VITE_BASE_PATH\" \"$*\" >> \"$PWD/frontend-build-invocations.log\"\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-build", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .env("NODE_OPTIONS", "--inspect")
+        .env("VITE_BASE_PATH", "/nested/")
+        .output()
+        .expect("execute frontend build");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("frontend-build-invocations.log"))
+            .expect("read frontend build invocations"),
+        "/nested/|node_modules/typescript/bin/tsc --noEmit\n/nested/|node_modules/vite/bin/vite.js build\n"
+    );
+    let receipt: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("frontend build receipt");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-frontend-build-receipt.v1"
+    );
+    assert_eq!(receipt["status"], "ready");
+    assert_eq!(receipt["vite_base_path"], "/nested/");
+    assert_eq!(
+        receipt["node_options_disposition"],
+        "removed_for_direct_children"
+    );
+    assert_eq!(
+        receipt["installed_cli_identities"].as_array().map(Vec::len),
+        Some(2)
+    );
+    assert_eq!(receipt["installed_cli_entrypoint_hashes_present"], true);
+    assert_eq!(receipt["direct_processes_spawned"], 2);
+    assert_eq!(receipt["successful_exit_codes"], serde_json::json!([0, 0]));
+    assert!(receipt["delivery_receipt_hash"]
+        .as_str()
+        .is_some_and(|value| value.starts_with("sha256:")));
+    assert_eq!(receipt["deterministic_receipt"], false);
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_build_rejects_source_mutation_before_second_child() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    copy_frontend_build_sources(&test.0);
+    write_frontend_build_runtime(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$PWD/frontend-build-invocations.log\"\nif [ ! -f \"$PWD/frontend-build-mutated.flag\" ]; then\n  : > \"$PWD/frontend-build-mutated.flag\"\n  printf ' ' >> \"$PWD/src/main.tsx\"\nfi\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-build", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating frontend build");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("frontend-build-invocations.log"))
+            .expect("read frontend build invocations")
+            .lines()
+            .count(),
+        1
+    );
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("frontend build error");
+    assert_eq!(error["code"], "frontend_build_source_changed");
 }
 
 #[cfg(unix)]
