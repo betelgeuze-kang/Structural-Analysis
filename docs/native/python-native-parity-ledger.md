@@ -341,7 +341,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   Markdown projection and emits a deterministic single-page A4 PDF plus self-hashed receipt with
   no product dependency on Python/Node/external renderers. Live MIDAS/OpenSees/CalculiX execution,
   same-mesh node/member mapping, PDF/A/accessibility/localization/multipage output and broader
-  report/comparison profiles remain open.
+  report/comparison profiles remain open. The bounded Workbench now separately re-verifies that
+  exact artifact chain and emits self-hashed `en-US`/`ko-KR` UTF-8 linear text, including Unicode
+  human-review text without ANSI/color/layout semantics. That terminal alternative is not a
+  Unicode-font PDF, tagged PDF, WCAG certification, or general localization closure.
 
 ### D9. CLI/API and Workbench composition
 

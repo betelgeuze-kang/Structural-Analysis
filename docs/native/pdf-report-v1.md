@@ -37,3 +37,5 @@ overlap or illegible text. Poppler is verification tooling, not a product depend
 This slice does not claim PDF/A conformance, tagged accessibility, Unicode or localized fonts,
 forms, signatures, multipage tables/charts, broader ResultIR profiles, engineering acceptance or
 design-code compliance. HIP C2 source-result parity and final C6 decommission also remain open.
+The Workbench's separately verified `en-US`/`ko-KR` UTF-8 linear report view is a terminal text
+alternative; it does not change or promote this fixed-font PDF boundary.

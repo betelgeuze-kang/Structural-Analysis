@@ -215,12 +215,14 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert workbench["cutover_gate"] == "C5"
     assert workbench["owner"] == "structural-workbench"
     assert "Import -> Validate -> Run -> Resume -> Compare -> Report" in workbench["claim"]
-    assert "Inspect -> Review -> Export" in workbench["claim"]
+    assert "Inspect -> Report-view -> Review -> Export" in workbench["claim"]
     assert "process death after checkpoint publication" in workbench["claim"]
     assert "no Python, Node, browser, CLI subprocess" in workbench["claim"]
     assert "never inferred" in workbench["claim"]
     assert "Catalog/Catalog-show" in workbench["claim"]
     assert "Evidence/Evidence-show" in workbench["claim"]
+    assert "English/Korean UTF-8 linear report view" in workbench["claim"]
+    assert "not WCAG or PDF/UA certification" in workbench["claim"]
     assert "React/TypeScript removal" in workbench["claim"]
     assert "HIP C2" in workbench["claim"]
     assert "C6" in workbench["claim"]

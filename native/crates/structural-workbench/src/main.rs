@@ -7,8 +7,8 @@ use serde_json::json;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
-    BenchmarkTruthClassV1, NativeWorkbench, WorkbenchError, WorkbenchReviewDecisionV1,
-    WorkbenchStageV1,
+    BenchmarkTruthClassV1, NativeWorkbench, WorkbenchError, WorkbenchReportLocaleV1,
+    WorkbenchReviewDecisionV1, WorkbenchStageV1,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -100,6 +100,11 @@ fn run(arguments: &[OsString]) -> ExitCode {
             let mut workbench = NativeWorkbench::open(&workspace)?;
             workbench.report()?;
             print_session(&workbench)
+        }),
+        Some("report-view") => parse_report_view(arguments).and_then(|(workspace, locale)| {
+            let workbench = NativeWorkbench::open(&workspace)?;
+            print!("{}", workbench.linear_report_text(locale)?);
+            Ok(())
         }),
         Some("review") => parse_review(arguments).and_then(|command| run_review(&command)),
         Some("review-show") => {
@@ -394,6 +399,40 @@ fn parse_workspace_only(arguments: &[OsString]) -> Result<PathBuf, WorkbenchErro
     }
 }
 
+fn parse_report_view(
+    arguments: &[OsString],
+) -> Result<(PathBuf, WorkbenchReportLocaleV1), WorkbenchError> {
+    let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("report-view option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("report-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| usage_error("report-view locale must be en-US or ko-KR"))?;
+            }
+            _ => return Err(usage_error("duplicate or unknown report-view option")),
+        }
+        index += 2;
+    }
+    Ok((
+        workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
+    ))
+}
+
 fn parse_stage_command(
     arguments: &[OsString],
     budget_flag: &str,
@@ -625,7 +664,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
+    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
 }
 
 #[cfg(test)]
@@ -634,8 +673,8 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_review,
-        parse_stage_command,
+        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_report_view,
+        parse_review, parse_stage_command,
     };
 
     #[test]
@@ -720,6 +759,36 @@ mod tests {
         let mut invalid = arguments;
         invalid[4] = OsString::from("inferred-pass");
         assert!(parse_review(&invalid).is_err());
+    }
+
+    #[test]
+    fn report_view_parser_defaults_to_english_and_accepts_korean() {
+        let default = [
+            OsString::from("report-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let (workspace, locale) = parse_report_view(&default).expect("default report view");
+        assert_eq!(workspace, PathBuf::from("session"));
+        assert_eq!(locale.label(), "en-US");
+
+        let korean = [
+            OsString::from("report-view"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        assert_eq!(
+            parse_report_view(&korean)
+                .expect("Korean report view")
+                .1
+                .label(),
+            "ko-KR"
+        );
+        let mut invalid = korean;
+        invalid[2] = OsString::from("ko-kr");
+        assert!(parse_report_view(&invalid).is_err());
     }
 
     #[test]

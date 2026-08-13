@@ -29,7 +29,11 @@ ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
    one immutable explicit human `pass`/`review`/`fail` disposition that is hash-bound to the exact
    session, ResultIR, comparison IR, and PDF; it is never inferred from a successful run or
    comparison. `Export` emits a self-hashed handoff manifest for those exact relative artifacts.
-8. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
+8. `Report-view` re-verifies the exact ResultIR, ReportIR, Markdown, PDF, receipt, comparison and
+   optional review bindings, then emits a deterministic self-hashed UTF-8 linear report view in
+   `en-US` or `ko-KR`. Meaning does not depend on ANSI styling, color, cursor position, graphics,
+   a browser, or an external renderer; directional-spoofing controls in review text are escaped.
+9. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
    acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
    it never reads protected source evidence or generates a readiness verdict.
 
@@ -53,6 +57,7 @@ structural-workbench run --workspace SESSION --step-budget 1
 structural-workbench resume --workspace SESSION
 structural-workbench compare --workspace SESSION --require-pass
 structural-workbench report --workspace SESSION
+structural-workbench report-view --workspace SESSION --locale ko-KR
 structural-workbench status --workspace SESSION
 structural-workbench inspect --workspace SESSION
 structural-workbench review --workspace SESSION --decision review \
@@ -75,6 +80,12 @@ The review is deliberately immutable. Revising a disposition requires a new Work
 instead of silently overwriting history. Reviewer and comment text are bounded and reject terminal
 control characters. The export is a manifest, not a signature or archive; the listed PDF and JSON
 files remain independently verifiable product artifacts.
+
+The UTF-8 linear report view is a bounded terminal alternative for the exact native report. Its
+English and Korean forms carry identical numerical values and provenance, include an explicit
+human-review state, avoid terminal escape bytes, and bind the pre-hash bytes with a final view
+hash. This is not a WCAG, PDF/UA, assistive-technology, or general localization certification; the
+fixed-font PDF remains ASCII-only.
 
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
@@ -105,7 +116,9 @@ in two workspaces, proves byte-identical inspect/review/export JSON, verifies th
 comparison does not infer the human decision, blocks review overwrite, and rejects a one-byte
 review mutation on reopen. Catalog/evidence E2E repeats byte-identically in a cleared environment,
 freezes conservative ready/blocked/unavailable projections, verifies self-hashes, and rejects
-evidence checksum tampering.
+evidence checksum tampering. A separate cleared-environment E2E publishes Korean reviewer/comment
+text, proves byte-identical `en-US` and `ko-KR` linear projections, verifies the localized view
+hash, and rejects an unsupported locale.
 
 ## Claim boundary
 
@@ -114,8 +127,10 @@ deterministic results summary, explicit human review and handoff export for that
 not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
 MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
 modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
-accessibility/localization, broader language-neutral fixture/oracle ownership, protected HIP C2
-receipts, and final Python/Node C6 removal remain open.
+general graphical accessibility/localization, Unicode or tagged PDF output, broader
+language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
+removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
+broader UI and document requirements.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 

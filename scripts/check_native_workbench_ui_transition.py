@@ -16,6 +16,7 @@ REQUIRED_PATHS = (
     Path("native/capabilities.json"),
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
+    Path("native/crates/structural-workbench/src/report_view.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
@@ -129,6 +130,10 @@ EXPECTED_FEATURES = {
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
     "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),
+    "bounded_terminal_utf8_linear_report_view_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "accessibility_localization_and_unicode_report_ui": ("open", True),
 }
 EXPECTED_PREREQUISITES = {
@@ -242,7 +247,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "report",
     ]:
         blockers.append("workbench_ui_native_core_flow_invalid")
-    if native.get("operator_flow") != ["inspect", "review", "export"]:
+    if native.get("operator_flow") != ["inspect", "report-view", "review", "export"]:
         blockers.append("workbench_ui_native_operator_flow_invalid")
     if native.get("catalog_flow") != [
         "catalog",
@@ -389,6 +394,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     ):
         if native.get(field) is not False:
             blockers.append(f"workbench_ui_native_false_boundary_invalid:{field}")
+    if native.get("linear_report_locales") != ["en-US", "ko-KR"]:
+        blockers.append("workbench_ui_native_linear_report_locales_invalid")
 
     legacy = manifest.get("legacy_surface")
     if not isinstance(legacy, dict):
@@ -696,11 +703,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native-workbench-review.v1",
             "structural-native-workbench-export.v1",
             "pub fn inspect_json",
+            "pub fn linear_report_text",
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
             "browse_embedded_benchmark_catalog",
             "browse_evidence_bundle",
+        ),
+        blockers,
+    )
+    native_report_view = _text(
+        root, Path("native/crates/structural-workbench/src/report_view.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/report_view.rs"),
+        native_report_view,
+        (
+            "structural-native-workbench-linear-report.v1",
+            "WorkbenchReportLocaleV1",
+            '"en-US"',
+            '"ko-KR"',
+            "safe_terminal_text",
+            "not WCAG, PDF/UA",
         ),
         blockers,
     )
@@ -1260,6 +1284,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         native_main,
         (
             'Some("inspect")',
+            'Some("report-view")',
             'Some("review")',
             'Some("export")',
             'Some("catalog")',
@@ -1310,6 +1335,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         transition_doc,
         (
             "not a C6 removal receipt",
+            "bounded terminal UTF-8 linear report view is C5-implemented",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

@@ -608,6 +608,12 @@ fn native_review_inspect_and_export_are_deterministic_and_tamper_evident() {
     assert!(before["human_review"].is_null());
     assert_eq!(before["comparison"]["status"], "passed");
     assert_eq!(before["backend_receipt"]["fallback_count"], 0);
+    let unreviewed_report =
+        run_workbench(&[text("report-view"), text("--workspace"), first.as_os_str()]);
+    assert_success(&unreviewed_report);
+    assert!(
+        String::from_utf8_lossy(&unreviewed_report.stdout).contains("Human review: not recorded\n")
+    );
 
     let first_review = run_workbench(&review_arguments(&first));
     let second_review = run_workbench(&review_arguments(&second));
@@ -666,4 +672,111 @@ fn native_review_inspect_and_export_are_deterministic_and_tamper_evident() {
     let rejected = run_workbench(&stage_arguments("status", &first));
     assert_eq!(rejected.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_hashed_json"));
+}
+
+#[test]
+fn localized_linear_report_view_is_utf8_deterministic_and_hash_bound() {
+    let (model, request, external, source) = inputs();
+    let temporary = TestDirectory::create();
+    let first = temporary.0.join("localized-first");
+    let second = temporary.0.join("localized-second");
+    for workspace in [&first, &second] {
+        assert_success(&run_workbench(&import_arguments(
+            "workflow", &model, &request, &external, &source, workspace,
+        )));
+        assert_success(&run_workbench(&[
+            text("review"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--decision"),
+            text("review"),
+            text("--reviewer"),
+            text("김 구조"),
+            text("--comment"),
+            text("접합부 가정을 확인하세요.\n이 줄은 색상없이도 읽혀야 합니다."),
+        ]));
+    }
+
+    let korean_arguments = [
+        text("report-view"),
+        text("--workspace"),
+        first.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ];
+    let first_korean = run_workbench(&korean_arguments);
+    let second_korean = run_workbench(&[
+        text("report-view"),
+        text("--workspace"),
+        second.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ]);
+    assert_success(&first_korean);
+    assert_success(&second_korean);
+    assert_eq!(first_korean.stdout, second_korean.stdout);
+    assert!(!first_korean.stdout.contains(&0x1b));
+    let korean = String::from_utf8(first_korean.stdout).expect("Korean UTF-8 report view");
+    assert!(korean.starts_with("구조 네이티브 워크벤치 - 선형 보고서\n"));
+    assert!(korean.contains("언어: ko-KR\n"));
+    assert!(korean.contains("표현: UTF-8 선형 텍스트;"));
+    assert!(korean.contains("검토자: 김 구조\n"));
+    assert!(korean.contains("비교 해시: sha256:"));
+    assert!(korean.contains("검토 해시: sha256:"));
+    assert!(korean.contains("  접합부 가정을 확인하세요.\n"));
+    assert!(korean.contains("  이 줄은 색상없이도 읽혀야 합니다.\n"));
+    assert!(korean.contains("WCAG, PDF/UA"));
+    let (unsigned, hash_line) = korean
+        .rsplit_once("보기 해시: ")
+        .expect("localized report view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let english = run_workbench(&[text("report-view"), text("--workspace"), first.as_os_str()]);
+    assert_success(&english);
+    let english = String::from_utf8(english.stdout).expect("English UTF-8 report view");
+    assert!(english.starts_with("Structural Native Workbench - linear report\n"));
+    assert!(english.contains("Locale: en-US\n"));
+    assert!(english.contains("Reviewer: 김 구조\n"));
+    let result: Value = serde_json::from_slice(
+        &std::fs::read(first.join("04-resume/result-ir.json")).expect("terminal ResultIR"),
+    )
+    .expect("terminal ResultIR JSON");
+    let report: Value = serde_json::from_slice(
+        &std::fs::read(first.join("04-resume/report-ir.json")).expect("terminal ReportIR"),
+    )
+    .expect("terminal ReportIR JSON");
+    let comparison: Value = serde_json::from_slice(
+        &std::fs::read(first.join("05-compare/comparison-receipt.json"))
+            .expect("comparison receipt"),
+    )
+    .expect("comparison receipt JSON");
+    let review: Value = serde_json::from_slice(
+        &std::fs::read(first.join("07-review/review.json")).expect("review"),
+    )
+    .expect("review JSON");
+    for value in [
+        result["result_hash"].as_str().expect("result hash"),
+        report["report_hash"].as_str().expect("report hash"),
+        report["document_source_hash"]
+            .as_str()
+            .expect("document hash"),
+        comparison["comparison_hash"]
+            .as_str()
+            .expect("comparison hash"),
+        review["review_hash"].as_str().expect("review hash"),
+    ] {
+        assert!(english.contains(value));
+        assert!(korean.contains(value));
+    }
+
+    let invalid_locale = run_workbench(&[
+        text("report-view"),
+        text("--workspace"),
+        first.as_os_str(),
+        text("--locale"),
+        text("ko-kr"),
+    ]);
+    assert_eq!(invalid_locale.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&invalid_locale.stdout)
+        .contains("report-view locale must be en-US or ko-KR"));
 }

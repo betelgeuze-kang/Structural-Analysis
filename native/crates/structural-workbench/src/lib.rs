@@ -21,15 +21,20 @@ use structural_contracts::model_ir::{
     canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2,
 };
 use structural_contracts::product_ir::{parse_model_ir_ndtha_analysis_request_v1, sha256_identity};
+use structural_contracts::product_ir::{
+    parse_nonlinear_ndtha_report_ir_v1, parse_nonlinear_ndtha_result_ir_v1,
+};
 
 mod catalog;
 mod evidence;
+mod report_view;
 
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,
     BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
+pub use report_view::WorkbenchReportLocaleV1;
 
 const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";
 const IMPORT_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-import-receipt.v1";
@@ -910,6 +915,99 @@ impl NativeWorkbench {
             }),
             "export_hash",
             "workbench_export_serialization_failed",
+        )
+    }
+
+    /// Return a deterministic UTF-8 linear alternative to the verified bounded report.
+    ///
+    /// English and Korean labels carry the same values and identities. The projection uses no
+    /// ANSI styling, color, cursor positioning, graphics, browser, or external renderer. This is
+    /// a bounded terminal accessibility aid, not WCAG or PDF/UA conformance.
+    ///
+    /// # Errors
+    ///
+    /// Requires a reported session and rejects any `ResultIR`, `ReportIR`, Markdown, PDF, receipt,
+    /// or optional review drift before rendering text.
+    pub fn linear_report_text(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+    ) -> Result<String, WorkbenchError> {
+        self.require_stage(WorkbenchStageV1::Reported)?;
+        let terminal = self.root.join(RESUME_DIRECTORY);
+        let result_bytes = read_bounded_regular_file(
+            &terminal.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report_bytes = read_bounded_regular_file(
+            &terminal.join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let document_bytes =
+            read_bounded_regular_file(&terminal.join("report.md"), MAX_PRODUCT_ARTIFACT_BYTES)?;
+        let report_directory = self.root.join(REPORT_DIRECTORY);
+        let pdf_bytes = read_bounded_regular_file(
+            &report_directory.join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let pdf_receipt_bytes = read_bounded_regular_file(
+            &report_directory.join("pdf-receipt.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reproduced = execute_pdf_report(&result_bytes, &report_bytes, &document_bytes)
+            .map_err(|error| input_error("workbench_linear_report_binding_invalid", &error))?;
+        if reproduced.pdf_bytes() != pdf_bytes
+            || reproduced.receipt_json().as_bytes() != pdf_receipt_bytes
+        {
+            return Err(WorkbenchError::new(
+                "workbench_linear_report_binding_mismatch",
+                "stored PDF or receipt differs from the exact ResultIR/ReportIR/Markdown projection",
+            ));
+        }
+        let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_linear_report_result_invalid", &error))?;
+        let report = parse_nonlinear_ndtha_report_ir_v1(&report_bytes)
+            .map_err(|error| input_error("workbench_linear_report_report_invalid", &error))?;
+        let comparison_passed = self.session.comparison_passed.ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_linear_report_comparison_missing",
+                "reported session has no verified external-comparison disposition",
+            )
+        })?;
+        let comparison_receipt = verified_receipt_json(
+            &self
+                .root
+                .join(COMPARISON_DIRECTORY)
+                .join("comparison-receipt.json"),
+        )?;
+        let comparison_hash = comparison_receipt
+            .get("comparison_hash")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_linear_report_comparison_invalid",
+                    "verified external-comparison receipt has no comparison hash",
+                )
+            })?;
+        let review = read_optional_review(&self.root, &self.session)?;
+        let pdf_hash = sha256_identity(&pdf_bytes);
+        report_view::render_linear_report(
+            locale,
+            &report_view::LinearReportInput {
+                result: result.result(),
+                report_hash: report.report_hash(),
+                document_hash: &report.report().document_source_hash,
+                comparison_passed,
+                comparison_hash,
+                pdf_hash: &pdf_hash,
+                review: review
+                    .as_ref()
+                    .map(|review| report_view::LinearReportReview {
+                        decision: review.decision,
+                        reviewer: &review.reviewer,
+                        comment: &review.comment,
+                        review_hash: &review.review_hash,
+                    }),
+            },
         )
     }
 

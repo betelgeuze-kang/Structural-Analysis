@@ -15,6 +15,10 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   comparison IR, and PDF. Solver completion or comparison success never infers this decision;
 - `export`: a deterministic self-hashed handoff manifest containing relative artifact names,
   lengths, and hashes.
+- `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
+  re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
+  uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
+  not WCAG/PDF-UA certification and does not make the fixed-font PDF Unicode-capable.
 - `catalog` / `catalog-show`: strict, self-hashed browsing of the 26-case language-neutral native
   benchmark catalog, including lifecycle, truth, size, first-target and text filters. Geometry-only
   cases remain excluded from accuracy and no runner/acquisition string is executed.
@@ -145,6 +149,10 @@ execution, the Node PDF exporter and measurement probes, Playwright/Chromium exe
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It does not provide a
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
+
+The bounded terminal UTF-8 linear report view is C5-implemented for English and Korean. General
+graphical accessibility, full application localization, assistive-technology validation, tagged
+PDF and Unicode PDF fonts remain an explicit removal blocker; the composite parity row stays open.
 
 ## Legacy authority still active
 

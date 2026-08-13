@@ -48,7 +48,9 @@ evidence. Another bounded C5 slice strictly ingests hash-bound external result/s
 and compares three global NDTHA quantities; its tracked source is a language-neutral Python C1
 golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
 distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A/
-accessibility/report output and C6 remain open. The legacy five-symbol ABI is unchanged.
+tagged or Unicode PDF output, general accessibility/localization and C6 remain open. The bounded
+Workbench separately provides a self-hashed `en-US`/`ko-KR` UTF-8 linear report alternative; it is
+not a certification or general UI-parity claim. The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
