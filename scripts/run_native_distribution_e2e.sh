@@ -718,7 +718,7 @@ exercise_frame_element_orientation_edit_surface() {
     grep -Fq '"element_type":"frame_3d"' "$output_directory/edit-receipt.json"
     grep -Fq '"formulation":"euler_bernoulli_3d"' \
       "$output_directory/edit-receipt.json"
-    grep -Fq '"previous_local_axis_rotation_rad":0.0' \
+    grep -Fq '"previous_local_axis_rotation_rad":0' \
       "$output_directory/edit-receipt.json"
     grep -Fq '"edited_local_axis_rotation_rad":0.25' \
       "$output_directory/edit-receipt.json"
