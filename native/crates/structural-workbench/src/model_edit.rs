@@ -24,12 +24,14 @@ const FRAME_ELEMENT_PROPERTIES_EDIT_EXTENSION_KEY: &str =
 const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
 const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
+const TRUSS3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss3d-member.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-pattern.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
 const FRAME_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame-section.v1";
+const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -40,11 +42,13 @@ const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_
 const FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_material_and_section_reference_edit_not_identity_type_formulation_connectivity_orientation_offset_release_property_creation_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
+const TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_truss3d_node_and_member_addition_with_existing_material_and_truss_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_truss3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -95,6 +99,12 @@ pub struct FrameSectionParametersV1 {
     pub shear_area_z_m2: f64,
 }
 
+/// Closed SI parameter set accepted by the truss-3D section author.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct TrussSectionParametersV1 {
+    pub area_m2: f64,
+}
+
 /// Complete deterministic artifact pair produced by one bounded frame-section edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameSectionEditOutcomeV1 {
@@ -130,6 +140,13 @@ pub struct ModelFrame3dMemberAddOutcomeV1 {
     pub receipt_json: String,
 }
 
+/// Complete deterministic artifact pair produced by one bounded truss-3D member addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelTruss3dMemberAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
 /// Complete deterministic artifact pair produced by one bounded nodal-load addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodalLoadAddOutcomeV1 {
@@ -161,6 +178,13 @@ pub struct ModelLinearMaterialAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded frame-section addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameSectionAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded truss-section addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelTrussSectionAddOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -351,6 +375,30 @@ pub fn publish_model_frame_section_add(
     Ok(outcome)
 }
 
+/// Add one v1 `truss_3d` section atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identity or area, invalid source or edited semantics, duplicate
+/// section identities, or publication failure.
+pub fn publish_model_truss_section_add(
+    source_path: &Path,
+    section_id: &str,
+    parameters: TrussSectionParametersV1,
+    output_directory: &Path,
+) -> Result<ModelTrussSectionAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_truss_section(&source, section_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
 /// Edit one prescribed value for an existing restrained DOF and atomically publish the result.
 ///
 /// # Errors
@@ -518,6 +566,44 @@ pub fn publish_model_frame3d_member_add(
 ) -> Result<ModelFrame3dMemberAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_frame3d_member(
+        &source,
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one node and one connected linear `truss_3d` member and atomically publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, duplicate identities or coordinates,
+/// missing/unsupported existing node, material, or truss-section references, and publication
+/// failures.
+#[allow(clippy::too_many_arguments)]
+pub fn publish_model_truss3d_member_add(
+    source_path: &Path,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelTruss3dMemberAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_truss3d_member(
         &source,
         node_id,
         coordinates_m,
@@ -1199,6 +1285,91 @@ pub fn add_model_frame_section(
         "claim_boundary": FRAME_SECTION_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFrameSectionAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Add one provenance-bound v1 `truss_3d` section in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identity/area, invalid source semantics, duplicate section identity, schema
+/// drift, or edited semantics rejected by C++.
+pub fn add_model_truss_section(
+    source_bytes: &[u8],
+    section_id: &str,
+    parameters: TrussSectionParametersV1,
+) -> Result<ModelTrussSectionAddOutcomeV1, WorkbenchError> {
+    validate_truss_section_add_request(source_bytes.len(), section_id, parameters)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let section_index = append_truss_section(&mut edited, section_id, parameters)?;
+    bind_truss_section_add_provenance(
+        &mut edited,
+        section_id,
+        section_index,
+        parameters,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "truss_section_add",
+        "model_id": edited_validation.report.model_id,
+        "section_id": section_id,
+        "section_index": section_index,
+        "family_id": "truss_3d",
+        "parameter_set_version": "1",
+        "parameters_si": truss_section_parameters_object(parameters),
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": TRUSS_SECTION_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelTrussSectionAddOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -1906,6 +2077,123 @@ pub fn add_model_frame3d_member(
     })
 }
 
+/// Add one provenance-bound node and connected linear `truss_3d` member in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, duplicate identities or coordinates, missing or unsupported
+/// references, schema drift, or edited topology rejected by the C++ semantic validator.
+#[allow(clippy::too_many_arguments)]
+pub fn add_model_truss3d_member(
+    source_bytes: &[u8],
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<ModelTruss3dMemberAddOutcomeV1, WorkbenchError> {
+    validate_truss3d_member_add_request(
+        source_bytes.len(),
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let (node_index, element_index) = append_truss3d_member(
+        &mut edited,
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
+    bind_truss3d_member_add_provenance(
+        &mut edited,
+        node_id,
+        node_index,
+        coordinates_m,
+        element_id,
+        element_index,
+        from_node_id,
+        material_id,
+        section_id,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "truss3d_member_add",
+        "model_id": edited_validation.report.model_id,
+        "node_id": node_id,
+        "node_index": node_index,
+        "coordinates_m": coordinates_m,
+        "element_id": element_id,
+        "element_index": element_index,
+        "element_type": "truss_3d",
+        "formulation": "linear_truss_3d",
+        "node_ids": [from_node_id, node_id],
+        "material_id": material_id,
+        "section_id": section_id,
+        "offsets_m": {"i_global_m": [0.0, 0.0, 0.0], "j_global_m": [0.0, 0.0, 0.0]},
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelTruss3dMemberAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 fn validate_edit_request(
     source_length: usize,
     node_id: &str,
@@ -2123,6 +2411,36 @@ fn validate_frame3d_member_add_request(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
+fn validate_truss3d_member_add_request(
+    source_length: usize,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, node_id, "new node")?;
+    validate_bounded_edit_identity(0, element_id, "new element")?;
+    validate_bounded_edit_identity(0, from_node_id, "existing node")?;
+    validate_bounded_edit_identity(0, material_id, "material")?;
+    validate_bounded_edit_identity(0, section_id, "section")?;
+    if node_id == from_node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_node_identity_invalid",
+            "new and existing endpoint node identities must differ",
+        ));
+    }
+    if coordinates_m.iter().any(|value| !value.is_finite()) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_coordinate_invalid",
+            "new truss-member node coordinates must be finite SI values",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_nodal_load_add_request(
     source_length: usize,
     load_pattern_id: &str,
@@ -2226,6 +2544,21 @@ fn validate_frame_section_add_request(
         return Err(WorkbenchError::new(
             "workbench_model_add_frame_section_parameter_invalid",
             "new frame-section SI parameters must be finite and greater than zero",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_truss_section_add_request(
+    source_length: usize,
+    section_id: &str,
+    parameters: TrussSectionParametersV1,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, section_id, "new section")?;
+    if !parameters.area_m2.is_finite() || parameters.area_m2 <= 0.0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss_section_area_invalid",
+            "new truss-section area must be a finite SI value greater than zero",
         ));
     }
     Ok(())
@@ -2610,6 +2943,41 @@ fn append_frame_section(
             "family_id": "frame_3d",
             "parameter_set_version": "1",
             "parameters": frame_section_parameters_object(parameters),
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok(section_index)
+}
+
+fn append_truss_section(
+    model: &mut Value,
+    section_id: &str,
+    parameters: TrussSectionParametersV1,
+) -> Result<usize, WorkbenchError> {
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    if sections
+        .iter()
+        .any(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss_section_identity_exists",
+            format!("ModelIR already has a section with identity {section_id}"),
+        ));
+    }
+    let section_index = sections.len();
+    model
+        .get_mut("sections")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("sections"))?
+        .push(json!({
+            "id": section_id,
+            "index": section_index,
+            "family_id": "truss_3d",
+            "parameter_set_version": "1",
+            "parameters": truss_section_parameters_object(parameters),
             "source_id": null,
             "extensions": {}
         }));
@@ -3047,6 +3415,171 @@ fn append_frame3d_member(
     Ok((node_index, element_index))
 }
 
+#[allow(clippy::too_many_arguments)]
+fn append_truss3d_member(
+    model: &mut Value,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(usize, usize), WorkbenchError> {
+    let node_index = validate_truss3d_node_add(model, node_id, coordinates_m, from_node_id)?;
+    validate_truss3d_member_properties(model, material_id, section_id)?;
+    let element_index = validate_truss3d_element_add(model, element_id)?;
+    model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("nodes"))?
+        .push(json!({
+            "id": node_id,
+            "index": node_index,
+            "coordinates_m": coordinates_m,
+            "source_id": null,
+            "extensions": {}
+        }));
+    model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?
+        .push(json!({
+            "id": element_id,
+            "index": element_index,
+            "type": "truss_3d",
+            "formulation": "linear_truss_3d",
+            "node_ids": [from_node_id, node_id],
+            "material_id": material_id,
+            "section_id": section_id,
+            "offsets": {
+                "i_global_m": [0.0, 0.0, 0.0],
+                "j_global_m": [0.0, 0.0, 0.0]
+            },
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok((node_index, element_index))
+}
+
+fn validate_truss3d_node_add(
+    model: &Value,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    from_node_id: &str,
+) -> Result<usize, WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_node_exists",
+            format!("ModelIR already has a node with identity {node_id}"),
+        ));
+    }
+    if !nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(from_node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_from_node_missing",
+            format!("ModelIR has no existing endpoint node with identity {from_node_id}"),
+        ));
+    }
+    for node in nodes {
+        let existing = node
+            .get("coordinates_m")
+            .and_then(Value::as_array)
+            .filter(|values| values.len() == 3)
+            .ok_or_else(|| snapshot_error("node coordinates_m"))?;
+        let duplicates = existing.iter().zip(coordinates_m).all(|(left, right)| {
+            finite_number(left, "node coordinate")
+                .is_ok_and(|left| normalized_number_bits(left) == normalized_number_bits(right))
+        });
+        if duplicates {
+            return Err(WorkbenchError::new(
+                "workbench_model_add_truss3d_member_coordinate_exists",
+                "new truss-member node coordinates duplicate an existing node",
+            ));
+        }
+    }
+    Ok(nodes.len())
+}
+
+fn validate_truss3d_member_properties(
+    model: &Value,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    let material = materials
+        .iter()
+        .find(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_add_truss3d_member_material_missing",
+                format!("ModelIR has no material with identity {material_id}"),
+            )
+        })?;
+    if material.get("law_id").and_then(Value::as_str) != Some("linear_elastic_isotropic")
+        || material
+            .get("parameter_set_version")
+            .and_then(Value::as_str)
+            != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_material_unsupported",
+            "new linear truss member requires an existing v1 linear_elastic_isotropic material",
+        ));
+    }
+
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    let section = sections
+        .iter()
+        .find(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_add_truss3d_member_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if section.get("family_id").and_then(Value::as_str) != Some("truss_3d")
+        || section.get("parameter_set_version").and_then(Value::as_str) != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_section_unsupported",
+            "new linear truss member requires an existing v1 truss_3d section",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_truss3d_element_add(model: &Value, element_id: &str) -> Result<usize, WorkbenchError> {
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_truss3d_member_element_exists",
+            format!("ModelIR already has an element with identity {element_id}"),
+        ));
+    }
+    Ok(elements.len())
+}
+
 fn validate_frame3d_node_add(
     model: &Value,
     node_id: &str,
@@ -3464,6 +3997,35 @@ fn bind_frame_section_add_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_truss_section_add_provenance(
+    model: &mut Value,
+    section_id: &str,
+    section_index: usize,
+    parameters: TrussSectionParametersV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        TRUSS_SECTION_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "truss_section_add",
+            "section_id": section_id,
+            "section_index": section_index,
+            "family_id": "truss_3d",
+            "parameter_set_version": "1",
+            "parameters_si": truss_section_parameters_object(parameters),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": TRUSS_SECTION_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_constraint_value_edit_provenance(
     model: &mut Value,
     constraint_id: &str,
@@ -3730,6 +4292,46 @@ fn bind_frame3d_member_add_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_truss3d_member_add_provenance(
+    model: &mut Value,
+    node_id: &str,
+    node_index: usize,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    element_index: usize,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        TRUSS3D_MEMBER_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "truss3d_member_add",
+            "node_id": node_id,
+            "node_index": node_index,
+            "coordinates_m": coordinates_m,
+            "element_id": element_id,
+            "element_index": element_index,
+            "element_type": "truss_3d",
+            "formulation": "linear_truss_3d",
+            "node_ids": [from_node_id, node_id],
+            "material_id": material_id,
+            "section_id": section_id,
+            "offsets_m": {"i_global_m": [0.0, 0.0, 0.0], "j_global_m": [0.0, 0.0, 0.0]},
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_parameter_edit_provenance(
     model: &mut Value,
     extension_key: &str,
@@ -3885,6 +4487,10 @@ fn frame_section_parameters_object(parameters: FrameSectionParametersV1) -> Valu
     })
 }
 
+fn truss_section_parameters_object(parameters: TrussSectionParametersV1) -> Value {
+    json!({"area_m2": parameters.area_m2})
+}
+
 fn frame_section_parameters_equal(
     left: FrameSectionParametersV1,
     right: FrameSectionParametersV1,
@@ -3944,8 +4550,10 @@ mod tests {
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_material_add_request,
         validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
+        validate_nodal_load_edit_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_section_add_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -4438,5 +5046,83 @@ mod tests {
                 "workbench_model_add_frame_section_parameter_invalid"
             );
         }
+    }
+
+    #[test]
+    fn truss_authoring_requests_require_bounded_identities_and_positive_finite_area() {
+        validate_truss_section_add_request(0, "T1", TrussSectionParametersV1 { area_m2: 0.005 })
+            .expect("valid truss-section addition request");
+        for area_m2 in [0.0, -1.0, f64::INFINITY, f64::NAN] {
+            assert_eq!(
+                validate_truss_section_add_request(0, "T1", TrussSectionParametersV1 { area_m2 },)
+                    .expect_err("invalid truss-section area")
+                    .code,
+                "workbench_model_add_truss_section_area_invalid"
+            );
+        }
+        validate_truss3d_member_add_request(0, "N3", [2.0, 1.0, 0.0], "E2", "N2", "M1", "T1")
+            .expect("valid truss-member addition request");
+        assert_eq!(
+            validate_truss3d_member_add_request(0, "N2", [2.0, 1.0, 0.0], "E2", "N2", "M1", "T1",)
+                .expect_err("identical endpoint identities")
+                .code,
+            "workbench_model_add_truss3d_member_node_identity_invalid"
+        );
+        assert_eq!(
+            validate_truss3d_member_add_request(
+                0,
+                "N3",
+                [f64::NAN, 1.0, 0.0],
+                "E2",
+                "N2",
+                "M1",
+                "T1",
+            )
+            .expect_err("non-finite coordinate")
+            .code,
+            "workbench_model_add_truss3d_member_coordinate_invalid"
+        );
+    }
+
+    #[test]
+    fn truss_member_properties_require_linear_material_and_v1_truss_section() {
+        let valid = json!({
+            "materials": [{
+                "id": "M1",
+                "law_id": "linear_elastic_isotropic",
+                "parameter_set_version": "1"
+            }],
+            "sections": [{
+                "id": "T1",
+                "family_id": "truss_3d",
+                "parameter_set_version": "1"
+            }]
+        });
+        validate_truss3d_member_properties(&valid, "M1", "T1")
+            .expect("compatible truss properties");
+        let mut nonlinear = valid.clone();
+        nonlinear["materials"][0]["law_id"] = json!("bilinear_combined_hardening_steel");
+        assert_eq!(
+            validate_truss3d_member_properties(&nonlinear, "M1", "T1")
+                .expect_err("nonlinear material")
+                .code,
+            "workbench_model_add_truss3d_member_material_unsupported"
+        );
+        let mut frame = valid.clone();
+        frame["sections"][0]["family_id"] = json!("frame_3d");
+        assert_eq!(
+            validate_truss3d_member_properties(&frame, "M1", "T1")
+                .expect_err("frame section")
+                .code,
+            "workbench_model_add_truss3d_member_section_unsupported"
+        );
+        let mut wrong_version = valid;
+        wrong_version["sections"][0]["parameter_set_version"] = json!("2");
+        assert_eq!(
+            validate_truss3d_member_properties(&wrong_version, "M1", "T1")
+                .expect_err("unsupported truss-section version")
+                .code,
+            "workbench_model_add_truss3d_member_section_unsupported"
+        );
     }
 }

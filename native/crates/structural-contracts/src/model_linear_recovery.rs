@@ -6,9 +6,7 @@ use serde_json::Value;
 use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 use crate::model_linear_product::MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS;
 use crate::product_ir::{sha256_identity, ModelIrIdentityV1, ProductIrContractError};
-use crate::sparse_product::{
-    residual_metrics_close, SparseLinearResultIrDocumentV1, SPARSE_LINEAR_MAXIMUM_ORDER,
-};
+use crate::sparse_product::{SparseLinearResultIrDocumentV1, SPARSE_LINEAR_MAXIMUM_ORDER};
 
 pub const MODEL_IR_LINEAR_RESULT_RECOVERY_IR_V1: &str =
     "structural-model-ir-linear-result-recovery-ir.v1";
@@ -203,9 +201,10 @@ pub fn verify_model_ir_linear_result_recovery_v1(
             "recovered active global displacement does not exactly reproduce the sparse solution",
         ));
     }
-    if !residual_metrics_close(
+    if !recovery_residual_metrics_close(
         recovered.summary.active_residual_inf,
         source.summary.final_residual_inf,
+        recovered,
     ) {
         return Err(error(
             "model_ir_linear_recovery_residual_mismatch",
@@ -214,6 +213,22 @@ pub fn verify_model_ir_linear_result_recovery_v1(
         ));
     }
     Ok(())
+}
+
+fn recovery_residual_metrics_close(
+    recovered_residual: f64,
+    sparse_residual: f64,
+    recovery: &ModelIrLinearResultRecoveryIrV1,
+) -> bool {
+    let force_scale = recovery
+        .active_internal_force
+        .iter()
+        .chain(&recovery.active_external_load)
+        .map(|value| value.abs())
+        .fold(1.0_f64, f64::max);
+    let metric_scale = recovered_residual.abs().max(sparse_residual.abs()).max(1.0);
+    let tolerance = 1.0e-12 * metric_scale + 64.0 * f64::EPSILON * force_scale;
+    (recovered_residual - sparse_residual).abs() <= tolerance
 }
 
 fn validate_recovery(

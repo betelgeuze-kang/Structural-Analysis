@@ -274,6 +274,18 @@ V29_FRAME_ELEMENT_PROPERTIES_EDIT_KEYS = {
     "workbench_frame_element_properties_edit_recovery_sha256",
 }
 V29_EXPECTED_KEYS = V28_EXPECTED_KEYS | V29_FRAME_ELEMENT_PROPERTIES_EDIT_KEYS
+V30_TRUSS3D_AUTHORING_KEYS = {
+    "workbench_truss3d_authoring_surface_passed",
+    "workbench_truss3d_authoring_section_model_sha256",
+    "workbench_truss3d_authoring_section_receipt_sha256",
+    "workbench_truss3d_authoring_member_model_sha256",
+    "workbench_truss3d_authoring_member_receipt_sha256",
+    "workbench_truss3d_authoring_composed_model_sha256",
+    "workbench_truss3d_authoring_request_sha256",
+    "workbench_truss3d_authoring_result_ir_sha256",
+    "workbench_truss3d_authoring_recovery_sha256",
+}
+V30_EXPECTED_KEYS = V29_EXPECTED_KEYS | V30_TRUSS3D_AUTHORING_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -345,6 +357,7 @@ def validate(
         "structural-native-distribution-e2e.v27": V27_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v28": V28_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v29": V29_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v30": V30_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -367,6 +380,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         schema_version = "structural-native-distribution-e2e.v13"
     backend = payload.get("backend_profile")
@@ -698,6 +712,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         for name in (
             "model_ir_linear_workbench_restart_passed",
@@ -737,6 +752,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("model_ir_linear_localized_pdf_surface_passed") is not True:
             errors.append("model_ir_linear_localized_pdf_surface_passed must be true")
@@ -767,6 +783,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         for name in (
             "mgt_model_ir_linear_workbench_restart_passed",
@@ -806,6 +823,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_nodal_load_edit_surface_passed") is not True:
             errors.append("workbench_nodal_load_edit_surface_passed must be true")
@@ -828,6 +846,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_constraint_value_edit_surface_passed") is not True:
             errors.append("workbench_constraint_value_edit_surface_passed must be true")
@@ -849,6 +868,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         for name in (
             "workbench_linear_material_edit_surface_passed",
@@ -875,6 +895,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_frame_element_orientation_edit_surface_passed") is not True:
             errors.append("workbench_frame_element_orientation_edit_surface_passed must be true")
@@ -894,6 +915,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_element_connectivity_edit_surface_passed") is not True:
             errors.append("workbench_element_connectivity_edit_surface_passed must be true")
@@ -912,6 +934,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_model_linear_request_create_surface_passed") is not True:
             errors.append("workbench_model_linear_request_create_surface_passed must be true")
@@ -929,6 +952,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_frame3d_member_add_surface_passed") is not True:
             errors.append("workbench_frame3d_member_add_surface_passed must be true")
@@ -947,6 +971,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_nodal_load_add_surface_passed") is not True:
             errors.append("workbench_nodal_load_add_surface_passed must be true")
@@ -965,6 +990,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_fixed_constraint_add_surface_passed") is not True:
             errors.append("workbench_fixed_constraint_add_surface_passed must be true")
@@ -982,6 +1008,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_linear_load_pattern_add_surface_passed") is not True:
             errors.append("workbench_linear_load_pattern_add_surface_passed must be true")
@@ -998,6 +1025,7 @@ def validate(
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_linear_material_add_surface_passed") is not True:
             errors.append("workbench_linear_material_add_surface_passed must be true")
@@ -1014,6 +1042,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
     }:
         if payload.get("workbench_frame_section_add_surface_passed") is not True:
             errors.append("workbench_frame_section_add_surface_passed must be true")
@@ -1027,7 +1056,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v29":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v29",
+        "structural-native-distribution-e2e.v30",
+    }:
         if payload.get("workbench_frame_element_properties_edit_surface_passed") is not True:
             errors.append("workbench_frame_element_properties_edit_surface_passed must be true")
         for name in (
@@ -1036,6 +1068,21 @@ def validate(
             "workbench_frame_element_properties_edit_request_sha256",
             "workbench_frame_element_properties_edit_result_ir_sha256",
             "workbench_frame_element_properties_edit_recovery_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v30":
+        if payload.get("workbench_truss3d_authoring_surface_passed") is not True:
+            errors.append("workbench_truss3d_authoring_surface_passed must be true")
+        for name in (
+            "workbench_truss3d_authoring_section_model_sha256",
+            "workbench_truss3d_authoring_section_receipt_sha256",
+            "workbench_truss3d_authoring_member_model_sha256",
+            "workbench_truss3d_authoring_member_receipt_sha256",
+            "workbench_truss3d_authoring_composed_model_sha256",
+            "workbench_truss3d_authoring_request_sha256",
+            "workbench_truss3d_authoring_result_ir_sha256",
+            "workbench_truss3d_authoring_recovery_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

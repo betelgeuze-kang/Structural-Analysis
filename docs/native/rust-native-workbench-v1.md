@@ -78,6 +78,11 @@ six positive finite SI parameters, neutral source ownership, and empty extension
 every existing round-trip row and blocker, revalidates through C++, and does not edit member
 references or broaden to other section families. See
 `docs/native/modelir-frame-section-add-v1.md` for the exact artifact and installed E2E boundary.
+The bounded truss3d authoring pair appends one v1 `truss_3d` area section and then one connected
+`truss_3d`/`linear_truss_3d` node/member using an existing compatible material. It preserves every
+round-trip row, omits frame-only rotation/release fields, revalidates through C++, and composes
+with the fixed-support creator into typed frame-plus-truss CPU recovery and byte-identical restart.
+See `docs/native/modelir-truss3d-authoring-v1.md` for its exact boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -175,6 +180,11 @@ structural-workbench model-add-frame-section MODEL.json \
   --torsional-constant-m4 0.000005 \
   --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
   --output-dir ADDED-SECTION-MODEL
+structural-workbench model-add-truss-section MODEL.json \
+  --section T1 --area-m2 0.005 --output-dir ADDED-TRUSS-SECTION-MODEL
+structural-workbench model-add-truss3d-member ADDED-TRUSS-SECTION-MODEL/model-ir.json \
+  --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
+  --material M1 --section T1 --output-dir ADDED-TRUSS-MEMBER-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \

@@ -1758,6 +1758,143 @@ exercise_frame_element_properties_edit_surface() {
 }
 exercise_frame_element_properties_edit_surface
 
+exercise_truss3d_authoring_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local baseline_request="$e2e_root/truss3d-authoring-baseline-request"
+  local baseline_run="$e2e_root/truss3d-authoring-baseline-run"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-create-linear-analysis-request "$source_model" \
+    --case truss3d-authoring-c5 --load-pattern LC_WEAK \
+    --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+    --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+    --output-dir "$baseline_request" \
+    > "$e2e_root/truss3d-authoring-baseline-request.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+    model-linear-run "$source_model" "$baseline_request/analysis-request.json" \
+    --output-dir "$baseline_run" \
+    > "$e2e_root/truss3d-authoring-baseline-run.stdout.json"
+  local baseline_displacement
+  baseline_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_run/result-recovery-ir.json")"
+  if [[ -z "$baseline_displacement" ]]; then
+    echo "installed truss3d baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+
+  local label section_directory member_directory composed_directory
+  local request_directory direct_directory partial_directory resumed_directory
+  local composed_displacement
+  for label in first second; do
+    section_directory="$e2e_root/truss3d-authoring-$label-section"
+    member_directory="$e2e_root/truss3d-authoring-$label-member"
+    composed_directory="$e2e_root/truss3d-authoring-$label-composed"
+    request_directory="$e2e_root/truss3d-authoring-$label-request"
+    direct_directory="$e2e_root/truss3d-authoring-$label-direct"
+    partial_directory="$e2e_root/truss3d-authoring-$label-partial"
+    resumed_directory="$e2e_root/truss3d-authoring-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-truss-section "$source_model" --section T1 --area-m2 0.005 \
+      --output-dir "$section_directory" \
+      > "$e2e_root/truss3d-authoring-$label-section.stdout.json"
+    grep -Fq '"operation":"truss_section_add"' "$section_directory/edit-receipt.json"
+    grep -Fq '"family_id":"truss_3d"' "$section_directory/edit-receipt.json"
+    grep -Fq '"parameters_si":{"area_m2":0.005}' "$section_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-truss-section.v1"' \
+      "$section_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-truss3d-member "$section_directory/model-ir.json" \
+      --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
+      --material M1 --section T1 --output-dir "$member_directory" \
+      > "$e2e_root/truss3d-authoring-$label-member.stdout.json"
+    grep -Fq '"operation":"truss3d_member_add"' "$member_directory/edit-receipt.json"
+    grep -Fq '"element_type":"truss_3d"' "$member_directory/edit-receipt.json"
+    grep -Fq '"formulation":"linear_truss_3d"' "$member_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-truss3d-member.v1"' \
+      "$member_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-fixed-constraint "$member_directory/model-ir.json" \
+      --constraint BC_N3 --node N3 --output-dir "$composed_directory" \
+      > "$e2e_root/truss3d-authoring-$label-composed.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$composed_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/truss3d-authoring-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$composed_directory/model-ir.json" \
+      --case truss3d-authoring-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/truss3d-authoring-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/truss3d-authoring-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1,2]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12,15]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+    local recovery_values truss_axial_force
+    recovery_values="$(sed -n 's/.*"recovery_values":\[\([^]]*\)\].*/\1/p' "$direct_directory/result-recovery-ir.json")"
+    truss_axial_force="${recovery_values##*,}"
+    if [[ -z "$recovery_values" || -z "$truss_axial_force" \
+      || "$truss_axial_force" == "0" || "$truss_axial_force" == "0.0" ]]; then
+      echo "installed truss3d recovery has no nonzero axial-force value" >&2
+      exit 1
+    fi
+    composed_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$direct_directory/result-recovery-ir.json")"
+    if [[ -z "$composed_displacement" || "$composed_displacement" == "$baseline_displacement" ]]; then
+      echo "installed truss3d authoring did not change recovered displacement" >&2
+      exit 1
+    fi
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 1 \
+      > "$e2e_root/truss3d-authoring-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/truss3d-authoring-$label-resumed.stdout.json"
+    grep -Fq '"status":"completed"' "$resumed_directory/run-receipt.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/truss3d-authoring-$label-restart-diff.txt"
+  done
+
+  for suffix in section member composed request direct partial resumed; do
+    diff -r "$e2e_root/truss3d-authoring-first-$suffix" \
+      "$e2e_root/truss3d-authoring-second-$suffix" \
+      > "$e2e_root/truss3d-authoring-$suffix-diff.txt"
+  done
+  for suffix in section member composed request direct partial resumed; do
+    cmp "$e2e_root/truss3d-authoring-first-$suffix.stdout.json" \
+      "$e2e_root/truss3d-authoring-second-$suffix.stdout.json"
+  done
+  cmp "$e2e_root/truss3d-authoring-first-validation.json" \
+    "$e2e_root/truss3d-authoring-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed truss3d authoring mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_truss3d_authoring_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -2074,6 +2211,14 @@ frame_element_properties_edit_receipt_hash="$(sha256sum "$e2e_root/frame-element
 frame_element_properties_edit_request_hash="$(sha256sum "$e2e_root/frame-element-properties-first-request/analysis-request.json" | awk '{print $1}')"
 frame_element_properties_edit_result_ir_hash="$(sha256sum "$e2e_root/frame-element-properties-first-run/result-ir.json" | awk '{print $1}')"
 frame_element_properties_edit_recovery_hash="$(sha256sum "$e2e_root/frame-element-properties-first-run/result-recovery-ir.json" | awk '{print $1}')"
+truss3d_authoring_section_model_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-section/model-ir.json" | awk '{print $1}')"
+truss3d_authoring_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-section/edit-receipt.json" | awk '{print $1}')"
+truss3d_authoring_member_model_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-member/model-ir.json" | awk '{print $1}')"
+truss3d_authoring_member_receipt_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-member/edit-receipt.json" | awk '{print $1}')"
+truss3d_authoring_composed_model_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-composed/model-ir.json" | awk '{print $1}')"
+truss3d_authoring_request_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-request/analysis-request.json" | awk '{print $1}')"
+truss3d_authoring_result_ir_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-ir.json" | awk '{print $1}')"
+truss3d_authoring_recovery_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -2155,6 +2300,10 @@ v29_receipt_json="${v28_receipt_json/structural-native-distribution-e2e.v28/stru
 frame_element_properties_edit_receipt_fields="\"workbench_frame_element_properties_edit_surface_passed\":true,\"workbench_frame_element_properties_edit_model_sha256\":\"sha256:$frame_element_properties_edit_model_hash\",\"workbench_frame_element_properties_edit_receipt_sha256\":\"sha256:$frame_element_properties_edit_receipt_hash\",\"workbench_frame_element_properties_edit_request_sha256\":\"sha256:$frame_element_properties_edit_request_hash\",\"workbench_frame_element_properties_edit_result_ir_sha256\":\"sha256:$frame_element_properties_edit_result_ir_hash\",\"workbench_frame_element_properties_edit_recovery_sha256\":\"sha256:$frame_element_properties_edit_recovery_hash\","
 v29_receipt_json="${v29_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_element_properties_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v29_receipt_json" > "$temporary_receipt"
+v30_receipt_json="${v29_receipt_json/structural-native-distribution-e2e.v29/structural-native-distribution-e2e.v30}"
+truss3d_authoring_receipt_fields="\"workbench_truss3d_authoring_surface_passed\":true,\"workbench_truss3d_authoring_section_model_sha256\":\"sha256:$truss3d_authoring_section_model_hash\",\"workbench_truss3d_authoring_section_receipt_sha256\":\"sha256:$truss3d_authoring_section_receipt_hash\",\"workbench_truss3d_authoring_member_model_sha256\":\"sha256:$truss3d_authoring_member_model_hash\",\"workbench_truss3d_authoring_member_receipt_sha256\":\"sha256:$truss3d_authoring_member_receipt_hash\",\"workbench_truss3d_authoring_composed_model_sha256\":\"sha256:$truss3d_authoring_composed_model_hash\",\"workbench_truss3d_authoring_request_sha256\":\"sha256:$truss3d_authoring_request_hash\",\"workbench_truss3d_authoring_result_ir_sha256\":\"sha256:$truss3d_authoring_result_ir_hash\",\"workbench_truss3d_authoring_recovery_sha256\":\"sha256:$truss3d_authoring_recovery_hash\","
+v30_receipt_json="${v30_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss3d_authoring_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v30_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

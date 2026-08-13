@@ -601,6 +601,39 @@ fn run_frame3d_member_add(
     ])
 }
 
+#[allow(clippy::too_many_arguments)]
+fn run_truss3d_member_add(
+    source: &Path,
+    destination: &Path,
+    node_id: &str,
+    coordinates: [&str; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-add-truss3d-member"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--coordinates"),
+        text(coordinates[0]),
+        text(coordinates[1]),
+        text(coordinates[2]),
+        text("--element"),
+        text(element_id),
+        text("--from-node"),
+        text(from_node_id),
+        text("--material"),
+        text(material_id),
+        text("--section"),
+        text(section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_nodal_load_add(
     source: &Path,
     destination: &Path,
@@ -722,6 +755,24 @@ fn run_frame_section_add(
         text(parameters[4]),
         text("--shear-area-z-m2"),
         text(parameters[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn run_truss_section_add(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    area_m2: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-add-truss-section"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--area-m2"),
+        text(area_m2),
         text("--output-dir"),
         destination.as_os_str(),
     ])
@@ -5542,6 +5593,410 @@ fn localized_linear_report_view_is_utf8_deterministic_and_hash_bound() {
     assert_eq!(invalid_locale.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&invalid_locale.stdout)
         .contains("report-view locale must be en-US or ko-KR"));
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn truss3d_authoring_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("truss authoring source bytes");
+    let source_value: Value =
+        serde_json::from_slice(&source_before).expect("truss authoring source JSON");
+
+    let section_first = temporary.0.join("truss-section-first");
+    let section_second = temporary.0.join("truss-section-second");
+    for destination in [&section_first, &section_second] {
+        let output = run_truss_section_add(&source, destination, "T1", "0.005");
+        assert_success(&output);
+        let receipt =
+            std::fs::read(destination.join("edit-receipt.json")).expect("truss-section receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(section_first.join(artifact)).expect("first section artifact"),
+            std::fs::read(section_second.join(artifact)).expect("second section artifact")
+        );
+    }
+    let section_bytes =
+        std::fs::read(section_first.join("model-ir.json")).expect("truss-section model");
+    let section_model = parse_model_ir_v2(&section_bytes).expect("strict truss-section model");
+    let section = &section_model.value()["sections"][1];
+    assert_eq!(section["id"], "T1");
+    assert_eq!(section["index"], 1);
+    assert_eq!(section["family_id"], "truss_3d");
+    assert_eq!(section["parameter_set_version"], "1");
+    assert_eq!(section["parameters"], serde_json::json!({"area_m2": 0.005}));
+    assert_eq!(section["source_id"], Value::Null);
+    assert!(section_model.value()["extensions"]
+        .get("structural-native:model-add-truss-section.v1")
+        .is_some());
+    assert_eq!(
+        section_model.value()["roundtrip_map"],
+        source_value["roundtrip_map"]
+    );
+    let mut section_receipt: Value = serde_json::from_slice(
+        &std::fs::read(section_first.join("edit-receipt.json")).expect("truss-section receipt"),
+    )
+    .expect("truss-section receipt JSON");
+    assert_eq!(section_receipt["operation"], "truss_section_add");
+    assert_eq!(section_receipt["parameters_si"], section["parameters"]);
+    assert_eq!(section_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(section_receipt["analysis_ready"], true);
+    assert_eq!(
+        section_receipt["edited_content_hash"],
+        section_model.content_hash()
+    );
+    assert_self_hashed_edit_receipt(&mut section_receipt);
+
+    let member_first = temporary.0.join("truss-member-first");
+    let member_second = temporary.0.join("truss-member-second");
+    for (section_directory, destination) in [
+        (&section_first, &member_first),
+        (&section_second, &member_second),
+    ] {
+        let output = run_truss3d_member_add(
+            &section_directory.join("model-ir.json"),
+            destination,
+            "N3",
+            ["2", "1", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "T1",
+        );
+        assert_success(&output);
+        let receipt =
+            std::fs::read(destination.join("edit-receipt.json")).expect("truss-member receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(member_first.join(artifact)).expect("first member artifact"),
+            std::fs::read(member_second.join(artifact)).expect("second member artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged source"),
+        source_before
+    );
+    let member_bytes =
+        std::fs::read(member_first.join("model-ir.json")).expect("truss-member model");
+    let member_model = parse_model_ir_v2(&member_bytes).expect("strict truss-member model");
+    assert_eq!(member_model.value()["nodes"][2]["id"], "N3");
+    assert_eq!(member_model.value()["nodes"][2]["index"], 2);
+    assert_eq!(
+        member_model.value()["nodes"][2]["coordinates_m"],
+        serde_json::json!([2, 1, 0])
+    );
+    let element = &member_model.value()["elements"][1];
+    assert_eq!(element["id"], "E2");
+    assert_eq!(element["index"], 1);
+    assert_eq!(element["type"], "truss_3d");
+    assert_eq!(element["formulation"], "linear_truss_3d");
+    assert_eq!(element["node_ids"], serde_json::json!(["N2", "N3"]));
+    assert_eq!(element["material_id"], "M1");
+    assert_eq!(element["section_id"], "T1");
+    assert!(element.get("local_axis_rotation_rad").is_none());
+    assert!(element.get("releases").is_none());
+    assert!(member_model.value()["extensions"]
+        .get("structural-native:model-add-truss3d-member.v1")
+        .is_some());
+    assert_eq!(
+        member_model.value()["roundtrip_map"],
+        source_value["roundtrip_map"]
+    );
+    let mut member_receipt: Value = serde_json::from_slice(
+        &std::fs::read(member_first.join("edit-receipt.json")).expect("member receipt"),
+    )
+    .expect("member receipt JSON");
+    assert_eq!(member_receipt["operation"], "truss3d_member_add");
+    assert_eq!(member_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(member_receipt["analysis_ready"], true);
+    assert_eq!(
+        member_receipt["edited_content_hash"],
+        member_model.content_hash()
+    );
+    assert_self_hashed_edit_receipt(&mut member_receipt);
+
+    let fixed = temporary.0.join("truss-fixed");
+    assert_success(&run_fixed_constraint_add(
+        &member_first.join("model-ir.json"),
+        &fixed,
+        "BC_N3",
+        "N3",
+    ));
+    let baseline_request = temporary.0.join("truss-baseline-request");
+    let composed_request = temporary.0.join("truss-composed-request");
+    assert_success(&run_model_linear_request_create(
+        &source,
+        &baseline_request,
+        "truss-authoring-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &fixed.join("model-ir.json"),
+        &composed_request,
+        "truss-authoring-c5",
+        "LC_WEAK",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &source_before,
+        &std::fs::read(baseline_request.join("analysis-request.json")).expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline execution");
+    let composed_model = std::fs::read(fixed.join("model-ir.json")).expect("composed truss model");
+    let composed_request_bytes =
+        std::fs::read(composed_request.join("analysis-request.json")).expect("composed request");
+    let composed =
+        execute_model_ir_linear_analysis(&composed_model, &composed_request_bytes, None, u32::MAX)
+            .expect("truss execution");
+    assert!(baseline.is_complete());
+    assert!(composed.is_complete());
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline recovery"),
+    )
+    .expect("baseline recovery JSON");
+    let recovery: Value =
+        serde_json::from_str(composed.result_recovery_ir_json().expect("truss recovery"))
+            .expect("truss recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        recovery["recovery_stable_indices"],
+        serde_json::json!([0, 1])
+    );
+    assert_eq!(
+        recovery["recovery_element_types"],
+        serde_json::json!([1, 2])
+    );
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12, 15]));
+    let values = recovery["recovery_values"]
+        .as_array()
+        .expect("recovery values");
+    assert_eq!(values.len(), 15);
+    assert!(values[12..]
+        .iter()
+        .all(|value| value.as_f64().is_some_and(f64::is_finite)));
+    assert!(values[14].as_f64().expect("truss axial force").abs() > f64::EPSILON);
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        recovery["global_displacement"]
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial =
+        execute_model_ir_linear_analysis(&composed_model, &composed_request_bytes, None, 1)
+            .expect("partial truss execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &composed_model,
+        &composed_request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed truss execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), composed.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        composed.result_recovery_ir_json()
+    );
+
+    for (name, section_id, area, status, code) in [
+        (
+            "duplicate-section",
+            "S1",
+            "0.005",
+            1,
+            "workbench_model_add_truss_section_identity_exists",
+        ),
+        ("zero-area", "T1", "0", 2, "workbench_usage_error"),
+        ("nonfinite-area", "T1", "NaN", 2, "workbench_usage_error"),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_truss_section_add(&source, &destination, section_id, area);
+        assert_eq!(rejected.status.code(), Some(status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+    for (name, node, coordinates, element_id, from_node, material, section, code) in [
+        (
+            "duplicate-node",
+            "N2",
+            ["2", "1", "0"],
+            "E2",
+            "N1",
+            "M1",
+            "T1",
+            "workbench_model_add_truss3d_member_node_exists",
+        ),
+        (
+            "duplicate-coordinate",
+            "N3",
+            ["2", "0", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "T1",
+            "workbench_model_add_truss3d_member_coordinate_exists",
+        ),
+        (
+            "duplicate-element",
+            "N3",
+            ["2", "1", "0"],
+            "E1",
+            "N2",
+            "M1",
+            "T1",
+            "workbench_model_add_truss3d_member_element_exists",
+        ),
+        (
+            "missing-from-node",
+            "N3",
+            ["2", "1", "0"],
+            "E2",
+            "MISSING",
+            "M1",
+            "T1",
+            "workbench_model_add_truss3d_member_from_node_missing",
+        ),
+        (
+            "missing-reference",
+            "N3",
+            ["2", "1", "0"],
+            "E2",
+            "N2",
+            "MISSING",
+            "T1",
+            "workbench_model_add_truss3d_member_material_missing",
+        ),
+        (
+            "missing-section",
+            "N3",
+            ["2", "1", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "MISSING",
+            "workbench_model_add_truss3d_member_section_missing",
+        ),
+        (
+            "wrong-family",
+            "N3",
+            ["2", "1", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "S1",
+            "workbench_model_add_truss3d_member_section_unsupported",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_truss3d_member_add(
+            &section_first.join("model-ir.json"),
+            &destination,
+            node,
+            coordinates,
+            element_id,
+            from_node,
+            material,
+            section,
+        );
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let existing_destination = run_truss3d_member_add(
+        &section_first.join("model-ir.json"),
+        &member_first,
+        "N3",
+        ["2", "1", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "T1",
+    );
+    assert_eq!(existing_destination.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&existing_destination.stdout)
+        .contains("workbench_stage_destination_exists"));
+
+    let invalid_source = temporary.0.join("invalid-truss-source.json");
+    std::fs::write(&invalid_source, b"{}").expect("write invalid truss source");
+    let invalid_destination = temporary.0.join("invalid-truss-destination");
+    let invalid = run_truss_section_add(&invalid_source, &invalid_destination, "T1", "0.005");
+    assert_eq!(invalid.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&invalid.stdout)
+        .contains("workbench_model_edit_source_validation_failed"));
+    assert!(!invalid_destination.exists());
+
+    let mut blocked = source_value;
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.truss-authoring-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Truss authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-truss-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked bytes"),
+    )
+    .expect("write blocked source");
+    let blocked_section = temporary.0.join("blocked-truss-section");
+    let blocked_member = temporary.0.join("blocked-truss-member");
+    assert_success(&run_truss_section_add(
+        &blocked_source,
+        &blocked_section,
+        "T1",
+        "0.005",
+    ));
+    assert_success(&run_truss3d_member_add(
+        &blocked_section.join("model-ir.json"),
+        &blocked_member,
+        "N3",
+        ["2", "1", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "T1",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_member.join("edit-receipt.json")).expect("blocked receipt"),
+    )
+    .expect("blocked receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.truss-authoring-visible-not-runnable"])
+    );
+    let blocked_request_directory = temporary.0.join("blocked-truss-request");
+    let blocked_request = run_model_linear_request_create(
+        &blocked_member.join("model-ir.json"),
+        &blocked_request_directory,
+        "blocked-truss",
+        "LC_WEAK",
+    );
+    assert_eq!(blocked_request.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&blocked_request.stdout)
+        .contains("workbench_model_linear_request_source_not_ready"));
+    assert!(!blocked_request_directory.exists());
 }
 
 #[test]

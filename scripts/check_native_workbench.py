@@ -94,11 +94,13 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-frame-element-properties.v1",
         "structural-native:model-edit-element-connectivity.v1",
         "structural-native:model-add-frame3d-member.v1",
+        "structural-native:model-add-truss3d-member.v1",
         "structural-native:model-add-nodal-load.v1",
         "structural-native:model-add-fixed-constraint.v1",
         "structural-native:model-add-linear-load-pattern.v1",
         "structural-native:model-add-linear-material.v1",
         "structural-native:model-add-frame-section.v1",
+        "structural-native:model-add-truss-section.v1",
         "structural-native:upstream-provenance",
         "structural-native-model-editor",
         "edit_model_nodal_load_components",
@@ -150,11 +152,13 @@ REQUIRED_TOKENS = {
         'Some("model-edit-frame-element-properties")',
         'Some("model-edit-element-connectivity")',
         'Some("model-add-frame3d-member")',
+        'Some("model-add-truss3d-member")',
         'Some("model-add-nodal-load")',
         'Some("model-add-fixed-constraint")',
         'Some("model-add-linear-load-pattern")',
         'Some("model-add-linear-material")',
         'Some("model-add-frame-section")',
+        'Some("model-add-truss-section")',
         'Some("model-create-linear-analysis-request")',
         'Some("import")',
         'Some("import-mgt")',
@@ -209,6 +213,7 @@ REQUIRED_TOKENS = {
         "linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executable",
         "linear_material_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
         "frame_section_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
+        "truss3d_authoring_is_deterministic_fail_closed_restartable_and_cpu_executable",
         "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
@@ -376,6 +381,18 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-truss3d-authoring-v1.md": (
+        "model-add-truss-section",
+        "model-add-truss3d-member",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-add-truss-section.v1",
+        "structural-native:model-add-truss3d-member.v1",
+        "linear_truss_3d",
+        "one-real-iteration checkpoint",
+        "typed frame-plus-truss recovery",
+        "fallback 0",
+        "C6",
+    ),
 }
 
 
@@ -388,6 +405,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     load_pattern_add_row: dict[str, object] = {}
     material_add_row: dict[str, object] = {}
     section_add_row: dict[str, object] = {}
+    truss_authoring_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     try:
         payload = json.loads(
@@ -400,6 +418,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         load_pattern_add_row = payload["capabilities"]["modelir_linear_load_pattern_add"]
         material_add_row = payload["capabilities"]["modelir_linear_material_add"]
         section_add_row = payload["capabilities"]["modelir_frame_section_add"]
+        truss_authoring_row = payload["capabilities"]["modelir_truss3d_authoring"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
@@ -538,6 +557,26 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         ("cutover_gate", "C5"),
         ("owner", "structural-workbench"),
     ):
+        if truss_authoring_row.get(field) != expected:
+            blockers.append(f"native_workbench_truss_authoring_capability_invalid:{field}")
+    truss_authoring_claim = str(truss_authoring_row.get("claim", ""))
+    for token in (
+        "v1 truss_3d section",
+        "truss_3d/linear_truss_3d member",
+        "single C ABI into C++",
+        "typed frame-plus-truss recovery",
+        "byte-identical restart",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in truss_authoring_claim:
+            blockers.append(f"native_workbench_truss_authoring_claim_token_missing:{token}")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
         if property_edit_row.get(field) != expected:
             blockers.append(f"native_workbench_property_edit_capability_invalid:{field}")
     property_edit_claim = str(property_edit_row.get("claim", ""))
@@ -579,6 +618,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "linear-load-pattern creator",
         "linear-material creator",
         "frame-section creator",
+        "truss3d section/member",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",

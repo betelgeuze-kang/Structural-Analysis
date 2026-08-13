@@ -239,12 +239,24 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "provenance-bound ModelIR node-coordinate edit" in workbench["claim"]
     assert "sixth provenance-bound frame-element orientation editor" in workbench["claim"]
     assert "model-edit-frame-element-orientation" in workbench["claim"]
+    assert "truss3d section/member" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
     assert "React/TypeScript removal" in workbench["claim"]
     assert "HIP C2" in workbench["claim"]
     assert "C6" in workbench["claim"]
+    assert capabilities.capability_is_enabled(payload, "modelir_truss3d_authoring") is True
+    truss_authoring = payload["capabilities"]["modelir_truss3d_authoring"]
+    assert truss_authoring["cutover_gate"] == "C5"
+    assert truss_authoring["owner"] == "structural-workbench"
+    assert "v1 truss_3d section" in truss_authoring["claim"]
+    assert "truss_3d/linear_truss_3d member" in truss_authoring["claim"]
+    assert "typed frame-plus-truss recovery" in truss_authoring["claim"]
+    assert "byte-identical restart" in truss_authoring["claim"]
+    assert "fallback 0" in truss_authoring["claim"]
+    assert "HIP C2" in truss_authoring["claim"]
+    assert "C6" in truss_authoring["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_linear_workbench") is True
     linear_workbench = payload["capabilities"]["modelir_linear_workbench"]
     assert linear_workbench["cutover_gate"] == "C5"
