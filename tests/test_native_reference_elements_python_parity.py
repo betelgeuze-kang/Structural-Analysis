@@ -60,6 +60,72 @@ def _normalize(vector: np.ndarray) -> np.ndarray:
     return vector / magnitude
 
 
+def _reduced_csr_assembly_oracle() -> dict[str, np.ndarray]:
+    contributions = [
+        (
+            20,
+            np.asarray([1, 2]),
+            np.asarray([[4.0, -4.0], [-4.0, 4.0]]),
+            np.asarray([[2.0, 1.0], [1.0, 2.0]]),
+            np.asarray([8.0, -8.0]),
+            np.asarray([12.0, -12.0]),
+        ),
+        (
+            10,
+            np.asarray([0, 1]),
+            np.asarray([[3.0, -3.0], [-3.0, 3.0]]),
+            np.asarray([[6.0, 3.0], [3.0, 6.0]]),
+            np.asarray([6.0, -6.0]),
+            np.asarray([9.0, -9.0]),
+        ),
+        (
+            30,
+            np.asarray([2, 3]),
+            np.asarray([[5.0, -5.0], [-5.0, 5.0]]),
+            np.asarray([[10.0, 4.0], [4.0, 10.0]]),
+            np.asarray([7.0, -7.0]),
+            np.asarray([11.0, -11.0]),
+        ),
+    ]
+    tangent = np.zeros((4, 4), dtype=np.float64)
+    mass = np.zeros((4, 4), dtype=np.float64)
+    residual = np.zeros(4, dtype=np.float64)
+    jvp = np.zeros(4, dtype=np.float64)
+    pattern = np.zeros((4, 4), dtype=np.bool_)
+    for _, dofs, local_tangent, local_mass, local_residual, local_jvp in sorted(
+        contributions, key=lambda contribution: contribution[0]
+    ):
+        tangent[np.ix_(dofs, dofs)] += local_tangent
+        mass[np.ix_(dofs, dofs)] += local_mass
+        residual[dofs] += local_residual
+        jvp[dofs] += local_jvp
+        pattern[np.ix_(dofs, dofs)] = True
+
+    active = np.asarray([1, 2, 3])
+    reduced_pattern = pattern[np.ix_(active, active)]
+    reduced_tangent = tangent[np.ix_(active, active)]
+    reduced_mass = mass[np.ix_(active, active)]
+    row_offsets = [0]
+    column_indices: list[int] = []
+    tangent_values: list[float] = []
+    mass_values: list[float] = []
+    for row in range(active.size):
+        columns = np.flatnonzero(reduced_pattern[row])
+        column_indices.extend(int(column) for column in columns)
+        tangent_values.extend(float(reduced_tangent[row, column]) for column in columns)
+        mass_values.extend(float(reduced_mass[row, column]) for column in columns)
+        row_offsets.append(len(column_indices))
+    return {
+        "assembly_csr.active_dofs": active,
+        "assembly_csr.row_offsets": np.asarray(row_offsets),
+        "assembly_csr.column_indices": np.asarray(column_indices),
+        "assembly_csr.tangent": np.asarray(tangent_values),
+        "assembly_csr.consistent_mass": np.asarray(mass_values),
+        "assembly_csr.residual": residual[active],
+        "assembly_csr.jvp": jvp[active],
+    }
+
+
 def _frame_oracle_for(
     node_i: np.ndarray,
     node_j: np.ndarray,
@@ -260,6 +326,13 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
         "assembly.consistent_mass",
         "assembly.residual",
         "assembly.jvp",
+        "assembly_csr.active_dofs",
+        "assembly_csr.row_offsets",
+        "assembly_csr.column_indices",
+        "assembly_csr.tangent",
+        "assembly_csr.consistent_mass",
+        "assembly_csr.residual",
+        "assembly_csr.jvp",
     }
     assert set(actual) == expected_keys
     expected: dict[str, np.ndarray] = {
@@ -328,5 +401,6 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
             "assembly.jvp": np.asarray([9, 3, -12]),
         }
     )
+    expected.update(_reduced_csr_assembly_oracle())
     for key, values in expected.items():
         np.testing.assert_allclose(actual[key], values, rtol=1.0e-13, atol=1.0e-14, err_msg=key)

@@ -85,8 +85,11 @@ authority. See
 ABI v1.7 adds a bounded CPU reference slice for explicit elastic/bilinear material state,
 linear truss3d, Euler-Bernoulli frame3d and a three-node plane-stress membrane. The stateless
 element operation publishes complete tangent, consistent mass, residual, JVP and recovery
-buffers through one safe Rust wrapper; deterministic dense assembly remains a separate C++
-reference target. An independent NumPy oracle compares every output value. Because HIP C2 is
+buffers through one safe Rust wrapper; deterministic dense plus homogeneous-constraint-reduced
+canonical CSR assembly remains a separate C++ reference target. The CSR projection publishes the
+sorted active-DOF map, canonical structure and the same four numerical channels without yet
+deriving an arbitrary ModelIR graph. An independent NumPy oracle compares every output value.
+Because HIP C2 is
 still open, these capabilities remain at C1. See
 `docs/native/reference-elements-assembly-v1.md`.
 

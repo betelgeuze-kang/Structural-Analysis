@@ -66,7 +66,10 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert assembly["cutover_gate"] == "C1"
     assert assembly["owner"] == "structural_assembly"
     assert "unique stable element order" in assembly["claim"]
-    assert "CSR" in assembly["claim"]
+    assert "constraint-reduced canonical-CSR" in assembly["claim"]
+    assert "sorted active-DOF map" in assembly["claim"]
+    assert "irregular constrained three-element CSR graph" in assembly["claim"]
+    assert "nonzero prescribed constraints" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
     assert capabilities.capability_is_enabled(payload, "sparse_linear_solver_cpu") is True
     sparse = payload["capabilities"]["sparse_linear_solver_cpu"]

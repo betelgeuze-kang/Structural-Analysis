@@ -3,6 +3,7 @@
 #include "reference_elements.hpp"
 
 #include <array>
+#include <cstdint>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -15,6 +16,15 @@ namespace {
 void emit(const std::string_view name, const std::span<const double> values) {
     std::cout << name;
     std::cout << std::setprecision(17);
+    for (const auto value : values) {
+        std::cout << '|' << value;
+    }
+    std::cout << '\n';
+}
+
+template <typename Integer>
+void emit_integer(const std::string_view name, const std::span<const Integer> values) {
+    std::cout << name;
     for (const auto value : values) {
         std::cout << '|' << value;
     }
@@ -172,5 +182,27 @@ int main() {
     emit("assembly.consistent_mass", assembly.consistent_mass);
     emit("assembly.residual", assembly.residual);
     emit("assembly.jvp", assembly.jvp);
+
+    const std::array<std::uint32_t, 2> dofs_c {2U, 3U};
+    const std::array<double, 4> tangent_c {5.0, -5.0, -5.0, 5.0};
+    const std::array<double, 4> mass_c {10.0, 4.0, 4.0, 10.0};
+    const std::array<double, 2> residual_c {7.0, -7.0};
+    const std::array<double, 2> jvp_c {11.0, -11.0};
+    const std::array csr_contributions {
+        contributions[0],
+        contributions[1],
+        structural::assembly::DenseElementContribution {
+            30U, dofs_c, tangent_c, mass_c, residual_c, jvp_c},
+    };
+    const std::array<std::uint32_t, 1> constrained_dofs {0U};
+    const auto csr = structural::assembly::assemble_reduced_csr_deterministic(
+        4U, csr_contributions, constrained_dofs);
+    emit_integer("assembly_csr.active_dofs", std::span {csr.active_dof_indices});
+    emit_integer("assembly_csr.row_offsets", std::span {csr.row_offsets});
+    emit_integer("assembly_csr.column_indices", std::span {csr.column_indices});
+    emit("assembly_csr.tangent", csr.tangent);
+    emit("assembly_csr.consistent_mass", csr.consistent_mass);
+    emit("assembly_csr.residual", csr.residual);
+    emit("assembly_csr.jvp", csr.jvp);
     return EXIT_SUCCESS;
 }

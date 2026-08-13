@@ -122,15 +122,19 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - DOF/reference/layout mismatch, CSR invalid, state epoch mismatch
   - fallback forbidden, backend unavailable와 device mismatch
 - Required gates: C0 through C6.
-- State: aggregate D3 remains C0, with one bounded dense reference assembly slice at C1. C++20
-  validates unique stable element indices, local matrix/vector shape, finite values and global
-  DOF references, then scatters tangent, consistent mass, residual and JVP in stable-index order.
-  The complete three-DOF/two-contribution output matches an independent NumPy oracle. This is not
-  CSR, constraint handling, arbitrary ModelIR assembly, stateful epoch propagation or Rust
-  product integration. The same product-owned HIP candidate assembles a 38-DOF overlapping
-  five-element graph without atomics in stable order and matches CPU with zero error while
-  retaining element outputs on device; protected-runner C2 promotion remains open. CSR and the
-  other paths remain open; probe/replay and Python-managed HIPRTC paths are not product authority.
+- State: aggregate D3 remains C0, with one bounded dense and constraint-reduced canonical-CSR
+  reference assembly slice at C1. C++20 validates unique stable element indices, local
+  matrix/vector shape, finite values, global DOF references and unique bounded homogeneous
+  constraints, then scatters tangent, consistent mass, residual and JVP in stable-index order.
+  It also emits sorted active-DOF mapping and canonical CSR structure independent of contribution
+  and constraint input order. The complete dense three-DOF/two-contribution output and an irregular
+  constrained three-element CSR graph match an independent NumPy oracle. This is not arbitrary
+  ModelIR assembly, nonzero prescribed-displacement correction, reordering, stateful epoch
+  propagation, Rust FFI or product integration. The same product-owned HIP candidate assembles a
+  38-DOF overlapping five-element graph without atomics in stable order and matches CPU with zero
+  error while retaining element outputs on device; protected-runner C2 promotion remains open.
+  Arbitrary ModelIR graph assembly and other paths remain open; probe/replay and Python-managed
+  HIPRTC paths are not product authority.
 
 ### D4. Linear, nonlinear, eigen and dynamic solvers
 

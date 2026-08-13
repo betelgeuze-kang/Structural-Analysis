@@ -63,6 +63,64 @@ int main() {
     expect(result.residual == std::vector<double>({6.0, 2.0, -8.0}), "residual assembly");
     expect(result.jvp == std::vector<double>({9.0, 3.0, -12.0}), "JVP assembly");
 
+    const std::array<std::uint32_t, 1> constrained_dofs {2U};
+    const auto reduced = structural::assembly::assemble_reduced_csr_deterministic(
+        3U, contributions, constrained_dofs);
+    expect(reduced.global_dof_count == 3U, "CSR global DOF inventory");
+    expect(
+        reduced.active_dof_indices == std::vector<std::uint32_t>({0U, 1U}),
+        "CSR active DOF mapping");
+    expect(
+        reduced.row_offsets == std::vector<std::uint64_t>({0U, 2U, 4U}),
+        "canonical CSR row offsets");
+    expect(
+        reduced.column_indices == std::vector<std::uint32_t>({0U, 1U, 0U, 1U}),
+        "strictly ordered CSR columns");
+    expect(
+        reduced.tangent == std::vector<double>({3.0, -3.0, -3.0, 7.0}),
+        "constraint-reduced CSR tangent");
+    expect(
+        reduced.consistent_mass == std::vector<double>({6.0, 3.0, 3.0, 8.0}),
+        "constraint-reduced CSR mass");
+    expect(reduced.residual == std::vector<double>({6.0, 2.0}), "reduced residual");
+    expect(reduced.jvp == std::vector<double>({9.0, 3.0}), "reduced JVP");
+
+    const std::array<std::uint32_t, 1> zero_dof {0U};
+    const std::array<double, 1> negative_zero {-0.0};
+    const std::array zero_contribution {
+        structural::assembly::DenseElementContribution {
+            1U, zero_dof, negative_zero, negative_zero, negative_zero, negative_zero},
+    };
+    const auto normalized_zero = structural::assembly::assemble_reduced_csr_deterministic(
+        1U, zero_contribution, std::span<const std::uint32_t> {});
+    expect(
+        !std::signbit(normalized_zero.tangent.front())
+            && !std::signbit(normalized_zero.consistent_mass.front())
+            && !std::signbit(normalized_zero.residual.front())
+            && !std::signbit(normalized_zero.jvp.front()),
+        "canonical CSR values normalize signed zero");
+
+    const std::array reversed_contributions {contributions[1], contributions[0]};
+    const auto repeated = structural::assembly::assemble_reduced_csr_deterministic(
+        3U, reversed_contributions, constrained_dofs);
+    expect(repeated.active_dof_indices == reduced.active_dof_indices, "CSR mapping determinism");
+    expect(repeated.row_offsets == reduced.row_offsets, "CSR row determinism");
+    expect(repeated.column_indices == reduced.column_indices, "CSR column determinism");
+    expect(repeated.tangent == reduced.tangent, "CSR tangent stable-index determinism");
+    expect(repeated.consistent_mass == reduced.consistent_mass, "CSR mass determinism");
+    expect(repeated.residual == reduced.residual, "CSR residual determinism");
+    expect(repeated.jvp == reduced.jvp, "CSR JVP determinism");
+    const std::array<std::uint32_t, 2> constraints_forward {2U, 3U};
+    const std::array<std::uint32_t, 2> constraints_reverse {3U, 2U};
+    const auto forward = structural::assembly::assemble_reduced_csr_deterministic(
+        4U, contributions, constraints_forward);
+    const auto reverse = structural::assembly::assemble_reduced_csr_deterministic(
+        4U, contributions, constraints_reverse);
+    expect(forward.active_dof_indices == reverse.active_dof_indices, "constraint-order mapping");
+    expect(forward.row_offsets == reverse.row_offsets, "constraint-order CSR rows");
+    expect(forward.column_indices == reverse.column_indices, "constraint-order CSR columns");
+    expect(forward.tangent == reverse.tangent, "constraint-order CSR values");
+
     const std::array duplicate_indices {
         contributions[0],
         structural::assembly::DenseElementContribution {
@@ -84,6 +142,27 @@ int main() {
             static_cast<void>(structural::assembly::assemble_dense_deterministic(3U, invalid));
         },
         "out-of-range DOF must fail");
+    const std::array<std::uint32_t, 2> duplicate_constraints {2U, 2U};
+    expect_throws(
+        [&contributions, &duplicate_constraints] {
+            static_cast<void>(structural::assembly::assemble_reduced_csr_deterministic(
+                3U, contributions, duplicate_constraints));
+        },
+        "duplicate constrained DOF must fail");
+    const std::array<std::uint32_t, 1> invalid_constraint {3U};
+    expect_throws(
+        [&contributions, &invalid_constraint] {
+            static_cast<void>(structural::assembly::assemble_reduced_csr_deterministic(
+                3U, contributions, invalid_constraint));
+        },
+        "out-of-range constrained DOF must fail");
+    const std::array<std::uint32_t, 3> all_constrained {2U, 0U, 1U};
+    expect_throws(
+        [&contributions, &all_constrained] {
+            static_cast<void>(structural::assembly::assemble_reduced_csr_deterministic(
+                3U, contributions, all_constrained));
+        },
+        "constraint reduction cannot remove every DOF");
     const std::array<std::uint32_t, 2> duplicate_dofs {1U, 1U};
     const std::array duplicate_dof_contribution {
         structural::assembly::DenseElementContribution {
@@ -124,5 +203,11 @@ int main() {
             static_cast<void>(structural::assembly::assemble_dense_deterministic(1U, overflowing));
         },
         "non-finite deterministic accumulation must fail");
+    expect_throws(
+        [&overflowing] {
+            static_cast<void>(structural::assembly::assemble_reduced_csr_deterministic(
+                1U, overflowing, std::span<const std::uint32_t> {}));
+        },
+        "non-finite sparse accumulation must fail");
     return EXIT_SUCCESS;
 }

@@ -22,10 +22,21 @@ REQUIRED_TOKENS = {
         "evaluate_shell3_membrane",
         "finish_response",
     ),
+    "native/cpp/src/assembly/dense_assembly.hpp": (
+        "CanonicalCsrAssemblyResult",
+        "active_dof_indices",
+        "row_offsets",
+        "column_indices",
+        "assemble_reduced_csr_deterministic",
+    ),
     "native/cpp/src/assembly/dense_assembly.cpp": (
         "stable_index",
+        "assemble_reduced_csr_deterministic",
         "element stable indices must be unique",
         "element contribution references an out-of-range DOF",
+        "constrained DOF indices must be unique",
+        "constraint reduction must retain at least one active DOF",
+        "sparse assembly accumulation exceeds the finite numerical domain",
     ),
     "native/cpp/include/structural/abi_v1.h": (
         "SA_ABI_V1_7",
@@ -50,6 +61,9 @@ REQUIRED_TOKENS = {
         "independent_numpy_oracle",
         "truss.tangent",
         "assembly.tangent",
+        "_reduced_csr_assembly_oracle",
+        "assembly_csr.row_offsets",
+        "assembly_csr.column_indices",
     ),
     "docs/native/reference-elements-assembly-v1.md": (
         "C0",

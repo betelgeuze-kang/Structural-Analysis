@@ -49,6 +49,8 @@ Jobs:
      rejection, failure atomicity and concurrent immutable execution
    - ABI v1.7 bounded truss3d/frame3d/three-node-membrane layout, disjoint caller-owned complete
      response, failure atomicity and reentrant safe-wrapper execution
+   - stable-index CPU assembly C0/C1 for dense output plus homogeneous-constraint reduced canonical
+     CSR active mapping, row/column structure and tangent/mass/residual/JVP NumPy parity
    - ABI v1.8 canonical-CSR U64/U32/F64 layouts, append-only table compatibility, fixed sparse
      numerical errors, failure atomicity and reentrant safe-wrapper execution
    - ABI v1.9 dense modal/buckling layouts, append-only v1.8 null-slot compatibility, disjoint
