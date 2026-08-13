@@ -3001,6 +3001,219 @@ fn frontend_audit_rejects_package_mutation_even_after_numeric_nonzero() {
     assert_eq!(error["code"], "frontend_audit_contract_changed");
 }
 
+#[cfg(unix)]
+#[test]
+fn frontend_audit_report_owns_json_child_and_publishes_verified_clean_report() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nif [ \"${NODE_OPTIONS+x}\" = x ]; then exit 91; fi\nprintf '%s\\n' \"$*\" > \"$FRONTEND_AUDIT_TEST_LOG\"\nprintf '%s\\n' '{\"metadata\":{\"vulnerabilities\":{\"info\":0,\"low\":0,\"moderate\":0,\"high\":0,\"critical\":0,\"total\":0}}}'\nexit 0\n",
+    );
+    let log = test.0.join("frontend-audit-report-invocation.log");
+    let report_path = test.0.join("evidence/frontend-audit.json");
+    std::fs::create_dir(report_path.parent().expect("report parent"))
+        .expect("create report parent");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit-report", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&report_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .env("NODE_OPTIONS", "--inspect")
+        .env("FRONTEND_AUDIT_TEST_LOG", &log)
+        .output()
+        .expect("run frontend audit report with fake npm");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert_eq!(
+        std::fs::read_to_string(log).expect("frontend audit report invocation log"),
+        "audit --json\n"
+    );
+    let receipt: Value = serde_json::from_slice(
+        output
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one audit report receipt line"),
+    )
+    .expect("frontend audit report receipt JSON");
+    assert_eq!(receipt["status"], "published_pass");
+    assert_eq!(
+        receipt["logical_command"],
+        serde_json::json!(["npm", "audit", "--json"])
+    );
+    assert_eq!(
+        receipt["node_options_disposition"],
+        "removed_for_direct_child"
+    );
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["contract_pass"], true);
+    assert_eq!(receipt["vulnerability_total"], 0);
+    assert_eq!(receipt["high_or_critical_vulnerability_count"], 0);
+    assert_eq!(
+        receipt["report"]["path"],
+        report_path.to_str().expect("UTF-8 report path")
+    );
+    assert_eq!(
+        receipt["report"]["publication_strategy"],
+        "bounded_staging_then_backup_rename_with_rollback"
+    );
+    verify_receipt_hash(&receipt);
+    let report_bytes = std::fs::read(&report_path).expect("read published audit report");
+    assert!(report_bytes.ends_with(b"\n"));
+    assert_eq!(receipt["report"]["sha256"], sha256_identity(&report_bytes));
+    assert_eq!(receipt["report"]["byte_length"], report_bytes.len());
+    let report: Value = serde_json::from_slice(&report_bytes).expect("published audit report JSON");
+    assert_eq!(
+        report["schema_version"],
+        "frontend-dependency-audit-report.v1"
+    );
+    assert_eq!(report["contract_pass"], true);
+    assert_eq!(report["summary"]["npm_audit_exit_code"], 0);
+    assert_eq!(report["diagnostics"]["npm_audit_stdout_bytes"], 97);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_report_publishes_findings_before_optional_blocked_exit() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s\\n' '{\"vulnerabilities\":{\"vite\":{\"name\":\"vite\",\"severity\":\"high\",\"isDirect\":true,\"range\":\"8.0.0 - 8.0.15\",\"fixAvailable\":{\"name\":\"vite\",\"version\":\"8.0.16\",\"isSemVerMajor\":false},\"via\":[{\"title\":\"advisory\",\"severity\":\"high\",\"url\":\"https://example.invalid/advisory\",\"range\":\"<=8.0.15\"}]}},\"metadata\":{\"vulnerabilities\":{\"info\":0,\"low\":0,\"moderate\":0,\"high\":1,\"critical\":0}}}'\nexit 1\n",
+    );
+    let report_path = test.0.join("evidence/blocked-audit.json");
+    std::fs::create_dir(report_path.parent().expect("report parent"))
+        .expect("create report parent");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit-report", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&report_path)
+        .arg("--fail-blocked")
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run blocked frontend audit report");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let receipt: Value = serde_json::from_slice(
+        output
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one blocked audit receipt line"),
+    )
+    .expect("blocked frontend audit receipt JSON");
+    assert_eq!(receipt["status"], "published_blocked");
+    assert_eq!(receipt["contract_pass"], false);
+    assert_eq!(receipt["blocker_count"], 2);
+    assert_eq!(receipt["vulnerability_total"], 1);
+    assert_eq!(receipt["high_or_critical_vulnerability_count"], 1);
+    verify_receipt_hash(&receipt);
+    let report: Value =
+        serde_json::from_slice(&std::fs::read(&report_path).expect("read blocked audit report"))
+            .expect("blocked audit report JSON");
+    assert_eq!(report["summary"]["high_vulnerability_count"], 1);
+    assert_eq!(report["vulnerabilities"][0]["name"], "vite");
+    assert_eq!(
+        report["vulnerabilities"][0]["fix_available"]["version"],
+        "8.0.16"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_report_blocks_duplicate_json_and_rejects_input_replacement() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s\\n' '{\"metadata\":{\"vulnerabilities\":{\"info\":0,\"info\":1,\"low\":0,\"moderate\":0,\"high\":0,\"critical\":0}}}'\nexit 0\n",
+    );
+    let report_path = test.0.join("evidence/malformed-audit.json");
+    std::fs::create_dir(report_path.parent().expect("report parent"))
+        .expect("create report parent");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit-report", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&report_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run malformed frontend audit report");
+    assert!(output.status.success());
+    let report: Value =
+        serde_json::from_slice(&std::fs::read(&report_path).expect("read malformed audit report"))
+            .expect("malformed audit compatibility report JSON");
+    assert_eq!(report["contract_pass"], false);
+    assert_eq!(report["checks"]["npm_audit_json_parse_pass"], false);
+    assert!(report["blockers"]
+        .as_array()
+        .expect("audit blockers")
+        .contains(&Value::String("npm_audit_json_unavailable".to_owned())));
+
+    let replacement = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit-report", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(test.0.join("package.json"))
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("reject frontend audit input replacement");
+    assert_eq!(replacement.status.code(), Some(1));
+    let error: Value = serde_json::from_slice(
+        replacement
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one replacement error line"),
+    )
+    .expect("frontend audit replacement error JSON");
+    assert_eq!(error["code"], "frontend_audit_report_output_invalid");
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_audit_report_rejects_destination_mutation_before_publication() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s' 'attacker-bytes' > \"$FRONTEND_AUDIT_REPORT_TARGET\"\nprintf '%s\\n' '{\"metadata\":{\"vulnerabilities\":{\"info\":0,\"low\":0,\"moderate\":0,\"high\":0,\"critical\":0,\"total\":0}}}'\nexit 0\n",
+    );
+    let report_path = test.0.join("evidence/mutated-audit.json");
+    std::fs::create_dir(report_path.parent().expect("report parent"))
+        .expect("create report parent");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["frontend-audit-report", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&report_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .env("FRONTEND_AUDIT_REPORT_TARGET", &report_path)
+        .output()
+        .expect("run destination-mutating frontend audit report");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value = serde_json::from_slice(
+        output
+            .stdout
+            .strip_suffix(b"\n")
+            .expect("one destination mutation error line"),
+    )
+    .expect("frontend audit destination mutation error JSON");
+    assert_eq!(error["code"], "frontend_audit_report_output_changed");
+    assert_eq!(
+        std::fs::read(&report_path).expect("read externally mutated report"),
+        b"attacker-bytes"
+    );
+}
+
 #[test]
 fn playwright_install_dry_run_is_deterministic_runtime_free_and_self_hashed() {
     let root = repository_root();

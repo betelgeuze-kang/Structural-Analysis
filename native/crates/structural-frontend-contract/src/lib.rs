@@ -4,6 +4,7 @@
 
 mod browser_smoke;
 mod frontend_audit;
+mod frontend_audit_report;
 mod frontend_build;
 mod frontend_dev;
 mod frontend_install;
@@ -47,6 +48,13 @@ pub use frontend_audit::{
     FrontendAuditReceiptV1, FrontendAuditRuntimeRequirementsV1,
 };
 use frontend_audit::{validate_frontend_audit_source, FrontendAuditSourceV1};
+pub use frontend_audit_report::{
+    canonical_frontend_audit_report_receipt_json, run_frontend_audit_report,
+    FrontendAuditPublishedReportV1, FrontendAuditReportChecksV1, FrontendAuditReportDiagnosticsV1,
+    FrontendAuditReportOptions, FrontendAuditReportReceiptV1, FrontendAuditReportSummaryV1,
+    FrontendAuditViaV1, FrontendAuditVulnerabilityV1, FrontendDependencyAuditReportV1,
+};
+use frontend_audit_report::{validate_frontend_audit_report_source, FrontendAuditReportSourceV1};
 pub use frontend_build::{
     canonical_frontend_build_receipt_json, run_frontend_build, FrontendBuildCliIdentityV1,
     FrontendBuildOptions, FrontendBuildReceiptV1, FrontendBuildRuntimeRequirementsV1,
@@ -216,6 +224,7 @@ struct FrontendSourceMapV1 {
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
     frontend_audit_contract: FrontendAuditSourceV1,
+    frontend_audit_report_contract: FrontendAuditReportSourceV1,
     frontend_build_contract: FrontendBuildSourceV1,
     frontend_dev_contract: FrontendDevSourceV1,
     frontend_install_contract: FrontendInstallSourceV1,
@@ -614,6 +623,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
         }
     }
     validate_frontend_audit_source(&source_map.frontend_audit_contract)?;
+    validate_frontend_audit_report_source(&source_map.frontend_audit_report_contract)?;
     validate_frontend_build_source(&source_map.frontend_build_contract)?;
     validate_frontend_dev_source(&source_map.frontend_dev_contract)?;
     validate_frontend_install_source(&source_map.frontend_install_contract)?;

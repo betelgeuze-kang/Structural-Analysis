@@ -77,6 +77,9 @@ python3 scripts/build_license_status_intake_packet.py \
 python3 scripts/build_frontend_dependency_audit_report.py \
   --out implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json
 
+# This compatibility entrypoint delegates npm audit execution, strict JSON projection,
+# and verified report publication to structural-frontend-contract frontend-audit-report.
+
 python3 scripts/build_ga_enterprise_readiness_report.py \
   --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json \
   --out-md implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.md

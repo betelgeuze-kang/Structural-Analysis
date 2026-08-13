@@ -7,26 +7,28 @@ use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_frontend_audit_receipt_json,
-    canonical_frontend_build_receipt_json, canonical_frontend_dev_receipt_json,
-    canonical_frontend_install_receipt_json, canonical_frontend_preview_receipt_json,
-    canonical_phase5_task_browser_smoke_receipt_json, canonical_playwright_install_receipt_json,
-    canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
-    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
+    canonical_frontend_audit_report_receipt_json, canonical_frontend_build_receipt_json,
+    canonical_frontend_dev_receipt_json, canonical_frontend_install_receipt_json,
+    canonical_frontend_preview_receipt_json, canonical_phase5_task_browser_smoke_receipt_json,
+    canonical_playwright_install_receipt_json, canonical_receipt_json,
+    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
+    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_audit,
-    run_frontend_build, run_frontend_dev, run_frontend_install, run_frontend_smoke,
-    run_phase5_task_browser_smoke, run_playwright_install, run_viewer_browser_smoke,
-    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
-    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
-    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, serve_frontend_preview, serve_viewer, FrontendAuditOptions,
-    FrontendBuildOptions, FrontendContractError, FrontendDevOptions, FrontendInstallOptions,
+    run_frontend_audit_report, run_frontend_build, run_frontend_dev, run_frontend_install,
+    run_frontend_smoke, run_phase5_task_browser_smoke, run_playwright_install,
+    run_viewer_browser_smoke, run_viewer_js_syntax, run_viewer_performance_probe,
+    run_viewer_readme_capture, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
+    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_frontend_preview,
+    serve_viewer, FrontendAuditOptions, FrontendAuditReportOptions, FrontendBuildOptions,
+    FrontendContractError, FrontendDevOptions, FrontendInstallOptions,
     Phase5TaskBrowserSmokeOptions, PlaywrightInstallOptions, ViewerJsSyntaxOptions,
     ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
     ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
@@ -50,7 +52,9 @@ fn main() -> ExitCode {
             print_error(error.code, &error.detail);
             ExitCode::from(EXIT_FAILURE)
         }
-        Err(CliError::RecordedAuditFailure(receipt)) => {
+        Err(
+            CliError::RecordedAuditFailure(receipt) | CliError::RecordedAuditReportFailure(receipt),
+        ) => {
             println!("{receipt}");
             ExitCode::from(EXIT_FAILURE)
         }
@@ -62,6 +66,7 @@ enum CliError {
     Usage(String),
     Contract(FrontendContractError),
     RecordedAuditFailure(String),
+    RecordedAuditReportFailure(String),
 }
 
 impl From<FrontendContractError> for CliError {
@@ -83,6 +88,17 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         .first()
         .and_then(|value| value.to_str())
         .ok_or_else(|| usage_error("missing or non-UTF-8 command"))?;
+    if command == "frontend-audit-report" {
+        let (options, fail_blocked) = parse_frontend_audit_report_arguments(&arguments[1..])?;
+        let receipt = run_frontend_audit_report(&options)?;
+        let contract_pass = receipt.contract_pass;
+        let encoded = canonical_frontend_audit_report_receipt_json(&receipt)?;
+        return if fail_blocked && !contract_pass {
+            Err(CliError::RecordedAuditReportFailure(encoded))
+        } else {
+            Ok(encoded)
+        };
+    }
     if command == "frontend-audit" {
         let (root, dry_run, fail_on_nonzero) = parse_frontend_audit_arguments(&arguments[1..])?;
         let mut options = FrontendAuditOptions::new(root);
@@ -232,7 +248,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, frontend-audit, frontend-build, frontend-dev, frontend-install, frontend-preview, phase5-task-browser-smoke, playwright-install, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, frontend-audit, frontend-audit-report, frontend-build, frontend-dev, frontend-install, frontend-preview, phase5-task-browser-smoke, playwright-install, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -1174,6 +1190,62 @@ fn parse_frontend_audit_arguments(
     ))
 }
 
+fn parse_frontend_audit_report_arguments(
+    arguments: &[OsString],
+) -> Result<(FrontendAuditReportOptions, bool), CliError> {
+    let mut root = None;
+    let mut package_json = None;
+    let mut package_lock = None;
+    let mut output = None;
+    let mut fail_blocked = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("frontend-audit-report option names must be UTF-8"))?;
+        if name == "--fail-blocked" {
+            if fail_blocked {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            fail_blocked = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("frontend-audit-report value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--package-json" if package_json.is_none() => {
+                package_json = Some(PathBuf::from(value));
+            }
+            "--package-lock" if package_lock.is_none() => {
+                package_lock = Some(PathBuf::from(value));
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--root" | "--package-json" | "--package-lock" | "--out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "frontend-audit-report options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = FrontendAuditReportOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        output.ok_or_else(|| usage_error("--out must be non-empty"))?,
+    );
+    options.package_json = package_json.unwrap_or(options.package_json);
+    options.package_lock = package_lock.unwrap_or(options.package_lock);
+    Ok((options, fail_blocked))
+}
+
 fn parse_options(arguments: &[OsString]) -> Result<BTreeMap<String, OsString>, CliError> {
     if arguments.len() % 2 != 0 {
         return Err(usage_error("every option must have one value"));
@@ -1231,7 +1303,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit --root DIR [--dry-run] [--fail-on-nonzero]; structural-frontend-contract frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract phase5-task-browser-smoke --root DIR [--skip-build] [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit --root DIR [--dry-run] [--fail-on-nonzero]; structural-frontend-contract frontend-audit-report --root DIR --out FILE [--package-json FILE] [--package-lock FILE] [--fail-blocked]; structural-frontend-contract frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract phase5-task-browser-smoke --root DIR [--skip-build] [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -1241,12 +1313,13 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_frontend_audit_arguments,
-        parse_frontend_dev_arguments, parse_phase5_task_browser_smoke_arguments,
-        parse_preview_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_js_syntax_arguments, parse_viewer_performance_probe_arguments,
-        parse_viewer_readme_capture_arguments, parse_viewer_report_pdf_export_arguments,
-        parse_viewer_report_pdf_smoke_arguments, parse_viewer_sample_workflow_arguments,
-        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
+        parse_frontend_audit_report_arguments, parse_frontend_dev_arguments,
+        parse_phase5_task_browser_smoke_arguments, parse_preview_arguments, parse_serve_arguments,
+        parse_smoke_arguments, parse_viewer_js_syntax_arguments,
+        parse_viewer_performance_probe_arguments, parse_viewer_readme_capture_arguments,
+        parse_viewer_report_pdf_export_arguments, parse_viewer_report_pdf_smoke_arguments,
+        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -1349,6 +1422,34 @@ mod tests {
             OsString::from("a"),
             OsString::from("--port"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn frontend_audit_report_parser_preserves_defaults_and_rejects_duplicates() {
+        let (report, fail_blocked) = parse_frontend_audit_report_arguments(&[
+            OsString::from("--package-lock"),
+            OsString::from("lock.json"),
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--out"),
+            OsString::from("report.json"),
+            OsString::from("--fail-blocked"),
+        ])
+        .expect("valid frontend audit report arguments");
+        assert_eq!(report.root, PathBuf::from("a"));
+        assert_eq!(report.package_json, PathBuf::from("package.json"));
+        assert_eq!(report.package_lock, PathBuf::from("lock.json"));
+        assert_eq!(report.output, PathBuf::from("report.json"));
+        assert!(fail_blocked);
+        assert!(parse_frontend_audit_report_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--out"),
+            OsString::from("one.json"),
+            OsString::from("--out"),
+            OsString::from("two.json"),
         ])
         .is_err());
     }

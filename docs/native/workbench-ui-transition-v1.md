@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/phase5-task-browser-smoke/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-audit-report/frontend-build/frontend-dev/frontend-install/frontend-preview/phase5-task-browser-smoke/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -62,6 +62,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `advisory_or_tool_failure`; npm findings, registry/network/configuration/tool-failure
   classification, dependency/license clearance, and external cache mutation remain outside the
   receipt.
+  Frontend dependency-audit evidence projection and publication are Rust-native:
+  `scripts/build_frontend_dependency_audit_report.py` now launches one direct Cargo
+  `frontend-audit-report` command and no longer launches or interprets npm itself. Rust owns the
+  exact `npm audit --json` child, bounded concurrent stdout/stderr capture, duplicate-key and
+  non-finite rejection, metadata/finding-count cross-checking, vulnerability aggregation,
+  compatibility report construction, frontend-contract and destination mutation checks, and
+  verified staging/backup/rename publication with rollback. The
+  Python wrapper strictly checks the canonical self-hashed receipt and published report identity,
+  then retains only CLI/output compatibility. npm remains the advisory oracle; registry/cache
+  behavior, independent advisory validation, dependency/license clearance, clean-machine evidence,
+  C5, and C6 remain open.
   Quality-gate frontend entrypoints are Rust-native: `scripts/verify_quality_gate.py` still owns
   Python sequencing of the broader repository checks, but its frontend install, strict audit,
   contract, build, manifest and browser verifiers call direct Cargo commands with npm package-script

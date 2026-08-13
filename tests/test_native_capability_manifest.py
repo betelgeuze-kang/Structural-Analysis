@@ -381,6 +381,27 @@ def test_native_frontend_audit_capability_is_bounded_c0() -> None:
     assert "C5 and C6 remain open" in audit["claim"]
 
 
+def test_native_frontend_audit_report_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(payload, "native_frontend_audit_report")
+        is True
+    )
+    audit = payload["capabilities"]["native_frontend_audit_report"]
+    assert audit["cutover_gate"] == "C0"
+    assert audit["owner"] == "structural-frontend-contract"
+    assert "launches one direct Cargo" in audit["claim"]
+    assert "direct Python npm, npx and Node entrypoints 0" in audit["claim"]
+    assert "one exact npm audit --json child" in audit["claim"]
+    assert "duplicate-key, non-finite, oversized" in audit["claim"]
+    assert "frontend-dependency-audit-report.v1" in audit["claim"]
+    assert "staging, backup rename and rollback" in audit["claim"]
+    assert "retains only CLI/output compatibility" in audit["claim"]
+    assert "npm remains the advisory oracle" in audit["claim"]
+    assert "dependency/license clearance" in audit["claim"]
+    assert "C5 and C6 remain open" in audit["claim"]
+
+
 def test_native_quality_gate_frontend_entrypoints_are_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

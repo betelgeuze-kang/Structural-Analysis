@@ -79,6 +79,7 @@
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/frontend_audit.rs",
+    "native/crates/structural-frontend-contract/src/frontend_audit_report.rs",
     "native/crates/structural-frontend-contract/src/frontend_build.rs",
     "native/crates/structural-frontend-contract/src/frontend_dev.rs",
     "native/crates/structural-frontend-contract/src/frontend_install.rs",
@@ -156,6 +157,20 @@
     "filesystem_mutation_accounting": "repository_contract_must_remain_unchanged_external_cache_mutation_not_instrumented",
     "environment_accounting": "npm_executable_configuration_registry_response_and_transitive_process_identity_not_instrumented",
     "claim_boundary": "This transitional C0 dependency-audit receipt proves only that Rust validates the frontend contract, removes inherited NODE_OPTIONS, owns one exact npm audit --audit-level high direct child, rejects package/lock/source-map or required-inventory mutation, and records its numeric exit. The default policy preserves the hosted workflow's non-blocking numeric-exit behavior; the explicit strict policy publishes the same receipt and then returns command failure on numeric nonzero for the quality gate. Exit zero is recorded as npm's audit-clean exit; a numeric nonzero is deliberately classified only as advisory_or_tool_failure because Rust does not parse or independently validate npm findings and cannot distinguish a vulnerability from registry, network, configuration, or tool failure. Direct dry-run resolves neither npm nor Node and spawns no child. Live registry/advisory/cache access, npm configuration/environment, executable and transitive-process identity, external cache mutation, finding counts and identities, dependency/license clearance, clean-machine publication, native UI parity, C5, and C6 remain outside Rust authority."
+  },
+  "frontend_audit_report_contract": {
+    "schema_version": "structural-native-frontend-audit-report-contract.v1",
+    "npm_launcher": "npm",
+    "arguments": [
+      "audit",
+      "--json"
+    ],
+    "maximum_stdout_bytes": 8388608,
+    "stderr_tail_characters": 2000,
+    "network_access_accounting": "not_instrumented_npm_registry_advisory_service_and_cache_access",
+    "filesystem_mutation_accounting": "repository_contract_must_remain_unchanged_report_published_with_bounded_staging_backup_rename_and_rollback_external_cache_mutation_not_instrumented",
+    "environment_accounting": "npm_executable_configuration_registry_response_and_transitive_process_identity_not_instrumented",
+    "claim_boundary": "This transitional C0 dependency-audit report receipt proves only that Rust validates and freezes the frontend package, lock, source map and required inventory, removes inherited NODE_OPTIONS, owns one exact npm audit --json child, drains stdout and stderr with bounded retained memory, rejects duplicate-key, non-finite, oversized or structurally invalid audit JSON and metadata/finding-count contradictions as blocked evidence, projects the retained PM compatibility report, rejects frontend-contract and destination mutation, and publishes verified report bytes through staging, backup rename and rollback before emitting a canonical self-hashed receipt. Numeric nonzero and malformed output remain blocked rather than being reclassified as clean; --fail-blocked changes only the outer command exit after report and receipt publication. Python retains only the compatibility Cargo launcher and report display. npm remains the advisory oracle; live registry/advisory/cache access, npm configuration and environment, executable and transitive-process identities, external-cache mutation, independent advisory verification, dependency/license clearance, clean-machine publication, native UI parity, C5 and C6 remain outside this receipt."
   },
   "frontend_build_contract": {
     "schema_version": "structural-native-frontend-build-contract.v1",

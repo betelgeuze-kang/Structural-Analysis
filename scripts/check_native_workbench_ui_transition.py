@@ -22,6 +22,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
     Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_audit.rs"),
+    Path("native/crates/structural-frontend-contract/src/frontend_audit_report.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_build.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_dev.rs"),
     Path("native/crates/structural-frontend-contract/src/frontend_install.rs"),
@@ -57,6 +58,7 @@ REQUIRED_PATHS = (
     Path("scripts/export-structure-viewer-report-pdf.mjs"),
     Path("scripts/measure-structure-viewer-visual-regression.mjs"),
     Path("scripts/run_phase5_task_based_ux_browser_smoke.py"),
+    Path("scripts/build_frontend_dependency_audit_report.py"),
     Path("scripts/verify-structure-viewer-sample-workflow.mjs"),
     Path("scripts/verify_quality_gate.py"),
     Path("implementation/phase1/structure_viewer_visual_regression_baseline.json"),
@@ -264,6 +266,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
         "structural-frontend-contract frontend-audit",
+        "structural-frontend-contract frontend-audit-report",
         "structural-frontend-contract frontend-build",
         "structural-frontend-contract frontend-dev",
         "structural-frontend-contract frontend-install",
@@ -307,6 +310,14 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "frontend_audit_numeric_nonzero_non_blocking": True,
         "frontend_audit_findings_not_independently_classified": True,
         "frontend_audit_network_uninstrumented": True,
+        "frontend_audit_report_node_required": True,
+        "frontend_audit_report_npm_required": True,
+        "frontend_audit_report_browser_required": False,
+        "frontend_audit_report_python_direct_npm_entrypoints": 0,
+        "frontend_audit_report_python_wrapper_retained": True,
+        "frontend_audit_report_strict_json_owned_by_rust": True,
+        "frontend_audit_report_verified_publication_owned_by_rust": True,
+        "frontend_audit_report_network_uninstrumented": True,
         "quality_gate_frontend_npm_entrypoints": 0,
         "quality_gate_frontend_direct_rust_entrypoints": True,
         "quality_gate_frontend_strict_audit_policy": True,
@@ -711,7 +722,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             "pub(crate) fn prepare_verified_publication_target",
             "pub(crate) fn publish_verified_outputs",
-            "bounded_staging_then_backup_rename_with_rollback",
+            "VERIFIED_PUBLICATION_STRATEGY",
             "create_new",
             "require_unchanged",
             "rollback_publication",
@@ -889,6 +900,55 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    frontend_audit_report = _text(
+        root,
+        Path(
+            "native/crates/structural-frontend-contract/src/frontend_audit_report.rs"
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path(
+            "native/crates/structural-frontend-contract/src/frontend_audit_report.rs"
+        ),
+        frontend_audit_report,
+        (
+            "pub fn run_frontend_audit_report",
+            "structural-native-frontend-audit-report-receipt.v1",
+            '"audit", "--json"',
+            "decode_json_strict",
+            "frontend_audit_report_contract_changed",
+            '.env_remove("NODE_OPTIONS")',
+            "VERIFIED_PUBLICATION_STRATEGY",
+            "npm_audit_json_unavailable",
+            "frontend_dependency_high_or_critical_vulnerabilities_present",
+            "network_access_accounting",
+            "filesystem_mutation_accounting",
+            "environment_accounting",
+        ),
+        blockers,
+    )
+    frontend_audit_report_wrapper = _text(
+        root, Path("scripts/build_frontend_dependency_audit_report.py"), blockers
+    )
+    _require_tokens(
+        Path("scripts/build_frontend_dependency_audit_report.py"),
+        frontend_audit_report_wrapper,
+        (
+            '"frontend-audit-report"',
+            "NATIVE_COMMAND",
+            "_receipt_from_stdout",
+            "_load_published_report",
+        ),
+        blockers,
+    )
+    if (
+        "subprocess.run" not in frontend_audit_report_wrapper
+        or "npm audit" in frontend_audit_report_wrapper
+        or "[_npm()" in frontend_audit_report_wrapper
+        or 'subprocess.run(["npm"' in frontend_audit_report_wrapper
+    ):
+        blockers.append("workbench_ui_frontend_audit_report_authority_invalid")
     frontend_preview = _text(
         root,
         Path("native/crates/structural-frontend-contract/src/frontend_preview.rs"),
@@ -1255,11 +1315,12 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/phase5-task-browser-smoke/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-audit-report/frontend-build/frontend-dev/frontend-install/frontend-preview/phase5-task-browser-smoke/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Frontend TypeScript/Vite build orchestration is Rust-native",
             "Frontend dependency-install orchestration is Rust-native",
             "Frontend dependency-audit orchestration is Rust-native",
+            "Frontend dependency-audit evidence projection and publication are Rust-native",
             "Quality-gate frontend entrypoints are Rust-native",
             "Hosted frontend/browser workflow product entrypoints are Rust-native",
             "Frontend development-server orchestration is Rust-native",
