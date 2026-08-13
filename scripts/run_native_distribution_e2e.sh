@@ -659,7 +659,7 @@ exercise_frame_section_edit_surface() {
     grep -Fq '"parameter_set_version":"1"' \
       "$output_directory/edit-receipt.json"
     grep -Fq '"area_m2":0.025' "$output_directory/edit-receipt.json"
-    grep -Fq '"torsional_constant_m4":0.000012' \
+    grep -Fq '"torsional_constant_m4":1.2e-05' \
       "$output_directory/edit-receipt.json"
     grep -Fq '"cpp_semantic_snapshot_verified":true' \
       "$output_directory/edit-receipt.json"
