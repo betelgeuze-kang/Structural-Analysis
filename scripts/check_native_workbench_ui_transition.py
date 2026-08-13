@@ -93,6 +93,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-fixed-constraint-add-v1.md"),
     Path("docs/native/modelir-linear-load-pattern-add-v1.md"),
     Path("docs/native/modelir-linear-material-add-v1.md"),
+    Path("docs/native/modelir-frame-section-add-v1.md"),
     Path("docs/native/modelir-linear-analysis-request-create-v1.md"),
     Path("docs/native/modelir-nodal-load-edit-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
@@ -193,6 +194,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_linear_elastic_isotropic_material_add": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_frame3d_section_add": (
         "c5_implemented",
         False,
     ),
@@ -341,6 +346,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-fixed-constraint",
         "model-add-linear-load-pattern",
         "model-add-linear-material",
+        "model-add-frame-section",
         "model-create-linear-analysis-request",
     ]:
         blockers.append("workbench_ui_native_model_flow_invalid")
@@ -913,6 +919,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
             "structural-native:model-add-linear-material.v1",
+            "structural-native:model-add-frame-section.v1",
             "pub fn edit_model_linear_material",
             "pub fn edit_model_frame_section",
             "pub fn edit_model_frame_element_orientation",
@@ -922,6 +929,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn add_model_fixed_constraint",
             "pub fn add_model_linear_load_pattern",
             "pub fn add_model_linear_material",
+            "pub fn add_model_frame_section",
             'mark_roundtrip_entity_approximated(&mut edited, "material", material_id)',
             'mark_roundtrip_entity_approximated(&mut edited, "section", section_id)',
             'mark_roundtrip_entity_approximated(&mut edited, "element", element_id)',
@@ -1520,6 +1528,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-add-fixed-constraint")',
             'Some("model-add-linear-load-pattern")',
             'Some("model-add-linear-material")',
+            'Some("model-add-frame-section")',
             'Some("model-create-linear-analysis-request")',
         ),
         blockers,
@@ -1642,6 +1651,23 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    frame_section_add_doc = _text(
+        root, Path("docs/native/modelir-frame-section-add-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-frame-section-add-v1.md"),
+        frame_section_add_doc,
+        (
+            "model-add-frame-section",
+            "Rust -> C ABI -> C++",
+            "structural-native:model-add-frame-section.v1",
+            "frame_3d",
+            "active external load",
+            "fallback 0",
+            "C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -1666,6 +1692,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-add-fixed-constraint",
             "model-add-linear-load-pattern",
             "model-add-linear-material",
+            "model-add-frame-section",
             "model-create-linear-analysis-request",
             "never infers this decision",
             "seven active workflows",
@@ -1734,7 +1761,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
-        "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, and one stateless linear-elastic-material addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
+        "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

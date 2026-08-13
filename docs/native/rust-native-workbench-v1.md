@@ -71,6 +71,11 @@ preserves every existing round-trip row and blocker and revalidates through C++.
 element references, create sections, broaden constitutive laws, or expose nonlinear material
 state. See `docs/native/modelir-linear-material-add-v1.md` for the exact artifact and installed E2E
 boundary.
+The bounded frame-section creator appends one unique contiguous-index v1 `frame_3d` section with
+six positive finite SI parameters, neutral source ownership, and empty extensions. It preserves
+every existing round-trip row and blocker, revalidates through C++, and does not edit member
+references or broaden to other section families. See
+`docs/native/modelir-frame-section-add-v1.md` for the exact artifact and installed E2E boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -160,6 +165,11 @@ structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
   --output-dir ADDED-MATERIAL-MODEL
+structural-workbench model-add-frame-section MODEL.json \
+  --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
+  --torsional-constant-m4 0.000005 \
+  --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
+  --output-dir ADDED-SECTION-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \
@@ -260,8 +270,9 @@ C++ validator. See
 `docs/native/modelir-constraint-value-edit-v1.md`,
 `docs/native/modelir-linear-material-edit-v1.md`,
 `docs/native/modelir-frame-section-edit-v1.md`,
-`docs/native/modelir-frame-element-orientation-edit-v1.md`, and
-`docs/native/modelir-element-connectivity-edit-v1.md`. The separate model-bound CPU linear request
+`docs/native/modelir-frame-element-orientation-edit-v1.md`,
+`docs/native/modelir-element-connectivity-edit-v1.md`, and
+`docs/native/modelir-frame-section-add-v1.md`. The separate model-bound CPU linear request
 creator does not edit the model; it validates the selection/config, performs authoritative C++
 assembly preflight without starting execution, and publishes a canonical request plus receipt. See
 `docs/native/modelir-linear-analysis-request-create-v1.md`.

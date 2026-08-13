@@ -27,6 +27,7 @@ const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fi
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-pattern.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
+const FRAME_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -40,6 +41,7 @@ const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_lin
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -142,6 +144,13 @@ pub struct ModelLinearLoadPatternAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded linear-material addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearMaterialAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded frame-section addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFrameSectionAddOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -298,6 +307,30 @@ pub fn publish_model_linear_material_add(
 ) -> Result<ModelLinearMaterialAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_linear_material(&source, material_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one v1 `frame_3d` section atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or parameters, invalid source or edited semantics,
+/// duplicate section identities, or publication failure.
+pub fn publish_model_frame_section_add(
+    source_path: &Path,
+    section_id: &str,
+    parameters: FrameSectionParametersV1,
+    output_directory: &Path,
+) -> Result<ModelFrameSectionAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_frame_section(&source, section_id, parameters)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1045,6 +1078,91 @@ pub fn add_model_linear_material(
         "claim_boundary": LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearMaterialAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Add one provenance-bound v1 `frame_3d` section in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identity/parameters, invalid source semantics, duplicate section identity,
+/// schema drift, or edited semantics rejected by C++.
+pub fn add_model_frame_section(
+    source_bytes: &[u8],
+    section_id: &str,
+    parameters: FrameSectionParametersV1,
+) -> Result<ModelFrameSectionAddOutcomeV1, WorkbenchError> {
+    validate_frame_section_add_request(source_bytes.len(), section_id, parameters)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let section_index = append_frame_section(&mut edited, section_id, parameters)?;
+    bind_frame_section_add_provenance(
+        &mut edited,
+        section_id,
+        section_index,
+        parameters,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "frame_section_add",
+        "model_id": edited_validation.report.model_id,
+        "section_id": section_id,
+        "section_index": section_index,
+        "family_id": "frame_3d",
+        "parameter_set_version": "1",
+        "parameters_si": frame_section_parameters_object(parameters),
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FRAME_SECTION_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFrameSectionAddOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -1942,6 +2060,24 @@ fn validate_linear_material_add_request(
     Ok(())
 }
 
+fn validate_frame_section_add_request(
+    source_length: usize,
+    section_id: &str,
+    parameters: FrameSectionParametersV1,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, section_id, "new section")?;
+    if frame_section_parameter_values(parameters)
+        .iter()
+        .any(|value| !value.is_finite() || *value <= 0.0)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame_section_parameter_invalid",
+            "new frame-section SI parameters must be finite and greater than zero",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_bounded_edit_identity(
     source_length: usize,
     identity: &str,
@@ -2290,6 +2426,41 @@ fn append_linear_material(
             "extensions": {}
         }));
     Ok(material_index)
+}
+
+fn append_frame_section(
+    model: &mut Value,
+    section_id: &str,
+    parameters: FrameSectionParametersV1,
+) -> Result<usize, WorkbenchError> {
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    if sections
+        .iter()
+        .any(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame_section_identity_exists",
+            format!("ModelIR already has a section with identity {section_id}"),
+        ));
+    }
+    let section_index = sections.len();
+    model
+        .get_mut("sections")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("sections"))?
+        .push(json!({
+            "id": section_id,
+            "index": section_index,
+            "family_id": "frame_3d",
+            "parameter_set_version": "1",
+            "parameters": frame_section_parameters_object(parameters),
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok(section_index)
 }
 
 fn replace_constraint_value(
@@ -3001,6 +3172,35 @@ fn bind_linear_material_add_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_frame_section_add_provenance(
+    model: &mut Value,
+    section_id: &str,
+    section_index: usize,
+    parameters: FrameSectionParametersV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FRAME_SECTION_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "frame_section_add",
+            "section_id": section_id,
+            "section_index": section_index,
+            "family_id": "frame_3d",
+            "parameter_set_version": "1",
+            "parameters_si": frame_section_parameters_object(parameters),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FRAME_SECTION_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_constraint_value_edit_provenance(
     model: &mut Value,
     constraint_id: &str,
@@ -3443,10 +3643,11 @@ mod tests {
         validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
-        validate_frame_section_edit_request, validate_linear_load_pattern_add_request,
-        validate_linear_material_add_request, validate_linear_material_edit_request,
-        validate_nodal_load_add_request, validate_nodal_load_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
+        validate_frame_section_add_request, validate_frame_section_edit_request,
+        validate_linear_load_pattern_add_request, validate_linear_material_add_request,
+        validate_linear_material_edit_request, validate_nodal_load_add_request,
+        validate_nodal_load_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -3860,6 +4061,41 @@ mod tests {
                     .expect_err("invalid material parameters")
                     .code,
                 expected_code
+            );
+        }
+    }
+
+    #[test]
+    fn frame_section_add_requires_bounded_identity_and_positive_finite_parameters() {
+        let section = FrameSectionParametersV1 {
+            area_m2: 0.01,
+            iy_m4: 0.000_04,
+            iz_m4: 0.000_025,
+            torsional_constant_m4: 0.000_005,
+            shear_area_y_m2: 0.008,
+            shear_area_z_m2: 0.008,
+        };
+        validate_frame_section_add_request(0, "S2", section)
+            .expect("valid frame-section addition request");
+        assert_eq!(
+            validate_frame_section_add_request(0, "", section)
+                .expect_err("empty section identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        for invalid_value in [0.0, -1.0, f64::INFINITY, f64::NAN] {
+            assert_eq!(
+                validate_frame_section_add_request(
+                    0,
+                    "S2",
+                    FrameSectionParametersV1 {
+                        shear_area_z_m2: invalid_value,
+                        ..section
+                    },
+                )
+                .expect_err("invalid frame-section parameter")
+                .code,
+                "workbench_model_add_frame_section_parameter_invalid"
             );
         }
     }

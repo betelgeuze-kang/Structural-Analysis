@@ -1451,6 +1451,174 @@ exercise_linear_material_add_surface() {
 }
 exercise_linear_material_add_surface
 
+exercise_frame_section_add_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local baseline_member="$e2e_root/frame-section-add-baseline-member"
+  local baseline_supported="$e2e_root/frame-section-add-baseline-supported"
+  local baseline_request="$e2e_root/frame-section-add-baseline-linear-request"
+  local baseline_run="$e2e_root/frame-section-add-baseline-linear-run"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-frame3d-member "$source_model" --node N3 \
+    --coordinates 4 0 0 --element E2 --from-node N2 \
+    --material M1 --section S1 --output-dir "$baseline_member" \
+    > "$e2e_root/frame-section-add-baseline-member.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-fixed-constraint "$baseline_member/model-ir.json" \
+    --constraint BC_N3 --node N3 --output-dir "$baseline_supported" \
+    > "$e2e_root/frame-section-add-baseline-supported.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-create-linear-analysis-request "$baseline_supported/model-ir.json" \
+    --case added-frame-section-c5 --load-pattern LC_WEAK \
+    --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+    --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+    --output-dir "$baseline_request" \
+    > "$e2e_root/frame-section-add-baseline-linear-request.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+    model-linear-run "$baseline_supported/model-ir.json" \
+    "$baseline_request/analysis-request.json" --output-dir "$baseline_run" \
+    > "$e2e_root/frame-section-add-baseline-linear-run.stdout.json"
+  grep -Fq '"status":"completed"' "$baseline_run/run-receipt.json"
+  grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-recovery-ir.json"
+  local baseline_maximum_displacement
+  baseline_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_run/result-recovery-ir.json")"
+  if [[ -z "$baseline_maximum_displacement" ]]; then
+    echo "installed original-section baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+
+  local label section_directory member_directory supported_directory request_directory
+  local run_directory section_maximum_displacement
+  for label in first second; do
+    section_directory="$e2e_root/frame-section-add-$label"
+    member_directory="$e2e_root/frame-section-add-$label-member"
+    supported_directory="$e2e_root/frame-section-add-$label-supported"
+    request_directory="$e2e_root/frame-section-add-$label-linear-request"
+    run_directory="$e2e_root/frame-section-add-$label-linear-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-frame-section "$source_model" --section S2 \
+      --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
+      --torsional-constant-m4 0.000005 \
+      --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
+      --output-dir "$section_directory" \
+      > "$e2e_root/frame-section-add-$label.stdout.json"
+    test -s "$section_directory/model-ir.json"
+    test -s "$section_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"operation":"frame_section_add"' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"section_id":"S2"' "$section_directory/edit-receipt.json"
+    grep -Fq '"section_index":1' "$section_directory/edit-receipt.json"
+    grep -Fq '"family_id":"frame_3d"' "$section_directory/edit-receipt.json"
+    grep -Fq '"parameter_set_version":"1"' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"area_m2":0.01' "$section_directory/edit-receipt.json"
+    grep -Fq '"iy_m4":0.00004' "$section_directory/edit-receipt.json"
+    grep -Fq '"iz_m4":0.000025' "$section_directory/edit-receipt.json"
+    grep -Fq '"torsional_constant_m4":0.000005' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"shear_area_y_m2":0.008' "$section_directory/edit-receipt.json"
+    grep -Fq '"shear_area_z_m2":0.008' "$section_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$section_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-frame-section.v1"' \
+      "$section_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$section_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-section-add-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-frame3d-member "$section_directory/model-ir.json" --node N3 \
+      --coordinates 4 0 0 --element E2 --from-node N2 \
+      --material M1 --section S2 --output-dir "$member_directory" \
+      > "$e2e_root/frame-section-add-$label-member.stdout.json"
+    grep -Fq '"section_id":"S2"' "$member_directory/edit-receipt.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-fixed-constraint "$member_directory/model-ir.json" \
+      --constraint BC_N3 --node N3 --output-dir "$supported_directory" \
+      > "$e2e_root/frame-section-add-$label-supported.stdout.json"
+    grep -Fq '"section_id":"S2"' "$supported_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$supported_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-section-add-$label-supported-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$supported_directory/model-ir.json" \
+      --case added-frame-section-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/frame-section-add-$label-linear-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$supported_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/frame-section-add-$label-linear-run.stdout.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+    section_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$run_directory/result-recovery-ir.json")"
+    if [[ -z "$section_maximum_displacement" \
+      || "$section_maximum_displacement" == "$baseline_maximum_displacement" ]]; then
+      echo "installed frame-section addition did not change recovered displacement" >&2
+      exit 1
+    fi
+  done
+  diff -r "$e2e_root/frame-section-add-first" \
+    "$e2e_root/frame-section-add-second" \
+    > "$e2e_root/frame-section-add-diff.txt"
+  diff -r "$e2e_root/frame-section-add-first-member" \
+    "$e2e_root/frame-section-add-second-member" \
+    > "$e2e_root/frame-section-add-member-diff.txt"
+  diff -r "$e2e_root/frame-section-add-first-supported" \
+    "$e2e_root/frame-section-add-second-supported" \
+    > "$e2e_root/frame-section-add-supported-diff.txt"
+  diff -r "$e2e_root/frame-section-add-first-linear-request" \
+    "$e2e_root/frame-section-add-second-linear-request" \
+    > "$e2e_root/frame-section-add-linear-request-diff.txt"
+  diff -r "$e2e_root/frame-section-add-first-linear-run" \
+    "$e2e_root/frame-section-add-second-linear-run" \
+    > "$e2e_root/frame-section-add-linear-run-diff.txt"
+  cmp "$e2e_root/frame-section-add-first.stdout.json" \
+    "$e2e_root/frame-section-add-second.stdout.json"
+  cmp "$e2e_root/frame-section-add-first-validation.json" \
+    "$e2e_root/frame-section-add-second-validation.json"
+  cmp "$e2e_root/frame-section-add-first-member.stdout.json" \
+    "$e2e_root/frame-section-add-second-member.stdout.json"
+  cmp "$e2e_root/frame-section-add-first-supported.stdout.json" \
+    "$e2e_root/frame-section-add-second-supported.stdout.json"
+  cmp "$e2e_root/frame-section-add-first-supported-validation.json" \
+    "$e2e_root/frame-section-add-second-supported-validation.json"
+  cmp "$e2e_root/frame-section-add-first-linear-request.stdout.json" \
+    "$e2e_root/frame-section-add-second-linear-request.stdout.json"
+  cmp "$e2e_root/frame-section-add-first-linear-run.stdout.json" \
+    "$e2e_root/frame-section-add-second-linear-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame-section addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_frame_section_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1756,6 +1924,12 @@ linear_material_add_composed_model_hash="$(sha256sum "$e2e_root/linear-material-
 linear_material_add_request_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 linear_material_add_result_ir_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 linear_material_add_recovery_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+frame_section_add_model_hash="$(sha256sum "$e2e_root/frame-section-add-first/model-ir.json" | awk '{print $1}')"
+frame_section_add_receipt_hash="$(sha256sum "$e2e_root/frame-section-add-first/edit-receipt.json" | awk '{print $1}')"
+frame_section_add_composed_model_hash="$(sha256sum "$e2e_root/frame-section-add-first-supported/model-ir.json" | awk '{print $1}')"
+frame_section_add_request_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
+frame_section_add_result_ir_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+frame_section_add_recovery_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1829,6 +2003,10 @@ v27_receipt_json="${v26_receipt_json/structural-native-distribution-e2e.v26/stru
 linear_material_add_receipt_fields="\"workbench_linear_material_add_surface_passed\":true,\"workbench_linear_material_add_model_sha256\":\"sha256:$linear_material_add_model_hash\",\"workbench_linear_material_add_receipt_sha256\":\"sha256:$linear_material_add_receipt_hash\",\"workbench_linear_material_add_composed_model_sha256\":\"sha256:$linear_material_add_composed_model_hash\",\"workbench_linear_material_add_request_sha256\":\"sha256:$linear_material_add_request_hash\",\"workbench_linear_material_add_result_ir_sha256\":\"sha256:$linear_material_add_result_ir_hash\",\"workbench_linear_material_add_recovery_sha256\":\"sha256:$linear_material_add_recovery_hash\","
 v27_receipt_json="${v27_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_material_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v27_receipt_json" > "$temporary_receipt"
+v28_receipt_json="${v27_receipt_json/structural-native-distribution-e2e.v27/structural-native-distribution-e2e.v28}"
+frame_section_add_receipt_fields="\"workbench_frame_section_add_surface_passed\":true,\"workbench_frame_section_add_model_sha256\":\"sha256:$frame_section_add_model_hash\",\"workbench_frame_section_add_receipt_sha256\":\"sha256:$frame_section_add_receipt_hash\",\"workbench_frame_section_add_composed_model_sha256\":\"sha256:$frame_section_add_composed_model_hash\",\"workbench_frame_section_add_request_sha256\":\"sha256:$frame_section_add_request_hash\",\"workbench_frame_section_add_result_ir_sha256\":\"sha256:$frame_section_add_result_ir_hash\",\"workbench_frame_section_add_recovery_sha256\":\"sha256:$frame_section_add_recovery_hash\","
+v28_receipt_json="${v28_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_section_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v28_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

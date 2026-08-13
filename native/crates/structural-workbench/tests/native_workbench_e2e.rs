@@ -678,6 +678,34 @@ fn run_linear_material_add(
     ])
 }
 
+fn run_frame_section_add(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    parameters: [&str; 6],
+) -> Output {
+    run_workbench(&[
+        text("model-add-frame-section"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--area-m2"),
+        text(parameters[0]),
+        text("--iy-m4"),
+        text(parameters[1]),
+        text("--iz-m4"),
+        text(parameters[2]),
+        text("--torsional-constant-m4"),
+        text(parameters[3]),
+        text("--shear-area-y-m2"),
+        text(parameters[4]),
+        text("--shear-area-z-m2"),
+        text(parameters[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -1146,6 +1174,45 @@ fn assert_published_linear_material_add(destination: &Path) {
     assert_eq!(receipt["parameter_set_version"], "1");
     assert_eq!(receipt["parameters_si"], material["parameters"]);
     assert_eq!(receipt["state_schema"], material["state_schema"]);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_frame_section_add(destination: &Path) {
+    let edited_bytes =
+        std::fs::read(destination.join("model-ir.json")).expect("section-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict section-added ModelIR");
+    let sections = edited.value()["sections"].as_array().expect("sections");
+    assert_eq!(sections.len(), 2);
+    let section = &sections[1];
+    assert_eq!(section["id"], "S2");
+    assert_eq!(section["index"], 1);
+    assert_eq!(section["family_id"], "frame_3d");
+    assert_eq!(section["parameter_set_version"], "1");
+    assert_eq!(section["parameters"]["area_m2"], 0.01);
+    assert_eq!(section["parameters"]["iy_m4"], 0.000_04);
+    assert_eq!(section["parameters"]["iz_m4"], 0.000_025);
+    assert_eq!(section["parameters"]["torsional_constant_m4"], 0.000_005);
+    assert_eq!(section["parameters"]["shear_area_y_m2"], 0.008);
+    assert_eq!(section["parameters"]["shear_area_z_m2"], 0.008);
+    assert_eq!(section["source_id"], Value::Null);
+    assert_eq!(section["extensions"], serde_json::json!({}));
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-frame-section.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("frame-section add receipt"),
+    )
+    .expect("frame-section add receipt JSON");
+    assert_eq!(receipt["operation"], "frame_section_add");
+    assert_eq!(receipt["section_id"], "S2");
+    assert_eq!(receipt["section_index"], 1);
+    assert_eq!(receipt["family_id"], "frame_3d");
+    assert_eq!(receipt["parameter_set_version"], "1");
+    assert_eq!(receipt["parameters_si"], section["parameters"]);
     assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
     assert_eq!(receipt["analysis_ready"], true);
     assert_eq!(receipt["edited_content_hash"], edited.content_hash());
@@ -3508,6 +3575,225 @@ fn linear_material_add_is_deterministic_cpp_revalidated_and_used_by_member_execu
             .expect("blocked material-added model"),
     )
     .expect("blocked material-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame_section_add_is_deterministic_cpp_revalidated_and_used_by_member_execution() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("frame-section-add-first");
+    let second = temporary.0.join("frame-section-add-second");
+    let parameters = ["0.01", "0.00004", "0.000025", "0.000005", "0.008", "0.008"];
+    for destination in [&first, &second] {
+        let output = run_frame_section_add(&source, destination, "S2", parameters);
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame-section add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first section-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second section-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after section addition"),
+        source_before
+    );
+    assert_published_frame_section_add(&first);
+
+    let baseline_member = temporary.0.join("section-add-baseline-member");
+    let added_member = temporary.0.join("section-add-new-section-member");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &baseline_member,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    assert_success(&run_frame3d_member_add(
+        &first.join("model-ir.json"),
+        &added_member,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S2",
+    ));
+    let baseline_supported = temporary.0.join("section-add-baseline-supported");
+    let added_supported = temporary.0.join("section-add-new-section-supported");
+    assert_success(&run_fixed_constraint_add(
+        &baseline_member.join("model-ir.json"),
+        &baseline_supported,
+        "BC_N3",
+        "N3",
+    ));
+    assert_success(&run_fixed_constraint_add(
+        &added_member.join("model-ir.json"),
+        &added_supported,
+        "BC_N3",
+        "N3",
+    ));
+    let added_supported_model: Value = serde_json::from_slice(
+        &std::fs::read(added_supported.join("model-ir.json")).expect("composed section model"),
+    )
+    .expect("composed section model JSON");
+    assert_eq!(added_supported_model["elements"][1]["section_id"], "S2");
+
+    let baseline_request = temporary.0.join("section-add-baseline-request");
+    let added_request = temporary.0.join("section-add-request");
+    assert_success(&run_model_linear_request_create(
+        &baseline_supported.join("model-ir.json"),
+        &baseline_request,
+        "added-frame-section-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &added_supported.join("model-ir.json"),
+        &added_request,
+        "added-frame-section-c5",
+        "LC_WEAK",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &std::fs::read(baseline_supported.join("model-ir.json")).expect("baseline composed model"),
+        &std::fs::read(baseline_request.join("analysis-request.json")).expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline section execution");
+    let added = execute_model_ir_linear_analysis(
+        &std::fs::read(added_supported.join("model-ir.json")).expect("new-section composed model"),
+        &std::fs::read(added_request.join("analysis-request.json")).expect("new-section request"),
+        None,
+        u32::MAX,
+    )
+    .expect("new section execution");
+    assert!(
+        baseline.is_complete(),
+        "baseline run receipt={}",
+        baseline.run_receipt_json()
+    );
+    assert!(
+        added.is_complete(),
+        "new-section run receipt={}",
+        added.run_receipt_json()
+    );
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline section recovery"),
+    )
+    .expect("baseline section recovery JSON");
+    let added_recovery: Value = serde_json::from_str(
+        added
+            .result_recovery_ir_json()
+            .expect("new section recovery"),
+    )
+    .expect("new section recovery JSON");
+    assert_eq!(
+        added_recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        added_recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        baseline_recovery["active_external_load"],
+        added_recovery["active_external_load"]
+    );
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        added_recovery["global_displacement"]
+    );
+    assert_eq!(added_recovery["fallback_count"], 0);
+
+    let existing = run_frame_section_add(&source, &first, "S2", parameters);
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, section_id, rejected_parameters, code) in [
+        (
+            "frame-section-add-duplicate-id",
+            "S1",
+            parameters,
+            "workbench_model_add_frame_section_identity_exists",
+        ),
+        (
+            "frame-section-add-zero-area",
+            "S2",
+            ["0", "0.00004", "0.000025", "0.000005", "0.008", "0.008"],
+            "workbench_usage_error",
+        ),
+        (
+            "frame-section-add-nonfinite-inertia",
+            "S2",
+            ["0.01", "NaN", "0.000025", "0.000005", "0.008", "0.008"],
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_frame_section_add(&source, &destination, section_id, rejected_parameters);
+        let expected_status = if code == "workbench_usage_error" {
+            2
+        } else {
+            1
+        };
+        assert_eq!(rejected.status.code(), Some(expected_status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value = serde_json::from_slice(&source_before).expect("section source JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.frame-section-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Section authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let original_roundtrip_map = blocked["roundtrip_map"].clone();
+    let blocked_source = temporary.0.join("blocked-section-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked section-add source bytes"),
+    )
+    .expect("write blocked section-add source");
+    let blocked_destination = temporary.0.join("blocked-section-add");
+    assert_success(&run_frame_section_add(
+        &blocked_source,
+        &blocked_destination,
+        "S2",
+        parameters,
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked section-add receipt"),
+    )
+    .expect("blocked section-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.frame-section-add-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked section-added model"),
+    )
+    .expect("blocked section-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
 }
 

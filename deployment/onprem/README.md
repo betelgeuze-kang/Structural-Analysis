@@ -26,7 +26,9 @@ absent from the runtime image.
   unconstrained node. `model-add-linear-load-pattern` atomically adds one zero-self-weight
   linear-static pattern and its first nonzero nodal load on an existing node.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
-  stateless trial/commit/rollback schema without changing existing references. The
+  stateless trial/commit/rollback schema without changing existing references.
+  `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
+  parameters without changing existing references. The
   `model-create-linear-analysis-request` surface binds one existing linear-static pattern and
   bounded PCG controls through C++ assembly preflight.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
@@ -116,6 +118,11 @@ structural-workbench model-add-linear-material /workspace/model.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
   --output-dir /workspace/added-material-model
+structural-workbench model-add-frame-section /workspace/model.json \
+  --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
+  --torsional-constant-m4 0.000005 \
+  --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
+  --output-dir /workspace/added-section-model
 structural-workbench model-create-linear-analysis-request /workspace/added-pattern-model/model-ir.json \
   --case case-1 --load-pattern LC_CUSTOM --max-iterations 100 \
   --absolute-residual-tolerance 1e-11 --relative-residual-tolerance 1e-13 \
@@ -161,6 +168,9 @@ The linear-material creator appends one v1 `linear_elastic_isotropic` material w
 physical SI parameters and the fixed stateless trial/commit/rollback schema; other laws,
 stateful/nonlinear material behavior, section creation, reference assignment/editing and deletion
 remain outside the command.
+The frame-section creator appends one v1 `frame_3d` section with six positive finite SI parameters;
+other families, material creation, reference assignment/editing and deletion remain outside the
+command.
 The model-bound CPU linear request creator performs ABI v1.13 C++ assembly preflight but neither
 starts execution nor supplies arbitrary solver/backend selection. None proves visual dragging,
 broader model editing,

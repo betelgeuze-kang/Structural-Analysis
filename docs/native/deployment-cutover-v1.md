@@ -31,13 +31,16 @@ revalidation.
 The installed `model-add-linear-material` command appends one v1 linear-elastic isotropic material
 with bounded physical SI parameters and the fixed stateless trial/commit/rollback schema, then
 strictly revalidates it through C++ without changing existing references.
+The installed `model-add-frame-section` command appends one v1 frame3d section with six positive
+finite SI parameters, then strictly revalidates it through C++ without changing existing
+references.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v27 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v28 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
-displacement, added-model linear execution, and a newly added material referenced by a composed
-member with changed recovered displacement under the same active load,
+displacement, added-model linear execution, and newly added material and section rows each
+referenced by a composed member with changed recovered displacement under the same active load,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

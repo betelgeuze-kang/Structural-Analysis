@@ -143,28 +143,34 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
     then composes a frame3d member referencing that material plus a fixed support and proves the
     exact unchanged active load, changed displacement against the original-material baseline,
     typed ResultIR/recovery and fallback 0;
-23. creates the bounded ModelIR linear CPU analysis request twice, proves byte-identical typed
+23. appends one unique contiguous-index v1 `frame_3d` section twice, proves byte-identical
+    model/edit-receipt bytes, unchanged source bytes, exact family/version and six positive SI
+    parameter bindings, preserved round-trip rows and strict C++ revalidation, then composes a
+    frame3d member referencing that section plus a fixed support and proves the exact unchanged
+    active load, changed displacement against the original-section baseline, typed
+    ResultIR/recovery and fallback 0;
+24. creates the bounded ModelIR linear CPU analysis request twice, proves byte-identical typed
     request and receipt output, unchanged source bytes, exact model/case/load/config provenance,
     strict C++ semantic snapshot and sparse assembly preflight, then consumes that generated
     request through restart/direct parity, result recovery, comparison and report generation;
-24. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+25. renders all four closed NDTHA response channels twice from the installed Workbench, proves
     exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
     window, and proves the durable session remains unchanged;
-25. renders all four fixed-guided original/deformed projections twice plus an explicit selected
+26. renders all four fixed-guided original/deformed projections twice plus an explicit selected
     step and magnification, proves ANSI-free byte determinism, distinct identities, exact C++
     snapshot/terminal-adapter binding, and durable-session nonmutation;
-26. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
+27. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-27. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
+28. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
     embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
     receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
-28. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
+29. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
     restores the validated session after creating a one-iteration PCG checkpoint to simulate
     process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
     exercises the same non-promoting inspect/review/reopen/export surface;
-29. installs an immutable update, rolls back and re-verifies activation;
-30. emits an append-only v27 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+30. installs an immutable update, rolls back and re-verifies activation;
+31. emits an append-only v28 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
@@ -182,13 +188,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    typed recovery identities,
    the linear-material-added ModelIR and edit receipt, the composed material-referencing member and
    fixed-support ModelIR, generated request, completed ResultIR and typed recovery identities,
+   the frame-section-added ModelIR and edit receipt, the composed section-referencing member and
+   fixed-support ModelIR, generated request, completed ResultIR and typed recovery identities,
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v26 receipts; v1 through v19 are not
+   The receipt checker continues to accept frozen v1 through v27 receipts; v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
@@ -196,7 +204,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    plus exact recovered-external-load authority; no pre-v25 receipt is installed homogeneous
    fixed-constraint-addition plus active-DOF-reduction authority; no pre-v26 receipt is installed
    atomic linear-static-pattern creation plus exact recovered-external-load authority; no pre-v27
-   receipt is installed linear-elastic-material creation plus composed-member execution authority.
+   receipt is installed linear-elastic-material creation plus composed-member execution authority;
+   no pre-v28 receipt is installed frame3d-section creation plus composed-member execution
+   authority.
 
 The reference command is:
 
