@@ -6,7 +6,9 @@ use serde_json::Value;
 use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 use crate::model_linear_product::MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS;
 use crate::product_ir::{sha256_identity, ModelIrIdentityV1, ProductIrContractError};
-use crate::sparse_product::{SparseLinearResultIrDocumentV1, SPARSE_LINEAR_MAXIMUM_ORDER};
+use crate::sparse_product::{
+    residual_metrics_close, SparseLinearResultIrDocumentV1, SPARSE_LINEAR_MAXIMUM_ORDER,
+};
 
 pub const MODEL_IR_LINEAR_RESULT_RECOVERY_IR_V1: &str =
     "structural-model-ir-linear-result-recovery-ir.v1";
@@ -167,7 +169,8 @@ pub fn parse_model_ir_linear_result_recovery_ir_v1(
 /// # Errors
 ///
 /// Rejects source hash/case/order drift, a non-bitwise active solution mapping, or residual-summary
-/// drift. This check deliberately supplements the recovery's standalone structural self-check.
+/// drift outside the sparse product's bounded FP64 parity tolerance. This check deliberately
+/// supplements the recovery's standalone exact structural self-check.
 pub fn verify_model_ir_linear_result_recovery_v1(
     result: &SparseLinearResultIrDocumentV1,
     recovery: &ModelIrLinearResultRecoveryDocumentV1,
@@ -200,13 +203,14 @@ pub fn verify_model_ir_linear_result_recovery_v1(
             "recovered active global displacement does not exactly reproduce the sparse solution",
         ));
     }
-    if recovered.summary.active_residual_inf.to_bits()
-        != source.summary.final_residual_inf.to_bits()
-    {
+    if !residual_metrics_close(
+        recovered.summary.active_residual_inf,
+        source.summary.final_residual_inf,
+    ) {
         return Err(error(
             "model_ir_linear_recovery_residual_mismatch",
             "/summary/active_residual_inf",
-            "recovery residual summary differs from the sparse ResultIR true residual",
+            "recovery residual summary differs from the sparse ResultIR outside the bounded FP64 parity tolerance",
         ));
     }
     Ok(())

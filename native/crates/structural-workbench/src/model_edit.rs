@@ -26,6 +26,7 @@ const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-lo
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-pattern.v1";
+const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -38,6 +39,7 @@ const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -133,6 +135,13 @@ pub struct ModelFixedConstraintAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded linear-load-pattern addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearLoadPatternAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded linear-material addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelLinearMaterialAddOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -265,6 +274,30 @@ pub fn publish_model_linear_load_pattern_add(
         node_id,
         components_si,
     )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one v1 linear-elastic isotropic material atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or parameters, invalid source or edited semantics,
+/// duplicate material identities, or publication failure.
+pub fn publish_model_linear_material_add(
+    source_path: &Path,
+    material_id: &str,
+    parameters: LinearElasticMaterialParametersV1,
+    output_directory: &Path,
+) -> Result<ModelLinearMaterialAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_linear_material(&source, material_id, parameters)?;
     publish_new_directory(
         output_directory,
         &[
@@ -926,6 +959,92 @@ pub fn add_model_linear_load_pattern(
         "claim_boundary": LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearLoadPatternAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Add one provenance-bound v1 linear-elastic isotropic material in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identity/parameters, invalid source semantics, duplicate material identity,
+/// schema drift, or edited semantics rejected by C++.
+pub fn add_model_linear_material(
+    source_bytes: &[u8],
+    material_id: &str,
+    parameters: LinearElasticMaterialParametersV1,
+) -> Result<ModelLinearMaterialAddOutcomeV1, WorkbenchError> {
+    validate_linear_material_add_request(source_bytes.len(), material_id, parameters)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let material_index = append_linear_material(&mut edited, material_id, parameters)?;
+    bind_linear_material_add_provenance(
+        &mut edited,
+        material_id,
+        material_index,
+        parameters,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "linear_material_add",
+        "model_id": edited_validation.report.model_id,
+        "material_id": material_id,
+        "material_index": material_index,
+        "law_id": "linear_elastic_isotropic",
+        "parameter_set_version": "1",
+        "parameters_si": linear_material_parameters_object(parameters),
+        "state_schema": linear_material_state_schema_object(),
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearMaterialAddOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -1793,6 +1912,36 @@ fn validate_linear_load_pattern_add_request(
     Ok(())
 }
 
+fn validate_linear_material_add_request(
+    source_length: usize,
+    material_id: &str,
+    parameters: LinearElasticMaterialParametersV1,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, material_id, "new material")?;
+    if !parameters.elastic_modulus_pa.is_finite() || parameters.elastic_modulus_pa <= 0.0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_linear_material_elastic_modulus_invalid",
+            "new material elastic modulus must be a finite SI value greater than zero",
+        ));
+    }
+    if !parameters.poisson_ratio.is_finite()
+        || parameters.poisson_ratio <= -1.0
+        || parameters.poisson_ratio >= 0.5
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_linear_material_poisson_ratio_invalid",
+            "new material Poisson ratio must be finite and strictly between -1 and 0.5",
+        ));
+    }
+    if !parameters.density_kg_m3.is_finite() || parameters.density_kg_m3 < 0.0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_linear_material_density_invalid",
+            "new material density must be a finite SI value greater than or equal to zero",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_bounded_edit_identity(
     source_length: usize,
     identity: &str,
@@ -2105,6 +2254,42 @@ fn append_linear_load_pattern(
             "extensions": {}
         }));
     Ok(load_pattern_index)
+}
+
+fn append_linear_material(
+    model: &mut Value,
+    material_id: &str,
+    parameters: LinearElasticMaterialParametersV1,
+) -> Result<usize, WorkbenchError> {
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    if materials
+        .iter()
+        .any(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_linear_material_identity_exists",
+            format!("ModelIR already has a material with identity {material_id}"),
+        ));
+    }
+    let material_index = materials.len();
+    model
+        .get_mut("materials")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("materials"))?
+        .push(json!({
+            "id": material_id,
+            "index": material_index,
+            "law_id": "linear_elastic_isotropic",
+            "parameter_set_version": "1",
+            "parameters": linear_material_parameters_object(parameters),
+            "state_schema": linear_material_state_schema_object(),
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok(material_index)
 }
 
 fn replace_constraint_value(
@@ -2786,6 +2971,36 @@ fn bind_linear_load_pattern_add_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_linear_material_add_provenance(
+    model: &mut Value,
+    material_id: &str,
+    material_index: usize,
+    parameters: LinearElasticMaterialParametersV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        LINEAR_MATERIAL_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "linear_material_add",
+            "material_id": material_id,
+            "material_index": material_index,
+            "law_id": "linear_elastic_isotropic",
+            "parameter_set_version": "1",
+            "parameters_si": linear_material_parameters_object(parameters),
+            "state_schema": linear_material_state_schema_object(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_constraint_value_edit_provenance(
     model: &mut Value,
     constraint_id: &str,
@@ -3125,6 +3340,14 @@ fn linear_material_parameters_object(parameters: LinearElasticMaterialParameters
     })
 }
 
+fn linear_material_state_schema_object() -> Value {
+    json!({
+        "stateful": false,
+        "state_update_epoch": "none",
+        "supports_trial_commit_rollback": true
+    })
+}
+
 fn linear_material_parameters_equal(
     left: LinearElasticMaterialParametersV1,
     right: LinearElasticMaterialParametersV1,
@@ -3221,9 +3444,9 @@ mod tests {
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_section_edit_request, validate_linear_load_pattern_add_request,
-        validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
+        validate_linear_material_add_request, validate_linear_material_edit_request,
+        validate_nodal_load_add_request, validate_nodal_load_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -3585,5 +3808,59 @@ mod tests {
             .code,
             "workbench_model_add_linear_load_pattern_zero_components"
         );
+    }
+
+    #[test]
+    fn linear_material_add_requires_bounded_identity_and_closed_physical_ranges() {
+        let material = LinearElasticMaterialParametersV1 {
+            elastic_modulus_pa: 70_000_000_000.0,
+            poisson_ratio: 0.33,
+            density_kg_m3: 2_700.0,
+        };
+        validate_linear_material_add_request(0, "M2", material)
+            .expect("valid linear-material addition request");
+        assert_eq!(
+            validate_linear_material_add_request(0, "", material)
+                .expect_err("empty material identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        for (parameters, expected_code) in [
+            (
+                LinearElasticMaterialParametersV1 {
+                    elastic_modulus_pa: 0.0,
+                    ..material
+                },
+                "workbench_model_add_linear_material_elastic_modulus_invalid",
+            ),
+            (
+                LinearElasticMaterialParametersV1 {
+                    poisson_ratio: 0.5,
+                    ..material
+                },
+                "workbench_model_add_linear_material_poisson_ratio_invalid",
+            ),
+            (
+                LinearElasticMaterialParametersV1 {
+                    density_kg_m3: -0.01,
+                    ..material
+                },
+                "workbench_model_add_linear_material_density_invalid",
+            ),
+            (
+                LinearElasticMaterialParametersV1 {
+                    elastic_modulus_pa: f64::NAN,
+                    ..material
+                },
+                "workbench_model_add_linear_material_elastic_modulus_invalid",
+            ),
+        ] {
+            assert_eq!(
+                validate_linear_material_add_request(0, "M2", parameters)
+                    .expect_err("invalid material parameters")
+                    .code,
+                expected_code
+            );
+        }
     }
 }

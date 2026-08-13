@@ -94,6 +94,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   pattern in a bound request, proves the exact N2-FX active load, changed recovery and fallback 0.
   Empty patterns, self-weight, combinations, time functions, other load families, editing,
   deletion, retargeting and visual authoring remain open.
+- `model-add-linear-material`: deterministic creation of one v1 `linear_elastic_isotropic`
+  material with a unique contiguous index, complete finite physical SI parameters, neutral source
+  ownership, empty extensions and the fixed stateless trial/commit/rollback schema. Rust preserves
+  all existing round-trip rows and blockers, then strictly reparses and C++-revalidates before
+  create-new publication. Installed E2E composes a new frame3d member that references this material
+  and a fixed support, proves the exact unchanged active load, changed recovered displacement and
+  fallback 0 against an otherwise identical original-material baseline. Other laws, nonlinear
+  material state, section creation, reference editing, deletion and visual authoring remain open.
 - `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
   load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
   same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before
@@ -253,6 +261,7 @@ edit, one bounded existing-frame-section parameter edit, one bounded existing-fr
 orientation edit, one bounded existing-two-node-element connectivity edit, one
 bounded connected-frame3d-member creator, one bounded existing-pattern nodal-load creator, one
 bounded homogeneous fixed-constraint creator, one atomic linear-static-pattern/first-load creator,
+one bounded stateless linear-elastic-material creator,
 bounded C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
@@ -273,8 +282,9 @@ exploration. The separate C++-revalidated node-coordinate, existing-nodal-load c
 existing-restrained-DOF prescribed-value, existing-linear-elastic-material parameter, and
 existing-frame3d-section parameter, existing-frame3d-element orientation, and
 existing-two-node-element connectivity commands close only seven provenance-bound edit operations;
-the four additional member, nodal-load, fixed-constraint, and atomic linear-static-pattern/first-
-load creators close only their documented fixed constructions. Visual dragging, general entity
+the five additional member, nodal-load, fixed-constraint, atomic linear-static-pattern/first-load,
+and stateless linear-elastic-material creators close only their documented fixed constructions.
+Visual dragging, general entity
 creation/deletion, broad retargeting, formulation/type/version changes, restraint-mask changes,
 and general property/material/section/load-combination/constraint-topology editing remain open, so
 the composite visual parity row stays open.

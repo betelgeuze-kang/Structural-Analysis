@@ -1282,6 +1282,175 @@ exercise_linear_load_pattern_add_surface() {
 }
 exercise_linear_load_pattern_add_surface
 
+exercise_linear_material_add_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local baseline_member="$e2e_root/linear-material-add-baseline-member"
+  local baseline_supported="$e2e_root/linear-material-add-baseline-supported"
+  local baseline_request="$e2e_root/linear-material-add-baseline-linear-request"
+  local baseline_run="$e2e_root/linear-material-add-baseline-linear-run"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-frame3d-member "$source_model" --node N3 \
+    --coordinates 4 0 0 --element E2 --from-node N2 \
+    --material M1 --section S1 --output-dir "$baseline_member" \
+    > "$e2e_root/linear-material-add-baseline-member.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-fixed-constraint "$baseline_member/model-ir.json" \
+    --constraint BC_N3 --node N3 --output-dir "$baseline_supported" \
+    > "$e2e_root/linear-material-add-baseline-supported.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-create-linear-analysis-request "$baseline_supported/model-ir.json" \
+    --case added-linear-material-c5 --load-pattern LC_WEAK \
+    --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+    --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+    --output-dir "$baseline_request" \
+    > "$e2e_root/linear-material-add-baseline-linear-request.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+    model-linear-run "$baseline_supported/model-ir.json" \
+    "$baseline_request/analysis-request.json" --output-dir "$baseline_run" \
+    > "$e2e_root/linear-material-add-baseline-linear-run.stdout.json"
+  grep -Fq '"status":"completed"' "$baseline_run/run-receipt.json"
+  grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-recovery-ir.json"
+  local baseline_maximum_displacement
+  baseline_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_run/result-recovery-ir.json")"
+  if [[ -z "$baseline_maximum_displacement" ]]; then
+    echo "installed original-material baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+
+  local label material_directory member_directory supported_directory request_directory
+  local run_directory material_maximum_displacement
+  for label in first second; do
+    material_directory="$e2e_root/linear-material-add-$label"
+    member_directory="$e2e_root/linear-material-add-$label-member"
+    supported_directory="$e2e_root/linear-material-add-$label-supported"
+    request_directory="$e2e_root/linear-material-add-$label-linear-request"
+    run_directory="$e2e_root/linear-material-add-$label-linear-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-linear-material "$source_model" --material M2 \
+      --elastic-modulus-pa 100000000000 --poisson-ratio 0.3 \
+      --density-kg-m3 2700 --output-dir "$material_directory" \
+      > "$e2e_root/linear-material-add-$label.stdout.json"
+    test -s "$material_directory/model-ir.json"
+    test -s "$material_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"operation":"linear_material_add"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"material_id":"M2"' "$material_directory/edit-receipt.json"
+    grep -Fq '"material_index":1' "$material_directory/edit-receipt.json"
+    grep -Fq '"law_id":"linear_elastic_isotropic"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"parameter_set_version":"1"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"density_kg_m3":2700' "$material_directory/edit-receipt.json"
+    grep -Fq '"elastic_modulus_pa":100000000000' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"poisson_ratio":0.3' "$material_directory/edit-receipt.json"
+    grep -Fq '"state_update_epoch":"none"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"stateful":false' "$material_directory/edit-receipt.json"
+    grep -Fq '"supports_trial_commit_rollback":true' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$material_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$material_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$material_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-linear-material.v1"' \
+      "$material_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$material_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-material-add-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-frame3d-member "$material_directory/model-ir.json" --node N3 \
+      --coordinates 4 0 0 --element E2 --from-node N2 \
+      --material M2 --section S1 --output-dir "$member_directory" \
+      > "$e2e_root/linear-material-add-$label-member.stdout.json"
+    grep -Fq '"material_id":"M2"' "$member_directory/edit-receipt.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-fixed-constraint "$member_directory/model-ir.json" \
+      --constraint BC_N3 --node N3 --output-dir "$supported_directory" \
+      > "$e2e_root/linear-material-add-$label-supported.stdout.json"
+    grep -Fq '"material_id":"M2"' "$supported_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$supported_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-material-add-$label-supported-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$supported_directory/model-ir.json" \
+      --case added-linear-material-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-material-add-$label-linear-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$supported_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/linear-material-add-$label-linear-run.stdout.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+    material_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$run_directory/result-recovery-ir.json")"
+    if [[ -z "$material_maximum_displacement" \
+      || "$material_maximum_displacement" == "$baseline_maximum_displacement" ]]; then
+      echo "installed linear-material addition did not change recovered displacement" >&2
+      exit 1
+    fi
+  done
+  diff -r "$e2e_root/linear-material-add-first" \
+    "$e2e_root/linear-material-add-second" \
+    > "$e2e_root/linear-material-add-diff.txt"
+  diff -r "$e2e_root/linear-material-add-first-member" \
+    "$e2e_root/linear-material-add-second-member" \
+    > "$e2e_root/linear-material-add-member-diff.txt"
+  diff -r "$e2e_root/linear-material-add-first-supported" \
+    "$e2e_root/linear-material-add-second-supported" \
+    > "$e2e_root/linear-material-add-supported-diff.txt"
+  diff -r "$e2e_root/linear-material-add-first-linear-request" \
+    "$e2e_root/linear-material-add-second-linear-request" \
+    > "$e2e_root/linear-material-add-linear-request-diff.txt"
+  diff -r "$e2e_root/linear-material-add-first-linear-run" \
+    "$e2e_root/linear-material-add-second-linear-run" \
+    > "$e2e_root/linear-material-add-linear-run-diff.txt"
+  cmp "$e2e_root/linear-material-add-first.stdout.json" \
+    "$e2e_root/linear-material-add-second.stdout.json"
+  cmp "$e2e_root/linear-material-add-first-validation.json" \
+    "$e2e_root/linear-material-add-second-validation.json"
+  cmp "$e2e_root/linear-material-add-first-member.stdout.json" \
+    "$e2e_root/linear-material-add-second-member.stdout.json"
+  cmp "$e2e_root/linear-material-add-first-supported.stdout.json" \
+    "$e2e_root/linear-material-add-second-supported.stdout.json"
+  cmp "$e2e_root/linear-material-add-first-supported-validation.json" \
+    "$e2e_root/linear-material-add-second-supported-validation.json"
+  cmp "$e2e_root/linear-material-add-first-linear-request.stdout.json" \
+    "$e2e_root/linear-material-add-second-linear-request.stdout.json"
+  cmp "$e2e_root/linear-material-add-first-linear-run.stdout.json" \
+    "$e2e_root/linear-material-add-second-linear-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear-material addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_linear_material_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1581,6 +1750,12 @@ linear_load_pattern_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-pattern
 linear_load_pattern_add_request_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 linear_load_pattern_add_result_ir_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 linear_load_pattern_add_recovery_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+linear_material_add_model_hash="$(sha256sum "$e2e_root/linear-material-add-first/model-ir.json" | awk '{print $1}')"
+linear_material_add_receipt_hash="$(sha256sum "$e2e_root/linear-material-add-first/edit-receipt.json" | awk '{print $1}')"
+linear_material_add_composed_model_hash="$(sha256sum "$e2e_root/linear-material-add-first-supported/model-ir.json" | awk '{print $1}')"
+linear_material_add_request_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
+linear_material_add_result_ir_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+linear_material_add_recovery_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1650,6 +1825,10 @@ v26_receipt_json="${v25_receipt_json/structural-native-distribution-e2e.v25/stru
 linear_load_pattern_add_receipt_fields="\"workbench_linear_load_pattern_add_surface_passed\":true,\"workbench_linear_load_pattern_add_model_sha256\":\"sha256:$linear_load_pattern_add_model_hash\",\"workbench_linear_load_pattern_add_receipt_sha256\":\"sha256:$linear_load_pattern_add_receipt_hash\",\"workbench_linear_load_pattern_add_request_sha256\":\"sha256:$linear_load_pattern_add_request_hash\",\"workbench_linear_load_pattern_add_result_ir_sha256\":\"sha256:$linear_load_pattern_add_result_ir_hash\",\"workbench_linear_load_pattern_add_recovery_sha256\":\"sha256:$linear_load_pattern_add_recovery_hash\","
 v26_receipt_json="${v26_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_pattern_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v26_receipt_json" > "$temporary_receipt"
+v27_receipt_json="${v26_receipt_json/structural-native-distribution-e2e.v26/structural-native-distribution-e2e.v27}"
+linear_material_add_receipt_fields="\"workbench_linear_material_add_surface_passed\":true,\"workbench_linear_material_add_model_sha256\":\"sha256:$linear_material_add_model_hash\",\"workbench_linear_material_add_receipt_sha256\":\"sha256:$linear_material_add_receipt_hash\",\"workbench_linear_material_add_composed_model_sha256\":\"sha256:$linear_material_add_composed_model_hash\",\"workbench_linear_material_add_request_sha256\":\"sha256:$linear_material_add_request_hash\",\"workbench_linear_material_add_result_ir_sha256\":\"sha256:$linear_material_add_result_ir_hash\",\"workbench_linear_material_add_recovery_sha256\":\"sha256:$linear_material_add_recovery_hash\","
+v27_receipt_json="${v27_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_material_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v27_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

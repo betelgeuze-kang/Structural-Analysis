@@ -656,6 +656,28 @@ fn run_linear_load_pattern_add(
     ])
 }
 
+fn run_linear_material_add(
+    source: &Path,
+    destination: &Path,
+    material_id: &str,
+    parameters: [&str; 3],
+) -> Output {
+    run_workbench(&[
+        text("model-add-linear-material"),
+        source.as_os_str(),
+        text("--material"),
+        text(material_id),
+        text("--elastic-modulus-pa"),
+        text(parameters[0]),
+        text("--poisson-ratio"),
+        text(parameters[1]),
+        text("--density-kg-m3"),
+        text(parameters[2]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -1079,6 +1101,51 @@ fn assert_published_linear_load_pattern_add(destination: &Path) {
     assert_eq!(receipt["nodal_load_index"], 0);
     assert_eq!(receipt["node_id"], "N2");
     assert_eq!(receipt["components_si"]["FX"], 2_500.0);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_linear_material_add(destination: &Path) {
+    let edited_bytes =
+        std::fs::read(destination.join("model-ir.json")).expect("material-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict material-added ModelIR");
+    let materials = edited.value()["materials"].as_array().expect("materials");
+    assert_eq!(materials.len(), 2);
+    let material = &materials[1];
+    assert_eq!(material["id"], "M2");
+    assert_eq!(material["index"], 1);
+    assert_eq!(material["law_id"], "linear_elastic_isotropic");
+    assert_eq!(material["parameter_set_version"], "1");
+    assert_eq!(
+        material["parameters"]["elastic_modulus_pa"],
+        100_000_000_000.0
+    );
+    assert_eq!(material["parameters"]["poisson_ratio"], 0.3);
+    assert_eq!(material["parameters"]["density_kg_m3"], 2_700.0);
+    assert_eq!(material["state_schema"]["stateful"], false);
+    assert_eq!(material["state_schema"]["state_update_epoch"], "none");
+    assert_eq!(
+        material["state_schema"]["supports_trial_commit_rollback"],
+        true
+    );
+    assert_eq!(material["source_id"], Value::Null);
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-linear-material.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("linear-material add receipt"),
+    )
+    .expect("linear-material add receipt JSON");
+    assert_eq!(receipt["operation"], "linear_material_add");
+    assert_eq!(receipt["material_id"], "M2");
+    assert_eq!(receipt["material_index"], 1);
+    assert_eq!(receipt["law_id"], "linear_elastic_isotropic");
+    assert_eq!(receipt["parameter_set_version"], "1");
+    assert_eq!(receipt["parameters_si"], material["parameters"]);
+    assert_eq!(receipt["state_schema"], material["state_schema"]);
     assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
     assert_eq!(receipt["analysis_ready"], true);
     assert_eq!(receipt["edited_content_hash"], edited.content_hash());
@@ -3211,6 +3278,236 @@ fn linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executabl
             .expect("blocked pattern-added model"),
     )
     .expect("blocked pattern-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_material_add_is_deterministic_cpp_revalidated_and_used_by_member_execution() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("linear-material-add-first");
+    let second = temporary.0.join("linear-material-add-second");
+    for destination in [&first, &second] {
+        let output =
+            run_linear_material_add(&source, destination, "M2", ["100000000000", "0.3", "2700"]);
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-material add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first material-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second material-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after material addition"),
+        source_before
+    );
+    assert_published_linear_material_add(&first);
+
+    let baseline_member = temporary.0.join("material-add-baseline-member");
+    let added_member = temporary.0.join("material-add-new-material-member");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &baseline_member,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    assert_success(&run_frame3d_member_add(
+        &first.join("model-ir.json"),
+        &added_member,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M2",
+        "S1",
+    ));
+    let baseline_supported = temporary.0.join("material-add-baseline-supported");
+    let added_supported = temporary.0.join("material-add-new-material-supported");
+    assert_success(&run_fixed_constraint_add(
+        &baseline_member.join("model-ir.json"),
+        &baseline_supported,
+        "BC_N3",
+        "N3",
+    ));
+    assert_success(&run_fixed_constraint_add(
+        &added_member.join("model-ir.json"),
+        &added_supported,
+        "BC_N3",
+        "N3",
+    ));
+    let added_supported_model: Value = serde_json::from_slice(
+        &std::fs::read(added_supported.join("model-ir.json")).expect("composed material model"),
+    )
+    .expect("composed material model JSON");
+    assert_eq!(added_supported_model["elements"][1]["material_id"], "M2");
+
+    let baseline_request = temporary.0.join("material-add-baseline-request");
+    let added_request = temporary.0.join("material-add-request");
+    assert_success(&run_model_linear_request_create(
+        &baseline_supported.join("model-ir.json"),
+        &baseline_request,
+        "added-linear-material-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &added_supported.join("model-ir.json"),
+        &added_request,
+        "added-linear-material-c5",
+        "LC_WEAK",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &std::fs::read(baseline_supported.join("model-ir.json")).expect("baseline composed model"),
+        &std::fs::read(baseline_request.join("analysis-request.json")).expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline material execution");
+    let added = execute_model_ir_linear_analysis(
+        &std::fs::read(added_supported.join("model-ir.json")).expect("new-material composed model"),
+        &std::fs::read(added_request.join("analysis-request.json")).expect("new-material request"),
+        None,
+        u32::MAX,
+    )
+    .expect("new material execution");
+    assert!(
+        baseline.is_complete(),
+        "baseline run receipt={}",
+        baseline.run_receipt_json()
+    );
+    assert!(
+        added.is_complete(),
+        "new-material run receipt={}",
+        added.run_receipt_json()
+    );
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline material recovery"),
+    )
+    .expect("baseline material recovery JSON");
+    let added_recovery: Value = serde_json::from_str(
+        added
+            .result_recovery_ir_json()
+            .expect("new material recovery"),
+    )
+    .expect("new material recovery JSON");
+    assert_eq!(
+        added_recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        added_recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        baseline_recovery["active_external_load"],
+        added_recovery["active_external_load"]
+    );
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        added_recovery["global_displacement"]
+    );
+    assert_eq!(added_recovery["fallback_count"], 0);
+
+    let existing = run_linear_material_add(&source, &first, "M2", ["100000000000", "0.3", "2700"]);
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, material_id, parameters, code) in [
+        (
+            "material-add-duplicate-id",
+            "M1",
+            ["100000000000", "0.3", "2700"],
+            "workbench_model_add_linear_material_identity_exists",
+        ),
+        (
+            "material-add-zero-modulus",
+            "M2",
+            ["0", "0.3", "2700"],
+            "workbench_usage_error",
+        ),
+        (
+            "material-add-invalid-ratio",
+            "M2",
+            ["100000000000", "0.5", "2700"],
+            "workbench_usage_error",
+        ),
+        (
+            "material-add-negative-density",
+            "M2",
+            ["100000000000", "0.3", "-1"],
+            "workbench_usage_error",
+        ),
+        (
+            "material-add-nonfinite-modulus",
+            "M2",
+            ["NaN", "0.3", "2700"],
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_linear_material_add(&source, &destination, material_id, parameters);
+        let expected_status = if code == "workbench_usage_error" {
+            2
+        } else {
+            1
+        };
+        assert_eq!(rejected.status.code(), Some(expected_status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value = serde_json::from_slice(&source_before).expect("material source JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.linear-material-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Material authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let original_roundtrip_map = blocked["roundtrip_map"].clone();
+    let blocked_source = temporary.0.join("blocked-material-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked material-add source bytes"),
+    )
+    .expect("write blocked material-add source");
+    let blocked_destination = temporary.0.join("blocked-material-add");
+    assert_success(&run_linear_material_add(
+        &blocked_source,
+        &blocked_destination,
+        "M2",
+        ["100000000000", "0.3", "2700"],
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked material-add receipt"),
+    )
+    .expect("blocked material-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.linear-material-add-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked material-added model"),
+    )
+    .expect("blocked material-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
 }
 

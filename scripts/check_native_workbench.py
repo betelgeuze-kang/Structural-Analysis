@@ -96,6 +96,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-add-nodal-load.v1",
         "structural-native:model-add-fixed-constraint.v1",
         "structural-native:model-add-linear-load-pattern.v1",
+        "structural-native:model-add-linear-material.v1",
         "structural-native:upstream-provenance",
         "structural-native-model-editor",
         "edit_model_nodal_load_components",
@@ -108,6 +109,7 @@ REQUIRED_TOKENS = {
         "add_model_nodal_load",
         "add_model_fixed_constraint",
         "add_model_linear_load_pattern",
+        "add_model_linear_material",
         "validate_model_bytes",
         "workbench_model_edit_no_change",
         "workbench_model_edit_semantics_invalid",
@@ -122,6 +124,7 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition",
         "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition",
         "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition",
+        "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition",
     ),
     "native/crates/structural-workbench/src/analysis_request.rs": (
         "structural-native-model-linear-request-create-receipt.v1",
@@ -144,6 +147,7 @@ REQUIRED_TOKENS = {
         'Some("model-add-nodal-load")',
         'Some("model-add-fixed-constraint")',
         'Some("model-add-linear-load-pattern")',
+        'Some("model-add-linear-material")',
         'Some("model-create-linear-analysis-request")',
         'Some("import")',
         'Some("import-mgt")',
@@ -195,6 +199,7 @@ REQUIRED_TOKENS = {
         "nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution",
         "fixed_constraint_add_is_deterministic_cpp_revalidated_and_changes_linear_execution",
         "linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executable",
+        "linear_material_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
         "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
@@ -335,6 +340,15 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-linear-material-add-v1.md": (
+        "model-add-linear-material",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-add-linear-material.v1",
+        "linear_elastic_isotropic",
+        "state_update_epoch",
+        "fallback 0",
+        "C6",
+    ),
 }
 
 
@@ -345,6 +359,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     load_add_row: dict[str, object] = {}
     constraint_add_row: dict[str, object] = {}
     load_pattern_add_row: dict[str, object] = {}
+    material_add_row: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
@@ -354,6 +369,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         load_add_row = payload["capabilities"]["modelir_nodal_load_add"]
         constraint_add_row = payload["capabilities"]["modelir_fixed_constraint_add"]
         load_pattern_add_row = payload["capabilities"]["modelir_linear_load_pattern_add"]
+        material_add_row = payload["capabilities"]["modelir_linear_material_add"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
         row = {}
@@ -446,6 +462,26 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
             blockers.append(
                 f"native_workbench_load_pattern_add_claim_token_missing:{token}"
             )
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if material_add_row.get(field) != expected:
+            blockers.append(f"native_workbench_material_add_capability_invalid:{field}")
+    material_add_claim = str(material_add_row.get("claim", ""))
+    for token in (
+        "v1 linear_elastic_isotropic material",
+        "fixed stateless trial/commit/rollback schema",
+        "single C ABI into C++",
+        "exact unchanged active load",
+        "changed displacement",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in material_add_claim:
+            blockers.append(f"native_workbench_material_add_claim_token_missing:{token}")
     claim = str(row.get("claim", ""))
     for token in (
         "Import -> Validate -> Run -> Resume -> Compare -> Report",
@@ -469,6 +505,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "model-bound CPU linear request",
         "fixed-constraint creator",
         "linear-load-pattern creator",
+        "linear-material creator",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",

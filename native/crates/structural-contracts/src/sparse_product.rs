@@ -670,9 +670,9 @@ fn validate_result(
         let initial_inf = norm_inf(&true_residual_for(request, &initial)?);
         let convergence_limit = request.config.absolute_residual_tolerance
             + request.config.relative_residual_tolerance * norm_inf(&request.right_hand_side);
-        if !close(summary.final_residual_inf, true_inf)
-            || !close(summary.final_residual_l2, true_l2)
-            || !close(summary.initial_residual_inf, initial_inf)
+        if !residual_metrics_close(summary.final_residual_inf, true_inf)
+            || !residual_metrics_close(summary.final_residual_l2, true_l2)
+            || !residual_metrics_close(summary.initial_residual_inf, initial_inf)
             || summary.final_residual_inf > convergence_limit
         {
             return Err(error(
@@ -781,7 +781,7 @@ fn norm_l2(values: &[f64]) -> f64 {
     }
 }
 
-fn close(left: f64, right: f64) -> bool {
+pub(crate) fn residual_metrics_close(left: f64, right: f64) -> bool {
     (left - right).abs() <= 1.0e-12 * left.abs().max(right.abs()).max(1.0)
 }
 

@@ -4,7 +4,9 @@ use structural_contracts::model_linear_comparison::{
     build_model_ir_linear_external_comparison_ir_v1,
     parse_model_ir_linear_external_comparison_ir_v1, parse_model_ir_linear_external_result_v1,
 };
-use structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1;
+use structural_contracts::model_linear_recovery::{
+    parse_model_ir_linear_result_recovery_ir_v1, verify_model_ir_linear_result_recovery_v1,
+};
 use structural_contracts::product_ir::{sha256_identity, ResultIdentityV1};
 use structural_contracts::sparse_product::{
     build_sparse_linear_request_v1, build_sparse_linear_result_ir_v1,
@@ -33,7 +35,9 @@ fn canonical_self_hashed(mut value: Value, field: &str) -> Vec<u8> {
         .into_bytes()
 }
 
-fn sparse_result() -> structural_contracts::sparse_product::SparseLinearResultIrDocumentV1 {
+fn sparse_result_with_reported_residual(
+    final_residual_inf: f64,
+) -> structural_contracts::sparse_product::SparseLinearResultIrDocumentV1 {
     let request = build_sparse_linear_request_v1(SparseLinearAnalysisRequestV1 {
         schema_version: SPARSE_LINEAR_REQUEST_V1.to_owned(),
         operation: "solve_sparse_spd_pcg".to_owned(),
@@ -70,7 +74,7 @@ fn sparse_result() -> structural_contracts::sparse_product::SparseLinearResultIr
             nonzero_count: 13,
             iterations: 5,
             initial_residual_inf: 20.0,
-            final_residual_inf: 0.0,
+            final_residual_inf,
             final_residual_l2: 0.0,
             last_increment_inf: 0.25,
         },
@@ -79,7 +83,13 @@ fn sparse_result() -> structural_contracts::sparse_product::SparseLinearResultIr
     .expect("result")
 }
 
-fn recovery_bytes(result_hash: &str) -> Vec<u8> {
+fn sparse_result() -> structural_contracts::sparse_product::SparseLinearResultIrDocumentV1 {
+    sparse_result_with_reported_residual(0.0)
+}
+
+fn recovery_bytes_with_first_residual(result_hash: &str, first_residual: f64) -> Vec<u8> {
+    let first_internal_force = 6.0 + first_residual;
+    let first_residual = first_internal_force - 6.0;
     canonical_self_hashed(
         json!({
             "schema_version": "structural-model-ir-linear-result-recovery-ir.v1",
@@ -99,17 +109,17 @@ fn recovery_bytes(result_hash: &str) -> Vec<u8> {
             "dof_order_per_node": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
             "active_dof_indices": [0, 1, 2, 3, 4],
             "global_displacement": [1.0, -2.0, 3.0, -4.0, 5.0, 0.0],
-            "active_internal_force": [6.0, -12.0, 18.0, -20.0, 14.0],
+            "active_internal_force": [first_internal_force, -12.0, 18.0, -20.0, 14.0],
             "active_external_load": [6.0, -12.0, 18.0, -20.0, 14.0],
-            "active_equilibrium_residual": [0.0, 0.0, 0.0, 0.0, 0.0],
-            "same_state_jvp": [6.0, -12.0, 18.0, -20.0, 14.0],
+            "active_equilibrium_residual": [first_residual, 0.0, 0.0, 0.0, 0.0],
+            "same_state_jvp": [first_internal_force, -12.0, 18.0, -20.0, 14.0],
             "recovery_stable_indices": [0],
             "recovery_element_types": [1],
             "recovery_offsets": [0, 12],
             "recovery_values": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             "summary": {
                 "maximum_absolute_displacement": 5.0,
-                "active_residual_inf": 0.0
+                "active_residual_inf": first_residual.abs()
             },
             "units": {
                 "global_displacement": "translations_m_rotations_rad",
@@ -130,6 +140,10 @@ fn recovery_bytes(result_hash: &str) -> Vec<u8> {
         }),
         "recovery_hash",
     )
+}
+
+fn recovery_bytes(result_hash: &str) -> Vec<u8> {
+    recovery_bytes_with_first_residual(result_hash, 0.0)
 }
 
 fn external_bytes(source_hash: &str, observed: f64) -> Vec<u8> {
@@ -207,6 +221,25 @@ fn recovered_result_and_external_dof_comparison_are_strict_and_self_hashed() {
         .status,
         structural_contracts::external_comparison::ExternalComparisonStatusV1::Diverged
     );
+}
+
+#[test]
+fn recovery_result_binding_uses_bounded_fp64_residual_parity() {
+    let rounded_result = sparse_result_with_reported_residual(5.0e-13);
+    let exact_recovery_bytes = recovery_bytes(rounded_result.result_hash());
+    let exact_recovery =
+        parse_model_ir_linear_result_recovery_ir_v1(&exact_recovery_bytes).expect("recovery");
+    verify_model_ir_linear_result_recovery_v1(&rounded_result, &exact_recovery)
+        .expect("roundoff-sized residual parity");
+
+    let result = sparse_result();
+    let divergent_recovery_bytes =
+        recovery_bytes_with_first_residual(result.result_hash(), 2.0e-12);
+    let divergent_recovery = parse_model_ir_linear_result_recovery_ir_v1(&divergent_recovery_bytes)
+        .expect("standalone exact recovery");
+    let error = verify_model_ir_linear_result_recovery_v1(&result, &divergent_recovery)
+        .expect_err("material residual divergence must fail closed");
+    assert_eq!(error.code, "model_ir_linear_recovery_residual_mismatch");
 }
 
 #[test]

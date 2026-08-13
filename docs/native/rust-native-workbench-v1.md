@@ -64,6 +64,13 @@ pattern is published. Self-weight, combinations, time functions, other load fami
 editing/deletion, and retargeting remain outside the command.
 See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
 boundary.
+The bounded linear-material creator appends one unique contiguous-index v1
+`linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
+source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
+preserves every existing round-trip row and blocker and revalidates through C++. It does not edit
+element references, create sections, broaden constitutive laws, or expose nonlinear material
+state. See `docs/native/modelir-linear-material-add-v1.md` for the exact artifact and installed E2E
+boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -149,6 +156,10 @@ structural-workbench model-add-fixed-constraint ADDED-LOAD-MODEL/model-ir.json \
 structural-workbench model-add-linear-load-pattern ADDED-CONSTRAINT-MODEL/model-ir.json \
   --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
   --components 2500 0 0 0 0 0 --output-dir ADDED-PATTERN-MODEL
+structural-workbench model-add-linear-material MODEL.json \
+  --material M2 --elastic-modulus-pa 100000000000 \
+  --poisson-ratio 0.3 --density-kg-m3 2700 \
+  --output-dir ADDED-MATERIAL-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \
