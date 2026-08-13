@@ -93,12 +93,16 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("import-mgt") => {
             parse_import(arguments, false, true).and_then(|command| run_import(&command))
         }
+        Some("import-model-linear") => parse_import(arguments, false, false)
+            .and_then(|command| run_model_ir_linear_import(&command)),
         Some("workflow") => {
             parse_import(arguments, true, false).and_then(|command| run_workflow(&command))
         }
         Some("workflow-mgt") => {
             parse_import(arguments, true, true).and_then(|command| run_workflow(&command))
         }
+        Some("workflow-model-linear") => parse_import(arguments, true, false)
+            .and_then(|command| run_model_ir_linear_workflow(&command)),
         Some("model-view") => {
             parse_model_view(arguments).and_then(|command| run_model_view(&command))
         }
@@ -247,6 +251,21 @@ fn run_workflow(command: &ImportCommand) -> Result<(), WorkbenchError> {
     print_session(&workbench)
 }
 
+fn run_model_ir_linear_import(command: &ImportCommand) -> Result<(), WorkbenchError> {
+    let workbench = initialize_model_ir_linear(command)?;
+    print_session(&workbench)
+}
+
+fn run_model_ir_linear_workflow(command: &ImportCommand) -> Result<(), WorkbenchError> {
+    let mut workbench = initialize_model_ir_linear(command)?;
+    workbench.validate()?;
+    workbench.run(command.step_budget)?;
+    workbench.resume(0)?;
+    workbench.compare(true)?;
+    workbench.report()?;
+    print_session(&workbench)
+}
+
 fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(&command.workspace)?;
     print!(
@@ -296,6 +315,17 @@ fn initialize(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError
             command.executable_artifact.as_deref(),
         )
     }
+}
+
+fn initialize_model_ir_linear(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError> {
+    NativeWorkbench::initialize_model_ir_linear_from_paths(
+        &command.workspace,
+        &command.model,
+        &command.request,
+        &command.external_result,
+        &command.source_artifact,
+        command.executable_artifact.as_deref(),
+    )
 }
 
 fn run_status(workspace: &Path) -> Result<(), WorkbenchError> {
@@ -398,7 +428,13 @@ fn run_interactive(workspace: &Path) -> Result<(), WorkbenchError> {
             WorkbenchStageV1::Validated => "Run to checkpoint",
             WorkbenchStageV1::Checkpointed => "Resume to terminal result",
             WorkbenchStageV1::Terminal => "Compare external result",
-            WorkbenchStageV1::Compared => "Render native PDF report",
+            WorkbenchStageV1::Compared => {
+                if workbench.session().analysis_profile().is_some() {
+                    "Publish verified ReportIR and PDF-ready document source"
+                } else {
+                    "Render native PDF report"
+                }
+            }
             WorkbenchStageV1::Reported => {
                 print_session(&workbench)?;
                 return Ok(());
@@ -1042,7 +1078,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 fn usage() -> &'static str {
     concat!(
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
-        "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
+        "\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
 

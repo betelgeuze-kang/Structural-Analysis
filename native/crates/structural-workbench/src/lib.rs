@@ -12,19 +12,28 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use structural_cli::{
-    execute_external_comparison, execute_localized_pdf_report, execute_model_ir_native_analysis,
+    execute_external_comparison, execute_localized_pdf_report, execute_model_ir_linear_analysis,
+    execute_model_ir_linear_external_comparison, execute_model_ir_native_analysis,
     execute_native_mgt_import, execute_pdf_report, publish_external_comparison,
-    publish_localized_pdf_report, publish_model_ir_native_analysis, publish_pdf_report,
-    validate_model_bytes, PdfReportLocaleV2,
+    publish_localized_pdf_report, publish_model_ir_linear_analysis,
+    publish_model_ir_linear_external_comparison, publish_model_ir_native_analysis,
+    publish_pdf_report, validate_model_bytes, PdfReportLocaleV2,
 };
-use structural_contracts::external_comparison::parse_external_result_v1;
+use structural_contracts::external_comparison::{parse_external_result_v1, ExternalSourceV1};
 use structural_contracts::model_ir::{
     canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2,
 };
+use structural_contracts::model_linear_comparison::parse_model_ir_linear_external_result_v1;
+use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
+use structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1;
 use structural_contracts::product_ir::{parse_model_ir_ndtha_analysis_request_v1, sha256_identity};
 use structural_contracts::product_ir::{
     parse_nonlinear_ndtha_report_ir_v1, parse_nonlinear_ndtha_result_ir_v1,
 };
+use structural_contracts::sparse_product::{
+    parse_sparse_linear_report_ir_v1, parse_sparse_linear_result_ir_v1,
+};
+use structural_report::build_sparse_linear_report_v1;
 
 mod catalog;
 mod deformed_view;
@@ -60,6 +69,7 @@ const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";
 const IMPORT_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-import-receipt.v1";
 const VALIDATION_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-validation-receipt.v1";
 const CLAIM_BOUNDARY: &str = "bounded_terminal_rust_native_workbench_for_one_fixed_guided_model_ir_ndtha_profile_not_general_gui_live_external_solver_rocm_package_or_c6_decommission";
+const MODEL_IR_LINEAR_CLAIM_BOUNDARY: &str = "bounded_terminal_rust_native_workbench_for_one_model_ir_linear_cpu_profile_with_recovered_global_dof_comparison_and_pdf_ready_document_source_not_general_gui_live_external_solver_rocm_package_or_c6_decommission";
 const SESSION_FILE: &str = "workbench-session.json";
 const IMPORT_DIRECTORY: &str = "01-import";
 const VALIDATION_DIRECTORY: &str = "02-validate";
@@ -73,9 +83,10 @@ const REVIEW_SCHEMA_V1: &str = "structural-native-workbench-review.v1";
 const VIEW_SCHEMA_V1: &str = "structural-native-workbench-view.v1";
 const EXPORT_SCHEMA_V1: &str = "structural-native-workbench-export.v1";
 const REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_native_result_comparison_and_pdf_not_an_automated_engineering_verdict_or_signature";
+const MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_and_document_source_not_an_automated_engineering_verdict_or_signature";
 const MAX_MODEL_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
-const MAX_EXTERNAL_RESULT_BYTES: u64 = 1024 * 1024;
+const MAX_EXTERNAL_RESULT_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_EXTERNAL_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_PRODUCT_ARTIFACT_BYTES: u64 = 300 * 1024 * 1024;
 static OUTPUT_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -114,6 +125,23 @@ pub enum WorkbenchStageV1 {
     Terminal,
     Compared,
     Reported,
+}
+
+/// Explicit opt-in analysis profile. Absence in a v1 session means the byte-stable legacy NDTHA
+/// profile so existing durable sessions keep their exact canonical representation.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WorkbenchAnalysisProfileV1 {
+    ModelIrLinearCpuV1,
+}
+
+impl WorkbenchAnalysisProfileV1 {
+    #[must_use]
+    pub const fn label(self) -> &'static str {
+        match self {
+            Self::ModelIrLinearCpuV1 => "model_ir_linear_cpu_v1",
+        }
+    }
 }
 
 impl WorkbenchStageV1 {
@@ -171,7 +199,14 @@ struct WorkbenchReviewV1 {
     comment: String,
     result_artifact_hash: String,
     comparison_artifact_hash: String,
-    pdf_artifact_hash: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pdf_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    result_recovery_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    report_document_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    analysis_profile: Option<WorkbenchAnalysisProfileV1>,
     claim_boundary: String,
     review_hash: String,
 }
@@ -191,6 +226,8 @@ pub struct WorkbenchSessionV1 {
     external_result_hash: String,
     source_artifact_hash: String,
     executable_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    analysis_profile: Option<WorkbenchAnalysisProfileV1>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     mgt_source_hash: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -222,6 +259,19 @@ impl WorkbenchSessionV1 {
     #[must_use]
     pub const fn comparison_passed(&self) -> Option<bool> {
         self.comparison_passed
+    }
+
+    #[must_use]
+    pub const fn analysis_profile(&self) -> Option<WorkbenchAnalysisProfileV1> {
+        self.analysis_profile
+    }
+
+    #[must_use]
+    pub const fn analysis_profile_label(&self) -> &'static str {
+        match self.analysis_profile {
+            Some(profile) => profile.label(),
+            None => "fixed_guided_model_ir_ndtha_v1",
+        }
     }
 }
 
@@ -266,6 +316,39 @@ impl NativeWorkbench {
             .map(|path| read_bounded_regular_file(path, MAX_EXTERNAL_ARTIFACT_BYTES))
             .transpose()?;
         Self::initialize(
+            root,
+            &source_model_ir,
+            &analysis_request,
+            &external_result,
+            &source_artifact,
+            executable_artifact.as_deref(),
+        )
+    }
+
+    /// Read bounded, non-symlinked inputs and initialize the opt-in `ModelIR` linear CPU profile.
+    ///
+    /// # Errors
+    ///
+    /// Rejects unsafe paths, malformed or identity-mismatched inputs, and existing destinations.
+    #[allow(clippy::too_many_arguments)]
+    pub fn initialize_model_ir_linear_from_paths(
+        root: &Path,
+        source_model_ir_path: &Path,
+        analysis_request_path: &Path,
+        external_result_path: &Path,
+        source_artifact_path: &Path,
+        executable_artifact_path: Option<&Path>,
+    ) -> Result<Self, WorkbenchError> {
+        let source_model_ir = read_bounded_regular_file(source_model_ir_path, MAX_MODEL_BYTES)?;
+        let analysis_request = read_bounded_regular_file(analysis_request_path, MAX_REQUEST_BYTES)?;
+        let external_result =
+            read_bounded_regular_file(external_result_path, MAX_EXTERNAL_RESULT_BYTES)?;
+        let source_artifact =
+            read_bounded_regular_file(source_artifact_path, MAX_EXTERNAL_ARTIFACT_BYTES)?;
+        let executable_artifact = executable_artifact_path
+            .map(|path| read_bounded_regular_file(path, MAX_EXTERNAL_ARTIFACT_BYTES))
+            .transpose()?;
+        Self::initialize_model_ir_linear(
             root,
             &source_model_ir,
             &analysis_request,
@@ -355,6 +438,7 @@ impl NativeWorkbench {
             external_result,
             source_artifact,
             executable_artifact,
+            None,
             Some(MgtImportEvidence {
                 source: imported.source_bytes(),
                 health: imported.health_json(),
@@ -388,6 +472,34 @@ impl NativeWorkbench {
             source_artifact,
             executable_artifact,
             None,
+            None,
+        )
+    }
+
+    /// Create a new immutable `ModelIR` linear CPU Workbench input set.
+    ///
+    /// # Errors
+    ///
+    /// Rejects malformed or identity-mismatched inputs, symlinked/existing destinations, and
+    /// provenance/publication failures.
+    #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
+    pub fn initialize_model_ir_linear(
+        root: &Path,
+        source_model_ir: &[u8],
+        analysis_request: &[u8],
+        external_result: &[u8],
+        source_artifact: &[u8],
+        executable_artifact: Option<&[u8]>,
+    ) -> Result<Self, WorkbenchError> {
+        Self::initialize_with_mgt_evidence(
+            root,
+            source_model_ir,
+            analysis_request,
+            external_result,
+            source_artifact,
+            executable_artifact,
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1),
+            None,
         )
     }
 
@@ -399,6 +511,7 @@ impl NativeWorkbench {
         external_result: &[u8],
         source_artifact: &[u8],
         executable_artifact: Option<&[u8]>,
+        analysis_profile: Option<WorkbenchAnalysisProfileV1>,
         mgt: Option<MgtImportEvidence<'_>>,
     ) -> Result<Self, WorkbenchError> {
         if root.exists() {
@@ -458,21 +571,54 @@ impl NativeWorkbench {
 
         let model = parse_model_ir_v2(source_model_ir)
             .map_err(|error| input_error("workbench_model_ir_invalid", &error))?;
-        let request = parse_model_ir_ndtha_analysis_request_v1(analysis_request)
-            .map_err(|error| input_error("workbench_analysis_request_invalid", &error))?;
-        let external = parse_external_result_v1(external_result)
-            .map_err(|error| input_error("workbench_external_result_invalid", &error))?;
-        let requested_identity = &request.request().model_identity;
-        if requested_identity.content_hash != model.content_hash()
-            || requested_identity.semantic_hash != model.semantic_hash()
-            || requested_identity.provenance_hash != model.provenance_hash()
-        {
-            return Err(WorkbenchError::new(
-                "workbench_model_request_identity_mismatch",
-                "the analysis request is not bound to the imported ModelIR identities",
-            ));
-        }
-        verify_external_artifact_bindings(&external, source_artifact, executable_artifact)?;
+        let (analysis_request_hash, canonical_analysis_request) = match analysis_profile {
+            None => {
+                let request = parse_model_ir_ndtha_analysis_request_v1(analysis_request)
+                    .map_err(|error| input_error("workbench_analysis_request_invalid", &error))?;
+                verify_requested_model_identity(&request.request().model_identity, &model)?;
+                (
+                    request.request_hash().to_owned(),
+                    request.canonical_json().to_owned(),
+                )
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let request = parse_model_ir_linear_analysis_request_v1(analysis_request)
+                    .map_err(|error| input_error("workbench_analysis_request_invalid", &error))?;
+                verify_requested_model_identity(&request.request().model_identity, &model)?;
+                (
+                    request.request_hash().to_owned(),
+                    request.canonical_json().to_owned(),
+                )
+            }
+        };
+        let (external_result_hash, canonical_external_result) = match analysis_profile {
+            None => {
+                let external = parse_external_result_v1(external_result)
+                    .map_err(|error| input_error("workbench_external_result_invalid", &error))?;
+                verify_external_source_artifact_bindings(
+                    &external.external_result().source,
+                    source_artifact,
+                    executable_artifact,
+                )?;
+                (
+                    external.external_result_hash().to_owned(),
+                    external.canonical_json().to_owned(),
+                )
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let external = parse_model_ir_linear_external_result_v1(external_result)
+                    .map_err(|error| input_error("workbench_external_result_invalid", &error))?;
+                verify_external_source_artifact_bindings(
+                    &external.external_result().source,
+                    source_artifact,
+                    executable_artifact,
+                )?;
+                (
+                    external.external_result_hash().to_owned(),
+                    external.canonical_json().to_owned(),
+                )
+            }
+        };
 
         let source_model_ir_hash = sha256_identity(source_model_ir);
         let source_artifact_hash = sha256_identity(source_artifact);
@@ -487,11 +633,17 @@ impl NativeWorkbench {
             "model_content_hash": model.content_hash(),
             "model_semantic_hash": model.semantic_hash(),
             "model_provenance_hash": model.provenance_hash(),
-            "analysis_request_hash": request.request_hash(),
-            "external_result_hash": external.external_result_hash(),
+            "analysis_request_hash": analysis_request_hash,
+            "external_result_hash": external_result_hash,
             "source_artifact_hash": source_artifact_hash,
             "executable_artifact_hash": executable_artifact_hash,
         });
+        if let Some(profile) = analysis_profile {
+            binding
+                .as_object_mut()
+                .expect("Workbench binding is an object")
+                .insert("analysis_profile".to_owned(), json!(profile));
+        }
         if let (Some(source_hash), Some(health_hash), Some(receipt_hash)) = (
             mgt_source_hash.as_deref(),
             mgt_import_health_artifact_hash.as_deref(),
@@ -519,16 +671,17 @@ impl NativeWorkbench {
             model_content_hash: model.content_hash().to_owned(),
             model_semantic_hash: model.semantic_hash().to_owned(),
             model_provenance_hash: model.provenance_hash().to_owned(),
-            analysis_request_hash: request.request_hash().to_owned(),
-            external_result_hash: external.external_result_hash().to_owned(),
+            analysis_request_hash,
+            external_result_hash,
             source_artifact_hash,
             executable_artifact_hash,
+            analysis_profile,
             mgt_source_hash,
             mgt_import_health_artifact_hash,
             mgt_import_receipt_artifact_hash,
             terminal_status: None,
             comparison_passed: None,
-            claim_boundary: CLAIM_BOUNDARY.to_owned(),
+            claim_boundary: session_claim_boundary(analysis_profile).to_owned(),
             session_hash: String::new(),
         };
         let session_json = canonical_session(&session)?;
@@ -553,13 +706,13 @@ impl NativeWorkbench {
                 "model_analysis_request",
                 "model-analysis-request.json",
                 "application/json",
-                request.canonical_bytes(),
+                canonical_analysis_request.as_bytes(),
             )?,
             artifact_entry(
                 "external_result",
                 "external-result.json",
                 "application/json",
-                external.canonical_bytes(),
+                canonical_external_result.as_bytes(),
             )?,
             artifact_entry(
                 "external_source_artifact",
@@ -610,22 +763,34 @@ impl NativeWorkbench {
                 )?,
             ]);
         }
-        let import_receipt = canonical_self_hashed(json!({
+        let mut import_receipt_value = json!({
             "schema_version": IMPORT_RECEIPT_SCHEMA_V1,
             "session_id": session_id,
             "status": "imported",
             "artifacts": inventory,
-            "claim_boundary": if mgt.is_some() {
+            "claim_boundary": if analysis_profile.is_some() {
+                "strict_language_neutral_model_ir_linear_input_ingestion_only_not_cpp_validation_solver_execution_or_external_acceptance"
+            } else if mgt.is_some() {
                 "bounded_original_mgt_import_health_normalized_modelir_and_cpp_snapshot_bound_to_one_native_workbench_profile"
             } else {
                 "strict_language_neutral_input_ingestion_only_not_cpp_validation_or_solver_execution"
             },
-        }))?;
+        });
+        if let Some(profile) = analysis_profile {
+            import_receipt_value
+                .as_object_mut()
+                .expect("Workbench import receipt is an object")
+                .insert("analysis_profile".to_owned(), json!(profile));
+        }
+        let import_receipt = canonical_self_hashed(import_receipt_value)?;
         let mut artifacts = vec![
             ("source-model-ir.json", source_model_ir),
             ("model-ir.json", model.canonical_bytes()),
-            ("model-analysis-request.json", request.canonical_bytes()),
-            ("external-result.json", external.canonical_bytes()),
+            (
+                "model-analysis-request.json",
+                canonical_analysis_request.as_bytes(),
+            ),
+            ("external-result.json", canonical_external_result.as_bytes()),
             ("external-source.artifact", source_artifact),
         ];
         if let Some(evidence) = mgt {
@@ -661,7 +826,7 @@ impl NativeWorkbench {
             read_bounded_regular_file(&root.join(SESSION_FILE), MAX_EXTERNAL_RESULT_BYTES)?;
         let mut session = parse_session(&session_bytes)?;
         verify_import_bindings(root, &session)?;
-        let discovered = verify_stage_chain(root, session.session_id())?;
+        let discovered = verify_stage_chain(root, &session)?;
         if session.stage > discovered.stage {
             return Err(WorkbenchError::new(
                 "workbench_session_ahead_of_artifacts",
@@ -749,13 +914,29 @@ impl NativeWorkbench {
             Value::Null
         };
         let report = if self.session.stage >= WorkbenchStageV1::Reported {
-            let receipt =
-                verified_receipt_json(&self.root.join(REPORT_DIRECTORY).join("pdf-receipt.json"))?;
-            json!({
-                "pdf_hash": receipt.get("pdf_hash").cloned().unwrap_or(Value::Null),
-                "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
-                "source_report_hash": receipt.get("source_report_hash").cloned().unwrap_or(Value::Null),
-            })
+            match self.session.analysis_profile {
+                None => {
+                    let receipt = verified_receipt_json(
+                        &self.root.join(REPORT_DIRECTORY).join("pdf-receipt.json"),
+                    )?;
+                    json!({
+                        "pdf_hash": receipt.get("pdf_hash").cloned().unwrap_or(Value::Null),
+                        "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
+                        "source_report_hash": receipt.get("source_report_hash").cloned().unwrap_or(Value::Null),
+                    })
+                }
+                Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                    let receipt = verified_receipt_json(
+                        &self.root.join(REPORT_DIRECTORY).join("report-receipt.json"),
+                    )?;
+                    json!({
+                        "document_source_hash": receipt.get("document_source_hash").cloned().unwrap_or(Value::Null),
+                        "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
+                        "source_recovery_hash": receipt.get("source_recovery_hash").cloned().unwrap_or(Value::Null),
+                        "source_report_hash": receipt.get("source_report_hash").cloned().unwrap_or(Value::Null),
+                    })
+                }
+            }
         } else {
             Value::Null
         };
@@ -781,30 +962,37 @@ impl NativeWorkbench {
                 WorkbenchStageV1::Reported => "review",
             }
         };
-        canonical_hashed_json(
-            json!({
-                "schema_version": VIEW_SCHEMA_V1,
-                "session_id": self.session.session_id,
-                "durable_stage": self.session.stage,
-                "import_kind": if self.session.mgt_source_hash.is_some() { "mgt" } else { "model_ir" },
-                "model_identity": {
-                    "content_hash": self.session.model_content_hash,
-                    "semantic_hash": self.session.model_semantic_hash,
-                    "provenance_hash": self.session.model_provenance_hash,
-                },
-                "workflow": workflow,
-                "terminal_status": self.session.terminal_status,
-                "result_summary": result_summary,
-                "backend_receipt": backend_receipt,
-                "comparison": comparison,
-                "report": report,
-                "human_review": review_view,
-                "next_action": next_action,
-                "claim_boundary": "deterministic_verified_native_operator_view_not_visual_model_editing_or_an_engineering_verdict",
-            }),
-            "view_hash",
-            "workbench_view_serialization_failed",
-        )
+        let mut view = json!({
+            "schema_version": VIEW_SCHEMA_V1,
+            "session_id": self.session.session_id,
+            "durable_stage": self.session.stage,
+            "import_kind": if self.session.mgt_source_hash.is_some() { "mgt" } else { "model_ir" },
+            "model_identity": {
+                "content_hash": self.session.model_content_hash,
+                "semantic_hash": self.session.model_semantic_hash,
+                "provenance_hash": self.session.model_provenance_hash,
+            },
+            "workflow": workflow,
+            "terminal_status": self.session.terminal_status,
+            "result_summary": result_summary,
+            "backend_receipt": backend_receipt,
+            "comparison": comparison,
+            "report": report,
+            "human_review": review_view,
+            "next_action": next_action,
+            "claim_boundary": "deterministic_verified_native_operator_view_not_visual_model_editing_or_an_engineering_verdict",
+        });
+        if let Some(profile) = self.session.analysis_profile {
+            view.as_object_mut()
+                .ok_or_else(|| {
+                    WorkbenchError::new(
+                        "workbench_view_serialization_failed",
+                        "Workbench view projection is not an object",
+                    )
+                })?
+                .insert("analysis_profile".to_owned(), json!(profile));
+        }
+        canonical_hashed_json(view, "view_hash", "workbench_view_serialization_failed")
     }
 
     /// Publish one immutable explicit human review bound to the reported native artifacts.
@@ -850,10 +1038,31 @@ impl NativeWorkbench {
                 .join("external-comparison-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
-        let pdf = read_bounded_regular_file(
-            &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
-            MAX_PRODUCT_ARTIFACT_BYTES,
-        )?;
+        let (pdf_artifact_hash, result_recovery_artifact_hash, report_document_artifact_hash) =
+            match self.session.analysis_profile {
+                None => (
+                    Some(sha256_identity(&read_bounded_regular_file(
+                        &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+                        MAX_PRODUCT_ARTIFACT_BYTES,
+                    )?)),
+                    None,
+                    None,
+                ),
+                Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
+                    None,
+                    Some(sha256_identity(&read_bounded_regular_file(
+                        &self
+                            .root
+                            .join(RESUME_DIRECTORY)
+                            .join("result-recovery-ir.json"),
+                        MAX_PRODUCT_ARTIFACT_BYTES,
+                    )?)),
+                    Some(sha256_identity(&read_bounded_regular_file(
+                        &self.root.join(REPORT_DIRECTORY).join("report.md"),
+                        MAX_PRODUCT_ARTIFACT_BYTES,
+                    )?)),
+                ),
+            };
         let review = WorkbenchReviewV1 {
             schema_version: REVIEW_SCHEMA_V1.to_owned(),
             session_id: self.session.session_id.clone(),
@@ -863,8 +1072,11 @@ impl NativeWorkbench {
             comment: comment.to_owned(),
             result_artifact_hash: sha256_identity(&result),
             comparison_artifact_hash: sha256_identity(&comparison),
-            pdf_artifact_hash: sha256_identity(&pdf),
-            claim_boundary: REVIEW_CLAIM_BOUNDARY.to_owned(),
+            pdf_artifact_hash,
+            result_recovery_artifact_hash,
+            report_document_artifact_hash,
+            analysis_profile: self.session.analysis_profile,
+            claim_boundary: review_claim_boundary(self.session.analysis_profile).to_owned(),
             review_hash: String::new(),
         };
         let canonical = canonical_review(&review)?;
@@ -893,6 +1105,7 @@ impl NativeWorkbench {
     /// # Errors
     ///
     /// Requires a reported session and a verified explicit human review.
+    #[allow(clippy::too_many_lines)]
     pub fn export_json(&self) -> Result<String, WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Reported)?;
         let review = read_review(&self.root, &self.session)?;
@@ -912,27 +1125,107 @@ impl NativeWorkbench {
                 .join("external-comparison-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
-        let pdf = read_bounded_regular_file(
-            &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
-            MAX_PRODUCT_ARTIFACT_BYTES,
-        )?;
         let review_json = canonical_review(&review)?;
+        let mut artifacts = vec![
+            artifact_entry(
+                "workbench_session",
+                SESSION_FILE,
+                "application/json",
+                session.as_bytes(),
+            )?,
+            artifact_entry(
+                "result_ir",
+                "04-resume/result-ir.json",
+                "application/json",
+                &result,
+            )?,
+        ];
+        if self.session.analysis_profile.is_some() {
+            let recovery = read_bounded_regular_file(
+                &self
+                    .root
+                    .join(RESUME_DIRECTORY)
+                    .join("result-recovery-ir.json"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?;
+            artifacts.push(artifact_entry(
+                "result_recovery_ir",
+                "04-resume/result-recovery-ir.json",
+                "application/json",
+                &recovery,
+            )?);
+        }
+        artifacts.extend([
+            artifact_entry(
+                "report_ir",
+                "04-resume/report-ir.json",
+                "application/json",
+                &report,
+            )?,
+            artifact_entry(
+                "external_comparison_ir",
+                "05-compare/external-comparison-ir.json",
+                "application/json",
+                &comparison,
+            )?,
+        ]);
+        match self.session.analysis_profile {
+            None => {
+                let pdf = read_bounded_regular_file(
+                    &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
+                artifacts.push(artifact_entry(
+                    "pdf_report",
+                    "06-report/report.pdf",
+                    "application/pdf",
+                    &pdf,
+                )?);
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let document = read_bounded_regular_file(
+                    &self.root.join(REPORT_DIRECTORY).join("report.md"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
+                artifacts.push(artifact_entry(
+                    "pdf_ready_document_source",
+                    "06-report/report.md",
+                    "text/markdown; charset=utf-8",
+                    &document,
+                )?);
+            }
+        }
+        artifacts.push(artifact_entry(
+            "human_review",
+            "07-review/review.json",
+            "application/json",
+            review_json.as_bytes(),
+        )?);
+        let mut export = json!({
+            "schema_version": EXPORT_SCHEMA_V1,
+            "session_id": self.session.session_id,
+            "decision": review.decision,
+            "review_hash": review.review_hash,
+            "artifacts": artifacts,
+            "claim_boundary": if self.session.analysis_profile.is_some() {
+                "deterministic_model_ir_linear_native_handoff_manifest_with_pdf_ready_document_source_not_an_archive_pdf_signature_or_engineering_acceptance"
+            } else {
+                "deterministic_native_handoff_manifest_not_an_archive_signature_or_engineering_acceptance"
+            },
+        });
+        if let Some(profile) = self.session.analysis_profile {
+            export
+                .as_object_mut()
+                .ok_or_else(|| {
+                    WorkbenchError::new(
+                        "workbench_export_serialization_failed",
+                        "Workbench export projection is not an object",
+                    )
+                })?
+                .insert("analysis_profile".to_owned(), json!(profile));
+        }
         canonical_hashed_json(
-            json!({
-                "schema_version": EXPORT_SCHEMA_V1,
-                "session_id": self.session.session_id,
-                "decision": review.decision,
-                "review_hash": review.review_hash,
-                "artifacts": [
-                    artifact_entry("workbench_session", SESSION_FILE, "application/json", session.as_bytes())?,
-                    artifact_entry("result_ir", "04-resume/result-ir.json", "application/json", &result)?,
-                    artifact_entry("report_ir", "04-resume/report-ir.json", "application/json", &report)?,
-                    artifact_entry("external_comparison_ir", "05-compare/external-comparison-ir.json", "application/json", &comparison)?,
-                    artifact_entry("pdf_report", "06-report/report.pdf", "application/pdf", &pdf)?,
-                    artifact_entry("human_review", "07-review/review.json", "application/json", review_json.as_bytes())?,
-                ],
-                "claim_boundary": "deterministic_native_handoff_manifest_not_an_archive_signature_or_engineering_acceptance",
-            }),
+            export,
             "export_hash",
             "workbench_export_serialization_failed",
         )
@@ -953,6 +1246,9 @@ impl NativeWorkbench {
         locale: WorkbenchReportLocaleV1,
     ) -> Result<String, WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Reported)?;
+        if self.session.analysis_profile.is_some() {
+            return self.model_ir_linear_report_text(locale);
+        }
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -1031,6 +1327,109 @@ impl NativeWorkbench {
         )
     }
 
+    fn model_ir_linear_report_text(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+    ) -> Result<String, WorkbenchError> {
+        let report_directory = self.root.join(REPORT_DIRECTORY);
+        let result_bytes = read_bounded_regular_file(
+            &report_directory.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &report_directory.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report_bytes = read_bounded_regular_file(
+            &report_directory.join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let document_bytes = read_bounded_regular_file(
+            &report_directory.join("report.md"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_linear_report_result_invalid", &error))?;
+        let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
+            .map_err(|error| input_error("workbench_linear_report_recovery_invalid", &error))?;
+        let report = parse_sparse_linear_report_ir_v1(&report_bytes)
+            .map_err(|error| input_error("workbench_linear_report_report_invalid", &error))?;
+        let expected = build_sparse_linear_report_v1(&result)
+            .map_err(|error| input_error("workbench_linear_report_projection_failed", &error))?;
+        if recovery.recovery().source_result_hash != result.result_hash()
+            || report.canonical_json() != expected.report_ir.canonical_json()
+            || document_bytes != expected.document_source.as_bytes()
+        {
+            return Err(WorkbenchError::new(
+                "workbench_linear_report_binding_mismatch",
+                "stored linear recovery, ReportIR, or document differs from the exact ResultIR projection",
+            ));
+        }
+        let comparison = verified_receipt_json(
+            &self
+                .root
+                .join(COMPARISON_DIRECTORY)
+                .join("comparison-receipt.json"),
+        )?;
+        let comparison_status = comparison
+            .get("status")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_linear_report_comparison_invalid",
+                    "verified comparison receipt has no status",
+                )
+            })?;
+        let comparison_hash = comparison
+            .get("comparison_hash")
+            .and_then(Value::as_str)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_linear_report_comparison_invalid",
+                    "verified comparison receipt has no comparison hash",
+                )
+            })?;
+        let (title, case_label, status_label, comparison_label, source_label, boundary) =
+            match locale {
+                WorkbenchReportLocaleV1::EnUs => (
+                    "Structural ModelIR Linear Workbench Report",
+                    "Case",
+                    "Terminal status",
+                    "External comparison",
+                    "Verified PDF-ready document source",
+                    "This is a bounded CPU candidate view, not engineering acceptance, PDF rendering, or design-code compliance.",
+                ),
+                WorkbenchReportLocaleV1::KoKr => (
+                    "구조 ModelIR 선형 Workbench 보고서",
+                    "케이스",
+                    "종료 상태",
+                    "외부 비교",
+                    "검증된 PDF용 문서 원본",
+                    "이 결과는 제한된 CPU 후보 뷰이며, 공학적 승인·PDF 렌더링·설계기준 적합성을 의미하지 않습니다.",
+                ),
+            };
+        let source = std::str::from_utf8(&document_bytes).map_err(|_| {
+            WorkbenchError::new(
+                "workbench_linear_report_document_invalid",
+                "verified report document source is not UTF-8",
+            )
+        })?;
+        let mut output = format!(
+            "{title}\nSchema: structural-native-workbench-model-ir-linear-report-view.v1\nLocale: {}\n{case_label}: {}\n{status_label}: completed\n{comparison_label}: {comparison_status}\nMatrix order: {}\nPCG iterations: {}\nMaximum absolute global displacement: {:.17e}\nActive residual infinity norm: {:.17e}\nResult hash: {}\nRecovery hash: {}\nReport hash: {}\nComparison hash: {comparison_hash}\nBoundary: {boundary}\n\n{source_label}\n\n",
+            locale.label(),
+            result.result().case_id,
+            result.result().summary.order,
+            result.result().summary.iterations,
+            recovery.recovery().summary.maximum_absolute_displacement,
+            recovery.recovery().summary.active_residual_inf,
+            result.result_hash(),
+            recovery.recovery_hash(),
+            report.report_hash(),
+        );
+        output.push_str(source);
+        Ok(output)
+    }
+
     /// Return a deterministic bounded window over one verified terminal NDTHA response channel.
     ///
     /// The view uses only the completed `ResultIR` prefix, preserves exact numeric values in a
@@ -1071,6 +1470,7 @@ impl NativeWorkbench {
         start_step: u32,
         count: u32,
     ) -> Result<String, WorkbenchError> {
+        self.require_ndtha_profile("NDTHA response view")?;
         if self.session.stage < WorkbenchStageV1::Terminal {
             return Err(WorkbenchError::new(
                 "workbench_transition_invalid",
@@ -1130,6 +1530,7 @@ impl NativeWorkbench {
         step: Option<u32>,
         scale: f64,
     ) -> Result<String, WorkbenchError> {
+        self.require_ndtha_profile("fixed-guided deformed view")?;
         if self.session.stage < WorkbenchStageV1::Terminal {
             return Err(WorkbenchError::new(
                 "workbench_transition_invalid",
@@ -1177,6 +1578,7 @@ impl NativeWorkbench {
         locale: WorkbenchReportLocaleV1,
         output_directory: &Path,
     ) -> Result<String, WorkbenchError> {
+        self.require_ndtha_profile("localized PDF export")?;
         self.require_stage(WorkbenchStageV1::Reported)?;
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result = read_bounded_regular_file(
@@ -1279,16 +1681,32 @@ impl NativeWorkbench {
         let model = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
         let request =
             self.read_import_artifact("model-analysis-request.json", MAX_REQUEST_BYTES)?;
-        let outcome = execute_model_ir_native_analysis(&model, &request, None, step_budget)
-            .map_err(|error| input_error("workbench_run_failed", &error))?;
-        if outcome.is_terminal() {
-            return Err(WorkbenchError::new(
-                "workbench_run_did_not_checkpoint",
-                "the bounded Run budget reached a terminal state; choose a smaller budget",
-            ));
+        match self.session.analysis_profile {
+            None => {
+                let outcome = execute_model_ir_native_analysis(&model, &request, None, step_budget)
+                    .map_err(|error| input_error("workbench_run_failed", &error))?;
+                if outcome.is_terminal() {
+                    return Err(WorkbenchError::new(
+                        "workbench_run_did_not_checkpoint",
+                        "the bounded Run budget reached a terminal state; choose a smaller budget",
+                    ));
+                }
+                publish_model_ir_native_analysis(&self.root.join(RUN_DIRECTORY), &outcome)
+                    .map_err(|error| input_error("workbench_run_publish_failed", &error))?;
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let outcome = execute_model_ir_linear_analysis(&model, &request, None, step_budget)
+                    .map_err(|error| input_error("workbench_run_failed", &error))?;
+                if outcome.is_complete() || outcome.is_terminal_failure() {
+                    return Err(WorkbenchError::new(
+                        "workbench_run_did_not_checkpoint",
+                        "the bounded Run iteration budget reached a terminal state; choose a smaller budget",
+                    ));
+                }
+                publish_model_ir_linear_analysis(&self.root.join(RUN_DIRECTORY), &outcome)
+                    .map_err(|error| input_error("workbench_run_publish_failed", &error))?;
+            }
         }
-        publish_model_ir_native_analysis(&self.root.join(RUN_DIRECTORY), &outcome)
-            .map_err(|error| input_error("workbench_run_publish_failed", &error))?;
         self.session.stage = WorkbenchStageV1::Checkpointed;
         self.persist()
     }
@@ -1305,27 +1723,62 @@ impl NativeWorkbench {
         let model = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
         let request =
             self.read_import_artifact("model-analysis-request.json", MAX_REQUEST_BYTES)?;
-        let checkpoint = read_bounded_regular_file(
-            &self.root.join(RUN_DIRECTORY).join("checkpoint.ndcp"),
-            MAX_PRODUCT_ARTIFACT_BYTES,
-        )?;
         let effective_budget = if step_budget == 0 {
             u32::MAX
         } else {
             step_budget
         };
-        let outcome =
-            execute_model_ir_native_analysis(&model, &request, Some(&checkpoint), effective_budget)
+        let terminal_status = match self.session.analysis_profile {
+            None => {
+                let checkpoint = read_bounded_regular_file(
+                    &self.root.join(RUN_DIRECTORY).join("checkpoint.ndcp"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
+                let outcome = execute_model_ir_native_analysis(
+                    &model,
+                    &request,
+                    Some(&checkpoint),
+                    effective_budget,
+                )
                 .map_err(|error| input_error("workbench_resume_failed", &error))?;
-        if !outcome.is_terminal() {
-            return Err(WorkbenchError::new(
-                "workbench_resume_not_terminal",
-                "Resume exhausted its budget before reaching a terminal state",
-            ));
-        }
-        let terminal_status = receipt_status(outcome.run_receipt_json())?;
-        publish_model_ir_native_analysis(&self.root.join(RESUME_DIRECTORY), &outcome)
-            .map_err(|error| input_error("workbench_resume_publish_failed", &error))?;
+                if !outcome.is_terminal() {
+                    return Err(WorkbenchError::new(
+                        "workbench_resume_not_terminal",
+                        "Resume exhausted its budget before reaching a terminal state",
+                    ));
+                }
+                let status = receipt_status(outcome.run_receipt_json(), None)?;
+                publish_model_ir_native_analysis(&self.root.join(RESUME_DIRECTORY), &outcome)
+                    .map_err(|error| input_error("workbench_resume_publish_failed", &error))?;
+                status
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let checkpoint = read_bounded_regular_file(
+                    &self.root.join(RUN_DIRECTORY).join("checkpoint.mlpcp"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
+                let outcome = execute_model_ir_linear_analysis(
+                    &model,
+                    &request,
+                    Some(&checkpoint),
+                    effective_budget,
+                )
+                .map_err(|error| input_error("workbench_resume_failed", &error))?;
+                if !outcome.is_complete() {
+                    return Err(WorkbenchError::new(
+                        "workbench_resume_not_terminal",
+                        "Resume did not produce a converged ModelIR linear result",
+                    ));
+                }
+                let status = receipt_status(
+                    outcome.run_receipt_json(),
+                    Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1),
+                )?;
+                publish_model_ir_linear_analysis(&self.root.join(RESUME_DIRECTORY), &outcome)
+                    .map_err(|error| input_error("workbench_resume_publish_failed", &error))?;
+                status
+            }
+        };
         self.session.stage = WorkbenchStageV1::Terminal;
         self.session.terminal_status = Some(terminal_status);
         self.persist()
@@ -1359,12 +1812,41 @@ impl NativeWorkbench {
         } else {
             None
         };
-        let outcome =
-            execute_external_comparison(&result, &external, &source, executable.as_deref())
+        let passed = match self.session.analysis_profile {
+            None => {
+                let outcome =
+                    execute_external_comparison(&result, &external, &source, executable.as_deref())
+                        .map_err(|error| input_error("workbench_comparison_failed", &error))?;
+                let passed = outcome.passed();
+                publish_external_comparison(&self.root.join(COMPARISON_DIRECTORY), &outcome)
+                    .map_err(|error| input_error("workbench_comparison_publish_failed", &error))?;
+                passed
+            }
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                let recovery = read_bounded_regular_file(
+                    &self
+                        .root
+                        .join(RESUME_DIRECTORY)
+                        .join("result-recovery-ir.json"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?;
+                let outcome = execute_model_ir_linear_external_comparison(
+                    &result,
+                    &recovery,
+                    &external,
+                    &source,
+                    executable.as_deref(),
+                )
                 .map_err(|error| input_error("workbench_comparison_failed", &error))?;
-        let passed = outcome.passed();
-        publish_external_comparison(&self.root.join(COMPARISON_DIRECTORY), &outcome)
-            .map_err(|error| input_error("workbench_comparison_publish_failed", &error))?;
+                let passed = outcome.passed();
+                publish_model_ir_linear_external_comparison(
+                    &self.root.join(COMPARISON_DIRECTORY),
+                    &outcome,
+                )
+                .map_err(|error| input_error("workbench_comparison_publish_failed", &error))?;
+                passed
+            }
+        };
         self.session.stage = WorkbenchStageV1::Compared;
         self.session.comparison_passed = Some(passed);
         self.persist()?;
@@ -1384,6 +1866,9 @@ impl NativeWorkbench {
     /// Rejects invalid order, forged projections and native PDF publication failure.
     pub fn report(&mut self) -> Result<(), WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Compared)?;
+        if self.session.analysis_profile.is_some() {
+            return self.publish_model_ir_linear_report_source();
+        }
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -1403,6 +1888,70 @@ impl NativeWorkbench {
         self.persist()
     }
 
+    fn publish_model_ir_linear_report_source(&mut self) -> Result<(), WorkbenchError> {
+        let terminal = self.root.join(RESUME_DIRECTORY);
+        let result_bytes = read_bounded_regular_file(
+            &terminal.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &terminal.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report_bytes = read_bounded_regular_file(
+            &terminal.join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let document_bytes =
+            read_bounded_regular_file(&terminal.join("report.md"), MAX_PRODUCT_ARTIFACT_BYTES)?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_report_result_invalid", &error))?;
+        let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
+            .map_err(|error| input_error("workbench_report_recovery_invalid", &error))?;
+        let report = parse_sparse_linear_report_ir_v1(&report_bytes)
+            .map_err(|error| input_error("workbench_report_ir_invalid", &error))?;
+        let expected = build_sparse_linear_report_v1(&result)
+            .map_err(|error| input_error("workbench_report_projection_failed", &error))?;
+        if recovery.recovery().source_result_hash != result.result_hash()
+            || report.report().source_result_hash != result.result_hash()
+            || report.canonical_json() != expected.report_ir.canonical_json()
+            || document_bytes != expected.document_source.as_bytes()
+        {
+            return Err(WorkbenchError::new(
+                "workbench_report_projection_mismatch",
+                "terminal recovery, ReportIR, or document source is not the exact sparse ResultIR projection",
+            ));
+        }
+        let receipt = canonical_self_hashed(json!({
+            "schema_version": "structural-native-model-ir-linear-report-source-receipt.v1",
+            "session_id": self.session.session_id,
+            "status": "reported",
+            "source_result_hash": result.result_hash(),
+            "source_recovery_hash": recovery.recovery_hash(),
+            "source_report_hash": report.report_hash(),
+            "document_source_hash": sha256_identity(&document_bytes),
+            "artifacts": [
+                artifact_entry("result_ir", "result-ir.json", "application/json", &result_bytes)?,
+                artifact_entry("result_recovery_ir", "result-recovery-ir.json", "application/json", &recovery_bytes)?,
+                artifact_entry("report_ir", "report-ir.json", "application/json", &report_bytes)?,
+                artifact_entry("pdf_ready_document_source", "report.md", "text/markdown; charset=utf-8", &document_bytes)?,
+            ],
+            "claim_boundary": "verified_deterministic_sparse_report_ir_and_pdf_ready_markdown_source_not_pdf_rendering_engineering_acceptance_or_design_code_compliance",
+        }))?;
+        publish_new_directory(
+            &self.root.join(REPORT_DIRECTORY),
+            &[
+                ("result-ir.json", &result_bytes),
+                ("result-recovery-ir.json", &recovery_bytes),
+                ("report-ir.json", &report_bytes),
+                ("report.md", &document_bytes),
+                ("report-receipt.json", receipt.as_bytes()),
+            ],
+        )?;
+        self.session.stage = WorkbenchStageV1::Reported;
+        self.persist()
+    }
+
     fn require_stage(&self, expected: WorkbenchStageV1) -> Result<(), WorkbenchError> {
         if self.session.stage == expected {
             Ok(())
@@ -1414,6 +1963,17 @@ impl NativeWorkbench {
                     expected.label(),
                     self.session.stage.label()
                 ),
+            ))
+        }
+    }
+
+    fn require_ndtha_profile(&self, operation: &str) -> Result<(), WorkbenchError> {
+        if self.session.analysis_profile.is_none() {
+            Ok(())
+        } else {
+            Err(WorkbenchError::new(
+                "workbench_profile_unsupported",
+                format!("{operation} is available only for the fixed-guided NDTHA profile"),
             ))
         }
     }
@@ -1536,7 +2096,8 @@ fn verify_review_binding(
     if session.stage != WorkbenchStageV1::Reported
         || review.schema_version != REVIEW_SCHEMA_V1
         || review.session_id != session.session_id
-        || review.claim_boundary != REVIEW_CLAIM_BOUNDARY
+        || review.analysis_profile != session.analysis_profile
+        || review.claim_boundary != review_claim_boundary(session.analysis_profile)
     {
         return Err(WorkbenchError::new(
             "workbench_review_contract_invalid",
@@ -1566,14 +2127,33 @@ fn verify_review_binding(
             .join("external-comparison-ir.json"),
         MAX_PRODUCT_ARTIFACT_BYTES,
     )?;
-    let pdf = read_bounded_regular_file(
-        &root.join(REPORT_DIRECTORY).join("report.pdf"),
-        MAX_PRODUCT_ARTIFACT_BYTES,
-    )?;
+    let (expected_pdf, expected_recovery, expected_document) = match session.analysis_profile {
+        None => (
+            Some(sha256_identity(&read_bounded_regular_file(
+                &root.join(REPORT_DIRECTORY).join("report.pdf"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?)),
+            None,
+            None,
+        ),
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
+            None,
+            Some(sha256_identity(&read_bounded_regular_file(
+                &root.join(RESUME_DIRECTORY).join("result-recovery-ir.json"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?)),
+            Some(sha256_identity(&read_bounded_regular_file(
+                &root.join(REPORT_DIRECTORY).join("report.md"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?)),
+        ),
+    };
     if review.source_session_hash != expected_session_hash
         || review.result_artifact_hash != sha256_identity(&result)
         || review.comparison_artifact_hash != sha256_identity(&comparison)
-        || review.pdf_artifact_hash != sha256_identity(&pdf)
+        || review.pdf_artifact_hash != expected_pdf
+        || review.result_recovery_artifact_hash != expected_recovery
+        || review.report_document_artifact_hash != expected_document
     {
         return Err(WorkbenchError::new(
             "workbench_review_binding_mismatch",
@@ -1581,6 +2161,15 @@ fn verify_review_binding(
         ));
     }
     Ok(())
+}
+
+const fn review_claim_boundary(profile: Option<WorkbenchAnalysisProfileV1>) -> &'static str {
+    match profile {
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+            MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY
+        }
+        None => REVIEW_CLAIM_BOUNDARY,
+    }
 }
 
 fn strict_artifact_json(
@@ -1605,12 +2194,11 @@ fn verified_receipt_json(path: &Path) -> Result<Value, WorkbenchError> {
     verify_self_hashed_json(&bytes, "receipt_hash")
 }
 
-fn verify_external_artifact_bindings(
-    external: &structural_contracts::external_comparison::ExternalResultDocumentV1,
+fn verify_external_source_artifact_bindings(
+    source: &ExternalSourceV1,
     source_artifact: &[u8],
     executable_artifact: Option<&[u8]>,
 ) -> Result<(), WorkbenchError> {
-    let source = &external.external_result().source;
     if sha256_identity(source_artifact) != source.source_artifact_hash {
         return Err(WorkbenchError::new(
             "workbench_external_source_hash_mismatch",
@@ -1635,6 +2223,24 @@ fn verify_external_artifact_bindings(
     }
 }
 
+fn verify_requested_model_identity(
+    requested: &structural_contracts::product_ir::ModelIrIdentityV1,
+    model: &structural_contracts::model_ir::ModelIrV2Document,
+) -> Result<(), WorkbenchError> {
+    if requested.content_hash == model.content_hash()
+        && requested.semantic_hash == model.semantic_hash()
+        && requested.provenance_hash == model.provenance_hash()
+    {
+        Ok(())
+    } else {
+        Err(WorkbenchError::new(
+            "workbench_model_request_identity_mismatch",
+            "the analysis request is not bound to the imported ModelIR identities",
+        ))
+    }
+}
+
+#[allow(clippy::too_many_lines)]
 fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(), WorkbenchError> {
     let imported = root.join(IMPORT_DIRECTORY);
     let source_model =
@@ -1654,10 +2260,20 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
     )?;
     let parsed_model = parse_model_ir_v2(&model)
         .map_err(|error| input_error("workbench_imported_model_invalid", &error))?;
-    let parsed_request = parse_model_ir_ndtha_analysis_request_v1(&request)
-        .map_err(|error| input_error("workbench_imported_request_invalid", &error))?;
-    let parsed_external = parse_external_result_v1(&external)
-        .map_err(|error| input_error("workbench_imported_external_result_invalid", &error))?;
+    let request_hash = match session.analysis_profile {
+        None => {
+            let parsed = parse_model_ir_ndtha_analysis_request_v1(&request)
+                .map_err(|error| input_error("workbench_imported_request_invalid", &error))?;
+            verify_requested_model_identity(&parsed.request().model_identity, &parsed_model)?;
+            parsed.request_hash().to_owned()
+        }
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+            let parsed = parse_model_ir_linear_analysis_request_v1(&request)
+                .map_err(|error| input_error("workbench_imported_request_invalid", &error))?;
+            verify_requested_model_identity(&parsed.request().model_identity, &parsed_model)?;
+            parsed.request_hash().to_owned()
+        }
+    };
     let executable = if session.executable_artifact_hash.is_some() {
         Some(read_bounded_regular_file(
             &imported.join("external-executable.artifact"),
@@ -1672,13 +2288,37 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
         }
         None
     };
+    let external_result_hash = match session.analysis_profile {
+        None => {
+            let parsed = parse_external_result_v1(&external).map_err(|error| {
+                input_error("workbench_imported_external_result_invalid", &error)
+            })?;
+            verify_external_source_artifact_bindings(
+                &parsed.external_result().source,
+                &source,
+                executable.as_deref(),
+            )?;
+            parsed.external_result_hash().to_owned()
+        }
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+            let parsed = parse_model_ir_linear_external_result_v1(&external).map_err(|error| {
+                input_error("workbench_imported_external_result_invalid", &error)
+            })?;
+            verify_external_source_artifact_bindings(
+                &parsed.external_result().source,
+                &source,
+                executable.as_deref(),
+            )?;
+            parsed.external_result_hash().to_owned()
+        }
+    };
     let mgt_binding = verify_mgt_import_bindings(&imported, session, &parsed_model, &model)?;
     let valid = session.source_model_ir_hash == sha256_identity(&source_model)
         && session.model_content_hash == parsed_model.content_hash()
         && session.model_semantic_hash == parsed_model.semantic_hash()
         && session.model_provenance_hash == parsed_model.provenance_hash()
-        && session.analysis_request_hash == parsed_request.request_hash()
-        && session.external_result_hash == parsed_external.external_result_hash()
+        && session.analysis_request_hash == request_hash
+        && session.external_result_hash == external_result_hash
         && session.source_artifact_hash == sha256_identity(&source)
         && session.executable_artifact_hash == executable.as_deref().map(sha256_identity);
     if !valid {
@@ -1697,6 +2337,12 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
         "source_artifact_hash": session.source_artifact_hash,
         "executable_artifact_hash": session.executable_artifact_hash,
     });
+    if let Some(profile) = session.analysis_profile {
+        binding
+            .as_object_mut()
+            .expect("Workbench binding is an object")
+            .insert("analysis_profile".to_owned(), json!(profile));
+    }
     if let Some(mgt_import) = mgt_binding {
         binding
             .as_object_mut()
@@ -1710,7 +2356,6 @@ fn verify_import_bindings(root: &Path, session: &WorkbenchSessionV1) -> Result<(
             "the session ID is not derived from the immutable imported artifact identities",
         ));
     }
-    verify_external_artifact_bindings(&parsed_external, &source, executable.as_deref())?;
     verify_receipt_directory(&imported, "import-receipt.json")?;
     Ok(())
 }
@@ -1800,8 +2445,12 @@ fn verify_mgt_import_bindings(
 
 fn verify_stage_chain(
     root: &Path,
-    expected_session_id: &str,
+    session: &WorkbenchSessionV1,
 ) -> Result<DiscoveredState, WorkbenchError> {
+    let report_receipt = match session.analysis_profile {
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => "report-receipt.json",
+        None => "pdf-receipt.json",
+    };
     let stages = [
         (
             WorkbenchStageV1::Imported,
@@ -1828,11 +2477,7 @@ fn verify_stage_chain(
             COMPARISON_DIRECTORY,
             "comparison-receipt.json",
         ),
-        (
-            WorkbenchStageV1::Reported,
-            REPORT_DIRECTORY,
-            "pdf-receipt.json",
-        ),
+        (WorkbenchStageV1::Reported, REPORT_DIRECTORY, report_receipt),
     ];
     let mut discovered = WorkbenchStageV1::Imported;
     let mut gap = false;
@@ -1852,8 +2497,13 @@ fn verify_stage_chain(
         }
         verify_directory(&path, "workbench_stage_directory_invalid")?;
         let receipt_value = verify_receipt_directory(&path, receipt)?;
-        let (terminal, comparison) =
-            verify_stage_receipt(stage, directory, &receipt_value, expected_session_id)?;
+        let (terminal, comparison) = verify_stage_receipt(
+            stage,
+            directory,
+            &receipt_value,
+            session.session_id(),
+            session.analysis_profile,
+        )?;
         if terminal.is_some() {
             terminal_status = terminal;
         }
@@ -1874,6 +2524,7 @@ fn verify_stage_receipt(
     directory: &str,
     receipt: &Value,
     expected_session_id: &str,
+    analysis_profile: Option<WorkbenchAnalysisProfileV1>,
 ) -> Result<(Option<String>, Option<bool>), WorkbenchError> {
     if receipt
         .get("session_id")
@@ -1889,7 +2540,9 @@ fn verify_stage_receipt(
     let expected = match stage {
         WorkbenchStageV1::Imported => Some("imported"),
         WorkbenchStageV1::Validated => Some("validated"),
+        WorkbenchStageV1::Checkpointed if analysis_profile.is_some() => Some("active"),
         WorkbenchStageV1::Checkpointed => Some("checkpointed"),
+        WorkbenchStageV1::Reported if analysis_profile.is_some() => Some("reported"),
         WorkbenchStageV1::Terminal | WorkbenchStageV1::Compared | WorkbenchStageV1::Reported => {
             None
         }
@@ -1901,13 +2554,18 @@ fn verify_stage_receipt(
         ));
     }
     let terminal = if stage == WorkbenchStageV1::Terminal {
+        let accepted = match analysis_profile {
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                status.filter(|value| *value == "completed")
+            }
+            None => status.filter(|value| matches!(*value, "completed" | "collapsed")),
+        };
         Some(
-            status
-                .filter(|value| matches!(*value, "completed" | "collapsed"))
+            accepted
                 .ok_or_else(|| {
                     WorkbenchError::new(
                         "workbench_terminal_receipt_invalid",
-                        "terminal run receipt must say completed or collapsed",
+                        "terminal run receipt has no status supported by the Workbench profile",
                     )
                 })?
                 .to_owned(),
@@ -2005,13 +2663,22 @@ fn parse_session(bytes: &[u8]) -> Result<WorkbenchSessionV1, WorkbenchError> {
             "session fields are missing, mistyped or unknown",
         )
     })?;
-    if session.schema_version != SESSION_SCHEMA_V1 || session.claim_boundary != CLAIM_BOUNDARY {
+    if session.schema_version != SESSION_SCHEMA_V1
+        || session.claim_boundary != session_claim_boundary(session.analysis_profile)
+    {
         return Err(WorkbenchError::new(
             "workbench_session_contract_invalid",
             "session schema or claim boundary is unsupported",
         ));
     }
     Ok(session)
+}
+
+const fn session_claim_boundary(profile: Option<WorkbenchAnalysisProfileV1>) -> &'static str {
+    match profile {
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => MODEL_IR_LINEAR_CLAIM_BOUNDARY,
+        None => CLAIM_BOUNDARY,
+    }
 }
 
 fn canonical_session(session: &WorkbenchSessionV1) -> Result<String, WorkbenchError> {
@@ -2103,12 +2770,19 @@ fn verify_self_hashed_json(bytes: &[u8], hash_field: &str) -> Result<Value, Work
     Ok(value)
 }
 
-fn receipt_status(receipt_json: &str) -> Result<String, WorkbenchError> {
+fn receipt_status(
+    receipt_json: &str,
+    analysis_profile: Option<WorkbenchAnalysisProfileV1>,
+) -> Result<String, WorkbenchError> {
     let value = verify_self_hashed_json(receipt_json.as_bytes(), "receipt_hash")?;
+    let accepted = |status: &&str| match analysis_profile {
+        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => *status == "completed",
+        None => matches!(*status, "completed" | "collapsed"),
+    };
     value
         .get("status")
         .and_then(Value::as_str)
-        .filter(|status| matches!(*status, "completed" | "collapsed"))
+        .filter(accepted)
         .map(ToOwned::to_owned)
         .ok_or_else(|| {
             WorkbenchError::new(
@@ -2384,6 +3058,7 @@ mod tests {
             source_artifact_hash:
                 "sha256:2222222222222222222222222222222222222222222222222222222222222222".to_owned(),
             executable_artifact_hash: None,
+            analysis_profile: None,
             mgt_source_hash: None,
             mgt_import_health_artifact_hash: None,
             mgt_import_receipt_artifact_hash: None,

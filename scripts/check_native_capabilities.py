@@ -41,6 +41,7 @@ EXPECTED_OWNERS = {
     "external_comparison": "structural-cli",
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
+    "modelir_linear_workbench": "structural-workbench",
     "native_benchmark_catalog": "structural-catalog",
     "native_frontend_build": "structural-frontend-contract",
     "native_frontend_dev": "structural-frontend-contract",

@@ -243,6 +243,17 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "React/TypeScript removal" in workbench["claim"]
     assert "HIP C2" in workbench["claim"]
     assert "C6" in workbench["claim"]
+    assert capabilities.capability_is_enabled(payload, "modelir_linear_workbench") is True
+    linear_workbench = payload["capabilities"]["modelir_linear_workbench"]
+    assert linear_workbench["cutover_gate"] == "C5"
+    assert linear_workbench["owner"] == "structural-workbench"
+    assert "model_ir_linear_cpu_v1" in linear_workbench["claim"]
+    assert "real PCG checkpoint.mlpcp" in linear_workbench["claim"]
+    assert "typed recovered global-DOF" in linear_workbench["claim"]
+    assert "existing fixed-guided NDTHA session and receipt bytes" in linear_workbench["claim"]
+    assert "deterministic PDF rendering" in linear_workbench["claim"]
+    assert "authoritative numerical C2/C3" in linear_workbench["claim"]
+    assert "C6" in linear_workbench["claim"]
 
 
 def test_native_evidence_bundle_capability_is_bounded_c5() -> None:

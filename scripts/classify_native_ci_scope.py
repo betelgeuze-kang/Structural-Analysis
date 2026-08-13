@@ -59,6 +59,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_mgt_import.py",
         "scripts/check_native_model_ir_linear_product.py",
         "scripts/check_native_model_ir_linear_jobs.py",
+        "scripts/check_native_model_ir_linear_workbench.py",
         "scripts/check_native_nonlinear_static_hip.py",
         "scripts/check_native_nonlinear_ndtha_hip.py",
         "scripts/check_native_pdf_report.py",
@@ -98,6 +99,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "tests/test_native_mgt_import_health_python_parity.py",
         "tests/test_native_model_ir_linear_product_contract.py",
         "tests/test_native_model_ir_linear_jobs_contract.py",
+        "tests/test_native_model_ir_linear_workbench_contract.py",
         "tests/test_native_pdf_report_contract.py",
         "tests/test_native_nonlinear_ndtha_python_parity.py",
         "tests/test_native_nonlinear_static_hip_contract.py",
@@ -335,6 +337,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         if path.startswith("native/crates/structural-runtime/")
         or path.startswith("native/crates/structural-report/")
         or path.startswith("native/crates/structural-cli/")
+        or path.startswith("native/crates/structural-workbench/")
         or path.startswith("native/tests/integration/")
         or path.startswith(LEGACY_RUNTIME_COMPAT_PREFIX)
         or path in LEGACY_REPLAY_RUNTIME_PATHS

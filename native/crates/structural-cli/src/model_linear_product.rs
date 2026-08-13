@@ -6,6 +6,9 @@ use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError, Mo
 use structural_contracts::model_linear_product::{
     parse_model_ir_linear_analysis_request_v1, ModelIrLinearAnalysisRequestDocumentV1,
 };
+use structural_contracts::model_linear_recovery::{
+    parse_model_ir_linear_result_recovery_ir_v1, verify_model_ir_linear_result_recovery_v1,
+};
 use structural_contracts::product_ir::{sha256_identity, ProductIrContractError};
 use structural_contracts::sparse_product::SparseLinearAnalysisRequestDocumentV1;
 use structural_runtime::{
@@ -213,10 +216,26 @@ pub fn execute_model_ir_linear_analysis(
     )?;
     let result_recovery_json = sparse_outcome
         .result_ir()
-        .map(|result| {
-            runtime
+        .map(|result| -> Result<String, ModelIrLinearProductError> {
+            let recovery = runtime
                 .recover_model_ir_linear_product(&document, &request, &prepared, result)
-                .map_err(ModelIrLinearProductError::from)
+                .map_err(ModelIrLinearProductError::from)?;
+            let parsed = parse_model_ir_linear_result_recovery_ir_v1(recovery.as_bytes())?;
+            verify_model_ir_linear_result_recovery_v1(result, &parsed)?;
+            let value = parsed.recovery();
+            if value.model_identity != request.request().model_identity
+                || value.analysis_request_hash != request.request_hash()
+                || value.assembly_hash != prepared.assembly_hash
+                || value.case_id != request.request().case_id
+                || value.load_pattern_id != request.request().load_pattern_id
+            {
+                return Err(contract_error(
+                    "model_ir_linear_recovery_outer_binding_mismatch",
+                    "/result_recovery_ir",
+                    "typed recovery differs from the exact ModelIR, analysis request, or assembly",
+                ));
+            }
+            Ok(parsed.canonical_json().to_owned())
         })
         .transpose()?;
     let run_receipt_json = build_run_receipt(

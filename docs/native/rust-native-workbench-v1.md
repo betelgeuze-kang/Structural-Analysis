@@ -8,9 +8,19 @@ decommission.
 ## Owned flow
 
 `structural-workbench` calls the Rust product libraries directly. It does not spawn
-`structural-cli`, Python, Node, a browser, or an external PDF renderer. The implemented profile is
-the exact fixed-guided one-story frame3d global-X `ModelIR` NDTHA slice. It accepts either strict
-ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
+`structural-cli`, Python, Node, a browser, or an external PDF renderer. The default/compatibility
+profile is the exact fixed-guided one-story frame3d global-X `ModelIR` NDTHA slice. It accepts
+either strict ModelIR or the exact numeric frame MGT profile normalized by the Rust importer.
+
+A second explicit `model_ir_linear_cpu_v1` profile now owns the same durable
+Import -> Validate -> Run -> Resume -> Compare -> Report sequence for the bounded typed-ModelIR
+frame3d/truss3d CPU linear-static product. Its Run publishes a real `checkpoint.mlpcp`; Resume
+publishes sparse ResultIR plus strictly typed global-DOF/element recovery IR; Compare consumes an
+explicit language-neutral global-DOF mapping; and Report publishes verified ReportIR plus
+PDF-ready Markdown without claiming PDF bytes. Inspect, English/Korean Report-view, explicit
+Review, and Export are profile-aware. Result-view, Result-deformed-view, and PDF export remain
+NDTHA-only and fail with `workbench_profile_unsupported` on the linear profile. See
+`docs/native/modelir-linear-workbench-v1.md`.
 
 The independent `model-view` read-only surface is broader than that analysis profile. It strictly
 parses any current ModelIR v2 document, crosses Rust -> C ABI -> C++ validation, and renders the
@@ -94,6 +104,12 @@ structural-workbench review --workspace SESSION --decision review \
   --reviewer "Engineer A" --comment "Check connection assumptions."
 structural-workbench review-show --workspace SESSION
 structural-workbench export --workspace SESSION
+structural-workbench import-model-linear MODEL.json MODEL-LINEAR-REQUEST.json \
+  --external-result LINEAR-EXTERNAL.json --source-artifact SOURCE \
+  --workspace LINEAR-SESSION
+structural-workbench workflow-model-linear MODEL.json MODEL-LINEAR-REQUEST.json \
+  --external-result LINEAR-EXTERNAL.json --source-artifact SOURCE \
+  --workspace LINEAR-SESSION --step-budget 1
 structural-workbench catalog --truth geometry_only --size large
 structural-workbench catalog-show --case peer_spd_rc_column_rectangular_seed_01
 structural-workbench evidence --bundle EVIDENCE-DIR --as-of-unix 1786579200
@@ -103,8 +119,9 @@ structural-workbench evidence-show --bundle EVIDENCE-DIR \
 
 `interactive` advances the same durable state machine one action at a time. `workflow` is the
 headless clean-machine form and performs the complete sequence; `workflow-mgt` does the same from
-original MGT bytes. Run must stop before the terminal step so Resume is a real checkpoint
-transition; the current fixtures use a budget of one.
+original MGT bytes; `workflow-model-linear` performs the bounded typed-ModelIR linear sequence.
+Run must stop before the terminal step so Resume is a real checkpoint transition; the current
+fixtures use a budget of one.
 
 The review is deliberately immutable. Revising a disposition requires a new Workbench session
 instead of silently overwriting history. Reviewer and comment text are bounded and reject terminal
@@ -189,13 +206,22 @@ proves all four closed channels are byte-deterministic and distinct, verifies th
 and ResultIR binding, exercises a bounded window, and rejects pre-terminal access, invalid options,
 out-of-range windows and a one-byte terminal ResultIR mutation.
 
+The ModelIR linear integration test likewise clears the child environment and PATH, advances one
+real PCG iteration, restores the validated session to model process death after checkpoint
+publication, reconciles `03-run`, and completes Resume -> Compare -> Report. It compares the
+terminal ResultIR, recovery IR, ReportIR, Markdown, comparison, report-source receipts, and session
+bytes against a separate one-shot workflow. It also exercises Korean report view, immutable review,
+handoff export, and fail-closed NDTHA-only command dispatch. The original 14-test NDTHA E2E remains
+the compatibility gate for omitted-profile session and receipt bytes.
+
 ## Claim boundary
 
-This is a terminal-native operator surface for one bounded product profile. It now owns a
-deterministic results summary, explicit human review and handoff export for that profile, but it is
-not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
-MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
-modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
+This is a terminal-native operator surface for two bounded product profiles. It now owns a
+deterministic results summary, explicit human review and handoff export for those profiles, but it
+is not a general visual model editor and does not yet replace all React/TypeScript UI behavior.
+General MGT grammar/encoding and broader user-directed analysis selection, arbitrary ModelIR
+topology, modal/buckling/nonlinear-static/transient and broader linear Workbench profiles, live
+MIDAS/OpenSees/CalculiX execution, device selection,
 general graphical accessibility/localization, arbitrary-Unicode or tagged PDF output, broader
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
 removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
