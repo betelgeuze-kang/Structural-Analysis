@@ -1,11 +1,17 @@
 # Bounded Durable Job Runtime v1
 
-## Closed profile
+## Closed profiles
 
 This slice reaches C5 only for the tracked single-host serial-FP64 CPU nonlinear-NDTHA request.
 Rust `structural-runtime` owns the durable state machine and artifact custody; C++ remains the
 numerical owner through ABI v1.5. The implemented states are `queued`, `running`, `checkpointed`,
 `succeeded`, `failed`, and `cancelled`.
+
+A separately tracked C5 profile admits the bounded typed-ModelIR frame3d/truss3d CPU linear
+product through ABI v1.13 assembly and ABI v1.10 PCG. It reuses the same append-only store and lease
+rules while preserving an immutable per-job analysis profile and one additional typed recovery
+artifact. See `docs/native/modelir-linear-durable-job-v1.md`; this extension does not promote either
+underlying numerical family beyond C1.
 
 Every transition is a canonical full-state JSON event in a contiguous append-only revision chain.
 Each event binds the prior event hash and its own SHA-256. Requests, checkpoints, ResultIR,
@@ -27,6 +33,7 @@ temporary names are ignored as uncommitted state, while committed revision gaps 
 
 ~~~bash
 structural-cli job submit request.json --store jobs --idempotency-key case-1
+structural-cli job submit-model-linear model.json request.json --store jobs --idempotency-key case-2
 structural-cli job poll JOB_ID --store jobs
 structural-cli job work-once --store jobs --worker-id worker-1 --step-budget 2
 structural-cli job work-once --store jobs --worker-id worker-2
@@ -53,7 +60,7 @@ failure atomicity, and forged report rejection.
 This is a local filesystem queue, not a multi-tenant service. It does not provide identity,
 authorization, tenant isolation, general network/API compatibility, distributed consensus,
 distributed worker claims, remote object storage, or release authority. Only the bounded CPU
-NDTHA profile is executable. A separate C5 slice now exposes this exact store through a loopback,
-single-tenant, static-role HTTP API; it does not broaden the durable runtime claim. HIP C2,
-additional solver families, broader service/API migration, Workbench integration, and C6 Python removal
-remain open. See `docs/native/job-service-api-v1.md`.
+NDTHA and typed-ModelIR linear profiles are executable. A separate C5 slice exposes this exact
+store through a loopback, single-tenant, static-role HTTP API; it does not broaden the durable
+runtime claim. HIP C2, additional solver families, broader service/API migration, Workbench
+integration, and C6 Python removal remain open. See `docs/native/job-service-api-v1.md`.

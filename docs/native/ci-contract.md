@@ -223,6 +223,11 @@ Required jobs:
      CSR -> ABI v1.10 PCG -> SAMLPC01 outer checkpoint -> terminal active-DOF/element recovery,
      with environment-cleared model-linear-run/model-linear-resume 14-artifact byte parity and
      explicit preservation of the sequential C1/protected C2 boundary
+   - the same bounded typed-ModelIR linear profile through a strict language-neutral durable
+     envelope, append-only job lifecycle, real-iteration process restart, exact completion
+     re-projection, public submit-model-linear/export, loopback submission and authenticated
+     recovery retrieval; this is separate C5 orchestration evidence and cannot promote numerical
+     C2, authoritative C3 or C6
    - bounded story-frame strict request -> ABI v1.11 real Newton iteration begin/advance ->
      SASTAC01 checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared
      static-run/static-resume byte parity, durable nonconvergence receipts and explicit

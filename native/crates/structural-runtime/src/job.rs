@@ -8,22 +8,32 @@ use fs2::FileExt;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
+use structural_contracts::model_linear_job::{
+    build_model_ir_linear_durable_job_request_v1, parse_model_ir_linear_durable_job_request_v1,
+    ModelIrLinearDurableJobRequestDocumentV1, MODEL_IR_LINEAR_MAXIMUM_JOB_REQUEST_BYTES,
+};
 use structural_contracts::product_ir::{
     parse_native_analysis_request_v1, parse_nonlinear_ndtha_report_ir_v1,
     parse_nonlinear_ndtha_result_ir_v1, sha256_identity,
 };
-use structural_report::build_nonlinear_ndtha_report_v1;
+use structural_report::{build_nonlinear_ndtha_report_v1, build_sparse_linear_report_v1};
 
-use crate::{NonlinearNdthaCheckpoint, NonlinearNdthaExecutionStatus, Runtime};
+use crate::{
+    ModelIrLinearCheckpointBindingsV1, ModelIrLinearCheckpointV1, NonlinearNdthaCheckpoint,
+    NonlinearNdthaExecutionStatus, PreparedModelIrLinearProductV1, Runtime,
+    SparseLinearExecutionStatus, SparseLinearSolverStatus,
+};
 
 const JOB_SCHEMA: &str = "structural-native-durable-job-event.v1";
 const JOB_PROFILE: &str = "append_only_hash_chain_single_host.v1";
 const CLAIM_BOUNDARY: &str = "single_host_local_job_orchestration_not_distributed_consensus_identity_authorization_or_release_authority";
-const MAX_REQUEST_BYTES: usize = 16 * 1024 * 1024;
+const MAX_NDTHA_REQUEST_BYTES: usize = 16 * 1024 * 1024;
+const MAX_REQUEST_BYTES: usize = MODEL_IR_LINEAR_MAXIMUM_JOB_REQUEST_BYTES;
 const MAX_CHECKPOINT_BYTES: usize = 256 * 1024 * 1024;
 const MAX_RESULT_BYTES: usize = 64 * 1024 * 1024;
 const MAX_REPORT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES: usize = 16 * 1024 * 1024;
+const MAX_RECOVERY_BYTES: usize = 64 * 1024 * 1024;
 const MAX_EVENT_BYTES: usize = 1024 * 1024;
 const MIN_LEASE_MILLIS: u64 = 1_000;
 const MAX_LEASE_MILLIS: u64 = 3_600_000;
@@ -57,6 +67,13 @@ pub enum DurableJobStatusV1 {
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
+pub enum DurableJobAnalysisProfileV1 {
+    NonlinearNdthaCpuV1,
+    ModelIrLinearCpuV1,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
 enum JobEventTypeV1 {
     Submitted,
     Claimed,
@@ -68,6 +85,7 @@ enum JobEventTypeV1 {
     Cancelled,
     LeaseExpiredRequeued,
     LeaseExpiredCancelled,
+    NumericalFailurePublished,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -78,6 +96,7 @@ enum JobArtifactRoleV1 {
     ResultIr,
     ReportIr,
     ReportDocument,
+    ResultRecoveryIr,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -106,6 +125,8 @@ struct JobEventV1 {
     job_id: String,
     idempotency_key: String,
     request: JobArtifactReferenceV1,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    analysis_profile: Option<DurableJobAnalysisProfileV1>,
     status: DurableJobStatusV1,
     event_type: JobEventTypeV1,
     revision: u64,
@@ -119,6 +140,8 @@ struct JobEventV1 {
     result_ir: Option<JobArtifactReferenceV1>,
     report_ir: Option<JobArtifactReferenceV1>,
     report_document: Option<JobArtifactReferenceV1>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    result_recovery_ir: Option<JobArtifactReferenceV1>,
     error_code: Option<String>,
     created_unix_ms: u64,
     updated_unix_ms: u64,
@@ -130,6 +153,8 @@ struct JobEventV1 {
 pub struct DurableJobViewV1 {
     pub job_id: String,
     pub request: JobArtifactReferenceV1,
+    #[serde(skip_serializing_if = "is_legacy_analysis_profile")]
+    pub analysis_profile: DurableJobAnalysisProfileV1,
     pub status: DurableJobStatusV1,
     pub revision: u64,
     pub attempt: u32,
@@ -143,6 +168,8 @@ pub struct DurableJobViewV1 {
     pub result_ir: Option<JobArtifactReferenceV1>,
     pub report_ir: Option<JobArtifactReferenceV1>,
     pub report_document: Option<JobArtifactReferenceV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result_recovery_ir: Option<JobArtifactReferenceV1>,
     pub error_code: Option<String>,
     pub created_unix_ms: u64,
     pub updated_unix_ms: u64,
@@ -166,11 +193,34 @@ pub struct DurableJobCompletionV1<'a> {
     pub report_document_bytes: &'a [u8],
 }
 
+#[derive(Clone, Copy, Debug)]
+pub struct ModelIrLinearDurableJobCompletionV1<'a> {
+    pub checkpoint_bytes: &'a [u8],
+    pub result_ir_bytes: &'a [u8],
+    pub result_recovery_ir_bytes: &'a [u8],
+    pub report_ir_bytes: &'a [u8],
+    pub report_document_bytes: &'a [u8],
+}
+
 struct CompletionReferencesV1 {
     checkpoint: JobArtifactReferenceV1,
     result_ir: JobArtifactReferenceV1,
     report_ir: JobArtifactReferenceV1,
     report_document: JobArtifactReferenceV1,
+}
+
+struct ModelIrLinearCompletionReferencesV1 {
+    checkpoint: JobArtifactReferenceV1,
+    result_ir: JobArtifactReferenceV1,
+    result_recovery_ir: JobArtifactReferenceV1,
+    report_ir: JobArtifactReferenceV1,
+    report_document: JobArtifactReferenceV1,
+}
+
+struct RestoredModelIrLinearJobV1 {
+    request: ModelIrLinearDurableJobRequestDocumentV1,
+    prepared: PreparedModelIrLinearProductV1,
+    checkpoint: ModelIrLinearCheckpointV1,
 }
 
 #[derive(Debug)]
@@ -241,7 +291,7 @@ impl DurableJobStoreV1 {
         now_unix_ms: u64,
     ) -> Result<DurableJobViewV1, DurableJobError> {
         validate_stable_id(idempotency_key, "/idempotency_key")?;
-        require_size(request_bytes, MAX_REQUEST_BYTES, "/request")?;
+        require_size(request_bytes, MAX_NDTHA_REQUEST_BYTES, "/request")?;
         let request = parse_native_analysis_request_v1(request_bytes)
             .map_err(|error| contract_source_error("job_request_invalid", &error))?;
         let _lock = self.lock()?;
@@ -251,11 +301,110 @@ impl DurableJobStoreV1 {
             let latest = self.load_latest_locked(&job_id)?;
             if latest.idempotency_key != idempotency_key
                 || latest.request.content_hash != request.request_hash()
+                || analysis_profile(&latest) != DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1
             {
                 return Err(job_error(
                     "job_idempotency_conflict",
                     "/idempotency_key",
                     "idempotency key is already bound to a different request",
+                ));
+            }
+            return Ok(view(&latest));
+        }
+        let request_reference = self.store_blob_locked(
+            JobArtifactRoleV1::Request,
+            request.canonical_bytes(),
+            "application/json",
+            MAX_NDTHA_REQUEST_BYTES,
+        )?;
+        let event = seal_event(JobEventV1 {
+            schema_version: JOB_SCHEMA.to_owned(),
+            service_profile: JOB_PROFILE.to_owned(),
+            claim_boundary: CLAIM_BOUNDARY.to_owned(),
+            job_id: job_id.clone(),
+            idempotency_key: idempotency_key.to_owned(),
+            request: request_reference,
+            analysis_profile: None,
+            status: DurableJobStatusV1::Queued,
+            event_type: JobEventTypeV1::Submitted,
+            revision: 0,
+            attempt: 0,
+            progress_completed: 0,
+            progress_total: request.request().config.step_count,
+            cancel_requested: false,
+            lease: None,
+            checkpoint: None,
+            resume_contract_hash: None,
+            result_ir: None,
+            report_ir: None,
+            report_document: None,
+            result_recovery_ir: None,
+            error_code: None,
+            created_unix_ms: now_unix_ms,
+            updated_unix_ms: now_unix_ms,
+            previous_event_hash: None,
+            event_hash: String::new(),
+        })?;
+        self.create_job_locked(&event)?;
+        Ok(view(&event))
+    }
+
+    /// Submit one self-contained typed-`ModelIR` linear CPU job from separate source documents.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error for strict model/request validation, identity drift, conflicting
+    /// idempotency, or durable write failure.
+    pub fn submit_model_ir_linear(
+        &self,
+        idempotency_key: &str,
+        model_ir_bytes: &[u8],
+        analysis_request_bytes: &[u8],
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        let request =
+            build_model_ir_linear_durable_job_request_v1(model_ir_bytes, analysis_request_bytes)
+                .map_err(|error| contract_source_error("job_request_invalid", &error))?;
+        self.submit_model_ir_linear_document(idempotency_key, &request, now_unix_ms)
+    }
+
+    /// Submit a previously packaged language-neutral typed-`ModelIR` linear job envelope.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same stable boundary as [`Self::submit_model_ir_linear`].
+    pub fn submit_model_ir_linear_envelope(
+        &self,
+        idempotency_key: &str,
+        request_bytes: &[u8],
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        let request = parse_model_ir_linear_durable_job_request_v1(request_bytes)
+            .map_err(|error| contract_source_error("job_request_invalid", &error))?;
+        self.submit_model_ir_linear_document(idempotency_key, &request, now_unix_ms)
+    }
+
+    fn submit_model_ir_linear_document(
+        &self,
+        idempotency_key: &str,
+        request: &ModelIrLinearDurableJobRequestDocumentV1,
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        validate_stable_id(idempotency_key, "/idempotency_key")?;
+        require_size(request.canonical_bytes(), MAX_REQUEST_BYTES, "/request")?;
+        let _lock = self.lock()?;
+        let job_id = job_id(idempotency_key);
+        let job_path = self.jobs_directory.join(&job_id);
+        if job_path.exists() {
+            let latest = self.load_latest_locked(&job_id)?;
+            if latest.idempotency_key != idempotency_key
+                || latest.request.content_hash != request.request_hash()
+                || analysis_profile(&latest) != DurableJobAnalysisProfileV1::ModelIrLinearCpuV1
+            {
+                return Err(job_error(
+                    "job_idempotency_conflict",
+                    "/idempotency_key",
+                    "idempotency key is already bound to a different request or profile",
                 ));
             }
             return Ok(view(&latest));
@@ -273,12 +422,13 @@ impl DurableJobStoreV1 {
             job_id: job_id.clone(),
             idempotency_key: idempotency_key.to_owned(),
             request: request_reference,
+            analysis_profile: Some(DurableJobAnalysisProfileV1::ModelIrLinearCpuV1),
             status: DurableJobStatusV1::Queued,
             event_type: JobEventTypeV1::Submitted,
             revision: 0,
             attempt: 0,
             progress_completed: 0,
-            progress_total: request.request().config.step_count,
+            progress_total: request.analysis_request().request().config.max_iterations,
             cancel_requested: false,
             lease: None,
             checkpoint: None,
@@ -286,6 +436,7 @@ impl DurableJobStoreV1 {
             result_ir: None,
             report_ir: None,
             report_document: None,
+            result_recovery_ir: None,
             error_code: None,
             created_unix_ms: now_unix_ms,
             updated_unix_ms: now_unix_ms,
@@ -350,7 +501,10 @@ impl DurableJobStoreV1 {
             ) {
                 continue;
             }
-            let request_bytes = self.read_blob_locked(&current.request, MAX_REQUEST_BYTES)?;
+            let request_bytes = self.read_blob_locked(
+                &current.request,
+                maximum_request_bytes(analysis_profile(&current)),
+            )?;
             let checkpoint_bytes = current
                 .checkpoint
                 .as_ref()
@@ -411,8 +565,9 @@ impl DurableJobStoreV1 {
         require_size(checkpoint_bytes, MAX_CHECKPOINT_BYTES, "/checkpoint")?;
         let _lock = self.lock()?;
         let current = self.load_latest_locked(job_id)?;
+        require_analysis_profile(&current, DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1)?;
         require_lease(&current, worker_id, lease_token, now_unix_ms)?;
-        let request_bytes = self.read_blob_locked(&current.request, MAX_REQUEST_BYTES)?;
+        let request_bytes = self.read_blob_locked(&current.request, MAX_NDTHA_REQUEST_BYTES)?;
         let request = parse_native_analysis_request_v1(&request_bytes)
             .map_err(|error| contract_source_error("job_request_invalid", &error))?;
         let runtime = Runtime::new().map_err(|error| runtime_source_error(&error))?;
@@ -468,6 +623,135 @@ impl DurableJobStoreV1 {
         Ok(view(&next))
     }
 
+    /// Publish one verified active typed-`ModelIR` linear checkpoint and release the lease.
+    ///
+    /// Cancellation retains the same exact checkpoint but commits a terminal cancelled event.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error for profile mismatch, stale lease, model/request/assembly binding
+    /// drift, a non-active checkpoint, or durable storage failure.
+    pub fn publish_model_ir_linear_checkpoint(
+        &self,
+        job_id: &str,
+        worker_id: &str,
+        lease_token: &str,
+        checkpoint_bytes: &[u8],
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        require_size(checkpoint_bytes, MAX_CHECKPOINT_BYTES, "/checkpoint")?;
+        let _lock = self.lock()?;
+        let current = self.load_latest_locked(job_id)?;
+        require_analysis_profile(&current, DurableJobAnalysisProfileV1::ModelIrLinearCpuV1)?;
+        require_lease(&current, worker_id, lease_token, now_unix_ms)?;
+        let restored =
+            self.restore_model_ir_linear_checkpoint_locked(&current, checkpoint_bytes)?;
+        let checkpoint = &restored.checkpoint;
+        let state = checkpoint.inner().state();
+        if !current.cancel_requested
+            && state.execution_status != SparseLinearExecutionStatus::Active
+        {
+            return Err(job_error(
+                "job_checkpoint_progress_invalid",
+                "/checkpoint",
+                "ModelIR linear checkpoint is not an active PCG boundary",
+            ));
+        }
+        let reference = self.store_blob_locked(
+            JobArtifactRoleV1::Checkpoint,
+            checkpoint_bytes,
+            "application/vnd.structural.model-ir-linear-checkpoint",
+            MAX_CHECKPOINT_BYTES,
+        )?;
+        let event_type = if current.cancel_requested {
+            JobEventTypeV1::Cancelled
+        } else {
+            JobEventTypeV1::CheckpointPublished
+        };
+        let mut next = next_event(&current, event_type, now_unix_ms)?;
+        next.status = if current.cancel_requested {
+            DurableJobStatusV1::Cancelled
+        } else {
+            DurableJobStatusV1::Checkpointed
+        };
+        next.progress_completed = state.iterations;
+        next.lease = None;
+        next.checkpoint = Some(reference);
+        next.resume_contract_hash = Some(checkpoint.receipt().checkpoint_hash);
+        next.error_code = current
+            .cancel_requested
+            .then(|| "cancelled_by_user".to_owned());
+        let next = seal_event(next)?;
+        self.append_event_locked(&current, &next)?;
+        Ok(view(&next))
+    }
+
+    /// Publish one verified terminal numerical failure with its last exact PCG boundary.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error unless this is a leased ModelIR-linear job with a non-converged
+    /// terminal checkpoint bound to its exact durable request.
+    pub fn fail_model_ir_linear_job(
+        &self,
+        job_id: &str,
+        worker_id: &str,
+        lease_token: &str,
+        checkpoint_bytes: &[u8],
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        require_size(checkpoint_bytes, MAX_CHECKPOINT_BYTES, "/checkpoint")?;
+        let _lock = self.lock()?;
+        let current = self.load_latest_locked(job_id)?;
+        require_analysis_profile(&current, DurableJobAnalysisProfileV1::ModelIrLinearCpuV1)?;
+        require_lease(&current, worker_id, lease_token, now_unix_ms)?;
+        let restored =
+            self.restore_model_ir_linear_checkpoint_locked(&current, checkpoint_bytes)?;
+        let checkpoint = &restored.checkpoint;
+        let state = checkpoint.inner().state();
+        if state.execution_status != SparseLinearExecutionStatus::Terminal
+            || state.solver_status == SparseLinearSolverStatus::Converged
+        {
+            return Err(job_error(
+                "job_checkpoint_progress_invalid",
+                "/checkpoint",
+                "ModelIR linear failure requires a non-converged terminal PCG boundary",
+            ));
+        }
+        let reference = self.store_blob_locked(
+            JobArtifactRoleV1::Checkpoint,
+            checkpoint_bytes,
+            "application/vnd.structural.model-ir-linear-checkpoint",
+            MAX_CHECKPOINT_BYTES,
+        )?;
+        let mut next = next_event(
+            &current,
+            if current.cancel_requested {
+                JobEventTypeV1::Cancelled
+            } else {
+                JobEventTypeV1::NumericalFailurePublished
+            },
+            now_unix_ms,
+        )?;
+        next.status = if current.cancel_requested {
+            DurableJobStatusV1::Cancelled
+        } else {
+            DurableJobStatusV1::Failed
+        };
+        next.progress_completed = state.iterations;
+        next.lease = None;
+        next.checkpoint = Some(reference);
+        next.resume_contract_hash = Some(checkpoint.receipt().checkpoint_hash);
+        next.error_code = Some(if current.cancel_requested {
+            "cancelled_by_user".to_owned()
+        } else {
+            sparse_failure_code(state.solver_status).to_owned()
+        });
+        let next = seal_event(next)?;
+        self.append_event_locked(&current, &next)?;
+        Ok(view(&next))
+    }
+
     /// Publish the exact terminal checkpoint, `ResultIR`, `ReportIR` and document source.
     ///
     /// # Errors
@@ -485,6 +769,7 @@ impl DurableJobStoreV1 {
         validate_completion_sizes(completion)?;
         let _lock = self.lock()?;
         let current = self.load_latest_locked(job_id)?;
+        require_analysis_profile(&current, DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1)?;
         require_lease(&current, worker_id, lease_token, now_unix_ms)?;
         if current.cancel_requested {
             return Err(job_error(
@@ -493,7 +778,7 @@ impl DurableJobStoreV1 {
                 "cancel-requested job cannot publish successful completion",
             ));
         }
-        let request_bytes = self.read_blob_locked(&current.request, MAX_REQUEST_BYTES)?;
+        let request_bytes = self.read_blob_locked(&current.request, MAX_NDTHA_REQUEST_BYTES)?;
         let request = parse_native_analysis_request_v1(&request_bytes)
             .map_err(|error| contract_source_error("job_request_invalid", &error))?;
         let result = parse_nonlinear_ndtha_result_ir_v1(completion.result_ir_bytes)
@@ -558,6 +843,92 @@ impl DurableJobStoreV1 {
         next.checkpoint = Some(references.checkpoint);
         next.resume_contract_hash = Some(checkpoint.receipt().checkpoint_hash);
         next.result_ir = Some(references.result_ir);
+        next.report_ir = Some(references.report_ir);
+        next.report_document = Some(references.report_document);
+        next.error_code = None;
+        let next = seal_event(next)?;
+        self.append_event_locked(&current, &next)?;
+        Ok(view(&next))
+    }
+
+    /// Publish a converged typed-`ModelIR` linear checkpoint and every deterministic terminal IR.
+    ///
+    /// The store reconstructs the model assembly, sparse request, result, recovery, report IR and
+    /// document source before committing any artifact reference.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error for stale lease, cancellation, profile or identity drift, a
+    /// non-converged checkpoint, noncanonical output, projection mismatch, or durable I/O failure.
+    pub fn complete_model_ir_linear_job(
+        &self,
+        job_id: &str,
+        worker_id: &str,
+        lease_token: &str,
+        completion: ModelIrLinearDurableJobCompletionV1<'_>,
+        now_unix_ms: u64,
+    ) -> Result<DurableJobViewV1, DurableJobError> {
+        validate_model_ir_linear_completion_sizes(completion)?;
+        let _lock = self.lock()?;
+        let current = self.load_latest_locked(job_id)?;
+        require_analysis_profile(&current, DurableJobAnalysisProfileV1::ModelIrLinearCpuV1)?;
+        require_lease(&current, worker_id, lease_token, now_unix_ms)?;
+        if current.cancel_requested {
+            return Err(job_error(
+                "job_cancel_pending",
+                "/status",
+                "cancel-requested job cannot publish successful completion",
+            ));
+        }
+        let restored =
+            self.restore_model_ir_linear_checkpoint_locked(&current, completion.checkpoint_bytes)?;
+        let state = restored.checkpoint.inner().state();
+        if state.execution_status != SparseLinearExecutionStatus::Terminal
+            || state.solver_status != SparseLinearSolverStatus::Converged
+        {
+            return Err(job_error(
+                "job_completion_state_invalid",
+                "/checkpoint",
+                "ModelIR linear completion checkpoint is not converged and terminal",
+            ));
+        }
+        let expected_result = Runtime::finish_sparse_linear_product(
+            &restored.prepared.generated_request,
+            restored.checkpoint.inner(),
+        )
+        .map_err(|error| runtime_source_error(&error))?;
+        let expected_report = build_sparse_linear_report_v1(&expected_result)
+            .map_err(|error| contract_source_error("job_report_projection_failed", &error))?;
+        let runtime = Runtime::new().map_err(|error| runtime_source_error(&error))?;
+        let expected_recovery = runtime
+            .recover_model_ir_linear_product(
+                restored.request.model_ir(),
+                restored.request.analysis_request(),
+                &restored.prepared,
+                &expected_result,
+            )
+            .map_err(|error| runtime_source_error(&error))?;
+        if restored.checkpoint.as_bytes() != completion.checkpoint_bytes
+            || expected_result.canonical_bytes() != completion.result_ir_bytes
+            || expected_recovery.as_bytes() != completion.result_recovery_ir_bytes
+            || expected_report.report_ir.canonical_json().as_bytes() != completion.report_ir_bytes
+            || expected_report.document_source.as_bytes() != completion.report_document_bytes
+        {
+            return Err(job_error(
+                "job_completion_projection_mismatch",
+                "/completion",
+                "ModelIR linear completion differs from deterministic native projection",
+            ));
+        }
+        let references = self.store_model_ir_linear_completion_blobs_locked(completion)?;
+        let mut next = next_event(&current, JobEventTypeV1::Completed, now_unix_ms)?;
+        next.status = DurableJobStatusV1::Succeeded;
+        next.progress_completed = state.iterations;
+        next.lease = None;
+        next.checkpoint = Some(references.checkpoint);
+        next.resume_contract_hash = Some(restored.checkpoint.receipt().checkpoint_hash);
+        next.result_ir = Some(references.result_ir);
+        next.result_recovery_ir = Some(references.result_recovery_ir);
         next.report_ir = Some(references.report_ir);
         next.report_document = Some(references.report_document);
         next.error_code = None;
@@ -712,6 +1083,53 @@ impl DurableJobStoreV1 {
             |event| event.report_document.as_ref(),
             MAX_DOCUMENT_BYTES,
         )
+    }
+
+    /// Read the published typed-`ModelIR` linear recovery IR for a succeeded job.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error if the artifact is absent, corrupt, symlinked, or oversized.
+    pub fn read_result_recovery_ir(&self, job_id: &str) -> Result<Vec<u8>, DurableJobError> {
+        self.read_published(
+            job_id,
+            |event| event.result_recovery_ir.as_ref(),
+            MAX_RECOVERY_BYTES,
+        )
+    }
+
+    fn restore_model_ir_linear_checkpoint_locked(
+        &self,
+        current: &JobEventV1,
+        checkpoint_bytes: &[u8],
+    ) -> Result<RestoredModelIrLinearJobV1, DurableJobError> {
+        let request_bytes = self.read_blob_locked(&current.request, MAX_REQUEST_BYTES)?;
+        let request = parse_model_ir_linear_durable_job_request_v1(&request_bytes)
+            .map_err(|error| contract_source_error("job_request_invalid", &error))?;
+        let runtime = Runtime::new().map_err(|error| runtime_source_error(&error))?;
+        let prepared = runtime
+            .prepare_model_ir_linear_product(request.model_ir(), request.analysis_request())
+            .map_err(|error| runtime_source_error(&error))?;
+        let bindings = ModelIrLinearCheckpointBindingsV1 {
+            model_content_hash: request.model_ir().content_hash().to_owned(),
+            model_semantic_hash: request.model_ir().semantic_hash().to_owned(),
+            model_provenance_hash: request.model_ir().provenance_hash().to_owned(),
+            analysis_request_hash: request.analysis_request().request_hash().to_owned(),
+            assembly_hash: prepared.assembly_hash.clone(),
+            generated_request_hash: prepared.generated_request.request_hash().to_owned(),
+        };
+        let checkpoint = ModelIrLinearCheckpointV1::from_bytes(checkpoint_bytes)
+            .map_err(|error| runtime_source_error(&error))?;
+        checkpoint
+            .verify_bindings(&bindings)
+            .map_err(|error| runtime_source_error(&error))?;
+        Runtime::restore_sparse_linear(&prepared.generated_request, checkpoint.inner().as_bytes())
+            .map_err(|error| runtime_source_error(&error))?;
+        Ok(RestoredModelIrLinearJobV1 {
+            request,
+            prepared,
+            checkpoint,
+        })
     }
 
     fn read_published<F>(
@@ -1030,6 +1448,44 @@ impl DurableJobStoreV1 {
         })
     }
 
+    fn store_model_ir_linear_completion_blobs_locked(
+        &self,
+        completion: ModelIrLinearDurableJobCompletionV1<'_>,
+    ) -> Result<ModelIrLinearCompletionReferencesV1, DurableJobError> {
+        Ok(ModelIrLinearCompletionReferencesV1 {
+            checkpoint: self.store_blob_locked(
+                JobArtifactRoleV1::Checkpoint,
+                completion.checkpoint_bytes,
+                "application/vnd.structural.model-ir-linear-checkpoint",
+                MAX_CHECKPOINT_BYTES,
+            )?,
+            result_ir: self.store_blob_locked(
+                JobArtifactRoleV1::ResultIr,
+                completion.result_ir_bytes,
+                "application/json",
+                MAX_RESULT_BYTES,
+            )?,
+            result_recovery_ir: self.store_blob_locked(
+                JobArtifactRoleV1::ResultRecoveryIr,
+                completion.result_recovery_ir_bytes,
+                "application/json",
+                MAX_RECOVERY_BYTES,
+            )?,
+            report_ir: self.store_blob_locked(
+                JobArtifactRoleV1::ReportIr,
+                completion.report_ir_bytes,
+                "application/json",
+                MAX_REPORT_BYTES,
+            )?,
+            report_document: self.store_blob_locked(
+                JobArtifactRoleV1::ReportDocument,
+                completion.report_document_bytes,
+                "text/markdown",
+                MAX_DOCUMENT_BYTES,
+            )?,
+        })
+    }
+
     fn read_blob_locked(
         &self,
         reference: &JobArtifactReferenceV1,
@@ -1171,6 +1627,7 @@ fn validate_transition(previous: &JobEventV1, next: &JobEventV1) -> Result<(), D
         || next.job_id != previous.job_id
         || next.idempotency_key != previous.idempotency_key
         || next.request != previous.request
+        || next.analysis_profile != previous.analysis_profile
         || next.progress_total != previous.progress_total
         || next.created_unix_ms != previous.created_unix_ms
         || next.updated_unix_ms < previous.updated_unix_ms
@@ -1199,6 +1656,7 @@ fn valid_genesis(event: &JobEventV1) -> bool {
         && event.result_ir.is_none()
         && event.report_ir.is_none()
         && event.report_document.is_none()
+        && event.result_recovery_ir.is_none()
         && event.error_code.is_none()
         && event.created_unix_ms == event.updated_unix_ms
         && event.previous_event_hash.is_none()
@@ -1214,7 +1672,8 @@ fn valid_transition_shape(previous: &JobEventV1, next: &JobEventV1) -> bool {
         || (next.event_type != JobEventTypeV1::Completed
             && (next.result_ir != previous.result_ir
                 || next.report_ir != previous.report_ir
-                || next.report_document != previous.report_document))
+                || next.report_document != previous.report_document
+                || next.result_recovery_ir != previous.result_recovery_ir))
     {
         return false;
     }
@@ -1260,6 +1719,17 @@ fn valid_transition_shape(previous: &JobEventV1, next: &JobEventV1) -> bool {
                 && !next.cancel_requested
                 && next.lease.is_none()
                 && next.checkpoint == previous.checkpoint
+                && next.error_code.is_some()
+        }
+        JobEventTypeV1::NumericalFailurePublished => {
+            previous.status == DurableJobStatusV1::Running
+                && analysis_profile(previous) == DurableJobAnalysisProfileV1::ModelIrLinearCpuV1
+                && next.status == DurableJobStatusV1::Failed
+                && !previous.cancel_requested
+                && !next.cancel_requested
+                && next.lease.is_none()
+                && next.checkpoint.is_some()
+                && next.resume_contract_hash.is_some()
                 && next.error_code.is_some()
         }
         JobEventTypeV1::RetryQueued => {
@@ -1351,7 +1821,10 @@ fn validate_event_invariants(event: &JobEventV1) -> Result<(), DurableJobError> 
     }
     validate_job_id(&event.job_id)?;
     validate_stable_id(&event.idempotency_key, "/idempotency_key")?;
-    validate_artifact_reference(&event.request, MAX_REQUEST_BYTES)?;
+    validate_artifact_reference(
+        &event.request,
+        maximum_request_bytes(analysis_profile(event)),
+    )?;
     if event.request.role != "request"
         || event.progress_total == 0
         || event.progress_completed > event.progress_total
@@ -1393,6 +1866,11 @@ fn validate_event_invariants(event: &JobEventV1) -> Result<(), DurableJobError> 
         "report_document",
         MAX_DOCUMENT_BYTES,
     )?;
+    validate_optional_artifact(
+        event.result_recovery_ir.as_ref(),
+        "result_recovery_ir",
+        MAX_RECOVERY_BYTES,
+    )?;
     if event.checkpoint.is_some() != event.resume_contract_hash.is_some() {
         return Err(job_error(
             "job_event_checkpoint_identity_invalid",
@@ -1403,19 +1881,7 @@ fn validate_event_invariants(event: &JobEventV1) -> Result<(), DurableJobError> 
     if let Some(hash) = event.resume_contract_hash.as_ref() {
         validate_hash(hash, "/resume_contract_hash")?;
     }
-    let succeeded = event.status == DurableJobStatusV1::Succeeded;
-    if succeeded
-        != (event.result_ir.is_some()
-            && event.report_ir.is_some()
-            && event.report_document.is_some()
-            && event.progress_completed == event.progress_total)
-    {
-        return Err(job_error(
-            "job_event_terminal_artifacts_invalid",
-            "/status",
-            "only succeeded jobs may expose a complete terminal artifact set",
-        ));
-    }
+    validate_terminal_artifacts(event)?;
     if let Some(code) = event.error_code.as_ref() {
         validate_error_code(code)?;
     }
@@ -1428,10 +1894,40 @@ fn validate_event_invariants(event: &JobEventV1) -> Result<(), DurableJobError> 
     Ok(())
 }
 
+fn validate_terminal_artifacts(event: &JobEventV1) -> Result<(), DurableJobError> {
+    let succeeded = event.status == DurableJobStatusV1::Succeeded;
+    let terminal_artifacts_complete =
+        event.result_ir.is_some() && event.report_ir.is_some() && event.report_document.is_some();
+    let any_terminal_artifact = event.result_ir.is_some()
+        || event.report_ir.is_some()
+        || event.report_document.is_some()
+        || event.result_recovery_ir.is_some();
+    let profile_terminal_valid = match analysis_profile(event) {
+        DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1 => {
+            event.result_recovery_ir.is_none() && event.progress_completed == event.progress_total
+        }
+        DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => {
+            event.result_recovery_ir.is_some() && event.progress_completed <= event.progress_total
+        }
+    };
+    if (succeeded && !(terminal_artifacts_complete && profile_terminal_valid))
+        || (!succeeded && any_terminal_artifact)
+    {
+        Err(job_error(
+            "job_event_terminal_artifacts_invalid",
+            "/status",
+            "only succeeded jobs may expose a complete terminal artifact set",
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 fn view(event: &JobEventV1) -> DurableJobViewV1 {
     DurableJobViewV1 {
         job_id: event.job_id.clone(),
         request: event.request.clone(),
+        analysis_profile: analysis_profile(event),
         status: event.status,
         revision: event.revision,
         attempt: event.attempt,
@@ -1445,11 +1941,56 @@ fn view(event: &JobEventV1) -> DurableJobViewV1 {
         result_ir: event.result_ir.clone(),
         report_ir: event.report_ir.clone(),
         report_document: event.report_document.clone(),
+        result_recovery_ir: event.result_recovery_ir.clone(),
         error_code: event.error_code.clone(),
         created_unix_ms: event.created_unix_ms,
         updated_unix_ms: event.updated_unix_ms,
         can_resume: event.checkpoint.is_some() && event.status == DurableJobStatusV1::Checkpointed,
         terminal_event_hash: event.event_hash.clone(),
+    }
+}
+
+fn analysis_profile(event: &JobEventV1) -> DurableJobAnalysisProfileV1 {
+    event
+        .analysis_profile
+        .unwrap_or(DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1)
+}
+
+#[allow(clippy::trivially_copy_pass_by_ref)] // serde skip predicate requires `&T`.
+const fn is_legacy_analysis_profile(profile: &DurableJobAnalysisProfileV1) -> bool {
+    matches!(profile, DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1)
+}
+
+const fn maximum_request_bytes(profile: DurableJobAnalysisProfileV1) -> usize {
+    match profile {
+        DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1 => MAX_NDTHA_REQUEST_BYTES,
+        DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => MAX_REQUEST_BYTES,
+    }
+}
+
+fn require_analysis_profile(
+    event: &JobEventV1,
+    expected: DurableJobAnalysisProfileV1,
+) -> Result<(), DurableJobError> {
+    if analysis_profile(event) == expected {
+        Ok(())
+    } else {
+        Err(job_error(
+            "job_analysis_profile_mismatch",
+            "/analysis_profile",
+            "durable job operation does not match the submitted analysis profile",
+        ))
+    }
+}
+
+const fn sparse_failure_code(status: SparseLinearSolverStatus) -> &'static str {
+    match status {
+        SparseLinearSolverStatus::Converged => "model_ir_linear_unexpected_convergence",
+        SparseLinearSolverStatus::Singularity => "model_ir_linear_singularity",
+        SparseLinearSolverStatus::IndefiniteOperator => "model_ir_linear_indefinite_operator",
+        SparseLinearSolverStatus::Nonconvergence => "model_ir_linear_nonconvergence",
+        SparseLinearSolverStatus::IncrementLimit => "model_ir_linear_increment_limit",
+        SparseLinearSolverStatus::ResidualLimit => "model_ir_linear_residual_limit",
     }
 }
 
@@ -1523,6 +2064,7 @@ fn artifact_role(role: JobArtifactRoleV1) -> &'static str {
         JobArtifactRoleV1::ResultIr => "result_ir",
         JobArtifactRoleV1::ReportIr => "report_ir",
         JobArtifactRoleV1::ReportDocument => "report_document",
+        JobArtifactRoleV1::ResultRecoveryIr => "result_recovery_ir",
     }
 }
 
@@ -1646,6 +2188,28 @@ fn validate_completion_sizes(
         "/checkpoint",
     )?;
     require_size(completion.result_ir_bytes, MAX_RESULT_BYTES, "/result_ir")?;
+    require_size(completion.report_ir_bytes, MAX_REPORT_BYTES, "/report_ir")?;
+    require_size(
+        completion.report_document_bytes,
+        MAX_DOCUMENT_BYTES,
+        "/report_document",
+    )
+}
+
+fn validate_model_ir_linear_completion_sizes(
+    completion: ModelIrLinearDurableJobCompletionV1<'_>,
+) -> Result<(), DurableJobError> {
+    require_size(
+        completion.checkpoint_bytes,
+        MAX_CHECKPOINT_BYTES,
+        "/checkpoint",
+    )?;
+    require_size(completion.result_ir_bytes, MAX_RESULT_BYTES, "/result_ir")?;
+    require_size(
+        completion.result_recovery_ir_bytes,
+        MAX_RECOVERY_BYTES,
+        "/result_recovery_ir",
+    )?;
     require_size(completion.report_ir_bytes, MAX_REPORT_BYTES, "/report_ir")?;
     require_size(
         completion.report_document_bytes,

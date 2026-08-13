@@ -26,6 +26,13 @@ pub enum ModelIrLinearProductError {
     Io { code: u32, message: String },
 }
 
+impl ModelIrLinearProductError {
+    #[must_use]
+    pub const fn is_contract_error(&self) -> bool {
+        matches!(self, Self::Contract(_))
+    }
+}
+
 impl fmt::Display for ModelIrLinearProductError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -106,6 +113,26 @@ impl ModelIrLinearAnalysisOutcomeV1 {
     #[must_use]
     pub fn run_receipt_json(&self) -> &str {
         &self.run_receipt_json
+    }
+
+    #[must_use]
+    pub fn result_ir_json(&self) -> Option<&str> {
+        self.sparse_outcome.result_ir_json()
+    }
+
+    #[must_use]
+    pub fn result_recovery_ir_json(&self) -> Option<&str> {
+        self.result_recovery_json.as_deref()
+    }
+
+    #[must_use]
+    pub fn report_ir_json(&self) -> Option<&str> {
+        self.sparse_outcome.report_ir_json()
+    }
+
+    #[must_use]
+    pub fn report_document(&self) -> Option<&str> {
+        self.sparse_outcome.report_document()
     }
 
     #[must_use]

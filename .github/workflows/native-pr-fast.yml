@@ -734,11 +734,14 @@ jobs:
           python3 scripts/check_native_generalized_eigen_product.py
           python3 scripts/check_native_sparse_linear_product.py
           python3 scripts/check_native_model_ir_linear_product.py
+          python3 scripts/check_native_model_ir_linear_jobs.py
           python3 scripts/check_native_nonlinear_static_product.py
           python3 scripts/check_native_pdf_report.py
           python3 scripts/check_native_workbench.py
           cargo test --manifest-path native/Cargo.toml -p structural-runtime \
             --test durable_job --locked
+          cargo test --manifest-path native/Cargo.toml -p structural-runtime \
+            --test model_ir_linear_durable_job --locked
           cargo test --manifest-path native/Cargo.toml -p structural-cli --locked
           cargo test --manifest-path native/Cargo.toml -p structural-workbench --locked
 

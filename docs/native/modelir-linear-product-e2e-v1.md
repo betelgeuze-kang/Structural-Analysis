@@ -88,5 +88,7 @@ nodal loads, active-DOF solution and residual, and element recovery.
 It does not expose constrained reactions; ABI v1.13 intentionally returns the reduced active system
 only. It also excludes
 nonzero prescribed constraints, releases/offsets, self-weight, member loads, combinations/stages,
-shells, nonlinear constitutive epochs, reordering/preconditioning authority, durable service jobs,
-PDF specialization, HIP execution, design-code compliance, and C6 decommission.
+shells, nonlinear constitutive epochs, reordering/preconditioning authority, native Workbench
+integration, PDF specialization, HIP execution, design-code compliance, and C6 decommission.
+The separately bounded durable job and loopback-service C5 path is documented in
+`docs/native/modelir-linear-durable-job-v1.md`; it does not broaden this numerical claim.

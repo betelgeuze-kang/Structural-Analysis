@@ -65,13 +65,25 @@
       "status": "implemented",
       "cutover_gate": "C4",
       "owner": "structural-runtime",
-      "claim": "bounded typed-ModelIR frame3d/truss3d CPU linear checkpoint C4 implementation only: Rust strictly binds content/semantic/provenance, analysis-request, ABI v1.13 assembly, generated canonical-CSR request and the complete ABI v1.10 real PCG iteration state in one pointer-free SAMLPC01 little-endian envelope; every single-byte mutation and request/configuration drift fails with checkpoint-mismatch taxonomy, and resumed terminal artifacts are byte-identical to direct execution; this is a separate CPU implementation capability and does not promote the sequential numerical family past C1 without the approved protected-runner HIP C2 receipt; constrained reactions, shell/nonlinear graphs, durable jobs and C6 remain open"
+      "claim": "bounded typed-ModelIR frame3d/truss3d CPU linear checkpoint C4 implementation only: Rust strictly binds content/semantic/provenance, analysis-request, ABI v1.13 assembly, generated canonical-CSR request and the complete ABI v1.10 real PCG iteration state in one pointer-free SAMLPC01 little-endian envelope; every single-byte mutation and request/configuration drift fails with checkpoint-mismatch taxonomy, and resumed terminal artifacts are byte-identical to direct execution; this is a separate CPU implementation capability and does not promote the sequential numerical family past C1 without the approved protected-runner HIP C2 receipt; constrained reactions, shell/nonlinear graphs and C6 remain open, while durable job/service orchestration is tracked only as separate bounded C5 capabilities"
     },
     "modelir_linear_product_e2e": {
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded typed-ModelIR frame3d/truss3d CPU linear product E2E C5 implementation only: public model-linear-run/model-linear-resume commands strictly bind exact ModelIR and analysis identities, cross ABI v1.13 C++ assembly, derive canonical CSR, advance ABI v1.10 PCG, publish the exact C4 checkpoint, self-hashed ResultIR/ReportIR/Markdown and a terminal ABI v1.13 active-DOF plus element recovery artifact; clean-environment direct and real-iteration resumed 14-artifact directories are byte-identical with no Python or Node lookup and fallback 0; this separate CPU implementation capability does not promote sequential C2/C3 authority, while constrained reactions, shell/nonlinear graphs, durable service jobs, approved protected-runner HIP C2, engineering acceptance and C6 remain open"
+      "claim": "bounded typed-ModelIR frame3d/truss3d CPU linear product E2E C5 implementation only: public model-linear-run/model-linear-resume commands strictly bind exact ModelIR and analysis identities, cross ABI v1.13 C++ assembly, derive canonical CSR, advance ABI v1.10 PCG, publish the exact C4 checkpoint, self-hashed ResultIR/ReportIR/Markdown and a terminal ABI v1.13 active-DOF plus element recovery artifact; clean-environment direct and real-iteration resumed 14-artifact directories are byte-identical with no Python or Node lookup and fallback 0; this separate CPU implementation capability does not promote sequential C2/C3 authority, while constrained reactions, shell/nonlinear graphs, approved protected-runner HIP C2, engineering acceptance and C6 remain open; the durable job/service path is tracked only as separate bounded C5 capabilities"
+    },
+    "modelir_linear_durable_jobs": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-runtime",
+      "claim": "bounded typed-ModelIR frame3d/truss3d CPU linear durable-job C5 implementation only: one strict language-neutral envelope binds canonical ModelIR plus exact analysis control and all three model identities, Rust dispatches its immutable profile through an append-only self-hashed event chain, expired-lease reconciliation and exact completion re-projection of ABI v1.13 assembly, ABI v1.10 PCG checkpoint, ResultIR, typed recovery IR, ReportIR and Markdown; clean-process real-iteration restart/export is byte-identical to the direct public product with no Python or Node lookup; this separate orchestration capability cannot promote the sequential numerical families beyond C1 or supply C2/C3 authority, while tenant authorization, distributed claims, native Workbench integration, approved protected-runner HIP C2, engineering acceptance and C6 remain open"
+    },
+    "modelir_linear_service_api": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded loopback single-host single-tenant typed-ModelIR frame3d/truss3d CPU linear service C5 implementation only: Rust accepts the strict durable envelope at POST /v1/model-linear-jobs, dispatches through the existing distinct hashed client/worker role credentials and synchronous durable worker, serves profile-specific checkpoint bytes and verified recovery through /v1/jobs/{job_id}/result-recovery-ir, and proves one real-iteration resume plus exact projection in a socket-free service test with no Python or Node; this separate transport capability cannot promote numerical C2/C3 authority, while live process-kill evidence remains with the original NDTHA service profile and TLS, tenant isolation, distributed workers, native Workbench integration, approved protected-runner HIP C2, engineering acceptance and C6 remain open"
     },
     "sparse_linear_solver_cpu": {
       "status": "implemented",

@@ -9,6 +9,7 @@ use std::time::Duration;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
+use structural_contracts::model_linear_job::MODEL_IR_LINEAR_MAXIMUM_JOB_REQUEST_BYTES;
 use structural_contracts::product_ir::sha256_identity;
 use structural_runtime::{unix_time_millis, DurableJobError, DurableJobStoreV1};
 
@@ -17,7 +18,7 @@ use crate::{execute_next_durable_job, DurableJobCommandError};
 pub const NATIVE_JOB_API_PROFILE_V1: &str = "structural-native-job-http-api.v1";
 const CLAIM_BOUNDARY: &str = "loopback_single_host_single_tenant_static_role_credentials_not_tls_multitenant_distributed_worker_or_release_authority";
 const MAX_HEADER_BYTES: usize = 16 * 1024;
-const MAX_REQUEST_BODY_BYTES: usize = 16 * 1024 * 1024;
+const MAX_REQUEST_BODY_BYTES: usize = MODEL_IR_LINEAR_MAXIMUM_JOB_REQUEST_BYTES;
 const MAX_WORKER_BODY_BYTES: usize = 64 * 1024;
 const MAX_TOKEN_FILE_BYTES: usize = 512;
 const MIN_TOKEN_BYTES: usize = 32;
@@ -324,6 +325,12 @@ impl NativeJobHttpApiV1 {
             return self.handle_worker(request);
         }
         let segments = path_segments(&request.path);
+        if segments.as_slice() == ["v1", "model-linear-jobs"] {
+            if !self.authorize(ApiRole::Client, request) {
+                return unauthorized_response();
+            }
+            return self.handle_model_ir_linear_submit(request);
+        }
         if segments.first() != Some(&"v1") || segments.get(1) != Some(&"jobs") {
             return error_response(
                 404,
@@ -384,6 +391,41 @@ impl NativeJobHttpApiV1 {
         }
     }
 
+    fn handle_model_ir_linear_submit(&self, request: &HttpRequest) -> HttpResponse {
+        if request.method != "POST" {
+            return method_not_allowed("POST");
+        }
+        if !has_json_content_type(&request.headers) {
+            return error_response(
+                415,
+                "job_api_content_type_invalid",
+                "/headers/content-type",
+                "POST /v1/model-linear-jobs requires application/json",
+            );
+        }
+        if request.body.is_empty() || request.body.len() > MAX_REQUEST_BODY_BYTES {
+            return body_size_response();
+        }
+        let Some(idempotency_key) = request.headers.get("idempotency-key") else {
+            return error_response(
+                400,
+                "job_api_idempotency_key_missing",
+                "/headers/idempotency-key",
+                "Idempotency-Key is required",
+            );
+        };
+        match unix_time_millis()
+            .map_err(DurableJobCommandError::Store)
+            .and_then(|now| {
+                self.store
+                    .submit_model_ir_linear_envelope(idempotency_key, &request.body, now)
+                    .map_err(DurableJobCommandError::Store)
+            }) {
+            Ok(view) => job_response(202, "submitted", &view),
+            Err(error) => command_error_response(&error),
+        }
+    }
+
     fn handle_poll(&self, request: &HttpRequest, job_id: &str) -> HttpResponse {
         if request.method != "GET" {
             return method_not_allowed("GET");
@@ -424,8 +466,18 @@ impl NativeJobHttpApiV1 {
             return unexpected_body_response();
         }
         let result = match artifact {
-            "checkpoint" => self.store.read_checkpoint(job_id).map(|bytes| {
-                artifact_response("application/vnd.structural.ndtha-checkpoint", bytes)
+            "checkpoint" => self.store.poll(job_id).and_then(|view| {
+                self.store.read_checkpoint(job_id).map(|bytes| {
+                    let media_type = match view.analysis_profile {
+                        structural_runtime::DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1 => {
+                            "application/vnd.structural.ndtha-checkpoint"
+                        }
+                        structural_runtime::DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => {
+                            "application/vnd.structural.model-ir-linear-checkpoint"
+                        }
+                    };
+                    artifact_response(media_type, bytes)
+                })
             }),
             "result-ir" => self
                 .store
@@ -439,6 +491,10 @@ impl NativeJobHttpApiV1 {
                 .store
                 .read_report_document(job_id)
                 .map(|bytes| artifact_response("text/markdown; charset=utf-8", bytes)),
+            "result-recovery-ir" => self
+                .store
+                .read_result_recovery_ir(job_id)
+                .map(|bytes| artifact_response("application/json", bytes)),
             _ => {
                 return error_response(
                     404,
@@ -983,6 +1039,12 @@ fn command_error_response(error: &DurableJobCommandError) -> HttpResponse {
             "/worker",
             "native worker execution failed within its bounded authority",
         ),
+        DurableJobCommandError::ModelLinearProduct(error) => error_response(
+            if error.is_contract_error() { 422 } else { 500 },
+            "job_api_model_ir_linear_execution_failed",
+            "/worker",
+            "typed ModelIR linear worker execution failed within its bounded authority",
+        ),
         DurableJobCommandError::Invariant { code, .. } => error_response(
             400,
             code,
@@ -1164,13 +1226,20 @@ fn setup_store_error(code: &str) -> NativeJobApiError {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeMap;
     use std::io::Write as _;
     use std::net::{TcpListener, TcpStream};
+    use std::path::Path;
     use std::thread;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    use structural_contracts::model_linear_job::build_model_ir_linear_durable_job_request_v1;
+    use structural_runtime::DurableJobStoreV1;
 
     use super::{
-        constant_time_equal, read_http_request, validate_wire_path, NativeJobApiCredentialsV1,
-        NativeJobApiServerConfigV1, NativeJobApiServerV1, MAX_REQUEST_BODY_BYTES,
+        constant_time_equal, read_http_request, validate_wire_path, HttpRequest,
+        NativeJobApiCredentialsV1, NativeJobApiServerConfigV1, NativeJobApiServerV1,
+        NativeJobHttpApiV1, MAX_REQUEST_BODY_BYTES,
     };
 
     #[test]
@@ -1219,6 +1288,108 @@ mod tests {
             .err()
             .expect("non-loopback bind rejection");
         assert_eq!(error.code, "job_api_non_loopback_bind_rejected");
+    }
+
+    #[test]
+    fn model_ir_linear_submit_worker_and_recovery_route_are_socket_free_and_profile_bound() {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "structural-model-linear-http-{}-{nanos}",
+            std::process::id()
+        ));
+        let repository = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../..")
+            .canonicalize()
+            .expect("repository root");
+        let model = std::fs::read(
+            repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"),
+        )
+        .expect("model fixture");
+        let request = std::fs::read(
+            repository
+                .join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"),
+        )
+        .expect("request fixture");
+        let envelope = build_model_ir_linear_durable_job_request_v1(&model, &request)
+            .expect("durable envelope");
+        let client_token = "client-token-0123456789-abcdefghijkl";
+        let worker_token = "worker-token-0123456789-abcdefghijkl";
+        let api = NativeJobHttpApiV1 {
+            store: DurableJobStoreV1::open(&root).expect("job store"),
+            credentials: NativeJobApiCredentialsV1::from_tokens(
+                client_token.as_bytes(),
+                worker_token.as_bytes(),
+            )
+            .expect("credentials"),
+        };
+        let submitted = api.handle(&HttpRequest {
+            method: "POST".to_owned(),
+            path: "/v1/model-linear-jobs".to_owned(),
+            headers: BTreeMap::from([
+                ("authorization".to_owned(), format!("Bearer {client_token}")),
+                ("content-type".to_owned(), "application/json".to_owned()),
+                ("idempotency-key".to_owned(), "http-model-linear".to_owned()),
+            ]),
+            body: envelope.canonical_bytes().to_vec(),
+        });
+        assert_eq!(submitted.status, 202);
+        let submitted_json: serde_json::Value =
+            serde_json::from_slice(&submitted.body).expect("submit response");
+        assert_eq!(
+            submitted_json["job"]["analysis_profile"],
+            "model_ir_linear_cpu_v1"
+        );
+        let job_id = submitted_json["job"]["job_id"]
+            .as_str()
+            .expect("job id")
+            .to_owned();
+
+        for (worker_id, step_budget, expected_status) in [
+            ("http-worker-first", 1_u32, "checkpointed"),
+            ("http-worker-resume", u32::MAX, "succeeded"),
+        ] {
+            let advanced = api.handle(&HttpRequest {
+                method: "POST".to_owned(),
+                path: "/v1/worker/run-once".to_owned(),
+                headers: BTreeMap::from([
+                    ("authorization".to_owned(), format!("Bearer {worker_token}")),
+                    ("content-type".to_owned(), "application/json".to_owned()),
+                ]),
+                body: serde_json::to_vec(&serde_json::json!({
+                    "schema_version": "structural-native-job-worker-command.v1",
+                    "worker_id": worker_id,
+                    "lease_millis": 10_000,
+                    "step_budget": step_budget,
+                }))
+                .expect("worker command"),
+            });
+            assert_eq!(advanced.status, 200);
+            let value: serde_json::Value =
+                serde_json::from_slice(&advanced.body).expect("worker response");
+            assert_eq!(value["job"]["status"], expected_status);
+        }
+
+        let recovery = api.handle(&HttpRequest {
+            method: "GET".to_owned(),
+            path: format!("/v1/jobs/{job_id}/result-recovery-ir"),
+            headers: BTreeMap::from([(
+                "authorization".to_owned(),
+                format!("Bearer {client_token}"),
+            )]),
+            body: Vec::new(),
+        });
+        assert_eq!(recovery.status, 200);
+        assert_eq!(recovery.content_type, "application/json");
+        let value: serde_json::Value =
+            serde_json::from_slice(&recovery.body).expect("recovery JSON");
+        assert_eq!(
+            value["schema_version"],
+            "structural-model-ir-linear-result-recovery-ir.v1"
+        );
+        std::fs::remove_dir_all(root).expect("cleanup");
     }
 
     #[test]

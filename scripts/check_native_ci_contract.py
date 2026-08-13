@@ -232,6 +232,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "check_native_sparse_linear.py",
         "check_native_sparse_linear_product.py",
         "check_native_model_ir_linear_product.py",
+        "check_native_model_ir_linear_jobs.py",
         "check_native_nonlinear_static_product.py",
         "check_native_nonlinear_static_hip.py",
         "check_native_nonlinear_ndtha_hip.py",

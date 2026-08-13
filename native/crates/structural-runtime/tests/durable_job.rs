@@ -133,6 +133,17 @@ fn assert_terminal_artifacts_equal(left: &TerminalArtifacts, right: &TerminalArt
     assert_eq!(left.report_document, right.report_document);
 }
 
+fn assert_legacy_submission_event_shape(root: &Path, job_id: &str) {
+    let submitted_event = std::fs::read_to_string(
+        root.join("jobs")
+            .join(job_id)
+            .join("events/00000000000000000000.json"),
+    )
+    .expect("legacy submission event");
+    assert!(!submitted_event.contains("analysis_profile"));
+    assert!(!submitted_event.contains("result_recovery_ir"));
+}
+
 #[test]
 fn checkpointed_job_reopens_resumes_and_publishes_exact_terminal_artifacts() {
     let directory = TestDirectory::create("resume");
@@ -142,6 +153,7 @@ fn checkpointed_job_reopens_resumes_and_publishes_exact_terminal_artifacts() {
         .submit("resume-e2e", &request, 1_000)
         .expect("submitted job");
     assert_eq!(submitted.status, DurableJobStatusV1::Queued);
+    assert_legacy_submission_event_shape(&directory.0, &submitted.job_id);
     assert_eq!(
         store
             .submit("resume-e2e", &request, 1_001)

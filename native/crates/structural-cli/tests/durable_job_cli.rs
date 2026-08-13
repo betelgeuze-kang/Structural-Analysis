@@ -62,6 +62,11 @@ fn verify_export_receipt(directory: &Path) {
     let bytes = std::fs::read(directory.join("job-receipt.json")).expect("job receipt");
     let mut receipt: serde_json::Value = serde_json::from_slice(&bytes).expect("receipt JSON");
     assert_eq!(receipt["status"], "succeeded");
+    assert!(receipt.get("analysis_profile").is_none());
+    assert_eq!(
+        receipt["claim_boundary"],
+        "single_host_bounded_cpu_nonlinear_ndtha_durable_job_export_not_distributed_service_hip_or_release_authority"
+    );
     let receipt_hash = receipt["receipt_hash"]
         .as_str()
         .expect("receipt hash")
@@ -131,6 +136,8 @@ fn clean_environment_submit_poll_checkpoint_resume_and_export_match_direct_run()
         .expect("job id")
         .to_owned();
     assert_eq!(submitted["job"]["status"], "queued");
+    assert!(submitted["job"].get("analysis_profile").is_none());
+    assert!(submitted["job"].get("result_recovery_ir").is_none());
 
     let duplicate = successful_json(&[
         text("job"),

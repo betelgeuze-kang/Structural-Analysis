@@ -140,7 +140,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,
   `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts and terminal
   active-DOF/element recovery; direct and resumed 14-file terminal directories are byte-identical
-  without Python/Node lookup. Neither separate capability promotes D3 beyond sequential C1. The
+  without Python/Node lookup. A further separate C5 orchestration slice packages the exact model
+  and analysis request into one strict envelope, survives a real-iteration durable restart, and
+  re-projects ResultIR, typed recovery IR, ReportIR and Markdown before publication through CLI or
+  the bounded loopback service. None of these separate capabilities promotes D3 beyond sequential
+  C1. The
   same product-owned HIP candidate assembles a 38-DOF
   overlapping five-element graph without atomics in stable order and matches CPU with zero error
   while retaining element outputs on device; protected-runner C2 promotion remains open.
@@ -221,8 +225,8 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   request/model/real-state/execution identities, and public linear-run/linear-resume publish typed
   active/failure receipts or self-hashed ResultIR/ReportIR/Markdown artifacts. Direct and
   real-iteration resumed terminal directories are byte-identical with Python/Node lookup removed.
-  Arbitrary ModelIR sparse assembly beyond the separately bounded frame3d/truss3d composition,
-  durable jobs, PDF projection, protected C2 and C6 remain open.
+  Arbitrary ModelIR sparse assembly and durable jobs beyond the separately bounded
+  frame3d/truss3d composition, PDF projection, protected C2 and C6 remain open.
 - A bounded dense symmetric generalized-eigen reference family is C1. C++20 owns modal
   `K phi = omega^2 M phi` and linear-buckling `K phi = lambda Kg phi` for at most 128 DOFs,
   including strict definiteness/semidefiniteness, rigid and infinite-mode filtering, stable
@@ -268,9 +272,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: Rust now owns a bounded single-host CPU NDTHA slice through C5: strict idempotent
   submit/poll/cancel, append-only hash-chained events, content-addressed artifacts, OS-lock worker
   leases, expired-lease crash reconciliation, C4 checkpoint resume, deterministic terminal
-  re-projection and environment-cleared CLI export. The existing Python SQLite service remains
-  authoritative for tenant authorization, HTTP/API compatibility and solver families outside this
-  bounded request. HIP C2, distributed claim semantics and final C6 decommission remain open.
+  re-projection and environment-cleared CLI export. A separately tracked C5 profile admits the
+  bounded typed-ModelIR frame3d/truss3d CPU linear product through the same immutable job state,
+  real-iteration restart and exact ResultIR/recovery/ReportIR/Markdown re-projection. The loopback
+  static-role HTTP service exposes separate strict submission and recovery routes for that profile.
+  Historical NDTHA event bytes remain compatible and numerical assembly/solver authority remains
+  sequentially at C1 pending protected HIP C2. The existing Python SQLite service remains
+  authoritative for tenant authorization, general HTTP/API compatibility and solver families
+  outside these bounded requests. HIP C2, distributed claim semantics, native Workbench
+  integration and final C6 decommission remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -386,7 +396,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   Rust also owns bounded single-host durable submit/poll/cancel,
   expired-lease recovery, checkpoint continuation and export at C5. A separate loopback,
   single-tenant HTTP slice exposes submit/poll/cancel/work-once and immutable artifact retrieval
-  at C5 with distinct static client/worker credentials and clean-process restart evidence. TLS,
+  at C5 with distinct static client/worker credentials and clean-process restart evidence. The
+  bounded typed-ModelIR linear profile additionally reaches this lifecycle through strict
+  submit-model-linear and `/v1/model-linear-jobs`, including exact recovery retrieval; that
+  orchestration path does not promote its C1 numerical families. TLS,
   non-loopback deployment, tenant isolation and distributed claims remain open. The Rust-native
   Workbench separately owns a C++-verified deterministic topology view for every current positive
   ModelIR profile and one provenance-bound node-coordinate edit that reparses, C++-revalidates and

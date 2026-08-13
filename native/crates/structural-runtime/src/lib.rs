@@ -15,8 +15,9 @@ use std::path::Path;
 
 pub use checkpoint::{NonlinearNdthaCheckpoint, NonlinearNdthaCheckpointReceipt};
 pub use job::{
-    unix_time_millis, DurableJobClaimV1, DurableJobCompletionV1, DurableJobError,
-    DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1, JobArtifactReferenceV1,
+    unix_time_millis, DurableJobAnalysisProfileV1, DurableJobClaimV1, DurableJobCompletionV1,
+    DurableJobError, DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1,
+    JobArtifactReferenceV1, ModelIrLinearDurableJobCompletionV1,
 };
 pub use model_checkpoint::{
     ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
@@ -287,40 +288,7 @@ impl Runtime {
         let result_ir = if state.execution_status == SparseLinearExecutionStatus::Terminal
             && state.solver_status == SparseLinearSolverStatus::Converged
         {
-            let solution = state.terminal_solution().map_err(RuntimeError::from)?;
-            let receipt = checkpoint.receipt();
-            let model_hash = sparse_linear_model_hash_v1(request)?;
-            let execution_hash = sparse_linear_execution_hash_v1(request)?;
-            if receipt.model_hash != model_hash || receipt.execution_hash != execution_hash {
-                return Err(RuntimeError {
-                    code: 1301,
-                    message: "sparse checkpoint identity drifted before ResultIR projection"
-                        .to_owned(),
-                });
-            }
-            Some(build_sparse_linear_result_ir_v1(
-                request,
-                ResultIdentityV1 {
-                    request_hash: request.request_hash().to_owned(),
-                    model_hash,
-                    state_hash: receipt.state_hash,
-                    execution_hash,
-                    checkpoint_hash: receipt.checkpoint_hash,
-                },
-                SparseLinearResultSummaryV1 {
-                    order: value.order,
-                    nonzero_count: u64::try_from(value.values.len()).map_err(|_| RuntimeError {
-                        code: 1900,
-                        message: "sparse nonzero count exceeds u64".to_owned(),
-                    })?,
-                    iterations: solution.iterations,
-                    initial_residual_inf: solution.initial_residual_inf,
-                    final_residual_inf: solution.final_residual_inf,
-                    final_residual_l2: solution.final_residual_l2,
-                    last_increment_inf: solution.last_increment_inf,
-                },
-                solution.solution,
-            )?)
+            Some(Self::finish_sparse_linear_product(request, &checkpoint)?)
         } else {
             None
         };
@@ -328,6 +296,55 @@ impl Runtime {
             checkpoint,
             result_ir,
         })
+    }
+
+    /// Project one exact converged sparse checkpoint into deterministic `ResultIR`.
+    ///
+    /// # Errors
+    ///
+    /// Returns checkpoint-mismatch or state-conflict semantics unless the checkpoint is bound to
+    /// the request and contains a converged terminal ABI state.
+    pub fn finish_sparse_linear_product(
+        request: &SparseLinearAnalysisRequestDocumentV1,
+        checkpoint: &SparseLinearCheckpointV1,
+    ) -> Result<SparseLinearResultIrDocumentV1, RuntimeError> {
+        checkpoint.verify_request(request)?;
+        let state = checkpoint.state();
+        let solution = state.terminal_solution().map_err(RuntimeError::from)?;
+        let receipt = checkpoint.receipt();
+        let model_hash = sparse_linear_model_hash_v1(request)?;
+        let execution_hash = sparse_linear_execution_hash_v1(request)?;
+        if receipt.model_hash != model_hash || receipt.execution_hash != execution_hash {
+            return Err(RuntimeError {
+                code: 1301,
+                message: "sparse checkpoint identity drifted before ResultIR projection".to_owned(),
+            });
+        }
+        let value = request.request();
+        build_sparse_linear_result_ir_v1(
+            request,
+            ResultIdentityV1 {
+                request_hash: request.request_hash().to_owned(),
+                model_hash,
+                state_hash: receipt.state_hash,
+                execution_hash,
+                checkpoint_hash: receipt.checkpoint_hash,
+            },
+            SparseLinearResultSummaryV1 {
+                order: value.order,
+                nonzero_count: u64::try_from(value.values.len()).map_err(|_| RuntimeError {
+                    code: 1900,
+                    message: "sparse nonzero count exceeds u64".to_owned(),
+                })?,
+                iterations: solution.iterations,
+                initial_residual_inf: solution.initial_residual_inf,
+                final_residual_inf: solution.final_residual_inf,
+                final_residual_l2: solution.final_residual_l2,
+                last_increment_inf: solution.last_increment_inf,
+            },
+            solution.solution,
+        )
+        .map_err(Into::into)
     }
 
     /// Canonically bind one complete Newton state to its exact nonlinear-static request.

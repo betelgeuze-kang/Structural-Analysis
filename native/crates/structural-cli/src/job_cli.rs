@@ -1,5 +1,7 @@
 use std::collections::BTreeMap;
 use std::ffi::OsString;
+use std::fs::{File, OpenOptions};
+use std::io::Read;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -13,6 +15,12 @@ const EXIT_USAGE_OR_INVALID: u8 = 2;
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum JobCommand {
     Submit {
+        request_path: PathBuf,
+        store_directory: PathBuf,
+        idempotency_key: String,
+    },
+    SubmitModelLinear {
+        model_path: PathBuf,
         request_path: PathBuf,
         store_directory: PathBuf,
         idempotency_key: String,
@@ -71,6 +79,24 @@ fn execute_job_command(command: &JobCommand) -> Result<(), DurableJobCommandErro
             })?;
             let store = DurableJobStoreV1::open(store_directory)?;
             let view = store.submit(idempotency_key, &request, unix_time_millis()?)?;
+            print_view(&view);
+        }
+        JobCommand::SubmitModelLinear {
+            model_path,
+            request_path,
+            store_directory,
+            idempotency_key,
+        } => {
+            let model = read_bounded_regular_file(model_path, 64 * 1024 * 1024, "model")?;
+            let request =
+                read_bounded_regular_file(request_path, 4 * 1024 * 1024, "analysis request")?;
+            let store = DurableJobStoreV1::open(store_directory)?;
+            let view = store.submit_model_ir_linear(
+                idempotency_key,
+                &model,
+                &request,
+                unix_time_millis()?,
+            )?;
             print_view(&view);
         }
         JobCommand::Poll {
@@ -155,6 +181,11 @@ fn print_command_error(error: &DurableJobCommandError) {
             "/worker".to_owned(),
             error.to_string(),
         ),
+        DurableJobCommandError::ModelLinearProduct(error) => (
+            "durable_job_model_ir_linear_product_failed".to_owned(),
+            "/worker".to_owned(),
+            error.to_string(),
+        ),
         DurableJobCommandError::Invariant { code, detail } => {
             (code.clone(), "/job".to_owned(), detail.clone())
         }
@@ -179,6 +210,16 @@ fn parse_job_arguments(arguments: &[OsString]) -> Option<JobCommand> {
             let flags = parse_flags(arguments, 3)?;
             Some(JobCommand::Submit {
                 request_path: positional(arguments, 2)?,
+                store_directory: path_flag(&flags, "--store")?,
+                idempotency_key: string_flag(&flags, "--idempotency-key")?,
+            })
+            .filter(|_| flags.len() == 2)
+        }
+        "submit-model-linear" if arguments.len() >= 8 => {
+            let flags = parse_flags(arguments, 4)?;
+            Some(JobCommand::SubmitModelLinear {
+                model_path: positional(arguments, 2)?,
+                request_path: positional(arguments, 3)?,
                 store_directory: path_flag(&flags, "--store")?,
                 idempotency_key: string_flag(&flags, "--idempotency-key")?,
             })
@@ -310,6 +351,91 @@ fn io_command_error(code: &str, detail: &str) -> DurableJobCommandError {
     }
 }
 
+fn read_bounded_regular_file(
+    path: &std::path::Path,
+    maximum: u64,
+    label: &str,
+) -> Result<Vec<u8>, DurableJobCommandError> {
+    let path_metadata = std::fs::symlink_metadata(path).map_err(|error| {
+        io_command_error(
+            "durable_job_input_metadata_failed",
+            &format!("could not inspect {label}: {error}"),
+        )
+    })?;
+    if path_metadata.file_type().is_symlink()
+        || !path_metadata.is_file()
+        || path_metadata.len() == 0
+        || path_metadata.len() > maximum
+    {
+        return Err(io_command_error(
+            "durable_job_input_type_or_size_invalid",
+            &format!("{label} must be one bounded regular non-symlink file"),
+        ));
+    }
+    let mut options = OpenOptions::new();
+    options.read(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NOFOLLOW);
+    }
+    let file: File = options.open(path).map_err(|error| {
+        io_command_error(
+            "durable_job_input_read_failed",
+            &format!("could not open {label} without following symlinks: {error}"),
+        )
+    })?;
+    let opened_metadata = file.metadata().map_err(|error| {
+        io_command_error(
+            "durable_job_input_metadata_failed",
+            &format!("could not inspect opened {label}: {error}"),
+        )
+    })?;
+    if !opened_metadata.is_file() || opened_metadata.len() == 0 || opened_metadata.len() > maximum {
+        return Err(io_command_error(
+            "durable_job_input_type_or_size_invalid",
+            &format!("opened {label} is not one bounded regular file"),
+        ));
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        if path_metadata.dev() != opened_metadata.dev()
+            || path_metadata.ino() != opened_metadata.ino()
+        {
+            return Err(io_command_error(
+                "durable_job_input_changed",
+                &format!("{label} changed while being opened"),
+            ));
+        }
+    }
+    let mut bytes = Vec::with_capacity(
+        usize::try_from(opened_metadata.len().min(maximum)).map_err(|_| {
+            io_command_error(
+                "durable_job_input_size_invalid",
+                &format!("{label} length does not fit the memory bound"),
+            )
+        })?,
+    );
+    let mut bounded = file.take(maximum.saturating_add(1));
+    bounded.read_to_end(&mut bytes).map_err(|error| {
+        io_command_error(
+            "durable_job_input_read_failed",
+            &format!("could not read {label}: {error}"),
+        )
+    })?;
+    if bytes.is_empty()
+        || u64::try_from(bytes.len()).ok() != Some(opened_metadata.len())
+        || bytes.len() > usize::try_from(maximum).unwrap_or(usize::MAX)
+    {
+        return Err(io_command_error(
+            "durable_job_input_changed",
+            &format!("{label} changed while being read"),
+        ));
+    }
+    Ok(bytes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{parse_job_arguments, JobCommand};
@@ -335,6 +461,24 @@ mod tests {
                 request_path: "request.json".into(),
                 store_directory: "jobs".into(),
                 idempotency_key: "case-1".to_owned(),
+            })
+        );
+        assert_eq!(
+            parse_job_arguments(&args(&[
+                "job",
+                "submit-model-linear",
+                "model.json",
+                "analysis.json",
+                "--store",
+                "jobs",
+                "--idempotency-key",
+                "model-case-1"
+            ])),
+            Some(JobCommand::SubmitModelLinear {
+                model_path: "model.json".into(),
+                request_path: "analysis.json".into(),
+                store_directory: "jobs".into(),
+                idempotency_key: "model-case-1".to_owned(),
             })
         );
         assert_eq!(
