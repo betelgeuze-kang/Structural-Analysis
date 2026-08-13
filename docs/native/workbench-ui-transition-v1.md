@@ -26,6 +26,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   status of any matching exact/canonicalized round-trip row as approximated, strictly reparses and
   C++-revalidates the result, and atomically publishes a new model plus self-hashed receipt. Visual
   dragging and broader model editing remain open.
+- `model-edit-nodal-load`: deterministic replacement of the six finite SI components of one
+  existing nodal load inside one named load pattern. Rust edits only the canonical C++ snapshot,
+  binds both identities plus previous/new components and source hashes, conservatively marks a
+  matching load-pattern round-trip row approximated, then strictly reparses and C++-revalidates the
+  result before create-new publication. Pattern/load creation, deletion, retargeting, combinations,
+  self-weight, visual manipulation, and broader model editing remain open.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -174,9 +180,9 @@ well. Viewer report PDF verification plus Viewer sample-workflow, performance, a
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
-bounded command-level node-coordinate edit, one bounded response-history table, and one exact-profile
-selected-step deformed-shape overlay, not a general visual model editor or arbitrary-nodal-field 3D
-result explorer.
+bounded command-level node-coordinate edit, one bounded existing-nodal-load component edit, one
+bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
+general visual model editor or arbitrary-nodal-field 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
 
@@ -190,9 +196,10 @@ open.
 The bounded general-ModelIR terminal topology view is C5-implemented for the eight current positive
 profiles and all four fixed projections. It closes native semantic-snapshot geometry inspection,
 not solver selection/execution, perspective interaction, or deformed/modal/contour result
-exploration. The separate C++-revalidated node-coordinate command closes only one provenance-bound
-edit operation; visual dragging and general property/material/section/load/constraint/topology
-editing remain open, so the composite visual parity row stays open.
+exploration. The separate C++-revalidated node-coordinate and existing-nodal-load component
+commands close only two provenance-bound edit operations; visual dragging, entity creation or
+deletion, and general property/material/section/load-combination/constraint/topology editing remain
+open, so the composite visual parity row stays open.
 
 The bounded NDTHA response-history view is C5-implemented for four closed response channels and
 arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table

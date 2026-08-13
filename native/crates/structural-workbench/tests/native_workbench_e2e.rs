@@ -226,6 +226,132 @@ fn assert_rejected_node_edit(
     assert!(!destination.exists());
 }
 
+fn run_nodal_load_edit(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    components: [&str; 6],
+) -> Output {
+    run_workbench(&[
+        text("model-edit-nodal-load"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--load"),
+        text(nodal_load_id),
+        text("--components"),
+        text(components[0]),
+        text(components[1]),
+        text(components[2]),
+        text(components[3]),
+        text(components[4]),
+        text(components[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn assert_published_nodal_load_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let load = edited
+        .value()
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .and_then(|patterns| {
+            patterns
+                .iter()
+                .find(|pattern| pattern.get("id").and_then(Value::as_str) == Some("LC_WEAK"))
+        })
+        .and_then(|pattern| pattern.get("nodal_loads"))
+        .and_then(Value::as_array)
+        .and_then(|loads| {
+            loads
+                .iter()
+                .find(|load| load.get("id").and_then(Value::as_str) == Some("L_WEAK_N2"))
+        })
+        .expect("edited nodal load");
+    for (key, expected) in [
+        ("FX", 0.0_f64),
+        ("FY", -20_000.0),
+        ("FZ", 0.0),
+        ("MX", 0.0),
+        ("MY", 0.0),
+        ("MZ", 0.0),
+    ] {
+        assert_eq!(
+            load["components_si"][key]
+                .as_f64()
+                .expect("finite edited component")
+                .to_bits(),
+            expected.to_bits()
+        );
+    }
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-nodal-load.v1")
+        .is_some());
+
+    let receipt_bytes = std::fs::read(destination.join("edit-receipt.json")).expect("edit receipt");
+    let mut receipt: Value = serde_json::from_slice(&receipt_bytes).expect("edit receipt JSON");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-model-edit-receipt.v1"
+    );
+    assert_eq!(receipt["operation"], "nodal_load_components");
+    assert_eq!(receipt["load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["nodal_load_id"], "L_WEAK_N2");
+    assert_eq!(receipt["previous_components_si"]["FY"], -10_000.0);
+    assert_eq!(receipt["edited_components_si"]["FY"], -20_000.0);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    let expected_receipt_hash = receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .and_then(|value| value.as_str().map(ToOwned::to_owned))
+        .expect("receipt self-hash");
+    let unsigned = canonicalize_model_ir_v2(&receipt).expect("unsigned canonical receipt");
+    assert_eq!(expected_receipt_hash, sha256_identity(unsigned.as_bytes()));
+}
+
+fn assert_rejected_nodal_load_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    components: [&str; 6],
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_nodal_load_edit(
+        source,
+        &destination,
+        load_pattern_id,
+        nodal_load_id,
+        components,
+    );
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
 #[test]
 #[allow(clippy::too_many_lines)]
 fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
@@ -521,6 +647,162 @@ fn node_coordinate_edit_preserves_analysis_blockers_without_promotion() {
     let view = String::from_utf8(view.stdout).expect("blocked edited model view");
     assert!(view.contains("Analysis ready: false\n"));
     assert!(view.contains("Blocking features: feature.edit-visible-not-runnable\n"));
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nodal_load_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("load-edit-first");
+    let second = temporary.0.join("load-edit-second");
+    for destination in [&first, &second] {
+        let output = run_nodal_load_edit(
+            &source,
+            destination,
+            "LC_WEAK",
+            "L_WEAK_N2",
+            ["0", "-20000", "0", "0", "0", "0"],
+        );
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("published edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first load edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second load edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after load edit"),
+        source_before
+    );
+    assert_published_nodal_load_edit(&first);
+
+    let repeated = run_nodal_load_edit(
+        &source,
+        &first,
+        "LC_WEAK",
+        "L_WEAK_N2",
+        ["0", "-20000", "0", "0", "0", "0"],
+    );
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, pattern_id, load_id, components, expected_code) in [
+        (
+            "missing-pattern",
+            "MISSING",
+            "L_WEAK_N2",
+            ["0", "-20000", "0", "0", "0", "0"],
+            "workbench_model_edit_load_pattern_missing",
+        ),
+        (
+            "missing-load",
+            "LC_WEAK",
+            "MISSING",
+            ["0", "-20000", "0", "0", "0", "0"],
+            "workbench_model_edit_nodal_load_missing",
+        ),
+        (
+            "load-no-op",
+            "LC_WEAK",
+            "L_WEAK_N2",
+            ["0", "-10000", "0", "0", "0", "0"],
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "load-signed-zero-no-op",
+            "LC_WEAK",
+            "L_WEAK_N2",
+            ["-0", "-10000", "0", "0", "0", "0"],
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "zero-load-pattern",
+            "LC_WEAK",
+            "L_WEAK_N2",
+            ["0", "0", "0", "0", "0", "0"],
+            "workbench_model_edit_semantics_invalid",
+        ),
+    ] {
+        assert_rejected_nodal_load_edit(
+            &source,
+            &temporary.0,
+            name,
+            pattern_id,
+            load_id,
+            components,
+            expected_code,
+        );
+    }
+}
+
+#[test]
+fn nodal_load_edit_preserves_analysis_blockers_without_promotion() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let mut blocked: Value = serde_json::from_slice(
+        &std::fs::read(fixture).expect("source ModelIR fixture for blocked load edit"),
+    )
+    .expect("source ModelIR JSON for blocked load edit");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.load-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Editing a load must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:LC_WEAK",
+        "entity_kind": "load_pattern",
+        "model_ir_entity_id": "LC_WEAK",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let source = temporary.0.join("blocked-load-source.model-ir.json");
+    std::fs::write(
+        &source,
+        serde_json::to_vec(&blocked).expect("blocked load edit source bytes"),
+    )
+    .expect("write blocked load edit source");
+    let destination = temporary.0.join("blocked-load-edit");
+    let output = run_nodal_load_edit(
+        &source,
+        &destination,
+        "LC_WEAK",
+        "L_WEAK_N2",
+        ["0", "-20000", "0", "0", "0", "0"],
+    );
+    assert_success(&output);
+
+    let receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("blocked load edit receipt"),
+    )
+    .expect("blocked load edit receipt JSON");
+    assert_eq!(receipt["analysis_ready"], false);
+    assert_eq!(
+        receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.load-edit-visible-not-runnable"])
+    );
+    let edited: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("model-ir.json")).expect("blocked load edited model"),
+    )
+    .expect("blocked load edited ModelIR JSON");
+    assert_eq!(
+        edited["roundtrip_map"][0]["mapping_status"], "approximated",
+        "edited round-trip map: {}",
+        edited["roundtrip_map"]
+    );
 }
 
 fn import_arguments<'a>(

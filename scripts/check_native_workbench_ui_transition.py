@@ -16,6 +16,7 @@ REQUIRED_PATHS = (
     Path("native/capabilities.json"),
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
+    Path("native/crates/structural-workbench/src/model_edit.rs"),
     Path("native/crates/structural-workbench/src/deformed_view.rs"),
     Path("native/crates/structural-workbench/src/model_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
@@ -81,6 +82,7 @@ REQUIRED_PATHS = (
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/localized-modelir-topology-view-v1.md"),
     Path("docs/native/localized-terminal-result-views-v1.md"),
+    Path("docs/native/modelir-nodal-load-edit-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
     Path("vite.config.ts"),
@@ -138,6 +140,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
+    "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_ndtha_terminal_response_history_view": ("c5_implemented", False),
     "bounded_fixed_guided_ndtha_deformed_shape_view": ("c5_implemented", False),
     "bounded_terminal_utf8_ndtha_result_views_en_us_ko_kr": (
@@ -265,7 +271,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "report",
     ]:
         blockers.append("workbench_ui_native_core_flow_invalid")
-    if native.get("model_flow") != ["model-view", "model-edit-node"]:
+    if native.get("model_flow") != [
+        "model-view",
+        "model-edit-node",
+        "model-edit-nodal-load",
+    ]:
         blockers.append("workbench_ui_native_model_flow_invalid")
     if native.get("operator_flow") != [
         "inspect",
@@ -1435,6 +1445,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "bounded NDTHA response-history view is C5-implemented",
             "fixed-guided deformed-shape view is C5-implemented",
             "localized NDTHA result views are C5-implemented",
+            "model-edit-nodal-load",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

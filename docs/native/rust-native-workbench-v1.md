@@ -32,6 +32,9 @@ an explicit analysis blocker instead of treating visibility as solver readiness.
 The independent provenance-bound ModelIR node-coordinate edit is also broader than the analysis
 profile. It changes one existing node in the verified C++ snapshot, preserves upstream provenance,
 strictly reparses and C++-revalidates the result, and publishes only to a new artifact directory.
+The sibling nodal-load edit replaces the six finite SI components of one existing load inside one
+named pattern under the same source-validation, provenance, create-new, and C++ revalidation rules.
+It cannot create, delete, retarget, or combine loads.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -82,6 +85,9 @@ invalid transition, or future session without matching artifacts fails closed.
 structural-workbench model-view MODEL.json --projection isometric
 structural-workbench model-edit-node MODEL.json --node N2 \
   --coordinates 2 1 1 --output-dir EDITED-MODEL
+structural-workbench model-edit-nodal-load MODEL.json \
+  --load-pattern LC_WEAK --load L_WEAK_N2 \
+  --components 0 -20000 0 0 0 0 --output-dir EDITED-LOAD-MODEL
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -157,8 +163,12 @@ The provenance-bound ModelIR node-coordinate edit changes exactly one existing n
 coordinates. It retains upstream provenance, marks any matching exact/canonicalized round-trip
 mapping as approximated, and binds the source and edited content/semantic/provenance identities
 into a self-hashed receipt.
-It does not provide visual dragging or general property, constraint, load, topology, or solver
-editing; see `docs/native/modelir-node-coordinate-edit-v1.md`.
+The sibling nodal-load edit replaces exactly six SI force/moment components for one existing load
+inside one named pattern under the same provenance and C++ revalidation policy; its matching
+load-pattern round-trip row is conservatively marked approximated. Neither command provides visual
+dragging, creation/deletion, retargeting, combinations, or general property, constraint, topology,
+or solver editing; see `docs/native/modelir-node-coordinate-edit-v1.md` and
+`docs/native/modelir-nodal-load-edit-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is
