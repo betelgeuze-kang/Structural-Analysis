@@ -38,6 +38,7 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         ".github/workflows/release-publish.yml",
         ".github/workflows/native-pr-fast.yml",
         ".github/workflows/native-nightly-quality.yml",
+        "native/decommission/legacy-frontend-build-contract-v1.json",
         "scripts/build_native_distribution.sh",
         "scripts/build_native_benchmark_catalog.sh",
         "scripts/build_native_workbench_evidence_bundle.sh",

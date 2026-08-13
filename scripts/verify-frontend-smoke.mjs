@@ -28,6 +28,6 @@ function runCommand(parts) {
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
-runCommand(['node', './scripts/verify-frontend-build-contract.mjs'])
+runCommand([npmCommand, 'run', 'verify:frontend-contract'])
 runCommand([npmCommand, 'ci'])
 runCommand([npmCommand, 'run', 'build'])

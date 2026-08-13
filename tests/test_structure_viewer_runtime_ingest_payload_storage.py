@@ -455,9 +455,9 @@ def test_runtime_payload_storage_is_wired_into_viewer_and_ci() -> None:
     workflow = (ROOT / ".github/workflows/runtime-input-viewer-ci.yml").read_text(
         encoding="utf-8"
     )
-    frontend_contract = (ROOT / "scripts/verify-frontend-build-contract.mjs").read_text(
-        encoding="utf-8"
-    )
+    frontend_contract = (
+        ROOT / "native/decommission/legacy-frontend-build-contract-v1.json"
+    ).read_text(encoding="utf-8")
 
     assert "from './viewer-storage.js'" in index
     assert "createBrowserRuntimeIngestPayloadStorage(window)" in index
@@ -505,6 +505,6 @@ def test_runtime_payload_storage_is_wired_into_viewer_and_ci() -> None:
         in workflow
     )
     assert (
-        "'src/structure-viewer/viewer-runtime-ingest-payload-storage.js'"
+        '"src/structure-viewer/viewer-runtime-ingest-payload-storage.js"'
         in frontend_contract
     )

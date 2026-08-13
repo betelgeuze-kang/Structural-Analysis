@@ -29,12 +29,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
+- `structural-frontend-contract check`: a Rust-native frontend build-contract checker driven by the
+  language-neutral transition map under `native/decommission`. It replaces the prior Node manifest
+  checker with strict duplicate-key JSON parsing, exact dependency/script pins, non-symlink path
+  inventory, and a canonical self-hashed read-only receipt. It does not build or execute the UI.
 
 This closes bounded results inspection, review/export, and catalog and copied-evidence browsing for
 the current native product. The canonical benchmark JSON and its Rust-native benchmark-catalog
 builder now live under `native/catalog`; the legacy React browser consumes that native-owned file.
 Both catalog and evidence-bundle generators and their contract tests are Rust-native; the legacy
-npm commands are wrappers only. It does not provide a
+npm commands are wrappers only. The legacy frontend static build-contract check is Rust-native as
+well; browser, viewer, and Vite execution remain Node-owned. It does not provide a
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
 
@@ -42,7 +47,7 @@ before language-neutral golden ownership is complete.
 
 `native/decommission/workbench-ui-transition-v1.json` freezes the current source and CI inventory.
 The product deployment, benchmark-catalog generation, and evidence-bundle generation authorities
-have left React/Node,
+have left React/Node, and the static frontend build-contract authority has left Node,
 but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
 verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node
 scripts, and their package manifest remain active verification or parity material. They are not a

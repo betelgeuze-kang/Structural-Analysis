@@ -181,6 +181,12 @@
       "owner": "structural-catalog",
       "claim": "bounded Rust-native benchmark-catalog C5 only: a language-neutral source map replaces the former Node directory and first-target rules; structural-catalog check/build reads sorted bounded regular non-symlink strict JSON from the 21 tracked open-data reports and five PEER specimen snapshots, rejects duplicate keys, invalid checksums, duplicate IDs, unsafe paths and nondeterministic output, preserves unverified license/truth/reference/runner fields, reproduces all 26 prior case projections exactly, atomically publishes for an explicit RFC 3339 timestamp, and emits a canonical self-hashed receipt with network and command execution counts 0; Cargo and installed-package E2E own generation parity with Python/Node lookup 0, while acquisition freshness, license verification, runner/reference attachment, broader language-neutral fixture/oracle ownership, approved HIP C2 and C6 remain open"
     },
+    "native_frontend_contract": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 contract only: a language-neutral source map and Rust-native structural-frontend-contract checker replace the former Node static manifest verifier; it reads strict duplicate-key-safe package and lock JSON plus a bounded non-symlink required-file inventory, enforces the existing exact dependency and selected script pins, emits a canonical self-hashed read-only receipt with command and network execution counts 0, and runs without node_modules; it does not build or execute React/Vite, prove browser behavior, provide native UI feature parity, authorize legacy deletion, or close C5/C6"
+    },
     "native_distribution": {
       "status": "implemented",
       "cutover_gate": "C5",

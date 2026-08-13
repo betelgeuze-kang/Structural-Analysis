@@ -65,7 +65,9 @@ def test_structure_viewer_project_manifest_verifier_reports_registered_release_t
 def test_structure_viewer_project_manifest_verifier_is_wired_to_package_script_and_quality_gate() -> None:
     package_json = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
-    contract = (ROOT / "scripts" / "verify-frontend-build-contract.mjs").read_text(encoding="utf-8")
+    contract = (
+        ROOT / "native/decommission/legacy-frontend-build-contract-v1.json"
+    ).read_text(encoding="utf-8")
 
     assert (
         package_json["scripts"]["verify:viewer-manifest"]

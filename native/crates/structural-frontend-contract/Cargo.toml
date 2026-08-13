@@ -1,0 +1,21 @@
+[package]
+name = "structural-frontend-contract"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Strict native checker for the transitional legacy frontend build contract"
+
+[[bin]]
+name = "structural-frontend-contract"
+path = "src/main.rs"
+
+[dependencies]
+libc = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+structural-contracts = { path = "../structural-contracts" }
+
+[lints]
+workspace = true

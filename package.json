@@ -13,7 +13,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build && node ./scripts/verify-workbench-viewer-delivery.mjs",
     "preview": "vite preview",
-    "verify:frontend-contract": "node ./scripts/verify-frontend-build-contract.mjs",
+    "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
     "verify:viewer-manifest": "node ./scripts/verify-structure-viewer-project-manifest.mjs",
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",

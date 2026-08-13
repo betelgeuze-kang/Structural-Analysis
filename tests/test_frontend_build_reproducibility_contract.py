@@ -17,7 +17,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
 
     assert package_json["name"] == "structural-analysis"
     assert package_json["packageManager"] == "npm@10.8.2"
-    assert package_json["scripts"]["verify:frontend-contract"] == "node ./scripts/verify-frontend-build-contract.mjs"
+    assert (
+        package_json["scripts"]["verify:frontend-contract"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- check --root ."
+    )
     assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
     assert package_json["scripts"]["verify:viewer-manifest"] == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
     assert (
@@ -73,9 +77,9 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "package-lock.json" in docs_text
 
 
-def test_frontend_contract_helper_runs_without_installed_packages() -> None:
+def test_native_frontend_contract_helper_runs_without_installed_packages() -> None:
     result = subprocess.run(
-        ["node", "scripts/verify-frontend-build-contract.mjs"],
+        ["npm", "run", "verify:frontend-contract", "--silent"],
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -83,7 +87,10 @@ def test_frontend_contract_helper_runs_without_installed_packages() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert "Frontend build contract OK" in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-frontend-contract-receipt.v1"
+    assert payload["commands_executed"] == 0
+    assert payload["network_access_count"] == 0
 
 
 def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
@@ -96,5 +103,6 @@ def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
     )
 
     assert result.returncode == 0, result.stderr
+    assert "npm run verify:frontend-contract" in result.stdout
     assert "npm ci" in result.stdout
     assert "npm run build" in result.stdout

@@ -112,10 +112,10 @@ def build_report(
     readme = (root / "README.md").read_text(encoding="utf-8")
     if not readme.startswith(f"# {expected_display}\n"):
         blockers.append("readme_display_name_mismatch")
-    frontend_contract = (
-        root / "scripts/verify-frontend-build-contract.mjs"
-    ).read_text(encoding="utf-8")
-    if f"packageJson.name !== '{expected_name}'" not in frontend_contract:
+    frontend_contract = _json(
+        root / "native/decommission/legacy-frontend-build-contract-v1.json"
+    )
+    if frontend_contract.get("expected_package_name") != expected_name:
         blockers.append("frontend_contract_distribution_name_mismatch")
 
     legacy_names = [
@@ -159,7 +159,7 @@ def build_report(
             "package-lock.json",
             "src/structural_analysis/product_identity.py",
             "README.md",
-            "scripts/verify-frontend-build-contract.mjs",
+            "native/decommission/legacy-frontend-build-contract-v1.json",
         ],
         "legacy_distribution_name_hits": legacy_hits,
         "blockers": blockers,

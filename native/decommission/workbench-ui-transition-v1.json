@@ -32,6 +32,9 @@
       "structural-catalog check",
       "structural-catalog build"
     ],
+    "legacy_frontend_contract_flow": [
+      "structural-frontend-contract check"
+    ],
     "runtime_python_required": false,
     "runtime_node_required": false,
     "runtime_browser_required": false,
@@ -51,7 +54,7 @@
       "src_ts_tsx_files": 43,
       "src_js_mjs_files": 82,
       "frontend_ts_tsx_test_files": 9,
-      "node_js_mjs_script_files": 23,
+      "node_js_mjs_script_files": 22,
       "js_mjs_test_files": 2
     },
     "active_node_workflows": [

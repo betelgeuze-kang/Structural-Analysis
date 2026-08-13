@@ -10,7 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_structure_viewer_browser_performance_probe_is_wired_to_package_and_full_gate() -> None:
     package_json = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-    frontend_contract = (ROOT / "scripts" / "verify-frontend-build-contract.mjs").read_text(encoding="utf-8")
+    frontend_contract = (
+        ROOT / "native/decommission/legacy-frontend-build-contract-v1.json"
+    ).read_text(encoding="utf-8")
     quality_gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     viewer_contracts = (ROOT / "scripts" / "verify_structure_viewer_contracts.py").read_text(encoding="utf-8")
 

@@ -88,6 +88,21 @@ def test_catalog_metadata_routes_through_native_product_gates() -> None:
     assert payload["protected_evidence"] is False
 
 
+def test_frontend_contract_cutover_routes_through_native_gates() -> None:
+    payload = scope.classify_paths(
+        [
+            "native/decommission/legacy-frontend-build-contract-v1.json",
+            "native/crates/structural-frontend-contract/src/lib.rs",
+        ]
+    )
+
+    assert payload["native"] is True
+    assert payload["rust"] is True
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["protected_evidence"] is False
+
+
 def test_legacy_workbench_ui_changes_route_through_native_transition_gate() -> None:
     payload = scope.classify_paths(
         [

@@ -812,6 +812,16 @@ name = "structural-ffi-sys"
 version = "0.1.0"
 
 [[package]]
+name = "structural-frontend-contract"
+version = "0.1.0"
+dependencies = [
+ "libc",
+ "serde",
+ "serde_json",
+ "structural-contracts",
+]
+
+[[package]]
 name = "structural-report"
 version = "0.1.0"
 dependencies = [

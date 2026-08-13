@@ -8,6 +8,7 @@ members = [
   "crates/structural-report",
   "crates/structural-catalog",
   "crates/structural-evidence",
+  "crates/structural-frontend-contract",
   "crates/structural-distribution",
   "crates/structural-cli",
   "crates/structural-workbench",

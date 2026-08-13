@@ -254,6 +254,19 @@ def test_native_benchmark_catalog_capability_is_bounded_c5() -> None:
     assert "C6 remain open" in catalog["claim"]
 
 
+def test_native_frontend_contract_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert capabilities.capability_is_enabled(payload, "native_frontend_contract") is True
+    frontend = payload["capabilities"]["native_frontend_contract"]
+    assert frontend["cutover_gate"] == "C0"
+    assert frontend["owner"] == "structural-frontend-contract"
+    assert "former Node static manifest verifier" in frontend["claim"]
+    assert "command and network execution counts 0" in frontend["claim"]
+    assert "does not build or execute React/Vite" in frontend["claim"]
+    assert "authorize legacy deletion" in frontend["claim"]
+    assert "close C5/C6" in frontend["claim"]
+
+
 def test_native_distribution_capability_is_bounded_c5():
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_distribution") is True

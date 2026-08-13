@@ -5,8 +5,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 ## Commands
 
 - `npm run verify:frontend-contract`
-  - Reads only repo files and checks the expected manifest, lockfile, scripts, and build entrypoints.
+  - Invokes the Rust-native `structural-frontend-contract` checker directly through Cargo.
+  - Reads only repo files and strictly checks the expected manifest, lockfile, scripts, and build entrypoints against `native/decommission/legacy-frontend-build-contract-v1.json`.
   - Works even when `node_modules/` is missing.
+  - Emits a canonical self-hashed receipt with command and network execution counts fixed at zero.
 - `npm run verify:frontend-smoke`
   - Runs the contract check, executes `npm ci`, and then runs `npm run build`.
   - This is the clean-checkout smoke path for CI or local verification.
