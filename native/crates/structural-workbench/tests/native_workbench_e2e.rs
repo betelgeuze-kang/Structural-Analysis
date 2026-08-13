@@ -4,6 +4,7 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::Value;
+use structural_cli::execute_model_ir_linear_analysis;
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
 use structural_contracts::product_ir::sha256_identity;
@@ -546,6 +547,39 @@ fn run_element_connectivity_edit(
     ])
 }
 
+#[allow(clippy::too_many_arguments)]
+fn run_frame3d_member_add(
+    source: &Path,
+    destination: &Path,
+    node_id: &str,
+    coordinates: [&str; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-add-frame3d-member"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--coordinates"),
+        text(coordinates[0]),
+        text(coordinates[1]),
+        text(coordinates[2]),
+        text("--element"),
+        text(element_id),
+        text("--from-node"),
+        text(from_node_id),
+        text("--material"),
+        text(material_id),
+        text("--section"),
+        text(section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -783,6 +817,65 @@ fn assert_published_element_connectivity_edit(destination: &Path) {
         receipt["source_provenance_hash"],
         receipt["edited_provenance_hash"]
     );
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_frame3d_member_add(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict added-member ModelIR");
+    assert_eq!(edited.value()["nodes"].as_array().expect("nodes").len(), 3);
+    assert_eq!(
+        edited.value()["elements"]
+            .as_array()
+            .expect("elements")
+            .len(),
+        2
+    );
+    assert_eq!(edited.value()["nodes"][2]["id"], "N3");
+    assert_eq!(edited.value()["nodes"][2]["index"], 2);
+    for (actual, expected) in edited.value()["nodes"][2]["coordinates_m"]
+        .as_array()
+        .expect("new node coordinates")
+        .iter()
+        .zip([4.0_f64, 0.0, 0.0])
+    {
+        assert_eq!(
+            actual
+                .as_f64()
+                .expect("finite new-node coordinate")
+                .to_bits(),
+            expected.to_bits()
+        );
+    }
+    assert_eq!(edited.value()["nodes"][2]["source_id"], Value::Null);
+    let element = &edited.value()["elements"][1];
+    assert_eq!(element["id"], "E2");
+    assert_eq!(element["index"], 1);
+    assert_eq!(element["type"], "frame_3d");
+    assert_eq!(element["formulation"], "euler_bernoulli_3d");
+    assert_eq!(element["node_ids"], serde_json::json!(["N2", "N3"]));
+    assert_eq!(element["material_id"], "M1");
+    assert_eq!(element["section_id"], "S1");
+    assert_eq!(element["source_id"], Value::Null);
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-frame3d-member.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("member-add receipt"),
+    )
+    .expect("member-add receipt JSON");
+    assert_eq!(receipt["operation"], "frame3d_member_add");
+    assert_eq!(receipt["node_id"], "N3");
+    assert_eq!(receipt["node_index"], 2);
+    assert_eq!(receipt["element_id"], "E2");
+    assert_eq!(receipt["element_index"], 1);
+    assert_eq!(receipt["node_ids"], serde_json::json!(["N2", "N3"]));
+    assert_eq!(receipt["material_id"], "M1");
+    assert_eq!(receipt["section_id"], "S1");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
     assert_self_hashed_edit_receipt(&mut receipt);
 }
 
@@ -2008,6 +2101,211 @@ fn element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_bloc
         blocked_edited["roundtrip_map"][1]["mapping_status"],
         "exact"
     );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame3d_member_add_is_deterministic_cpp_revalidated_and_linear_executable() {
+    let temporary = TestDirectory::create();
+    let model =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&model).expect("frame3d member-add source");
+    let first = temporary.0.join("frame3d-member-add-first");
+    let second = temporary.0.join("frame3d-member-add-second");
+    for destination in [&first, &second] {
+        let output = run_frame3d_member_add(
+            &model,
+            destination,
+            "N3",
+            ["4", "0", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "S1",
+        );
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame3d member-add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first member-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second member-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&model).expect("source after member addition"),
+        source_before
+    );
+    assert_published_frame3d_member_add(&first);
+
+    let view = run_workbench(&[text("model-view"), first.join("model-ir.json").as_os_str()]);
+    assert_success(&view);
+    let view_text = String::from_utf8_lossy(&view.stdout);
+    assert!(view_text.contains("nodes=3 elements=2"));
+    assert!(view_text.contains("C++ semantic snapshot: verified"));
+
+    let request_directory = temporary.0.join("added-member-linear-request");
+    let request_output = run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "added-frame3d-member-linear-c5",
+        "LC_WEAK",
+    );
+    assert_success(&request_output);
+    let added_model = std::fs::read(first.join("model-ir.json")).expect("added-member model");
+    let added_request = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("added-member analysis request");
+    let outcome = execute_model_ir_linear_analysis(&added_model, &added_request, None, u32::MAX)
+        .expect("added-member native linear execution");
+    assert!(outcome.is_complete());
+    assert!(!outcome.is_terminal_failure());
+    assert!(outcome.result_ir_json().is_some());
+    assert!(outcome.result_recovery_ir_json().is_some());
+
+    let existing = run_frame3d_member_add(
+        &model,
+        &first,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    );
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, node_id, coordinates, element_id, from_node, material, section, code) in [
+        (
+            "member-add-duplicate-node",
+            "N2",
+            ["4", "0", "0"],
+            "E2",
+            "N1",
+            "M1",
+            "S1",
+            "workbench_model_add_frame3d_member_node_exists",
+        ),
+        (
+            "member-add-duplicate-coordinate",
+            "N3",
+            ["2", "0", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "S1",
+            "workbench_model_add_frame3d_member_coordinate_exists",
+        ),
+        (
+            "member-add-duplicate-element",
+            "N3",
+            ["4", "0", "0"],
+            "E1",
+            "N2",
+            "M1",
+            "S1",
+            "workbench_model_add_frame3d_member_element_exists",
+        ),
+        (
+            "member-add-missing-from-node",
+            "N3",
+            ["4", "0", "0"],
+            "E2",
+            "MISSING",
+            "M1",
+            "S1",
+            "workbench_model_add_frame3d_member_from_node_missing",
+        ),
+        (
+            "member-add-missing-material",
+            "N3",
+            ["4", "0", "0"],
+            "E2",
+            "N2",
+            "MISSING",
+            "S1",
+            "workbench_model_add_frame3d_member_material_missing",
+        ),
+        (
+            "member-add-missing-section",
+            "N3",
+            ["4", "0", "0"],
+            "E2",
+            "N2",
+            "M1",
+            "MISSING",
+            "workbench_model_add_frame3d_member_section_missing",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_frame3d_member_add(
+            &model,
+            &destination,
+            node_id,
+            coordinates,
+            element_id,
+            from_node,
+            material,
+            section,
+        );
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value = serde_json::from_slice(&source_before).expect("source ModelIR JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.frame3d-member-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Topology authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-member-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked member-add source bytes"),
+    )
+    .expect("write blocked member-add source");
+    let blocked_destination = temporary.0.join("blocked-member-add");
+    let blocked_output = run_frame3d_member_add(
+        &blocked_source,
+        &blocked_destination,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    );
+    assert_success(&blocked_output);
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked member-add receipt"),
+    )
+    .expect("blocked member-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.frame3d-member-add-visible-not-runnable"])
+    );
+    let blocked_request_destination = temporary.0.join("blocked-member-add-request");
+    let blocked_request = run_model_linear_request_create(
+        &blocked_destination.join("model-ir.json"),
+        &blocked_request_destination,
+        "blocked-member",
+        "LC_WEAK",
+    );
+    assert_eq!(blocked_request.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&blocked_request.stdout)
+        .contains("workbench_model_linear_request_source_not_ready"));
+    assert!(!blocked_request_destination.exists());
 }
 
 #[test]

@@ -92,6 +92,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-frame-section.v1",
         "structural-native:model-edit-frame-element-orientation.v1",
         "structural-native:model-edit-element-connectivity.v1",
+        "structural-native:model-add-frame3d-member.v1",
         "structural-native:upstream-provenance",
         "structural-native-model-editor",
         "edit_model_nodal_load_components",
@@ -100,6 +101,7 @@ REQUIRED_TOKENS = {
         "edit_model_frame_section",
         "edit_model_frame_element_orientation",
         "edit_model_element_connectivity",
+        "add_model_frame3d_member",
         "validate_model_bytes",
         "workbench_model_edit_no_change",
         "workbench_model_edit_semantics_invalid",
@@ -110,6 +112,7 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit",
         "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit",
         "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit",
+        "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition",
     ),
     "native/crates/structural-workbench/src/analysis_request.rs": (
         "structural-native-model-linear-request-create-receipt.v1",
@@ -128,6 +131,7 @@ REQUIRED_TOKENS = {
         'Some("model-edit-frame-section")',
         'Some("model-edit-frame-element-orientation")',
         'Some("model-edit-element-connectivity")',
+        'Some("model-add-frame3d-member")',
         'Some("model-create-linear-analysis-request")',
         'Some("import")',
         'Some("import-mgt")',
@@ -175,6 +179,7 @@ REQUIRED_TOKENS = {
         "frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blockers",
         "element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers",
+        "frame3d_member_add_is_deterministic_cpp_revalidated_and_linear_executable",
         "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
@@ -205,6 +210,7 @@ REQUIRED_TOKENS = {
         "linear-material editor",
         "frame-section",
         "frame-element orientation",
+        "frame3d-member creator",
         "does not infer the human decision",
         "HIP C2",
         "C6",
@@ -277,17 +283,28 @@ REQUIRED_TOKENS = {
         "ABI v1.13",
         "C6 remain open",
     ),
+    "docs/native/modelir-frame3d-member-add-v1.md": (
+        "model-add-frame3d-member",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-add-frame3d-member.v1",
+        "euler_bernoulli_3d",
+        "typed ResultIR",
+        "recovery in the product E2E",
+        "C6",
+    ),
 }
 
 
 def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     root = repo_root.resolve()
     blockers: list[str] = []
+    member_add_row: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
         )
         row = payload["capabilities"]["native_workbench"]
+        member_add_row = payload["capabilities"]["modelir_frame3d_member_add"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
         row = {}
@@ -297,6 +314,26 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         blockers.append("native_workbench_capability_gate_not_c5")
     if row.get("owner") != "structural-workbench":
         blockers.append("native_workbench_capability_owner_invalid")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if member_add_row.get(field) != expected:
+            blockers.append(f"native_workbench_member_add_capability_invalid:{field}")
+    member_add_claim = str(member_add_row.get("claim", ""))
+    for token in (
+        "one finite-coordinate node",
+        "frame_3d/euler_bernoulli_3d",
+        "existing v1 linear-elastic material",
+        "native CPU linear product",
+        "fallback 0",
+        "arbitrary topology",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in member_add_claim:
+            blockers.append(f"native_workbench_member_add_claim_token_missing:{token}")
     claim = str(row.get("claim", ""))
     for token in (
         "Import -> Validate -> Run -> Resume -> Compare -> Report",

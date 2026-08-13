@@ -867,6 +867,110 @@ exercise_element_connectivity_edit_surface() {
 }
 exercise_element_connectivity_edit_surface
 
+exercise_frame3d_member_add_surface() {
+  local source_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  local label added_directory request_directory run_directory
+  for label in first second; do
+    added_directory="$e2e_root/frame3d-member-add-$label"
+    request_directory="$e2e_root/frame3d-member-add-$label-linear-request"
+    run_directory="$e2e_root/frame3d-member-add-$label-linear-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-frame3d-member "$source_model" --node N3 \
+      --coordinates 4 0 0 --element E2 --from-node N2 \
+      --material M1 --section S1 --output-dir "$added_directory" \
+      > "$e2e_root/frame3d-member-add-$label.stdout.json"
+    test -s "$added_directory/model-ir.json"
+    test -s "$added_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"operation":"frame3d_member_add"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N3"' "$added_directory/edit-receipt.json"
+    grep -Fq '"node_index":2' "$added_directory/edit-receipt.json"
+    grep -Fq '"element_id":"E2"' "$added_directory/edit-receipt.json"
+    grep -Fq '"element_index":1' "$added_directory/edit-receipt.json"
+    grep -Fq '"element_type":"frame_3d"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"formulation":"euler_bernoulli_3d"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"node_ids":["N2","N3"]' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"material_id":"M1"' "$added_directory/edit-receipt.json"
+    grep -Fq '"section_id":"S1"' "$added_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$added_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-frame3d-member.v1"' \
+      "$added_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$added_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame3d-member-add-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$added_directory/model-ir.json" \
+      > "$e2e_root/frame3d-member-add-$label-view.txt"
+    grep -Fq 'nodes=3 elements=2' \
+      "$e2e_root/frame3d-member-add-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/frame3d-member-add-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$added_directory/model-ir.json" \
+      --case added-frame3d-member-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/frame3d-member-add-$label-linear-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$added_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/frame3d-member-add-$label-linear-run.stdout.json"
+    test -s "$run_directory/result-ir.json"
+    test -s "$run_directory/result-recovery-ir.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"schema_version":"structural-sparse-linear-result-ir.v1"' \
+      "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"schema_version":"structural-model-ir-linear-result-recovery-ir.v1"' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+  done
+  diff -r "$e2e_root/frame3d-member-add-first" \
+    "$e2e_root/frame3d-member-add-second" \
+    > "$e2e_root/frame3d-member-add-diff.txt"
+  diff -r "$e2e_root/frame3d-member-add-first-linear-request" \
+    "$e2e_root/frame3d-member-add-second-linear-request" \
+    > "$e2e_root/frame3d-member-add-linear-request-diff.txt"
+  diff -r "$e2e_root/frame3d-member-add-first-linear-run" \
+    "$e2e_root/frame3d-member-add-second-linear-run" \
+    > "$e2e_root/frame3d-member-add-linear-run-diff.txt"
+  cmp "$e2e_root/frame3d-member-add-first.stdout.json" \
+    "$e2e_root/frame3d-member-add-second.stdout.json"
+  cmp "$e2e_root/frame3d-member-add-first-validation.json" \
+    "$e2e_root/frame3d-member-add-second-validation.json"
+  cmp "$e2e_root/frame3d-member-add-first-view.txt" \
+    "$e2e_root/frame3d-member-add-second-view.txt"
+  cmp "$e2e_root/frame3d-member-add-first-linear-request.stdout.json" \
+    "$e2e_root/frame3d-member-add-second-linear-request.stdout.json"
+  cmp "$e2e_root/frame3d-member-add-first-linear-run.stdout.json" \
+    "$e2e_root/frame3d-member-add-second-linear-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame3d-member addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_frame3d_member_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1147,6 +1251,10 @@ element_connectivity_edit_model_hash="$(sha256sum "$e2e_root/element-connectivit
 element_connectivity_edit_receipt_hash="$(sha256sum "$e2e_root/element-connectivity-edit-first/edit-receipt.json" | awk '{print $1}')"
 model_linear_request_create_request_hash="$(sha256sum "$e2e_root/model-linear-request-create-first/analysis-request.json" | awk '{print $1}')"
 model_linear_request_create_receipt_hash="$(sha256sum "$e2e_root/model-linear-request-create-first/request-receipt.json" | awk '{print $1}')"
+frame3d_member_add_model_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/model-ir.json" | awk '{print $1}')"
+frame3d_member_add_receipt_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/edit-receipt.json" | awk '{print $1}')"
+frame3d_member_add_request_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
+frame3d_member_add_result_ir_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1200,6 +1308,10 @@ v22_receipt_json="${v21_receipt_json/structural-native-distribution-e2e.v21/stru
 model_linear_request_create_receipt_fields="\"workbench_model_linear_request_create_surface_passed\":true,\"workbench_model_linear_request_create_request_sha256\":\"sha256:$model_linear_request_create_request_hash\",\"workbench_model_linear_request_create_receipt_sha256\":\"sha256:$model_linear_request_create_receipt_hash\","
 v22_receipt_json="${v22_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_linear_request_create_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v22_receipt_json" > "$temporary_receipt"
+v23_receipt_json="${v22_receipt_json/structural-native-distribution-e2e.v22/structural-native-distribution-e2e.v23}"
+frame3d_member_add_receipt_fields="\"workbench_frame3d_member_add_surface_passed\":true,\"workbench_frame3d_member_add_model_sha256\":\"sha256:$frame3d_member_add_model_hash\",\"workbench_frame3d_member_add_receipt_sha256\":\"sha256:$frame3d_member_add_receipt_hash\",\"workbench_frame3d_member_add_request_sha256\":\"sha256:$frame3d_member_add_request_hash\",\"workbench_frame3d_member_add_result_ir_sha256\":\"sha256:$frame3d_member_add_result_ir_hash\","
+v23_receipt_json="${v23_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame3d_member_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v23_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

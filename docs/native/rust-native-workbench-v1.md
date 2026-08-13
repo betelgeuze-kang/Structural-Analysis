@@ -43,8 +43,12 @@ editor similarly replaces the six positive SI parameters only for one existing v
 section. The frame-element orientation editor replaces only the finite local-axis rotation of one
 existing `frame_3d` element. The element-connectivity editor retargets only the ordered endpoints
 of one existing two-node element and delegates all resulting geometry, graph, reference, and
-profile checks to the C++ validator. None creates/deletes entities or changes identities,
-families/laws, versions, formulation, property references, offsets, or releases.
+profile checks to the C++ validator. These existing-entity editors do not create/delete entities
+or change identities, families/laws, versions, formulation, property references, offsets, or
+releases. The bounded frame3d-member creator separately appends exactly one new node and one
+connected linear `frame_3d`/`euler_bernoulli_3d` element, reuses one existing compatible material
+and section, assigns contiguous indices, and fixes rotation/offsets/releases to zero/empty before
+C++ revalidation. It does not broaden to arbitrary topology authoring.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -119,6 +123,9 @@ structural-workbench model-edit-frame-element-orientation MODEL.json \
 structural-workbench model-edit-element-connectivity MODEL.json \
   --element E1 --nodes N1 N3 \
   --output-dir EDITED-CONNECTIVITY-MODEL
+structural-workbench model-add-frame3d-member MODEL.json \
+  --node N3 --coordinates 4 0 0 --element E2 --from-node N2 \
+  --material M1 --section S1 --output-dir ADDED-MEMBER-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \

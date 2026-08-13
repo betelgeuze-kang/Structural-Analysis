@@ -63,6 +63,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   before create-new publication. Node/element creation or deletion, identity/type/formulation/
   property/offset/release changes, broad topology authoring, visual manipulation, and solver
   selection remain open.
+- `model-add-frame3d-member`: deterministic creation of one new node plus one connected linear
+  `frame_3d`/`euler_bernoulli_3d` member using an existing v1 linear-elastic material and frame3d
+  section. Rust assigns the next contiguous indices, fixes orientation/offsets/releases to the
+  closed zero/empty construction, records neutral source ownership, preserves existing round-trip
+  rows, then strictly reparses and C++-revalidates before create-new publication. Installed E2E
+  also creates a bound linear request and reaches typed ResultIR/recovery. Arbitrary element types,
+  deletion, loads/constraints/properties, visual authoring and general topology remain open.
 - `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
   load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
   same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before

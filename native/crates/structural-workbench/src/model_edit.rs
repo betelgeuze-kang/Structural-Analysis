@@ -21,6 +21,7 @@ const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-element-orientation.v1";
 const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
+const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -29,6 +30,7 @@ const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_m
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
+const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -96,6 +98,13 @@ pub struct ModelFrameElementOrientationEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded element-connectivity edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelElementConnectivityEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded frame-3D member addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFrame3dMemberAddOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -262,6 +271,43 @@ pub fn publish_model_element_connectivity_edit(
 ) -> Result<ModelElementConnectivityEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_element_connectivity(&source, element_id, node_ids)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one node and one connected linear `frame_3d` member and atomically publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, duplicate identities or coordinates,
+/// missing/unsupported existing node, material, or section references, and publication failures.
+#[allow(clippy::too_many_arguments)]
+pub fn publish_model_frame3d_member_add(
+    source_path: &Path,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFrame3dMemberAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_frame3d_member(
+        &source,
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
     publish_new_directory(
         output_directory,
         &[
@@ -951,6 +997,125 @@ pub fn edit_model_element_connectivity(
     })
 }
 
+/// Add one provenance-bound node and connected linear `frame_3d` member in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, duplicate identities or coordinates, missing or unsupported
+/// references, schema drift, or edited topology rejected by the C++ semantic validator.
+#[allow(clippy::too_many_arguments)]
+pub fn add_model_frame3d_member(
+    source_bytes: &[u8],
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<ModelFrame3dMemberAddOutcomeV1, WorkbenchError> {
+    validate_frame3d_member_add_request(
+        source_bytes.len(),
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let (node_index, element_index) = append_frame3d_member(
+        &mut edited,
+        node_id,
+        coordinates_m,
+        element_id,
+        from_node_id,
+        material_id,
+        section_id,
+    )?;
+    bind_frame3d_member_add_provenance(
+        &mut edited,
+        node_id,
+        node_index,
+        coordinates_m,
+        element_id,
+        element_index,
+        from_node_id,
+        material_id,
+        section_id,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "frame3d_member_add",
+        "model_id": edited_validation.report.model_id,
+        "node_id": node_id,
+        "node_index": node_index,
+        "coordinates_m": coordinates_m,
+        "element_id": element_id,
+        "element_index": element_index,
+        "element_type": "frame_3d",
+        "formulation": "euler_bernoulli_3d",
+        "node_ids": [from_node_id, node_id],
+        "material_id": material_id,
+        "section_id": section_id,
+        "local_axis_rotation_rad": 0.0,
+        "offsets_m": {"i_global_m": [0.0, 0.0, 0.0], "j_global_m": [0.0, 0.0, 0.0]},
+        "releases": {"i": [], "j": []},
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFrame3dMemberAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 fn validate_edit_request(
     source_length: usize,
     node_id: &str,
@@ -1121,6 +1286,36 @@ fn validate_element_connectivity_edit_request(
         return Err(WorkbenchError::new(
             "workbench_model_edit_element_connectivity_invalid",
             "edited element endpoints must reference two distinct node identities",
+        ));
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_frame3d_member_add_request(
+    source_length: usize,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, node_id, "new node")?;
+    validate_bounded_edit_identity(0, element_id, "new element")?;
+    validate_bounded_edit_identity(0, from_node_id, "existing node")?;
+    validate_bounded_edit_identity(0, material_id, "material")?;
+    validate_bounded_edit_identity(0, section_id, "section")?;
+    if node_id == from_node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_node_identity_invalid",
+            "new and existing endpoint node identities must differ",
+        ));
+    }
+    if coordinates_m.iter().any(|value| !value.is_finite()) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_coordinate_invalid",
+            "new frame-member node coordinates must be finite SI values",
         ));
     }
     Ok(())
@@ -1506,6 +1701,173 @@ fn replace_element_connectivity(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn append_frame3d_member(
+    model: &mut Value,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(usize, usize), WorkbenchError> {
+    let node_index = validate_frame3d_node_add(model, node_id, coordinates_m, from_node_id)?;
+    validate_frame3d_member_properties(model, material_id, section_id)?;
+    let element_index = validate_frame3d_element_add(model, element_id)?;
+    model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("nodes"))?
+        .push(json!({
+            "id": node_id,
+            "index": node_index,
+            "coordinates_m": coordinates_m,
+            "source_id": null,
+            "extensions": {}
+        }));
+    model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?
+        .push(json!({
+            "id": element_id,
+            "index": element_index,
+            "type": "frame_3d",
+            "formulation": "euler_bernoulli_3d",
+            "node_ids": [from_node_id, node_id],
+            "material_id": material_id,
+            "section_id": section_id,
+            "local_axis_rotation_rad": 0.0,
+            "offsets": {
+                "i_global_m": [0.0, 0.0, 0.0],
+                "j_global_m": [0.0, 0.0, 0.0]
+            },
+            "releases": {"i": [], "j": []},
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok((node_index, element_index))
+}
+
+fn validate_frame3d_node_add(
+    model: &Value,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    from_node_id: &str,
+) -> Result<usize, WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_node_exists",
+            format!("ModelIR already has a node with identity {node_id}"),
+        ));
+    }
+    if !nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(from_node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_from_node_missing",
+            format!("ModelIR has no existing endpoint node with identity {from_node_id}"),
+        ));
+    }
+    for node in nodes {
+        let existing = node
+            .get("coordinates_m")
+            .and_then(Value::as_array)
+            .filter(|values| values.len() == 3)
+            .ok_or_else(|| snapshot_error("node coordinates_m"))?;
+        let duplicates = existing.iter().zip(coordinates_m).all(|(left, right)| {
+            finite_number(left, "node coordinate")
+                .is_ok_and(|left| normalized_number_bits(left) == normalized_number_bits(right))
+        });
+        if duplicates {
+            return Err(WorkbenchError::new(
+                "workbench_model_add_frame3d_member_coordinate_exists",
+                "new frame-member node coordinates duplicate an existing node",
+            ));
+        }
+    }
+    Ok(nodes.len())
+}
+
+fn validate_frame3d_member_properties(
+    model: &Value,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    let material = materials
+        .iter()
+        .find(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_add_frame3d_member_material_missing",
+                format!("ModelIR has no material with identity {material_id}"),
+            )
+        })?;
+    if material.get("law_id").and_then(Value::as_str) != Some("linear_elastic_isotropic")
+        || material
+            .get("parameter_set_version")
+            .and_then(Value::as_str)
+            != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_material_unsupported",
+            "new linear frame member requires an existing v1 linear_elastic_isotropic material",
+        ));
+    }
+
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    let section = sections
+        .iter()
+        .find(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_add_frame3d_member_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if section.get("family_id").and_then(Value::as_str) != Some("frame_3d")
+        || section.get("parameter_set_version").and_then(Value::as_str) != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_section_unsupported",
+            "new linear frame member requires an existing v1 frame_3d section",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_frame3d_element_add(model: &Value, element_id: &str) -> Result<usize, WorkbenchError> {
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_frame3d_member_element_exists",
+            format!("ModelIR already has an element with identity {element_id}"),
+        ));
+    }
+    Ok(elements.len())
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_edit_provenance(
     model: &mut Value,
     node_id: &str,
@@ -1836,6 +2198,48 @@ fn bind_element_connectivity_edit_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_frame3d_member_add_provenance(
+    model: &mut Value,
+    node_id: &str,
+    node_index: usize,
+    coordinates_m: [f64; 3],
+    element_id: &str,
+    element_index: usize,
+    from_node_id: &str,
+    material_id: &str,
+    section_id: &str,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FRAME3D_MEMBER_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "frame3d_member_add",
+            "node_id": node_id,
+            "node_index": node_index,
+            "coordinates_m": coordinates_m,
+            "element_id": element_id,
+            "element_index": element_index,
+            "element_type": "frame_3d",
+            "formulation": "euler_bernoulli_3d",
+            "node_ids": [from_node_id, node_id],
+            "material_id": material_id,
+            "section_id": section_id,
+            "local_axis_rotation_rad": 0.0,
+            "offsets_m": {"i_global_m": [0.0, 0.0, 0.0], "j_global_m": [0.0, 0.0, 0.0]},
+            "releases": {"i": [], "j": []},
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_parameter_edit_provenance(
     model: &mut Value,
     extension_key: &str,
@@ -2032,7 +2436,7 @@ mod tests {
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits,
         validate_constraint_value_edit_request, validate_edit_request,
-        validate_element_connectivity_edit_request,
+        validate_element_connectivity_edit_request, validate_frame3d_member_add_request,
         validate_frame_element_orientation_edit_request, validate_frame_section_edit_request,
         validate_linear_material_edit_request, validate_nodal_load_edit_request,
         FrameSectionParametersV1, LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
@@ -2268,6 +2672,38 @@ mod tests {
                 .expect_err("identical endpoints")
                 .code,
             "workbench_model_edit_element_connectivity_invalid"
+        );
+    }
+
+    #[test]
+    fn frame3d_member_add_requires_bounded_distinct_identities_and_finite_coordinates() {
+        validate_frame3d_member_add_request(0, "N3", [4.0, 0.0, 0.0], "E2", "N2", "M1", "S1")
+            .expect("valid frame3d member addition request");
+        assert_eq!(
+            validate_frame3d_member_add_request(0, "N2", [4.0, 0.0, 0.0], "E2", "N2", "M1", "S1",)
+                .expect_err("new and existing node identities must differ")
+                .code,
+            "workbench_model_add_frame3d_member_node_identity_invalid"
+        );
+        assert_eq!(
+            validate_frame3d_member_add_request(
+                0,
+                "N3",
+                [f64::NAN, 0.0, 0.0],
+                "E2",
+                "N2",
+                "M1",
+                "S1",
+            )
+            .expect_err("new node coordinates must be finite")
+            .code,
+            "workbench_model_add_frame3d_member_coordinate_invalid"
+        );
+        assert_eq!(
+            validate_frame3d_member_add_request(0, "N3", [4.0, 0.0, 0.0], "", "N2", "M1", "S1",)
+                .expect_err("new element identity must be bounded")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
         );
     }
 }

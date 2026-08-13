@@ -19,10 +19,12 @@ provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-
 `model-edit-linear-material`, `model-edit-frame-section`, and
 `model-edit-frame-element-orientation` existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
+The installed `model-add-frame3d-member` command appends one connected linear frame3d node/member
+pair using existing compatible material/section identities and strict C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v22 proves repeated edited/request artifact bytes, exact
+assembly preflight. Distribution E2E v23 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
-value/endpoint bindings,
+value/endpoint bindings, contiguous new topology indices, and added-model linear execution,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
