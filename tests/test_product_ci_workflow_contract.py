@@ -114,6 +114,7 @@ def test_workbench_v2_e2e_routes_through_the_native_orchestrator() -> None:
     assert "Rust-orchestrated Workbench v2 guarded E2E" in runtime
     assert "Rust-orchestrated Workbench v2 browser regression" in nightly
     assert "Rust-orchestrated Viewer report PDF contract" in nightly
+    assert "Rust-orchestrated Viewer performance contract" in nightly
     assert "scripts/verify-workbench-v2-e2e.mjs" not in runtime
     for path in (
         "native/Cargo.toml",

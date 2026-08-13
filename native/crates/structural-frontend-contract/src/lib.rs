@@ -8,6 +8,7 @@ mod prototype;
 mod prototype_browser_smoke;
 mod smoke;
 mod viewer_manifest;
+mod viewer_performance_probe;
 mod viewer_report_pdf_smoke;
 mod viewer_server;
 mod workbench_v2_browser_smoke;
@@ -47,6 +48,14 @@ pub use viewer_manifest::{
     ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
 };
 use viewer_manifest::{validate_viewer_manifest_source, ViewerManifestSourceV1};
+pub use viewer_performance_probe::{
+    canonical_viewer_performance_probe_receipt_json, run_viewer_performance_probe,
+    ViewerPerformanceProbeOptions, ViewerPerformanceProbeReceiptV1,
+    ViewerPerformanceSourceIdentityV1,
+};
+use viewer_performance_probe::{
+    validate_viewer_performance_probe_source, ViewerPerformanceProbeSourceV1,
+};
 pub use viewer_report_pdf_smoke::{
     canonical_viewer_report_pdf_smoke_receipt_json, run_viewer_report_pdf_smoke,
     ViewerReportPdfSmokeOptions, ViewerReportPdfSmokeReceiptV1,
@@ -128,6 +137,7 @@ struct FrontendSourceMapV1 {
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
     viewer_browser_smoke_contract: ViewerBrowserSmokeSourceV1,
+    viewer_performance_probe_contract: ViewerPerformanceProbeSourceV1,
     viewer_report_pdf_smoke_contract: ViewerReportPdfSmokeSourceV1,
     viewer_server_contract: ViewerServerSourceV1,
     workbench_prototype_contract: WorkbenchPrototypeSourceV1,
@@ -514,6 +524,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     validate_viewer_browser_smoke_source(&source_map.viewer_browser_smoke_contract)?;
+    validate_viewer_performance_probe_source(&source_map.viewer_performance_probe_contract)?;
     validate_viewer_report_pdf_smoke_source(&source_map.viewer_report_pdf_smoke_contract)?;
     validate_viewer_server_source(&source_map.viewer_server_contract)?;
     validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;

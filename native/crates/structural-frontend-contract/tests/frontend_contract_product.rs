@@ -8,13 +8,15 @@ use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_report_pdf_smoke, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, ViewerReportPdfSmokeOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
+    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -133,6 +135,118 @@ fn write_fake_executable(root: &Path, name: &str, script: &[u8]) -> PathBuf {
     permissions.set_mode(0o700);
     std::fs::set_permissions(&executable, permissions).expect("make fake executable runnable");
     bin
+}
+
+#[cfg(unix)]
+fn performance_source_rows(root: &Path) -> Vec<Value> {
+    let tracked = [
+        ("viewer_index", "src/structure-viewer/index.html"),
+        (
+            "browser_performance_probe",
+            "scripts/measure-structure-viewer-performance.mjs",
+        ),
+        (
+            "canvas_frame_probe",
+            "scripts/structure-viewer-canvas-frame.mjs",
+        ),
+        (
+            "frontend_smoke_spec",
+            "tests/frontend/structure-viewer-smoke.spec.ts",
+        ),
+    ];
+    tracked
+        .iter()
+        .map(|(label, relative)| {
+            let bytes = std::fs::read(root.join(relative)).expect("read performance source");
+            let identity = sha256_identity(&bytes);
+            serde_json::json!({
+                "label": label,
+                "path": relative,
+                "available": true,
+                "bytes": bytes.len(),
+                "sha256": identity.strip_prefix("sha256:").expect("SHA prefix"),
+            })
+        })
+        .collect()
+}
+
+#[cfg(unix)]
+fn write_performance_probe_fixture(root: &Path, output: &Path) {
+    let source_rows = performance_source_rows(root);
+    let artifact = serde_json::json!({
+        "schema_version": "structure-viewer-browser-performance-probe.v1",
+        "generated_at": "2026-08-13T12:34:56.789Z",
+        "contract_pass": true,
+        "reason_code": "PASS",
+        "summary_line": "Structure viewer browser performance probe: PASS | ready=125ms | fps=60.0 | mode=local_browser_probe",
+        "probe_mode": "local_browser_probe",
+        "measured_browser_probe": true,
+        "live_performance_claim": false,
+        "independent_product_claim": false,
+        "claim_boundary": "Local browser performance smoke only; not a normalized customer hardware FPS claim.",
+        "query": "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+        "output_path": output.to_str().expect("UTF-8 performance output"),
+        "budgets": {
+            "max_ready_ms": 60000,
+            "min_average_fps": 5,
+            "sample_ms": 1500,
+        },
+        "probe": {
+            "url": "http://127.0.0.1:4173/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized",
+            "readyMs": 125,
+            "viewport": {"width": 1440, "height": 1000},
+            "canvasMetrics": {
+                "nonBlank": true,
+                "canvasWidth": 1440,
+                "canvasHeight": 1000,
+                "sampleWidth": 180,
+                "sampleHeight": 120,
+                "significantPixelCount": 2400,
+                "significantPixelRatio": 0.111_111_111_111_111_1,
+                "bbox": {"minX": 10, "minY": 12, "maxX": 169, "maxY": 107, "width": 160, "height": 96},
+                "coverageWidth": 0.888_888_888_888_888_8,
+                "coverageHeight": 0.8,
+                "bboxAspectRatio": 1.666_666_666_666_666_7,
+                "centerX": 0.5,
+                "centerY": 0.5,
+            },
+            "rafSample": {
+                "frameCount": 91,
+                "elapsedMs": 1500,
+                "averageFps": 60,
+                "averageFrameMs": 16.666_666_666_666_668,
+                "p95FrameMs": 17,
+                "maxFrameMs": 19,
+            },
+            "navigationTiming": {
+                "domContentLoadedMs": 50,
+                "loadEventEndMs": 75,
+                "responseEndMs": 20,
+            },
+            "viewerState": {
+                "title": "Structural Insight",
+                "stageVariant": "optimized",
+                "projectStatus": "ready",
+                "statsText": "Members 11,334",
+            },
+            "browserErrors": [],
+        },
+        "source_rows": source_rows,
+        "residual_live_work": [
+            "Run the same probe across a defined browser/device/GPU matrix.",
+            "Promote customer-hardware FPS and interaction latency budgets only after repeatable lab baselines exist.",
+            "Attach screenshot visual regression baselines for the same query and view modes."
+        ],
+        "blockers": [],
+    });
+    std::fs::write(
+        root.join("performance-probe-fixture.json"),
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(&artifact).expect("encode performance fixture")
+        ),
+    )
+    .expect("write performance probe fixture");
 }
 
 fn verify_receipt_hash(value: &Value) {
@@ -583,6 +697,243 @@ fn workbench_v2_browser_smoke_checks_delivery_then_requires_pinned_runtime() {
     assert!(value["detail"]
         .as_str()
         .is_some_and(|detail| detail.contains("node_modules/@playwright/test/cli.js")));
+}
+
+#[test]
+fn viewer_performance_probe_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = ViewerPerformanceProbeOptions::new(root);
+    options.dry_run = true;
+    options.output = Some(PathBuf::from("planned-performance.json"));
+    let first = run_viewer_performance_probe(&options).expect("Viewer performance dry-run");
+    let second = run_viewer_performance_probe(&options).expect("repeat Viewer performance dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.tracked_sources.len(), 4);
+    assert!(first
+        .tracked_sources
+        .iter()
+        .all(|source| source.sha256.starts_with("sha256:") && source.bytes > 0));
+    assert_eq!(first.sample_ms, 1_500);
+    assert_eq!(first.max_ready_ms, 60_000);
+    assert_eq!(first.minimum_average_fps.to_bits(), 5.0_f64.to_bits());
+    assert_eq!(first.viewport_width, 1_440);
+    assert_eq!(first.viewport_height, 1_000);
+    assert_eq!(
+        first.requested_output.as_deref(),
+        Some("planned-performance.json")
+    );
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!(first.probe_artifact_sha256, None);
+    assert_eq!(first.viewer_ready_ms, None);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert!(first.runtime_requirements.node_required);
+    assert!(first.runtime_requirements.browser_required);
+    assert!(first.runtime_requirements.retained_node_internal_listener);
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_performance_probe_receipt_json(&first)
+        .expect("canonical Viewer performance receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer performance receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_viewer_performance_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-performance-probe", "--root"])
+        .arg(&root)
+        .args([
+            "--query",
+            "project=p&drawing=d",
+            "--sample-ms",
+            "250",
+            "--max-ready-ms",
+            "5000",
+            "--min-fps",
+            "7.5",
+            "--width",
+            "800",
+            "--height",
+            "600",
+            "--out",
+            "planned.json",
+            "--dry-run",
+        ])
+        .env_clear()
+        .output()
+        .expect("run Viewer performance dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer performance CLI receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer performance receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["action"], "viewer_performance_probe");
+    assert_eq!(receipt["query"], "project=p&drawing=d");
+    assert_eq!(receipt["sample_ms"], 250);
+    assert_eq!(receipt["max_ready_ms"], 5_000);
+    assert_eq!(receipt["minimum_average_fps"], 7.5);
+    assert_eq!(receipt["viewport_width"], 800);
+    assert_eq!(receipt["viewport_height"], 600);
+    assert_eq!(receipt["direct_processes_spawned"], 0);
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_performance_probe_owns_child_and_strict_retained_artifact() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let output_path = test.0.join("verified-performance.json");
+    write_performance_probe_fixture(&test.0, &output_path);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf '%s\n' \"$*\" >> \"$PWD/node-invocations.log\"\nprintf 'probe chatter\n'\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/performance-probe-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-performance-probe", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer performance probe");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let receipt: Value =
+        serde_json::from_slice(bytes).expect("Viewer performance live receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&receipt)
+            .expect("canonical Viewer performance receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(receipt["execution_mode"], "execute");
+    assert_eq!(receipt["status"], "passed");
+    assert_eq!(receipt["output_disposition"], "operator_path_retained");
+    assert_eq!(
+        receipt["published_output_path"].as_str(),
+        output_path.to_str()
+    );
+    assert_eq!(receipt["viewer_ready_ms"], 125);
+    assert_eq!(receipt["average_fps"], 60);
+    assert_eq!(receipt["significant_pixel_count"], 2_400);
+    assert_eq!(receipt["browser_error_count"], 0);
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["successful_exit_code"], 0);
+    assert!(receipt["probe_artifact_sha256"].is_string());
+    assert!(output_path.is_file());
+    assert!(std::fs::read_to_string(test.0.join("node-invocations.log"))
+        .expect("read Viewer performance invocation")
+        .contains("scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"));
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_performance_probe_removes_partial_explicit_output_on_failure() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf 'partial' > \"$out\"\nexit 29\n",
+    );
+    let output_path = test.0.join("failed-performance.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-performance-probe", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute failing Viewer performance probe");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer performance error JSON");
+    assert_eq!(error["code"], "viewer_performance_probe_failed");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_performance_probe_rejects_duplicate_json_and_removes_output() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nprintf '%s\n' '{\"schema_version\":\"first\",\"schema_version\":\"forged\"}' > \"$out\"\nexit 0\n",
+    );
+    let output_path = test.0.join("duplicate-performance.json");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-performance-probe", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute duplicate-key Viewer performance probe");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer performance duplicate-key error JSON");
+    assert_eq!(error["code"], "viewer_performance_probe_artifact_invalid");
+    assert!(!output_path.exists());
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_performance_probe_rejects_source_mutation_and_removes_output() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let output_path = test.0.join("mutated-performance.json");
+    write_performance_probe_fixture(&test.0, &output_path);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        b"#!/bin/sh\nprintf ' ' >> scripts/structure-viewer-canvas-frame.mjs\nout=''\nwhile [ \"$#\" -gt 0 ]; do\n  if [ \"$1\" = '--out' ]; then shift; out=$1; fi\n  shift\ndone\nwhile IFS= read -r line; do printf '%s\n' \"$line\"; done < \"$PWD/performance-probe-fixture.json\" > \"$out\"\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-performance-probe", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&output_path)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute mutating Viewer performance probe");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer performance mutation error JSON");
+    assert_eq!(error["code"], "viewer_performance_probe_contract_changed");
+    assert!(!output_path.exists());
 }
 
 #[test]

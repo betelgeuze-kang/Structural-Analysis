@@ -74,7 +74,8 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     assert not (ROOT / "scripts" / "verify-structure-viewer-report-pdf.mjs").exists()
     assert (
         package_json["scripts"]["verify:viewer-performance-probe"]
-        == "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-performance-probe --root ."
     )
     assert (
         package_json["scripts"]["verify:viewer-visual-regression"]
@@ -124,6 +125,7 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:viewer-report-pdf" in docs_text
     assert "structural-frontend-contract viewer-report-pdf-smoke" in docs_text
     assert "npm run verify:viewer-performance-probe" in docs_text
+    assert "structural-frontend-contract viewer-performance-probe" in docs_text
     assert "npm run verify:viewer-visual-regression" in docs_text
     assert "package-lock.json" in docs_text
 

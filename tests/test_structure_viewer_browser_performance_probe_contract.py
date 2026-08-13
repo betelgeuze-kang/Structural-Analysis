@@ -18,9 +18,11 @@ def test_structure_viewer_browser_performance_probe_is_wired_to_package_and_full
 
     assert (
         package_json["scripts"]["verify:viewer-performance-probe"]
-        == "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-performance-probe --root ."
     )
     assert "scripts/measure-structure-viewer-performance.mjs" in frontend_contract
+    assert "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs" in frontend_contract
     assert "verify:viewer-performance-probe" in quality_gate
     assert quality_gate.index("verify:viewer-report-pdf") < quality_gate.index("verify:viewer-performance-probe")
     assert quality_gate.index("verify:viewer-performance-probe") < quality_gate.index("report_commercialization_level.py")
@@ -32,8 +34,18 @@ def test_structure_viewer_browser_performance_probe_has_dry_run_and_claim_bounda
     out = tmp_path / "viewer-performance.json"
     result = subprocess.run(
         [
-            "node",
-            "scripts/measure-structure-viewer-performance.mjs",
+            "cargo",
+            "run",
+            "--quiet",
+            "--locked",
+            "--manifest-path",
+            "native/Cargo.toml",
+            "-p",
+            "structural-frontend-contract",
+            "--",
+            "viewer-performance-probe",
+            "--root",
+            ".",
             "--dry-run",
             "--query",
             "project=midas33_release&drawing=midas33_optimized&variant=optimized",
@@ -51,9 +63,16 @@ def test_structure_viewer_browser_performance_probe_has_dry_run_and_claim_bounda
     )
 
     assert result.returncode == 0, result.stderr
-    assert "scripts/measure-structure-viewer-performance.mjs" in result.stdout
-    assert "project=midas33_release&drawing=midas33_optimized&variant=optimized" in result.stdout
-    assert str(out) in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-viewer-performance-probe-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["query"] == "project=midas33_release&drawing=midas33_optimized&variant=optimized"
+    assert payload["requested_output"] == str(out)
+    assert payload["sample_ms"] == 100
+    assert payload["minimum_average_fps"] == 1
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["probe_artifact_sha256"] is None
+    assert payload["logical_command_template"][1] == "scripts/measure-structure-viewer-performance.mjs"
     assert "structure-viewer-browser-performance-probe.v1" in script_text
     assert "local_browser_probe" in script_text
     assert "live_performance_claim: false" in script_text

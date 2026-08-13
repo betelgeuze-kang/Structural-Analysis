@@ -28,6 +28,7 @@
     "scripts/verify-workstation-delivery-viewer-smoke.mjs",
     "scripts/export-structure-viewer-report-pdf.mjs",
     "scripts/measure-structure-viewer-performance.mjs",
+    "scripts/structure-viewer-canvas-frame.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
     "src/structure-viewer/index.html",
     "src/structure-viewer/design-tokens.css",
@@ -66,6 +67,7 @@
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
+    "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
     "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
@@ -85,7 +87,7 @@
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
-    "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
+    "verify:viewer-performance-probe": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-performance-probe --root .",
     "verify:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-smoke --root .",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
@@ -281,6 +283,45 @@
     ],
     "external_network_access_accounting": "not_instrumented_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates the frozen package/lock/source Viewer browser-smoke inputs and either plans or owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI and specification. Live execution hashes the installed Playwright launcher script; dry-run has no installed-runtime hash, binds no listener, and spawns no process. Node executable identity, Playwright transitive runtime bytes, Chromium, the JavaScript Viewer, browser page requests, rendered behavior, clean-machine execution, and native UI parity remain outside Rust authority; live evidence requires a host that permits loopback sockets and has the pinned browser runtime installed."
+  },
+  "viewer_performance_probe_contract": {
+    "schema_version": "structural-native-viewer-performance-probe-contract.v1",
+    "node_launcher": "node",
+    "probe_path": "scripts/measure-structure-viewer-performance.mjs",
+    "output_schema_version": "structure-viewer-browser-performance-probe.v1",
+    "default_query": "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "default_sample_ms": 1500,
+    "default_max_ready_ms": 60000,
+    "default_min_average_fps": 5.0,
+    "default_viewport_width": 1440,
+    "default_viewport_height": 1000,
+    "tracked_sources": [
+      {
+        "label": "viewer_index",
+        "path": "src/structure-viewer/index.html"
+      },
+      {
+        "label": "browser_performance_probe",
+        "path": "scripts/measure-structure-viewer-performance.mjs"
+      },
+      {
+        "label": "canvas_frame_probe",
+        "path": "scripts/structure-viewer-canvas-frame.mjs"
+      },
+      {
+        "label": "frontend_smoke_spec",
+        "path": "tests/frontend/structure-viewer-smoke.spec.ts"
+      }
+    ],
+    "expected_probe_mode": "local_browser_probe",
+    "expected_probe_claim_boundary": "Local browser performance smoke only; not a normalized customer hardware FPS claim.",
+    "residual_live_work": [
+      "Run the same probe across a defined browser/device/GPU matrix.",
+      "Promote customer-hardware FPS and interaction latency budgets only after repeatable lab baselines exist.",
+      "Attach screenshot visual regression baselines for the same query and view modes."
+    ],
+    "external_network_access_accounting": "not_instrumented_probe_loopback_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen frontend plus four performance inputs, owns the direct Node child and temporary/explicit artifact lifecycle, rejects input mutation, strictly decodes the bounded probe artifact, independently rechecks source-row identities, loopback URL, viewport, browser-error absence, canvas framing, ready-time and RAF budgets, and emits a canonical self-hashed receipt. Dry-run creates no output and spawns no process. The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript, browser page requests, canvas inspection, RAF sampling, and raw payload construction; Node and browser runtime identity, normalized customer-hardware performance, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
   },
   "viewer_report_pdf_smoke_contract": {
     "schema_version": "structural-native-viewer-report-pdf-smoke-contract.v1",

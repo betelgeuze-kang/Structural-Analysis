@@ -62,7 +62,7 @@ jobs:
       - name: Rust-orchestrated Viewer report PDF contract
         run: npm run verify:viewer-report-pdf
 
-      - name: Viewer performance contract
+      - name: Rust-orchestrated Viewer performance contract
         run: npm run verify:viewer-performance-probe
 
       - name: Viewer visual-regression contract

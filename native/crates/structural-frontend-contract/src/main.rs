@@ -8,14 +8,15 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_performance_probe_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_server_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_report_pdf_smoke, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, serve_viewer, FrontendContractError,
-    ViewerReportPdfSmokeOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_smoke,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
+    FrontendContractError, ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -84,6 +85,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_workbench_v2_browser_smoke(&root, dry_run)?;
         return canonical_workbench_v2_browser_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-performance-probe" {
+        let options = parse_viewer_performance_probe_arguments(&arguments[1..])?;
+        let receipt = run_viewer_performance_probe(&options)?;
+        return canonical_viewer_performance_probe_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "viewer-report-pdf-smoke" {
         let options = parse_viewer_report_pdf_smoke_arguments(&arguments[1..])?;
         let receipt = run_viewer_report_pdf_smoke(&options)?;
@@ -123,7 +129,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-report-pdf-smoke, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -141,6 +147,120 @@ struct BrowserSmokeOptions {
     root: PathBuf,
     mode: String,
     dry_run: bool,
+}
+
+fn parse_viewer_performance_probe_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerPerformanceProbeOptions, CliError> {
+    let mut root = None;
+    let mut query = None;
+    let mut sample_ms = None;
+    let mut max_ready_ms = None;
+    let mut minimum_average_fps = None;
+    let mut viewport_width = None;
+    let mut viewport_height = None;
+    let mut output = None;
+    let mut dry_run = false;
+    let mut keep_temporary_output = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-performance-probe option names must be UTF-8"))?;
+        if matches!(name, "--dry-run" | "--keep") {
+            let flag = if name == "--dry-run" {
+                &mut dry_run
+            } else {
+                &mut keep_temporary_output
+            };
+            if *flag {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            *flag = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-performance-probe value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--query" if query.is_none() => query = Some(parse_utf8(value, "--query")?),
+            "--sample-ms" if sample_ms.is_none() => {
+                sample_ms = Some(parse_positive_u64(value, "--sample-ms")?);
+            }
+            "--max-ready-ms" if max_ready_ms.is_none() => {
+                max_ready_ms = Some(parse_positive_u64(value, "--max-ready-ms")?);
+            }
+            "--min-fps" if minimum_average_fps.is_none() => {
+                minimum_average_fps = Some(parse_positive_f64(value, "--min-fps")?);
+            }
+            "--width" if viewport_width.is_none() => {
+                viewport_width = Some(parse_positive_u32(value, "--width")?);
+            }
+            "--height" if viewport_height.is_none() => {
+                viewport_height = Some(parse_positive_u32(value, "--height")?);
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--root" | "--query" | "--sample-ms" | "--max-ready-ms" | "--min-fps" | "--width"
+            | "--height" | "--out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-performance-probe options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerPerformanceProbeOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    options.query = query.unwrap_or(options.query);
+    options.sample_ms = sample_ms.unwrap_or(options.sample_ms);
+    options.max_ready_ms = max_ready_ms.unwrap_or(options.max_ready_ms);
+    options.minimum_average_fps = minimum_average_fps.unwrap_or(options.minimum_average_fps);
+    options.viewport_width = viewport_width.unwrap_or(options.viewport_width);
+    options.viewport_height = viewport_height.unwrap_or(options.viewport_height);
+    options.output = output;
+    options.dry_run = dry_run;
+    options.keep_temporary_output = keep_temporary_output;
+    Ok(options)
+}
+
+fn parse_utf8(value: &OsString, name: &str) -> Result<String, CliError> {
+    value
+        .to_str()
+        .map(ToOwned::to_owned)
+        .ok_or_else(|| usage_error(&format!("{name} must be UTF-8")))
+}
+
+fn parse_positive_u64(value: &OsString, name: &str) -> Result<u64, CliError> {
+    parse_utf8(value, name)?
+        .parse::<u64>()
+        .ok()
+        .filter(|value| *value > 0)
+        .ok_or_else(|| usage_error(&format!("{name} must be a positive integer")))
+}
+
+fn parse_positive_u32(value: &OsString, name: &str) -> Result<u32, CliError> {
+    parse_utf8(value, name)?
+        .parse::<u32>()
+        .ok()
+        .filter(|value| *value > 0)
+        .ok_or_else(|| usage_error(&format!("{name} must be a positive integer")))
+}
+
+fn parse_positive_f64(value: &OsString, name: &str) -> Result<f64, CliError> {
+    parse_utf8(value, name)?
+        .parse::<f64>()
+        .ok()
+        .filter(|value| value.is_finite() && *value > 0.0)
+        .ok_or_else(|| usage_error(&format!("{name} must be a positive finite number")))
 }
 
 fn parse_viewer_report_pdf_smoke_arguments(
@@ -446,7 +566,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -456,7 +576,8 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_report_pdf_smoke_arguments, run, BrowserSmokeOptions, ServeOptions,
+        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_smoke_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -572,6 +693,48 @@ mod tests {
             OsString::from("a"),
             OsString::from("--min-bytes"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_performance_parser_accepts_complete_and_rejects_invalid_options() {
+        let probe = parse_viewer_performance_probe_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--query"),
+            OsString::from("project=p&drawing=d"),
+            OsString::from("--sample-ms"),
+            OsString::from("250"),
+            OsString::from("--max-ready-ms"),
+            OsString::from("5000"),
+            OsString::from("--min-fps"),
+            OsString::from("7.5"),
+            OsString::from("--width"),
+            OsString::from("800"),
+            OsString::from("--height"),
+            OsString::from("600"),
+            OsString::from("--out"),
+            OsString::from("probe.json"),
+            OsString::from("--dry-run"),
+            OsString::from("--keep"),
+        ])
+        .expect("valid Viewer performance arguments");
+        assert_eq!(probe.root, PathBuf::from("a"));
+        assert_eq!(probe.query, "project=p&drawing=d");
+        assert_eq!(probe.sample_ms, 250);
+        assert_eq!(probe.max_ready_ms, 5_000);
+        assert_eq!(probe.minimum_average_fps.to_bits(), 7.5_f64.to_bits());
+        assert_eq!(probe.viewport_width, 800);
+        assert_eq!(probe.viewport_height, 600);
+        assert_eq!(probe.output, Some(PathBuf::from("probe.json")));
+        assert!(probe.dry_run);
+        assert!(probe.keep_temporary_output);
+        assert!(parse_viewer_performance_probe_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--min-fps"),
+            OsString::from("NaN"),
         ])
         .is_err());
     }

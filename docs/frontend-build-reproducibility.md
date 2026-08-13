@@ -53,10 +53,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - `npm run verify:viewer-report-pdf -- --dry-run` emits a canonical self-hashed plan without creating output or spawning a process. `--out FILE` retains an explicit PDF plus `FILE.html`; otherwise live output is temporary unless `--keep` is supplied.
   - The retained Node exporter still owns its internal loopback server, Playwright, Chromium, Viewer JavaScript rendering, and PDF generation. Browser page requests are uninstrumented, so this remains a transitional C0 full-quality smoke and not native PDF/UI parity or C6 evidence.
 - `npm run verify:viewer-performance-probe`
-  - Starts the source viewer in a local browser, waits for a nonblank well-framed canvas, and samples `requestAnimationFrame`.
-  - Runs in `--verify` mode in the full quality gate and writes to the OS temp directory, so the gate does not dirty tracked artifacts.
+  - Invokes the Rust-native `structural-frontend-contract viewer-performance-probe` verifier. Rust hashes the four frozen probe inputs, owns the direct Node child and output cleanup, strictly decodes the bounded JSON artifact, rechecks its source hashes, loopback URL, viewport, browser errors, canvas framing, ready-time budget, and RAF budget, then emits a canonical self-hashed receipt.
+  - The default full-quality invocation uses temporary output, so the gate does not dirty tracked artifacts. `npm run verify:viewer-performance-probe -- --dry-run` creates no output, listener, or process; `--out FILE` retains an explicit raw probe artifact and `--keep` retains the otherwise temporary raw artifact.
   - To persist the evidence artifact, run `node scripts/measure-structure-viewer-performance.mjs`; it writes `implementation/phase1/structure_viewer_browser_performance_probe.json`.
-  - This is a local browser performance smoke. It is not a normalized customer-hardware FPS claim.
+  - The retained Node probe still owns its internal loopback server, Playwright, Chromium, Viewer rendering, canvas inspection, RAF sampling, and raw payload construction. This is a local browser performance smoke, not a normalized customer-hardware FPS claim or C6 evidence.
 - `npm run verify:viewer-visual-regression`
   - Starts the source viewer in 11 desktop/mobile render-mode and workflow states, including plan view, review member selection, compare overlay, CSV evidence ingest, renderable JSON ingest, section edit apply, and load-combination draft, compares local canvas signatures against `implementation/phase1/structure_viewer_visual_regression_baseline.json`, and writes the verify report to the OS temp directory.
   - To refresh the tracked baseline, run `node scripts/measure-structure-viewer-visual-regression.mjs --update-baseline`.
