@@ -27,6 +27,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_performance_probe.rs"),
+    Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_sample_workflow.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_server.rs"),
@@ -214,6 +215,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract viewer-sample-workflow",
         "structural-frontend-contract viewer-performance-probe",
         "structural-frontend-contract viewer-visual-regression",
+        "structural-frontend-contract viewer-report-pdf-export",
         "structural-frontend-contract viewer-report-pdf-smoke",
         "structural-frontend-contract serve",
         "structural-frontend-contract viewer-manifest",
@@ -231,6 +233,10 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "workbench_v2_browser_smoke_node_required": True,
         "workbench_v2_browser_smoke_playwright_required": True,
         "workbench_v2_browser_smoke_browser_required": True,
+        "viewer_report_pdf_export_node_required": True,
+        "viewer_report_pdf_export_playwright_required": True,
+        "viewer_report_pdf_export_browser_required": True,
+        "viewer_report_pdf_export_pdftotext_optional": True,
         "viewer_report_pdf_smoke_node_required": True,
         "viewer_report_pdf_smoke_playwright_required": True,
         "viewer_report_pdf_smoke_browser_required": True,
@@ -396,6 +402,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- viewer-report-pdf-smoke --root ."
     ):
         blockers.append("workbench_ui_viewer_report_pdf_smoke_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("export:viewer-report-pdf") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-report-pdf-export --root ."
+    ):
+        blockers.append("workbench_ui_viewer_report_pdf_export_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get(
         "verify:viewer-performance-probe"
     ) != (
@@ -434,6 +445,30 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "automatically_inferred",
             "browse_embedded_benchmark_catalog",
             "browse_evidence_bundle",
+        ),
+        blockers,
+    )
+    viewer_report_pdf_export = _text(
+        root,
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs"
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path(
+            "native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs"
+        ),
+        viewer_report_pdf_export,
+        (
+            "pub fn run_viewer_report_pdf_export",
+            "run_viewer_report_pdf_smoke",
+            "viewer_report_pdf_export_output_changed",
+            "viewer_report_pdf_export_publish_failed",
+            "rollback_publication",
+            "bounded_staging_then_backup_rename_with_rollback",
+            "direct_processes_spawned",
+            "retained Node exporter",
         ),
         blockers,
     )
@@ -783,7 +818,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-smoke/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer, prototype, and Workbench v2 browser-smoke orchestration are Rust-native",
             "Viewer report PDF verification wrapper is Rust-native",

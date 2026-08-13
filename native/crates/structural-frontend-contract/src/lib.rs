@@ -9,6 +9,7 @@ mod prototype_browser_smoke;
 mod smoke;
 mod viewer_manifest;
 mod viewer_performance_probe;
+mod viewer_report_pdf_export;
 mod viewer_report_pdf_smoke;
 mod viewer_sample_workflow;
 mod viewer_server;
@@ -57,6 +58,10 @@ pub use viewer_performance_probe::{
 };
 use viewer_performance_probe::{
     validate_viewer_performance_probe_source, ViewerPerformanceProbeSourceV1,
+};
+pub use viewer_report_pdf_export::{
+    canonical_viewer_report_pdf_export_receipt_json, run_viewer_report_pdf_export,
+    ViewerReportPdfExportOptions, ViewerReportPdfExportReceiptV1,
 };
 pub use viewer_report_pdf_smoke::{
     canonical_viewer_report_pdf_smoke_receipt_json, run_viewer_report_pdf_smoke,

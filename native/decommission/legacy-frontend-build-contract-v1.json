@@ -70,6 +70,7 @@
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_performance_probe.rs",
+    "native/crates/structural-frontend-contract/src/viewer_report_pdf_export.rs",
     "native/crates/structural-frontend-contract/src/viewer_report_pdf_smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_sample_workflow.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
@@ -84,7 +85,7 @@
   "expected_scripts": {
     "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
     "dev": "vite",
-    "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
+    "export:viewer-report-pdf": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-report-pdf-export --root .",
     "preview": "vite preview",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "verify:frontend-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- browser-smoke --root .",

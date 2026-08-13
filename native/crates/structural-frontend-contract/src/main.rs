@@ -9,17 +9,18 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
-    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, serve_viewer, FrontendContractError,
-    ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
-    ViewerVisualRegressionOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
+    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_viewer,
+    FrontendContractError, ViewerPerformanceProbeOptions, ViewerReportPdfExportOptions,
+    ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -98,6 +99,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_viewer_report_pdf_smoke(&options)?;
         return canonical_viewer_report_pdf_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "viewer-report-pdf-export" {
+        let options = parse_viewer_report_pdf_export_arguments(&arguments[1..])?;
+        let receipt = run_viewer_report_pdf_export(&options)?;
+        return canonical_viewer_report_pdf_export_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "viewer-sample-workflow" {
         let options = parse_viewer_sample_workflow_arguments(&arguments[1..])?;
         let receipt = run_viewer_sample_workflow(&options)?;
@@ -142,7 +148,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, prototype, prototype-browser-smoke, serve, smoke, viewer-manifest, viewer-performance-probe, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
 }
@@ -453,6 +459,83 @@ fn parse_nonnegative_f64(value: &OsString, name: &str) -> Result<f64, CliError> 
         .ok_or_else(|| usage_error(&format!("{name} must be a finite nonnegative number")))
 }
 
+fn parse_viewer_report_pdf_export_arguments(
+    arguments: &[OsString],
+) -> Result<ViewerReportPdfExportOptions, CliError> {
+    let mut root = None;
+    let mut query = None;
+    let mut minimum_pdf_bytes = None;
+    let mut output = None;
+    let mut html_output = None;
+    let mut dry_run = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("viewer-report-pdf-export option names must be UTF-8"))?;
+        if name == "--dry-run" {
+            if dry_run {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            dry_run = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("viewer-report-pdf-export value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--query" if query.is_none() => {
+                query = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("--query must be UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--min-bytes" if minimum_pdf_bytes.is_none() => {
+                minimum_pdf_bytes = Some(
+                    value
+                        .to_str()
+                        .and_then(|value| value.parse::<u64>().ok())
+                        .filter(|value| *value > 0)
+                        .ok_or_else(|| usage_error("--min-bytes must be a positive integer"))?,
+                );
+            }
+            "--out" if output.is_none() => output = Some(PathBuf::from(value)),
+            "--html-out" if html_output.is_none() => html_output = Some(PathBuf::from(value)),
+            "--root" | "--query" | "--min-bytes" | "--out" | "--html-out" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => {
+                return Err(usage_error(
+                    "viewer-report-pdf-export options are missing or unknown",
+                ));
+            }
+        }
+        index += 2;
+    }
+    let mut options = ViewerReportPdfExportOptions::new(
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+    );
+    if let Some(query) = query {
+        options.query = query;
+    }
+    if let Some(minimum_pdf_bytes) = minimum_pdf_bytes {
+        options.minimum_pdf_bytes = minimum_pdf_bytes;
+    }
+    if let Some(output) = output {
+        options.output = output;
+    }
+    options.html_output = html_output;
+    options.dry_run = dry_run;
+    Ok(options)
+}
+
 fn parse_viewer_report_pdf_smoke_arguments(
     arguments: &[OsString],
 ) -> Result<ViewerReportPdfSmokeOptions, CliError> {
@@ -756,7 +839,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -766,9 +849,9 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments,
-        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_smoke_arguments,
-        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
-        BrowserSmokeOptions, ServeOptions,
+        parse_viewer_performance_probe_arguments, parse_viewer_report_pdf_export_arguments,
+        parse_viewer_report_pdf_smoke_arguments, parse_viewer_sample_workflow_arguments,
+        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -854,6 +937,51 @@ mod tests {
             OsString::from("a"),
             OsString::from("--port"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn viewer_report_pdf_export_parser_preserves_defaults_and_accepts_outputs() {
+        let defaults = parse_viewer_report_pdf_export_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+        ])
+        .expect("default Viewer report PDF export arguments");
+        assert_eq!(
+            defaults.output,
+            PathBuf::from("structure_viewer_report.pdf")
+        );
+        assert_eq!(defaults.html_output, None);
+        assert!(!defaults.dry_run);
+
+        let export = parse_viewer_report_pdf_export_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--query"),
+            OsString::from("project=p&drawing=d&variant=v"),
+            OsString::from("--min-bytes"),
+            OsString::from("42"),
+            OsString::from("--out"),
+            OsString::from("report.pdf"),
+            OsString::from("--html-out"),
+            OsString::from("report.html"),
+            OsString::from("--dry-run"),
+        ])
+        .expect("complete Viewer report PDF export arguments");
+        assert_eq!(export.root, PathBuf::from("a"));
+        assert_eq!(export.query, "project=p&drawing=d&variant=v");
+        assert_eq!(export.minimum_pdf_bytes, 42);
+        assert_eq!(export.output, PathBuf::from("report.pdf"));
+        assert_eq!(export.html_output, Some(PathBuf::from("report.html")));
+        assert!(export.dry_run);
+        assert!(parse_viewer_report_pdf_export_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--out"),
+            OsString::from("a.pdf"),
+            OsString::from("--out"),
+            OsString::from("b.pdf"),
         ])
         .is_err());
     }

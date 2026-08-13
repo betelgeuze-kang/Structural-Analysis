@@ -334,6 +334,25 @@ def test_native_viewer_visual_regression_capability_is_bounded_c0() -> None:
     assert "C6 remain open" in visual["claim"]
 
 
+def test_native_viewer_report_pdf_export_capability_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(payload, "native_viewer_report_pdf_export")
+        is True
+    )
+    export = payload["capabilities"]["native_viewer_report_pdf_export"]
+    assert export["cutover_gate"] == "C0"
+    assert export["owner"] == "structural-frontend-contract"
+    assert "export:viewer-report-pdf" in export["claim"]
+    assert "viewer-report-pdf-export" in export["claim"]
+    assert "rejects symlinks and PDF/HTML aliasing" in export["claim"]
+    assert "destination mutation during generation" in export["claim"]
+    assert "backup/rename publication with rollback" in export["claim"]
+    assert "dry-run creates no output or process" in export["claim"]
+    assert "retained Node exporter" in export["claim"]
+    assert "C5 and C6 remain open" in export["claim"]
+
+
 def test_native_viewer_sample_workflow_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert (

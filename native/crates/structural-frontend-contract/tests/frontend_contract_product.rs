@@ -9,15 +9,17 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
     canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
-    run_viewer_performance_probe, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
-    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
-    run_workbench_v2_browser_smoke, ViewerPerformanceProbeOptions, ViewerReportPdfSmokeOptions,
+    run_viewer_performance_probe, run_viewer_report_pdf_export, run_viewer_report_pdf_smoke,
+    run_viewer_sample_workflow, run_viewer_visual_regression,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
+    ViewerPerformanceProbeOptions, ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions,
     ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
 
@@ -1585,6 +1587,201 @@ fn viewer_visual_regression_rejects_source_mutation_and_removes_output() {
             .expect("Viewer visual-regression mutation error JSON");
     assert_eq!(error["code"], "viewer_visual_regression_contract_changed");
     assert!(!output_path.exists());
+}
+
+#[test]
+fn viewer_report_pdf_export_dry_run_is_process_free_canonical_and_self_hashed() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let mut options = ViewerReportPdfExportOptions::new(test.0.clone());
+    options.output = PathBuf::from("planned.pdf");
+    options.html_output = Some(PathBuf::from("planned.html"));
+    options.dry_run = true;
+    let first = run_viewer_report_pdf_export(&options).expect("Viewer report PDF export dry-run");
+    let second =
+        run_viewer_report_pdf_export(&options).expect("repeat Viewer report PDF export dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(first.requested_pdf_output, "planned.pdf");
+    assert_eq!(first.requested_html_output.as_deref(), Some("planned.html"));
+    assert_eq!(first.published_pdf_path, None);
+    assert_eq!(first.published_html_path, None);
+    assert_eq!(first.pdf_previous_state, "absent");
+    assert_eq!(first.html_previous_state.as_deref(), Some("absent"));
+    assert_eq!(first.output_disposition, "not_created");
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert!(first.deterministic_receipt);
+    assert!(!test.0.join("planned.pdf").exists());
+    assert!(!test.0.join("planned.html").exists());
+    let encoded = canonical_viewer_report_pdf_export_receipt_json(&first)
+        .expect("canonical Viewer report PDF export receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Viewer report PDF export JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_export_replaces_existing_files_only_after_verification() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        "#!/bin/sh\nout=''\nhtml=''\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    --out) shift; out=$1 ;;\n    --html-out) shift; html=$1 ;;\n  esac\n  shift\ndone\nprintf '%%PDF-fake-published-report\\n' > \"$out\"\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'viewer screenshot marker' 'Engineer-in-loop Checklist' '상용 검토 가능' > \"$html\"\nexit 0\n".as_bytes(),
+    );
+    let pdf = test.0.join("published.pdf");
+    let html = test.0.join("published.html");
+    std::fs::write(&pdf, b"old-pdf").expect("write old PDF");
+    std::fs::write(&html, b"old-html").expect("write old HTML");
+    let old_pdf_sha = sha256_identity(b"old-pdf");
+    let old_html_sha = sha256_identity(b"old-html");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-export", "--root"])
+        .arg(&test.0)
+        .args(["--min-bytes", "5", "--out"])
+        .arg(&pdf)
+        .arg("--html-out")
+        .arg(&html)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute Viewer report PDF export");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let receipt: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF export receipt");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-viewer-report-pdf-export-receipt.v1"
+    );
+    assert_eq!(receipt["status"], "published");
+    assert_eq!(receipt["pdf_previous_state"], "regular_file");
+    assert_eq!(receipt["pdf_previous_sha256"], old_pdf_sha);
+    assert_eq!(receipt["html_previous_state"], "regular_file");
+    assert_eq!(receipt["html_previous_sha256"], old_html_sha);
+    assert_eq!(
+        receipt["output_disposition"],
+        "verified_pdf_and_html_published"
+    );
+    assert_eq!(receipt["direct_processes_spawned"], 1);
+    assert_eq!(receipt["successful_exit_codes"], serde_json::json!([0]));
+    assert!(std::fs::read(&pdf)
+        .expect("read published PDF")
+        .starts_with(b"%PDF-"));
+    assert!(std::fs::read_to_string(&html)
+        .expect("read published HTML")
+        .contains("Engineer-in-loop Checklist"));
+    assert!(std::fs::read_dir(&test.0)
+        .expect("read test root")
+        .all(|entry| !entry
+            .expect("directory entry")
+            .file_name()
+            .to_string_lossy()
+            .starts_with(".structural-viewer-report-pdf-")));
+    verify_receipt_hash(&receipt);
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_export_preserves_existing_outputs_when_verification_fails() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        "#!/bin/sh\nout=''\nhtml=''\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    --out) shift; out=$1 ;;\n    --html-out) shift; html=$1 ;;\n  esac\n  shift\ndone\nprintf 'not-a-pdf' > \"$out\"\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'viewer screenshot marker' 'Engineer-in-loop Checklist' '상용 검토 가능' > \"$html\"\nexit 0\n".as_bytes(),
+    );
+    let pdf = test.0.join("preserved.pdf");
+    let html = test.0.join("preserved.html");
+    std::fs::write(&pdf, b"old-pdf").expect("write old PDF");
+    std::fs::write(&html, b"old-html").expect("write old HTML");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-export", "--root"])
+        .arg(&test.0)
+        .args(["--min-bytes", "5", "--out"])
+        .arg(&pdf)
+        .arg("--html-out")
+        .arg(&html)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute invalid Viewer report PDF export");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF export error");
+    assert_eq!(error["code"], "viewer_report_pdf_smoke_pdf_invalid");
+    assert_eq!(std::fs::read(&pdf).expect("read preserved PDF"), b"old-pdf");
+    assert_eq!(
+        std::fs::read(&html).expect("read preserved HTML"),
+        b"old-html"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_export_rejects_destination_mutation_during_generation() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_executable(
+        &test.0,
+        "node",
+        "#!/bin/sh\nout=''\nhtml=''\nwhile [ \"$#\" -gt 0 ]; do\n  case \"$1\" in\n    --out) shift; out=$1 ;;\n    --html-out) shift; html=$1 ;;\n  esac\n  shift\ndone\nprintf '%%PDF-fake-raced-report\\n' > \"$out\"\nprintf '%s\\n' 'Drawing Review' 'Before / After Member Comparison' 'viewer screenshot marker' 'Engineer-in-loop Checklist' '상용 검토 가능' > \"$html\"\nprintf 'concurrent-writer' > \"$PWD/raced.pdf\"\nexit 0\n".as_bytes(),
+    );
+    let pdf = test.0.join("raced.pdf");
+    std::fs::write(&pdf, b"old-pdf").expect("write old PDF");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-export", "--root"])
+        .arg(&test.0)
+        .args(["--min-bytes", "5", "--out"])
+        .arg(&pdf)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("execute raced Viewer report PDF export");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF race error");
+    assert_eq!(error["code"], "viewer_report_pdf_export_output_changed");
+    assert_eq!(
+        std::fs::read(&pdf).expect("read concurrently changed output"),
+        b"concurrent-writer"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn viewer_report_pdf_export_rejects_symlink_destination_before_process_launch() {
+    use std::os::unix::fs::symlink;
+
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let target = test.0.join("real.pdf");
+    let link = test.0.join("linked.pdf");
+    std::fs::write(&target, b"preserve").expect("write symlink target");
+    symlink(&target, &link).expect("create output symlink");
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["viewer-report-pdf-export", "--root"])
+        .arg(&test.0)
+        .arg("--out")
+        .arg(&link)
+        .env_clear()
+        .output()
+        .expect("reject Viewer report PDF output symlink");
+    assert_eq!(output.status.code(), Some(1));
+    let error: Value =
+        serde_json::from_slice(output.stdout.strip_suffix(b"\n").expect("one JSON line"))
+            .expect("Viewer report PDF symlink error");
+    assert_eq!(error["code"], "viewer_report_pdf_export_output_invalid");
+    assert_eq!(std::fs::read(&target).expect("read target"), b"preserve");
 }
 
 #[test]
