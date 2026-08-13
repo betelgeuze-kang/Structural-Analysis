@@ -124,36 +124,49 @@ pub fn serve_viewer(
     })?;
 
     loop {
-        let (mut stream, _) = listener.accept().map_err(|error| {
+        let (stream, _) = listener.accept().map_err(|error| {
             FrontendContractError::new(
                 "viewer_server_accept_failed",
                 format!("accept Viewer loopback connection failed: {error}"),
             )
         })?;
-        stream
-            .set_read_timeout(Some(READ_TIMEOUT))
-            .map_err(|error| {
-                FrontendContractError::new(
-                    "viewer_server_socket_config_failed",
-                    format!("set Viewer request timeout failed: {error}"),
-                )
-            })?;
-        stream
-            .set_write_timeout(Some(WRITE_TIMEOUT))
-            .map_err(|error| {
-                FrontendContractError::new(
-                    "viewer_server_socket_config_failed",
-                    format!("set Viewer response timeout failed: {error}"),
-                )
-            })?;
-        let response = match read_request(&mut stream)
-            .and_then(|request| route_request(root, &source, &request))
-        {
+        handle_stream(root, &source, stream)?;
+    }
+}
+
+pub(crate) fn handle_stream(
+    root: &Path,
+    source: &ViewerServerSourceV1,
+    mut stream: TcpStream,
+) -> Result<(), FrontendContractError> {
+    stream.set_nonblocking(false).map_err(|error| {
+        FrontendContractError::new(
+            "viewer_server_socket_config_failed",
+            format!("configure Viewer connection blocking mode failed: {error}"),
+        )
+    })?;
+    stream
+        .set_read_timeout(Some(READ_TIMEOUT))
+        .map_err(|error| {
+            FrontendContractError::new(
+                "viewer_server_socket_config_failed",
+                format!("set Viewer request timeout failed: {error}"),
+            )
+        })?;
+    stream
+        .set_write_timeout(Some(WRITE_TIMEOUT))
+        .map_err(|error| {
+            FrontendContractError::new(
+                "viewer_server_socket_config_failed",
+                format!("set Viewer response timeout failed: {error}"),
+            )
+        })?;
+    let response =
+        match read_request(&mut stream).and_then(|request| route_request(root, source, &request)) {
             Ok(response) => response,
             Err(error) => error_response(400, "Bad Request", &error.detail),
         };
-        write_response(&mut stream, &response)?;
-    }
+    write_response(&mut stream, &response)
 }
 
 /// Encode a Viewer server receipt as canonical JSON.
@@ -213,7 +226,7 @@ pub(crate) fn validate_viewer_server_source(
     Ok(())
 }
 
-fn prepare_server(
+pub(crate) fn prepare_server(
     root: &Path,
     host: &str,
     port: u16,

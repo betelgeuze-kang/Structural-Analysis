@@ -20,6 +20,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
+    Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/prototype.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
@@ -177,10 +178,18 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
         "structural-frontend-contract prototype",
+        "structural-frontend-contract browser-smoke",
         "structural-frontend-contract serve",
         "structural-frontend-contract viewer-manifest",
     ]:
         blockers.append("workbench_ui_native_frontend_contract_flow_invalid")
+    if native.get("legacy_frontend_runtime") != {
+        "build_smoke_node_required": True,
+        "browser_smoke_node_required": True,
+        "browser_smoke_playwright_required": True,
+        "browser_smoke_browser_required": True,
+    }:
+        blockers.append("workbench_ui_native_frontend_runtime_boundary_invalid")
     for field in (
         "runtime_python_required",
         "runtime_node_required",
@@ -304,6 +313,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- serve --root ."
     ):
         blockers.append("workbench_ui_viewer_server_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get(
+        "verify:frontend-browser-smoke"
+    ) != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- browser-smoke --root ."
+    ):
+        blockers.append("workbench_ui_viewer_browser_smoke_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -381,6 +397,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     )
     viewer_server = _text(
         root, Path("native/crates/structural-frontend-contract/src/viewer_server.rs"), blockers
+    )
+    viewer_browser_smoke = _text(
+        root,
+        Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/browser_smoke.rs"),
+        viewer_browser_smoke,
+        (
+            "pub fn run_viewer_browser_smoke",
+            "node_modules/@playwright/test/cli.js",
+            "not_instrumented_browser_page_requests",
+            "loopback_listener_count",
+            "direct_processes_spawned",
+            "frontend_contract_receipt_hash",
+            "playwright_cli_sha256",
+            "viewer_browser_smoke_failed",
+        ),
+        blockers,
     )
     _require_tokens(
         Path("native/crates/structural-frontend-contract/src/viewer_server.rs"),
@@ -470,9 +506,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/prototype/serve/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/browser-smoke/serve/viewer-manifest",
             "frontend clean-build orchestration, static contract",
-            "project-manifest checks are Rust-native",
+            "project-manifest checks and source Viewer browser-smoke orchestration are Rust-native",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),
@@ -517,7 +553,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript and Node build/verification dependency visible",
+        "active React/TypeScript/JavaScript, Playwright, browser, and Node build/verification dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

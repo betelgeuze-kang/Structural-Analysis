@@ -16,7 +16,7 @@
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
-    "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
+    "verify:frontend-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- browser-smoke --root .",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-prototype-browser-smoke": "node ./scripts/verify-workbench-prototype-browser-smoke.mjs",
     "build:benchmark-catalog": "bash ./scripts/build_native_benchmark_catalog.sh",

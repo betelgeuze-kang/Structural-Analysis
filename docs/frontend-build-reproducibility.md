@@ -20,9 +20,11 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Also rejects legacy `App` ownership markers in the eager Workbench graph and requires exactly one separately emitted lazy legacy chunk.
   - Emits a canonical self-hashed receipt without executing JavaScript; browser behavior remains owned by the browser E2E gates.
 - `npm run verify:frontend-browser-smoke`
-  - Starts a local static HTTP server and runs the Playwright structure-viewer smoke against the source HTML.
+  - Invokes the Rust-native `structural-frontend-contract browser-smoke` wrapper. Rust validates the frozen package, lock, and source inputs, owns one ephemeral IPv4 loopback server, directly launches the pinned Playwright CLI through Node, stops both sides on failure or completion, and emits a self-hashed receipt only after exit code zero. A live receipt hashes the installed Playwright launcher script.
   - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
+  - `npm run verify:frontend-browser-smoke -- --mode minimal --dry-run` validates and hashes the exact command/spec plan without binding a listener or spawning Node.
   - Assumes Chromium is already available to Playwright; browser installation is an environment setup step, not part of the smoke command.
+  - Node executable identity, Playwright transitive runtime bytes, Chromium, the JavaScript Viewer, and browser page requests remain outside this receipt. Sandboxes without installed packages or loopback sockets cannot produce a live receipt; hosted or clean-machine execution remains required.
 - `npm run verify:workbench-prototype-dom-contract`
   - Invokes the Rust-native `structural-frontend-contract prototype` checker over the strict demo fixture, conservative six-state projection, bounded `app.js` safety/ownership markers, and prototype HTML attachment points.
   - Emits a canonical self-hashed receipt with process, network, and browser execution counts fixed at zero; it does not import or execute the JavaScript module or emulate a DOM.

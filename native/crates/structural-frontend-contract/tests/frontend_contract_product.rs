@@ -7,9 +7,10 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_server_receipt_json,
-    canonical_workbench_prototype_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, check_workbench_prototype, plan_viewer_server, run_frontend_smoke,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_server_receipt_json, canonical_workbench_prototype_receipt_json,
+    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
+    check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -240,6 +241,97 @@ fn tracked_viewer_server_plan_is_loopback_bounded_and_self_hashed() {
     let error = plan_viewer_server(&root, "0.0.0.0", 8765)
         .expect_err("non-loopback Viewer server must fail");
     assert_eq!(error.code, "viewer_server_host_forbidden");
+}
+
+#[test]
+fn viewer_browser_smoke_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let first =
+        run_viewer_browser_smoke(&root, "minimal", true).expect("Viewer browser smoke dry-run");
+    let second = run_viewer_browser_smoke(&root, "minimal", true)
+        .expect("repeat Viewer browser smoke dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.browser_smoke_mode, "minimal");
+    assert_eq!(first.status, "planned");
+    assert!(first.frontend_contract_receipt_hash.starts_with("sha256:"));
+    assert_eq!(first.playwright_cli_sha256, None);
+    assert_eq!(
+        first.logical_command,
+        vec![
+            "node".to_owned(),
+            "node_modules/@playwright/test/cli.js".to_owned(),
+            "test".to_owned(),
+            "tests/frontend/structure-viewer-smoke.spec.ts".to_owned(),
+            "--reporter=line".to_owned(),
+        ]
+    );
+    assert!(first.node_runtime_required);
+    assert!(first.browser_runtime_required);
+    assert_eq!(first.loopback_listener_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert_eq!(first.successful_exit_code, None);
+    assert_eq!(first.request_error_count, 0);
+    assert_eq!(
+        first.external_network_access_accounting,
+        "not_instrumented_browser_page_requests"
+    );
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_viewer_browser_smoke_receipt_json(&first)
+        .expect("canonical Viewer browser smoke receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("browser smoke receipt JSON");
+    verify_receipt_hash(&value);
+
+    let error = run_viewer_browser_smoke(&root, "widened", true)
+        .expect_err("unknown Viewer browser smoke mode must fail");
+    assert_eq!(error.code, "viewer_browser_smoke_mode_invalid");
+}
+
+#[test]
+fn clean_environment_viewer_browser_smoke_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["browser-smoke", "--root"])
+        .arg(&root)
+        .args(["--mode", "full", "--dry-run"])
+        .env_clear()
+        .output()
+        .expect("run Viewer browser smoke dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("browser smoke receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "viewer_browser_smoke");
+    assert_eq!(value["browser_smoke_mode"], "full");
+    assert_eq!(value["loopback_listener_count"], 0);
+    assert_eq!(value["direct_processes_spawned"], 0);
+    assert!(value["frontend_contract_receipt_hash"]
+        .as_str()
+        .is_some_and(|hash| hash.starts_with("sha256:")));
+    assert!(value["playwright_cli_sha256"].is_null());
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn viewer_browser_smoke_requires_the_pinned_runtime_before_live_side_effects() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let error = run_viewer_browser_smoke(&test.0, "minimal", false)
+        .expect_err("missing pinned Playwright CLI must fail");
+    assert_eq!(error.code, "frontend_required_file_missing");
+    assert!(error
+        .detail
+        .contains("node_modules/@playwright/test/cli.js"));
 }
 
 #[test]

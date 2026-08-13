@@ -7,9 +7,10 @@ use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_viewer_server_receipt_json,
-    canonical_workbench_prototype_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, check_workbench_prototype, plan_viewer_server, run_frontend_smoke,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
+    canonical_viewer_server_receipt_json, canonical_workbench_prototype_receipt_json,
+    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
+    check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
     serve_viewer, FrontendContractError,
 };
 
@@ -63,6 +64,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_frontend_smoke(&root, dry_run)?;
         return canonical_smoke_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "browser-smoke" {
+        let options = parse_browser_smoke_arguments(&arguments[1..])?;
+        let receipt = run_viewer_browser_smoke(&options.root, &options.mode, options.dry_run)?;
+        return canonical_viewer_browser_smoke_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "serve" {
         let options = parse_serve_arguments(&arguments[1..])?;
         if options.dry_run {
@@ -97,7 +103,7 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be check, delivery, prototype, serve, smoke, or viewer-manifest",
+            "command must be browser-smoke, check, delivery, prototype, serve, smoke, or viewer-manifest",
         )),
     }
 }
@@ -108,6 +114,60 @@ struct ServeOptions {
     host: String,
     port: u16,
     dry_run: bool,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+struct BrowserSmokeOptions {
+    root: PathBuf,
+    mode: String,
+    dry_run: bool,
+}
+
+fn parse_browser_smoke_arguments(arguments: &[OsString]) -> Result<BrowserSmokeOptions, CliError> {
+    let mut root = None;
+    let mut mode = None;
+    let mut dry_run = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("browser-smoke option names must be UTF-8"))?;
+        if name == "--dry-run" {
+            if dry_run {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            dry_run = true;
+            index += 1;
+            continue;
+        }
+        let value = arguments
+            .get(index + 1)
+            .filter(|value| !value.is_empty())
+            .ok_or_else(|| {
+                usage_error("browser-smoke value options require one non-empty value")
+            })?;
+        match name {
+            "--root" if root.is_none() => root = Some(PathBuf::from(value)),
+            "--mode" if mode.is_none() => {
+                mode = Some(
+                    value
+                        .to_str()
+                        .ok_or_else(|| usage_error("--mode must be UTF-8"))?
+                        .to_owned(),
+                );
+            }
+            "--root" | "--mode" => {
+                return Err(usage_error("duplicate options are not allowed"));
+            }
+            _ => return Err(usage_error("browser-smoke options are missing or unknown")),
+        }
+        index += 2;
+    }
+    Ok(BrowserSmokeOptions {
+        root: root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        mode: mode.unwrap_or_else(|| "full".to_owned()),
+        dry_run,
+    })
 }
 
 fn parse_serve_arguments(arguments: &[OsString]) -> Result<ServeOptions, CliError> {
@@ -287,7 +347,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -295,7 +355,10 @@ mod tests {
     use std::ffi::OsString;
     use std::path::PathBuf;
 
-    use super::{parse_serve_arguments, parse_smoke_arguments, run, ServeOptions};
+    use super::{
+        parse_browser_smoke_arguments, parse_serve_arguments, parse_smoke_arguments, run,
+        BrowserSmokeOptions, ServeOptions,
+    };
 
     #[test]
     fn parser_rejects_unknown_duplicate_and_incomplete_options() {
@@ -321,6 +384,31 @@ mod tests {
             OsString::from("a"),
             OsString::from("--dry-run"),
             OsString::from("--dry-run"),
+        ])
+        .is_err());
+        assert!(parse_browser_smoke_arguments(&[]).is_err());
+        assert_eq!(
+            parse_browser_smoke_arguments(&[
+                OsString::from("--dry-run"),
+                OsString::from("--mode"),
+                OsString::from("minimal"),
+                OsString::from("--root"),
+                OsString::from("a"),
+            ])
+            .expect("valid browser smoke arguments"),
+            BrowserSmokeOptions {
+                root: PathBuf::from("a"),
+                mode: "minimal".to_owned(),
+                dry_run: true,
+            }
+        );
+        assert!(parse_browser_smoke_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--mode"),
+            OsString::from("full"),
+            OsString::from("--mode"),
+            OsString::from("minimal"),
         ])
         .is_err());
         assert_eq!(

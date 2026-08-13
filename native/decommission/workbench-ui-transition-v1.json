@@ -37,9 +37,16 @@
       "structural-frontend-contract smoke",
       "structural-frontend-contract delivery",
       "structural-frontend-contract prototype",
+      "structural-frontend-contract browser-smoke",
       "structural-frontend-contract serve",
       "structural-frontend-contract viewer-manifest"
     ],
+    "legacy_frontend_runtime": {
+      "build_smoke_node_required": true,
+      "browser_smoke_node_required": true,
+      "browser_smoke_playwright_required": true,
+      "browser_smoke_browser_required": true
+    },
     "runtime_python_required": false,
     "runtime_node_required": false,
     "runtime_browser_required": false,
@@ -59,7 +66,7 @@
       "src_ts_tsx_files": 43,
       "src_js_mjs_files": 83,
       "frontend_ts_tsx_test_files": 9,
-      "node_js_mjs_script_files": 17,
+      "node_js_mjs_script_files": 16,
       "js_mjs_test_files": 2
     },
     "active_node_workflows": [
@@ -125,5 +132,5 @@
     "native_result_error_checksum_parity_complete": false
   },
   "c6_complete": false,
-  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build orchestration, offline prototype static contract, loopback Viewer serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript and Node build/verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build orchestration, offline prototype static contract, Viewer browser-smoke wrapper and process lifetime, loopback Viewer serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript, Playwright, browser, and Node build/verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

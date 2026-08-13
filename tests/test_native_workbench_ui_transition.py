@@ -54,7 +54,7 @@ def test_workbench_ui_transition_inventory_is_honest_and_not_c6() -> None:
         "src_ts_tsx_files": 43,
         "src_js_mjs_files": 83,
         "frontend_ts_tsx_test_files": 9,
-        "node_js_mjs_script_files": 17,
+        "node_js_mjs_script_files": 16,
         "js_mjs_test_files": 2,
     }
     assert len(report["active_node_workflows"]) == 7

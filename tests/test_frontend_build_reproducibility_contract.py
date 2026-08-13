@@ -52,7 +52,8 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     )
     assert (
         package_json["scripts"]["verify:frontend-browser-smoke"]
-        == "node ./scripts/verify-frontend-browser-smoke.mjs"
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- browser-smoke --root ."
     )
     assert (
         package_json["scripts"]["verify:viewer-report-pdf"]
@@ -157,6 +158,50 @@ def test_native_frontend_smoke_dry_run_is_process_free_and_self_hashed() -> None
     assert payload["direct_processes_spawned"] == 0
     assert payload["delivery_receipt_hash"] is None
     assert payload["network_access_accounting"] == "not_instrumented_npm_ci_may_access_registry"
+    assert payload["receipt_hash"].startswith("sha256:")
+
+
+def test_native_viewer_browser_smoke_dry_run_is_listener_and_process_free() -> None:
+    result = subprocess.run(
+        [
+            "npm",
+            "run",
+            "verify:frontend-browser-smoke",
+            "--silent",
+            "--",
+            "--mode",
+            "minimal",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-viewer-browser-smoke-receipt.v1"
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["browser_smoke_mode"] == "minimal"
+    assert payload["status"] == "planned"
+    assert payload["logical_command"] == [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "tests/frontend/structure-viewer-smoke.spec.ts",
+        "--reporter=line",
+    ]
+    assert payload["node_runtime_required"] is True
+    assert payload["browser_runtime_required"] is True
+    assert payload["loopback_listener_count"] == 0
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_code"] is None
+    assert payload["frontend_contract_receipt_hash"].startswith("sha256:")
+    assert payload["playwright_cli_sha256"] is None
+    assert payload["external_network_access_accounting"] == (
+        "not_instrumented_browser_page_requests"
+    )
     assert payload["receipt_hash"].startswith("sha256:")
 
 

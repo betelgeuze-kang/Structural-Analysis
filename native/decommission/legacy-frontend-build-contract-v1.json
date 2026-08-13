@@ -17,7 +17,6 @@
     "prototype/structural-workbench/app.js",
     "prototype/structural-workbench/demo-case.json",
     "prototype/structural-workbench/index.html",
-    "scripts/verify-frontend-browser-smoke.mjs",
     "scripts/verify-structure-viewer-callout-docking.mjs",
     "scripts/verify-structure-viewer-critical-callout-focus.mjs",
     "scripts/verify-structure-viewer-drawing-handoff-preview.mjs",
@@ -51,6 +50,7 @@
     "native/decommission/legacy-frontend-build-contract-v1.json",
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
+    "native/crates/structural-frontend-contract/src/browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
@@ -66,7 +66,7 @@
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "preview": "vite preview",
     "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
-    "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
+    "verify:frontend-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- browser-smoke --root .",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
@@ -211,6 +211,18 @@
     ],
     "generated_release_path_fragment": "implementation/phase1/release/",
     "claim_boundary": "This read-only transitional C0 check proves only that the strict language-neutral default Viewer project manifest, its exact generated JavaScript projection, registered project/drawing/variant inventory, repo-confined path dispositions, and any locally present artifact-count sources satisfy the frozen static contract. Missing gitignored generated release artifacts remain explicit warnings. It does not execute JavaScript or a browser, prove runtime rendering, validate engineering results, promote native UI parity, or authorize React/TypeScript/Node removal."
+  },
+  "viewer_browser_smoke_contract": {
+    "schema_version": "structural-native-viewer-browser-smoke-contract.v1",
+    "node_launcher": "node",
+    "playwright_cli_path": "node_modules/@playwright/test/cli.js",
+    "spec_path": "tests/frontend/structure-viewer-smoke.spec.ts",
+    "supported_modes": [
+      "minimal",
+      "full"
+    ],
+    "external_network_access_accounting": "not_instrumented_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates the frozen package/lock/source Viewer browser-smoke inputs and either plans or owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI and specification. Live execution hashes the installed Playwright launcher script; dry-run has no installed-runtime hash, binds no listener, and spawns no process. Node executable identity, Playwright transitive runtime bytes, Chromium, the JavaScript Viewer, browser page requests, rendered behavior, clean-machine execution, and native UI parity remain outside Rust authority; live evidence requires a host that permits loopback sockets and has the pinned browser runtime installed."
   },
   "viewer_server_contract": {
     "contract": "structural-native-viewer-server-contract.v1",
