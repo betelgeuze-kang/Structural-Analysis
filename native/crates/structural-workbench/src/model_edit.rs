@@ -28,6 +28,8 @@ const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
 const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
 const TRUSS3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss3d-member.v1";
+const TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-truss3d-leaf-member.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
@@ -48,6 +50,7 @@ const TRUSS_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_e
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_truss3d_node_and_member_addition_with_existing_material_and_truss_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
+const TRUSS3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_linear_truss3d_leaf_member_and_orphan_node_deletion_not_cascade_general_entity_or_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -162,6 +165,13 @@ pub struct ModelFrame3dMemberAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded truss-3D member addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelTruss3dMemberAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded truss leaf deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelTruss3dLeafMemberDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -681,6 +691,30 @@ pub fn publish_model_truss3d_member_add(
         material_id,
         section_id,
     )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral truss leaf and its orphan node, then publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, non-terminal or source-owned rows,
+/// any other element/load/constraint/stage/round-trip reference, and publication failures.
+pub fn publish_model_truss3d_leaf_member_delete(
+    source_path: &Path,
+    element_id: &str,
+    node_id: &str,
+    output_directory: &Path,
+) -> Result<ModelTruss3dLeafMemberDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_truss3d_leaf_member(&source, element_id, node_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2464,6 +2498,112 @@ pub fn add_model_truss3d_member(
     })
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedTruss3dLeafV1 {
+    node_index: usize,
+    coordinates_m: [f64; 3],
+    element_index: usize,
+    node_ids: [String; 2],
+    material_id: String,
+    section_id: String,
+    offsets_global_m: [[f64; 3]; 2],
+}
+
+/// Delete one last contiguous neutral linear-truss leaf and its orphan node in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal rows, source-owned entities, a node
+/// referenced by any other element/load/constraint, a staged element, round-trip mappings, schema
+/// drift, or edited topology rejected by the C++ semantic validator.
+pub fn delete_model_truss3d_leaf_member(
+    source_bytes: &[u8],
+    element_id: &str,
+    node_id: &str,
+) -> Result<ModelTruss3dLeafMemberDeleteOutcomeV1, WorkbenchError> {
+    validate_truss3d_leaf_member_delete_request(source_bytes.len(), element_id, node_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_truss3d_leaf_member(&mut edited, element_id, node_id)?;
+    bind_truss3d_leaf_member_delete_provenance(
+        &mut edited,
+        element_id,
+        node_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "truss3d_leaf_member_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_node_id": node_id,
+        "removed_node_index": removed.node_index,
+        "removed_coordinates_m": removed.coordinates_m,
+        "removed_element_id": element_id,
+        "removed_element_index": removed.element_index,
+        "removed_element_type": "truss_3d",
+        "removed_formulation": "linear_truss_3d",
+        "removed_node_ids": removed.node_ids,
+        "removed_material_id": removed.material_id,
+        "removed_section_id": removed.section_id,
+        "removed_offsets_m": {
+            "i_global_m": removed.offsets_global_m[0],
+            "j_global_m": removed.offsets_global_m[1]
+        },
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": TRUSS3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelTruss3dLeafMemberDeleteOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 fn validate_edit_request(
     source_length: usize,
     node_id: &str,
@@ -2733,6 +2873,22 @@ fn validate_truss3d_member_add_request(
         return Err(WorkbenchError::new(
             "workbench_model_add_truss3d_member_coordinate_invalid",
             "new truss-member node coordinates must be finite SI values",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_truss3d_leaf_member_delete_request(
+    source_length: usize,
+    element_id: &str,
+    node_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, element_id, "truss element")?;
+    validate_bounded_edit_identity(0, node_id, "orphan node")?;
+    if element_id == node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_identity_collision",
+            "deleted element and node identities must differ",
         ));
     }
     Ok(())
@@ -3916,6 +4072,249 @@ fn append_truss3d_member(
     Ok((node_index, element_index))
 }
 
+#[allow(clippy::too_many_lines)]
+fn remove_truss3d_leaf_member(
+    model: &mut Value,
+    element_id: &str,
+    node_id: &str,
+) -> Result<RemovedTruss3dLeafV1, WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if nodes.len() <= 2 || elements.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_minimum_topology",
+            "leaf deletion must retain at least two nodes and one element",
+        ));
+    }
+    let node_position = nodes
+        .iter()
+        .position(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_truss3d_leaf_node_missing",
+                format!("ModelIR has no node with identity {node_id}"),
+            )
+        })?;
+    let element_position = elements
+        .iter()
+        .position(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_truss3d_leaf_element_missing",
+                format!("ModelIR has no element with identity {element_id}"),
+            )
+        })?;
+    if node_position + 1 != nodes.len() || element_position + 1 != elements.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_not_terminal",
+            "deleted node and element must be the last contiguous rows in their families",
+        ));
+    }
+    let node = &nodes[node_position];
+    let element = &elements[element_position];
+    if node.get("index").and_then(Value::as_u64) != u64::try_from(node_position).ok()
+        || element.get("index").and_then(Value::as_u64) != u64::try_from(element_position).ok()
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_index_mismatch",
+            "deleted node and element indices must match their last contiguous positions",
+        ));
+    }
+    if element.get("type").and_then(Value::as_str) != Some("truss_3d")
+        || element.get("formulation").and_then(Value::as_str) != Some("linear_truss_3d")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_type_unsupported",
+            "leaf deletion accepts only a truss_3d/linear_truss_3d element",
+        ));
+    }
+    if !node.get("source_id").is_some_and(Value::is_null)
+        || !element.get("source_id").is_some_and(Value::is_null)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_source_owned",
+            "leaf deletion accepts only neutral node and element rows with null source_id",
+        ));
+    }
+    let element_node_values = element
+        .get("node_ids")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == 2)
+        .ok_or_else(|| snapshot_error("truss element node_ids"))?;
+    let node_ids = [
+        element_node_values[0]
+            .as_str()
+            .ok_or_else(|| snapshot_error("truss element i-node identity"))?
+            .to_owned(),
+        element_node_values[1]
+            .as_str()
+            .ok_or_else(|| snapshot_error("truss element j-node identity"))?
+            .to_owned(),
+    ];
+    if node_ids.iter().all(|candidate| candidate != node_id) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_endpoint_mismatch",
+            format!("element {element_id} does not reference deleted node {node_id}"),
+        ));
+    }
+    if elements[..element_position].iter().any(|candidate| {
+        candidate
+            .get("node_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| id.as_str() == Some(node_id)))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_element",
+            format!("node {node_id} is referenced by another element"),
+        ));
+    }
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    if constraints
+        .iter()
+        .any(|constraint| constraint.get("node_id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_constraint",
+            format!("node {node_id} is referenced by a constraint"),
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.iter().any(|pattern| {
+        pattern
+            .get("nodal_loads")
+            .and_then(Value::as_array)
+            .is_some_and(|loads| {
+                loads
+                    .iter()
+                    .any(|load| load.get("node_id").and_then(Value::as_str) == Some(node_id))
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_load",
+            format!("node {node_id} is referenced by a nodal load"),
+        ));
+    }
+    let construction_stages = model
+        .get("construction_stages")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("construction_stages"))?;
+    if construction_stages.iter().any(|stage| {
+        stage
+            .get("active_element_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| id.as_str() == Some(element_id)))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_element_referenced_by_stage",
+            format!("element {element_id} is referenced by a construction stage"),
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        matches!(
+            feature.get("source_entity_id").and_then(Value::as_str),
+            Some(identity) if identity == element_id || identity == node_id
+        )
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_unsupported_feature_owned",
+            "leaf deletion refuses node or element rows referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows.iter().any(|row| {
+        matches!(
+            row.get("model_ir_entity_id").and_then(Value::as_str),
+            Some(identity) if identity == element_id || identity == node_id
+        )
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_truss3d_leaf_roundtrip_owned",
+            "leaf deletion refuses node or element rows with a round-trip mapping",
+        ));
+    }
+
+    let read_triplet = |value: &Value, field: &'static str| {
+        let values = value
+            .as_array()
+            .filter(|values| values.len() == 3)
+            .ok_or_else(|| snapshot_error(field))?;
+        Ok::<[f64; 3], WorkbenchError>([
+            finite_number(&values[0], field)?,
+            finite_number(&values[1], field)?,
+            finite_number(&values[2], field)?,
+        ])
+    };
+    let coordinates_m = node
+        .get("coordinates_m")
+        .ok_or_else(|| snapshot_error("node coordinates_m"))
+        .and_then(|value| read_triplet(value, "node coordinates_m"))?;
+    let offsets = element
+        .get("offsets")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("truss element offsets"))?;
+    let offsets_global_m = [
+        offsets
+            .get("i_global_m")
+            .ok_or_else(|| snapshot_error("truss element i offset"))
+            .and_then(|value| read_triplet(value, "truss element i offset"))?,
+        offsets
+            .get("j_global_m")
+            .ok_or_else(|| snapshot_error("truss element j offset"))
+            .and_then(|value| read_triplet(value, "truss element j offset"))?,
+    ];
+    let material_id = element
+        .get("material_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("truss element material_id"))?
+        .to_owned();
+    let section_id = element
+        .get("section_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("truss element section_id"))?
+        .to_owned();
+
+    model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last element"))?;
+    model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("nodes"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last node"))?;
+    Ok(RemovedTruss3dLeafV1 {
+        node_index: node_position,
+        coordinates_m,
+        element_index: element_position,
+        node_ids,
+        material_id,
+        section_id,
+        offsets_global_m,
+    })
+}
+
 fn validate_truss3d_node_add(
     model: &Value,
     node_id: &str,
@@ -4850,6 +5249,44 @@ fn bind_truss3d_member_add_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_truss3d_leaf_member_delete_provenance(
+    model: &mut Value,
+    element_id: &str,
+    node_id: &str,
+    removed: &RemovedTruss3dLeafV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "truss3d_leaf_member_delete",
+            "removed_node_id": node_id,
+            "removed_node_index": removed.node_index,
+            "removed_coordinates_m": removed.coordinates_m,
+            "removed_element_id": element_id,
+            "removed_element_index": removed.element_index,
+            "removed_element_type": "truss_3d",
+            "removed_formulation": "linear_truss_3d",
+            "removed_node_ids": removed.node_ids,
+            "removed_material_id": removed.material_id,
+            "removed_section_id": removed.section_id,
+            "removed_offsets_m": {
+                "i_global_m": removed.offsets_global_m[0],
+                "j_global_m": removed.offsets_global_m[1]
+            },
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": TRUSS3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_parameter_edit_provenance(
     model: &mut Value,
     extension_key: &str,
@@ -5060,7 +5497,7 @@ mod tests {
 
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
-        mark_roundtrip_node_approximated, normalized_number_bits,
+        mark_roundtrip_node_approximated, normalized_number_bits, remove_truss3d_leaf_member,
         validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
@@ -5068,11 +5505,12 @@ mod tests {
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_material_add_request,
         validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_edit_request, validate_truss3d_member_add_request,
-        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
-        validate_truss_element_property_references, validate_truss_section_add_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
+        validate_truss3d_member_add_request, validate_truss3d_member_properties,
+        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
+        validate_truss_section_add_request, validate_truss_section_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -5642,6 +6080,132 @@ mod tests {
                 .expect_err("unsupported truss-section version")
                 .code,
             "workbench_model_add_truss3d_member_section_unsupported"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn truss_leaf_delete_requires_terminal_neutral_unreferenced_rows() {
+        validate_truss3d_leaf_member_delete_request(0, "E2", "N3")
+            .expect("valid bounded delete request");
+        assert_eq!(
+            validate_truss3d_leaf_member_delete_request(0, "E2", "E2")
+                .expect_err("identity collision")
+                .code,
+            "workbench_model_delete_truss3d_leaf_identity_collision"
+        );
+        let model = json!({
+            "nodes": [
+                {"id": "N1", "index": 0, "coordinates_m": [0, 0, 0], "source_id": "s:N1"},
+                {"id": "N2", "index": 1, "coordinates_m": [2, 0, 0], "source_id": "s:N2"},
+                {"id": "N3", "index": 2, "coordinates_m": [2, 1, 0], "source_id": null}
+            ],
+            "elements": [
+                {"id": "E1", "index": 0, "node_ids": ["N1", "N2"], "source_id": "s:E1"},
+                {
+                    "id": "E2",
+                    "index": 1,
+                    "type": "truss_3d",
+                    "formulation": "linear_truss_3d",
+                    "node_ids": ["N2", "N3"],
+                    "material_id": "M1",
+                    "section_id": "T1",
+                    "offsets": {
+                        "i_global_m": [0, 0, 0],
+                        "j_global_m": [0, 0, 0]
+                    },
+                    "source_id": null
+                }
+            ],
+            "constraints": [],
+            "load_patterns": [],
+            "construction_stages": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed =
+            remove_truss3d_leaf_member(&mut deleted, "E2", "N3").expect("delete neutral leaf");
+        assert_eq!(removed.node_index, 2);
+        assert_eq!(removed.element_index, 1);
+        assert_eq!(deleted["nodes"].as_array().expect("nodes").len(), 2);
+        assert_eq!(deleted["elements"].as_array().expect("elements").len(), 1);
+
+        let mut constrained = model.clone();
+        constrained["constraints"] = json!([{"id": "BC3", "node_id": "N3"}]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut constrained, "E2", "N3")
+                .expect_err("constraint reference")
+                .code,
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_constraint"
+        );
+        let mut element_referenced = model.clone();
+        element_referenced["elements"][0]["node_ids"] = json!(["N1", "N3"]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut element_referenced, "E2", "N3")
+                .expect_err("other element reference")
+                .code,
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_element"
+        );
+        let mut loaded = model.clone();
+        loaded["load_patterns"] = json!([{
+            "id": "LC1",
+            "nodal_loads": [{"id": "L3", "node_id": "N3"}]
+        }]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut loaded, "E2", "N3")
+                .expect_err("nodal load reference")
+                .code,
+            "workbench_model_delete_truss3d_leaf_node_referenced_by_load"
+        );
+        let mut staged = model.clone();
+        staged["construction_stages"] = json!([{
+            "id": "STAGE1",
+            "active_element_ids": ["E2"]
+        }]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut staged, "E2", "N3")
+                .expect_err("construction-stage reference")
+                .code,
+            "workbench_model_delete_truss3d_leaf_element_referenced_by_stage"
+        );
+        let mut unsupported = model.clone();
+        unsupported["unsupported_features"] = json!([{
+            "feature_id": "feature:E2",
+            "source_entity_id": "E2"
+        }]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut unsupported, "E2", "N3")
+                .expect_err("unsupported-feature reference")
+                .code,
+            "workbench_model_delete_truss3d_leaf_unsupported_feature_owned"
+        );
+        let mut source_owned = model.clone();
+        source_owned["nodes"][2]["source_id"] = json!("source:N3");
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut source_owned, "E2", "N3")
+                .expect_err("source-owned node")
+                .code,
+            "workbench_model_delete_truss3d_leaf_source_owned"
+        );
+        let mut wrong_family = model.clone();
+        wrong_family["elements"][1]["type"] = json!("frame_3d");
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut wrong_family, "E2", "N3")
+                .expect_err("wrong element family")
+                .code,
+            "workbench_model_delete_truss3d_leaf_type_unsupported"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{
+            "entity_kind": "element",
+            "model_ir_entity_id": "E2"
+        }]);
+        assert_eq!(
+            remove_truss3d_leaf_member(&mut mapped, "E2", "N3")
+                .expect_err("round-trip ownership")
+                .code,
+            "workbench_model_delete_truss3d_leaf_roundtrip_owned"
         );
     }
 

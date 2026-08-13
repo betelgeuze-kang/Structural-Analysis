@@ -673,6 +673,24 @@ fn run_truss3d_member_add(
     ])
 }
 
+fn run_truss3d_leaf_member_delete(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    node_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-truss3d-leaf-member"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--node"),
+        text(node_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_nodal_load_add(
     source: &Path,
     destination: &Path,
@@ -6437,6 +6455,288 @@ fn truss3d_edits_are_deterministic_fail_closed_restartable_and_cpu_executable() 
     assert!(String::from_utf8_lossy(&blocked_request.stdout)
         .contains("workbench_model_linear_request_source_not_ready"));
     assert!(!blocked_request_directory.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn truss3d_leaf_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("leaf-delete source bytes");
+    let section = temporary.0.join("leaf-delete-section");
+    let member = temporary.0.join("leaf-delete-member");
+    assert_success(&run_truss_section_add(&source, &section, "T1", "0.005"));
+    assert_success(&run_truss3d_member_add(
+        &section.join("model-ir.json"),
+        &member,
+        "N3",
+        ["2", "1", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "T1",
+    ));
+    let member_path = member.join("model-ir.json");
+    let member_bytes = std::fs::read(&member_path).expect("leaf-delete composed source");
+    let member_model = parse_model_ir_v2(&member_bytes).expect("strict composed source");
+
+    let first = temporary.0.join("leaf-delete-first");
+    let second = temporary.0.join("leaf-delete-second");
+    for destination in [&first, &second] {
+        let output = run_truss3d_leaf_member_delete(&member_path, destination, "E2", "N3");
+        assert_success(&output);
+        let receipt =
+            std::fs::read(destination.join("edit-receipt.json")).expect("leaf-delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first leaf-delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second leaf-delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged leaf-delete base source"),
+        source_before
+    );
+    assert_eq!(
+        std::fs::read(&member_path).expect("unchanged leaf-delete composed source"),
+        member_bytes
+    );
+
+    let deleted_bytes = std::fs::read(first.join("model-ir.json")).expect("deleted leaf ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict deleted leaf ModelIR");
+    assert_eq!(deleted.value()["nodes"].as_array().expect("nodes").len(), 2);
+    assert_eq!(
+        deleted.value()["elements"]
+            .as_array()
+            .expect("elements")
+            .len(),
+        1
+    );
+    assert_eq!(deleted.value()["nodes"][1]["id"], "N2");
+    assert_eq!(deleted.value()["elements"][0]["id"], "E1");
+    assert_eq!(
+        deleted.value()["materials"],
+        member_model.value()["materials"]
+    );
+    assert_eq!(
+        deleted.value()["sections"],
+        member_model.value()["sections"]
+    );
+    assert_eq!(
+        deleted.value()["constraints"],
+        member_model.value()["constraints"]
+    );
+    assert_eq!(
+        deleted.value()["load_patterns"],
+        member_model.value()["load_patterns"]
+    );
+    assert_eq!(
+        deleted.value()["roundtrip_map"],
+        member_model.value()["roundtrip_map"]
+    );
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-truss3d-leaf-member.v1")
+        .expect("leaf-delete provenance extension");
+    assert_eq!(extension["operation"], "truss3d_leaf_member_delete");
+    assert_eq!(extension["removed_node_id"], "N3");
+    assert_eq!(extension["removed_node_index"], 2);
+    assert_eq!(
+        extension["removed_coordinates_m"],
+        serde_json::json!([2, 1, 0])
+    );
+    assert_eq!(extension["removed_element_id"], "E2");
+    assert_eq!(extension["removed_element_index"], 1);
+    assert_eq!(
+        extension["removed_node_ids"],
+        serde_json::json!(["N2", "N3"])
+    );
+    assert_eq!(extension["removed_material_id"], "M1");
+    assert_eq!(extension["removed_section_id"], "T1");
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("leaf-delete receipt"),
+    )
+    .expect("leaf-delete receipt JSON");
+    assert_eq!(receipt["operation"], "truss3d_leaf_member_delete");
+    assert_eq!(receipt["removed_node_id"], "N3");
+    assert_eq!(receipt["removed_element_id"], "E2");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("leaf-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "truss-leaf-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("leaf-delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("leaf-delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("leaf-delete direct recovery"),
+    )
+    .expect("leaf-delete recovery JSON");
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 1)
+        .expect("leaf-delete partial execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("leaf-delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, element_id, node_id, code) in [
+        (
+            "leaf-delete-missing-node",
+            "E2",
+            "MISSING",
+            "workbench_model_delete_truss3d_leaf_node_missing",
+        ),
+        (
+            "leaf-delete-nonterminal-source-row",
+            "E1",
+            "N2",
+            "workbench_model_delete_truss3d_leaf_not_terminal",
+        ),
+        (
+            "leaf-delete-endpoint-mismatch",
+            "E2",
+            "N2",
+            "workbench_model_delete_truss3d_leaf_not_terminal",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_truss3d_leaf_member_delete(&member_path, &destination, element_id, node_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let fixed = temporary.0.join("leaf-delete-fixed");
+    assert_success(&run_fixed_constraint_add(
+        &member_path,
+        &fixed,
+        "BC_N3",
+        "N3",
+    ));
+    let constrained_destination = temporary.0.join("leaf-delete-constrained-rejected");
+    let constrained = run_truss3d_leaf_member_delete(
+        &fixed.join("model-ir.json"),
+        &constrained_destination,
+        "E2",
+        "N3",
+    );
+    assert_eq!(constrained.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&constrained.stdout)
+        .contains("workbench_model_delete_truss3d_leaf_node_referenced_by_constraint"));
+    assert!(!constrained_destination.exists());
+
+    let loaded = temporary.0.join("leaf-delete-loaded");
+    assert_success(&run_nodal_load_add(
+        &member_path,
+        &loaded,
+        "LC_WEAK",
+        "L_N3",
+        "N3",
+        ["1", "0", "0", "0", "0", "0"],
+    ));
+    let loaded_destination = temporary.0.join("leaf-delete-loaded-rejected");
+    let loaded_rejection = run_truss3d_leaf_member_delete(
+        &loaded.join("model-ir.json"),
+        &loaded_destination,
+        "E2",
+        "N3",
+    );
+    assert_eq!(loaded_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&loaded_rejection.stdout)
+        .contains("workbench_model_delete_truss3d_leaf_node_referenced_by_load"));
+    assert!(!loaded_destination.exists());
+
+    let mut source_owned = member_model.value().clone();
+    source_owned["nodes"][2]["source_id"] = serde_json::json!("native:test:N3");
+    let source_owned_path = temporary.0.join("leaf-delete-source-owned.json");
+    std::fs::write(
+        &source_owned_path,
+        canonicalize_model_ir_v2(&source_owned)
+            .expect("canonical source-owned leaf")
+            .as_bytes(),
+    )
+    .expect("write source-owned leaf");
+    let source_owned_destination = temporary.0.join("leaf-delete-source-owned-rejected");
+    let source_owned_rejection =
+        run_truss3d_leaf_member_delete(&source_owned_path, &source_owned_destination, "E2", "N3");
+    assert_eq!(source_owned_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&source_owned_rejection.stdout)
+        .contains("workbench_model_delete_truss3d_leaf_source_owned"));
+    assert!(!source_owned_destination.exists());
+
+    let existing = run_truss3d_leaf_member_delete(&member_path, &first, "E2", "N3");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut blocked = member_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.truss-leaf-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Leaf deletion must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-leaf-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked leaf")
+            .as_bytes(),
+    )
+    .expect("write blocked leaf source");
+    let blocked_destination = temporary.0.join("blocked-leaf-delete-output");
+    assert_success(&run_truss3d_leaf_member_delete(
+        &blocked_source,
+        &blocked_destination,
+        "E2",
+        "N3",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked leaf receipt"),
+    )
+    .expect("blocked leaf receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.truss-leaf-delete-visible-not-runnable"])
+    );
 }
 
 #[test]

@@ -88,6 +88,13 @@ truss element's compatible v1 material/section references. Both commands preserv
 fields, bind previous and edited values, revalidate through C++, and compose into distinct typed
 CPU recovery with byte-identical restart. See `docs/native/modelir-truss3d-editing-v1.md` for the
 exact boundary.
+The bounded truss3d leaf deleter is the narrow inverse of member authoring: it removes only the
+last contiguous neutral `truss_3d`/`linear_truss_3d` row and its last orphan endpoint node. It
+rejects every retained element/load/constraint/stage/unsupported-feature/round-trip reference,
+source-owned or nonterminal rows, and minimum-topology violations before C++ revalidation and
+create-new publication. Its reduced frame-only model executes with typed recovery, fallback 0,
+and byte-identical restart. See `docs/native/modelir-truss3d-leaf-deletion-v1.md` for the exact
+boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -196,6 +203,8 @@ structural-workbench model-add-truss-section MODEL.json \
 structural-workbench model-add-truss3d-member ADDED-TRUSS-SECTION-MODEL/model-ir.json \
   --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
   --material M1 --section T1 --output-dir ADDED-TRUSS-MEMBER-MODEL
+structural-workbench model-delete-truss3d-leaf-member ADDED-TRUSS-MEMBER-MODEL/model-ir.json \
+  --element E2 --node N3 --output-dir DELETED-TRUSS-LEAF-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \

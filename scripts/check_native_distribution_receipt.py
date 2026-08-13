@@ -298,6 +298,15 @@ V31_TRUSS3D_EDITING_KEYS = {
     "workbench_truss3d_editing_recovery_sha256",
 }
 V31_EXPECTED_KEYS = V30_EXPECTED_KEYS | V31_TRUSS3D_EDITING_KEYS
+V32_TRUSS3D_LEAF_DELETION_KEYS = {
+    "workbench_truss3d_leaf_deletion_surface_passed",
+    "workbench_truss3d_leaf_deletion_model_sha256",
+    "workbench_truss3d_leaf_deletion_receipt_sha256",
+    "workbench_truss3d_leaf_deletion_request_sha256",
+    "workbench_truss3d_leaf_deletion_result_ir_sha256",
+    "workbench_truss3d_leaf_deletion_recovery_sha256",
+}
+V32_EXPECTED_KEYS = V31_EXPECTED_KEYS | V32_TRUSS3D_LEAF_DELETION_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -371,12 +380,16 @@ def validate(
         "structural-native-distribution-e2e.v29": V29_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v30": V30_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v31": V31_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v32": V32_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
-    if receipt_schema_version in {
+    cumulative_receipt_schema_version = receipt_schema_version
+    if receipt_schema_version == "structural-native-distribution-e2e.v32":
+        cumulative_receipt_schema_version = "structural-native-distribution-e2e.v31"
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v14",
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
@@ -709,7 +722,7 @@ def validate(
             "workbench_model_view_isometric_sha256"
         ):
             errors.append("localized en-US and ko-KR model-view identities must differ")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v14",
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
@@ -751,7 +764,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v15",
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
@@ -784,7 +797,7 @@ def validate(
             "model_ir_linear_localized_pdf_ko_kr_sha256"
         ):
             errors.append("ModelIR-linear localized en-US and ko-KR PDF identities must differ")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v16",
         "structural-native-distribution-e2e.v17",
         "structural-native-distribution-e2e.v18",
@@ -826,7 +839,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v17",
         "structural-native-distribution-e2e.v18",
         "structural-native-distribution-e2e.v19",
@@ -851,7 +864,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v18",
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
@@ -875,7 +888,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v19",
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
@@ -904,7 +917,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v20",
         "structural-native-distribution-e2e.v21",
         "structural-native-distribution-e2e.v22",
@@ -926,7 +939,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v21",
         "structural-native-distribution-e2e.v22",
         "structural-native-distribution-e2e.v23",
@@ -947,7 +960,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v22",
         "structural-native-distribution-e2e.v23",
         "structural-native-distribution-e2e.v24",
@@ -967,7 +980,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v23",
         "structural-native-distribution-e2e.v24",
         "structural-native-distribution-e2e.v25",
@@ -988,7 +1001,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v24",
         "structural-native-distribution-e2e.v25",
         "structural-native-distribution-e2e.v26",
@@ -1009,7 +1022,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v25",
         "structural-native-distribution-e2e.v26",
         "structural-native-distribution-e2e.v27",
@@ -1029,7 +1042,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v26",
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
@@ -1048,7 +1061,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v27",
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
@@ -1067,7 +1080,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v28",
         "structural-native-distribution-e2e.v29",
         "structural-native-distribution-e2e.v30",
@@ -1085,7 +1098,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v29",
         "structural-native-distribution-e2e.v30",
         "structural-native-distribution-e2e.v31",
@@ -1101,7 +1114,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version in {
+    if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v30",
         "structural-native-distribution-e2e.v31",
     }:
@@ -1119,7 +1132,7 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v31":
+    if cumulative_receipt_schema_version == "structural-native-distribution-e2e.v31":
         if payload.get("workbench_truss3d_editing_surface_passed") is not True:
             errors.append("workbench_truss3d_editing_surface_passed must be true")
         for name in (
@@ -1131,6 +1144,18 @@ def validate(
             "workbench_truss3d_editing_request_sha256",
             "workbench_truss3d_editing_result_ir_sha256",
             "workbench_truss3d_editing_recovery_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v32":
+        if payload.get("workbench_truss3d_leaf_deletion_surface_passed") is not True:
+            errors.append("workbench_truss3d_leaf_deletion_surface_passed must be true")
+        for name in (
+            "workbench_truss3d_leaf_deletion_model_sha256",
+            "workbench_truss3d_leaf_deletion_receipt_sha256",
+            "workbench_truss3d_leaf_deletion_request_sha256",
+            "workbench_truss3d_leaf_deletion_result_ir_sha256",
+            "workbench_truss3d_leaf_deletion_recovery_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

@@ -77,6 +77,26 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   rows, then strictly reparses and C++-revalidates before create-new publication. Installed E2E
   also creates a bound linear request and reaches typed ResultIR/recovery. Arbitrary element types,
   deletion, loads/constraints/properties, visual authoring and general topology remain open.
+- `model-add-truss-section` / `model-add-truss3d-member`: deterministic creation of one v1
+  `truss_3d` area section followed by one new node and connected `linear_truss_3d` member using an
+  existing compatible material. Rust assigns contiguous indices, neutral source ownership and
+  zero offsets, omits frame-only fields, preserves round-trip rows and blockers, then strictly
+  reparses and C++-revalidates. Focused and installed E2E reach typed frame-plus-truss recovery,
+  fallback 0 and byte-identical restart. Other section/element families, arbitrary topology and
+  visual authoring remain open.
+- `model-edit-truss-section` / `model-edit-truss-element-properties`: deterministic replacement of
+  one existing v1 truss area or atomic compatible material/section reassignment on one existing
+  truss element. Rust retains identity, formulation, connectivity, offsets and unrelated fields,
+  binds previous/edited values, degrades only a matching direct round-trip claim, then strictly
+  reparses and C++-revalidates. Creation/deletion of properties, nonlinear state, other families
+  and visual editing remain open.
+- `model-delete-truss3d-leaf-member`: deterministic removal of only the last contiguous neutral
+  `truss_3d`/`linear_truss_3d` member and its last orphan endpoint node. Rust rejects source-owned
+  or nonterminal rows, minimum-topology violations, and any other element/load/constraint/stage/
+  unsupported-feature/round-trip reference; binds all removed values and source hashes; and
+  strictly reparses and C++-revalidates before create-new publication. Installed E2E proves
+  frame-only typed recovery, fallback 0 and byte-identical restart. Cascade/reindex/general entity
+  or property deletion and visual authoring remain open.
 - `model-add-nodal-load`: deterministic creation of one globally unique, nonzero six-component SI
   nodal load inside one existing `linear_static` pattern on one existing node. The load receives a
   contiguous pattern-local index and neutral source ownership; only a matching direct load-pattern
@@ -268,16 +288,11 @@ project-manifest checks and Viewer, prototype, and Workbench v2 browser-smoke or
 well. Viewer report PDF verification plus Viewer sample-workflow, performance, and visual-regression
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
-checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
-bounded command-level node-coordinate edit, one bounded existing-nodal-load component edit, one
-bounded existing-constraint prescribed-value edit, one bounded existing-linear-material parameter
-edit, one bounded existing-frame-section parameter edit, one bounded existing-frame-element
-orientation edit, one bounded compatible frame-element material/section assignment edit, one
-bounded existing-two-node-element connectivity edit, one
-bounded connected-frame3d-member creator, one bounded existing-pattern nodal-load creator, one
-bounded homogeneous fixed-constraint creator, one atomic linear-static-pattern/first-load creator,
-one bounded stateless linear-elastic-material creator, one bounded frame3d-section creator,
-bounded C++-assembly-preflighted ModelIR linear CPU request creator, one
+checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only the
+documented bounded existing-entity editors, frame/truss member and property creators, and the
+single last-neutral-truss-leaf deletion operation. It also provides bounded nodal-load,
+fixed-constraint, linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
+section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
@@ -295,15 +310,16 @@ profiles and all four fixed projections. It closes native semantic-snapshot geom
 not solver selection/execution, perspective interaction, or deformed/modal/contour result
 exploration. The separate C++-revalidated node-coordinate, existing-nodal-load component,
 existing-restrained-DOF prescribed-value, existing-linear-elastic-material parameter, and
-existing-frame3d-section parameter, existing-frame3d-element orientation, and
-existing-two-node-element connectivity commands close only seven provenance-bound edit operations;
-the six additional member, nodal-load, fixed-constraint, atomic linear-static-pattern/first-load,
-stateless linear-elastic-material, and frame3d-section creators close only their documented fixed
-constructions.
-Visual dragging, general entity
-creation/deletion, broad retargeting, formulation/type/version changes, restraint-mask changes,
-and general property/material/section/load-combination/constraint-topology editing remain open, so
-the composite visual parity row stays open.
+existing frame/truss-section parameters, frame orientation, compatible frame/truss property
+references, and existing-two-node-element connectivity commands close only their documented
+provenance-bound operations. The frame/truss member, nodal-load, fixed-constraint, atomic
+linear-static-pattern/first-load, stateless linear-elastic-material and frame/truss-section
+creators close only their documented fixed constructions. The leaf deleter closes only one last
+contiguous neutral unreferenced linear-truss member and last orphan endpoint node.
+Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
+formulation/type/version changes, restraint-mask changes, and general
+property/material/section/load-combination/constraint-topology editing remain open, so the
+composite visual parity row stays open.
 
 The model-bound CPU linear request creator additionally closes selection of one existing
 `linear_static` pattern and the four bounded PCG controls, with authoritative C++ assembly

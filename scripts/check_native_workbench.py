@@ -97,6 +97,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-element-connectivity.v1",
         "structural-native:model-add-frame3d-member.v1",
         "structural-native:model-add-truss3d-member.v1",
+        "structural-native:model-delete-truss3d-leaf-member.v1",
         "structural-native:model-add-nodal-load.v1",
         "structural-native:model-add-fixed-constraint.v1",
         "structural-native:model-add-linear-load-pattern.v1",
@@ -115,6 +116,7 @@ REQUIRED_TOKENS = {
         "edit_model_truss_element_properties",
         "edit_model_element_connectivity",
         "add_model_frame3d_member",
+        "delete_model_truss3d_leaf_member",
         "add_model_nodal_load",
         "add_model_fixed_constraint",
         "add_model_linear_load_pattern",
@@ -133,6 +135,7 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_existing_modelir_truss3d_element_material_and_section_reference_edit",
         "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit",
         "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition",
+        "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_linear_truss3d_leaf_member_and_orphan_node_deletion",
         "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition",
         "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition",
         "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition",
@@ -161,6 +164,7 @@ REQUIRED_TOKENS = {
         'Some("model-edit-element-connectivity")',
         'Some("model-add-frame3d-member")',
         'Some("model-add-truss3d-member")',
+        'Some("model-delete-truss3d-leaf-member")',
         'Some("model-add-nodal-load")',
         'Some("model-add-fixed-constraint")',
         'Some("model-add-linear-load-pattern")',
@@ -223,6 +227,7 @@ REQUIRED_TOKENS = {
         "frame_section_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
         "truss3d_authoring_is_deterministic_fail_closed_restartable_and_cpu_executable",
         "truss3d_edits_are_deterministic_fail_closed_restartable_and_cpu_executable",
+        "truss3d_leaf_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable",
         "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
@@ -255,6 +260,7 @@ REQUIRED_TOKENS = {
         "frame-element orientation",
         "truss-section area",
         "truss element's compatible",
+        "truss3d leaf deleter",
         "frame3d-member creator",
         "nodal-load creator",
         "does not infer the human decision",
@@ -415,6 +421,17 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-truss3d-leaf-deletion-v1.md": (
+        "model-delete-truss3d-leaf-member",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-delete-truss3d-leaf-member.v1",
+        "last contiguous",
+        "one-real-iteration checkpoint",
+        "frame-only",
+        "typed recovery",
+        "fallback 0",
+        "C6",
+    ),
 }
 
 
@@ -429,6 +446,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     section_add_row: dict[str, object] = {}
     truss_authoring_row: dict[str, object] = {}
     truss_editing_row: dict[str, object] = {}
+    truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     try:
         payload = json.loads(
@@ -443,6 +461,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         section_add_row = payload["capabilities"]["modelir_frame_section_add"]
         truss_authoring_row = payload["capabilities"]["modelir_truss3d_authoring"]
         truss_editing_row = payload["capabilities"]["modelir_truss3d_editing"]
+        truss_leaf_deletion_row = payload["capabilities"]["modelir_truss3d_leaf_deletion"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
@@ -622,6 +641,32 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         ("cutover_gate", "C5"),
         ("owner", "structural-workbench"),
     ):
+        if truss_leaf_deletion_row.get(field) != expected:
+            blockers.append(
+                f"native_workbench_truss_leaf_deletion_capability_invalid:{field}"
+            )
+    truss_leaf_deletion_claim = str(truss_leaf_deletion_row.get("claim", ""))
+    for token in (
+        "last contiguous neutral truss_3d/linear_truss_3d member",
+        "last contiguous orphan endpoint node",
+        "element/load/constraint/construction-stage/unsupported-feature/round-trip reference",
+        "single C ABI into C++",
+        "frame-only typed recovery",
+        "byte-identical restart",
+        "fallback 0",
+        "general entity or property deletion",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in truss_leaf_deletion_claim:
+            blockers.append(
+                f"native_workbench_truss_leaf_deletion_claim_token_missing:{token}"
+            )
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
         if property_edit_row.get(field) != expected:
             blockers.append(f"native_workbench_property_edit_capability_invalid:{field}")
     property_edit_claim = str(property_edit_row.get("claim", ""))
@@ -665,6 +710,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "linear-material creator",
         "frame-section creator",
         "truss3d section/member",
+        "model-delete-truss3d-leaf-member",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",

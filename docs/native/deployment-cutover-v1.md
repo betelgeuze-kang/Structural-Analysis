@@ -35,14 +35,20 @@ strictly revalidates it through C++ without changing existing references.
 The installed `model-add-frame-section` command appends one v1 frame3d section with six positive
 finite SI parameters, then strictly revalidates it through C++ without changing existing
 references.
+The installed truss surface creates one v1 area section and connected neutral linear-truss leaf,
+edits one existing truss area or compatible material/section assignment, and removes only the last
+contiguous neutral unreferenced truss leaf plus its last orphan endpoint node. The deletion rejects
+loaded, constrained, staged, mapped, source-owned or nonterminal rows without cascade or reindexing.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v29 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v32 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
 displacement, added-model linear execution, and newly added material and section rows each
 referenced by a composed member with changed recovered displacement under the same active load,
 compatible M2/S2 assignment to E1 with the same active load and changed recovered displacement,
+truss3d authoring/editing with typed frame-plus-truss recovery, and last-neutral-truss-leaf deletion
+with frame-only recovery, constrained-endpoint rejection and one-real-iteration restart parity,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

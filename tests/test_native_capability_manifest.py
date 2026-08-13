@@ -242,6 +242,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "model-edit-truss-section" in workbench["claim"]
     assert "model-edit-truss-element-properties" in workbench["claim"]
     assert "truss3d section/member" in workbench["claim"]
+    assert "model-delete-truss3d-leaf-member" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
@@ -270,6 +271,23 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in truss_editing["claim"]
     assert "HIP C2" in truss_editing["claim"]
     assert "C6" in truss_editing["claim"]
+    assert (
+        capabilities.capability_is_enabled(payload, "modelir_truss3d_leaf_deletion")
+        is True
+    )
+    truss_leaf_deletion = payload["capabilities"]["modelir_truss3d_leaf_deletion"]
+    assert truss_leaf_deletion["cutover_gate"] == "C5"
+    assert truss_leaf_deletion["owner"] == "structural-workbench"
+    assert (
+        "last contiguous neutral truss_3d/linear_truss_3d member"
+        in truss_leaf_deletion["claim"]
+    )
+    assert "last contiguous orphan endpoint node" in truss_leaf_deletion["claim"]
+    assert "frame-only typed recovery" in truss_leaf_deletion["claim"]
+    assert "byte-identical restart" in truss_leaf_deletion["claim"]
+    assert "fallback 0" in truss_leaf_deletion["claim"]
+    assert "HIP C2" in truss_leaf_deletion["claim"]
+    assert "C6" in truss_leaf_deletion["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_linear_workbench") is True
     linear_workbench = payload["capabilities"]["modelir_linear_workbench"]
     assert linear_workbench["cutover_gate"] == "C5"
@@ -672,6 +690,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v20" in distribution["claim"]
     assert "append-only v30" in distribution["claim"]
     assert "append-only v31" in distribution["claim"]
+    assert "append-only v32" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -681,7 +700,8 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v30 receipts" in distribution["claim"]
+    assert "frozen v1 through v31 receipts" in distribution["claim"]
+    assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "distinct baseline/section/property displacement" in distribution["claim"]
     assert "one-real-iteration restart parity" in distribution["claim"]
     assert "structural-catalog" in distribution["claim"]
@@ -707,11 +727,12 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v31 E2E" in deployment["claim"]
+    assert "distribution v32 E2E" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]
     assert "compatible truss material/section reassignment" in deployment["claim"]
+    assert "last-neutral-truss-leaf deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
     assert "v6 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "frozen v1 through v5 rootfs receipts" in deployment["claim"]
