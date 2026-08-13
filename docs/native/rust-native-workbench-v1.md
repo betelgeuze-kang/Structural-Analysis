@@ -37,6 +37,10 @@ named pattern under the same source-validation, provenance, create-new, and C++ 
 It cannot create, delete, retarget, or combine loads.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. It cannot add/remove restraints or retarget a node.
+The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
+parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
+editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`
+section. Neither command changes identities, families/laws, versions, topology, or references.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -93,6 +97,15 @@ structural-workbench model-edit-nodal-load MODEL.json \
 structural-workbench model-edit-constraint-value MODEL.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir EDITED-CONSTRAINT-MODEL
+structural-workbench model-edit-linear-material MODEL.json \
+  --material M1 --elastic-modulus-pa 210000000000 \
+  --poisson-ratio 0.29 --density-kg-m3 7850 \
+  --output-dir EDITED-MATERIAL-MODEL
+structural-workbench model-edit-frame-section MODEL.json \
+  --section S1 --area-m2 0.025 --iy-m4 0.00009 --iz-m4 0.00006 \
+  --torsional-constant-m4 0.000012 \
+  --shear-area-y-m2 0.02 --shear-area-z-m2 0.02 \
+  --output-dir EDITED-SECTION-MODEL
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -173,10 +186,16 @@ inside one named pattern under the same provenance and C++ revalidation policy; 
 load-pattern round-trip row is conservatively marked approximated. The constraint-value editor
 changes one existing restrained DOF's finite prescribed metre/radian value and similarly degrades a
 matching constraint row. None of the commands provides visual dragging, entity creation/deletion,
-load/constraint retargeting, combinations, restraint-mask changes, or general property, topology,
-or solver editing; see `docs/native/modelir-node-coordinate-edit-v1.md`,
-`docs/native/modelir-nodal-load-edit-v1.md`, and
-`docs/native/modelir-constraint-value-edit-v1.md`.
+load/constraint retargeting, combinations, restraint-mask changes, or general topology or solver
+editing. Two further closed property commands replace all parameters of one existing v1
+`linear_elastic_isotropic` material or one existing v1 `frame_3d` section. They require physical SI
+ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and
+cannot create, delete, retarget, or change type. See
+`docs/native/modelir-node-coordinate-edit-v1.md`,
+`docs/native/modelir-nodal-load-edit-v1.md`,
+`docs/native/modelir-constraint-value-edit-v1.md`,
+`docs/native/modelir-linear-material-edit-v1.md`, and
+`docs/native/modelir-frame-section-edit-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is

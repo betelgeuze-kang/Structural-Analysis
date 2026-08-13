@@ -83,6 +83,8 @@ REQUIRED_PATHS = (
     Path("docs/native/localized-modelir-topology-view-v1.md"),
     Path("docs/native/localized-terminal-result-views-v1.md"),
     Path("docs/native/modelir-constraint-value-edit-v1.md"),
+    Path("docs/native/modelir-linear-material-edit-v1.md"),
+    Path("docs/native/modelir-frame-section-edit-v1.md"),
     Path("docs/native/modelir-nodal-load-edit-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
@@ -146,6 +148,14 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_existing_modelir_constraint_prescribed_value_edit": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_existing_linear_elastic_material_parameter_edit": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_existing_frame3d_section_parameter_edit": (
         "c5_implemented",
         False,
     ),
@@ -281,6 +291,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-edit-node",
         "model-edit-nodal-load",
         "model-edit-constraint-value",
+        "model-edit-linear-material",
+        "model-edit-frame-section",
     ]:
         blockers.append("workbench_ui_native_model_flow_invalid")
     if native.get("operator_flow") != [
@@ -833,6 +845,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "Structural Native Workbench - 모델 위상 뷰",
             "C++ 의미 스냅샷",
             "보기 해시",
+        ),
+        blockers,
+    )
+    native_model_edit = _text(
+        root, Path("native/crates/structural-workbench/src/model_edit.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/model_edit.rs"),
+        native_model_edit,
+        (
+            "structural-native:model-edit-linear-material.v1",
+            "structural-native:model-edit-frame-section.v1",
+            "pub fn edit_model_linear_material",
+            "pub fn edit_model_frame_section",
+            'mark_roundtrip_entity_approximated(&mut edited, "material", material_id)',
+            'mark_roundtrip_entity_approximated(&mut edited, "section", section_id)',
         ),
         blockers,
     )
@@ -1402,6 +1430,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("catalog-show")',
             'Some("evidence")',
             'Some("evidence-show")',
+            'Some("model-edit-linear-material")',
+            'Some("model-edit-frame-section")',
         ),
         blockers,
     )
@@ -1453,6 +1483,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "localized NDTHA result views are C5-implemented",
             "model-edit-nodal-load",
             "model-edit-constraint-value",
+            "model-edit-linear-material",
+            "model-edit-frame-section",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",
@@ -1520,6 +1552,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
+        "existing-linear-elastic-material parameter and existing-frame3d-section parameter edits",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

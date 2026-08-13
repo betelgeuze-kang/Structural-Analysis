@@ -38,6 +38,18 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   round-trip row approximated, then strictly reparses and C++-revalidates before create-new
   publication. Restraint changes, constraint creation/deletion/retargeting, multi-point constraints,
   visual manipulation, and broader model editing remain open.
+- `model-edit-linear-material`: deterministic replacement of elastic modulus, Poisson ratio, and
+  density for one existing v1 `linear_elastic_isotropic` material. Rust binds the fixed law and
+  version, previous/new SI parameter objects and source hashes, marks only a matching material
+  round-trip row approximated, then strictly reparses and C++-revalidates before create-new
+  publication. Other laws, state schemas, creation/deletion, retargeting, and broader property
+  editing remain open.
+- `model-edit-frame-section`: deterministic replacement of area, two second moments, torsional
+  constant, and two shear areas for one existing v1 `frame_3d` section. Every SI value is positive;
+  Rust binds the fixed family/version and previous/new parameter objects, marks only a matching
+  section round-trip row approximated, then strictly reparses and C++-revalidates before create-new
+  publication. Other families, creation/deletion, topology/orientation, and broader property
+  editing remain open.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -187,7 +199,8 @@ process/artifact verification are also Rust-native; npm package installation, Vi
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
 bounded command-level node-coordinate edit, one bounded existing-nodal-load component edit, one
-bounded existing-constraint prescribed-value edit, one
+bounded existing-constraint prescribed-value edit, one bounded existing-linear-material parameter
+edit, one bounded existing-frame-section parameter edit, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
@@ -203,11 +216,12 @@ open.
 The bounded general-ModelIR terminal topology view is C5-implemented for the eight current positive
 profiles and all four fixed projections. It closes native semantic-snapshot geometry inspection,
 not solver selection/execution, perspective interaction, or deformed/modal/contour result
-exploration. The separate C++-revalidated node-coordinate, existing-nodal-load component and
-existing-restrained-DOF prescribed-value commands close only three provenance-bound edit
-operations; visual dragging, entity creation/deletion/retargeting, restraint-mask changes, and
-general property/material/section/load-combination/constraint-topology editing remain open, so the
-composite visual parity row stays open.
+exploration. The separate C++-revalidated node-coordinate, existing-nodal-load component,
+existing-restrained-DOF prescribed-value, existing-linear-elastic-material parameter, and
+existing-frame3d-section parameter commands close only five provenance-bound edit operations;
+visual dragging, entity creation/deletion/retargeting, type/version changes, restraint-mask changes,
+and general property/material/section/load-combination/constraint-topology editing remain open, so
+the composite visual parity row stays open.
 
 The bounded NDTHA response-history view is C5-implemented for four closed response channels and
 arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table

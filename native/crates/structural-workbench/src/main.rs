@@ -7,8 +7,9 @@ use serde_json::json;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
-    BenchmarkTruthClassV1, ModelTopologyProjectionV1, NativeWorkbench, WorkbenchError,
-    WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    BenchmarkTruthClassV1, FrameSectionParametersV1, LinearElasticMaterialParametersV1,
+    ModelTopologyProjectionV1, NativeWorkbench, WorkbenchError, WorkbenchReportLocaleV1,
+    WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
     WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1, WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1,
     WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
 };
@@ -76,6 +77,22 @@ struct ModelEditConstraintValueCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelEditLinearMaterialCommand {
+    model: PathBuf,
+    material_id: String,
+    parameters: LinearElasticMaterialParametersV1,
+    output_directory: PathBuf,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct ModelEditFrameSectionCommand {
+    model: PathBuf,
+    section_id: String,
+    parameters: FrameSectionParametersV1,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ResultViewCommand {
     workspace: PathBuf,
@@ -135,6 +152,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             .and_then(|command| run_model_edit_nodal_load(&command)),
         Some("model-edit-constraint-value") => parse_model_edit_constraint_value(arguments)
             .and_then(|command| run_model_edit_constraint_value(&command)),
+        Some("model-edit-linear-material") => parse_model_edit_linear_material(arguments)
+            .and_then(|command| run_model_edit_linear_material(&command)),
+        Some("model-edit-frame-section") => parse_model_edit_frame_section(arguments)
+            .and_then(|command| run_model_edit_frame_section(&command)),
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
         }
@@ -414,6 +435,32 @@ fn run_model_edit_constraint_value(
         &command.constraint_id,
         &command.dof,
         command.value_si,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_linear_material(
+    command: &ModelEditLinearMaterialCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_linear_material_edit(
+        &command.model,
+        &command.material_id,
+        command.parameters,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_frame_section(
+    command: &ModelEditFrameSectionCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_frame_section_edit(
+        &command.model,
+        &command.section_id,
+        command.parameters,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -776,6 +823,111 @@ fn parse_model_edit_constraint_value(
         value_si,
         output_directory: PathBuf::from(&arguments[9]),
     })
+}
+
+fn parse_model_edit_linear_material(
+    arguments: &[OsString],
+) -> Result<ModelEditLinearMaterialCommand, WorkbenchError> {
+    if arguments.len() != 12
+        || arguments[2] != "--material"
+        || arguments[4] != "--elastic-modulus-pa"
+        || arguments[6] != "--poisson-ratio"
+        || arguments[8] != "--density-kg-m3"
+        || arguments[10] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-linear-material requires MODEL.json --material ID --elastic-modulus-pa E --poisson-ratio NU --density-kg-m3 RHO --output-dir DIR",
+        ));
+    }
+    let material_id =
+        parse_bounded_edit_id(&arguments[3], "model-edit-linear-material material ID")?;
+    let parameters = LinearElasticMaterialParametersV1 {
+        elastic_modulus_pa: parse_finite_edit_number(
+            &arguments[5],
+            "model-edit-linear-material elastic modulus",
+        )?,
+        poisson_ratio: parse_finite_edit_number(
+            &arguments[7],
+            "model-edit-linear-material Poisson ratio",
+        )?,
+        density_kg_m3: parse_finite_edit_number(
+            &arguments[9],
+            "model-edit-linear-material density",
+        )?,
+    };
+    if parameters.elastic_modulus_pa <= 0.0
+        || parameters.poisson_ratio <= -1.0
+        || parameters.poisson_ratio >= 0.5
+        || parameters.density_kg_m3 < 0.0
+    {
+        return Err(usage_error(
+            "model-edit-linear-material requires E > 0, -1 < NU < 0.5, and RHO >= 0",
+        ));
+    }
+    Ok(ModelEditLinearMaterialCommand {
+        model: PathBuf::from(&arguments[1]),
+        material_id,
+        parameters,
+        output_directory: PathBuf::from(&arguments[11]),
+    })
+}
+
+fn parse_model_edit_frame_section(
+    arguments: &[OsString],
+) -> Result<ModelEditFrameSectionCommand, WorkbenchError> {
+    if arguments.len() != 18
+        || arguments[2] != "--section"
+        || arguments[4] != "--area-m2"
+        || arguments[6] != "--iy-m4"
+        || arguments[8] != "--iz-m4"
+        || arguments[10] != "--torsional-constant-m4"
+        || arguments[12] != "--shear-area-y-m2"
+        || arguments[14] != "--shear-area-z-m2"
+        || arguments[16] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-frame-section requires MODEL.json --section ID --area-m2 A --iy-m4 IY --iz-m4 IZ --torsional-constant-m4 J --shear-area-y-m2 AY --shear-area-z-m2 AZ --output-dir DIR",
+        ));
+    }
+    let values = arguments[5..16]
+        .iter()
+        .step_by(2)
+        .map(|value| parse_finite_edit_number(value, "model-edit-frame-section parameter"))
+        .collect::<Result<Vec<_>, _>>()?;
+    if values.iter().any(|value| *value <= 0.0) {
+        return Err(usage_error(
+            "model-edit-frame-section parameters must be finite SI numbers greater than zero",
+        ));
+    }
+    Ok(ModelEditFrameSectionCommand {
+        model: PathBuf::from(&arguments[1]),
+        section_id: parse_bounded_edit_id(&arguments[3], "model-edit-frame-section section ID")?,
+        parameters: FrameSectionParametersV1 {
+            area_m2: values[0],
+            iy_m4: values[1],
+            iz_m4: values[2],
+            torsional_constant_m4: values[3],
+            shear_area_y_m2: values[4],
+            shear_area_z_m2: values[5],
+        },
+        output_directory: PathBuf::from(&arguments[17]),
+    })
+}
+
+fn parse_bounded_edit_id(argument: &OsString, name: &str) -> Result<String, WorkbenchError> {
+    argument
+        .to_str()
+        .filter(|value| !value.is_empty() && value.len() <= 128)
+        .map(ToOwned::to_owned)
+        .ok_or_else(|| usage_error(&format!("{name} must be valid UTF-8 with 1-128 bytes")))
+}
+
+fn parse_finite_edit_number(argument: &OsString, name: &str) -> Result<f64, WorkbenchError> {
+    argument
+        .to_str()
+        .and_then(|value| value.parse::<f64>().ok())
+        .filter(|value| value.is_finite())
+        .ok_or_else(|| usage_error(&format!("{name} must be a finite SI number")))
 }
 
 fn parse_report_view(
@@ -1230,7 +1382,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 fn usage() -> &'static str {
     concat!(
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
-        "\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
+        "\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
 
@@ -1241,7 +1393,8 @@ mod tests {
 
     use super::{
         parse_catalog, parse_catalog_show, parse_deformed_view, parse_evidence, parse_import,
-        parse_model_edit_constraint_value, parse_model_edit_nodal_load, parse_model_edit_node,
+        parse_model_edit_constraint_value, parse_model_edit_frame_section,
+        parse_model_edit_linear_material, parse_model_edit_nodal_load, parse_model_edit_node,
         parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
         parse_review, parse_stage_command,
     };
@@ -1418,6 +1571,87 @@ mod tests {
         let mut invalid_value = arguments;
         invalid_value[7] = OsString::from("inf");
         assert!(parse_model_edit_constraint_value(&invalid_value).is_err());
+    }
+
+    #[test]
+    fn model_edit_linear_material_parser_has_closed_physical_ranges() {
+        let arguments = [
+            OsString::from("model-edit-linear-material"),
+            OsString::from("model.json"),
+            OsString::from("--material"),
+            OsString::from("M1"),
+            OsString::from("--elastic-modulus-pa"),
+            OsString::from("210000000000"),
+            OsString::from("--poisson-ratio"),
+            OsString::from("0.29"),
+            OsString::from("--density-kg-m3"),
+            OsString::from("7850"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_linear_material(&arguments)
+            .expect("valid linear-material edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.material_id, "M1");
+        assert_eq!(
+            parsed.parameters.elastic_modulus_pa.to_bits(),
+            210_000_000_000.0_f64.to_bits()
+        );
+        assert_eq!(
+            parsed.parameters.poisson_ratio.to_bits(),
+            0.29_f64.to_bits()
+        );
+        assert_eq!(
+            parsed.parameters.density_kg_m3.to_bits(),
+            7850.0_f64.to_bits()
+        );
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        for (index, value) in [(5, "0"), (7, "0.5"), (7, "-1"), (9, "-1"), (9, "NaN")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_model_edit_linear_material(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn model_edit_frame_section_parser_requires_positive_finite_si_values() {
+        let arguments = [
+            OsString::from("model-edit-frame-section"),
+            OsString::from("model.json"),
+            OsString::from("--section"),
+            OsString::from("S1"),
+            OsString::from("--area-m2"),
+            OsString::from("0.025"),
+            OsString::from("--iy-m4"),
+            OsString::from("0.00009"),
+            OsString::from("--iz-m4"),
+            OsString::from("0.00006"),
+            OsString::from("--torsional-constant-m4"),
+            OsString::from("0.000012"),
+            OsString::from("--shear-area-y-m2"),
+            OsString::from("0.02"),
+            OsString::from("--shear-area-z-m2"),
+            OsString::from("0.02"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed =
+            parse_model_edit_frame_section(&arguments).expect("valid frame-section edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.section_id, "S1");
+        assert_eq!(parsed.parameters.area_m2.to_bits(), 0.025_f64.to_bits());
+        assert_eq!(
+            parsed.parameters.torsional_constant_m4.to_bits(),
+            0.000_012_f64.to_bits()
+        );
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        for (index, value) in [(5, "0"), (7, "-1"), (15, "inf")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_model_edit_frame_section(&invalid).is_err());
+        }
     }
 
     #[test]

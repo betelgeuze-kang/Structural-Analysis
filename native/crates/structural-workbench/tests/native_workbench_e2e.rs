@@ -452,6 +452,205 @@ fn assert_rejected_constraint_value_edit(
     assert!(!destination.exists());
 }
 
+fn run_linear_material_edit(
+    source: &Path,
+    destination: &Path,
+    material_id: &str,
+    parameters: [&str; 3],
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-material"),
+        source.as_os_str(),
+        text("--material"),
+        text(material_id),
+        text("--elastic-modulus-pa"),
+        text(parameters[0]),
+        text("--poisson-ratio"),
+        text(parameters[1]),
+        text("--density-kg-m3"),
+        text(parameters[2]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn run_frame_section_edit(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    parameters: [&str; 6],
+) -> Output {
+    run_workbench(&[
+        text("model-edit-frame-section"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--area-m2"),
+        text(parameters[0]),
+        text("--iy-m4"),
+        text(parameters[1]),
+        text("--iz-m4"),
+        text(parameters[2]),
+        text("--torsional-constant-m4"),
+        text(parameters[3]),
+        text("--shear-area-y-m2"),
+        text(parameters[4]),
+        text("--shear-area-z-m2"),
+        text(parameters[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn assert_self_hashed_edit_receipt(receipt: &mut Value) {
+    let expected_receipt_hash = receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .and_then(|value| value.as_str().map(ToOwned::to_owned))
+        .expect("receipt self-hash");
+    let unsigned = canonicalize_model_ir_v2(receipt).expect("unsigned canonical receipt");
+    assert_eq!(expected_receipt_hash, sha256_identity(unsigned.as_bytes()));
+}
+
+fn assert_published_linear_material_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let material = edited
+        .value()
+        .get("materials")
+        .and_then(Value::as_array)
+        .and_then(|materials| {
+            materials
+                .iter()
+                .find(|material| material.get("id").and_then(Value::as_str) == Some("M1"))
+        })
+        .expect("edited material");
+    for (key, expected) in [
+        ("elastic_modulus_pa", 210_000_000_000.0_f64),
+        ("poisson_ratio", 0.29),
+        ("density_kg_m3", 7850.0),
+    ] {
+        assert_eq!(
+            material["parameters"][key]
+                .as_f64()
+                .expect("finite material parameter")
+                .to_bits(),
+            expected.to_bits()
+        );
+    }
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-material.v1")
+        .is_some());
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("material edit receipt"),
+    )
+    .expect("material edit receipt JSON");
+    assert_eq!(receipt["operation"], "linear_elastic_material_parameters");
+    assert_eq!(receipt["material_id"], "M1");
+    assert_eq!(receipt["law_id"], "linear_elastic_isotropic");
+    assert_eq!(receipt["parameter_set_version"], "1");
+    assert_eq!(receipt["previous_parameters_si"]["poisson_ratio"], 0.3);
+    assert_eq!(receipt["edited_parameters_si"]["poisson_ratio"], 0.29);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_frame_section_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let section = edited
+        .value()
+        .get("sections")
+        .and_then(Value::as_array)
+        .and_then(|sections| {
+            sections
+                .iter()
+                .find(|section| section.get("id").and_then(Value::as_str) == Some("S1"))
+        })
+        .expect("edited section");
+    for (key, expected) in [
+        ("area_m2", 0.025_f64),
+        ("iy_m4", 0.000_09),
+        ("iz_m4", 0.000_06),
+        ("torsional_constant_m4", 0.000_012),
+        ("shear_area_y_m2", 0.02),
+        ("shear_area_z_m2", 0.02),
+    ] {
+        assert_eq!(
+            section["parameters"][key]
+                .as_f64()
+                .expect("finite section parameter")
+                .to_bits(),
+            expected.to_bits()
+        );
+    }
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-frame-section.v1")
+        .is_some());
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("section edit receipt"),
+    )
+    .expect("section edit receipt JSON");
+    assert_eq!(receipt["operation"], "frame_section_parameters");
+    assert_eq!(receipt["section_id"], "S1");
+    assert_eq!(receipt["family_id"], "frame_3d");
+    assert_eq!(receipt["parameter_set_version"], "1");
+    assert_eq!(receipt["previous_parameters_si"]["area_m2"], 0.02);
+    assert_eq!(receipt["edited_parameters_si"]["area_m2"], 0.025);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_rejected_linear_material_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    material_id: &str,
+    parameters: [&str; 3],
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_linear_material_edit(source, &destination, material_id, parameters);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
+fn assert_rejected_frame_section_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    section_id: &str,
+    parameters: [&str; 6],
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_frame_section_edit(source, &destination, section_id, parameters);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
 #[test]
 #[allow(clippy::too_many_lines)]
 fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
@@ -1050,6 +1249,292 @@ fn constraint_value_edit_preserves_source_analysis_blockers_without_promotion() 
     )
     .expect("blocked constraint edited ModelIR JSON");
     assert_eq!(edited["roundtrip_map"][0]["mapping_status"], "approximated");
+}
+
+#[test]
+fn linear_material_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("material-edit-first");
+    let second = temporary.0.join("material-edit-second");
+    let edited_parameters = ["210000000000", "0.29", "7850"];
+    for destination in [&first, &second] {
+        let output = run_linear_material_edit(&source, destination, "M1", edited_parameters);
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("material edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first material edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second material edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after edit"),
+        source_before
+    );
+    assert_published_linear_material_edit(&first);
+
+    let repeated = run_linear_material_edit(&source, &first, "M1", edited_parameters);
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, material_id, parameters, expected_code) in [
+        (
+            "material-missing",
+            "MISSING",
+            edited_parameters,
+            "workbench_model_edit_material_missing",
+        ),
+        (
+            "material-no-op",
+            "M1",
+            ["200000000000", "0.3", "7850"],
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        assert_rejected_linear_material_edit(
+            &source,
+            &temporary.0,
+            name,
+            material_id,
+            parameters,
+            expected_code,
+        );
+    }
+
+    let mut zero_density_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for signed-zero edit");
+    zero_density_source["materials"][0]["parameters"]["density_kg_m3"] = serde_json::json!(0.0);
+    let zero_density_path = temporary.0.join("zero-density-source.model-ir.json");
+    std::fs::write(
+        &zero_density_path,
+        serde_json::to_vec(&zero_density_source).expect("zero-density source bytes"),
+    )
+    .expect("write zero-density source");
+    assert_rejected_linear_material_edit(
+        &zero_density_path,
+        &temporary.0,
+        "material-density-signed-zero-no-op",
+        "M1",
+        ["200000000000", "0.3", "-0"],
+        "workbench_model_edit_no_change",
+    );
+
+    let other_law = repository_root().join("examples/bounded_planar_frame_alpha.model-ir.v2.json");
+    assert_rejected_linear_material_edit(
+        &other_law,
+        &temporary.0,
+        "material-wrong-law",
+        "steel",
+        edited_parameters,
+        "workbench_model_edit_material_law_unsupported",
+    );
+
+    let mut invalid_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for invalid material edit");
+    invalid_source["elements"][0]["material_id"] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary.0.join("invalid-material-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid material source bytes"),
+    )
+    .expect("write invalid material edit source");
+    assert_rejected_linear_material_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-material-source-edit",
+        "M1",
+        edited_parameters,
+        "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+fn frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("section-edit-first");
+    let second = temporary.0.join("section-edit-second");
+    let edited_parameters = ["0.025", "0.00009", "0.00006", "0.000012", "0.02", "0.02"];
+    for destination in [&first, &second] {
+        let output = run_frame_section_edit(&source, destination, "S1", edited_parameters);
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("section edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first section edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second section edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after edit"),
+        source_before
+    );
+    assert_published_frame_section_edit(&first);
+
+    let repeated = run_frame_section_edit(&source, &first, "S1", edited_parameters);
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, section_id, parameters, expected_code) in [
+        (
+            "section-missing",
+            "MISSING",
+            edited_parameters,
+            "workbench_model_edit_section_missing",
+        ),
+        (
+            "section-no-op",
+            "S1",
+            ["0.02", "0.00008", "0.00005", "0.00001", "0.016", "0.016"],
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        assert_rejected_frame_section_edit(
+            &source,
+            &temporary.0,
+            name,
+            section_id,
+            parameters,
+            expected_code,
+        );
+    }
+
+    let other_family =
+        repository_root().join("examples/bounded_planar_frame_alpha.model-ir.v2.json");
+    assert_rejected_frame_section_edit(
+        &other_family,
+        &temporary.0,
+        "section-wrong-family",
+        "RC1",
+        edited_parameters,
+        "workbench_model_edit_section_family_unsupported",
+    );
+
+    let mut invalid_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for invalid section edit");
+    invalid_source["elements"][0]["section_id"] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary.0.join("invalid-section-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid section source bytes"),
+    )
+    .expect("write invalid section edit source");
+    assert_rejected_frame_section_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-section-source-edit",
+        "S1",
+        edited_parameters,
+        "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+fn material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let mut blocked: Value = serde_json::from_slice(
+        &std::fs::read(fixture).expect("source ModelIR fixture for blocked parameter edits"),
+    )
+    .expect("source ModelIR JSON for blocked parameter edits");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.parameter-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Parameter editing must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:M1",
+            "entity_kind": "material",
+            "model_ir_entity_id": "M1",
+            "mapping_status": "exact",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:S1",
+            "entity_kind": "section",
+            "model_ir_entity_id": "S1",
+            "mapping_status": "canonicalized",
+            "extensions": {}
+        }
+    ]);
+    let source = temporary.0.join("blocked-parameter-source.model-ir.json");
+    std::fs::write(
+        &source,
+        serde_json::to_vec(&blocked).expect("blocked parameter edit source bytes"),
+    )
+    .expect("write blocked parameter edit source");
+    let material_destination = temporary.0.join("blocked-material-edit");
+    let material_output = run_linear_material_edit(
+        &source,
+        &material_destination,
+        "M1",
+        ["210000000000", "0.29", "7850"],
+    );
+    assert_success(&material_output);
+    let material_edited: Value = serde_json::from_slice(
+        &std::fs::read(material_destination.join("model-ir.json"))
+            .expect("blocked material edited model"),
+    )
+    .expect("blocked material edited JSON");
+    assert_eq!(
+        material_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        material_edited["roundtrip_map"][1]["mapping_status"],
+        "canonicalized"
+    );
+
+    let section_destination = temporary.0.join("blocked-section-edit");
+    let section_output = run_frame_section_edit(
+        &material_destination.join("model-ir.json"),
+        &section_destination,
+        "S1",
+        ["0.025", "0.00009", "0.00006", "0.000012", "0.02", "0.02"],
+    );
+    assert_success(&section_output);
+    let receipt: Value = serde_json::from_slice(
+        &std::fs::read(section_destination.join("edit-receipt.json"))
+            .expect("blocked section edit receipt"),
+    )
+    .expect("blocked section edit receipt JSON");
+    assert_eq!(receipt["analysis_ready"], false);
+    assert_eq!(
+        receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.parameter-edit-visible-not-runnable"])
+    );
+    let section_edited: Value = serde_json::from_slice(
+        &std::fs::read(section_destination.join("model-ir.json"))
+            .expect("blocked section edited model"),
+    )
+    .expect("blocked section edited JSON");
+    assert_eq!(
+        section_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        section_edited["roundtrip_map"][1]["mapping_status"],
+        "approximated"
+    );
 }
 
 fn import_arguments<'a>(
