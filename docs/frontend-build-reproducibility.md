@@ -32,6 +32,12 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Checks registered project/drawing/variant counts, OPSTOOL release triples, repo-confined artifact/provenance paths, and locally present artifact-count sources; missing gitignored release outputs remain explicit warnings.
   - Emits a canonical self-hashed receipt with command and network execution counts fixed at zero, without importing or executing the Viewer JavaScript module.
   - Runs before viewer/browser smoke in the PR quality gate so broken drawing registrations fail early.
+- `npm run serve:viewer`
+  - Starts the Rust-native source Viewer server on the fixed IPv4 loopback default `127.0.0.1:8765`; `STRUCTURE_VIEWER_PORT` may select another nonzero port, but non-loopback hosts are rejected.
+  - Serves only bounded non-symlink files below explicit Viewer/open-data/visualization prefixes, accepts GET/HEAD only, and rejects traversal, backslashes, dotfiles, and repository-wide access.
+  - `npm run serve:viewer -- --dry-run` emits the canonical self-hashed startup plan without binding a socket.
+  - The server removes the Node HTTP runtime from this local launch boundary; the served Viewer application and browser remain JavaScript-owned.
+  - Sandboxes that deny loopback sockets can verify routing and startup plans but cannot issue a live-listener receipt; that check remains for a hosted or clean-machine lane with loopback permission.
 - `npm run verify:viewer-report-pdf`
   - Uses Playwright to export the active MIDAS33 engineer-in-loop report to PDF and checks that the PDF is non-empty with a valid `%PDF-` header.
   - Runs in the full quality gate because it is a release-output smoke rather than a fast PR contract.

@@ -31,7 +31,7 @@
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
     "verify:viewer-sample-workflow": "node ./scripts/verify-structure-viewer-sample-workflow.mjs --fail-blocked",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
-    "serve:viewer": "node ./scripts/serve-structure-viewer.mjs",
+    "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "ai:kiro-design": "./scripts/ai-run-kiro-design.sh",
     "ai:preflight": "bash scripts/ai-preflight.sh",
     "ai:verify": "bash scripts/ai-verify.sh",

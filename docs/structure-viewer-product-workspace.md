@@ -15,6 +15,18 @@ Runtime responsibility boundaries and the offline bundle graph are defined in [S
 src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized
 ```
 
+Start the source workspace through the loopback-only Rust server:
+
+```bash
+npm run serve:viewer
+# dry-run, no listener:
+npm run serve:viewer -- --dry-run
+```
+
+The launch receipt is self-hashed and lists the exact allowed file prefixes. The server cannot bind
+to a non-loopback host and does not expose arbitrary repository paths; JavaScript rendering and
+browser behavior remain separate Viewer/browser responsibilities.
+
 - Backward-compatible aliases still work:
 
 ```text

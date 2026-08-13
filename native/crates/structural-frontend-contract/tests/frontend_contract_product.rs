@@ -7,9 +7,9 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_manifest_receipt_json, canonical_workbench_prototype_receipt_json,
-    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
-    check_workbench_prototype, run_frontend_smoke,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_server_receipt_json,
+    canonical_workbench_prototype_receipt_json, check_frontend_contract, check_frontend_delivery,
+    check_viewer_manifest, check_workbench_prototype, plan_viewer_server, run_frontend_smoke,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -206,6 +206,75 @@ fn tracked_workbench_prototype_contract_is_conservative_and_self_hashed() {
     let encoded = canonical_workbench_prototype_receipt_json(&first)
         .expect("canonical Workbench prototype receipt");
     let value: Value = serde_json::from_str(&encoded).expect("prototype receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn tracked_viewer_server_plan_is_loopback_bounded_and_self_hashed() {
+    let root = repository_root();
+    let first = plan_viewer_server(&root, "127.0.0.1", 8765).expect("Viewer server plan");
+    let second = plan_viewer_server(&root, "127.0.0.1", 8765).expect("repeat server plan");
+    assert_eq!(first, second);
+    assert_eq!(first.mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert!(first.loopback_only);
+    assert_eq!(first.listener_count, 0);
+    assert_eq!(first.external_network_access_count, 0);
+    assert_eq!(first.commands_executed, 0);
+    assert_eq!(
+        first.viewer_url,
+        "http://127.0.0.1:8765/src/structure-viewer/index.html?project=midas33_release&drawing=midas33_optimized&variant=optimized"
+    );
+    assert!(first
+        .allowed_path_prefixes
+        .iter()
+        .any(|prefix| prefix == "src/structure-viewer/"));
+    assert!(!first
+        .allowed_path_prefixes
+        .iter()
+        .any(|prefix| prefix.starts_with('.') || prefix == "/"));
+    let encoded = canonical_viewer_server_receipt_json(&first).expect("canonical server receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("server receipt JSON");
+    verify_receipt_hash(&value);
+
+    let error = plan_viewer_server(&root, "0.0.0.0", 8765)
+        .expect_err("non-loopback Viewer server must fail");
+    assert_eq!(error.code, "viewer_server_host_forbidden");
+}
+
+#[test]
+fn clean_environment_viewer_server_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args([
+            "serve",
+            "--root",
+            root.to_str().expect("UTF-8 repo root"),
+            "--host",
+            "127.0.0.1",
+            "--port",
+            "8765",
+            "--dry-run",
+        ])
+        .env_clear()
+        .output()
+        .expect("run Viewer server dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("server receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "viewer_server");
+    assert_eq!(value["listener_count"], 0);
     verify_receipt_hash(&value);
 }
 

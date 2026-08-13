@@ -27,6 +27,7 @@
     "scripts/verify-structure-viewer-report-pdf.mjs",
     "scripts/measure-structure-viewer-performance.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
+    "src/structure-viewer/index.html",
     "src/structure-viewer/design-tokens.css",
     "src/structure-viewer/viewer-visual-identity.css",
     "src/structure-viewer/viewer-visual-scene.js",
@@ -52,6 +53,7 @@
     "native/crates/structural-frontend-contract/src/main.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
+    "native/crates/structural-frontend-contract/src/viewer_server.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
   ],
   "forbidden_paths": [
@@ -63,6 +65,7 @@
     "dev": "vite",
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "preview": "vite preview",
+    "serve:viewer": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- serve --root .",
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
@@ -208,6 +211,21 @@
     ],
     "generated_release_path_fragment": "implementation/phase1/release/",
     "claim_boundary": "This read-only transitional C0 check proves only that the strict language-neutral default Viewer project manifest, its exact generated JavaScript projection, registered project/drawing/variant inventory, repo-confined path dispositions, and any locally present artifact-count sources satisfy the frozen static contract. Missing gitignored generated release artifacts remain explicit warnings. It does not execute JavaScript or a browser, prove runtime rendering, validate engineering results, promote native UI parity, or authorize React/TypeScript/Node removal."
+  },
+  "viewer_server_contract": {
+    "contract": "structural-native-viewer-server-contract.v1",
+    "default_host": "127.0.0.1",
+    "default_port": 8765,
+    "viewer_entry": "/src/structure-viewer/index.html",
+    "default_query": "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+    "allowed_path_prefixes": [
+      "src/structure-viewer/",
+      "implementation/phase1/open_data/",
+      "implementation/phase1/release/visualization/",
+      "implementation/phase1/output/structural_svg/",
+      "output/structural_svg/"
+    ],
+    "claim_boundary": "This transitional C0 local server receipt proves only that Rust binds one fixed IPv4 loopback listener and serves bounded non-symlink regular files from explicit Viewer/data prefixes with GET/HEAD-only, traversal/dotfile rejection, no-store, and nosniff responses. Dry-run binds no listener. It does not execute JavaScript, a browser, Python, Node, engineering analysis, or external network access; the static Viewer runtime remains JavaScript-owned and C6 removal remains forbidden."
   },
   "claim_boundary": "This transitional Rust-native check proves only that the still-active legacy React/Vite package and lock metadata plus required source inventory match their pinned repository contract. It does not build or execute the frontend, prove browser behavior, promote native UI parity, or authorize React/TypeScript/Node removal."
 }

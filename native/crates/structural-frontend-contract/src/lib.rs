@@ -5,6 +5,7 @@
 mod prototype;
 mod smoke;
 mod viewer_manifest;
+mod viewer_server;
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -29,6 +30,10 @@ pub use viewer_manifest::{
     ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
 };
 use viewer_manifest::{validate_viewer_manifest_source, ViewerManifestSourceV1};
+pub use viewer_server::{
+    canonical_viewer_server_receipt_json, plan_viewer_server, serve_viewer, ViewerServerReceiptV1,
+};
+use viewer_server::{validate_viewer_server_source, ViewerServerSourceV1};
 
 const SOURCE_MAP_SCHEMA_V1: &str = "structural-legacy-frontend-build-contract.v1";
 const RECEIPT_SCHEMA_V1: &str = "structural-native-frontend-contract-receipt.v1";
@@ -91,6 +96,7 @@ struct FrontendSourceMapV1 {
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
+    viewer_server_contract: ViewerServerSourceV1,
     workbench_prototype_contract: WorkbenchPrototypeSourceV1,
     claim_boundary: String,
 }
@@ -472,6 +478,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
+    validate_viewer_server_source(&source_map.viewer_server_contract)?;
     validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;
     Ok(())
 }

@@ -46,6 +46,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- prototype --root ."
     )
     assert (
+        package_json["scripts"]["serve:viewer"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- serve --root ."
+    )
+    assert (
         package_json["scripts"]["verify:frontend-browser-smoke"]
         == "node ./scripts/verify-frontend-browser-smoke.mjs"
     )
@@ -94,6 +99,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:frontend-browser-smoke" in docs_text
     assert "npm run verify:workbench-prototype-dom-contract" in docs_text
     assert "structural-frontend-contract prototype" in docs_text
+    assert "npm run serve:viewer" in docs_text
+    assert "--dry-run" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
     assert "structural-frontend-contract viewer-manifest" in docs_text
     assert "npm run verify:viewer-report-pdf" in docs_text
@@ -175,3 +182,22 @@ def test_native_workbench_prototype_contract_runs_without_a_dom_or_browser() -> 
     assert payload["network_access_count"] == 0
     assert payload["browser_executed"] is False
     assert payload["receipt_hash"].startswith("sha256:")
+
+
+def test_native_viewer_server_dry_run_is_loopback_only_and_listener_free() -> None:
+    result = subprocess.run(
+        ["npm", "run", "serve:viewer", "--silent", "--", "--dry-run"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-viewer-server-receipt.v1"
+    assert payload["loopback_only"] is True
+    assert payload["listener_count"] == 0
+    assert payload["external_network_access_count"] == 0
+    assert payload["commands_executed"] == 0
+    assert payload["viewer_url"].startswith("http://127.0.0.1:8765/")
