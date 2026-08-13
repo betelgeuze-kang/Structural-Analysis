@@ -22,6 +22,14 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- check --root ."
     )
+    assert (
+        package_json["scripts"]["verify:workbench-viewer-delivery"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- delivery --root ."
+    )
+    assert package_json["scripts"]["build"].endswith(
+        "structural-frontend-contract -- delivery --root ."
+    )
     assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
     assert package_json["scripts"]["verify:viewer-manifest"] == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
     assert (
@@ -69,6 +77,7 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert package_lock["packages"][""]["devDependencies"] == package_json["devDependencies"]
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run verify:frontend-smoke" in docs_text
+    assert "structural-frontend-contract delivery" in docs_text
     assert "npm run verify:frontend-browser-smoke" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
     assert "npm run verify:viewer-report-pdf" in docs_text

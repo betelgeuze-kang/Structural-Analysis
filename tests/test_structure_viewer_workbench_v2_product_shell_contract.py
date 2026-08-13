@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -63,18 +64,26 @@ def test_static_viewer_remains_an_embedded_workbench_subsystem() -> None:
 def test_production_build_emits_both_product_entries_and_verifies_delivery() -> None:
     vite = _read("vite.config.ts")
     package = _read("package.json")
-    verifier = _read("scripts/verify-workbench-viewer-delivery.mjs")
+    verifier = _read("native/crates/structural-frontend-contract/src/lib.rs")
+    source_map = json.loads(
+        _read("native/decommission/legacy-frontend-build-contract-v1.json")
+    )
+    delivery = source_map["delivery_contract"]
     e2e = _read("tests/frontend/workbench-v2-e2e.spec.ts")
 
     assert "const rootHtml" in vite
     assert "const viewerHtml" in vite
     assert "workbench: rootHtml" in vite
     assert "structureViewer: viewerHtml" in vite
-    assert "verify-workbench-viewer-delivery.mjs" in package
-    assert "distDir, 'src', 'structure-viewer', 'index.html'" in verifier
-    assert 'data-si-shell="product"' in verifier
+    assert "structural-frontend-contract -- delivery --root ." in package
+    assert "pub fn check_frontend_delivery" in verifier
+    assert delivery["viewer_entry"] == "src/structure-viewer/index.html"
+    assert 'data-si-shell="product"' in delivery["viewer_required_markers"]
     assert "Viewer entry resolved to the Workbench SPA fallback" in verifier
-    assert "Legacy App code leaked into the eager Workbench graph" in verifier
+    assert "legacy App code leaked into the eager Workbench graph" in verifier
     assert "exactly one lazy legacy App chunk" in verifier
     assert "legacy_marker_count" in verifier
+    assert delivery["claim_boundary"].startswith(
+        "This read-only transitional C0 check"
+    )
     assert 'body[data-si-shell="product"]' in e2e

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build && node ./scripts/verify-workbench-viewer-delivery.mjs",
+    "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
     "preview": "vite preview",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
@@ -22,7 +22,7 @@
     "build:benchmark-catalog": "bash ./scripts/build_native_benchmark_catalog.sh",
     "verify:benchmark-catalog-contract": "cargo test --locked --manifest-path native/Cargo.toml -p structural-catalog",
     "verify:workbench-v2-e2e": "node ./scripts/verify-workbench-v2-e2e.mjs",
-    "verify:workbench-viewer-delivery": "node ./scripts/verify-workbench-viewer-delivery.mjs",
+    "verify:workbench-viewer-delivery": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
     "build:evidence-bundle": "bash ./scripts/build_native_workbench_evidence_bundle.sh",
     "verify:evidence-bundle-contract": "cargo test --locked --manifest-path native/Cargo.toml -p structural-evidence",
     "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",

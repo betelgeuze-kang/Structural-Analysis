@@ -15,8 +15,12 @@ use structural_contracts::product_ir::sha256_identity;
 
 const SOURCE_MAP_SCHEMA_V1: &str = "structural-legacy-frontend-build-contract.v1";
 const RECEIPT_SCHEMA_V1: &str = "structural-native-frontend-contract-receipt.v1";
+const DELIVERY_RECEIPT_SCHEMA_V1: &str = "structural-native-frontend-delivery-receipt.v1";
 const MAX_SOURCE_MAP_BYTES: usize = 1024 * 1024;
 const MAX_JSON_BYTES: u64 = 8 * 1024 * 1024;
+const MAX_DELIVERY_TEXT_BYTES: u64 = 64 * 1024 * 1024;
+const MAX_DELIVERY_TOTAL_ASSET_BYTES: u64 = 256 * 1024 * 1024;
+const MAX_DELIVERY_ASSETS: usize = 512;
 const MAX_REQUIRED_FILES: usize = 256;
 const MAX_PATH_BYTES: usize = 512;
 const SOURCE_MAP_BYTES: &[u8] = include_bytes!(concat!(
@@ -67,6 +71,23 @@ struct FrontendSourceMapV1 {
     expected_scripts: BTreeMap<String, String>,
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
+    delivery_contract: FrontendDeliverySourceV1,
+    claim_boundary: String,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FrontendDeliverySourceV1 {
+    contract: String,
+    dist_directory: String,
+    workbench_entry: String,
+    viewer_entry: String,
+    workbench_required_marker: String,
+    workbench_forbidden_marker: String,
+    viewer_required_markers: Vec<String>,
+    viewer_forbidden_marker: String,
+    workbench_viewer_target: String,
+    legacy_sentinels: Vec<String>,
     claim_boundary: String,
 }
 
@@ -76,6 +97,19 @@ struct ValidatedPackage {
     version: String,
     manager: String,
     lockfile_version: u64,
+}
+
+#[derive(Debug)]
+struct DeliveryText {
+    path: String,
+    bytes: Vec<u8>,
+    text: String,
+}
+
+#[derive(Debug)]
+struct LoadedDeliveryAsset {
+    receipt: DeliveryAssetReceiptV1,
+    bytes: Vec<u8>,
 }
 
 /// Canonical, self-hashed result of one read-only contract check.
@@ -93,6 +127,40 @@ pub struct FrontendContractReceiptV1 {
     pub required_file_inventory_sha256: String,
     pub package_json_sha256: String,
     pub package_lock_sha256: String,
+    pub deterministic: bool,
+    pub commands_executed: u64,
+    pub network_access_count: u64,
+    pub claim_boundary: String,
+    pub receipt_hash: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+struct DeliveryAssetReceiptV1 {
+    entry: String,
+    reference: String,
+    path: String,
+    byte_length: u64,
+    sha256: String,
+}
+
+/// Canonical, self-hashed verification of one completed Vite delivery tree.
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+pub struct FrontendDeliveryReceiptV1 {
+    pub schema_version: String,
+    pub action: String,
+    pub contract: String,
+    pub status: String,
+    pub source_map_sha256: String,
+    pub workbench_entry: String,
+    pub viewer_entry: String,
+    pub legacy_chunk: String,
+    pub workbench_asset_count: usize,
+    pub viewer_asset_count: usize,
+    pub legacy_marker_count: usize,
+    pub workbench_entry_sha256: String,
+    pub viewer_entry_sha256: String,
+    pub legacy_chunk_sha256: String,
+    pub asset_inventory_sha256: String,
     pub deterministic: bool,
     pub commands_executed: u64,
     pub network_access_count: u64,
@@ -173,6 +241,114 @@ pub fn canonical_receipt_json(
     receipt: &FrontendContractReceiptV1,
 ) -> Result<String, FrontendContractError> {
     canonical_struct(receipt, "frontend_receipt_encode_failed")
+}
+
+/// Verify the already-built Workbench/Viewer delivery tree without executing it.
+///
+/// # Errors
+///
+/// Rejects missing, empty, oversized, non-UTF-8, or symlinked entries; unsafe or missing emitted
+/// assets; entry-marker drift; eager legacy markers; and zero or multiple lazy legacy chunks.
+pub fn check_frontend_delivery(
+    root: &Path,
+) -> Result<FrontendDeliveryReceiptV1, FrontendContractError> {
+    verify_real_directory(root, "frontend delivery root")?;
+    let source_map = parse_source_map()?;
+    let contract = &source_map.delivery_contract;
+    let dist = resolve_required_directory(root, &contract.dist_directory)?;
+    let workbench = read_delivery_text(root, &dist, &contract.workbench_entry, "Workbench entry")?;
+    let viewer = read_delivery_text(root, &dist, &contract.viewer_entry, "Viewer entry")?;
+    validate_delivery_entry_markers(&workbench.text, &viewer.text, contract)?;
+
+    let workbench_assets = load_delivery_assets(root, &dist, &workbench.text, "workbench")?;
+    let viewer_assets = load_delivery_assets(root, &dist, &viewer.text, "viewer")?;
+    let workbench_scripts = workbench_assets
+        .iter()
+        .filter(|asset| has_js_extension(clean_reference(&asset.receipt.reference)))
+        .map(|asset| delivery_asset_text(asset, "Workbench JavaScript asset"))
+        .collect::<Result<Vec<_>, _>>()?;
+    if !workbench_scripts
+        .iter()
+        .any(|source| source.contains(&contract.workbench_viewer_target))
+    {
+        return Err(delivery_drift(
+            "Workbench JavaScript does not target the emitted Viewer entry",
+        ));
+    }
+    for sentinel in &contract.legacy_sentinels {
+        if workbench_scripts
+            .iter()
+            .any(|source| source.contains(sentinel))
+        {
+            return Err(delivery_drift(&format!(
+                "legacy App code leaked into the eager Workbench graph: {sentinel}"
+            )));
+        }
+    }
+
+    let legacy_chunks = find_legacy_chunk_names(&workbench_scripts)?;
+    if legacy_chunks.len() != 1 {
+        return Err(delivery_drift(&format!(
+            "Workbench must reference exactly one lazy legacy App chunk; found {}",
+            legacy_chunks.len()
+        )));
+    }
+    let legacy_name = legacy_chunks
+        .iter()
+        .next()
+        .ok_or_else(|| delivery_drift("legacy chunk selection failed"))?;
+    let legacy_relative = format!("assets/{legacy_name}");
+    let legacy = read_delivery_text(root, &dist, &legacy_relative, "Legacy App JavaScript asset")?;
+    for sentinel in &contract.legacy_sentinels {
+        if !legacy.text.contains(sentinel) {
+            return Err(delivery_drift(&format!(
+                "lazy legacy App chunk is missing its ownership marker: {sentinel}"
+            )));
+        }
+    }
+
+    let asset_inventory = workbench_assets
+        .iter()
+        .chain(&viewer_assets)
+        .map(|asset| asset.receipt.clone())
+        .collect::<Vec<_>>();
+    let inventory_json =
+        canonical_struct(&asset_inventory, "frontend_delivery_receipt_encode_failed")?;
+    let mut receipt = FrontendDeliveryReceiptV1 {
+        schema_version: DELIVERY_RECEIPT_SCHEMA_V1.to_owned(),
+        action: "delivery_check".to_owned(),
+        contract: contract.contract.clone(),
+        status: "ready".to_owned(),
+        source_map_sha256: sha256_identity(SOURCE_MAP_BYTES),
+        workbench_entry: workbench.path,
+        viewer_entry: viewer.path,
+        legacy_chunk: legacy.path,
+        workbench_asset_count: workbench_assets.len(),
+        viewer_asset_count: viewer_assets.len(),
+        legacy_marker_count: contract.legacy_sentinels.len(),
+        workbench_entry_sha256: sha256_identity(&workbench.bytes),
+        viewer_entry_sha256: sha256_identity(&viewer.bytes),
+        legacy_chunk_sha256: sha256_identity(&legacy.bytes),
+        asset_inventory_sha256: sha256_identity(inventory_json.as_bytes()),
+        deterministic: true,
+        commands_executed: 0,
+        network_access_count: 0,
+        claim_boundary: contract.claim_boundary.clone(),
+        receipt_hash: String::new(),
+    };
+    receipt.receipt_hash = hash_without_delivery_receipt_hash(&receipt)?;
+    Ok(receipt)
+}
+
+/// Encode a frontend-delivery receipt as canonical JSON.
+///
+/// # Errors
+///
+/// Returns an error if the receipt cannot be projected into canonical JSON.
+pub fn canonical_delivery_receipt_json(
+    receipt: &FrontendDeliveryReceiptV1,
+) -> Result<String, FrontendContractError> {
+    canonical_struct(receipt, "frontend_delivery_receipt_encode_failed")
 }
 
 fn parse_source_map() -> Result<FrontendSourceMapV1, FrontendContractError> {
@@ -273,6 +449,64 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
             ));
         }
     }
+    validate_delivery_source(&source_map.delivery_contract)?;
+    Ok(())
+}
+
+fn validate_delivery_source(
+    delivery: &FrontendDeliverySourceV1,
+) -> Result<(), FrontendContractError> {
+    if delivery.contract != "workbench_viewer_production_delivery_v1"
+        || delivery.viewer_required_markers.is_empty()
+        || delivery.viewer_required_markers.len() > 16
+        || delivery.legacy_sentinels.is_empty()
+        || delivery.legacy_sentinels.len() > 16
+    {
+        return Err(FrontendContractError::new(
+            "frontend_source_map_contract_invalid",
+            "frontend delivery contract identity or marker count is invalid",
+        ));
+    }
+    for path in [
+        &delivery.dist_directory,
+        &delivery.workbench_entry,
+        &delivery.viewer_entry,
+    ] {
+        validate_relative_path(path)?;
+    }
+    let strings = [
+        delivery.contract.as_str(),
+        delivery.workbench_required_marker.as_str(),
+        delivery.workbench_forbidden_marker.as_str(),
+        delivery.viewer_forbidden_marker.as_str(),
+        delivery.workbench_viewer_target.as_str(),
+        delivery.claim_boundary.as_str(),
+    ];
+    if strings
+        .into_iter()
+        .chain(
+            delivery
+                .viewer_required_markers
+                .iter()
+                .chain(&delivery.legacy_sentinels)
+                .map(String::as_str),
+        )
+        .any(|value| {
+            value.is_empty() || value.len() > 16 * 1024 || value.chars().any(char::is_control)
+        })
+    {
+        return Err(FrontendContractError::new(
+            "frontend_source_map_contract_invalid",
+            "frontend delivery marker text is invalid",
+        ));
+    }
+    let unique_sentinels = delivery.legacy_sentinels.iter().collect::<BTreeSet<_>>();
+    if unique_sentinels.len() != delivery.legacy_sentinels.len() {
+        return Err(FrontendContractError::new(
+            "frontend_source_map_contract_invalid",
+            "frontend delivery legacy sentinels must be unique",
+        ));
+    }
     Ok(())
 }
 
@@ -372,6 +606,250 @@ fn validate_package_maps(
         &source_map.expected_dev_dependencies,
         "package devDependencies",
     )
+}
+
+fn validate_delivery_entry_markers(
+    workbench: &str,
+    viewer: &str,
+    contract: &FrontendDeliverySourceV1,
+) -> Result<(), FrontendContractError> {
+    if !workbench.contains(&contract.workbench_required_marker) {
+        return Err(delivery_drift(
+            "Workbench entry does not contain the React product-shell root",
+        ));
+    }
+    if workbench.contains(&contract.workbench_forbidden_marker) {
+        return Err(delivery_drift(
+            "Workbench entry was replaced by the Viewer entry",
+        ));
+    }
+    for marker in &contract.viewer_required_markers {
+        if !viewer.contains(marker) {
+            return Err(delivery_drift(&format!(
+                "Viewer entry is missing required marker: {marker}"
+            )));
+        }
+    }
+    if viewer.contains(&contract.viewer_forbidden_marker) {
+        return Err(delivery_drift(
+            "Viewer entry resolved to the Workbench SPA fallback",
+        ));
+    }
+    Ok(())
+}
+
+fn read_delivery_text(
+    root: &Path,
+    dist: &Path,
+    relative: &str,
+    label: &str,
+) -> Result<DeliveryText, FrontendContractError> {
+    let path = resolve_required_file(dist, relative)?;
+    let bytes = read_bounded_regular_file(&path, MAX_DELIVERY_TEXT_BYTES, label)?;
+    if bytes.is_empty() {
+        return Err(delivery_drift(&format!("{label} is empty")));
+    }
+    let text = String::from_utf8(bytes.clone())
+        .map_err(|_| delivery_drift(&format!("{label} must be valid UTF-8 text")))?;
+    if text.trim().is_empty() {
+        return Err(delivery_drift(&format!("{label} is empty")));
+    }
+    Ok(DeliveryText {
+        path: relative_portable_path(root, &path)?,
+        bytes,
+        text,
+    })
+}
+
+fn load_delivery_assets(
+    root: &Path,
+    dist: &Path,
+    html: &str,
+    entry: &str,
+) -> Result<Vec<LoadedDeliveryAsset>, FrontendContractError> {
+    let references = emitted_asset_references(html)?;
+    if references.is_empty() {
+        return Err(delivery_drift(&format!(
+            "{entry} entry has no emitted asset references"
+        )));
+    }
+    if references.len() > MAX_DELIVERY_ASSETS {
+        return Err(delivery_drift(&format!(
+            "{entry} entry exceeds the emitted asset-count bound"
+        )));
+    }
+    let mut loaded = Vec::with_capacity(references.len());
+    let mut total_bytes = 0_u64;
+    for (reference, relative) in references {
+        let path = resolve_required_file(dist, &relative).map_err(|error| {
+            delivery_drift(&format!(
+                "{entry} entry references a missing or unsafe emitted asset {reference}: {error}"
+            ))
+        })?;
+        let remaining = MAX_DELIVERY_TOTAL_ASSET_BYTES.saturating_sub(total_bytes);
+        if remaining == 0 {
+            return Err(delivery_drift(&format!(
+                "{entry} entry exceeds the emitted asset-byte bound"
+            )));
+        }
+        let bytes = read_bounded_regular_file(
+            &path,
+            MAX_DELIVERY_TEXT_BYTES.min(remaining),
+            "frontend emitted asset",
+        )
+        .map_err(|error| {
+            delivery_drift(&format!(
+                "{entry} entry references an invalid emitted asset {reference}: {error}"
+            ))
+        })?;
+        let byte_length = u64::try_from(bytes.len())
+            .map_err(|_| delivery_drift("frontend emitted asset length is not addressable"))?;
+        total_bytes = total_bytes
+            .checked_add(byte_length)
+            .ok_or_else(|| delivery_drift("frontend emitted asset-byte count overflowed"))?;
+        loaded.push(LoadedDeliveryAsset {
+            receipt: DeliveryAssetReceiptV1 {
+                entry: entry.to_owned(),
+                reference,
+                path: relative_portable_path(root, &path)?,
+                byte_length,
+                sha256: sha256_identity(&bytes),
+            },
+            bytes,
+        });
+    }
+    Ok(loaded)
+}
+
+fn emitted_asset_references(html: &str) -> Result<Vec<(String, String)>, FrontendContractError> {
+    let mut references = Vec::new();
+    let mut cursor = 0_usize;
+    while cursor < html.len() {
+        let src = html[cursor..].find("src=\"").map(|index| index + cursor);
+        let href = html[cursor..].find("href=\"").map(|index| index + cursor);
+        let Some(start) = (match (src, href) {
+            (Some(left), Some(right)) => Some(left.min(right)),
+            (Some(value), None) | (None, Some(value)) => Some(value),
+            (None, None) => None,
+        }) else {
+            break;
+        };
+        let value_start = start
+            + if html[start..].starts_with("src=\"") {
+                "src=\"".len()
+            } else {
+                "href=\"".len()
+            };
+        let Some(end_offset) = html[value_start..].find('"') else {
+            break;
+        };
+        let end = value_start + end_offset;
+        let reference = &html[value_start..end];
+        if let Some(relative) = emitted_asset_relative(reference)? {
+            references.push((reference.to_owned(), relative));
+        }
+        cursor = end.saturating_add(1);
+    }
+    Ok(references)
+}
+
+fn emitted_asset_relative(reference: &str) -> Result<Option<String>, FrontendContractError> {
+    if reference.len() > MAX_PATH_BYTES || reference.chars().any(char::is_control) {
+        return Err(delivery_drift("frontend asset reference is invalid"));
+    }
+    let clean = clean_reference(reference);
+    let candidate = if clean.starts_with("assets/") {
+        Some(clean)
+    } else {
+        clean.find("/assets/").map(|index| &clean[index + 1..])
+    };
+    let Some(candidate) = candidate else {
+        return Ok(None);
+    };
+    if candidate.contains('\'') {
+        return Ok(None);
+    }
+    validate_relative_path(candidate).map_err(|_| {
+        delivery_drift(&format!(
+            "frontend emitted asset path is unsafe: {reference}"
+        ))
+    })?;
+    if !candidate.starts_with("assets/") {
+        return Ok(None);
+    }
+    Ok(Some(candidate.to_owned()))
+}
+
+fn clean_reference(reference: &str) -> &str {
+    let query = reference.find('?');
+    let fragment = reference.find('#');
+    match (query, fragment) {
+        (Some(left), Some(right)) => &reference[..left.min(right)],
+        (Some(index), None) | (None, Some(index)) => &reference[..index],
+        (None, None) => reference,
+    }
+}
+
+fn delivery_asset_text(
+    asset: &LoadedDeliveryAsset,
+    label: &str,
+) -> Result<String, FrontendContractError> {
+    if asset.bytes.is_empty() {
+        return Err(delivery_drift(&format!("{label} is empty")));
+    }
+    let text = String::from_utf8(asset.bytes.clone())
+        .map_err(|_| delivery_drift(&format!("{label} must be valid UTF-8 text")))?;
+    if text.trim().is_empty() {
+        return Err(delivery_drift(&format!("{label} is empty")));
+    }
+    Ok(text)
+}
+
+fn find_legacy_chunk_names(scripts: &[String]) -> Result<BTreeSet<String>, FrontendContractError> {
+    let mut names = BTreeSet::new();
+    for source in scripts {
+        for prefix in ["assets/App-", "./App-"] {
+            let mut cursor = 0_usize;
+            while let Some(offset) = source[cursor..].find(prefix) {
+                let marker_start = cursor + offset;
+                let name_start = marker_start + prefix.len() - "App-".len();
+                let Some(suffix) = source[name_start..].find(".js") else {
+                    break;
+                };
+                let name_end = name_start + suffix + ".js".len();
+                let name = &source[name_start..name_end];
+                if valid_legacy_chunk_name(name) {
+                    names.insert(name.to_owned());
+                }
+                cursor = name_end;
+            }
+        }
+    }
+    if names.len() > 32 {
+        return Err(delivery_drift(
+            "frontend lazy legacy chunk inventory exceeds its bound",
+        ));
+    }
+    Ok(names)
+}
+
+fn valid_legacy_chunk_name(value: &str) -> bool {
+    value.starts_with("App-")
+        && has_js_extension(value)
+        && value.len() <= MAX_PATH_BYTES
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.'))
+}
+
+fn has_js_extension(value: &str) -> bool {
+    Path::new(value)
+        .extension()
+        .is_some_and(|extension| extension == "js")
+}
+
+fn delivery_drift(detail: &str) -> FrontendContractError {
+    FrontendContractError::new("frontend_delivery_contract_drift", detail)
 }
 
 fn decode_object(
@@ -492,6 +970,50 @@ fn validate_relative_path(relative: &str) -> Result<(), FrontendContractError> {
         ));
     }
     Ok(())
+}
+
+fn resolve_required_directory(
+    root: &Path,
+    relative: &str,
+) -> Result<PathBuf, FrontendContractError> {
+    validate_relative_path(relative)?;
+    let mut path = root.to_path_buf();
+    for component in Path::new(relative).components() {
+        let Component::Normal(name) = component else {
+            return Err(FrontendContractError::new(
+                "frontend_source_map_path_invalid",
+                format!("frontend contract path is unsafe: {relative}"),
+            ));
+        };
+        path.push(name);
+        verify_real_directory(&path, "frontend delivery directory")?;
+    }
+    Ok(path)
+}
+
+fn relative_portable_path(root: &Path, path: &Path) -> Result<String, FrontendContractError> {
+    let relative = path.strip_prefix(root).map_err(|_| {
+        FrontendContractError::new(
+            "frontend_unsafe_path",
+            "frontend delivery path escaped the declared root",
+        )
+    })?;
+    let mut segments = Vec::new();
+    for component in relative.components() {
+        let Component::Normal(segment) = component else {
+            return Err(FrontendContractError::new(
+                "frontend_unsafe_path",
+                "frontend delivery path is not portable",
+            ));
+        };
+        segments.push(segment.to_str().ok_or_else(|| {
+            FrontendContractError::new(
+                "frontend_unsafe_path",
+                "frontend delivery path must be UTF-8",
+            )
+        })?);
+    }
+    Ok(segments.join("/"))
 }
 
 fn resolve_required_file(root: &Path, relative: &str) -> Result<PathBuf, FrontendContractError> {
@@ -671,6 +1193,33 @@ fn hash_without_receipt_hash(
         FrontendContractError::new(
             "frontend_receipt_encode_failed",
             format!("canonicalize frontend receipt failed: {error}"),
+        )
+    })?;
+    Ok(sha256_identity(canonical.as_bytes()))
+}
+
+fn hash_without_delivery_receipt_hash(
+    receipt: &FrontendDeliveryReceiptV1,
+) -> Result<String, FrontendContractError> {
+    let mut value = serde_json::to_value(receipt).map_err(|error| {
+        FrontendContractError::new(
+            "frontend_delivery_receipt_encode_failed",
+            format!("project frontend delivery receipt failed: {error}"),
+        )
+    })?;
+    value
+        .as_object_mut()
+        .ok_or_else(|| {
+            FrontendContractError::new(
+                "frontend_delivery_receipt_encode_failed",
+                "frontend delivery receipt projection is not an object",
+            )
+        })?
+        .remove("receipt_hash");
+    let canonical = canonicalize_model_ir_v2(&value).map_err(|error| {
+        FrontendContractError::new(
+            "frontend_delivery_receipt_encode_failed",
+            format!("canonicalize frontend delivery receipt failed: {error}"),
         )
     })?;
     Ok(sha256_identity(canonical.as_bytes()))

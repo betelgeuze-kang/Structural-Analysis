@@ -6,7 +6,8 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
-    canonical_receipt_json, check_frontend_contract, FrontendContractError,
+    canonical_delivery_receipt_json, canonical_receipt_json, check_frontend_contract,
+    check_frontend_delivery, FrontendContractError,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -61,7 +62,12 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             let receipt = check_frontend_contract(&required_path(&options, "--root")?)?;
             canonical_receipt_json(&receipt).map_err(Into::into)
         }
-        _ => Err(usage_error("command must be check")),
+        "delivery" => {
+            require_exact_options(&options, &["--root"])?;
+            let receipt = check_frontend_delivery(&required_path(&options, "--root")?)?;
+            canonical_delivery_receipt_json(&receipt).map_err(Into::into)
+        }
+        _ => Err(usage_error("command must be check or delivery")),
     }
 }
 
@@ -122,7 +128,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check --root DIR"
+    "usage: structural-frontend-contract check|delivery --root DIR"
 }
 
 #[cfg(test)]

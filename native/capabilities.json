@@ -185,7 +185,7 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "structural-frontend-contract",
-      "claim": "bounded transitional C0 contract only: a language-neutral source map and Rust-native structural-frontend-contract checker replace the former Node static manifest verifier; it reads strict duplicate-key-safe package and lock JSON plus a bounded non-symlink required-file inventory, enforces the existing exact dependency and selected script pins, emits a canonical self-hashed read-only receipt with command and network execution counts 0, and runs without node_modules; it does not build or execute React/Vite, prove browser behavior, provide native UI feature parity, authorize legacy deletion, or close C5/C6"
+      "claim": "bounded transitional C0 contract only: a language-neutral source map and Rust-native structural-frontend-contract check/delivery commands replace the former Node static manifest and built Vite delivery verifiers; they read strict duplicate-key-safe package and lock JSON plus bounded non-symlink required-file and emitted-asset inventories, enforce the existing exact dependency/script pins, Viewer shell and fallback markers, Workbench Viewer target, and eager/lazy legacy chunk separation, and emit canonical self-hashed read-only receipts with command and network execution counts 0; the manifest check runs without node_modules, while delivery consumes an already-built tree; they do not build or execute React/Vite or JavaScript, prove browser behavior, provide native UI feature parity, authorize legacy deletion, or close C5/C6"
     },
     "native_distribution": {
       "status": "implemented",

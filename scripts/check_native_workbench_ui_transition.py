@@ -164,7 +164,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     ]:
         blockers.append("workbench_ui_native_benchmark_catalog_flow_invalid")
     if native.get("legacy_frontend_contract_flow") != [
-        "structural-frontend-contract check"
+        "structural-frontend-contract check",
+        "structural-frontend-contract delivery",
     ]:
         blockers.append("workbench_ui_native_frontend_contract_flow_invalid")
     for field in (
@@ -261,6 +262,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- check --root ."
     ):
         blockers.append("workbench_ui_frontend_contract_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get(
+        "verify:workbench-viewer-delivery"
+    ) != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- delivery --root ."
+    ):
+        blockers.append("workbench_ui_frontend_delivery_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -289,7 +297,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         frontend_contract,
         (
             "structural-native-frontend-contract-receipt.v1",
+            "structural-native-frontend-delivery-receipt.v1",
             "pub fn check_frontend_contract",
+            "pub fn check_frontend_delivery",
             "decode_json_strict",
             "frontend_forbidden_path_present",
             "commands_executed",
@@ -360,7 +370,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "Rust-native frontend build-contract checker",
+            "Rust-native frontend build and static-delivery",
+            "built-tree delivery checks are",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
         ),
