@@ -544,6 +544,8 @@ def test_native_viewer_sample_workflow_capability_is_bounded_c0() -> None:
     assert "viewer-sample-workflow" in workflow["claim"]
     assert "exact four ordered MIDAS33/real-drawing rehearsal steps" in workflow["claim"]
     assert "browser warning/error aggregates" in workflow["claim"]
+    assert "no outer npm package-script launcher" in workflow["claim"]
+    assert "Python retains readiness-report assembly" in workflow["claim"]
     assert "dry-run creates no output, listener or process" in workflow["claim"]
     assert "retained Node probe still owns" in workflow["claim"]
     assert "not human new-user observation" in workflow["claim"]

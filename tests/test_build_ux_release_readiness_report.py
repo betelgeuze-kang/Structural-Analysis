@@ -20,7 +20,7 @@ def _write(path: Path, payload: object) -> Path:
     return path
 
 
-def test_native_sample_workflow_receipt_is_extracted_from_npm_stdout() -> None:
+def test_native_sample_workflow_receipt_is_extracted_from_command_stdout() -> None:
     receipt = {
         "schema_version": "structural-native-viewer-sample-workflow-receipt.v1",
         "action": "viewer_sample_workflow",
@@ -116,6 +116,16 @@ def test_native_sample_workflow_receipt_is_extracted_from_npm_stdout() -> None:
         )
         == {}
     )
+
+
+def test_browser_smoke_default_enters_through_direct_rust_command() -> None:
+    args = build_ux_release_readiness_report.build_parser().parse_args([])
+
+    assert args.browser_smoke_command == (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- viewer-sample-workflow --root ."
+    )
+    assert "npm" not in args.browser_smoke_command.split()
 
 
 def test_ux_release_readiness_rejects_missing_native_receipt_after_run(

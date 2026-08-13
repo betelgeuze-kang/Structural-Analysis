@@ -19,6 +19,10 @@ DEFAULT_VIEWER_QUALITY = Path("implementation/phase1/commercialization_status/re
 DEFAULT_VIEWER_PERFORMANCE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
 DEFAULT_SAMPLE_WORKFLOW_SMOKE = Path("implementation/phase1/structure_viewer_sample_workflow_smoke.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_release_readiness_report.json")
+DEFAULT_BROWSER_SMOKE_COMMAND = (
+    "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+    "-p structural-frontend-contract -- viewer-sample-workflow --root ."
+)
 NATIVE_SAMPLE_WORKFLOW_RECEIPT_KEYS = frozenset(
     {
         "schema_version",
@@ -422,7 +426,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sample-workflow-smoke", type=Path, default=DEFAULT_SAMPLE_WORKFLOW_SMOKE)
     parser.add_argument("--max-sample-minutes", type=float, default=30.0)
     parser.add_argument("--run-browser-smoke", action="store_true")
-    parser.add_argument("--browser-smoke-command", default="npm run verify:viewer-sample-workflow")
+    parser.add_argument(
+        "--browser-smoke-command",
+        default=DEFAULT_BROWSER_SMOKE_COMMAND,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
