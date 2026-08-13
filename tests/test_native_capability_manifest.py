@@ -261,10 +261,13 @@ def test_native_frontend_contract_capability_is_bounded_c0() -> None:
     assert frontend["cutover_gate"] == "C0"
     assert frontend["owner"] == "structural-frontend-contract"
     assert "former Node static package, build-smoke wrapper, built Vite delivery" in frontend["claim"]
+    assert "offline prototype DOM shim" in frontend["claim"]
     assert "bounded non-symlink required-file and emitted-asset inventories" in frontend["claim"]
     assert "exact neutral-JSON-to-JavaScript runtime projection" in frontend["claim"]
     assert "confine Viewer artifact paths to the declared repo" in frontend["claim"]
     assert "locally present artifact-count parity" in frontend["claim"]
+    assert "project all six prototype states without positive demo status" in frontend["claim"]
+    assert "reject innerHTML/eval source markers" in frontend["claim"]
     assert "Rust directly owns the frozen stop-on-failure npm ci and npm run build" in frontend["claim"]
     assert "dry-run spawns 0 processes" in frontend["claim"]
     assert "direct child exits" in frontend["claim"]
@@ -272,6 +275,7 @@ def test_native_frontend_contract_capability_is_bounded_c0() -> None:
     assert "delivery consumes an already-built tree" in frontend["claim"]
     assert "command and network execution counts 0" in frontend["claim"]
     assert "do not execute UI or browser behavior" in frontend["claim"]
+    assert "Playwright prototype smoke still owns runtime DOM/input/export/accessibility" in frontend["claim"]
     assert "authorize legacy deletion" in frontend["claim"]
     assert "close C5/C6" in frontend["claim"]
 

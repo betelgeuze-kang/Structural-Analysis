@@ -7,8 +7,9 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, run_frontend_smoke,
+    canonical_viewer_manifest_receipt_json, canonical_workbench_prototype_receipt_json,
+    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
+    check_workbench_prototype, run_frontend_smoke,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -183,6 +184,81 @@ fn frontend_smoke_dry_run_is_deterministic_native_and_process_free() {
     );
     let encoded = canonical_smoke_receipt_json(&first).expect("canonical smoke receipt");
     let value: Value = serde_json::from_str(&encoded).expect("smoke receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn tracked_workbench_prototype_contract_is_conservative_and_self_hashed() {
+    let root = repository_root();
+    let first = check_workbench_prototype(&root).expect("tracked Workbench prototype contract");
+    let second = check_workbench_prototype(&root).expect("repeat Workbench prototype contract");
+    assert_eq!(first, second);
+    assert_eq!(first.data_mode, "demo");
+    assert_eq!(first.canonical_state_count, 6);
+    assert_eq!(first.status_states["solver_connected"], "BLOCKED");
+    assert_eq!(first.status_states["p0"], "UNAVAILABLE");
+    assert_eq!(first.status_states["p1"], "UNAVAILABLE");
+    assert_eq!(first.status_states["gpu"], "MISSING");
+    assert!(!first.status_states.values().any(|state| state == "LIVE"));
+    assert_eq!(first.commands_executed, 0);
+    assert_eq!(first.network_access_count, 0);
+    assert!(!first.browser_executed);
+    let encoded = canonical_workbench_prototype_receipt_json(&first)
+        .expect("canonical Workbench prototype receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("prototype receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn workbench_prototype_duplicate_fixture_and_inner_html_fail_closed() {
+    let duplicate = TestRoot::create();
+    copy_contract_inventory(&duplicate.0);
+    let demo_path = duplicate
+        .0
+        .join("prototype/structural-workbench/demo-case.json");
+    let bytes = std::fs::read(&demo_path).expect("read demo fixture");
+    let mut drift = b"{\"schema_version\":\"duplicate\",".to_vec();
+    drift.extend_from_slice(bytes.strip_prefix(b"{").expect("fixture object"));
+    std::fs::write(&demo_path, drift).expect("write duplicate demo fixture");
+    let error = check_workbench_prototype(&duplicate.0).expect_err("duplicate key must fail");
+    assert_eq!(error.code, "workbench_prototype_demo_json_invalid");
+
+    let unsafe_source = TestRoot::create();
+    copy_contract_inventory(&unsafe_source.0);
+    let app_path = unsafe_source
+        .0
+        .join("prototype/structural-workbench/app.js");
+    let mut app = std::fs::read(&app_path).expect("read prototype app");
+    app.extend_from_slice(b"\ndocument.body.innerHTML = 'unsafe';\n");
+    std::fs::write(&app_path, app).expect("write unsafe prototype app");
+    let error = check_workbench_prototype(&unsafe_source.0).expect_err("innerHTML must fail");
+    assert_eq!(error.code, "workbench_prototype_source_drift");
+}
+
+#[test]
+fn clean_environment_prototype_cli_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["prototype", "--root"])
+        .arg(&root)
+        .env_clear()
+        .output()
+        .expect("run native Workbench prototype contract");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("prototype receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "workbench_prototype_check");
     verify_receipt_hash(&value);
 }
 

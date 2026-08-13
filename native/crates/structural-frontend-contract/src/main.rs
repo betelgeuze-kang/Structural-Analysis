@@ -7,8 +7,9 @@ use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
-    canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, run_frontend_smoke, FrontendContractError,
+    canonical_viewer_manifest_receipt_json, canonical_workbench_prototype_receipt_json,
+    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
+    check_workbench_prototype, run_frontend_smoke, FrontendContractError,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -78,8 +79,13 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             let receipt = check_viewer_manifest(&required_path(&options, "--root")?)?;
             canonical_viewer_manifest_receipt_json(&receipt).map_err(Into::into)
         }
+        "prototype" => {
+            require_exact_options(&options, &["--root"])?;
+            let receipt = check_workbench_prototype(&required_path(&options, "--root")?)?;
+            canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
+        }
         _ => Err(usage_error(
-            "command must be check, delivery, smoke, or viewer-manifest",
+            "command must be check, delivery, prototype, smoke, or viewer-manifest",
         )),
     }
 }
@@ -177,7 +183,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]"
 }
 
 #[cfg(test)]

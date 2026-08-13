@@ -41,6 +41,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- viewer-manifest --root ."
     )
     assert (
+        package_json["scripts"]["verify:workbench-prototype-dom-contract"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- prototype --root ."
+    )
+    assert (
         package_json["scripts"]["verify:frontend-browser-smoke"]
         == "node ./scripts/verify-frontend-browser-smoke.mjs"
     )
@@ -87,6 +92,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "npm run verify:frontend-smoke" in docs_text
     assert "structural-frontend-contract delivery" in docs_text
     assert "npm run verify:frontend-browser-smoke" in docs_text
+    assert "npm run verify:workbench-prototype-dom-contract" in docs_text
+    assert "structural-frontend-contract prototype" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
     assert "structural-frontend-contract viewer-manifest" in docs_text
     assert "npm run verify:viewer-report-pdf" in docs_text
@@ -143,4 +150,28 @@ def test_native_frontend_smoke_dry_run_is_process_free_and_self_hashed() -> None
     assert payload["direct_processes_spawned"] == 0
     assert payload["delivery_receipt_hash"] is None
     assert payload["network_access_accounting"] == "not_instrumented_npm_ci_may_access_registry"
+    assert payload["receipt_hash"].startswith("sha256:")
+
+
+def test_native_workbench_prototype_contract_runs_without_a_dom_or_browser() -> None:
+    result = subprocess.run(
+        ["npm", "run", "verify:workbench-prototype-dom-contract", "--silent"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-workbench-prototype-receipt.v1"
+    assert payload["status_states"] == {
+        "gpu": "MISSING",
+        "p0": "UNAVAILABLE",
+        "p1": "UNAVAILABLE",
+        "solver_connected": "BLOCKED",
+    }
+    assert payload["commands_executed"] == 0
+    assert payload["network_access_count"] == 0
+    assert payload["browser_executed"] is False
     assert payload["receipt_hash"].startswith("sha256:")

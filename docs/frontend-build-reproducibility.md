@@ -23,6 +23,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Starts a local static HTTP server and runs the Playwright structure-viewer smoke against the source HTML.
   - The PR quality gate uses `-- --mode minimal`; the full gate runs desktop and mobile coverage.
   - Assumes Chromium is already available to Playwright; browser installation is an environment setup step, not part of the smoke command.
+- `npm run verify:workbench-prototype-dom-contract`
+  - Invokes the Rust-native `structural-frontend-contract prototype` checker over the strict demo fixture, conservative six-state projection, bounded `app.js` safety/ownership markers, and prototype HTML attachment points.
+  - Emits a canonical self-hashed receipt with process, network, and browser execution counts fixed at zero; it does not import or execute the JavaScript module or emulate a DOM.
+  - The retained Playwright prototype browser smoke continues to own rendered state, inert user-input, export, accessibility, and runtime behavior evidence.
 - `npm run verify:viewer-manifest`
   - Invokes the Rust-native `structural-frontend-contract viewer-manifest` checker over the strict language-neutral JSON source and its byte-exact generated JavaScript projection.
   - Checks registered project/drawing/variant counts, OPSTOOL release triples, repo-confined artifact/provenance paths, and locally present artifact-count sources; missing gitignored release outputs remain explicit warnings.
@@ -53,6 +57,7 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - Every production build passes `workbench_viewer_production_delivery_v1`; an iframe `src` string alone is not delivery evidence.
 - The default Workbench request graph excludes the legacy `App` chunk. Browser E2E proves it is fetched only after navigating to `/#/legacy`.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
+- The offline Workbench prototype gate must pass the Rust-native static contract before the separate Playwright smoke executes the retained browser behavior.
 - Browser verification commands must not run `playwright install` implicitly; this keeps sandboxed quality gates from mutating the user home cache or stalling on network prompts.
 - Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.
 - Full-gate PDF smoke must exercise the same source viewer report export path before release-facing promotion.

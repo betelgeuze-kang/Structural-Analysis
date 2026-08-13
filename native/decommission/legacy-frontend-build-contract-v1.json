@@ -14,6 +14,9 @@
     "vite.config.ts",
     "src/main.tsx",
     "src/App.tsx",
+    "prototype/structural-workbench/app.js",
+    "prototype/structural-workbench/demo-case.json",
+    "prototype/structural-workbench/index.html",
     "scripts/verify-frontend-browser-smoke.mjs",
     "scripts/verify-structure-viewer-callout-docking.mjs",
     "scripts/verify-structure-viewer-critical-callout-focus.mjs",
@@ -47,6 +50,7 @@
     "native/decommission/legacy-frontend-build-contract-v1.json",
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
+    "native/crates/structural-frontend-contract/src/prototype.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
   ],
@@ -66,6 +70,7 @@
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
+    "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-viewer-delivery": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root ."
   },
   "expected_dependencies": {
@@ -114,6 +119,70 @@
     ],
     "network_access_accounting": "not_instrumented_npm_ci_may_access_registry",
     "claim_boundary": "This transitional C0 process receipt proves only that Rust validated the pinned frontend contract and either planned or directly spawned the frozen npm ci and npm run build sequence, stopping on failure, rejecting package/lock contract mutation across execution, and validating the resulting bounded Vite delivery tree before success. npm executable resolution, registry/cache access, package lifecycle internals, JavaScript runtime behavior, browser behavior, native UI parity, and React/TypeScript/Node removal remain outside this receipt."
+  },
+  "workbench_prototype_contract": {
+    "contract": "structural-workbench-prototype-static-contract.v1",
+    "app_path": "prototype/structural-workbench/app.js",
+    "demo_case_path": "prototype/structural-workbench/demo-case.json",
+    "html_path": "prototype/structural-workbench/index.html",
+    "expected_demo_schema_version": "workbench-demo.v1",
+    "expected_data_mode": "demo",
+    "canonical_states": [
+      "DEMO",
+      "LIVE",
+      "STALE",
+      "BLOCKED",
+      "MISSING",
+      "UNAVAILABLE"
+    ],
+    "expected_status_states": {
+      "solver_connected": "BLOCKED",
+      "p0": "UNAVAILABLE",
+      "p1": "UNAVAILABLE",
+      "gpu": "MISSING"
+    },
+    "app_required_markers": [
+      "export const STATE_META = {",
+      "DEMO: { label: 'DEMO'",
+      "LIVE: { label: 'LIVE'",
+      "STALE: { label: 'STALE'",
+      "BLOCKED: { label: 'BLOCKED'",
+      "MISSING: { label: 'MISSING'",
+      "UNAVAILABLE: { label: 'UNAVAILABLE'",
+      "export function mapDataMode(mode) {",
+      "export function mapCheckState(value) {",
+      "case 'NOT_CONNECTED':",
+      "case 'NOT_EVALUATED':",
+      "export function buildStatusRows(status) {",
+      "export function buildDemoBundle(model, { reviewComment, selectedFileName } = {}) {",
+      "schema_version: 'workbench-demo-export.v1'",
+      "export function createStateChip(state, { srLabel } = {}) {",
+      "node.textContent = String(text)",
+      "fileNameOut.textContent = file ? file.name : 'No file selected'",
+      "commentOut.textContent = hasValue(commentInput.value)",
+      "createStateChip('UNAVAILABLE', { srLabel: 'Automated verdict' })"
+    ],
+    "app_forbidden_markers": [
+      ".innerHTML",
+      "eval(",
+      "new Function(",
+      "document.write("
+    ],
+    "html_required_markers": [
+      "data-wb-root",
+      "data-wb-mode",
+      "data-wb-claim",
+      "data-wb-project",
+      "data-wb-status",
+      "data-wb-verdict",
+      "data-wb-file",
+      "data-wb-file-name",
+      "data-wb-comment",
+      "data-wb-comment-preview",
+      "data-wb-export",
+      "<script type=\"module\" src=\"./app.js\"></script>"
+    ],
+    "claim_boundary": "This read-only transitional C0 check proves only that the bounded strict demo fixture, conservative six-state status projection, app source safety/ownership markers, and prototype HTML attachment points match the frozen offline contract without Node or a DOM shim. It does not execute JavaScript or a browser; the retained Playwright smoke owns rendered state, inert user-input, download, accessibility, and runtime behavior evidence. It does not validate engineering results, provide native UI parity, or authorize React/TypeScript/Node removal."
   },
   "viewer_manifest_contract": {
     "contract": "structure-viewer-project-manifest-verification.v1",

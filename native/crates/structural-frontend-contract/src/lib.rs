@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+mod prototype;
 mod smoke;
 mod viewer_manifest;
 
@@ -16,6 +17,11 @@ use serde_json::{Map, Value};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 use structural_contracts::product_ir::sha256_identity;
 
+pub use prototype::{
+    canonical_workbench_prototype_receipt_json, check_workbench_prototype,
+    WorkbenchPrototypeReceiptV1,
+};
+use prototype::{validate_workbench_prototype_source, WorkbenchPrototypeSourceV1};
 pub use smoke::{canonical_smoke_receipt_json, run_frontend_smoke, FrontendSmokeReceiptV1};
 use smoke::{validate_frontend_smoke_source, FrontendSmokeSourceV1};
 pub use viewer_manifest::{
@@ -85,6 +91,7 @@ struct FrontendSourceMapV1 {
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
+    workbench_prototype_contract: WorkbenchPrototypeSourceV1,
     claim_boundary: String,
 }
 
@@ -465,6 +472,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
+    validate_workbench_prototype_source(&source_map.workbench_prototype_contract)?;
     Ok(())
 }
 

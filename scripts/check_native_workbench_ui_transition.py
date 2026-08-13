@@ -20,6 +20,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
+    Path("native/crates/structural-frontend-contract/src/prototype.rs"),
     Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"),
@@ -30,6 +31,9 @@ REQUIRED_PATHS = (
     Path("native/decommission/legacy-frontend-build-contract-v1.json"),
     Path("src/structure-viewer/viewer-project-manifest.v1.json"),
     Path("src/structure-viewer/viewer-project-manifest-data.js"),
+    Path("prototype/structural-workbench/app.js"),
+    Path("prototype/structural-workbench/demo-case.json"),
+    Path("prototype/structural-workbench/index.html"),
     Path("native/evidence/workbench-evidence-sources-v1.json"),
     Path("native/tests/fixtures/workbench_evidence/manifest.json"),
     Path("docs/native/benchmark-catalog-v1.md"),
@@ -171,6 +175,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "structural-frontend-contract check",
         "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
+        "structural-frontend-contract prototype",
         "structural-frontend-contract viewer-manifest",
     ]:
         blockers.append("workbench_ui_native_frontend_contract_flow_invalid")
@@ -285,6 +290,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- viewer-manifest --root ."
     ):
         blockers.append("workbench_ui_viewer_manifest_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get(
+        "verify:workbench-prototype-dom-contract"
+    ) != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- prototype --root ."
+    ):
+        blockers.append("workbench_ui_prototype_contract_authority_invalid")
 
     native_lib = _text(
         root, Path("native/crates/structural-workbench/src/lib.rs"), blockers
@@ -341,6 +353,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "not_instrumented_npm_ci_may_access_registry",
             "direct_processes_spawned",
             "delivery_receipt_hash",
+        ),
+        blockers,
+    )
+    workbench_prototype = _text(
+        root, Path("native/crates/structural-frontend-contract/src/prototype.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/prototype.rs"),
+        workbench_prototype,
+        (
+            "pub fn check_workbench_prototype",
+            "workbench_prototype_demo_json_invalid",
+            "workbench_prototype_source_drift",
+            "commands_executed",
+            "network_access_count",
+            "browser_executed",
         ),
         blockers,
     )
@@ -419,7 +447,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/smoke/delivery/viewer-manifest",
+            "structural-frontend-contract check/smoke/delivery/prototype/viewer-manifest",
             "frontend clean-build orchestration, static contract",
             "Viewer project-manifest checks are Rust-native",
             "removal remains forbidden",
