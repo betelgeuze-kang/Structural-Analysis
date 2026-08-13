@@ -440,6 +440,22 @@ def valid_v23_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v24_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v23_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v24",
+            "workbench_nodal_load_add_surface_passed": True,
+            "workbench_nodal_load_add_model_sha256": "sha256:" + "1" * 64,
+            "workbench_nodal_load_add_receipt_sha256": "sha256:" + "2" * 64,
+            "workbench_nodal_load_add_request_sha256": "sha256:" + "3" * 64,
+            "workbench_nodal_load_add_result_ir_sha256": "sha256:" + "4" * 64,
+            "workbench_nodal_load_add_recovery_sha256": "sha256:" + "5" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -1093,6 +1109,32 @@ def test_distribution_receipt_rejects_unbound_v23_frame3d_member_add(
     )
 
 
+def test_distribution_receipt_accepts_nodal_load_add_v24_contract(tmp_path: Path):
+    receipt, manifest = valid_v24_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v24_nodal_load_add(tmp_path: Path):
+    receipt, manifest = valid_v24_contract()
+    receipt["workbench_nodal_load_add_surface_passed"] = False
+    receipt["workbench_nodal_load_add_recovery_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_nodal_load_add_surface_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_nodal_load_add_recovery_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -1174,7 +1216,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v23" in e2e
+    assert "structural-native-distribution-e2e.v24" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
     assert "workbench_model_linear_request_create_surface_passed" in e2e
@@ -1243,6 +1285,14 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_frame3d_member_add_receipt_sha256" in e2e
     assert "workbench_frame3d_member_add_request_sha256" in e2e
     assert "workbench_frame3d_member_add_result_ir_sha256" in e2e
+    assert "exercise_nodal_load_add_surface" in e2e
+    assert "model-add-nodal-load" in e2e
+    assert "workbench_nodal_load_add_surface_passed" in e2e
+    assert "workbench_nodal_load_add_model_sha256" in e2e
+    assert "workbench_nodal_load_add_receipt_sha256" in e2e
+    assert "workbench_nodal_load_add_request_sha256" in e2e
+    assert "workbench_nodal_load_add_result_ir_sha256" in e2e
+    assert "workbench_nodal_load_add_recovery_sha256" in e2e
     assert "exercise_result_view_surface" in e2e
     assert "result-view" in e2e
     assert "workbench_result_view_surface_passed" in e2e

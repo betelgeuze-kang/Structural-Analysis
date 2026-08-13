@@ -971,6 +971,106 @@ exercise_frame3d_member_add_surface() {
 }
 exercise_frame3d_member_add_surface
 
+exercise_nodal_load_add_surface() {
+  local source_model="$e2e_root/frame3d-member-add-first/model-ir.json"
+  local source_before_hash baseline_recovery baseline_maximum_displacement
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  baseline_recovery="$e2e_root/frame3d-member-add-first-linear-run/result-recovery-ir.json"
+  baseline_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_recovery")"
+  if [[ -z "$baseline_maximum_displacement" ]]; then
+    echo "installed frame3d-member baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+  local label added_directory request_directory run_directory loaded_maximum_displacement
+  for label in first second; do
+    added_directory="$e2e_root/nodal-load-add-$label"
+    request_directory="$e2e_root/nodal-load-add-$label-linear-request"
+    run_directory="$e2e_root/nodal-load-add-$label-linear-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-nodal-load "$source_model" --load-pattern LC_WEAK \
+      --load L_WEAK_N3 --node N3 --components 0 -1000 0 0 0 0 \
+      --output-dir "$added_directory" \
+      > "$e2e_root/nodal-load-add-$label.stdout.json"
+    test -s "$added_directory/model-ir.json"
+    test -s "$added_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"operation":"nodal_load_add"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_WEAK"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_index":1' "$added_directory/edit-receipt.json"
+    grep -Fq '"analysis_type":"linear_static"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_id":"L_WEAK_N3"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_index":1' "$added_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N3"' "$added_directory/edit-receipt.json"
+    grep -Fq '"components_si":{"FX":0,"FY":-1000,"FZ":0,"MX":0,"MY":0,"MZ":0}' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$added_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$added_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$added_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-nodal-load.v1"' \
+      "$added_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$added_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/nodal-load-add-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$added_directory/model-ir.json" \
+      --case added-nodal-load-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/nodal-load-add-$label-linear-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$added_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/nodal-load-add-$label-linear-run.stdout.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0,0,-1000,0,0,0,0]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+    loaded_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$run_directory/result-recovery-ir.json")"
+    if [[ -z "$loaded_maximum_displacement" \
+      || "$loaded_maximum_displacement" == "$baseline_maximum_displacement" ]]; then
+      echo "installed nodal-load addition did not change recovered displacement" >&2
+      exit 1
+    fi
+  done
+  diff -r "$e2e_root/nodal-load-add-first" \
+    "$e2e_root/nodal-load-add-second" \
+    > "$e2e_root/nodal-load-add-diff.txt"
+  diff -r "$e2e_root/nodal-load-add-first-linear-request" \
+    "$e2e_root/nodal-load-add-second-linear-request" \
+    > "$e2e_root/nodal-load-add-linear-request-diff.txt"
+  diff -r "$e2e_root/nodal-load-add-first-linear-run" \
+    "$e2e_root/nodal-load-add-second-linear-run" \
+    > "$e2e_root/nodal-load-add-linear-run-diff.txt"
+  cmp "$e2e_root/nodal-load-add-first.stdout.json" \
+    "$e2e_root/nodal-load-add-second.stdout.json"
+  cmp "$e2e_root/nodal-load-add-first-validation.json" \
+    "$e2e_root/nodal-load-add-second-validation.json"
+  cmp "$e2e_root/nodal-load-add-first-linear-request.stdout.json" \
+    "$e2e_root/nodal-load-add-second-linear-request.stdout.json"
+  cmp "$e2e_root/nodal-load-add-first-linear-run.stdout.json" \
+    "$e2e_root/nodal-load-add-second-linear-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed nodal-load addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_nodal_load_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1255,6 +1355,11 @@ frame3d_member_add_model_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/m
 frame3d_member_add_receipt_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/edit-receipt.json" | awk '{print $1}')"
 frame3d_member_add_request_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 frame3d_member_add_result_ir_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
+nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
+nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
+nodal_load_add_result_ir_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+nodal_load_add_recovery_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1312,6 +1417,10 @@ v23_receipt_json="${v22_receipt_json/structural-native-distribution-e2e.v22/stru
 frame3d_member_add_receipt_fields="\"workbench_frame3d_member_add_surface_passed\":true,\"workbench_frame3d_member_add_model_sha256\":\"sha256:$frame3d_member_add_model_hash\",\"workbench_frame3d_member_add_receipt_sha256\":\"sha256:$frame3d_member_add_receipt_hash\",\"workbench_frame3d_member_add_request_sha256\":\"sha256:$frame3d_member_add_request_hash\",\"workbench_frame3d_member_add_result_ir_sha256\":\"sha256:$frame3d_member_add_result_ir_hash\","
 v23_receipt_json="${v23_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame3d_member_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v23_receipt_json" > "$temporary_receipt"
+v24_receipt_json="${v23_receipt_json/structural-native-distribution-e2e.v23/structural-native-distribution-e2e.v24}"
+nodal_load_add_receipt_fields="\"workbench_nodal_load_add_surface_passed\":true,\"workbench_nodal_load_add_model_sha256\":\"sha256:$nodal_load_add_model_hash\",\"workbench_nodal_load_add_receipt_sha256\":\"sha256:$nodal_load_add_receipt_hash\",\"workbench_nodal_load_add_request_sha256\":\"sha256:$nodal_load_add_request_hash\",\"workbench_nodal_load_add_result_ir_sha256\":\"sha256:$nodal_load_add_result_ir_hash\",\"workbench_nodal_load_add_recovery_sha256\":\"sha256:$nodal_load_add_recovery_hash\","
+v24_receipt_json="${v24_receipt_json/\"workbench_result_view_surface_passed\":true,/${nodal_load_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v24_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

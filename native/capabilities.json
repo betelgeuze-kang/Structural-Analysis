@@ -199,6 +199,12 @@
       "owner": "structural-workbench",
       "claim": "bounded ModelIR linear frame3d topology-authoring C5 only: Rust appends one finite-coordinate node and one connected frame_3d/euler_bernoulli_3d member with contiguous indices, neutral new-entity source ownership, one existing v1 linear-elastic material and one existing v1 frame3d section, zero local rotation/offsets and no releases; source and edited models cross the single C ABI into C++ semantic validation, explicit blockers are preserved, output is create-new and self-hashed, and installed static/shared E2E creates an exact model-bound request then converges through the native CPU linear product with typed ResultIR/recovery and fallback 0; arbitrary topology, element formulations, creation/deletion of other entity families, visual manipulation, HIP C2 and C6 remain open"
     },
+    "modelir_nodal_load_add": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-workbench",
+      "claim": "bounded ModelIR linear nodal-load authoring C5 only: Rust appends one nonzero finite six-component SI nodal load with a globally unique identity and contiguous pattern-local index to one existing linear_static pattern and existing node, assigns neutral source ownership, preserves explicit blockers, and degrades only a matching direct load-pattern round-trip claim; source and edited models cross the single C ABI into C++ semantic validation, output is create-new and self-hashed, and installed static/shared E2E composes the prior connected frame3d-member addition, creates an exact model-bound request, then proves the new N3-UY external load in typed recovery, changed displacement, native CPU linear completion and fallback 0; pattern/node creation, other load families, deletion/retargeting/combination, arbitrary solver selection, visual manipulation, HIP C2 and C6 remain open"
+    },
     "modelir_linear_workbench": {
       "status": "implemented",
       "cutover_gate": "C5",

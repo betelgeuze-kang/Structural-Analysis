@@ -49,6 +49,10 @@ releases. The bounded frame3d-member creator separately appends exactly one new 
 connected linear `frame_3d`/`euler_bernoulli_3d` element, reuses one existing compatible material
 and section, assigns contiguous indices, and fixes rotation/offsets/releases to zero/empty before
 C++ revalidation. It does not broaden to arbitrary topology authoring.
+The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
+one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
+and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and
+revalidates through C++. It does not create or retarget patterns/nodes or broaden to other loads.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -126,6 +130,9 @@ structural-workbench model-edit-element-connectivity MODEL.json \
 structural-workbench model-add-frame3d-member MODEL.json \
   --node N3 --coordinates 4 0 0 --element E2 --from-node N2 \
   --material M1 --section S1 --output-dir ADDED-MEMBER-MODEL
+structural-workbench model-add-nodal-load ADDED-MEMBER-MODEL/model-ir.json \
+  --load-pattern LC_WEAK --load L_WEAK_N3 --node N3 \
+  --components 0 -1000 0 0 0 0 --output-dir ADDED-LOAD-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \

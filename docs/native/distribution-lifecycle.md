@@ -122,28 +122,33 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
     indices and property references, strict C++ revalidation and deterministic topology rendering,
     then creates an exact model-bound request and completes the native CPU linear product with
     typed ResultIR/recovery and fallback 0;
-19. creates the bounded ModelIR linear CPU analysis request twice, proves byte-identical typed
+19. appends one globally unique nonzero nodal load twice to the newly added node in an existing
+    linear-static pattern, proves byte-identical model/edit-receipt bytes, unchanged source bytes,
+    exact pattern/node/component/index bindings and strict C++ revalidation, then creates a bound
+    request and proves the exact added N3-UY external load, changed displacement, typed
+    ResultIR/recovery and fallback 0 through native CPU execution;
+20. creates the bounded ModelIR linear CPU analysis request twice, proves byte-identical typed
     request and receipt output, unchanged source bytes, exact model/case/load/config provenance,
     strict C++ semantic snapshot and sparse assembly preflight, then consumes that generated
     request through restart/direct parity, result recovery, comparison and report generation;
-20. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+21. renders all four closed NDTHA response channels twice from the installed Workbench, proves
     exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
     window, and proves the durable session remains unchanged;
-21. renders all four fixed-guided original/deformed projections twice plus an explicit selected
+22. renders all four fixed-guided original/deformed projections twice plus an explicit selected
     step and magnification, proves ANSI-free byte determinism, distinct identities, exact C++
     snapshot/terminal-adapter binding, and durable-session nonmutation;
-22. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
+23. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-23. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
+24. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
     embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
     receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
-24. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
+25. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
     restores the validated session after creating a one-iteration PCG checkpoint to simulate
     process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
     exercises the same non-promoting inspect/review/reopen/export surface;
-25. installs an immutable update, rolls back and re-verifies activation;
-26. emits an append-only v23 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+26. installs an immutable update, rolls back and re-verifies activation;
+27. emits an append-only v24 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
@@ -153,17 +158,20 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    the generated bounded linear analysis request and its C++-preflight receipt identities,
    the connected frame3d-member-added ModelIR, edit receipt, generated request and completed
    ResultIR identities,
+   the nodal-load-added ModelIR, edit receipt, generated request, completed ResultIR and typed
+   recovery identities,
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v22 receipts; v1 through v19 are not
+   The receipt checker continues to accept frozen v1 through v23 receipts; v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
-   plus native-linear-execution authority.
+   plus native-linear-execution authority, and no pre-v24 receipt is installed nodal-load-addition
+   plus exact recovered-external-load authority.
 
 The reference command is:
 

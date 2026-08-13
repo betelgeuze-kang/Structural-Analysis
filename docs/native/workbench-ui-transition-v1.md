@@ -70,6 +70,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   rows, then strictly reparses and C++-revalidates before create-new publication. Installed E2E
   also creates a bound linear request and reaches typed ResultIR/recovery. Arbitrary element types,
   deletion, loads/constraints/properties, visual authoring and general topology remain open.
+- `model-add-nodal-load`: deterministic creation of one globally unique, nonzero six-component SI
+  nodal load inside one existing `linear_static` pattern on one existing node. The load receives a
+  contiguous pattern-local index and neutral source ownership; only a matching direct load-pattern
+  round-trip claim is degraded. Rust strictly reparses and C++-revalidates before create-new
+  publication. Installed E2E composes the connected-member addition, applies an exact N3-UY load,
+  and proves that value in typed recovery plus changed displacement and fallback 0. Pattern/node
+  creation, retargeting, deletion, combinations, other load families and visual authoring remain
+  open.
 - `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
   load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
   same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before

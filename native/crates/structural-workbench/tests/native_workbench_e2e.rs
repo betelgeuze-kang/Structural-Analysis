@@ -580,6 +580,35 @@ fn run_frame3d_member_add(
     ])
 }
 
+fn run_nodal_load_add(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components: [&str; 6],
+) -> Output {
+    run_workbench(&[
+        text("model-add-nodal-load"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--load"),
+        text(nodal_load_id),
+        text("--node"),
+        text(node_id),
+        text("--components"),
+        text(components[0]),
+        text(components[1]),
+        text(components[2]),
+        text(components[3]),
+        text(components[4]),
+        text(components[5]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -873,6 +902,45 @@ fn assert_published_frame3d_member_add(destination: &Path) {
     assert_eq!(receipt["node_ids"], serde_json::json!(["N2", "N3"]));
     assert_eq!(receipt["material_id"], "M1");
     assert_eq!(receipt["section_id"], "S1");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_nodal_load_add(destination: &Path) {
+    let edited_bytes =
+        std::fs::read(destination.join("model-ir.json")).expect("load-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict load-added ModelIR");
+    let pattern = edited.value()["load_patterns"]
+        .as_array()
+        .expect("load patterns")
+        .iter()
+        .find(|pattern| pattern["id"] == "LC_WEAK")
+        .expect("LC_WEAK pattern");
+    let loads = pattern["nodal_loads"].as_array().expect("nodal loads");
+    assert_eq!(loads.len(), 2);
+    assert_eq!(loads[1]["id"], "L_WEAK_N3");
+    assert_eq!(loads[1]["index"], 1);
+    assert_eq!(loads[1]["node_id"], "N3");
+    assert_eq!(loads[1]["components_si"]["FY"], -1_000.0);
+    assert_eq!(loads[1]["source_id"], Value::Null);
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-nodal-load.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("load-add receipt"),
+    )
+    .expect("load-add receipt JSON");
+    assert_eq!(receipt["operation"], "nodal_load_add");
+    assert_eq!(receipt["load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["load_pattern_index"], 1);
+    assert_eq!(receipt["analysis_type"], "linear_static");
+    assert_eq!(receipt["nodal_load_id"], "L_WEAK_N3");
+    assert_eq!(receipt["nodal_load_index"], 1);
+    assert_eq!(receipt["node_id"], "N3");
+    assert_eq!(receipt["components_si"]["FY"], -1_000.0);
     assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
     assert_eq!(receipt["analysis_ready"], true);
     assert_eq!(receipt["edited_content_hash"], edited.content_hash());
@@ -2306,6 +2374,253 @@ fn frame3d_member_add_is_deterministic_cpp_revalidated_and_linear_executable() {
     assert!(String::from_utf8_lossy(&blocked_request.stdout)
         .contains("workbench_model_linear_request_source_not_ready"));
     assert!(!blocked_request_destination.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("load-add-member-source");
+    let member_output = run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    );
+    assert_success(&member_output);
+    let member_source = member_directory.join("model-ir.json");
+    let member_source_before = std::fs::read(&member_source).expect("member source bytes");
+
+    let first = temporary.0.join("nodal-load-add-first");
+    let second = temporary.0.join("nodal-load-add-second");
+    for destination in [&first, &second] {
+        let output = run_nodal_load_add(
+            &member_source,
+            destination,
+            "LC_WEAK",
+            "L_WEAK_N3",
+            "N3",
+            ["0", "-1000", "0", "0", "0", "0"],
+        );
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("nodal-load add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first load-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second load-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&member_source).expect("member source after load addition"),
+        member_source_before
+    );
+    assert_published_nodal_load_add(&first);
+
+    let baseline_request_directory = temporary.0.join("load-add-baseline-request");
+    let loaded_request_directory = temporary.0.join("load-add-loaded-request");
+    assert_success(&run_model_linear_request_create(
+        &member_source,
+        &baseline_request_directory,
+        "added-nodal-load-linear-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &loaded_request_directory,
+        "added-nodal-load-linear-c5",
+        "LC_WEAK",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &member_source_before,
+        &std::fs::read(baseline_request_directory.join("analysis-request.json"))
+            .expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline member-model execution");
+    let loaded_model = std::fs::read(first.join("model-ir.json")).expect("load-added model");
+    let loaded = execute_model_ir_linear_analysis(
+        &loaded_model,
+        &std::fs::read(loaded_request_directory.join("analysis-request.json"))
+            .expect("load-added request"),
+        None,
+        u32::MAX,
+    )
+    .expect("load-added native linear execution");
+    assert!(baseline.is_complete());
+    assert!(loaded.is_complete());
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline result recovery"),
+    )
+    .expect("baseline recovery JSON");
+    let loaded_recovery: Value = serde_json::from_str(
+        loaded
+            .result_recovery_ir_json()
+            .expect("load-added result recovery"),
+    )
+    .expect("load-added recovery JSON");
+    let n3_uy_position = loaded_recovery["active_dof_indices"]
+        .as_array()
+        .expect("active DOF indices")
+        .iter()
+        .position(|index| index.as_u64() == Some(13))
+        .expect("N3 UY active DOF");
+    assert_eq!(
+        baseline_recovery["active_external_load"][n3_uy_position],
+        0.0
+    );
+    assert_eq!(
+        loaded_recovery["active_external_load"][n3_uy_position],
+        -1_000.0
+    );
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        loaded_recovery["global_displacement"]
+    );
+    assert_eq!(loaded_recovery["fallback_count"], 0);
+
+    let existing = run_nodal_load_add(
+        &member_source,
+        &first,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    );
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, pattern, load, node, components, code) in [
+        (
+            "load-add-duplicate-id",
+            "LC_WEAK",
+            "L_AXIAL_N2",
+            "N3",
+            ["0", "-1000", "0", "0", "0", "0"],
+            "workbench_model_add_nodal_load_identity_exists",
+        ),
+        (
+            "load-add-missing-pattern",
+            "MISSING",
+            "L_WEAK_N3",
+            "N3",
+            ["0", "-1000", "0", "0", "0", "0"],
+            "workbench_model_add_nodal_load_pattern_missing",
+        ),
+        (
+            "load-add-missing-node",
+            "LC_WEAK",
+            "L_WEAK_N3",
+            "MISSING",
+            ["0", "-1000", "0", "0", "0", "0"],
+            "workbench_model_add_nodal_load_node_missing",
+        ),
+        (
+            "load-add-zero",
+            "LC_WEAK",
+            "L_WEAK_N3",
+            "N3",
+            ["0", "0", "0", "0", "0", "0"],
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_nodal_load_add(
+            &member_source,
+            &destination,
+            pattern,
+            load,
+            node,
+            components,
+        );
+        let expected_status = if code == "workbench_usage_error" {
+            2
+        } else {
+            1
+        };
+        assert_eq!(rejected.status.code(), Some(expected_status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value =
+        serde_json::from_slice(&member_source_before).expect("member source JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.nodal-load-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Load authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:LC_WEAK",
+            "entity_kind": "load_pattern",
+            "model_ir_entity_id": "LC_WEAK",
+            "mapping_status": "exact",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:N3",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N3",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let blocked_source = temporary.0.join("blocked-load-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked load-add source bytes"),
+    )
+    .expect("write blocked load-add source");
+    let blocked_destination = temporary.0.join("blocked-load-add");
+    assert_success(&run_nodal_load_add(
+        &blocked_source,
+        &blocked_destination,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked load-add receipt"),
+    )
+    .expect("blocked load-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.nodal-load-add-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked load-added model"),
+    )
+    .expect("blocked load-added JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        blocked_edited["roundtrip_map"][1]["mapping_status"],
+        "exact"
+    );
 }
 
 #[test]

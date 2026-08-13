@@ -22,6 +22,7 @@ const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
 const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
 const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
+const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -31,6 +32,7 @@ const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_mod
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
+const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -109,6 +111,13 @@ pub struct ModelFrame3dMemberAddOutcomeV1 {
     pub receipt_json: String,
 }
 
+/// Complete deterministic artifact pair produced by one bounded nodal-load addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelNodalLoadAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
 /// Edit one node in a bounded regular `ModelIR` file and atomically publish a new artifact set.
 ///
 /// # Errors
@@ -149,6 +158,38 @@ pub fn publish_model_nodal_load_components_edit(
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome =
         edit_model_nodal_load_components(&source, load_pattern_id, nodal_load_id, components_si)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one nodal load to an existing linear-static pattern and atomically publish it.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or components, invalid source or edited semantics,
+/// missing or unsupported references, duplicate load identities, or publication failure.
+pub fn publish_model_nodal_load_add(
+    source_path: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components_si: [f64; 6],
+    output_directory: &Path,
+) -> Result<ModelNodalLoadAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_nodal_load(
+        &source,
+        load_pattern_id,
+        nodal_load_id,
+        node_id,
+        components_si,
+    )?;
     publish_new_directory(
         output_directory,
         &[
@@ -514,6 +555,112 @@ pub fn edit_model_nodal_load_components(
         "claim_boundary": NODAL_LOAD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodalLoadEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Add one provenance-bound nodal load to an existing linear-static pattern in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identities or components, invalid source semantics, missing patterns or nodes,
+/// duplicate load identities, non-linear-static patterns, schema drift, or edited semantics
+/// rejected by C++.
+pub fn add_model_nodal_load(
+    source_bytes: &[u8],
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components_si: [f64; 6],
+) -> Result<ModelNodalLoadAddOutcomeV1, WorkbenchError> {
+    validate_nodal_load_add_request(
+        source_bytes.len(),
+        load_pattern_id,
+        nodal_load_id,
+        node_id,
+        components_si,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let (load_pattern_index, nodal_load_index) = append_nodal_load(
+        &mut edited,
+        load_pattern_id,
+        nodal_load_id,
+        node_id,
+        components_si,
+    )?;
+    bind_nodal_load_add_provenance(
+        &mut edited,
+        load_pattern_id,
+        load_pattern_index,
+        nodal_load_id,
+        nodal_load_index,
+        node_id,
+        components_si,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "load_pattern", load_pattern_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "nodal_load_add",
+        "model_id": edited_validation.report.model_id,
+        "load_pattern_id": load_pattern_id,
+        "load_pattern_index": load_pattern_index,
+        "analysis_type": "linear_static",
+        "nodal_load_id": nodal_load_id,
+        "nodal_load_index": nodal_load_index,
+        "node_id": node_id,
+        "components_si": components_object(components_si),
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NODAL_LOAD_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelNodalLoadAddOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -1321,6 +1468,31 @@ fn validate_frame3d_member_add_request(
     Ok(())
 }
 
+fn validate_nodal_load_add_request(
+    source_length: usize,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components_si: [f64; 6],
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_pattern_id, "load pattern")?;
+    validate_bounded_edit_identity(0, nodal_load_id, "new nodal load")?;
+    validate_bounded_edit_identity(0, node_id, "load target node")?;
+    if components_si.iter().any(|value| !value.is_finite()) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nodal_load_component_invalid",
+            "new nodal-load components must be finite SI values",
+        ));
+    }
+    if components_si.iter().all(|value| *value == 0.0) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nodal_load_zero_components",
+            "new nodal load must contain at least one non-zero SI component",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_bounded_edit_identity(
     source_length: usize,
     identity: &str,
@@ -1425,6 +1597,84 @@ fn replace_nodal_load_components(
         .ok_or_else(|| snapshot_error("nodal load"))?
         .insert("components_si".to_owned(), components_object(components_si));
     Ok(previous_components_si)
+}
+
+fn append_nodal_load(
+    model: &mut Value,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+    components_si: [f64; 6],
+) -> Result<(usize, usize), WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if !nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nodal_load_node_missing",
+            format!("ModelIR has no load target node with identity {node_id}"),
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.iter().any(|pattern| {
+        pattern
+            .get("nodal_loads")
+            .and_then(Value::as_array)
+            .is_some_and(|loads| {
+                loads
+                    .iter()
+                    .any(|load| load.get("id").and_then(Value::as_str) == Some(nodal_load_id))
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nodal_load_identity_exists",
+            format!("ModelIR already has a nodal load with identity {nodal_load_id}"),
+        ));
+    }
+    let load_pattern_index = load_patterns
+        .iter()
+        .position(|pattern| pattern.get("id").and_then(Value::as_str) == Some(load_pattern_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_add_nodal_load_pattern_missing",
+                format!("ModelIR has no load pattern with identity {load_pattern_id}"),
+            )
+        })?;
+    let pattern = &load_patterns[load_pattern_index];
+    if pattern.get("analysis_type").and_then(Value::as_str) != Some("linear_static") {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nodal_load_pattern_unsupported",
+            "new nodal load requires an existing linear_static load pattern",
+        ));
+    }
+    let nodal_load_index = pattern
+        .get("nodal_loads")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load pattern nodal_loads"))?
+        .len();
+    model
+        .get_mut("load_patterns")
+        .and_then(Value::as_array_mut)
+        .and_then(|patterns| patterns.get_mut(load_pattern_index))
+        .and_then(|pattern| pattern.get_mut("nodal_loads"))
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("load pattern nodal_loads"))?
+        .push(json!({
+            "id": nodal_load_id,
+            "index": nodal_load_index,
+            "node_id": node_id,
+            "components_si": components_object(components_si),
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok((load_pattern_index, nodal_load_index))
 }
 
 fn replace_constraint_value(
@@ -2008,6 +2258,40 @@ fn bind_nodal_load_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_nodal_load_add_provenance(
+    model: &mut Value,
+    load_pattern_id: &str,
+    load_pattern_index: usize,
+    nodal_load_id: &str,
+    nodal_load_index: usize,
+    node_id: &str,
+    components_si: [f64; 6],
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NODAL_LOAD_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "nodal_load_add",
+            "load_pattern_id": load_pattern_id,
+            "load_pattern_index": load_pattern_index,
+            "analysis_type": "linear_static",
+            "nodal_load_id": nodal_load_id,
+            "nodal_load_index": nodal_load_index,
+            "node_id": node_id,
+            "components_si": components_object(components_si),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": NODAL_LOAD_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_constraint_value_edit_provenance(
     model: &mut Value,
     constraint_id: &str,
@@ -2438,8 +2722,9 @@ mod tests {
         validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_frame3d_member_add_request,
         validate_frame_element_orientation_edit_request, validate_frame_section_edit_request,
-        validate_linear_material_edit_request, validate_nodal_load_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
+        validate_linear_material_edit_request, validate_nodal_load_add_request,
+        validate_nodal_load_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -2704,6 +2989,42 @@ mod tests {
                 .expect_err("new element identity must be bounded")
                 .code,
             "workbench_model_edit_entity_id_invalid"
+        );
+    }
+
+    #[test]
+    fn nodal_load_add_requires_bounded_identities_finite_and_nonzero_components() {
+        validate_nodal_load_add_request(
+            0,
+            "LC_WEAK",
+            "L_WEAK_N3",
+            "N3",
+            [0.0, -1_000.0, 0.0, 0.0, 0.0, 0.0],
+        )
+        .expect("valid nodal-load addition request");
+        assert_eq!(
+            validate_nodal_load_add_request(0, "LC_WEAK", "", "N3", [1.0; 6])
+                .expect_err("new load identity must be bounded")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        assert_eq!(
+            validate_nodal_load_add_request(
+                0,
+                "LC_WEAK",
+                "L_WEAK_N3",
+                "N3",
+                [0.0, f64::NAN, 0.0, 0.0, 0.0, 0.0],
+            )
+            .expect_err("new load components must be finite")
+            .code,
+            "workbench_model_add_nodal_load_component_invalid"
+        );
+        assert_eq!(
+            validate_nodal_load_add_request(0, "LC_WEAK", "L_WEAK_N3", "N3", [-0.0; 6])
+                .expect_err("new load must not be all zero")
+                .code,
+            "workbench_model_add_nodal_load_zero_components"
         );
     }
 }
