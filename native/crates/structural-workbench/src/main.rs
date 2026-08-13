@@ -47,6 +47,14 @@ struct ModelViewCommand {
     projection: ModelTopologyProjectionV1,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelEditNodeCommand {
+    model: PathBuf,
+    node_id: String,
+    coordinates_m: [f64; 3],
+    output_directory: PathBuf,
+}
+
 fn main() -> ExitCode {
     let arguments = std::env::args_os().skip(1).collect::<Vec<_>>();
     run(&arguments)
@@ -72,6 +80,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
         Some("model-view") => {
             parse_model_view(arguments).and_then(|command| run_model_view(&command))
+        }
+        Some("model-edit-node") => {
+            parse_model_edit_node(arguments).and_then(|command| run_model_edit_node(&command))
         }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
@@ -234,6 +245,17 @@ fn run_model_view(command: &ModelViewCommand) -> Result<(), WorkbenchError> {
         "{}",
         structural_workbench::render_model_topology_view_file(&command.model, command.projection)?
     );
+    Ok(())
+}
+
+fn run_model_edit_node(command: &ModelEditNodeCommand) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_node_coordinate_edit(
+        &command.model,
+        &command.node_id,
+        command.coordinates_m,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
     Ok(())
 }
 
@@ -445,6 +467,37 @@ fn parse_model_view(arguments: &[OsString]) -> Result<ModelViewCommand, Workbenc
     Ok(ModelViewCommand {
         model: PathBuf::from(&arguments[1]),
         projection,
+    })
+}
+
+fn parse_model_edit_node(arguments: &[OsString]) -> Result<ModelEditNodeCommand, WorkbenchError> {
+    if arguments.len() != 10
+        || arguments[2] != "--node"
+        || arguments[4] != "--coordinates"
+        || arguments[8] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-node requires MODEL.json --node ID --coordinates X Y Z --output-dir DIR",
+        ));
+    }
+    let node_id = arguments[3]
+        .to_str()
+        .filter(|value| !value.is_empty() && value.len() <= 128)
+        .ok_or_else(|| usage_error("model-edit-node ID must be valid UTF-8 with 1-128 bytes"))?
+        .to_owned();
+    let mut coordinates_m = [0.0; 3];
+    for (target, source) in coordinates_m.iter_mut().zip(&arguments[5..8]) {
+        *target = source
+            .to_str()
+            .and_then(|value| value.parse::<f64>().ok())
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| usage_error("model-edit-node coordinates must be finite SI numbers"))?;
+    }
+    Ok(ModelEditNodeCommand {
+        model: PathBuf::from(&arguments[1]),
+        node_id,
+        coordinates_m,
+        output_directory: PathBuf::from(&arguments[9]),
     })
 }
 
@@ -755,7 +808,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -766,8 +819,9 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_model_view,
-        parse_report_pdf_export, parse_report_view, parse_review, parse_stage_command,
+        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_model_edit_node,
+        parse_model_view, parse_report_pdf_export, parse_report_view, parse_review,
+        parse_stage_command,
     };
 
     #[test]
@@ -812,6 +866,34 @@ mod tests {
         let mut invalid = xz;
         invalid[3] = OsString::from("perspective");
         assert!(parse_model_view(&invalid).is_err());
+    }
+
+    #[test]
+    fn model_edit_node_parser_requires_fixed_finite_si_coordinates() {
+        let arguments = [
+            OsString::from("model-edit-node"),
+            OsString::from("model.json"),
+            OsString::from("--node"),
+            OsString::from("N2"),
+            OsString::from("--coordinates"),
+            OsString::from("2"),
+            OsString::from("1.5"),
+            OsString::from("-0.25"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_node(&arguments).expect("valid node edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.node_id, "N2");
+        assert_eq!(
+            parsed.coordinates_m.map(f64::to_bits),
+            [2.0_f64, 1.5_f64, -0.25_f64].map(f64::to_bits)
+        );
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut invalid = arguments;
+        invalid[6] = OsString::from("NaN");
+        assert!(parse_model_edit_node(&invalid).is_err());
     }
 
     #[test]

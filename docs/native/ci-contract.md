@@ -138,8 +138,9 @@ loads HIP through the installed package's single `sa_get_api_v1` symbol, runs it
 consumer and bounded Workbench flow, exercises update/rollback, and uploads a deterministic tar plus
 receipts that bind the installed execution to the C2 receipt. Both strict ModelIR and exact-profile
 MGT Workbench paths run with original MGT/import-health identities plus deterministic inspect,
-explicit non-promoting review, review reopen and export hashes in the append-only distribution v3
-receipt. A local execution is a candidate, not
+explicit non-promoting review, review reopen, export, catalog/evidence, localized PDF, general
+ModelIR topology-view, and provenance-bound node-coordinate edit hashes in the append-only
+distribution v9 receipt. A local execution is a candidate, not
 authoritative C2 or ROCm-package evidence.
 
 ## 3. merge-product
@@ -161,7 +162,8 @@ Required jobs:
      Workbench and Rust installer; installed shared binaries resolve the same packaged product ABI
    - hash-bound install/update/rollback and all journal crash boundaries are covered by Rust tests;
      an empty-PATH installed E2E runs ModelIR, exact-profile MGT import health, CMake consumers and
-     both Workbench direct/restart paths with Python/Node lookup count 0
+     both Workbench direct/restart paths, deterministic localized PDF and all topology projections,
+     plus a source-preserving C++-revalidated node-coordinate edit with Python/Node lookup count 0
 2. rust-cpp-integration
    - safe wrapper ownership, concurrency와 exception/panic conversion
    - bounded track/nonlinear-static C++/Python product-golden parity and fallback count 0

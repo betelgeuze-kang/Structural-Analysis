@@ -25,6 +25,8 @@
 20. [Native Distribution Lifecycle](distribution-lifecycle.md)
 21. [Native Deployment Cutover v1](deployment-cutover-v1.md)
 22. [Native Workbench UI Transition v1](workbench-ui-transition-v1.md)
+23. [ModelIR Terminal Topology View v1](modelir-terminal-topology-view-v1.md)
+24. [ModelIR Node-Coordinate Edit v1](modelir-node-coordinate-edit-v1.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

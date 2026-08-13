@@ -175,8 +175,21 @@ cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
 
 The closed projection vocabulary is `isometric`, `xy`, `xz`, and `yz`. The fixed ASCII view keeps
 explicit analysis blockers visible and binds its bytes with a final SHA-256; it is topology
-inspection, not a model editor or deformed/result explorer. See
+inspection, not an editing interaction or deformed/result explorer. See
 `docs/native/modelir-terminal-topology-view-v1.md` for the exact boundary.
+
+One existing node's finite SI coordinates can be edited through a create-new, provenance-bound
+artifact flow and revalidated by the C++ semantic core:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  model-edit-node tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json \
+  --node N2 --coordinates 2 1 1 --output-dir edited-model
+~~~
+
+This publishes canonical `model-ir.json` and self-hashed `edit-receipt.json` without modifying the
+source. It is a bounded command-level coordinate edit, not visual dragging or general model editing.
+See `docs/native/modelir-node-coordinate-edit-v1.md`.
 
 The bounded native MGT import-health command is:
 

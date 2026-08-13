@@ -86,13 +86,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 9. runs all four fixed projections of the installed C++-verified general ModelIR terminal topology
    view twice, proving byte determinism, distinct projection identities, ANSI-free output, and
    Python/Node-free empty-`PATH` execution;
-10. installs an immutable update, rolls back and re-verifies activation;
-11. emits an append-only v8 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+10. runs the installed provenance-bound node-coordinate edit twice, proves byte-identical model and
+    receipt output, unchanged source bytes, strict C++ revalidation, analysis readiness and
+    deterministic topology rendering with an empty `PATH`;
+11. installs an immutable update, rolls back and re-verifies activation;
+12. emits an append-only v9 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
-   installed font/license/provenance, and all four topology projection
-   identities, Python/Node lookup count 0 and fallback count 0. The receipt checker continues to
-   accept frozen v1 through v7 receipts without treating them as v8 topology-view authority.
+   installed font/license/provenance, all four topology projection identities, and edited ModelIR
+   plus edit-receipt identities, Python/Node lookup count 0 and fallback count 0. The receipt checker
+   continues to accept frozen v1 through v8 receipts without treating them as v9 model-edit
+   authority.
 
 The reference command is:
 

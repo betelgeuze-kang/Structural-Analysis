@@ -18,7 +18,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
 - `model-view`: a deterministic self-hashed ANSI-free terminal topology projection for every
   current semantically valid ModelIR v2 profile. Rust renders only the canonical C++ snapshot in
   fixed isometric/XY/XZ/YZ views, lists full node/element identities and analysis types, and keeps
-  explicit analysis blockers visible; editing and deformed/result exploration remain open.
+  explicit analysis blockers visible; deformed/result exploration remains open.
+- `model-edit-node`: a deterministic provenance-bound edit of one existing node's finite SI
+  coordinates. Rust edits only the canonical C++ snapshot, retains upstream provenance, marks the
+  status of any matching exact/canonicalized round-trip row as approximated, strictly reparses and
+  C++-revalidates the result, and atomically publishes a new model plus self-hashed receipt. Visual
+  dragging and broader model editing remain open.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -154,9 +159,10 @@ project-manifest checks and Viewer, prototype, and Workbench v2 browser-smoke or
 well. Viewer report PDF verification plus Viewer sample-workflow, performance, and visual-regression
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
-checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It does not provide a
-general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
-before language-neutral golden ownership is complete.
+checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
+bounded command-level node-coordinate edit, not a general visual model editor or 3D result explorer.
+Broader fixture/oracle migration is still needed before language-neutral golden ownership is
+complete.
 
 The bounded terminal UTF-8 linear report view is C5-implemented for English and Korean.
 The bounded embedded-font PDF export is C5-implemented
@@ -167,8 +173,10 @@ open.
 
 The bounded general-ModelIR terminal topology view is C5-implemented for the eight current positive
 profiles and all four fixed projections. It closes native semantic-snapshot geometry inspection,
-not model editing, solver selection/execution, perspective interaction, or deformed/modal/contour
-result exploration; the composite visual parity row therefore stays open.
+not solver selection/execution, perspective interaction, or deformed/modal/contour result
+exploration. The separate C++-revalidated node-coordinate command closes only one provenance-bound
+edit operation; visual dragging and general property/material/section/load/constraint/topology
+editing remain open, so the composite visual parity row stays open.
 
 ## Legacy authority still active
 

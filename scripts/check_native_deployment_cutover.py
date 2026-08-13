@@ -175,6 +175,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Python, Node, React",
             "no listener, exposed port, secret, or network namespace",
             "structural-installer",
+            "model-edit-node",
             "customer-approved image build",
             "not final C6",
         ),

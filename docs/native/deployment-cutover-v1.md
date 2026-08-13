@@ -13,6 +13,11 @@ capability, enables `no-new-privileges`, and mounts a no-exec temporary filesyst
 Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no Python, Node,
 browser, React, package-manager, or external-renderer runtime lookup.
 
+The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
+provenance-bound `model-edit-node` coordinate command. Distribution E2E v9 proves repeated edited
+model/receipt bytes and source nonmutation for CPU static and shared packages. This does not promote
+the rootfs diagnostic into general visual-editing or customer-image evidence.
+
 The prior React Pages workflow moved out of `.github/workflows` to
 `deployment/legacy-react-pages`; it can no longer receive Pages write authority or be dispatched.
 The prior Python project-ops image moved to `deployment/legacy-python-onprem`. The old packaging

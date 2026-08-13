@@ -28,6 +28,7 @@ use structural_contracts::product_ir::{
 
 mod catalog;
 mod evidence;
+mod model_edit;
 mod model_view;
 mod report_view;
 
@@ -36,6 +37,9 @@ pub use catalog::{
     BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
+pub use model_edit::{
+    edit_model_node_coordinates, publish_model_node_coordinate_edit, ModelNodeEditOutcomeV1,
+};
 pub use model_view::{
     render_model_topology_view, render_model_topology_view_file, ModelTopologyProjectionV1,
 };

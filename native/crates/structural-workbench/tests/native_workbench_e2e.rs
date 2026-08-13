@@ -125,6 +125,107 @@ fn assert_blocked_model_remains_viewable(temporary: &Path, model: &Value) {
     assert!(view.contains("Blocking features: feature.blocked\n"));
 }
 
+fn run_node_edit(
+    source: &Path,
+    destination: &Path,
+    node_id: &str,
+    coordinates: [&str; 3],
+) -> Output {
+    run_workbench(&[
+        text("model-edit-node"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--coordinates"),
+        text(coordinates[0]),
+        text(coordinates[1]),
+        text(coordinates[2]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn assert_published_node_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let node = edited
+        .value()
+        .get("nodes")
+        .and_then(Value::as_array)
+        .and_then(|nodes| {
+            nodes
+                .iter()
+                .find(|node| node.get("id").and_then(Value::as_str) == Some("N2"))
+        })
+        .expect("edited node");
+    let coordinates = node["coordinates_m"]
+        .as_array()
+        .expect("edited node coordinates");
+    for (actual, expected) in coordinates.iter().zip([2.0_f64, 1.0_f64, 1.0_f64]) {
+        assert_eq!(
+            actual.as_f64().expect("finite coordinate").to_bits(),
+            expected.to_bits()
+        );
+    }
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-node.v1")
+        .is_some());
+
+    let receipt_bytes = std::fs::read(destination.join("edit-receipt.json")).expect("edit receipt");
+    let mut receipt: Value = serde_json::from_slice(&receipt_bytes).expect("edit receipt JSON");
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-model-edit-receipt.v1"
+    );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    let expected_receipt_hash = receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .and_then(|value| value.as_str().map(ToOwned::to_owned))
+        .expect("receipt self-hash");
+    let unsigned = canonicalize_model_ir_v2(&receipt).expect("unsigned canonical receipt");
+    assert_eq!(expected_receipt_hash, sha256_identity(unsigned.as_bytes()));
+
+    let view = run_workbench(&[
+        text("model-view"),
+        destination.join("model-ir.json").as_os_str(),
+    ]);
+    assert_success(&view);
+    assert!(String::from_utf8_lossy(&view.stdout).contains("C++ semantic snapshot: verified\n"));
+}
+
+fn assert_rejected_node_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    node_id: &str,
+    coordinates: [&str; 3],
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_node_edit(source, &destination, node_id, coordinates);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
 #[test]
 fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed() {
     const FIXTURES: [&str; 8] = [
@@ -217,6 +318,157 @@ fn general_modelir_topology_view_is_cpp_verified_deterministic_and_fail_closed()
     ]);
     assert_eq!(invalid_projection.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&invalid_projection.stdout).contains("workbench_usage_error"));
+}
+
+#[test]
+fn node_coordinate_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("edited-first");
+    let second = temporary.0.join("edited-second");
+    for destination in [&first, &second] {
+        let output = run_node_edit(&source, destination, "N2", ["2", "1", "1"]);
+        assert_success(&output);
+        let receipt_bytes =
+            std::fs::read(destination.join("edit-receipt.json")).expect("published edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after edit"),
+        source_before
+    );
+    assert_published_node_edit(&first);
+
+    let repeated = run_node_edit(&source, &first, "N2", ["2", "1", "1"]);
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, node_id, coordinates, expected_code) in [
+        (
+            "missing",
+            "MISSING",
+            ["2", "1", "1"],
+            "workbench_model_edit_node_missing",
+        ),
+        (
+            "no-op",
+            "N2",
+            ["2", "0", "0"],
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "signed-zero-no-op",
+            "N2",
+            ["2", "-0", "0"],
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "zero-length",
+            "N2",
+            ["0", "0", "0"],
+            "workbench_model_edit_semantics_invalid",
+        ),
+    ] {
+        assert_rejected_node_edit(
+            &source,
+            &temporary.0,
+            name,
+            node_id,
+            coordinates,
+            expected_code,
+        );
+    }
+
+    let mut invalid_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for invalid-source edit");
+    invalid_source["elements"][0]["node_ids"][1] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary.0.join("invalid-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid source bytes"),
+    )
+    .expect("write invalid edit source");
+    assert_rejected_node_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-source-edit",
+        "N2",
+        ["2", "1", "1"],
+        "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+fn node_coordinate_edit_preserves_analysis_blockers_without_promotion() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let mut blocked: Value = serde_json::from_slice(
+        &std::fs::read(fixture).expect("source ModelIR fixture for blocked edit"),
+    )
+    .expect("source ModelIR JSON for blocked edit");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Editing must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:N2",
+        "entity_kind": "node",
+        "model_ir_entity_id": "N2",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let source = temporary.0.join("blocked-source.model-ir.json");
+    std::fs::write(
+        &source,
+        serde_json::to_vec(&blocked).expect("blocked edit source bytes"),
+    )
+    .expect("write blocked edit source");
+    let destination = temporary.0.join("blocked-edit");
+    let output = run_node_edit(&source, &destination, "N2", ["2", "1", "0"]);
+    assert_success(&output);
+
+    let receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("blocked edit receipt"),
+    )
+    .expect("blocked edit receipt JSON");
+    assert_eq!(receipt["analysis_ready"], false);
+    assert_eq!(
+        receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.edit-visible-not-runnable"])
+    );
+    let edited: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("model-ir.json")).expect("blocked edited model"),
+    )
+    .expect("blocked edited ModelIR JSON");
+    assert_eq!(
+        edited["roundtrip_map"][0]["mapping_status"], "approximated",
+        "edited round-trip map: {}",
+        edited["roundtrip_map"]
+    );
+    let view = run_workbench(&[
+        text("model-view"),
+        destination.join("model-ir.json").as_os_str(),
+    ]);
+    assert_success(&view);
+    let view = String::from_utf8(view.stdout).expect("blocked edited model view");
+    assert!(view.contains("Analysis ready: false\n"));
+    assert!(view.contains("Blocking features: feature.edit-visible-not-runnable\n"));
 }
 
 fn import_arguments<'a>(
