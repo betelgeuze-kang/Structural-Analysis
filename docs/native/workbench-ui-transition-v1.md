@@ -18,7 +18,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
 - `model-view`: a deterministic self-hashed ANSI-free terminal topology projection for every
   current semantically valid ModelIR v2 profile. Rust renders only the canonical C++ snapshot in
   fixed isometric/XY/XZ/YZ views, lists full node/element identities and analysis types, and keeps
-  explicit analysis blockers visible; deformed/result exploration remains open.
+  explicit analysis blockers visible; general arbitrary-nodal-field result exploration remains
+  open.
 - `model-edit-node`: a deterministic provenance-bound edit of one existing node's finite SI
   coordinates. Rust edits only the canonical C++ snapshot, retains upstream provenance, marks the
   status of any matching exact/canonicalized round-trip row as approximated, strictly reparses and
@@ -33,6 +34,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   residual-infinity values plus per-step convergence metadata through a maximum 256-row window.
   ResultIR v1 has no `dt_s`, so the view preserves step indices and does not invent timestamps;
   general 3D/deformed/modal/contour exploration remains open.
+- `result-deformed-view`: a deterministic self-hashed ANSI-free original/deformed overlay for the
+  exact executed fixed-guided one-story profile. It revalidates the immutable ModelIR through C++,
+  applies only a selected ResultIR top displacement in global X, records the visual magnification
+  and all provenance hashes, and fails closed outside the completed prefix. It is not a general
+  nodal-field, stress, contour, modal, animation, or 3D-result surface.
 - `report-export-pdf`: a deterministic bounded embedded-font PDF export in `en-US` or `ko-KR`.
   It re-verifies the stored v1 report chain, embeds a renamed OFL-1.1 Type0/ToUnicode subset,
   publishes to a new directory, and leaves the Workbench unchanged. Fixed labels and printable
@@ -165,8 +171,9 @@ well. Viewer report PDF verification plus Viewer sample-workflow, performance, a
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
-bounded command-level node-coordinate edit and one bounded response-history table, not a general
-visual model editor or 3D result explorer.
+bounded command-level node-coordinate edit, one bounded response-history table, and one exact-profile
+selected-step deformed-shape overlay, not a general visual model editor or arbitrary-nodal-field 3D
+result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
 
@@ -188,6 +195,11 @@ The bounded NDTHA response-history view is C5-implemented for four closed respon
 arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table
 inspection for the current profile, not time reconstruction or 3D/deformed/modal/contour result
 exploration, so the composite visual parity row remains open.
+
+The fixed-guided deformed-shape view is C5-implemented for the exact executed one-story adapter
+profile, four fixed projections, and a bounded visual magnification. It closes selected-step
+original/deformed inspection only; general nodal displacement fields, element curvature, stress,
+contour, modal, animation, and interactive 3D exploration remain open.
 
 ## Legacy authority still active
 

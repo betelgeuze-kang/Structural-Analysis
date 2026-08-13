@@ -858,6 +858,7 @@ fn invalid_transition_and_import_tamper_fail_closed() {
 }
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn mgt_import_restart_workflow_preserves_health_and_is_bitwise_deterministic() {
     let (source_mgt, request, external, source) = mgt_inputs();
     let temporary = TestDirectory::create();
@@ -926,6 +927,33 @@ fn mgt_import_restart_workflow_preserves_health_and_is_bitwise_deterministic() {
             .expect("MGT C++ snapshot"),
         std::fs::read(restarted.join("01-import/model-ir.json")).expect("normalized ModelIR")
     );
+    let restarted_deformed = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--projection"),
+        text("xz"),
+        text("--step"),
+        text("2"),
+        text("--scale"),
+        text("250"),
+    ]);
+    let direct_deformed = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--projection"),
+        text("xz"),
+        text("--step"),
+        text("2"),
+        text("--scale"),
+        text("250"),
+    ]);
+    assert_success(&restarted_deformed);
+    assert_success(&direct_deformed);
+    assert_eq!(restarted_deformed.stdout, direct_deformed.stdout);
+    assert!(String::from_utf8_lossy(&restarted_deformed.stdout)
+        .contains("Profile: fixed_guided_frame3d_x\n"));
 
     let mut tampered =
         std::fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT bytes");
@@ -1168,6 +1196,135 @@ fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated()
     std::fs::write(result_path, tampered).expect("tamper terminal ResultIR");
     let rejected = run_workbench(&[
         text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_guided_deformed_view_is_profile_bound_deterministic_and_terminal_gated() {
+    let (model, request, external, source) = inputs();
+    let temporary = TestDirectory::create();
+    let workspace = temporary.0.join("deformed-view");
+    let mut import = import_arguments("import", &model, &request, &external, &source, &workspace);
+    import.truncate(9);
+    assert_success(&run_workbench(&import));
+
+    let premature = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(premature.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&premature.stdout).contains("workbench_transition_invalid"));
+
+    for command in ["validate", "run", "resume"] {
+        assert_success(&run_workbench(&stage_arguments(command, &workspace)));
+    }
+    let session_before = std::fs::read(workspace.join("workbench-session.json"))
+        .expect("session before deformed views");
+    let result: Value = serde_json::from_slice(
+        &std::fs::read(workspace.join("04-resume/result-ir.json")).expect("terminal ResultIR"),
+    )
+    .expect("terminal ResultIR JSON");
+    let result_hash = result["result_hash"].as_str().expect("result hash");
+    let mut projection_outputs = Vec::new();
+    for projection in ["isometric", "xy", "xz", "yz"] {
+        let arguments = [
+            text("result-deformed-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--projection"),
+            text(projection),
+        ];
+        let first = run_workbench(&arguments);
+        let second = run_workbench(&arguments);
+        assert_success(&first);
+        assert_eq!(first.stdout, second.stdout);
+        assert!(!first.stdout.contains(&0x1b));
+        let view = String::from_utf8(first.stdout).expect("ASCII deformed view");
+        assert!(
+            view.starts_with("Structural Native Workbench - fixed-guided NDTHA deformed shape\n")
+        );
+        assert!(
+            view.contains("Schema: structural-native-workbench-fixed-guided-deformed-view.v1\n")
+        );
+        assert!(view.contains("Profile: fixed_guided_frame3d_x\n"));
+        assert!(view.contains(&format!("Projection: {projection}\n")));
+        assert!(view.contains("Selected step: 5\n"));
+        assert!(view.contains("Visual magnification: 1.00000000000000000e3\n"));
+        assert!(view.contains("C++ semantic snapshot: verified\n"));
+        assert!(view.contains(
+            "C++ fixed-guided adapter execution: verified by durable terminal receipt\n"
+        ));
+        assert!(view.contains(result_hash));
+        assert!(view.contains("not_general_nodal_displacement_3d_modal_contour"));
+        let (unsigned, hash_line) = view
+            .rsplit_once("View hash: ")
+            .expect("deformed view hash line");
+        assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+        projection_outputs.push(view);
+    }
+    for left in 0..projection_outputs.len() {
+        for right in (left + 1)..projection_outputs.len() {
+            assert_ne!(projection_outputs[left], projection_outputs[right]);
+        }
+    }
+    assert!(projection_outputs[3].contains("Projected motion visible: false\n"));
+
+    let explicit = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--projection"),
+        text("xz"),
+        text("--step"),
+        text("2"),
+        text("--scale"),
+        text("250"),
+    ]);
+    assert_success(&explicit);
+    let explicit = String::from_utf8(explicit.stdout).expect("explicit deformed view");
+    assert!(explicit.contains("Selected step: 2\n"));
+    assert!(explicit.contains("Visual magnification: 2.50000000000000000e2\n"));
+    assert_ne!(explicit, projection_outputs[2]);
+
+    for arguments in [
+        vec![
+            text("result-deformed-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--step"),
+            text("6"),
+        ],
+        vec![
+            text("result-deformed-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--scale"),
+            text("1000001"),
+        ],
+    ] {
+        let rejected = run_workbench(&arguments);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+    assert_eq!(
+        std::fs::read(workspace.join("workbench-session.json"))
+            .expect("session after deformed views"),
+        session_before
+    );
+
+    let result_path = workspace.join("04-resume/result-ir.json");
+    let mut tampered = std::fs::read(&result_path).expect("terminal ResultIR bytes");
+    tampered[0] ^= 1;
+    std::fs::write(result_path, tampered).expect("tamper terminal ResultIR");
+    let rejected = run_workbench(&[
+        text("result-deformed-view"),
         text("--workspace"),
         workspace.as_os_str(),
     ]);

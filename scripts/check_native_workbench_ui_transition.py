@@ -16,6 +16,7 @@ REQUIRED_PATHS = (
     Path("native/capabilities.json"),
     Path("native/crates/structural-workbench/src/lib.rs"),
     Path("native/crates/structural-workbench/src/main.rs"),
+    Path("native/crates/structural-workbench/src/deformed_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
     Path("native/crates/structural-catalog/src/lib.rs"),
@@ -130,6 +131,7 @@ EXPECTED_FEATURES = {
     "bounded_general_modelir_terminal_topology_view": ("c5_implemented", False),
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
     "bounded_ndtha_terminal_response_history_view": ("c5_implemented", False),
+    "bounded_fixed_guided_ndtha_deformed_shape_view": ("c5_implemented", False),
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
     "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),
@@ -257,6 +259,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "inspect",
         "report-view",
         "result-view",
+        "result-deformed-view",
         "report-export-pdf",
         "review",
         "export",
@@ -720,6 +723,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn inspect_json",
             "pub fn linear_report_text",
             "pub fn ndtha_response_view_text",
+            "pub fn fixed_guided_deformed_shape_view_text",
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
@@ -756,6 +760,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "WORKBENCH_RESULT_VIEW_MAX_COUNT_V1",
             "ResultIR v1 does not carry dt_s",
             "not a time reconstruction, 3D/deformed/modal/contour view",
+        ),
+        blockers,
+    )
+    native_deformed_view = _text(
+        root, Path("native/crates/structural-workbench/src/deformed_view.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/deformed_view.rs"),
+        native_deformed_view,
+        (
+            "structural-native-workbench-fixed-guided-deformed-view.v1",
+            "fixed_guided_frame3d_x",
+            "validate_model_bytes",
+            "Top displacement global X (m)",
+            "C++ fixed-guided adapter execution",
+            "not_general_nodal_displacement_3d_modal_contour",
         ),
         blockers,
     )
@@ -1317,6 +1337,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("inspect")',
             'Some("report-view")',
             'Some("result-view")',
+            'Some("result-deformed-view")',
             'Some("report-export-pdf")',
             'Some("review")',
             'Some("export")',
@@ -1371,6 +1392,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "bounded terminal UTF-8 linear report view is C5-implemented",
             "bounded embedded-font PDF export is C5-implemented",
             "bounded NDTHA response-history view is C5-implemented",
+            "fixed-guided deformed-shape view is C5-implemented",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

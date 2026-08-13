@@ -215,7 +215,10 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert workbench["cutover_gate"] == "C5"
     assert workbench["owner"] == "structural-workbench"
     assert "Import -> Validate -> Run -> Resume -> Compare -> Report" in workbench["claim"]
-    assert "Inspect -> Report-view -> Result-view -> Review -> Export" in workbench["claim"]
+    assert (
+        "Inspect -> Report-view -> Result-view -> Result-deformed-view -> Review -> Export"
+        in workbench["claim"]
+    )
     assert "process death after checkpoint publication" in workbench["claim"]
     assert "no Python, Node, browser, CLI subprocess" in workbench["claim"]
     assert "never inferred" in workbench["claim"]
@@ -225,6 +228,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "general ModelIR terminal topology view" in workbench["claim"]
     assert "provenance-bound ModelIR node-coordinate edit" in workbench["claim"]
     assert "bounded self-hashed NDTHA response-history view" in workbench["claim"]
+    assert "exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
     assert "React/TypeScript removal" in workbench["claim"]
     assert "HIP C2" in workbench["claim"]
@@ -611,10 +615,11 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "static/shared" in distribution["claim"]
     assert "install/update/rollback" in distribution["claim"]
     assert "Python/Node lookup 0" in distribution["claim"]
-    assert "append-only v10 receipt" in distribution["claim"]
+    assert "append-only v11 receipt" in distribution["claim"]
     assert "provenance-bound node-coordinate edit" in distribution["claim"]
     assert "NDTHA response-history channels" in distribution["claim"]
-    assert "frozen v1 through v9 receipts" in distribution["claim"]
+    assert "exact-profile deformed-shape projections" in distribution["claim"]
+    assert "frozen v1 through v10 receipts" in distribution["claim"]
     assert "structural-catalog" in distribution["claim"]
     assert "structural-evidence" in distribution["claim"]
     assert "explicit non-promoting review" in distribution["claim"]
@@ -636,6 +641,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "operator artifact self-hashes" in deployment["claim"]
     assert "catalog/evidence projections" in deployment["claim"]
     assert "bounded NDTHA response-history view" in deployment["claim"]
+    assert "exact-profile deformed-shape views" in deployment["claim"]
     assert "outside .github/workflows" in deployment["claim"]
     assert "final C6 remain open" in deployment["claim"]
 

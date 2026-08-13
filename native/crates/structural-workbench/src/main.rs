@@ -9,6 +9,7 @@ use structural_workbench::{
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
     BenchmarkTruthClassV1, ModelTopologyProjectionV1, NativeWorkbench, WorkbenchError,
     WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1, WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1,
     WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
 };
 
@@ -64,11 +65,20 @@ struct ResultViewCommand {
     count: u32,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct DeformedViewCommand {
+    workspace: PathBuf,
+    projection: ModelTopologyProjectionV1,
+    step: Option<u32>,
+    scale: f64,
+}
+
 fn main() -> ExitCode {
     let arguments = std::env::args_os().skip(1).collect::<Vec<_>>();
     run(&arguments)
 }
 
+#[allow(clippy::too_many_lines)] // Closed command dispatch stays visible in one auditable match.
 fn run(arguments: &[OsString]) -> ExitCode {
     if arguments.len() == 1 && arguments[0] == "--version" {
         return print_version();
@@ -137,6 +147,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("result-view") => {
             parse_result_view(arguments).and_then(|command| run_result_view(&command))
         }
+        Some("result-deformed-view") => {
+            parse_deformed_view(arguments).and_then(|command| run_deformed_view(&command))
+        }
         Some("report-export-pdf") => {
             parse_report_pdf_export(arguments).and_then(|(workspace, output_directory, locale)| {
                 let workbench = NativeWorkbench::open(&workspace)?;
@@ -201,6 +214,8 @@ fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
                     | "workbench_evidence_artifact_not_found"
                     | "workbench_evidence_as_of_invalid"
                     | "workbench_result_view_window_invalid"
+                    | "workbench_deformed_view_step_invalid"
+                    | "workbench_deformed_view_scale_invalid"
             ) {
                 EXIT_USAGE_OR_POLICY
             } else {
@@ -234,6 +249,19 @@ fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
     print!(
         "{}",
         workbench.ndtha_response_view_text(command.channel, command.start_step, command.count)?
+    );
+    Ok(())
+}
+
+fn run_deformed_view(command: &DeformedViewCommand) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    print!(
+        "{}",
+        workbench.fixed_guided_deformed_shape_view_text(
+            command.projection,
+            command.step,
+            command.scale,
+        )?
     );
     Ok(())
 }
@@ -617,6 +645,72 @@ fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, Workbe
     })
 }
 
+fn parse_deformed_view(arguments: &[OsString]) -> Result<DeformedViewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut projection = ModelTopologyProjectionV1::Isometric;
+    let mut projection_seen = false;
+    let mut step = None;
+    let mut scale = WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1;
+    let mut scale_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("result-deformed-view option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("result-deformed-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--projection" if !projection_seen => {
+                projection_seen = true;
+                projection = value
+                    .to_str()
+                    .and_then(ModelTopologyProjectionV1::parse)
+                    .ok_or_else(|| {
+                        usage_error(
+                            "result-deformed-view projection must be isometric, xy, xz or yz",
+                        )
+                    })?;
+            }
+            "--step" if step.is_none() => {
+                let parsed = parse_u32(value, "result-deformed-view step")?;
+                if parsed == 0 {
+                    return Err(usage_error("result-deformed-view step must be at least 1"));
+                }
+                step = Some(parsed);
+            }
+            "--scale" if !scale_seen => {
+                scale_seen = true;
+                scale = value
+                    .to_str()
+                    .and_then(|text| text.parse::<f64>().ok())
+                    .filter(|value| {
+                        value.is_finite()
+                            && *value > 0.0
+                            && *value <= WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1
+                    })
+                    .ok_or_else(|| {
+                        usage_error("result-deformed-view scale must be finite and in (0, 1000000]")
+                    })?;
+            }
+            _ => {
+                return Err(usage_error(
+                    "duplicate or unknown result-deformed-view option",
+                ))
+            }
+        }
+        index += 2;
+    }
+    Ok(DeformedViewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        projection,
+        step,
+        scale,
+    })
+}
+
 fn parse_report_pdf_export(
     arguments: &[OsString],
 ) -> Result<(PathBuf, PathBuf, WorkbenchReportLocaleV1), WorkbenchError> {
@@ -890,7 +984,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -901,9 +995,9 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_model_edit_node,
-        parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
-        parse_review, parse_stage_command,
+        parse_catalog, parse_catalog_show, parse_deformed_view, parse_evidence, parse_import,
+        parse_model_edit_node, parse_model_view, parse_report_pdf_export, parse_report_view,
+        parse_result_view, parse_review, parse_stage_command,
     };
 
     #[test]
@@ -1106,6 +1200,42 @@ mod tests {
             let mut invalid = window.clone();
             invalid[index] = OsString::from(invalid_value);
             assert!(parse_result_view(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn deformed_view_parser_has_closed_projection_step_and_scale_options() {
+        let default = [
+            OsString::from("result-deformed-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_deformed_view(&default).expect("default deformed view");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.projection.label(), "isometric");
+        assert_eq!(parsed.step, None);
+        assert_eq!(parsed.scale.to_bits(), 1_000.0_f64.to_bits());
+
+        let explicit = [
+            OsString::from("result-deformed-view"),
+            OsString::from("--scale"),
+            OsString::from("25.5"),
+            OsString::from("--step"),
+            OsString::from("3"),
+            OsString::from("--projection"),
+            OsString::from("xz"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_deformed_view(&explicit).expect("explicit deformed view");
+        assert_eq!(parsed.projection.label(), "xz");
+        assert_eq!(parsed.step, Some(3));
+        assert_eq!(parsed.scale.to_bits(), 25.5_f64.to_bits());
+
+        for (index, invalid_value) in [(2, "NaN"), (4, "0"), (6, "perspective")] {
+            let mut invalid = explicit.clone();
+            invalid[index] = OsString::from(invalid_value);
+            assert!(parse_deformed_view(&invalid).is_err());
         }
     }
 

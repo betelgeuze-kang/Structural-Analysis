@@ -48,7 +48,7 @@ impl ModelTopologyProjectionV1 {
         }
     }
 
-    fn project(self, coordinates: [f64; 3]) -> (f64, f64) {
+    pub(crate) fn project(self, coordinates: [f64; 3]) -> (f64, f64) {
         let [x, y, z] = coordinates;
         match self {
             // A rational oblique projection avoids trigonometric/library drift while preserving

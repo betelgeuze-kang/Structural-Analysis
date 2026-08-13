@@ -27,6 +27,7 @@ use structural_contracts::product_ir::{
 };
 
 mod catalog;
+mod deformed_view;
 mod evidence;
 mod model_edit;
 mod model_view;
@@ -36,6 +37,9 @@ mod result_view;
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,
     BenchmarkLifecycleV1, BenchmarkSizeClassV1, BenchmarkTruthClassV1,
+};
+pub use deformed_view::{
+    WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1, WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1,
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
@@ -1057,6 +1061,53 @@ impl NativeWorkbench {
         let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
             .map_err(|error| input_error("workbench_result_view_result_invalid", &error))?;
         result_view::render_ndtha_response_view(result.result(), channel, start_step, count)
+    }
+
+    /// Return a deterministic original/deformed overlay for the executed fixed-guided profile.
+    ///
+    /// The view revalidates the immutable `ModelIR` through C++, consumes the adapter selectors
+    /// from the immutable request, and applies only one selected `ResultIR` top displacement in
+    /// global X.
+    /// The scale changes presentation only and never mutates or re-executes the analysis.
+    ///
+    /// # Errors
+    ///
+    /// Requires at least the terminal stage and rejects receipt drift, profile/identity mismatch,
+    /// an incomplete result prefix, an out-of-range step, or an unsafe visual magnification.
+    pub fn fixed_guided_deformed_shape_view_text(
+        &self,
+        projection: ModelTopologyProjectionV1,
+        step: Option<u32>,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        if self.session.stage < WorkbenchStageV1::Terminal {
+            return Err(WorkbenchError::new(
+                "workbench_transition_invalid",
+                format!(
+                    "terminal or later is required but the durable stage is {}",
+                    self.session.stage.label()
+                ),
+            ));
+        }
+        let model = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
+        let request_bytes =
+            self.read_import_artifact("model-analysis-request.json", MAX_REQUEST_BYTES)?;
+        let request = parse_model_ir_ndtha_analysis_request_v1(&request_bytes)
+            .map_err(|error| input_error("workbench_deformed_view_request_invalid", &error))?;
+        let result_bytes = read_bounded_regular_file(
+            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_deformed_view_result_invalid", &error))?;
+        deformed_view::render_fixed_guided_deformed_view(
+            &model,
+            &request,
+            result.result(),
+            projection,
+            step,
+            scale,
+        )
     }
 
     /// Publish a deterministic embedded-font English or Korean PDF from a verified report session.

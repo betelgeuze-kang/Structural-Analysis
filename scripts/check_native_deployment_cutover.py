@@ -299,6 +299,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
+        "structural-native-distribution-e2e.v11",
+        "result-deformed-view",
+        "workbench_deformed_view_surface_passed",
         "rollback --root",
     ):
         if token not in distribution_e2e:

@@ -113,6 +113,15 @@ V10_RESULT_VIEW_KEYS = {
     "workbench_result_view_window_sha256",
 }
 V10_EXPECTED_KEYS = V9_EXPECTED_KEYS | V10_RESULT_VIEW_KEYS
+V11_DEFORMED_VIEW_KEYS = {
+    "workbench_deformed_view_surface_passed",
+    "workbench_deformed_view_isometric_sha256",
+    "workbench_deformed_view_xy_sha256",
+    "workbench_deformed_view_xz_sha256",
+    "workbench_deformed_view_yz_sha256",
+    "workbench_deformed_view_explicit_sha256",
+}
+V11_EXPECTED_KEYS = V10_EXPECTED_KEYS | V11_DEFORMED_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -164,6 +173,7 @@ def validate(
         "structural-native-distribution-e2e.v8": V8_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v9": V9_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v10": V10_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v11": V11_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -198,6 +208,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "mgt_source_sha256",
@@ -228,6 +239,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "mgt_workbench_restart_passed",
@@ -244,6 +256,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "workbench_operator_surface_passed",
@@ -270,6 +283,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "workbench_catalog_surface_passed",
@@ -287,6 +301,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "evidence_builder_check_passed",
@@ -307,6 +322,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         for name in (
             "catalog_builder_check_passed",
@@ -326,6 +342,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         if payload.get("workbench_localized_pdf_surface_passed") is not True:
             errors.append("workbench_localized_pdf_surface_passed must be true")
@@ -348,6 +365,7 @@ def validate(
         "structural-native-distribution-e2e.v8",
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         if payload.get("workbench_model_view_surface_passed") is not True:
             errors.append("workbench_model_view_surface_passed must be true")
@@ -368,6 +386,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v9",
         "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
     }:
         if payload.get("workbench_model_edit_surface_passed") is not True:
             errors.append("workbench_model_edit_surface_passed must be true")
@@ -377,7 +396,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if schema_version == "structural-native-distribution-e2e.v10":
+    if schema_version in {
+        "structural-native-distribution-e2e.v10",
+        "structural-native-distribution-e2e.v11",
+    }:
         if payload.get("workbench_result_view_surface_passed") is not True:
             errors.append("workbench_result_view_surface_passed must be true")
         result_view_identities = []
@@ -395,6 +417,24 @@ def validate(
                 result_view_identities.append(identity)
         if len(result_view_identities) == 5 and len(set(result_view_identities)) != 5:
             errors.append("all response channel and explicit-window identities must differ")
+    if schema_version == "structural-native-distribution-e2e.v11":
+        if payload.get("workbench_deformed_view_surface_passed") is not True:
+            errors.append("workbench_deformed_view_surface_passed must be true")
+        deformed_view_identities = []
+        for name in (
+            "workbench_deformed_view_isometric_sha256",
+            "workbench_deformed_view_xy_sha256",
+            "workbench_deformed_view_xz_sha256",
+            "workbench_deformed_view_yz_sha256",
+            "workbench_deformed_view_explicit_sha256",
+        ):
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                deformed_view_identities.append(identity)
+        if len(deformed_view_identities) == 5 and len(set(deformed_view_identities)) != 5:
+            errors.append("all deformed-shape projection and explicit identities must differ")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):
         if type(payload.get(name)) is not int or payload[name] != 0:
             errors.append(f"{name} must be integer zero")

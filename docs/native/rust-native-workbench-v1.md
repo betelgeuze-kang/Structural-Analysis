@@ -50,7 +50,11 @@ strictly reparses and C++-revalidates the result, and publishes only to a new ar
    infinity norm. Output is windowed to at most 256 exact rows and uses the whole completed channel
    as a stable ASCII plot extent. It uses one-based step indices and does not invent time values
    because ResultIR v1 does not carry `dt_s`.
-11. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
+11. `Result-deformed-view` re-verifies the immutable ModelIR through C++, binds the executed
+   fixed-guided adapter selectors to the terminal ResultIR, and overlays the original one-member
+   geometry with one selected step's global-X top displacement. Four closed projections and a
+   bounded presentation-only magnification are deterministic and ANSI-free.
+12. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
    acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
    it never reads protected source evidence or generates a readiness verdict.
 
@@ -80,6 +84,8 @@ structural-workbench report --workspace SESSION
 structural-workbench report-view --workspace SESSION --locale ko-KR
 structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
+structural-workbench result-deformed-view --workspace SESSION \
+  --projection xz --step 2 --scale 250
 structural-workbench report-export-pdf --workspace SESSION \
   --output-dir LOCALIZED-REPORT --locale ko-KR
 structural-workbench status --workspace SESSION
@@ -131,6 +137,12 @@ an inspection aid, while the scientific-notation table remains the numeric autho
 time reconstruction, deformed/3D/contour/modal renderer, arbitrary ResultIR query language, or
 engineering verdict; see `docs/native/ndtha-response-view-v1.md`.
 
+The fixed-guided deformed-shape view uses only the exact adapter profile's selected top
+displacement in global X. It prints original and magnified coordinates, records when a projection
+hides that motion, and preserves ModelIR/request/result/state/execution/checkpoint provenance. It
+does not synthesize a general nodal field, element curvature, stress, contour, modal shape, or
+engineering verdict; see `docs/native/fixed-guided-deformed-shape-view-v1.md`.
+
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
 non-symlink bundle directory; every artifact is bounded and must match the manifest SHA-256. An
@@ -180,7 +192,8 @@ general graphical accessibility/localization, arbitrary-Unicode or tagged PDF ou
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
 removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
 broader UI and document requirements, nor does the fixed-label embedded-font PDF v2 export.
-Likewise, the bounded response-history table does not close the remaining general 3D result
+Likewise, the bounded response-history table and exact fixed-guided selected-step overlay do not
+close the remaining arbitrary-nodal-field, modal, contour, animation, or interactive 3D result
 exploration requirement.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.

@@ -14,9 +14,10 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate command. Distribution E2E v10 proves repeated edited
-model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history views
-for CPU static and shared packages. This does not promote the rootfs diagnostic into general
+provenance-bound `model-edit-node` coordinate command. Distribution E2E v11 proves repeated edited
+model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history and
+exact-profile selected-step deformed-shape views for CPU static and shared packages. This does not
+promote the rootfs diagnostic into general
 visual-editing, 3D result exploration, or customer-image evidence.
 
 The prior React Pages workflow moved out of `.github/workflows` to
