@@ -29,7 +29,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
+- `structural-frontend-contract check/smoke/delivery/frontend-audit/frontend-build/frontend-dev/frontend-install/frontend-preview/phase5-task-browser-smoke/playwright-install/prototype/prototype-browser-smoke/workbench-v2-browser-smoke/browser-smoke/viewer-js-syntax/viewer-sample-workflow/viewer-performance-probe/viewer-visual-regression/viewer-readme-capture/viewer-report-pdf-export/viewer-report-pdf-smoke/serve/viewer-manifest`: a Rust-native frontend
   contract checker and clean-build process orchestrator driven by the language-neutral transition
   map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
   manifest checkers, the former Node smoke wrapper, and the offline prototype DOM shim with strict
@@ -85,6 +85,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   hashes the installed Playwright CLI, removes inherited `NODE_OPTIONS`, and owns the exact Chromium
   plus OS-dependency installation child. Playwright retains downloads, caches, elevation and host
   package mutation; downloaded bytes and rollback remain uninstrumented.
+  Phase 5 task-based browser-smoke orchestration is Rust-native: the legacy Python receipt script
+  launches one direct Cargo command instead of directly owning npm build, npm preview, socket
+  readiness, or npx Playwright processes. Rust freezes the exact developer-preview specification
+  and five-step vocabulary, owns the frontend build, fixed `127.0.0.1:4173` SPA listener and direct
+  Playwright child, and emits a canonical receipt only after unchanged inputs/delivery, all zero
+  exits, and no request error. Python still owns compatibility release-receipt assembly; retained
+  Node, TypeScript, Vite, Playwright, Chromium, React behavior and human usability evidence remain
+  open, and this sandbox cannot provide the live loopback receipt.
   Viewer JavaScript syntax gate orchestration is Rust-native: the runtime-input CI enters through
   one Rust command that freezes the exact ten source identities, owns each `node --check` child,
   rejects source mutation, and emits a canonical receipt. The retained Node parser and executable

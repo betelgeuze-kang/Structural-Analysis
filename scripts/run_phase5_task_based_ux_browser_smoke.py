@@ -5,15 +5,12 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
-import os
 from pathlib import Path
 import subprocess
 import sys
-import time
 from typing import Any
-from urllib.error import URLError
-from urllib.request import urlopen
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,11 +40,60 @@ WORKFLOW_STEPS = [
     "compare_report",
 ]
 BASE_URL = "http://127.0.0.1:4173"
-BUILD_CMD = ["npm", "run", "build"]
-PREVIEW_CMD = ["npm", "run", "preview", "--", "--host", "127.0.0.1", "--port", "4173"]
-PLAYWRIGHT_CMD = ["npx", "playwright", "test", TASK_BASED_UX_TEST.as_posix()]
+NATIVE_CMD = [
+    "cargo",
+    "run",
+    "--quiet",
+    "--locked",
+    "--manifest-path",
+    "native/Cargo.toml",
+    "-p",
+    "structural-frontend-contract",
+    "--",
+    "phase5-task-browser-smoke",
+    "--root",
+    ".",
+]
+PLAYWRIGHT_CMD = [
+    "node",
+    "node_modules/@playwright/test/cli.js",
+    "test",
+    TASK_BASED_UX_TEST.as_posix(),
+    "--reporter=line",
+]
 PREVIEW_LOOPBACK_BIND_BLOCKER = "preview_server_loopback_bind_permission_blocked"
 PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
+NATIVE_RECEIPT_KEYS = frozenset(
+    {
+        "schema_version",
+        "action",
+        "execution_mode",
+        "status",
+        "source_map_sha256",
+        "frontend_contract_receipt_hash",
+        "build_skipped",
+        "build_disposition",
+        "frontend_build_receipt_hash",
+        "delivery_receipt_hash",
+        "specification",
+        "playwright_cli_sha256",
+        "playwright_command",
+        "dist_directory",
+        "spa_fallback_entry",
+        "base_url_environment",
+        "required_workflow_steps",
+        "runtime_requirements",
+        "loopback_listener_count",
+        "loopback_port",
+        "direct_processes_spawned",
+        "successful_exit_codes",
+        "request_error_count",
+        "external_network_access_accounting",
+        "deterministic_receipt",
+        "claim_boundary",
+        "receipt_hash",
+    }
+)
 INPUTS = (
     APP_SURFACE,
     WORKFLOW_PANEL,
@@ -75,69 +121,116 @@ def _completed_output(result: subprocess.CompletedProcess[str]) -> str:
     return _clip_output((result.stdout or "") + (result.stderr or ""))
 
 
-def _wait_for_preview(
-    preview: subprocess.Popen[str],
-    *,
-    timeout_seconds: float = 20.0,
-) -> dict[str, Any]:
-    started_at = time.monotonic()
-    last_error = ""
-    while time.monotonic() - started_at < timeout_seconds:
-        if preview.poll() is not None:
-            output = preview.stdout.read() if preview.stdout is not None else ""
-            return {
-                "ready": False,
-                "exit_code": preview.returncode,
-                "elapsed_seconds": round(time.monotonic() - started_at, 3),
-                "output_excerpt": _clip_output(output),
-                "last_error": last_error,
-            }
+def _strict_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite_json(value: str) -> Any:
+    raise ValueError(f"non-finite JSON number: {value}")
+
+
+def _json_objects_from_last_line(stdout: str) -> list[dict[str, Any]]:
+    objects: list[dict[str, Any]] = []
+    for line in reversed(stdout.splitlines()):
         try:
-            with urlopen(BASE_URL, timeout=1.0) as response:
-                status_code = int(response.getcode())
-            if 200 <= status_code < 500:
-                return {
-                    "ready": True,
-                    "exit_code": None,
-                    "elapsed_seconds": round(time.monotonic() - started_at, 3),
-                    "http_status": status_code,
-                    "last_error": "",
-                }
-            last_error = f"http_status_{status_code}"
-        except (OSError, URLError) as exc:
-            last_error = f"{exc.__class__.__name__}: {exc}"
-        time.sleep(0.25)
-    return {
-        "ready": False,
-        "exit_code": None,
-        "elapsed_seconds": round(time.monotonic() - started_at, 3),
-        "output_excerpt": "",
-        "last_error": last_error or "preview_server_readiness_timeout",
-    }
+            payload = json.loads(
+                line,
+                object_pairs_hook=_strict_json_object,
+                parse_constant=_reject_nonfinite_json,
+            )
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if isinstance(payload, dict):
+            objects.append(payload)
+    return objects
 
 
-def _preview_start_blocker(output: str) -> dict[str, Any]:
-    normalized = output.lower()
-    if "listen" in normalized and "eperm" in normalized and "127.0.0.1" in normalized:
-        return {
-            "blocker": PREVIEW_LOOPBACK_BIND_BLOCKER,
-            "blocker_category": "environment_loopback_bind_permission",
-            "blocker_reason_code": PREVIEW_LOOPBACK_BIND_REASON_CODE,
-            "environment_blocker": True,
-            "blocker_evidence": {
-                "syscall": "listen",
-                "code": "EPERM",
-                "address": "127.0.0.1",
-                "port": 4173,
-            },
-        }
-    return {
-        "blocker": "preview_server_failed_before_browser_execution",
-        "blocker_category": "preview_server_start_failure",
-        "blocker_reason_code": "preview_server_start_failed",
-        "environment_blocker": False,
-        "blocker_evidence": {},
-    }
+def _is_sha256_identity(value: Any) -> bool:
+    text = str(value or "")
+    digest = text.removeprefix("sha256:")
+    return bool(
+        text.startswith("sha256:")
+        and len(digest) == 64
+        and all(character in "0123456789abcdef" for character in digest)
+    )
+
+
+def _native_receipt(stdout: str, *, skip_build: bool) -> dict[str, Any]:
+    for payload in _json_objects_from_last_line(stdout):
+        specification = payload.get("specification")
+        build_hash = payload.get("frontend_build_receipt_hash")
+        expected_exit_codes = [0] if skip_build else [0, 0, 0]
+        expected_process_count = 1 if skip_build else 3
+        if (
+            set(payload) != NATIVE_RECEIPT_KEYS
+            or payload.get("schema_version")
+            != "structural-native-phase5-task-browser-smoke-receipt.v1"
+            or payload.get("action") != "phase5_task_browser_smoke"
+            or payload.get("execution_mode") != "execute"
+            or payload.get("status") != "passed"
+            or payload.get("build_skipped") is not skip_build
+            or payload.get("build_disposition")
+            != ("skipped_existing_delivery" if skip_build else "executed")
+            or (build_hash is not None if skip_build else not _is_sha256_identity(build_hash))
+            or not _is_sha256_identity(payload.get("source_map_sha256"))
+            or not _is_sha256_identity(payload.get("frontend_contract_receipt_hash"))
+            or not _is_sha256_identity(payload.get("delivery_receipt_hash"))
+            or not _is_sha256_identity(payload.get("playwright_cli_sha256"))
+            or not isinstance(specification, dict)
+            or set(specification) != {"path", "byte_length", "sha256"}
+            or specification.get("path") != TASK_BASED_UX_TEST.as_posix()
+            or not isinstance(specification.get("byte_length"), int)
+            or isinstance(specification.get("byte_length"), bool)
+            or int(specification["byte_length"]) <= 0
+            or not _is_sha256_identity(specification.get("sha256"))
+            or payload.get("playwright_command") != PLAYWRIGHT_CMD
+            or payload.get("dist_directory") != "dist"
+            or payload.get("spa_fallback_entry") != "index.html"
+            or payload.get("base_url_environment") != "DEVELOPER_PREVIEW_BASE_URL"
+            or payload.get("required_workflow_steps") != WORKFLOW_STEPS
+            or payload.get("runtime_requirements")
+            != {"node_required": True, "browser_required": True}
+            or payload.get("loopback_listener_count") != 1
+            or payload.get("loopback_port") != 4173
+            or payload.get("direct_processes_spawned") != expected_process_count
+            or payload.get("successful_exit_codes") != expected_exit_codes
+            or payload.get("request_error_count") != 0
+            or payload.get("external_network_access_accounting")
+            != "not_instrumented_frontend_build_and_browser_page_requests"
+            or payload.get("deterministic_receipt") is not False
+            or not str(payload.get("claim_boundary") or "").strip()
+            or not _is_sha256_identity(payload.get("receipt_hash"))
+        ):
+            continue
+        unsigned = dict(payload)
+        expected_hash = str(unsigned.pop("receipt_hash"))
+        canonical = json.dumps(
+            unsigned,
+            ensure_ascii=False,
+            sort_keys=True,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        if "sha256:" + hashlib.sha256(canonical).hexdigest() == expected_hash:
+            return payload
+    return {}
+
+
+def _native_error(stdout: str) -> dict[str, str]:
+    for payload in _json_objects_from_last_line(stdout):
+        if (
+            set(payload) == {"schema_version", "code", "detail"}
+            and payload.get("schema_version") == "structural-frontend-contract-error.v1"
+            and isinstance(payload.get("code"), str)
+            and isinstance(payload.get("detail"), str)
+        ):
+            return {"code": payload["code"], "detail": payload["detail"]}
+    return {"code": "", "detail": ""}
 
 
 def _base_payload(*, repo_root: Path = ROOT, source_commit_sha: str | None = None) -> dict[str, Any]:
@@ -228,105 +321,182 @@ def run_phase5_task_based_ux_browser_smoke(
     skip_build: bool = False,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
-    commands: dict[str, Any] = {}
-    if not skip_build:
-        build_result = subprocess.run(
-            BUILD_CMD,
+    native_command = [*NATIVE_CMD]
+    if skip_build:
+        native_command.append("--skip-build")
+    try:
+        result = subprocess.run(
+            native_command,
             cwd=repo_root,
             capture_output=True,
             text=True,
-            timeout=180,
+            timeout=360,
             check=False,
         )
-        commands["build"] = {
-            "argv": BUILD_CMD,
-            "exit_code": build_result.returncode,
-            "output_excerpt": _completed_output(build_result),
+    except subprocess.TimeoutExpired as exc:
+        output = _clip_output(str(exc))
+        commands = {
+            "native": {
+                "argv": native_command,
+                "exit_code": None,
+                "output_excerpt": output,
+            },
+            "preview": {
+                "argv": ["structural-frontend-contract", "phase5-task-browser-smoke"],
+                "base_url": BASE_URL,
+                "ready": False,
+                "output_excerpt": output,
+            },
         }
-        if build_result.returncode != 0:
+        return _blocked_payload(
+            repo_root=repo_root,
+            source_commit_sha=source_commit_sha,
+            phase="native_browser_execution",
+            blocker="native_phase5_task_browser_smoke_timeout",
+            blocker_category="native_browser_execution_timeout",
+            blocker_reason_code="native_command_timeout",
+            commands=commands,
+        )
+    except OSError as exc:
+        output = _clip_output(f"{exc.__class__.__name__}: {exc}")
+        commands = {
+            "native": {
+                "argv": native_command,
+                "exit_code": None,
+                "output_excerpt": output,
+            },
+            "preview": {
+                "argv": ["structural-frontend-contract", "phase5-task-browser-smoke"],
+                "base_url": BASE_URL,
+                "ready": False,
+                "output_excerpt": output,
+            },
+        }
+        return _blocked_payload(
+            repo_root=repo_root,
+            source_commit_sha=source_commit_sha,
+            phase="native_browser_execution",
+            blocker="native_phase5_task_browser_smoke_launch_failed",
+            blocker_category="native_command_launch_failure",
+            blocker_reason_code="native_command_launch_failed",
+            commands=commands,
+        )
+
+    output = _completed_output(result)
+    commands: dict[str, Any] = {
+        "native": {
+            "argv": native_command,
+            "exit_code": result.returncode,
+            "output_excerpt": output,
+        },
+        "preview": {
+            "argv": ["structural-frontend-contract", "phase5-task-browser-smoke"],
+            "base_url": BASE_URL,
+            "ready": result.returncode == 0,
+            "output_excerpt": output,
+        },
+    }
+    if result.returncode != 0:
+        error = _native_error((result.stdout or "") + "\n" + (result.stderr or ""))
+        code = error["code"]
+        detail = error["detail"]
+        if code.startswith("frontend_build_") or code.startswith(
+            "phase5_task_browser_smoke_build_"
+        ):
             return _blocked_payload(
                 repo_root=repo_root,
                 source_commit_sha=source_commit_sha,
                 phase="build",
                 blocker="frontend_build_failed",
+                blocker_category="native_frontend_build_failure",
+                blocker_reason_code=code or "frontend_build_failed",
                 commands=commands,
             )
-
-    preview = subprocess.Popen(
-        PREVIEW_CMD,
-        cwd=repo_root,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    preview_ready = _wait_for_preview(preview)
-    commands["preview"] = {
-        "argv": PREVIEW_CMD,
-        "base_url": BASE_URL,
-        **preview_ready,
-    }
-    if not preview_ready["ready"]:
-        preview_output = str(preview_ready.get("output_excerpt") or "")
-        if preview.poll() is None:
+        if code == "phase5_task_browser_smoke_bind_failed":
+            normalized = detail.lower()
+            permission_blocked = any(
+                marker in normalized
+                for marker in ("operation not permitted", "permission denied", "os error 1")
+            )
             return _blocked_payload(
                 repo_root=repo_root,
                 source_commit_sha=source_commit_sha,
-                phase="preview_server_ready",
-                blocker="preview_server_readiness_timeout",
-                blocker_category="preview_server_readiness_failure",
-                blocker_reason_code="preview_server_not_reachable",
+                phase="preview_server_start",
+                blocker=(
+                    PREVIEW_LOOPBACK_BIND_BLOCKER
+                    if permission_blocked
+                    else "preview_server_failed_before_browser_execution"
+                ),
+                blocker_category=(
+                    "environment_loopback_bind_permission"
+                    if permission_blocked
+                    else "preview_server_start_failure"
+                ),
+                blocker_reason_code=(
+                    PREVIEW_LOOPBACK_BIND_REASON_CODE
+                    if permission_blocked
+                    else "preview_server_start_failed"
+                ),
+                environment_blocker=permission_blocked,
+                blocker_evidence=(
+                    {
+                        "syscall": "listen",
+                        "code": "EPERM",
+                        "address": "127.0.0.1",
+                        "port": 4173,
+                    }
+                    if permission_blocked
+                    else {}
+                ),
                 commands=commands,
             )
-        preview_blocker = _preview_start_blocker(preview_output)
         return _blocked_payload(
             repo_root=repo_root,
             source_commit_sha=source_commit_sha,
-            phase="preview_server_start",
-            blocker=str(preview_blocker["blocker"]),
-            blocker_category=str(preview_blocker["blocker_category"]),
-            blocker_reason_code=str(preview_blocker["blocker_reason_code"]),
-            environment_blocker=bool(preview_blocker["environment_blocker"]),
-            blocker_evidence=preview_blocker["blocker_evidence"],
+            phase="playwright_browser_execution",
+            blocker="playwright_task_based_browser_smoke_failed",
+            blocker_category="native_playwright_execution_failure",
+            blocker_reason_code=code or "native_phase5_task_browser_smoke_failed",
             commands=commands,
         )
 
-    try:
-        env = os.environ.copy()
-        env["DEVELOPER_PREVIEW_BASE_URL"] = BASE_URL
-        playwright_result = subprocess.run(
-            PLAYWRIGHT_CMD,
-            cwd=repo_root,
-            capture_output=True,
-            text=True,
-            timeout=180,
-            check=False,
-            env=env,
-        )
-        commands["playwright"] = {
-            "argv": PLAYWRIGHT_CMD,
-            "exit_code": playwright_result.returncode,
-            "output_excerpt": _completed_output(playwright_result),
-        }
-        if playwright_result.returncode != 0:
-            return _blocked_payload(
-                repo_root=repo_root,
-                source_commit_sha=source_commit_sha,
-                phase="playwright_browser_execution",
-                blocker="playwright_task_based_browser_smoke_failed",
-                commands=commands,
-            )
-        return _passed_payload(
+    receipt = _native_receipt(result.stdout or "", skip_build=skip_build)
+    if not receipt:
+        return _blocked_payload(
             repo_root=repo_root,
             source_commit_sha=source_commit_sha,
+            phase="native_receipt_validation",
+            blocker="native_phase5_task_browser_receipt_invalid",
+            blocker_category="native_receipt_validation_failure",
+            blocker_reason_code="native_receipt_missing_or_invalid",
             commands=commands,
         )
-    finally:
-        preview.terminate()
-        try:
-            preview.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            preview.kill()
-            preview.wait(timeout=5)
+    commands["native"]["receipt_hash"] = receipt["receipt_hash"]
+    commands["build"] = {
+        "owned_by": "structural-frontend-contract",
+        "skipped": skip_build,
+        "receipt_hash": receipt["frontend_build_receipt_hash"],
+        "delivery_receipt_hash": receipt["delivery_receipt_hash"],
+    }
+    commands["preview"].update(
+        {
+            "owned_by": "structural-frontend-contract",
+            "listener_count": receipt["loopback_listener_count"],
+            "port": receipt["loopback_port"],
+            "request_error_count": receipt["request_error_count"],
+        }
+    )
+    commands["playwright"] = {
+        "owned_by": "structural-frontend-contract",
+        "argv": receipt["playwright_command"],
+        "exit_code": receipt["successful_exit_codes"][-1],
+        "cli_sha256": receipt["playwright_cli_sha256"],
+    }
+    return _passed_payload(
+        repo_root=repo_root,
+        source_commit_sha=source_commit_sha,
+        commands=commands,
+    )
 
 
 def write_phase5_task_based_ux_browser_smoke_receipt(

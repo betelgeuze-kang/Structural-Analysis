@@ -136,6 +136,7 @@ fn prepare_browser_smoke(
         logical_command,
         base_url_environment: "STRUCTURE_VIEWER_BASE_URL".to_owned(),
         base_url_path: String::new(),
+        listener_port: 0,
         extra_environment: vec![(
             "STRUCTURE_VIEWER_BROWSER_SMOKE_MODE".to_owned(),
             mode.to_owned(),

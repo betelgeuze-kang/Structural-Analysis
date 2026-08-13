@@ -9,11 +9,11 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_frontend_audit_receipt_json,
     canonical_frontend_build_receipt_json, canonical_frontend_dev_receipt_json,
     canonical_frontend_install_receipt_json, canonical_frontend_preview_receipt_json,
-    canonical_playwright_install_receipt_json, canonical_receipt_json,
-    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
-    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
-    canonical_viewer_report_pdf_export_receipt_json,
+    canonical_phase5_task_browser_smoke_receipt_json, canonical_playwright_install_receipt_json,
+    canonical_receipt_json, canonical_smoke_receipt_json,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
@@ -21,12 +21,13 @@ use structural_frontend_contract::{
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_audit,
     run_frontend_build, run_frontend_dev, run_frontend_install, run_frontend_smoke,
-    run_playwright_install, run_viewer_browser_smoke, run_viewer_js_syntax,
-    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
-    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, serve_frontend_preview,
-    serve_viewer, FrontendAuditOptions, FrontendBuildOptions, FrontendContractError,
-    FrontendDevOptions, FrontendInstallOptions, PlaywrightInstallOptions, ViewerJsSyntaxOptions,
+    run_phase5_task_browser_smoke, run_playwright_install, run_viewer_browser_smoke,
+    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
+    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, serve_frontend_preview, serve_viewer, FrontendAuditOptions,
+    FrontendBuildOptions, FrontendContractError, FrontendDevOptions, FrontendInstallOptions,
+    Phase5TaskBrowserSmokeOptions, PlaywrightInstallOptions, ViewerJsSyntaxOptions,
     ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions, ViewerReportPdfExportOptions,
     ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions, ViewerVisualRegressionOptions,
 };
@@ -136,6 +137,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         let receipt = run_playwright_install(&options)?;
         return canonical_playwright_install_receipt_json(&receipt).map_err(Into::into);
     }
+    if command == "phase5-task-browser-smoke" {
+        let options = parse_phase5_task_browser_smoke_arguments(&arguments[1..])?;
+        let receipt = run_phase5_task_browser_smoke(&options)?;
+        return canonical_phase5_task_browser_smoke_receipt_json(&receipt).map_err(Into::into);
+    }
     if command == "smoke" {
         let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
         let receipt = run_frontend_smoke(&root, dry_run)?;
@@ -226,9 +232,58 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_workbench_prototype_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be browser-smoke, check, delivery, frontend-audit, frontend-build, frontend-dev, frontend-install, frontend-preview, playwright-install, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
+            "command must be browser-smoke, check, delivery, frontend-audit, frontend-build, frontend-dev, frontend-install, frontend-preview, phase5-task-browser-smoke, playwright-install, prototype, prototype-browser-smoke, serve, smoke, viewer-js-syntax, viewer-manifest, viewer-performance-probe, viewer-readme-capture, viewer-report-pdf-export, viewer-report-pdf-smoke, viewer-sample-workflow, viewer-visual-regression, or workbench-v2-browser-smoke",
         )),
     }
+}
+
+fn parse_phase5_task_browser_smoke_arguments(
+    arguments: &[OsString],
+) -> Result<Phase5TaskBrowserSmokeOptions, CliError> {
+    let mut root = None;
+    let mut dry_run = false;
+    let mut skip_build = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("phase5-task-browser-smoke option names must be UTF-8"))?;
+        match name {
+            "--dry-run" | "--skip-build" => {
+                let flag = if name == "--dry-run" {
+                    &mut dry_run
+                } else {
+                    &mut skip_build
+                };
+                if *flag {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                *flag = true;
+                index += 1;
+            }
+            "--root" => {
+                if root.is_some() {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                let value = arguments
+                    .get(index + 1)
+                    .filter(|value| !value.is_empty())
+                    .ok_or_else(|| usage_error("--root must have one non-empty value"))?;
+                root = Some(PathBuf::from(value));
+                index += 2;
+            }
+            _ => {
+                return Err(usage_error(
+                    "phase5-task-browser-smoke options are missing or unknown",
+                ));
+            }
+        }
+    }
+    Ok(Phase5TaskBrowserSmokeOptions {
+        root: root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        dry_run,
+        skip_build,
+    })
 }
 
 fn parse_viewer_js_syntax_arguments(
@@ -1176,7 +1231,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit --root DIR [--dry-run] [--fail-on-nonzero]; structural-frontend-contract frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
+    "usage: structural-frontend-contract check|delivery|prototype|viewer-manifest --root DIR; structural-frontend-contract frontend-audit --root DIR [--dry-run] [--fail-on-nonzero]; structural-frontend-contract frontend-build|frontend-install|playwright-install|smoke|prototype-browser-smoke|workbench-v2-browser-smoke --root DIR [--dry-run]; structural-frontend-contract phase5-task-browser-smoke --root DIR [--skip-build] [--dry-run]; structural-frontend-contract viewer-js-syntax --root DIR [--dry-run]; structural-frontend-contract viewer-performance-probe --root DIR [--query QUERY] [--sample-ms N] [--max-ready-ms N] [--min-fps N] [--width N] [--height N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-readme-capture --root DIR [--out FILE] [--view-preset ID] [--camera-x N] [--camera-y N] [--camera-z N] [--dry-run]; structural-frontend-contract viewer-report-pdf-export --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--html-out FILE] [--dry-run]; structural-frontend-contract viewer-report-pdf-smoke --root DIR [--query QUERY] [--min-bytes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-sample-workflow --root DIR [--max-minutes N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract viewer-visual-regression --root DIR [--baseline FILE] [--case-id IDS] [--timeout-ms N] [--max-mean-abs-diff N] [--max-max-abs-diff N] [--max-coverage-delta N] [--max-center-delta N] [--out FILE] [--dry-run] [--keep]; structural-frontend-contract browser-smoke --root DIR [--mode minimal|full] [--dry-run]; structural-frontend-contract frontend-dev|frontend-preview|serve --root DIR [--host 127.0.0.1] [--port PORT] [--dry-run]"
 }
 
 #[cfg(test)]
@@ -1186,12 +1241,12 @@ mod tests {
 
     use super::{
         parse_browser_smoke_arguments, parse_frontend_audit_arguments,
-        parse_frontend_dev_arguments, parse_preview_arguments, parse_serve_arguments,
-        parse_smoke_arguments, parse_viewer_js_syntax_arguments,
-        parse_viewer_performance_probe_arguments, parse_viewer_readme_capture_arguments,
-        parse_viewer_report_pdf_export_arguments, parse_viewer_report_pdf_smoke_arguments,
-        parse_viewer_sample_workflow_arguments, parse_viewer_visual_regression_arguments, run,
-        BrowserSmokeOptions, ServeOptions,
+        parse_frontend_dev_arguments, parse_phase5_task_browser_smoke_arguments,
+        parse_preview_arguments, parse_serve_arguments, parse_smoke_arguments,
+        parse_viewer_js_syntax_arguments, parse_viewer_performance_probe_arguments,
+        parse_viewer_readme_capture_arguments, parse_viewer_report_pdf_export_arguments,
+        parse_viewer_report_pdf_smoke_arguments, parse_viewer_sample_workflow_arguments,
+        parse_viewer_visual_regression_arguments, run, BrowserSmokeOptions, ServeOptions,
     };
 
     #[test]
@@ -1294,6 +1349,31 @@ mod tests {
             OsString::from("a"),
             OsString::from("--port"),
             OsString::from("0"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn phase5_task_browser_parser_accepts_flags_and_rejects_duplicates() {
+        assert_eq!(
+            parse_phase5_task_browser_smoke_arguments(&[
+                OsString::from("--skip-build"),
+                OsString::from("--root"),
+                OsString::from("a"),
+                OsString::from("--dry-run"),
+            ])
+            .expect("valid Phase 5 task browser arguments"),
+            structural_frontend_contract::Phase5TaskBrowserSmokeOptions {
+                root: PathBuf::from("a"),
+                dry_run: true,
+                skip_build: true,
+            }
+        );
+        assert!(parse_phase5_task_browser_smoke_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--skip-build"),
+            OsString::from("--skip-build"),
         ])
         .is_err());
     }

@@ -204,6 +204,7 @@ fn prepare_workbench_v2_browser_smoke(
         logical_command: playwright_command,
         base_url_environment: source.base_url_environment.clone(),
         base_url_path: String::new(),
+        listener_port: 0,
         extra_environment: source
             .node_environment
             .iter()

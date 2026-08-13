@@ -8,6 +8,7 @@ mod frontend_build;
 mod frontend_dev;
 mod frontend_install;
 mod frontend_preview;
+mod phase5_task_browser_smoke;
 mod playwright;
 mod playwright_install;
 mod prototype;
@@ -67,6 +68,14 @@ pub use frontend_preview::{
     FrontendPreviewReceiptV1, FrontendPreviewRuntimeRequirementsV1,
 };
 use frontend_preview::{validate_frontend_preview_source, FrontendPreviewSourceV1};
+pub use phase5_task_browser_smoke::{
+    canonical_phase5_task_browser_smoke_receipt_json, run_phase5_task_browser_smoke,
+    Phase5TaskBrowserSmokeOptions, Phase5TaskBrowserSmokeReceiptV1,
+    Phase5TaskBrowserSmokeRuntimeRequirementsV1, Phase5TaskBrowserSmokeSpecificationV1,
+};
+use phase5_task_browser_smoke::{
+    validate_phase5_task_browser_smoke_source, Phase5TaskBrowserSmokeSourceV1,
+};
 pub use playwright_install::{
     canonical_playwright_install_receipt_json, run_playwright_install,
     PlaywrightInstallCliIdentityV1, PlaywrightInstallOptions, PlaywrightInstallReceiptV1,
@@ -211,6 +220,7 @@ struct FrontendSourceMapV1 {
     frontend_dev_contract: FrontendDevSourceV1,
     frontend_install_contract: FrontendInstallSourceV1,
     frontend_preview_contract: FrontendPreviewSourceV1,
+    phase5_task_browser_smoke_contract: Phase5TaskBrowserSmokeSourceV1,
     playwright_install_contract: PlaywrightInstallSourceV1,
     delivery_contract: FrontendDeliverySourceV1,
     smoke_contract: FrontendSmokeSourceV1,
@@ -608,6 +618,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
     validate_frontend_dev_source(&source_map.frontend_dev_contract)?;
     validate_frontend_install_source(&source_map.frontend_install_contract)?;
     validate_frontend_preview_source(&source_map.frontend_preview_contract)?;
+    validate_phase5_task_browser_smoke_source(&source_map.phase5_task_browser_smoke_contract)?;
     validate_playwright_install_source(&source_map.playwright_install_contract)?;
     validate_delivery_source(&source_map.delivery_contract)?;
     validate_frontend_smoke_source(&source_map.smoke_contract)?;

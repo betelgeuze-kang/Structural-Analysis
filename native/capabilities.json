@@ -211,6 +211,12 @@
       "owner": "structural-frontend-contract",
       "claim": "bounded transitional C0 quality-gate frontend-entrypoint ownership only: scripts/verify_quality_gate.py retains overall Python sequencing but invokes frontend install, strict dependency audit, contract check, build, Viewer manifest, browser smoke, sample workflow, PDF smoke, performance probe and visual regression through direct Cargo structural-frontend-contract commands with npm and npm package-script entrypoints 0; strict audit publishes the same canonical advisory_or_tool_failure receipt and then fails the Rust command on numeric nonzero, preserving the prior quality-gate stop-on-failure behavior, while frontend-web retains its separate non-blocking audit policy; npm, Node, TypeScript, Vite, Playwright, Chromium, Python sequencing, registry/network/configuration effects and rendered behavior remain retained, and clean-machine live evidence, native UI parity, C5 and C6 remain open"
     },
+    "native_phase5_task_browser_smoke": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-frontend-contract",
+      "claim": "bounded transitional C0 Phase 5 task-smoke orchestration only: scripts/run_phase5_task_based_ux_browser_smoke.py invokes one direct Cargo structural-frontend-contract phase5-task-browser-smoke command with direct npm, npx, Node, preview-server and socket-readiness entrypoints 0; Rust freezes the complete frontend build plan, exact developer-preview Playwright specification, fixed five-step workflow vocabulary, fixed 127.0.0.1:4173 SPA route and direct Node command, owns the two build children unless --skip-build is explicit, validates delivery, owns the listener and Playwright child, rejects input or delivery mutation, and emits a canonical self-hashed receipt only after all child exits are zero and request errors are 0, while dry-run requires no dist, runtime, listener, browser or process; Python strictly validates that receipt but retains Cargo process launch plus legacy release-receipt metadata and publication, and Node, TypeScript, Vite, Playwright, Chromium, React/TypeScript rendered behavior, browser requests, human usability observation, hosted live evidence, native UI parity, C5 and C6 remain open"
+    },
     "native_frontend_install": {
       "status": "implemented",
       "cutover_gate": "C0",

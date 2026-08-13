@@ -41,6 +41,7 @@ pub(crate) struct PlaywrightPlan {
     pub logical_command: Vec<String>,
     pub base_url_environment: String,
     pub base_url_path: String,
+    pub listener_port: u16,
     pub extra_environment: Vec<(String, String)>,
     pub server_route: PlaywrightServerRoute,
 }
@@ -57,8 +58,10 @@ pub(crate) enum PlaywrightErrorDomain {
     Viewer,
     WorkbenchPrototype,
     WorkbenchV2,
+    Phase5Task,
 }
 
+#[allow(clippy::too_many_lines)] // Explicit fixed-domain mappings keep the public taxonomy stable.
 pub(crate) fn map_playwright_error(
     domain: PlaywrightErrorDomain,
     error: FrontendContractError,
@@ -151,6 +154,36 @@ pub(crate) fn map_playwright_error(
         }
         (PlaywrightErrorDomain::WorkbenchV2, "playwright_failed") => {
             "workbench_v2_browser_smoke_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_plan_invalid") => {
+            "phase5_task_browser_smoke_plan_invalid"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_server_panicked") => {
+            "phase5_task_browser_smoke_server_panicked"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_bind_failed") => {
+            "phase5_task_browser_smoke_bind_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_socket_config_failed") => {
+            "phase5_task_browser_smoke_socket_config_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_launch_failed") => {
+            "phase5_task_browser_smoke_launch_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_wait_failed") => {
+            "phase5_task_browser_smoke_wait_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_server_failed") => {
+            "phase5_task_browser_smoke_server_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_request_failed") => {
+            "phase5_task_browser_smoke_request_failed"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_terminated") => {
+            "phase5_task_browser_smoke_terminated"
+        }
+        (PlaywrightErrorDomain::Phase5Task, "playwright_failed") => {
+            "phase5_task_browser_smoke_failed"
         }
         _ => return error,
     };
@@ -306,8 +339,8 @@ fn valid_environment_value(value: &str) -> bool {
 }
 
 fn start_server(plan: &PlaywrightPlan) -> Result<BrowserServer, FrontendContractError> {
-    let listener =
-        TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).map_err(|error| {
+    let listener = TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, plan.listener_port))
+        .map_err(|error| {
             FrontendContractError::new(
                 "playwright_bind_failed",
                 format!("bind Playwright loopback server failed: {error}"),
@@ -452,6 +485,7 @@ mod tests {
             ],
             base_url_environment: "TEST_BASE_URL".to_owned(),
             base_url_path: "/prototype/structural-workbench".to_owned(),
+            listener_port: 0,
             extra_environment: Vec::new(),
             server_route: PlaywrightServerRoute::Scoped {
                 allowed_path_prefix: "prototype/structural-workbench/".to_owned(),
@@ -486,5 +520,10 @@ mod tests {
             FrontendContractError::new("playwright_failed", "failed"),
         );
         assert_eq!(workbench_v2.code, "workbench_v2_browser_smoke_failed");
+        let phase5 = map_playwright_error(
+            PlaywrightErrorDomain::Phase5Task,
+            FrontendContractError::new("playwright_bind_failed", "denied"),
+        );
+        assert_eq!(phase5.code, "phase5_task_browser_smoke_bind_failed");
     }
 }

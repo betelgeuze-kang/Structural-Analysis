@@ -9,11 +9,11 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_frontend_audit_receipt_json,
     canonical_frontend_build_receipt_json, canonical_frontend_dev_receipt_json,
     canonical_frontend_install_receipt_json, canonical_frontend_preview_receipt_json,
-    canonical_playwright_install_receipt_json, canonical_receipt_json,
-    canonical_smoke_receipt_json, canonical_viewer_browser_smoke_receipt_json,
-    canonical_viewer_js_syntax_receipt_json, canonical_viewer_manifest_receipt_json,
-    canonical_viewer_performance_probe_receipt_json, canonical_viewer_readme_capture_receipt_json,
-    canonical_viewer_report_pdf_export_receipt_json,
+    canonical_phase5_task_browser_smoke_receipt_json, canonical_playwright_install_receipt_json,
+    canonical_receipt_json, canonical_smoke_receipt_json,
+    canonical_viewer_browser_smoke_receipt_json, canonical_viewer_js_syntax_receipt_json,
+    canonical_viewer_manifest_receipt_json, canonical_viewer_performance_probe_receipt_json,
+    canonical_viewer_readme_capture_receipt_json, canonical_viewer_report_pdf_export_receipt_json,
     canonical_viewer_report_pdf_smoke_receipt_json, canonical_viewer_sample_workflow_receipt_json,
     canonical_viewer_server_receipt_json, canonical_viewer_visual_regression_receipt_json,
     canonical_workbench_prototype_browser_smoke_receipt_json,
@@ -21,11 +21,12 @@ use structural_frontend_contract::{
     check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
     check_workbench_prototype, plan_frontend_preview, plan_viewer_server, run_frontend_audit,
     run_frontend_build, run_frontend_dev, run_frontend_install, run_frontend_smoke,
-    run_playwright_install, run_viewer_browser_smoke, run_viewer_js_syntax,
-    run_viewer_performance_probe, run_viewer_readme_capture, run_viewer_report_pdf_export,
-    run_viewer_report_pdf_smoke, run_viewer_sample_workflow, run_viewer_visual_regression,
-    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke, FrontendAuditOptions,
-    FrontendBuildOptions, FrontendDevOptions, FrontendInstallOptions, PlaywrightInstallOptions,
+    run_phase5_task_browser_smoke, run_playwright_install, run_viewer_browser_smoke,
+    run_viewer_js_syntax, run_viewer_performance_probe, run_viewer_readme_capture,
+    run_viewer_report_pdf_export, run_viewer_report_pdf_smoke, run_viewer_sample_workflow,
+    run_viewer_visual_regression, run_workbench_prototype_browser_smoke,
+    run_workbench_v2_browser_smoke, FrontendAuditOptions, FrontendBuildOptions, FrontendDevOptions,
+    FrontendInstallOptions, Phase5TaskBrowserSmokeOptions, PlaywrightInstallOptions,
     ViewerJsSyntaxOptions, ViewerPerformanceProbeOptions, ViewerReadmeCaptureOptions,
     ViewerReportPdfExportOptions, ViewerReportPdfSmokeOptions, ViewerSampleWorkflowOptions,
     ViewerVisualRegressionOptions,
@@ -882,6 +883,116 @@ fn workbench_v2_browser_smoke_checks_delivery_then_requires_pinned_runtime() {
     assert!(value["detail"]
         .as_str()
         .is_some_and(|detail| detail.contains("node_modules/@playwright/test/cli.js")));
+}
+
+#[test]
+fn phase5_task_browser_smoke_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let mut options = Phase5TaskBrowserSmokeOptions::new(root);
+    options.dry_run = true;
+    let first =
+        run_phase5_task_browser_smoke(&options).expect("Phase 5 task browser smoke dry-run");
+    let second =
+        run_phase5_task_browser_smoke(&options).expect("repeat Phase 5 task browser smoke dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert!(!first.build_skipped);
+    assert_eq!(first.build_disposition, "planned");
+    assert!(first
+        .frontend_build_receipt_hash
+        .as_deref()
+        .is_some_and(|value| value.starts_with("sha256:")));
+    assert_eq!(first.delivery_receipt_hash, None);
+    assert_eq!(
+        first.specification.path,
+        "tests/frontend/developer-preview-workflow.spec.ts"
+    );
+    assert!(first.specification.byte_length > 0);
+    assert!(first.specification.sha256.starts_with("sha256:"));
+    assert_eq!(first.playwright_cli_sha256, None);
+    assert_eq!(
+        first.playwright_command,
+        vec![
+            "node".to_owned(),
+            "node_modules/@playwright/test/cli.js".to_owned(),
+            "test".to_owned(),
+            "tests/frontend/developer-preview-workflow.spec.ts".to_owned(),
+            "--reporter=line".to_owned(),
+        ]
+    );
+    assert_eq!(first.base_url_environment, "DEVELOPER_PREVIEW_BASE_URL");
+    assert_eq!(
+        first.required_workflow_steps,
+        [
+            "import",
+            "model_health",
+            "analysis_setup",
+            "run_monitor",
+            "compare_report",
+        ]
+    );
+    assert_eq!(first.loopback_listener_count, 0);
+    assert_eq!(first.loopback_port, 4_173);
+    assert!(first.runtime_requirements.node_required);
+    assert!(first.runtime_requirements.browser_required);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert_eq!(first.request_error_count, 0);
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_phase5_task_browser_smoke_receipt_json(&first)
+        .expect("canonical Phase 5 task browser receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Phase 5 task browser receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_phase5_task_browser_smoke_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["phase5-task-browser-smoke", "--root"])
+        .arg(&root)
+        .arg("--dry-run")
+        .env_clear()
+        .output()
+        .expect("run Phase 5 task browser smoke dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("Phase 5 task browser receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "phase5_task_browser_smoke");
+    assert_eq!(value["execution_mode"], "dry_run");
+    assert_eq!(value["loopback_listener_count"], 0);
+    assert_eq!(value["loopback_port"], 4_173);
+    assert_eq!(value["direct_processes_spawned"], 0);
+    assert!(value["delivery_receipt_hash"].is_null());
+    assert!(value["playwright_cli_sha256"].is_null());
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn phase5_task_browser_smoke_skip_build_checks_delivery_before_runtime_or_socket() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+    let mut options = Phase5TaskBrowserSmokeOptions::new(test.0.clone());
+    options.skip_build = true;
+    let error = run_phase5_task_browser_smoke(&options)
+        .expect_err("missing pinned Playwright CLI must fail before binding");
+    assert_eq!(error.code, "frontend_required_file_missing");
+    assert!(error
+        .detail
+        .contains("node_modules/@playwright/test/cli.js"));
 }
 
 #[test]

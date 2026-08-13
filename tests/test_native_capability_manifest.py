@@ -402,6 +402,30 @@ def test_native_quality_gate_frontend_entrypoints_are_bounded_c0() -> None:
     assert "C5 and C6 remain open" in gate["claim"]
 
 
+def test_native_phase5_task_browser_smoke_is_bounded_c0() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "native_phase5_task_browser_smoke"
+        )
+        is True
+    )
+    smoke = payload["capabilities"]["native_phase5_task_browser_smoke"]
+    assert smoke["cutover_gate"] == "C0"
+    assert smoke["owner"] == "structural-frontend-contract"
+    assert "one direct Cargo structural-frontend-contract" in smoke["claim"]
+    assert "direct npm, npx, Node, preview-server and socket-readiness entrypoints 0" in smoke[
+        "claim"
+    ]
+    assert "fixed five-step workflow vocabulary" in smoke["claim"]
+    assert "fixed 127.0.0.1:4173 SPA route" in smoke["claim"]
+    assert "all child exits are zero and request errors are 0" in smoke["claim"]
+    assert "dry-run requires no dist, runtime, listener, browser or process" in smoke["claim"]
+    assert "Python strictly validates that receipt" in smoke["claim"]
+    assert "human usability observation, hosted live evidence" in smoke["claim"]
+    assert "C5 and C6 remain open" in smoke["claim"]
+
+
 def test_native_frontend_ci_entrypoints_capability_is_bounded_c0() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_frontend_ci_entrypoints") is True

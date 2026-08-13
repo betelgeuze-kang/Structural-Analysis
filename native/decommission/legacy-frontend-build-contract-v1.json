@@ -32,6 +32,7 @@
     "scripts/verify-structure-viewer-sample-workflow.mjs",
     "scripts/structure-viewer-canvas-frame.mjs",
     "scripts/measure-structure-viewer-visual-regression.mjs",
+    "scripts/run_phase5_task_based_ux_browser_smoke.py",
     "scripts/verify_quality_gate.py",
     "implementation/phase1/structure_viewer_visual_regression_baseline.json",
     "src/structure-viewer/index.html",
@@ -70,6 +71,7 @@
     "tests/frontend/workbench-v2-job-contract.spec.ts",
     "tests/frontend/workbench-v2-engineering-value-state.spec.ts",
     "tests/frontend/workbench-v2-status-taxonomy.spec.ts",
+    "tests/frontend/developer-preview-workflow.spec.ts",
     "scripts/json-module-loader.mjs",
     "docs/frontend-build-reproducibility.md",
     "native/decommission/legacy-frontend-build-contract-v1.json",
@@ -81,6 +83,7 @@
     "native/crates/structural-frontend-contract/src/frontend_dev.rs",
     "native/crates/structural-frontend-contract/src/frontend_install.rs",
     "native/crates/structural-frontend-contract/src/frontend_preview.rs",
+    "native/crates/structural-frontend-contract/src/phase5_task_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/playwright.rs",
     "native/crates/structural-frontend-contract/src/playwright_install.rs",
     "native/crates/structural-frontend-contract/src/prototype.rs",
@@ -215,6 +218,25 @@
     "dist_directory": "dist",
     "spa_fallback_entry": "index.html",
     "claim_boundary": "This transitional C0 local-server receipt proves only that Rust validates the pinned frontend contract and already-built delivery, binds one fixed IPv4 loopback listener, and serves bounded regular non-symlink files from the delivery tree with confined SPA fallback, GET/HEAD-only, traversal and dotfile rejection, no-store, and nosniff responses. Dry-run validates the delivery and binds no listener. The npm package script remains a launcher convenience, while the server itself spawns no process and requires no Node, Vite, browser, Python, engineering analysis, or external network access. It does not prove rendered browser behavior, clean-machine publication, native UI parity, C5, or C6."
+  },
+  "phase5_task_browser_smoke_contract": {
+    "schema_version": "structural-native-phase5-task-browser-smoke-contract.v1",
+    "node_launcher": "node",
+    "playwright_cli_path": "node_modules/@playwright/test/cli.js",
+    "spec_path": "tests/frontend/developer-preview-workflow.spec.ts",
+    "dist_directory": "dist",
+    "spa_fallback_entry": "index.html",
+    "base_url_environment": "DEVELOPER_PREVIEW_BASE_URL",
+    "loopback_port": 4173,
+    "required_workflow_steps": [
+      "import",
+      "model_health",
+      "analysis_setup",
+      "run_monitor",
+      "compare_report"
+    ],
+    "external_network_access_accounting": "not_instrumented_frontend_build_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the pinned frontend contract, complete frontend build plan, exact Phase 5 task specification, fixed five-step workflow vocabulary, Playwright command, and fixed-loopback SPA route. Live execution directly owns the two frontend build Node children unless an explicit existing-delivery skip is requested, verifies the bounded delivery, then owns one 127.0.0.1:4173 listener plus one direct Node child running the pinned Playwright CLI; success requires all child exits zero, no server request error, and unchanged inputs and delivery. Dry-run binds no listener and spawns no process. The compatibility Python wrapper still owns Cargo command launch and legacy release-receipt assembly, while Node, TypeScript, Vite, Playwright, Chromium, React/TypeScript behavior, browser page requests, human usability observation, clean-machine live execution, native UI parity, C5, and C6 remain outside this receipt."
   },
   "playwright_install_contract": {
     "schema_version": "structural-native-playwright-install-contract.v1",

@@ -141,6 +141,7 @@ fn prepare_prototype_browser_smoke(
         logical_command,
         base_url_environment: source.base_url_environment.clone(),
         base_url_path: format!("/{}", source.server_path_prefix.trim_end_matches('/')),
+        listener_port: 0,
         extra_environment: Vec::new(),
         server_route: PlaywrightServerRoute::Scoped {
             allowed_path_prefix: source.server_path_prefix.clone(),

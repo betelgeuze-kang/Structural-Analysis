@@ -174,6 +174,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "structural-frontend-contract prototype-browser-smoke" in docs_text
     assert "npm run verify:workbench-v2-e2e" in docs_text
     assert "structural-frontend-contract workbench-v2-browser-smoke" in docs_text
+    assert "structural-frontend-contract phase5-task-browser-smoke" in docs_text
+    assert "direct `npm run build`, `npm run preview`, and `npx playwright`" in docs_text
     assert "npm run serve:viewer" in docs_text
     assert "--dry-run" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
