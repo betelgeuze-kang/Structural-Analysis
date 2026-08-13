@@ -33,7 +33,10 @@ ModelIR or the exact numeric frame MGT profile normalized by the Rust importer:
    optional review bindings, then emits a deterministic self-hashed UTF-8 linear report view in
    `en-US` or `ko-KR`. Meaning does not depend on ANSI styling, color, cursor position, graphics,
    a browser, or an external renderer; directional-spoofing controls in review text are escaped.
-9. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
+9. `Report-export-pdf` is a bounded embedded-font PDF export in `en-US` or `ko-KR`. It first
+   reproduces the stored v1 PDF/receipt, then publishes a separate deterministic Type0/ToUnicode
+   PDF and self-hashed receipt to a new directory without mutating the durable session.
+10. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
    acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
    it never reads protected source evidence or generates a readiness verdict.
 
@@ -58,6 +61,8 @@ structural-workbench resume --workspace SESSION
 structural-workbench compare --workspace SESSION --require-pass
 structural-workbench report --workspace SESSION
 structural-workbench report-view --workspace SESSION --locale ko-KR
+structural-workbench report-export-pdf --workspace SESSION \
+  --output-dir LOCALIZED-REPORT --locale ko-KR
 structural-workbench status --workspace SESSION
 structural-workbench inspect --workspace SESSION
 structural-workbench review --workspace SESSION --decision review \
@@ -85,7 +90,8 @@ The UTF-8 linear report view is a bounded terminal alternative for the exact nat
 English and Korean forms carry identical numerical values and provenance, include an explicit
 human-review state, avoid terminal escape bytes, and bind the pre-hash bytes with a final view
 hash. This is not a WCAG, PDF/UA, assistive-technology, or general localization certification; the
-fixed-font PDF remains ASCII-only.
+durable fixed-font v1 PDF remains ASCII-only. The separate v2 export embeds only printable ASCII
+plus fixed English/Korean labels and is not arbitrary-Unicode coverage.
 
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
@@ -118,7 +124,9 @@ review mutation on reopen. Catalog/evidence E2E repeats byte-identically in a cl
 freezes conservative ready/blocked/unavailable projections, verifies self-hashes, and rejects
 evidence checksum tampering. A separate cleared-environment E2E publishes Korean reviewer/comment
 text, proves byte-identical `en-US` and `ko-KR` linear projections, verifies the localized view
-hash, and rejects an unsupported locale.
+hash, and rejects an unsupported locale. Another cleared-environment E2E proves the embedded-font
+PDF export is byte-identical per locale, distinct across locales, self-hashed, non-mutating, and
+create-new, while invalid locale and existing-destination cases fail closed.
 
 ## Claim boundary
 
@@ -127,10 +135,10 @@ deterministic results summary, explicit human review and handoff export for that
 not a general visual model editor and does not yet replace all React/TypeScript UI behavior. General
 MGT grammar/encoding and user-directed analysis selection, arbitrary ModelIR topology,
 modal/static/sparse Workbench profiles, live MIDAS/OpenSees/CalculiX execution, device selection,
-general graphical accessibility/localization, Unicode or tagged PDF output, broader
+general graphical accessibility/localization, arbitrary-Unicode or tagged PDF output, broader
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
 removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
-broader UI and document requirements.
+broader UI and document requirements, nor does the fixed-label embedded-font PDF v2 export.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 

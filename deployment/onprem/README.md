@@ -11,7 +11,10 @@ absent from the runtime image.
 - The container has no listener, exposed port, secret, or network namespace.
 - `/workspace` is the only operator-mounted working directory; the root filesystem is read-only.
 - The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report flow plus
-  deterministic Inspect -> explicit Review -> Export handoff.
+  deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
+  export.
+- `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
+  OFL-1.1 redistribution notice; PDF generation itself needs no runtime font lookup.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
   distribution build candidate.
 - Native bundle install, update, crash recovery, and rollback remain owned and tested by

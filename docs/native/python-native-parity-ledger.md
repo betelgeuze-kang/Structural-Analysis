@@ -339,12 +339,15 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   quantities against a Python C1 golden without promoting that fixture to live external-solver
   evidence. A separate bounded C5 Rust renderer now byte-verifies the exact ResultIR/ReportIR/
   Markdown projection and emits a deterministic single-page A4 PDF plus self-hashed receipt with
-  no product dependency on Python/Node/external renderers. Live MIDAS/OpenSees/CalculiX execution,
-  same-mesh node/member mapping, PDF/A/accessibility/localization/multipage output and broader
-  report/comparison profiles remain open. The bounded Workbench now separately re-verifies that
-  exact artifact chain and emits self-hashed `en-US`/`ko-KR` UTF-8 linear text, including Unicode
-  human-review text without ANSI/color/layout semantics. That terminal alternative is not a
-  Unicode-font PDF, tagged PDF, WCAG certification, or general localization closure.
+  no product dependency on Python/Node/external renderers. An additive C5 v2 path embeds a renamed
+  OFL-1.1 Type0/ToUnicode subset for exact `en-US`/`ko-KR` labels plus printable-ASCII dynamic
+  values, with clean-environment CLI and Workbench parity while preserving absent-locale v1 bytes.
+  Live MIDAS/OpenSees/CalculiX execution, same-mesh node/member mapping, PDF/A/accessibility/general
+  localization/arbitrary-Unicode/multipage output and broader report/comparison profiles remain
+  open. The bounded Workbench also re-verifies the exact artifact chain and emits self-hashed
+  `en-US`/`ko-KR` UTF-8 linear text, including Unicode human-review text without ANSI/color/layout
+  semantics. Neither the terminal alternative nor fixed-label PDF is tagged PDF, WCAG/PDF-UA
+  certification, or general localization closure.
 
 ### D9. CLI/API and Workbench composition
 

@@ -79,6 +79,17 @@ V6_CATALOG_BUILDER_KEYS = {
     "catalog_builder_output_sha256",
 }
 V6_EXPECTED_KEYS = V5_EXPECTED_KEYS | V6_CATALOG_BUILDER_KEYS
+V7_LOCALIZED_PDF_KEYS = {
+    "workbench_localized_pdf_surface_passed",
+    "workbench_localized_pdf_en_us_sha256",
+    "workbench_localized_pdf_ko_kr_sha256",
+    "workbench_localized_pdf_en_us_receipt_sha256",
+    "workbench_localized_pdf_ko_kr_receipt_sha256",
+    "localized_report_font_sha256",
+    "localized_report_font_license_sha256",
+    "localized_report_font_provenance_sha256",
+}
+V7_EXPECTED_KEYS = V6_EXPECTED_KEYS | V7_LOCALIZED_PDF_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -126,6 +137,7 @@ def validate(
         "structural-native-distribution-e2e.v4": V4_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v5": V5_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v6": V6_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v7": V7_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -156,6 +168,7 @@ def validate(
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
         "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
     }:
         for name in (
             "mgt_source_sha256",
@@ -182,6 +195,7 @@ def validate(
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
         "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
     }:
         for name in (
             "mgt_workbench_restart_passed",
@@ -194,6 +208,7 @@ def validate(
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
         "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
     }:
         for name in (
             "workbench_operator_surface_passed",
@@ -216,6 +231,7 @@ def validate(
         "structural-native-distribution-e2e.v4",
         "structural-native-distribution-e2e.v5",
         "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
     }:
         for name in (
             "workbench_catalog_surface_passed",
@@ -229,6 +245,7 @@ def validate(
     if schema_version in {
         "structural-native-distribution-e2e.v5",
         "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
     }:
         for name in (
             "evidence_builder_check_passed",
@@ -243,7 +260,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if schema_version == "structural-native-distribution-e2e.v6":
+    if schema_version in {
+        "structural-native-distribution-e2e.v6",
+        "structural-native-distribution-e2e.v7",
+    }:
         for name in (
             "catalog_builder_check_passed",
             "catalog_builder_build_passed",
@@ -257,6 +277,24 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if schema_version == "structural-native-distribution-e2e.v7":
+        if payload.get("workbench_localized_pdf_surface_passed") is not True:
+            errors.append("workbench_localized_pdf_surface_passed must be true")
+        for name in (
+            "workbench_localized_pdf_en_us_sha256",
+            "workbench_localized_pdf_ko_kr_sha256",
+            "workbench_localized_pdf_en_us_receipt_sha256",
+            "workbench_localized_pdf_ko_kr_receipt_sha256",
+            "localized_report_font_sha256",
+            "localized_report_font_license_sha256",
+            "localized_report_font_provenance_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+        if payload.get("workbench_localized_pdf_en_us_sha256") == payload.get(
+            "workbench_localized_pdf_ko_kr_sha256"
+        ):
+            errors.append("localized en-US and ko-KR PDF identities must differ")
     for name in ("python_lookup_count", "node_lookup_count", "fallback_count"):
         if type(payload.get(name)) is not int or payload[name] != 0:
             errors.append(f"{name} must be integer zero")

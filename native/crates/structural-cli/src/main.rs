@@ -7,11 +7,12 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_cli::{
     contract_error_report, execute_dense_spectral_analysis, execute_external_comparison,
-    execute_model_ir_native_analysis, execute_native_analysis, execute_native_mgt_import,
-    execute_nonlinear_static_analysis, execute_pdf_report, execute_sparse_linear_analysis,
-    publish_dense_spectral_analysis, publish_external_comparison, publish_model_ir_native_analysis,
-    publish_native_analysis, publish_native_mgt_import, publish_nonlinear_static_analysis,
-    publish_pdf_report, publish_sparse_linear_analysis, validate_model_bytes, validation_succeeds,
+    execute_localized_pdf_report, execute_model_ir_native_analysis, execute_native_analysis,
+    execute_native_mgt_import, execute_nonlinear_static_analysis, execute_pdf_report,
+    execute_sparse_linear_analysis, publish_dense_spectral_analysis, publish_external_comparison,
+    publish_localized_pdf_report, publish_model_ir_native_analysis, publish_native_analysis,
+    publish_native_mgt_import, publish_nonlinear_static_analysis, publish_pdf_report,
+    publish_sparse_linear_analysis, validate_model_bytes, validation_succeeds, PdfReportLocaleV2,
 };
 
 mod job_cli;
@@ -85,6 +86,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
     eprintln!(
         "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis static-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis static-resume <REQUEST.json> <CHECKPOINT.stacp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
+    eprintln!("localized PDF option: --locale en-US|ko-KR");
     ExitCode::from(EXIT_USAGE_OR_INVALID)
 }
 
@@ -597,6 +599,7 @@ struct PdfReportCommand {
     report_ir_path: PathBuf,
     document_source_path: PathBuf,
     output_directory: PathBuf,
+    locale: Option<PdfReportLocaleV2>,
 }
 
 fn run_pdf_report(command: &PdfReportCommand) -> ExitCode {
@@ -619,38 +622,57 @@ fn run_pdf_report(command: &PdfReportCommand) -> ExitCode {
                 );
             }
         };
-    let outcome = match execute_pdf_report(&result_ir, &report_ir, &document_source) {
-        Ok(outcome) => outcome,
-        Err(error) => {
-            let exit = if error.is_contract_error() {
-                EXIT_USAGE_OR_INVALID
-            } else {
-                EXIT_FAILURE
+    let receipt = if let Some(locale) = command.locale {
+        let outcome =
+            match execute_localized_pdf_report(&result_ir, &report_ir, &document_source, locale) {
+                Ok(outcome) => outcome,
+                Err(error) => return pdf_render_failure(&error),
             };
-            println!(
-                "{}",
-                json!({
-                    "schema_version": "structural-native-pdf-report-failure.v1",
-                    "code": "pdf_report_failed",
-                    "detail": error.to_string()
-                })
-            );
-            return ExitCode::from(exit);
+        if let Err(error) = publish_localized_pdf_report(&command.output_directory, &outcome) {
+            return pdf_publish_failure(&error);
         }
+        outcome.receipt_json().to_owned()
+    } else {
+        let outcome = match execute_pdf_report(&result_ir, &report_ir, &document_source) {
+            Ok(outcome) => outcome,
+            Err(error) => return pdf_render_failure(&error),
+        };
+        if let Err(error) = publish_pdf_report(&command.output_directory, &outcome) {
+            return pdf_publish_failure(&error);
+        }
+        outcome.receipt_json().to_owned()
     };
-    if let Err(error) = publish_pdf_report(&command.output_directory, &outcome) {
-        println!(
-            "{}",
-            json!({
-                "schema_version": "structural-native-pdf-report-failure.v1",
-                "code": "pdf_report_publish_failed",
-                "detail": error.to_string()
-            })
-        );
-        return ExitCode::from(EXIT_FAILURE);
-    }
-    println!("{}", outcome.receipt_json());
+    println!("{receipt}");
     ExitCode::SUCCESS
+}
+
+fn pdf_render_failure(error: &structural_cli::NativePdfReportError) -> ExitCode {
+    let exit = if error.is_contract_error() {
+        EXIT_USAGE_OR_INVALID
+    } else {
+        EXIT_FAILURE
+    };
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-native-pdf-report-failure.v1",
+            "code": "pdf_report_failed",
+            "detail": error.to_string()
+        })
+    );
+    ExitCode::from(exit)
+}
+
+fn pdf_publish_failure(error: &structural_cli::NativePdfReportError) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-native-pdf-report-failure.v1",
+            "code": "pdf_report_publish_failed",
+            "detail": error.to_string()
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
 }
 
 fn pdf_input_failure(code: &str, path: &str, detail: &str) -> ExitCode {
@@ -876,7 +898,8 @@ fn parse_validate_arguments(arguments: &[OsString]) -> Option<(PathBuf, bool)> {
 }
 
 fn parse_pdf_report_arguments(arguments: &[OsString]) -> Option<PdfReportCommand> {
-    if arguments.len() != 7 || arguments[0] != "report" || arguments[1] != "render-pdf" {
+    if !matches!(arguments.len(), 7 | 9) || arguments[0] != "report" || arguments[1] != "render-pdf"
+    {
         return None;
     }
     if [&arguments[2], &arguments[3], &arguments[4], &arguments[6]]
@@ -886,11 +909,22 @@ fn parse_pdf_report_arguments(arguments: &[OsString]) -> Option<PdfReportCommand
     {
         return None;
     }
+    let locale = if arguments.len() == 9 {
+        if arguments[7] != "--locale" {
+            return None;
+        }
+        Some(PdfReportLocaleV2::from_language_tag(
+            arguments[8].to_str()?,
+        )?)
+    } else {
+        None
+    };
     Some(PdfReportCommand {
         result_ir_path: PathBuf::from(&arguments[2]),
         report_ir_path: PathBuf::from(&arguments[3]),
         document_source_path: PathBuf::from(&arguments[4]),
         output_directory: PathBuf::from(&arguments[6]),
+        locale,
     })
 }
 
@@ -1187,7 +1221,8 @@ mod tests {
         parse_model_analysis_arguments, parse_pdf_report_arguments,
         parse_sparse_analysis_arguments, parse_spectral_analysis_arguments,
         parse_validate_arguments, AnalysisCommand, ComparisonCommand, MgtImportCommand,
-        ModelAnalysisCommand, PdfReportCommand, SparseAnalysisCommand, SpectralAnalysisCommand,
+        ModelAnalysisCommand, PdfReportCommand, PdfReportLocaleV2, SparseAnalysisCommand,
+        SpectralAnalysisCommand,
     };
     use std::ffi::OsString;
 
@@ -1521,8 +1556,41 @@ mod tests {
                 report_ir_path: "report.json".into(),
                 document_source_path: "report.md".into(),
                 output_directory: "pdf".into(),
+                locale: None,
             })
         );
+        assert_eq!(
+            parse_pdf_report_arguments(&args(&[
+                "report",
+                "render-pdf",
+                "result.json",
+                "report.json",
+                "report.md",
+                "--output-dir",
+                "pdf",
+                "--locale",
+                "ko-KR"
+            ])),
+            Some(PdfReportCommand {
+                result_ir_path: "result.json".into(),
+                report_ir_path: "report.json".into(),
+                document_source_path: "report.md".into(),
+                output_directory: "pdf".into(),
+                locale: Some(PdfReportLocaleV2::KoKr),
+            })
+        );
+        assert!(parse_pdf_report_arguments(&args(&[
+            "report",
+            "render-pdf",
+            "result.json",
+            "report.json",
+            "report.md",
+            "--output-dir",
+            "pdf",
+            "--locale",
+            "ko-kr"
+        ]))
+        .is_none());
         assert!(parse_pdf_report_arguments(&args(&[
             "report",
             "render-pdf",

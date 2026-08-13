@@ -16,7 +16,11 @@ SPEC.loader.exec_module(pdf_report)
 
 
 def _copy_contract(tmp_path: Path) -> None:
-    for relative in ("native/capabilities.json", *pdf_report.REQUIRED_TOKENS):
+    for relative in (
+        "native/capabilities.json",
+        pdf_report.EMBEDDED_FONT_ASSET,
+        *pdf_report.REQUIRED_TOKENS,
+    ):
         source = ROOT / relative
         destination = tmp_path / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -51,3 +55,16 @@ def test_contract_fails_closed_when_xref_tamper_evidence_disappears(
         blocker.endswith(":xref_tamper_is_detected_without_a_pdf_parser_dependency")
         for blocker in report["blockers"]
     )
+
+
+def test_contract_fails_closed_when_embedded_font_bytes_drift(tmp_path: Path) -> None:
+    _copy_contract(tmp_path)
+    path = tmp_path / pdf_report.EMBEDDED_FONT_ASSET
+    tampered = bytearray(path.read_bytes())
+    tampered[-1] ^= 1
+    path.write_bytes(tampered)
+
+    report = pdf_report.check_pdf_report_contract(tmp_path)
+
+    assert report["contract_pass"] is False
+    assert "pdf_report_embedded_font_hash_mismatch" in report["blockers"]

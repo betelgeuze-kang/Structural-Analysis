@@ -106,6 +106,16 @@ fn run(arguments: &[OsString]) -> ExitCode {
             print!("{}", workbench.linear_report_text(locale)?);
             Ok(())
         }),
+        Some("report-export-pdf") => {
+            parse_report_pdf_export(arguments).and_then(|(workspace, output_directory, locale)| {
+                let workbench = NativeWorkbench::open(&workspace)?;
+                println!(
+                    "{}",
+                    workbench.export_localized_pdf(locale, &output_directory)?
+                );
+                Ok(())
+            })
+        }
         Some("review") => parse_review(arguments).and_then(|command| run_review(&command)),
         Some("review-show") => {
             parse_workspace_only(arguments).and_then(|workspace| run_review_show(&workspace))
@@ -433,6 +443,47 @@ fn parse_report_view(
     ))
 }
 
+fn parse_report_pdf_export(
+    arguments: &[OsString],
+) -> Result<(PathBuf, PathBuf, WorkbenchReportLocaleV1), WorkbenchError> {
+    let mut workspace = None;
+    let mut output_directory = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("report-export-pdf option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("report-export-pdf option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--output-dir" if output_directory.is_none() => {
+                output_directory = Some(PathBuf::from(value));
+            }
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("report-export-pdf locale must be en-US or ko-KR")
+                    })?;
+            }
+            _ => return Err(usage_error("duplicate or unknown report-export-pdf option")),
+        }
+        index += 2;
+    }
+    Ok((
+        workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        output_directory.ok_or_else(|| usage_error("--output-dir is required"))?,
+        locale,
+    ))
+}
+
 fn parse_stage_command(
     arguments: &[OsString],
     budget_flag: &str,
@@ -664,7 +715,10 @@ fn usage_error(detail: &str) -> WorkbenchError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]"
+    concat!(
+        "usage:\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
+    )
 }
 
 #[cfg(test)]
@@ -673,8 +727,8 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_report_view,
-        parse_review, parse_stage_command,
+        parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_report_pdf_export,
+        parse_report_view, parse_review, parse_stage_command,
     };
 
     #[test]
@@ -789,6 +843,34 @@ mod tests {
         let mut invalid = korean;
         invalid[2] = OsString::from("ko-kr");
         assert!(parse_report_view(&invalid).is_err());
+    }
+
+    #[test]
+    fn localized_pdf_export_parser_requires_new_destination_and_closed_locale() {
+        let arguments = [
+            OsString::from("report-export-pdf"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--output-dir"),
+            OsString::from("localized"),
+        ];
+        let (workspace, output, locale) =
+            parse_report_pdf_export(&arguments).expect("localized PDF export");
+        assert_eq!(workspace, PathBuf::from("session"));
+        assert_eq!(output, PathBuf::from("localized"));
+        assert_eq!(locale.label(), "ko-KR");
+
+        let mut invalid = arguments;
+        invalid[4] = OsString::from("ko-kr");
+        assert!(parse_report_pdf_export(&invalid).is_err());
+        assert!(parse_report_pdf_export(&[
+            OsString::from("report-export-pdf"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ])
+        .is_err());
     }
 
     #[test]

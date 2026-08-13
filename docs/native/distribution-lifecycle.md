@@ -38,6 +38,12 @@ It also binds:
 - static or shared linkage;
 - the installed CMake build identity and backend bit.
 
+Every CPU and ROCm payload also carries the bounded localized-report font, its deterministic
+provenance, README, and complete OFL-1.1 notice under `share/structural-report/`. The executable
+uses its compile-time embedded copy and does not require that directory at runtime; the separate
+files make the exact redistributed font software and license inspectable, and the distribution
+manifest binds their lengths, modes, and SHA-256 identities.
+
 The manifest authority is deliberately only `cpu_build_candidate` or `rocm_build_candidate`.
 Only the subsequent clean-machine or approved-device receipt can establish the bounded C5 lane.
 
@@ -74,12 +80,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    then checks and atomically builds a synthetic evidence bundle with `structural-evidence` and
    browses it and the embedded benchmark catalog without Python, Node, network access,
    protected-source reads, or command execution from catalog data;
-8. installs an immutable update, rolls back and re-verifies activation;
-9. emits an append-only v6 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+8. runs the installed Workbench's fixed `en-US` and `ko-KR` embedded-font PDF export twice per
+   locale, proves per-locale byte determinism, distinct locale output, durable-session
+   nonmutation, and exact installed TTF/OFL/provenance bindings;
+9. installs an immutable update, rolls back and re-verifies activation;
+10. emits an append-only v7 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
-   evidence-builder check/build/manifest, catalog and evidence-view
+   evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt, and
+   installed font/license/provenance
    identities, Python/Node lookup count 0 and fallback count 0. The receipt checker continues to
-   accept frozen v1/v2/v3/v4/v5 receipts without treating them as v6 catalog-builder authority.
+   accept frozen v1 through v6 receipts without treating them as v7 localized-PDF authority.
 
 The reference command is:
 

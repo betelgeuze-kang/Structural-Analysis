@@ -616,9 +616,12 @@ R8의 PDF slice는 같은 bounded ResultIR/ReportIR의 single-page A4 summary에
   self-hashed receipt를 create-new directory에 publish한다.
 - environment-cleared E2E가 external renderer 없이 bitwise repeatability를 증명한다. Poppler
   render/text inspection은 개발 검증이며 product dependency가 아니다.
+- 명시적 `en-US`/`ko-KR` v2는 renamed OFL-1.1 TrueType subset, Type0/CIDFont2, Identity-H와
+  ToUnicode를 내장해 고정 라벨을 지역화한다. locale이 없으면 기존 v1 바이트를 유지한다.
 
-PDF/A, tagged accessibility, Unicode/localized font, multipage table/chart, broader report profile,
-HIP C2와 C6는 open이다. 상세 계약은 `docs/native/pdf-report-v1.md`에 고정한다.
+PDF/A, tagged accessibility, arbitrary-Unicode/general localization, multipage table/chart,
+broader report profile, HIP C2와 C6는 open이다. 상세 계약은 `docs/native/pdf-report-v1.md`와
+`docs/native/pdf-report-v2.md`에 고정한다.
 
 R9의 service slice는 durable-job store의 loopback single-host/single-tenant HTTP facade에 한해
 C5에 도달한다.

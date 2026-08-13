@@ -182,6 +182,24 @@ def valid_v6_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v7_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v6_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v7",
+            "workbench_localized_pdf_surface_passed": True,
+            "workbench_localized_pdf_en_us_sha256": "sha256:" + "1" * 64,
+            "workbench_localized_pdf_ko_kr_sha256": "sha256:" + "2" * 64,
+            "workbench_localized_pdf_en_us_receipt_sha256": "sha256:" + "3" * 64,
+            "workbench_localized_pdf_ko_kr_receipt_sha256": "sha256:" + "4" * 64,
+            "localized_report_font_sha256": "sha256:" + "5" * 64,
+            "localized_report_font_license_sha256": "sha256:" + "6" * 64,
+            "localized_report_font_provenance_sha256": "sha256:" + "7" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -272,6 +290,38 @@ def test_distribution_receipt_rejects_missing_v6_catalog_authority(tmp_path: Pat
     assert any("catalog_builder_check_passed" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_localized_pdf_v7_contract(tmp_path: Path):
+    receipt, manifest = valid_v7_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_missing_v7_localized_pdf_authority(tmp_path: Path):
+    receipt, manifest = valid_v7_contract()
+    receipt["workbench_localized_pdf_surface_passed"] = False
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_localized_pdf_surface_passed" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_equal_v7_locale_pdf_identities(tmp_path: Path):
+    receipt, manifest = valid_v7_contract()
+    receipt["workbench_localized_pdf_ko_kr_sha256"] = receipt[
+        "workbench_localized_pdf_en_us_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("PDF identities must differ" in error for error in validation["errors"])
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -326,6 +376,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert 'structural-catalog "$payload/bin/structural-catalog"' in build
     assert "-p structural-evidence" in build
     assert 'structural-evidence "$payload/bin/structural-evidence"' in build
+    assert 'localized_report_share="$payload/share/structural-report"' in build
+    assert "OFL-1.1.txt" in build
+    assert "StructuralReportKoreanSubset.provenance.json" in build
+    assert "StructuralReportKoreanSubset.ttf" in build
     assert '"$1" == "--check"' in evidence_wrapper
     assert "structural-evidence -- check --root" in evidence_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in evidence_wrapper
@@ -341,7 +395,11 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v6" in e2e
+    assert "structural-native-distribution-e2e.v7" in e2e
+    assert "exercise_localized_pdf_surface" in e2e
+    assert "report-export-pdf" in e2e
+    assert "workbench_localized_pdf_surface_passed" in e2e
+    assert "localized_report_font_license_sha256" in e2e
     assert "structural-catalog" in e2e
     assert "catalog_builder_build_passed" in e2e
     assert "structural-evidence" in e2e
@@ -363,7 +421,11 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert "exercise_operator_surface" in rocm_e2e
     assert "workbench_operator_surface_passed" in rocm_e2e
-    assert "structural-native-distribution-e2e.v6" in rocm_e2e
+    assert "structural-native-distribution-e2e.v7" in rocm_e2e
+    assert "exercise_localized_pdf_surface" in rocm_e2e
+    assert "report-export-pdf" in rocm_e2e
+    assert "workbench_localized_pdf_surface_passed" in rocm_e2e
+    assert "localized_report_font_license_sha256" in rocm_e2e
     assert "structural-catalog" in rocm_e2e
     assert "catalog_builder_build_passed" in rocm_e2e
     assert "structural-evidence" in rocm_e2e

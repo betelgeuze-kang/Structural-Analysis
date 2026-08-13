@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+EMBEDDED_FONT_ASSET = (
+    "native/crates/structural-report/assets/StructuralReportKoreanSubset.ttf"
+)
 
 REQUIRED_TOKENS = {
     "native/crates/structural-report/src/pdf.rs": (
@@ -21,14 +25,44 @@ REQUIRED_TOKENS = {
         "startxref",
         "not_pdf_a_accessibility",
     ),
+    "native/crates/structural-report/src/localized_pdf.rs": (
+        "render_nonlinear_ndtha_localized_pdf_v2",
+        "validate_deterministic_localized_pdf_v2",
+        "/Subtype /Type0",
+        "/CIDToGIDMap /Identity",
+        "/ToUnicode 9 0 R",
+        "pdf_embedded_font_identity_mismatch",
+        "not_arbitrary_unicode_pdf_ua_accessibility",
+    ),
+    "native/crates/structural-report/src/localized_font.rs": (
+        "include_bytes!",
+        "LOCALIZED_FONT_GLYPHS",
+        "sha256:bdcc6ac7747f102ba1dc64a0d034d9695bab41b1f82b098ffb836334c9329a68",
+    ),
+    "native/crates/structural-report/assets/StructuralReportKoreanSubset.provenance.json": (
+        "OFL-1.1",
+        "reserved_primary_names_removed",
+        "not a production, build, test, packaging, or runtime dependency",
+        "not a general Korean or arbitrary-Unicode font",
+    ),
+    "native/crates/structural-report/assets/OFL-1.1.txt": (
+        "SIL OPEN FONT LICENSE",
+        "Reserved Font Names",
+        "Structural Report Korean Subset",
+    ),
     "native/crates/structural-report/tests/pdf_render.rs": (
         "deterministic_pdf_is_hash_bound_to_exact_report_projection",
         "forged_document_and_self_consistent_alternate_report_are_rejected",
         "xref_tamper_is_detected_without_a_pdf_parser_dependency",
+        "embedded_font_localized_pdfs_are_deterministic_distinct_and_extractable",
+        "localized_pdf_rejects_projection_and_embedded_font_tampering",
     ),
     "native/crates/structural-cli/src/report.rs": (
         "execute_pdf_report",
         "publish_pdf_report",
+        "execute_localized_pdf_report",
+        "publish_localized_pdf_report",
+        "structural-native-localized-pdf-report-receipt.v2",
         "report.pdf",
         "pdf-receipt.json",
         "receipt_hash",
@@ -37,6 +71,7 @@ REQUIRED_TOKENS = {
         "python_node_and_external_renderer_free_pdf_is_bitwise_deterministic",
         "command.env_clear()",
         "forged_markdown_and_existing_destination_fail_without_overwrite",
+        "localized_embedded_font_pdf_is_clean_environment_deterministic_and_closed",
         "sha256:35f2bebb41411b31cba9e0c395ba74f914097498e8da63e4b14d72704f06c197",
         "sha256:b807334630bb3c98398efcec4451e44ba23e3e538a1938b1c284bc781a677877",
     ),
@@ -47,6 +82,16 @@ REQUIRED_TOKENS = {
         "tagged accessibility",
         "HIP C2",
         "C6",
+    ),
+    "docs/native/pdf-report-v2.md": (
+        "absent `--locale`",
+        "OFL-1.1",
+        "Identity-H",
+        "ToUnicode",
+        "printable ASCII dynamic values",
+        "arbitrary Unicode",
+        "PDF/UA",
+        "Poppler",
     ),
 }
 
@@ -73,6 +118,10 @@ def check_pdf_report_contract(repo_root: Path = ROOT) -> dict[str, object]:
         "deterministic A4 PDF 1.7",
         "validates its own xref/object/trailer",
         "no Python, Node or external renderer lookup",
+        "OFL-1.1",
+        "en-US",
+        "ko-KR",
+        "arbitrary Unicode",
         "PDF/A",
         "tagged accessibility",
         "HIP C2",
@@ -80,6 +129,38 @@ def check_pdf_report_contract(repo_root: Path = ROOT) -> dict[str, object]:
     ):
         if token not in claim:
             blockers.append(f"pdf_report_scope_token_missing:{token}")
+
+    try:
+        font_bytes = (
+            root / EMBEDDED_FONT_ASSET
+        ).read_bytes()
+        provenance = json.loads(
+            (
+                root
+                / "native/crates/structural-report/assets/StructuralReportKoreanSubset.provenance.json"
+            ).read_text(encoding="utf-8")
+        )
+        asset = provenance["asset"]
+        origin = provenance["origin"]
+        modification = provenance["modification"]
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        blockers.append(f"pdf_report_embedded_font_provenance_invalid:{exc}")
+    else:
+        if not all(isinstance(value, dict) for value in (asset, origin, modification)):
+            blockers.append("pdf_report_embedded_font_provenance_shape_invalid")
+            asset = {}
+            origin = {}
+            modification = {}
+        if asset.get("byte_length") != len(font_bytes):
+            blockers.append("pdf_report_embedded_font_length_mismatch")
+        if asset.get("sha256") != hashlib.sha256(font_bytes).hexdigest():
+            blockers.append("pdf_report_embedded_font_hash_mismatch")
+        if asset.get("postscript_name") != "StructuralReportKoreanSubset":
+            blockers.append("pdf_report_embedded_font_name_invalid")
+        if origin.get("license") != "OFL-1.1":
+            blockers.append("pdf_report_embedded_font_license_invalid")
+        if modification.get("reserved_primary_names_removed") is not True:
+            blockers.append("pdf_report_embedded_font_reserved_names_not_removed")
 
     for relative, tokens in REQUIRED_TOKENS.items():
         path = root / relative

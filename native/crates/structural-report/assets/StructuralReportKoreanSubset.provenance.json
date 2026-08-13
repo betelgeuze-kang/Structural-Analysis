@@ -1,0 +1,42 @@
+{
+  "schema_version": "structural-report-embedded-font-provenance.v1",
+  "asset": {
+    "path": "StructuralReportKoreanSubset.ttf",
+    "byte_length": 37356,
+    "sha256": "bdcc6ac7747f102ba1dc64a0d034d9695bab41b1f82b098ffb836334c9329a68",
+    "family_name": "Structural Report Korean Subset",
+    "postscript_name": "StructuralReportKoreanSubset",
+    "cmap_codepoint_count": 192,
+    "glyph_count_including_notdef": 193,
+    "units_per_em": 1000
+  },
+  "origin": {
+    "distribution_filename": "NanumGothic.ttf",
+    "upstream_name": "NanumFontSetup_TTF_ALL",
+    "upstream_contact": "http://hangeul.naver.com/",
+    "original_sha256": "48a28e97b34fc8e5b157657633670cd1b7de126cfc414da65ce9c3d5bc8be733",
+    "copyright": "Copyright 2010 NAVER Corporation",
+    "license": "OFL-1.1",
+    "license_file": "OFL-1.1.txt"
+  },
+  "modification": {
+    "kind": "renamed deterministic glyph subset",
+    "reserved_primary_names_removed": true,
+    "base_unicode_range": "U+0020-U+007E",
+    "fixed_label_inventory": [
+      "구조 해석 보고서",
+      "제한된 비선형 시간이력해석 결정론적 네이티브",
+      "해석 요약 케이스 종료 상태 완료 붕괴 완료 단계 최대 층간변위비 잔류 최상층 변위",
+      "출처 결과 보고서 문서 요청 모델 상태 실행 체크포인트",
+      "실행 영수증 백엔드 결정론 폴백 횟수 권한 경계",
+      "제한된 후보 결과 공학적 승인 또는 설계 기준 적합성 인증이 아님",
+      "검토 또는 재배포 전에 결과 보고서 문서와 영수증 해시를 확인하십시오",
+      "구조 네이티브 페이지 퍼센트"
+    ],
+    "layout_tables_removed": true,
+    "hinting_removed": true,
+    "fonttools_version": "4.61.1",
+    "authoring_boundary": "FontTools was used once to create this checked-in language-neutral binary asset and generated glyph inventory; it is not a production, build, test, packaging, or runtime dependency."
+  },
+  "claim_boundary": "The asset covers printable ASCII plus only the fixed Korean report-label inventory. It is not a general Korean or arbitrary-Unicode font and does not establish PDF/UA or accessibility conformance."
+}

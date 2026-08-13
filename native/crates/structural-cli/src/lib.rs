@@ -37,7 +37,9 @@ pub use product::{
     NativeAnalysisRunOutcomeV1,
 };
 pub use report::{
-    execute_pdf_report, publish_pdf_report, NativePdfReportError, NativePdfReportOutcomeV1,
+    execute_localized_pdf_report, execute_pdf_report, publish_localized_pdf_report,
+    publish_pdf_report, NativeLocalizedPdfReportOutcomeV2, NativePdfReportError,
+    NativePdfReportOutcomeV1,
 };
 pub use service::{
     load_native_job_api_credentials, NativeJobApiCredentialsV1, NativeJobApiError,
@@ -56,6 +58,7 @@ pub use static_product::{
     execute_nonlinear_static_analysis, publish_nonlinear_static_analysis,
     NonlinearStaticProductError, NonlinearStaticRunOutcomeV1,
 };
+pub use structural_report::PdfReportLocaleV2;
 
 /// Failure boundary for a complete native `ModelIR` validation request.
 #[derive(Clone, Debug, Eq, PartialEq)]

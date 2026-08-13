@@ -4,8 +4,14 @@
 
 use std::fmt::Write as _;
 
+mod localized_font;
+mod localized_pdf;
 mod pdf;
 
+pub use localized_pdf::{
+    render_nonlinear_ndtha_localized_pdf_v2, validate_deterministic_localized_pdf_v2,
+    NonlinearNdthaLocalizedPdfDocumentV2, PdfReportLocaleV2,
+};
 pub use pdf::{
     render_nonlinear_ndtha_pdf_v1, validate_deterministic_pdf_v1, NonlinearNdthaPdfDocumentV1,
     PdfRenderError,

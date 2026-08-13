@@ -147,6 +147,17 @@ cmake -E copy native/target/release/structural-catalog "$payload/bin/structural-
 cmake -E copy native/target/release/structural-evidence "$payload/bin/structural-evidence"
 cmake -E copy native/target/release/structural-workbench "$payload/bin/structural-workbench"
 cmake -E copy native/target/release/structural-installer "$payload/bin/structural-installer"
+localized_report_share="$payload/share/structural-report"
+cmake -E make_directory "$localized_report_share"
+for asset in \
+  OFL-1.1.txt \
+  README.md \
+  StructuralReportKoreanSubset.provenance.json \
+  StructuralReportKoreanSubset.ttf; do
+  cmake -E copy \
+    "native/crates/structural-report/assets/$asset" \
+    "$localized_report_share/$asset"
+done
 
 if [[ "$backend" == "cpu-only" && "$linkage" == "shared" ]]; then
   if ldd "$payload/lib/libstructural_c_abi_v1.so" | grep -Eiq 'hip|hsa|rocm'; then

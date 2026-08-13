@@ -134,6 +134,7 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_embedded_font_pdf_en_us_ko_kr": ("c5_implemented", False),
     "accessibility_localization_and_unicode_report_ui": ("open", True),
 }
 EXPECTED_PREREQUISITES = {
@@ -247,7 +248,13 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "report",
     ]:
         blockers.append("workbench_ui_native_core_flow_invalid")
-    if native.get("operator_flow") != ["inspect", "report-view", "review", "export"]:
+    if native.get("operator_flow") != [
+        "inspect",
+        "report-view",
+        "report-export-pdf",
+        "review",
+        "export",
+    ]:
         blockers.append("workbench_ui_native_operator_flow_invalid")
     if native.get("catalog_flow") != [
         "catalog",
@@ -396,6 +403,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             blockers.append(f"workbench_ui_native_false_boundary_invalid:{field}")
     if native.get("linear_report_locales") != ["en-US", "ko-KR"]:
         blockers.append("workbench_ui_native_linear_report_locales_invalid")
+    if native.get("localized_pdf_locales") != ["en-US", "ko-KR"]:
+        blockers.append("workbench_ui_native_localized_pdf_locales_invalid")
 
     legacy = manifest.get("legacy_surface")
     if not isinstance(legacy, dict):
@@ -1285,6 +1294,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             'Some("inspect")',
             'Some("report-view")',
+            'Some("report-export-pdf")',
             'Some("review")',
             'Some("export")',
             'Some("catalog")',
@@ -1336,6 +1346,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             "not a C6 removal receipt",
             "bounded terminal UTF-8 linear report view is C5-implemented",
+            "bounded embedded-font PDF export is C5-implemented",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

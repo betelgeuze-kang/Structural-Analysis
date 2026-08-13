@@ -47,10 +47,11 @@ store through strict HTTP/1.1 with distinct static client/worker credentials and
 evidence. Another bounded C5 slice strictly ingests hash-bound external result/source artifacts
 and compares three global NDTHA quantities; its tracked source is a language-neutral Python C1
 golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and multi-tenant or
-distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A/
-tagged or Unicode PDF output, general accessibility/localization and C6 remain open. The bounded
-Workbench separately provides a self-hashed `en-US`/`ko-KR` UTF-8 linear report alternative; it is
-not a certification or general UI-parity claim. The legacy five-symbol ABI is unchanged.
+distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A,
+tagged or arbitrary-Unicode PDF output, general accessibility/localization and C6 remain open. The
+bounded Workbench separately provides a self-hashed `en-US`/`ko-KR` UTF-8 linear report alternative
+and fixed-label embedded-font PDF export; neither is a certification or general UI-parity claim.
+The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and
 will be removed with that hook after rollback coverage; backend receipts replace its telemetry.
@@ -256,11 +257,17 @@ The bounded native PDF command is:
 cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   report render-pdf result-ir.json report-ir.json report.md \
   --output-dir pdf-report
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  report render-pdf result-ir.json report-ir.json report.md \
+  --output-dir korean-pdf-report --locale ko-KR
 ~~~
 
 The renderer re-projects and verifies all three inputs before emitting a deterministic A4 PDF and
-self-hashed receipt. It invokes no external renderer; see `docs/native/pdf-report-v1.md` for the
-PDF/A, accessibility and broader-report boundary.
+self-hashed receipt. With no locale it preserves frozen v1 bytes; explicit `en-US` or `ko-KR`
+selects the bounded embedded-font v2 path. It invokes no external renderer; see
+`docs/native/pdf-report-v1.md` and `docs/native/pdf-report-v2.md` for the PDF/A, accessibility,
+arbitrary-Unicode, and broader-report boundary.
 
 The bounded native job service command is:
 

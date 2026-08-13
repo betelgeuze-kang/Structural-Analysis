@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
-use structural_report::validate_deterministic_pdf_v1;
+use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -779,4 +779,125 @@ fn localized_linear_report_view_is_utf8_deterministic_and_hash_bound() {
     assert_eq!(invalid_locale.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&invalid_locale.stdout)
         .contains("report-view locale must be en-US or ko-KR"));
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn localized_pdf_export_is_deterministic_hash_bound_and_non_mutating() {
+    let (model, request, external, source) = inputs();
+    let temporary = TestDirectory::create();
+    let workspace = temporary.0.join("localized-pdf-session");
+    assert_success(&run_workbench(&import_arguments(
+        "workflow", &model, &request, &external, &source, &workspace,
+    )));
+    let workspace_files = collect_files(&workspace);
+    let workspace_bytes = workspace_files
+        .iter()
+        .map(|relative| {
+            (
+                relative.clone(),
+                std::fs::read(workspace.join(relative)).expect("workspace artifact"),
+            )
+        })
+        .collect::<Vec<_>>();
+
+    let mut locale_hashes = Vec::new();
+    for locale in ["en-US", "ko-KR"] {
+        let first = temporary.0.join(format!("localized-pdf-{locale}-first"));
+        let second = temporary.0.join(format!("localized-pdf-{locale}-second"));
+        for output_directory in [&first, &second] {
+            let output = run_workbench(&[
+                text("report-export-pdf"),
+                text("--workspace"),
+                workspace.as_os_str(),
+                text("--output-dir"),
+                output_directory.as_os_str(),
+                text("--locale"),
+                text(locale),
+            ]);
+            assert_success(&output);
+            let receipt: Value =
+                serde_json::from_slice(&output.stdout).expect("localized PDF receipt stdout");
+            assert_eq!(
+                receipt["schema_version"],
+                "structural-native-localized-pdf-report-receipt.v2"
+            );
+            assert_eq!(receipt["locale"], locale);
+            assert_eq!(receipt["embedded_font"]["license"]["id"], "OFL-1.1");
+            let stored_receipt =
+                std::fs::read(output_directory.join("pdf-receipt.json")).expect("stored receipt");
+            assert_eq!(
+                String::from_utf8_lossy(&output.stdout).trim_end(),
+                String::from_utf8_lossy(&stored_receipt)
+            );
+            let pdf =
+                std::fs::read(output_directory.join("report.pdf")).expect("localized PDF artifact");
+            validate_deterministic_localized_pdf_v2(&pdf)
+                .expect("localized PDF structure and embedded font");
+            assert_eq!(receipt["pdf_hash"], sha256_identity(&pdf));
+
+            let mut unsigned = receipt;
+            let receipt_hash = unsigned
+                .as_object_mut()
+                .expect("receipt object")
+                .remove("receipt_hash")
+                .and_then(|value| value.as_str().map(str::to_owned))
+                .expect("receipt hash");
+            let canonical = canonicalize_model_ir_v2(&unsigned).expect("canonical receipt");
+            assert_eq!(receipt_hash, sha256_identity(canonical.as_bytes()));
+        }
+        for file in ["report.pdf", "pdf-receipt.json"] {
+            assert_eq!(
+                std::fs::read(first.join(file)).expect("first localized artifact"),
+                std::fs::read(second.join(file)).expect("second localized artifact"),
+                "localized Workbench PDF drift: {locale}/{file}"
+            );
+        }
+        locale_hashes.push(sha256_identity(
+            &std::fs::read(first.join("report.pdf")).expect("localized PDF"),
+        ));
+    }
+    assert_ne!(locale_hashes[0], locale_hashes[1]);
+    assert_eq!(workspace_files, collect_files(&workspace));
+    for (relative, before) in workspace_bytes {
+        assert_eq!(
+            before,
+            std::fs::read(workspace.join(&relative)).expect("unchanged workspace artifact"),
+            "localized export mutated workspace artifact: {}",
+            relative.display()
+        );
+    }
+
+    let invalid_destination = temporary.0.join("invalid-locale-pdf");
+    let invalid = run_workbench(&[
+        text("report-export-pdf"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--output-dir"),
+        invalid_destination.as_os_str(),
+        text("--locale"),
+        text("ko-kr"),
+    ]);
+    assert_eq!(invalid.status.code(), Some(2));
+    assert!(!invalid_destination.exists());
+
+    let existing = temporary.0.join("existing-localized-pdf");
+    std::fs::create_dir(&existing).expect("existing output directory");
+    std::fs::write(existing.join("sentinel"), b"preserve").expect("sentinel");
+    let rejected = run_workbench(&[
+        text("report-export-pdf"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--output-dir"),
+        existing.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ]);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_localized_pdf_publish_failed"));
+    assert_eq!(
+        std::fs::read(existing.join("sentinel")).expect("preserved sentinel"),
+        b"preserve"
+    );
 }
