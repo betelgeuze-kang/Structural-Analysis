@@ -128,9 +128,11 @@ fn prepare_browser_smoke(
         "--reporter=line".to_owned(),
     ];
     let playwright_plan = PlaywrightPlan {
-        root: working_root,
+        root: working_root.clone(),
+        server_root: working_root,
         node_launcher: EXPECTED_NODE_LAUNCHER.to_owned(),
         playwright_cli_path: EXPECTED_PLAYWRIGHT_CLI.to_owned(),
+        playwright_cli_command_index: 1,
         logical_command,
         base_url_environment: "STRUCTURE_VIEWER_BASE_URL".to_owned(),
         base_url_path: String::new(),

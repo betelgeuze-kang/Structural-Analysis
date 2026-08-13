@@ -9,9 +9,10 @@ use structural_frontend_contract::{
     canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_browser_smoke_receipt_json, canonical_viewer_manifest_receipt_json,
     canonical_viewer_server_receipt_json, canonical_workbench_prototype_browser_smoke_receipt_json,
-    canonical_workbench_prototype_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, check_workbench_prototype, plan_viewer_server, run_frontend_smoke,
-    run_viewer_browser_smoke, run_workbench_prototype_browser_smoke,
+    canonical_workbench_prototype_receipt_json, canonical_workbench_v2_browser_smoke_receipt_json,
+    check_frontend_contract, check_frontend_delivery, check_viewer_manifest,
+    check_workbench_prototype, plan_viewer_server, run_frontend_smoke, run_viewer_browser_smoke,
+    run_workbench_prototype_browser_smoke, run_workbench_v2_browser_smoke,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -420,6 +421,161 @@ fn prototype_browser_smoke_requires_pinned_runtime_before_live_side_effects() {
     assert!(error
         .detail
         .contains("node_modules/@playwright/test/cli.js"));
+}
+
+#[test]
+fn workbench_v2_browser_smoke_dry_run_is_deterministic_process_free_and_self_hashed() {
+    let root = repository_root();
+    let first =
+        run_workbench_v2_browser_smoke(&root, true).expect("Workbench v2 browser smoke dry-run");
+    let second = run_workbench_v2_browser_smoke(&root, true)
+        .expect("repeat Workbench v2 browser smoke dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.execution_mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert!(first.frontend_contract_receipt_hash.starts_with("sha256:"));
+    assert_eq!(first.delivery_receipt_hash, None);
+    assert_eq!(
+        first.build_command,
+        vec!["npm".to_owned(), "run".to_owned(), "build".to_owned()]
+    );
+    assert_eq!(first.build_environment["VITE_BASE_PATH"], "/");
+    assert_eq!(first.specifications.len(), 6);
+    assert!(first
+        .specifications
+        .iter()
+        .all(|specification| specification.sha256.starts_with("sha256:")));
+    assert!(first.json_module_loader_sha256.starts_with("sha256:"));
+    assert_eq!(first.playwright_cli_sha256, None);
+    assert_eq!(
+        first.playwright_command,
+        vec![
+            "node".to_owned(),
+            "node_modules/@playwright/test/cli.js".to_owned(),
+            "test".to_owned(),
+            "tests/frontend/workbench-v2-e2e.spec.ts".to_owned(),
+            "tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts".to_owned(),
+            "tests/frontend/workbench-v2-live-provider-guard.spec.ts".to_owned(),
+            "tests/frontend/workbench-v2-job-contract.spec.ts".to_owned(),
+            "tests/frontend/workbench-v2-engineering-value-state.spec.ts".to_owned(),
+            "tests/frontend/workbench-v2-status-taxonomy.spec.ts".to_owned(),
+            "--reporter=line".to_owned(),
+        ]
+    );
+    assert_eq!(first.dist_directory, "dist");
+    assert_eq!(first.spa_fallback_entry, "index.html");
+    assert_eq!(first.base_url_environment, "WORKBENCH_V2_BASE_URL");
+    assert_eq!(
+        first.node_environment["NODE_OPTIONS"],
+        "--loader=./scripts/json-module-loader.mjs"
+    );
+    assert!(first.node_runtime_required);
+    assert!(first.browser_runtime_required);
+    assert_eq!(first.loopback_listener_count, 0);
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert_eq!(first.request_error_count, 0);
+    assert!(first.deterministic_receipt);
+    let encoded = canonical_workbench_v2_browser_smoke_receipt_json(&first)
+        .expect("canonical Workbench v2 browser receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("Workbench v2 browser receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[test]
+fn clean_environment_workbench_v2_browser_smoke_dry_run_emits_one_canonical_receipt() {
+    let root = repository_root();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["workbench-v2-browser-smoke", "--root"])
+        .arg(&root)
+        .arg("--dry-run")
+        .env_clear()
+        .output()
+        .expect("run Workbench v2 browser smoke dry-run");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("Workbench v2 browser receipt JSON");
+    assert_eq!(
+        canonicalize_model_ir_v2(&value)
+            .expect("canonical receipt")
+            .as_bytes(),
+        bytes
+    );
+    assert_eq!(value["action"], "workbench_v2_browser_smoke");
+    assert_eq!(value["execution_mode"], "dry_run");
+    assert_eq!(value["loopback_listener_count"], 0);
+    assert_eq!(value["direct_processes_spawned"], 0);
+    assert!(value["delivery_receipt_hash"].is_null());
+    assert!(value["playwright_cli_sha256"].is_null());
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn workbench_v2_browser_smoke_stops_on_build_failure_before_runtime_or_socket() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s|%s\\n' \"$VITE_BASE_PATH\" \"$*\" >> \"$PWD/npm-invocations.log\"\nexit 19\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["workbench-v2-browser-smoke", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run failing Workbench v2 browser smoke");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("npm-invocations.log"))
+            .expect("read npm invocation log"),
+        "/|run build\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("error JSON");
+    assert_eq!(value["code"], "workbench_v2_browser_smoke_build_failed");
+    assert!(value["detail"]
+        .as_str()
+        .is_some_and(|detail| detail.contains("exit code 19")));
+}
+
+#[cfg(unix)]
+#[test]
+fn workbench_v2_browser_smoke_checks_delivery_then_requires_pinned_runtime() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s|%s\\n' \"$VITE_BASE_PATH\" \"$*\" >> \"$PWD/npm-invocations.log\"\nexit 0\n",
+    );
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["workbench-v2-browser-smoke", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run Workbench v2 browser smoke without installed Playwright");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("npm-invocations.log"))
+            .expect("read npm invocation log"),
+        "/|run build\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("error JSON");
+    assert_eq!(value["code"], "frontend_required_file_missing");
+    assert!(value["detail"]
+        .as_str()
+        .is_some_and(|detail| detail.contains("node_modules/@playwright/test/cli.js")));
 }
 
 #[test]

@@ -51,6 +51,13 @@
     "src/structure-viewer/viewer-stage-result-callouts-renderer.js",
     "tests/frontend/structure-viewer-smoke.spec.ts",
     "tests/frontend/workbench-prototype-smoke.spec.ts",
+    "tests/frontend/workbench-v2-e2e.spec.ts",
+    "tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts",
+    "tests/frontend/workbench-v2-live-provider-guard.spec.ts",
+    "tests/frontend/workbench-v2-job-contract.spec.ts",
+    "tests/frontend/workbench-v2-engineering-value-state.spec.ts",
+    "tests/frontend/workbench-v2-status-taxonomy.spec.ts",
+    "scripts/json-module-loader.mjs",
     "docs/frontend-build-reproducibility.md",
     "native/decommission/legacy-frontend-build-contract-v1.json",
     "native/crates/structural-frontend-contract/src/lib.rs",
@@ -61,6 +68,7 @@
     "native/crates/structural-frontend-contract/src/prototype_browser_smoke.rs",
     "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/src/viewer_server.rs",
+    "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
   ],
   "forbidden_paths": [
@@ -82,6 +90,7 @@
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
     "verify:workbench-prototype-dom-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype --root .",
     "verify:workbench-prototype-browser-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- prototype-browser-smoke --root .",
+    "verify:workbench-v2-e2e": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- workbench-v2-browser-smoke --root .",
     "verify:workbench-viewer-delivery": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root ."
   },
   "expected_dependencies": {
@@ -205,6 +214,36 @@
     "base_url_environment": "WORKBENCH_PROTOTYPE_BASE_URL",
     "external_network_access_accounting": "not_instrumented_browser_page_requests",
     "claim_boundary": "This transitional C0 receipt proves only that Rust validates the frozen package, lock, static prototype, specification, command, environment, and scoped server inputs and either plans or owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI. The server exposes only the prototype/structural-workbench prefix. Live execution hashes the installed Playwright launcher script; dry-run has no installed-runtime hash, binds no listener, and spawns no process. Node executable identity, Playwright transitive runtime bytes, Chromium, the prototype JavaScript, browser page requests, rendered behavior, clean-machine execution, and native UI parity remain outside Rust authority; live evidence requires a host that permits loopback sockets and has the pinned browser runtime installed."
+  },
+  "workbench_v2_browser_smoke_contract": {
+    "schema_version": "structural-native-workbench-v2-browser-smoke-contract.v1",
+    "build_command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "build_environment": {
+      "VITE_BASE_PATH": "/"
+    },
+    "node_launcher": "node",
+    "node_environment": {
+      "NODE_OPTIONS": "--loader=./scripts/json-module-loader.mjs"
+    },
+    "json_module_loader_path": "scripts/json-module-loader.mjs",
+    "playwright_cli_path": "node_modules/@playwright/test/cli.js",
+    "spec_paths": [
+      "tests/frontend/workbench-v2-e2e.spec.ts",
+      "tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts",
+      "tests/frontend/workbench-v2-live-provider-guard.spec.ts",
+      "tests/frontend/workbench-v2-job-contract.spec.ts",
+      "tests/frontend/workbench-v2-engineering-value-state.spec.ts",
+      "tests/frontend/workbench-v2-status-taxonomy.spec.ts"
+    ],
+    "dist_directory": "dist",
+    "spa_fallback_entry": "index.html",
+    "base_url_environment": "WORKBENCH_V2_BASE_URL",
+    "external_network_access_accounting": "not_instrumented_npm_build_and_browser_page_requests",
+    "claim_boundary": "This transitional C0 receipt proves only that Rust validates and hashes the frozen package, lock, JSON loader, six Workbench v2 specifications, build command/environment, exact NODE_OPTIONS loader override, Playwright command, and SPA server policy. Live execution directly owns one npm build child, rejects package/lock mutation, verifies the bounded emitted delivery, then owns one ephemeral IPv4 loopback listener plus one direct Node child running the pinned Playwright CLI; it publishes no success receipt unless both child exits are zero and the server reports no request error. Dry-run binds no listener and spawns no process. npm and Node executable identity, npm/Vite/TypeScript internals, registry or build-time network access, Playwright transitive runtime bytes, Chromium, React/TypeScript/JavaScript behavior, browser page requests, clean-machine execution, native UI parity, and C6 removal remain outside Rust authority."
   },
   "viewer_manifest_contract": {
     "contract": "structure-viewer-project-manifest-verification.v1",

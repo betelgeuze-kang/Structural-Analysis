@@ -33,6 +33,10 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Invokes the Rust-native `structural-frontend-contract prototype-browser-smoke` wrapper after the static prototype contract. Rust validates and hashes the frozen specification and owns one ephemeral IPv4 loopback server scoped to `prototype/structural-workbench/` plus one direct Node child running the pinned Playwright CLI.
   - `npm run verify:workbench-prototype-browser-smoke -- --dry-run` validates the exact command, environment, specification, static-contract receipt, and scoped server policy without binding a listener or spawning a process.
   - A live receipt is published only after Playwright exits zero and hashes the installed Playwright launcher script. Node executable identity, Playwright transitive bytes, Chromium, prototype JavaScript, rendered behavior, and browser page requests remain outside the receipt. A host with installed packages, Chromium, and loopback permission is required for live evidence.
+- `npm run verify:workbench-v2-e2e`
+  - Invokes the Rust-native `structural-frontend-contract workbench-v2-browser-smoke` orchestrator. Rust hashes the fixed JSON module loader and six Playwright specifications, directly runs `npm run build` with `VITE_BASE_PATH=/`, rejects package/lock mutation, verifies the emitted delivery tree, serves `dist/` with a confined SPA fallback, and directly launches the pinned Playwright CLI through Node.
+  - `npm run verify:workbench-v2-e2e -- --dry-run` emits a canonical self-hashed plan with no build child, listener, or Node child. Live success requires both direct child exits to be zero and no static-server request error; inherited `NODE_OPTIONS` is replaced with the exact contracted loader value so the Playwright workers retain JSON-module support without accepting unrelated options.
+  - npm/Node executable identity, npm/Vite/TypeScript internals, build-time network access, Playwright transitive bytes, Chromium, React/TypeScript/JavaScript behavior, and browser page requests remain outside the receipt. This is transitional C0 orchestration and does not authorize C6 removal.
 - `npm run verify:viewer-manifest`
   - Invokes the Rust-native `structural-frontend-contract viewer-manifest` checker over the strict language-neutral JSON source and its byte-exact generated JavaScript projection.
   - Checks registered project/drawing/variant counts, OPSTOOL release triples, repo-confined artifact/provenance paths, and locally present artifact-count sources; missing gitignored release outputs remain explicit warnings.
@@ -70,6 +74,7 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
 - The default Workbench request graph excludes the legacy `App` chunk. Browser E2E proves it is fetched only after navigating to `/#/legacy`.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
 - The offline Workbench prototype gate must pass the Rust-native static contract before the Rust-orchestrated Playwright smoke executes the retained browser behavior.
+- The Workbench v2 browser gate must use the Rust-owned build/SPA/Playwright lifecycle; the removed Node orchestration wrapper must not return.
 - Browser verification commands must not run `playwright install` implicitly; this keeps sandboxed quality gates from mutating the user home cache or stalling on network prompts.
 - Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.
 - Full-gate PDF smoke must exercise the same source viewer report export path before release-facing promotion.

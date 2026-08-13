@@ -183,12 +183,48 @@ pub(crate) fn validate_scoped_policy(
     validate_relative_path(redirect_path)
 }
 
+pub(crate) fn handle_spa_stream(
+    root: &Path,
+    fallback_entry: &str,
+    stream: TcpStream,
+) -> Result<(), FrontendContractError> {
+    validate_spa_policy(fallback_entry)?;
+    handle_stream_with_router(stream, |request| {
+        route_spa_request(root, fallback_entry, request)
+    })
+}
+
+pub(crate) fn validate_spa_policy(fallback_entry: &str) -> Result<(), FrontendContractError> {
+    if fallback_entry
+        .bytes()
+        .any(|byte| matches!(byte, b'?' | b'#' | b'%'))
+    {
+        return Err(FrontendContractError::new(
+            "viewer_server_spa_policy_invalid",
+            "SPA fallback entry is invalid",
+        ));
+    }
+    validate_relative_path(fallback_entry)
+}
+
 fn handle_stream_with_policy(
     root: &Path,
     allowed_path_prefixes: &[String],
     root_redirect: &str,
-    mut stream: TcpStream,
+    stream: TcpStream,
 ) -> Result<(), FrontendContractError> {
+    handle_stream_with_router(stream, |request| {
+        route_request_with_policy(root, allowed_path_prefixes, root_redirect, request)
+    })
+}
+
+fn handle_stream_with_router<F>(
+    mut stream: TcpStream,
+    route: F,
+) -> Result<(), FrontendContractError>
+where
+    F: FnOnce(&[u8]) -> Result<HttpResponse, FrontendContractError>,
+{
     stream.set_nonblocking(false).map_err(|error| {
         FrontendContractError::new(
             "viewer_server_socket_config_failed",
@@ -211,9 +247,7 @@ fn handle_stream_with_policy(
                 format!("set Viewer response timeout failed: {error}"),
             )
         })?;
-    let response = match read_request(&mut stream).and_then(|request| {
-        route_request_with_policy(root, allowed_path_prefixes, root_redirect, &request)
-    }) {
+    let response = match read_request(&mut stream).and_then(|request| route(&request)) {
         Ok(response) => response,
         Err(error) => error_response(400, "Bad Request", &error.detail),
     };
@@ -381,33 +415,9 @@ fn route_request_with_policy(
     root_redirect: &str,
     request: &[u8],
 ) -> Result<HttpResponse, FrontendContractError> {
-    let text = std::str::from_utf8(request).map_err(|error| {
-        FrontendContractError::new(
-            "viewer_server_request_invalid",
-            format!("Viewer request headers are not UTF-8: {error}"),
-        )
-    })?;
-    let line = text.lines().next().ok_or_else(|| {
-        FrontendContractError::new(
-            "viewer_server_request_invalid",
-            "Viewer request line is missing",
-        )
-    })?;
-    let mut fields = line.split_ascii_whitespace();
-    let method = fields.next().unwrap_or_default();
-    let target = fields.next().unwrap_or_default();
-    let version = fields.next().unwrap_or_default();
-    if fields.next().is_some()
-        || !matches!(method, "GET" | "HEAD")
-        || !matches!(version, "HTTP/1.0" | "HTTP/1.1")
-        || !target.starts_with('/')
-    {
-        return Ok(error_response(
-            405,
-            "Method Not Allowed",
-            "Only bounded GET and HEAD requests are supported",
-        ));
-    }
+    let Some((method, target)) = request_method_and_target(request)? else {
+        return Ok(method_not_allowed_response());
+    };
     let raw_path = target.split('?').next().unwrap_or_default();
     if matches!(raw_path, "/" | "/index.html") {
         return Ok(HttpResponse {
@@ -440,11 +450,100 @@ fn route_request_with_policy(
     })
 }
 
+fn route_spa_request(
+    root: &Path,
+    fallback_entry: &str,
+    request: &[u8],
+) -> Result<HttpResponse, FrontendContractError> {
+    let Some((method, target)) = request_method_and_target(request)? else {
+        return Ok(method_not_allowed_response());
+    };
+    let raw_path = target.split('?').next().unwrap_or_default();
+    let decoded = percent_decode_path(raw_path)?;
+    let relative = decoded.trim_start_matches('/');
+    if !relative.is_empty() && !safe_relative_path(relative) {
+        return Ok(error_response(403, "Forbidden", "Forbidden"));
+    }
+    let requested = if relative.is_empty() {
+        fallback_entry
+    } else {
+        relative
+    };
+    let (path, response_path) = match resolve_required_file(root, requested) {
+        Ok(path) => (path, requested),
+        Err(error)
+            if matches!(
+                error.code,
+                "frontend_required_file_missing" | "frontend_required_file_invalid"
+            ) =>
+        {
+            (resolve_required_file(root, fallback_entry)?, fallback_entry)
+        }
+        Err(error) => return Err(error),
+    };
+    let body = read_bounded_regular_file(
+        &path,
+        MAX_RESPONSE_BODY_BYTES,
+        "Workbench SPA response file",
+    )?;
+    Ok(HttpResponse {
+        status: 200,
+        reason: "OK",
+        headers: vec![(
+            "Content-Type".to_owned(),
+            content_type(response_path).to_owned(),
+        )],
+        body,
+        head_only: method == "HEAD",
+    })
+}
+
+fn request_method_and_target(
+    request: &[u8],
+) -> Result<Option<(&str, &str)>, FrontendContractError> {
+    let text = std::str::from_utf8(request).map_err(|error| {
+        FrontendContractError::new(
+            "viewer_server_request_invalid",
+            format!("Viewer request headers are not UTF-8: {error}"),
+        )
+    })?;
+    let line = text.lines().next().ok_or_else(|| {
+        FrontendContractError::new(
+            "viewer_server_request_invalid",
+            "Viewer request line is missing",
+        )
+    })?;
+    let mut fields = line.split_ascii_whitespace();
+    let method = fields.next().unwrap_or_default();
+    let target = fields.next().unwrap_or_default();
+    let version = fields.next().unwrap_or_default();
+    if fields.next().is_some()
+        || !matches!(method, "GET" | "HEAD")
+        || !matches!(version, "HTTP/1.0" | "HTTP/1.1")
+        || !target.starts_with('/')
+    {
+        return Ok(None);
+    }
+    Ok(Some((method, target)))
+}
+
+fn method_not_allowed_response() -> HttpResponse {
+    error_response(
+        405,
+        "Method Not Allowed",
+        "Only bounded GET and HEAD requests are supported",
+    )
+}
+
 fn allowed_relative_path(relative: &str, prefixes: &[String]) -> bool {
+    safe_relative_path(relative) && prefixes.iter().any(|prefix| relative.starts_with(prefix))
+}
+
+fn safe_relative_path(relative: &str) -> bool {
     if relative.is_empty()
         || relative.len() > 1024
-        || relative.contains('\0')
         || relative.contains('\\')
+        || relative.chars().any(char::is_control)
         || relative.split('/').any(|part| part.starts_with('.'))
         || !Path::new(relative)
             .components()
@@ -452,7 +551,7 @@ fn allowed_relative_path(relative: &str, prefixes: &[String]) -> bool {
     {
         return false;
     }
-    prefixes.iter().any(|prefix| relative.starts_with(prefix))
+    true
 }
 
 fn percent_decode_path(value: &str) -> Result<String, FrontendContractError> {
@@ -611,8 +710,8 @@ mod tests {
 
     use super::{
         allowed_relative_path, content_type, percent_decode_path, route_request,
-        route_request_with_policy, validate_scoped_policy, validate_viewer_server_source,
-        ViewerServerSourceV1,
+        route_request_with_policy, route_spa_request, validate_scoped_policy, validate_spa_policy,
+        validate_viewer_server_source, ViewerServerSourceV1,
     };
 
     static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -774,5 +873,61 @@ mod tests {
         }
 
         std::fs::remove_dir_all(root).expect("remove prototype router fixture");
+    }
+
+    #[test]
+    fn spa_router_serves_emitted_assets_and_falls_back_without_repo_escape() {
+        let root = std::env::temp_dir().join(format!(
+            "structural-workbench-spa-router-test-{}-{}",
+            std::process::id(),
+            TEST_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::create_dir_all(root.join("assets")).expect("create SPA asset fixture");
+        std::fs::create_dir_all(root.join("src/structure-viewer"))
+            .expect("create Viewer delivery fixture");
+        std::fs::write(root.join("index.html"), b"<html>workbench</html>\n")
+            .expect("write SPA fallback");
+        std::fs::write(root.join("assets/app.js"), b"const app = true;\n")
+            .expect("write SPA asset");
+        std::fs::write(
+            root.join("src/structure-viewer/index.html"),
+            b"<html>viewer</html>\n",
+        )
+        .expect("write Viewer delivery");
+        assert!(validate_spa_policy("index.html").is_ok());
+        assert!(validate_spa_policy("../index.html").is_err());
+
+        for (target, expected) in [
+            ("/", b"<html>workbench</html>\n".as_slice()),
+            ("/unknown/route", b"<html>workbench</html>\n".as_slice()),
+            ("/assets/app.js", b"const app = true;\n".as_slice()),
+            (
+                "/src/structure-viewer/index.html",
+                b"<html>viewer</html>\n".as_slice(),
+            ),
+        ] {
+            let request = format!("GET {target} HTTP/1.1\r\nHost: localhost\r\n\r\n");
+            let response = route_spa_request(&root, "index.html", request.as_bytes())
+                .expect("route SPA request");
+            assert_eq!(response.status, 200);
+            assert_eq!(response.body, expected);
+        }
+
+        let forbidden = route_spa_request(
+            &root,
+            "index.html",
+            b"GET /%2e%2e/secret.txt HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        )
+        .expect("route SPA escape");
+        assert_eq!(forbidden.status, 403);
+        let method = route_spa_request(
+            &root,
+            "index.html",
+            b"POST / HTTP/1.1\r\nHost: localhost\r\n\r\n",
+        )
+        .expect("route unsupported method");
+        assert_eq!(method.status, 405);
+
+        std::fs::remove_dir_all(root).expect("remove SPA router fixture");
     }
 }

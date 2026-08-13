@@ -108,5 +108,5 @@ jobs:
       - name: Rust-orchestrated Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke
 
-      - name: Workbench v2 E2E
+      - name: Rust-orchestrated Workbench v2 E2E
         run: npm run verify:workbench-v2-e2e

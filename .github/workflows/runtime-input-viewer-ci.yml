@@ -19,7 +19,11 @@ on:
       - "src/structure-viewer/viewer-story-analysis-panel.js"
       - "implementation/phase1/generate_selfcontained_viewer.py"
       - "implementation/phase1/release_viewer_bundler.py"
-      - "scripts/verify-workbench-v2-e2e.mjs"
+      - "native/Cargo.toml"
+      - "native/Cargo.lock"
+      - "native/crates/structural-frontend-contract/**"
+      - "native/decommission/legacy-frontend-build-contract-v1.json"
+      - "package.json"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
@@ -50,7 +54,11 @@ on:
       - "src/structure-viewer/viewer-story-analysis-panel.js"
       - "implementation/phase1/generate_selfcontained_viewer.py"
       - "implementation/phase1/release_viewer_bundler.py"
-      - "scripts/verify-workbench-v2-e2e.mjs"
+      - "native/Cargo.toml"
+      - "native/Cargo.lock"
+      - "native/crates/structural-frontend-contract/**"
+      - "native/decommission/legacy-frontend-build-contract-v1.json"
+      - "package.json"
       - "scripts/verify_quality_gate.py"
       - "tests/frontend/workbench-v2-*.spec.ts"
       - "tests/test_midas_mgt_nodal_load_contract.py"
@@ -166,7 +174,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Workbench v2 guarded E2E
+      - name: Rust-orchestrated Workbench v2 guarded E2E
         run: |
           set +e
           npm run verify:workbench-v2-e2e > workbench-v2-e2e.log 2>&1

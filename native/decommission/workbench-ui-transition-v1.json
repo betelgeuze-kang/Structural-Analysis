@@ -38,6 +38,7 @@
       "structural-frontend-contract delivery",
       "structural-frontend-contract prototype",
       "structural-frontend-contract prototype-browser-smoke",
+      "structural-frontend-contract workbench-v2-browser-smoke",
       "structural-frontend-contract browser-smoke",
       "structural-frontend-contract serve",
       "structural-frontend-contract viewer-manifest"
@@ -49,7 +50,11 @@
       "browser_smoke_browser_required": true,
       "prototype_browser_smoke_node_required": true,
       "prototype_browser_smoke_playwright_required": true,
-      "prototype_browser_smoke_browser_required": true
+      "prototype_browser_smoke_browser_required": true,
+      "workbench_v2_browser_smoke_build_node_required": true,
+      "workbench_v2_browser_smoke_node_required": true,
+      "workbench_v2_browser_smoke_playwright_required": true,
+      "workbench_v2_browser_smoke_browser_required": true
     },
     "runtime_python_required": false,
     "runtime_node_required": false,
@@ -70,7 +75,7 @@
       "src_ts_tsx_files": 43,
       "src_js_mjs_files": 83,
       "frontend_ts_tsx_test_files": 9,
-      "node_js_mjs_script_files": 15,
+      "node_js_mjs_script_files": 14,
       "js_mjs_test_files": 2
     },
     "active_node_workflows": [
@@ -136,5 +141,5 @@
     "native_result_error_checksum_parity_complete": false
   },
   "c6_complete": false,
-  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build orchestration, offline prototype static contract, Viewer and Workbench prototype browser-smoke wrappers and process lifetimes, scoped loopback serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript, Playwright, browser, and Node build/verification dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
+  "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, frontend clean-build orchestration, offline prototype static contract, Viewer, Workbench prototype, and Workbench v2 browser-smoke wrappers and process lifetimes, scoped loopback and SPA serving, and read-only browsing surfaces while keeping every active React/TypeScript/JavaScript, npm/Vite/TypeScript build, Playwright, browser, and Node dependency visible. It does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

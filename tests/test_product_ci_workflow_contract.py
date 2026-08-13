@@ -105,6 +105,25 @@ def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
         assert f'- "{path}"' in workflow
 
 
+def test_workbench_v2_e2e_routes_through_the_native_orchestrator() -> None:
+    frontend = _read("frontend-web-ci.yml")
+    runtime = _read("runtime-input-viewer-ci.yml")
+    nightly = _read("nightly-full-quality.yml")
+
+    assert "Rust-orchestrated Workbench v2 E2E" in frontend
+    assert "Rust-orchestrated Workbench v2 guarded E2E" in runtime
+    assert "Rust-orchestrated Workbench v2 browser regression" in nightly
+    assert "scripts/verify-workbench-v2-e2e.mjs" not in runtime
+    for path in (
+        "native/Cargo.toml",
+        "native/Cargo.lock",
+        "native/crates/structural-frontend-contract/**",
+        "native/decommission/legacy-frontend-build-contract-v1.json",
+        "package.json",
+    ):
+        assert runtime.count(f'- "{path}"') == 2
+
+
 def test_legacy_evidence_has_independent_hosted_lane() -> None:
     workflow = _read("legacy-evidence-ci.yml")
 

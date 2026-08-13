@@ -133,9 +133,11 @@ fn prepare_prototype_browser_smoke(
         "--reporter=line".to_owned(),
     ];
     let playwright_plan = PlaywrightPlan {
-        root: working_root,
+        root: working_root.clone(),
+        server_root: working_root,
         node_launcher: source.node_launcher.clone(),
         playwright_cli_path: source.playwright_cli_path.clone(),
+        playwright_cli_command_index: 1,
         logical_command,
         base_url_environment: source.base_url_environment.clone(),
         base_url_path: format!("/{}", source.server_path_prefix.trim_end_matches('/')),

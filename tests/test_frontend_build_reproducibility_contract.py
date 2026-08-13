@@ -51,6 +51,12 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "-p structural-frontend-contract -- prototype-browser-smoke --root ."
     )
     assert (
+        package_json["scripts"]["verify:workbench-v2-e2e"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- workbench-v2-browser-smoke --root ."
+    )
+    assert not (ROOT / "scripts" / "verify-workbench-v2-e2e.mjs").exists()
+    assert (
         package_json["scripts"]["serve:viewer"]
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
         "-p structural-frontend-contract -- serve --root ."
@@ -107,6 +113,8 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert "structural-frontend-contract prototype" in docs_text
     assert "npm run verify:workbench-prototype-browser-smoke" in docs_text
     assert "structural-frontend-contract prototype-browser-smoke" in docs_text
+    assert "npm run verify:workbench-v2-e2e" in docs_text
+    assert "structural-frontend-contract workbench-v2-browser-smoke" in docs_text
     assert "npm run serve:viewer" in docs_text
     assert "--dry-run" in docs_text
     assert "npm run verify:viewer-manifest" in docs_text
@@ -272,6 +280,55 @@ def test_native_workbench_prototype_browser_smoke_dry_run_is_process_free() -> N
     assert payload["direct_processes_spawned"] == 0
     assert payload["successful_exit_code"] is None
     assert payload["prototype_contract_receipt_hash"].startswith("sha256:")
+    assert payload["playwright_cli_sha256"] is None
+    assert payload["receipt_hash"].startswith("sha256:")
+
+
+def test_native_workbench_v2_browser_smoke_dry_run_is_process_free() -> None:
+    result = subprocess.run(
+        [
+            "npm",
+            "run",
+            "verify:workbench-v2-e2e",
+            "--silent",
+            "--",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == (
+        "structural-native-workbench-v2-browser-smoke-receipt.v1"
+    )
+    assert payload["execution_mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["build_command"] == ["npm", "run", "build"]
+    assert payload["build_environment"] == {"VITE_BASE_PATH": "/"}
+    assert payload["playwright_command"] == [
+        "node",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "tests/frontend/workbench-v2-e2e.spec.ts",
+        "tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts",
+        "tests/frontend/workbench-v2-live-provider-guard.spec.ts",
+        "tests/frontend/workbench-v2-job-contract.spec.ts",
+        "tests/frontend/workbench-v2-engineering-value-state.spec.ts",
+        "tests/frontend/workbench-v2-status-taxonomy.spec.ts",
+        "--reporter=line",
+    ]
+    assert payload["node_environment"] == {
+        "NODE_OPTIONS": "--loader=./scripts/json-module-loader.mjs"
+    }
+    assert len(payload["specifications"]) == 6
+    assert payload["loopback_listener_count"] == 0
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["successful_exit_codes"] == []
+    assert payload["delivery_receipt_hash"] is None
     assert payload["playwright_cli_sha256"] is None
     assert payload["receipt_hash"].startswith("sha256:")
 

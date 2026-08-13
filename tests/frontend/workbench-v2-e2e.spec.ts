@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 
-// End-to-end smoke for the Workbench v2 product shell. The runner builds and
-// serves dist; the embedded Viewer must resolve to its emitted production entry,
-// not to the server's Workbench SPA fallback.
+// End-to-end smoke for the Workbench v2 product shell. The Rust orchestrator
+// builds and serves dist with a confined SPA fallback; the embedded Viewer must
+// resolve to its emitted production entry, not to the Workbench fallback.
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const routeUrl = `${baseUrl}/#/workbench-v2`

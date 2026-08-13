@@ -10,10 +10,12 @@ use std::time::Duration;
 use structural_contracts::product_ir::sha256_identity;
 
 use super::viewer_server::{
-    handle_scoped_stream, handle_stream, validate_scoped_policy, validate_viewer_server_source,
-    ViewerServerSourceV1,
+    handle_scoped_stream, handle_spa_stream, handle_stream, validate_scoped_policy,
+    validate_spa_policy, validate_viewer_server_source, ViewerServerSourceV1,
 };
-use super::{read_bounded_regular_file, resolve_required_file, FrontendContractError};
+use super::{
+    read_bounded_regular_file, resolve_required_file, verify_real_directory, FrontendContractError,
+};
 
 const MAX_PLAYWRIGHT_CLI_BYTES: u64 = 4 * 1024 * 1024;
 const PROCESS_POLL_INTERVAL: Duration = Duration::from_millis(10);
@@ -25,12 +27,17 @@ pub(crate) enum PlaywrightServerRoute {
         allowed_path_prefix: String,
         root_redirect: String,
     },
+    Spa {
+        fallback_entry: String,
+    },
 }
 
 pub(crate) struct PlaywrightPlan {
     pub root: PathBuf,
+    pub server_root: PathBuf,
     pub node_launcher: String,
     pub playwright_cli_path: String,
+    pub playwright_cli_command_index: usize,
     pub logical_command: Vec<String>,
     pub base_url_environment: String,
     pub base_url_path: String,
@@ -49,6 +56,7 @@ pub(crate) struct PlaywrightExecution {
 pub(crate) enum PlaywrightErrorDomain {
     Viewer,
     WorkbenchPrototype,
+    WorkbenchV2,
 }
 
 pub(crate) fn map_playwright_error(
@@ -114,6 +122,36 @@ pub(crate) fn map_playwright_error(
         (PlaywrightErrorDomain::WorkbenchPrototype, "playwright_failed") => {
             "workbench_prototype_browser_smoke_failed"
         }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_plan_invalid") => {
+            "workbench_v2_browser_smoke_plan_invalid"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_server_panicked") => {
+            "workbench_v2_browser_smoke_server_panicked"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_bind_failed") => {
+            "workbench_v2_browser_smoke_bind_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_socket_config_failed") => {
+            "workbench_v2_browser_smoke_socket_config_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_launch_failed") => {
+            "workbench_v2_browser_smoke_launch_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_wait_failed") => {
+            "workbench_v2_browser_smoke_wait_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_server_failed") => {
+            "workbench_v2_browser_smoke_server_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_request_failed") => {
+            "workbench_v2_browser_smoke_request_failed"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_terminated") => {
+            "workbench_v2_browser_smoke_terminated"
+        }
+        (PlaywrightErrorDomain::WorkbenchV2, "playwright_failed") => {
+            "workbench_v2_browser_smoke_failed"
+        }
         _ => return error,
     };
     FrontendContractError::new(code, error.detail)
@@ -147,6 +185,7 @@ pub(crate) fn execute_playwright(
     plan: &PlaywrightPlan,
 ) -> Result<PlaywrightExecution, FrontendContractError> {
     validate_playwright_plan(plan)?;
+    verify_real_directory(&plan.server_root, "Playwright static-server root")?;
     let playwright_cli_path = resolve_required_file(&plan.root, &plan.playwright_cli_path)?;
     let playwright_cli = read_bounded_regular_file(
         &playwright_cli_path,
@@ -199,7 +238,15 @@ pub(crate) fn execute_playwright(
 pub(crate) fn validate_playwright_plan(plan: &PlaywrightPlan) -> Result<(), FrontendContractError> {
     let command_valid = (3..=16).contains(&plan.logical_command.len())
         && plan.logical_command.first() == Some(&plan.node_launcher)
-        && plan.logical_command.get(1) == Some(&plan.playwright_cli_path)
+        && (1..plan.logical_command.len()).contains(&plan.playwright_cli_command_index)
+        && plan.logical_command.get(plan.playwright_cli_command_index)
+            == Some(&plan.playwright_cli_path)
+        && plan
+            .logical_command
+            .iter()
+            .filter(|part| *part == &plan.playwright_cli_path)
+            .count()
+            == 1
         && plan.logical_command.iter().all(|part| {
             !part.is_empty() && part.len() <= 1024 && !part.chars().any(char::is_control)
         });
@@ -238,6 +285,7 @@ pub(crate) fn validate_playwright_plan(plan: &PlaywrightPlan) -> Result<(), Fron
             allowed_path_prefix,
             root_redirect,
         } => validate_scoped_policy(allowed_path_prefix, root_redirect),
+        PlaywrightServerRoute::Spa { fallback_entry } => validate_spa_policy(fallback_entry),
     }
 }
 
@@ -283,7 +331,7 @@ fn start_server(plan: &PlaywrightPlan) -> Result<BrowserServer, FrontendContract
     let stop = Arc::new(AtomicBool::new(false));
     let request_errors = Arc::new(AtomicU64::new(0));
     let (error_tx, error_rx) = mpsc::channel();
-    let root = plan.root.clone();
+    let root = plan.server_root.clone();
     let route = plan.server_route.clone();
     let server_stop = Arc::clone(&stop);
     let server_request_errors = Arc::clone(&request_errors);
@@ -300,6 +348,9 @@ fn start_server(plan: &PlaywrightPlan) -> Result<BrowserServer, FrontendContract
                             root_redirect,
                         } => {
                             handle_scoped_stream(&root, allowed_path_prefix, root_redirect, stream)
+                        }
+                        PlaywrightServerRoute::Spa { fallback_entry } => {
+                            handle_spa_stream(&root, fallback_entry, stream)
                         }
                     };
                     if result.is_err() {
@@ -390,8 +441,10 @@ mod tests {
     fn execution_plan_rejects_command_environment_and_base_path_drift() {
         let mut plan = PlaywrightPlan {
             root: PathBuf::from("."),
+            server_root: PathBuf::from("."),
             node_launcher: "node".to_owned(),
             playwright_cli_path: "node_modules/@playwright/test/cli.js".to_owned(),
+            playwright_cli_command_index: 1,
             logical_command: vec![
                 "node".to_owned(),
                 "node_modules/@playwright/test/cli.js".to_owned(),
@@ -428,5 +481,10 @@ mod tests {
             prototype.code,
             "workbench_prototype_browser_smoke_bind_failed"
         );
+        let workbench_v2 = map_playwright_error(
+            PlaywrightErrorDomain::WorkbenchV2,
+            FrontendContractError::new("playwright_failed", "failed"),
+        );
+        assert_eq!(workbench_v2.code, "workbench_v2_browser_smoke_failed");
     }
 }

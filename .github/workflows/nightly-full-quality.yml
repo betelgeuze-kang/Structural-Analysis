@@ -56,7 +56,7 @@ jobs:
       - name: Deterministic Python regression suite
         run: python -m pytest -q
 
-      - name: Workbench v2 browser regression
+      - name: Rust-orchestrated Workbench v2 browser regression
         run: npm run verify:workbench-v2-e2e
 
       - name: Viewer report contract

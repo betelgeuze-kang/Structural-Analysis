@@ -178,5 +178,9 @@ npm run build:evidence-bundle -- --check   # consistency check (no write)
 npm run verify:evidence-bundle-contract    # offline gate contract test
 ```
 
-End-to-end specs live in `tests/frontend/workbench-v2-e2e.spec.ts` and run in the
-Frontend Web CI workflow.
+The end-to-end suite starts with `tests/frontend/workbench-v2-e2e.spec.ts` and runs through
+`npm run verify:workbench-v2-e2e` in Frontend Web CI. That package command enters the Rust-native
+`structural-frontend-contract workbench-v2-browser-smoke` lifecycle: Rust owns the fixed build
+environment, delivery post-check, confined `dist/` SPA server, direct Playwright child, and
+canonical receipt. npm/Vite/TypeScript, Node, Playwright, Chromium, and the React application remain
+required transitional runtimes; this orchestration receipt is not native UI parity or C6 evidence.

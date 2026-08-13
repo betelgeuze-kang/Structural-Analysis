@@ -108,7 +108,7 @@ def test_legacy_workbench_ui_changes_route_through_native_transition_gate() -> N
         [
             "src/workbench-v2/WorkbenchPage.tsx",
             "src/structure-viewer/viewer-shell.js",
-            "scripts/verify-workbench-v2-e2e.mjs",
+            "native/crates/structural-frontend-contract/src/workbench_v2_browser_smoke.rs",
             ".github/workflows/frontend-web-ci.yml",
             "package.json",
         ]
