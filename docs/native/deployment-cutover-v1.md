@@ -14,7 +14,7 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate command. Distribution E2E v15 proves repeated edited
+provenance-bound `model-edit-node` coordinate command. Distribution E2E v16 proves repeated edited
 model/receipt bytes and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
@@ -22,6 +22,10 @@ same installed-package gate now also executes the ModelIR linear staged/restart/
 path and binds typed recovery, external comparison, deterministic PDF and both report receipts. It
 also proves repeated `en-US`/`ko-KR` embedded-font sparse PDF exports, locale separation and
 durable-session nonmutation from the installed package.
+The v16 addition also runs the exact normalized cantilever MGT through the ModelIR-linear profile,
+simulates process death after its one-iteration checkpoint, proves restart/direct artifact-tree
+identity, and binds the original source, normalized import health, typed recovery, PDF/receipts and
+non-promoting operator handoff.
 This does not
 promote the rootfs diagnostic into general
 visual-editing, 3D result exploration, or customer-image evidence.
@@ -51,15 +55,18 @@ scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> --receipt <RECEIPT.
 
 The last command is a Docker-independent Linux diagnostic harness. It places the verified bundle
 under a read-only bind mount, unshares user/mount/network namespaces, maps the runtime to UID/GID
-65532, clears `PATH`, runs the ModelIR, MGT and ModelIR-linear Workbench workflows, and asks the Rust installer to
+65532, clears `PATH`, runs the ModelIR, MGT, ModelIR-linear and exact normalized-MGT-linear
+Workbench workflows, and asks the Rust installer to
 emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact receipt requires
 `EROFS` from both root and payload write probes, a writable operator workspace, only `lo`, zero
 IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
 artifacts. Its append-only v4 adds typed linear recovery, external comparison, deterministic PDF,
 document source, PDF/report receipts and inspect/review/export identities. The append-only v5 adds
 repeated `en-US`/`ko-KR` embedded-font sparse PDF export, exact installed font/license/provenance,
-locale separation and durable-session nonmutation while preserving frozen v1 through v4
-verification. It also verifies self-hashed benchmark-catalog and copied-evidence views, including the
+locale separation and durable-session nonmutation. The append-only v6 binds the exact MGT-linear
+source, normalized import health, ResultIR/recovery/comparison, PDF/document, PDF/report receipts
+and inspect/review/export identities while preserving frozen v1 through v5 verification. It also
+verifies self-hashed benchmark-catalog and copied-evidence views, including the
 non-promoting geometry/no-runner and ready/blocked/unavailable boundaries. Its contract fixes
 `container_image_built=false` and `customer_image_receipt=false`; browsing does not generate or
 approve evidence.

@@ -159,6 +159,7 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--workbench-root",
             "--mgt-workbench-root",
             "--model-ir-linear-workbench-root",
+            "--mgt-model-ir-linear-workbench-root",
             "--workbench-inspect-before-review",
             "--workbench-review-show",
             "--workbench-inspect-after-review",
@@ -171,6 +172,10 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-ir-linear-workbench-review-show",
             "--model-ir-linear-workbench-inspect-after-review",
             "--model-ir-linear-workbench-export",
+            "--mgt-model-ir-linear-workbench-inspect-before-review",
+            "--mgt-model-ir-linear-workbench-review-show",
+            "--mgt-model-ir-linear-workbench-inspect-after-review",
+            "--mgt-model-ir-linear-workbench-export",
             "--model-ir-linear-workbench-session-before-localized-pdf",
             "--model-ir-linear-localized-pdf-en-us-first-root",
             "--model-ir-linear-localized-pdf-en-us-second-root",
@@ -188,6 +193,8 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
     let mgt_workbench_root = required_path(options, "--mgt-workbench-root")?;
     let model_ir_linear_workbench_root =
         required_path(options, "--model-ir-linear-workbench-root")?;
+    let mgt_model_ir_linear_workbench_root =
+        required_path(options, "--mgt-model-ir-linear-workbench-root")?;
     let workbench_inspect_before_review =
         required_path(options, "--workbench-inspect-before-review")?;
     let workbench_review_show = required_path(options, "--workbench-review-show")?;
@@ -208,6 +215,18 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-ir-linear-workbench-inspect-after-review")?;
     let model_ir_linear_workbench_export =
         required_path(options, "--model-ir-linear-workbench-export")?;
+    let mgt_model_ir_linear_workbench_inspect_before_review = required_path(
+        options,
+        "--mgt-model-ir-linear-workbench-inspect-before-review",
+    )?;
+    let mgt_model_ir_linear_workbench_review_show =
+        required_path(options, "--mgt-model-ir-linear-workbench-review-show")?;
+    let mgt_model_ir_linear_workbench_inspect_after_review = required_path(
+        options,
+        "--mgt-model-ir-linear-workbench-inspect-after-review",
+    )?;
+    let mgt_model_ir_linear_workbench_export =
+        required_path(options, "--mgt-model-ir-linear-workbench-export")?;
     let model_ir_linear_workbench_session_before_localized_pdf = required_path(
         options,
         "--model-ir-linear-workbench-session-before-localized-pdf",
@@ -230,6 +249,7 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         workbench_root: &workbench_root,
         mgt_workbench_root: &mgt_workbench_root,
         model_ir_linear_workbench_root: &model_ir_linear_workbench_root,
+        mgt_model_ir_linear_workbench_root: &mgt_model_ir_linear_workbench_root,
         workbench_inspect_before_review: &workbench_inspect_before_review,
         workbench_review_show: &workbench_review_show,
         workbench_inspect_after_review: &workbench_inspect_after_review,
@@ -244,6 +264,12 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_ir_linear_workbench_inspect_after_review:
             &model_ir_linear_workbench_inspect_after_review,
         model_ir_linear_workbench_export: &model_ir_linear_workbench_export,
+        mgt_model_ir_linear_workbench_inspect_before_review:
+            &mgt_model_ir_linear_workbench_inspect_before_review,
+        mgt_model_ir_linear_workbench_review_show: &mgt_model_ir_linear_workbench_review_show,
+        mgt_model_ir_linear_workbench_inspect_after_review:
+            &mgt_model_ir_linear_workbench_inspect_after_review,
+        mgt_model_ir_linear_workbench_export: &mgt_model_ir_linear_workbench_export,
         model_ir_linear_workbench_session_before_localized_pdf:
             &model_ir_linear_workbench_session_before_localized_pdf,
         model_ir_linear_localized_pdf_en_us_first_root:
@@ -347,7 +373,7 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --model-ir-linear-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --model-ir-linear-workbench-inspect-before-review FILE --model-ir-linear-workbench-review-show FILE --model-ir-linear-workbench-inspect-after-review FILE --model-ir-linear-workbench-export FILE --model-ir-linear-workbench-session-before-localized-pdf FILE --model-ir-linear-localized-pdf-en-us-first-root DIR --model-ir-linear-localized-pdf-en-us-second-root DIR --model-ir-linear-localized-pdf-ko-kr-first-root DIR --model-ir-linear-localized-pdf-ko-kr-second-root DIR --workbench-catalog FILE --workbench-evidence FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
+    "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --model-ir-linear-workbench-root DIR --mgt-model-ir-linear-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --model-ir-linear-workbench-inspect-before-review FILE --model-ir-linear-workbench-review-show FILE --model-ir-linear-workbench-inspect-after-review FILE --model-ir-linear-workbench-export FILE --mgt-model-ir-linear-workbench-inspect-before-review FILE --mgt-model-ir-linear-workbench-review-show FILE --mgt-model-ir-linear-workbench-inspect-after-review FILE --mgt-model-ir-linear-workbench-export FILE --model-ir-linear-workbench-session-before-localized-pdf FILE --model-ir-linear-localized-pdf-en-us-first-root DIR --model-ir-linear-localized-pdf-en-us-second-root DIR --model-ir-linear-localized-pdf-ko-kr-first-root DIR --model-ir-linear-localized-pdf-ko-kr-second-root DIR --workbench-catalog FILE --workbench-evidence FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
 }
 
 #[cfg(test)]

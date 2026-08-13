@@ -65,6 +65,10 @@ linear_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_m
 linear_request="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
+mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
+mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"
+mgt_linear_external="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_external_v1.json"
+mgt_linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_language_neutral_oracle_v1.txt"
 
 unshare -Urn bwrap \
   --ro-bind / / \
@@ -129,6 +133,28 @@ unshare -Urn bwrap \
       > /mnt/model-ir-linear-inspect-after-review.json
     /opt/payload/bin/structural-workbench export --workspace /mnt/model-ir-linear-workbench \
       > /mnt/model-ir-linear-export.json
+    /opt/payload/bin/structural-workbench workflow-mgt-model-linear "${12}" "${13}" \
+      --model-id workbench-mgt-linear-cantilever-v1 \
+      --external-result "${14}" --source-artifact "${15}" \
+      --workspace /mnt/mgt-model-ir-linear-workbench --step-budget 1 \
+      > /mnt/mgt-model-ir-linear-workflow.json
+    /opt/payload/bin/structural-workbench inspect \
+      --workspace /mnt/mgt-model-ir-linear-workbench \
+      > /mnt/mgt-model-ir-linear-inspect-before-review.json
+    /opt/payload/bin/structural-workbench review \
+      --workspace /mnt/mgt-model-ir-linear-workbench \
+      --decision review --reviewer native-rootfs-c5 \
+      --comment "Explicit isolated C5 handoff review; no engineering approval is inferred." \
+      > /mnt/mgt-model-ir-linear-review-publish.json
+    /opt/payload/bin/structural-workbench review-show \
+      --workspace /mnt/mgt-model-ir-linear-workbench \
+      > /mnt/mgt-model-ir-linear-review-show.json
+    /opt/payload/bin/structural-workbench inspect \
+      --workspace /mnt/mgt-model-ir-linear-workbench \
+      > /mnt/mgt-model-ir-linear-inspect-after-review.json
+    /opt/payload/bin/structural-workbench export \
+      --workspace /mnt/mgt-model-ir-linear-workbench \
+      > /mnt/mgt-model-ir-linear-export.json
     /bin/cp /mnt/model-ir-linear-workbench/workbench-session.json \
       /mnt/model-ir-linear-session-before-localized-pdf.json
     for locale in en-US ko-KR; do
@@ -168,6 +194,7 @@ unshare -Urn bwrap \
       --workbench-root /mnt/modelir-workbench \
       --mgt-workbench-root /mnt/mgt-workbench \
       --model-ir-linear-workbench-root /mnt/model-ir-linear-workbench \
+      --mgt-model-ir-linear-workbench-root /mnt/mgt-model-ir-linear-workbench \
       --workbench-inspect-before-review /mnt/modelir-inspect-before-review.json \
       --workbench-review-show /mnt/modelir-review-show.json \
       --workbench-inspect-after-review /mnt/modelir-inspect-after-review.json \
@@ -182,6 +209,13 @@ unshare -Urn bwrap \
       --model-ir-linear-workbench-inspect-after-review \
         /mnt/model-ir-linear-inspect-after-review.json \
       --model-ir-linear-workbench-export /mnt/model-ir-linear-export.json \
+      --mgt-model-ir-linear-workbench-inspect-before-review \
+        /mnt/mgt-model-ir-linear-inspect-before-review.json \
+      --mgt-model-ir-linear-workbench-review-show \
+        /mnt/mgt-model-ir-linear-review-show.json \
+      --mgt-model-ir-linear-workbench-inspect-after-review \
+        /mnt/mgt-model-ir-linear-inspect-after-review.json \
+      --mgt-model-ir-linear-workbench-export /mnt/mgt-model-ir-linear-export.json \
       --model-ir-linear-workbench-session-before-localized-pdf \
         /mnt/model-ir-linear-session-before-localized-pdf.json \
       --model-ir-linear-localized-pdf-en-us-first-root \
@@ -199,7 +233,8 @@ unshare -Urn bwrap \
   ' structural-rootfs-e2e \
     "$model" "$request" "$external" "$source_artifact" "$mgt_source" "$mgt_request" \
     "$evidence_bundle" "$linear_model" "$linear_request" "$linear_external" \
-    "$linear_source_artifact"
+    "$linear_source_artifact" "$mgt_linear_source" "$mgt_linear_request" \
+    "$mgt_linear_external" "$mgt_linear_source_artifact"
 
 "$installer" runtime-receipt-verify \
   --receipt "$e2e_root/rootfs-isolation-receipt.json" \

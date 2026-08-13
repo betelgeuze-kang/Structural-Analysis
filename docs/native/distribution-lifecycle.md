@@ -106,8 +106,12 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 15. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
     embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
     receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
-16. installs an immutable update, rolls back and re-verifies activation;
-17. emits an append-only v15 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+16. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
+    restores the validated session after creating a one-iteration PCG checkpoint to simulate
+    process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
+    exercises the same non-promoting inspect/review/reopen/export surface;
+17. installs an immutable update, rolls back and re-verifies activation;
+18. emits an append-only v16 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
@@ -116,9 +120,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
-   count 0, plus the localized ModelIR-linear PDF and receipt identities. The receipt checker
-   continues to accept frozen v1 through v14 receipts without treating them as v15 localized
-   ModelIR-linear PDF authority.
+   count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
+   source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
+   The receipt checker continues to accept frozen v1 through v15 receipts without treating them as
+   v16 normalized-MGT-linear package authority.
 
 The reference command is:
 
@@ -134,26 +139,32 @@ scripts/run_native_rootfs_isolation_e2e.sh --bundle <BUNDLE> \
 ```
 
 On Linux hosts that permit unprivileged namespaces, the rootfs harness executes the bounded
-ModelIR/NDTHA, normalized-MGT-to-NDTHA and ModelIR-linear Workbench profiles from the verified CPU
-bundle as UID/GID 65532 with an empty lookup path, a read-only root
-and payload, a writable operator workspace, and only loopback networking. Both profiles also run
+ModelIR/NDTHA, normalized-MGT-to-NDTHA, ModelIR-linear and the exact
+normalized-MGT-to-ModelIR-linear Workbench profiles from the verified CPU bundle as UID/GID 65532
+with an empty lookup path, a read-only root and payload, a writable operator workspace, and only
+loopback networking. All four profiles also run
 inspect, an explicit non-promoting `review`, review reopen, post-review inspect and handoff export.
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v5 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v6 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
 The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
 deterministic PDF, document source, PDF/report receipts and inspect/review/export identities. The
 append-only v5 receipt additionally binds repeated `en-US`/`ko-KR` embedded-font sparse PDF and
 typed receipt identities, exact installed TTF/OFL/provenance bytes, locale separation and durable
-session nonmutation. The installer continues to verify frozen v1 through v4 rootfs receipts against
-their original bundles and claim boundaries; v3 first carried catalog/evidence surface evidence,
-v4 first carried the ModelIR-linear surface, and only v5 carries its localized PDF surface.
+session nonmutation. The append-only v6 receipt additionally binds the original MGT bytes,
+normalized import health, typed recovery, external comparison, deterministic PDF/document and
+PDF/report receipts plus inspect/review/export identities for the exact MGT-linear profile. The
+installer continues to verify frozen v1 through v5 rootfs receipts against their original bundles
+and claim boundaries; v3 first carried catalog/evidence surface evidence, v4 first carried the
+ModelIR-linear surface, v5 first carried its localized PDF surface, and only v6 carries the exact
+normalized-MGT-linear isolated surface.
 
-The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA and
-frame3d/truss3d ModelIR-linear Workbench profiles. General native UI/MGT coverage,
+The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
+frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.
+General native UI/MGT coverage,
 React/TypeScript deletion, live external-solver
 execution, signing, cross-platform installers, remote update transport, release retention and
 final C6 removal remain open.

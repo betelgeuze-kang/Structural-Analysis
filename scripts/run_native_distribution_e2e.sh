@@ -174,6 +174,54 @@ grep -Fq '"schema_version":"structural-native-model-ir-linear-pdf-report-receipt
   "$linear_direct/06-report/report-receipt.json"
 diff -r "$linear_restarted" "$linear_direct" > "$e2e_root/model-ir-linear-workbench-diff.txt"
 
+mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
+mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"
+mgt_linear_external="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_external_v1.json"
+mgt_linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_language_neutral_oracle_v1.txt"
+mgt_linear_restarted="$e2e_root/mgt-model-ir-linear-workbench-restarted"
+mgt_linear_direct="$e2e_root/mgt-model-ir-linear-workbench-direct"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" import-mgt-model-linear \
+  "$mgt_linear_source" "$mgt_linear_request" \
+  --model-id workbench-mgt-linear-cantilever-v1 \
+  --external-result "$mgt_linear_external" \
+  --source-artifact "$mgt_linear_source_artifact" --workspace "$mgt_linear_restarted" \
+  > "$e2e_root/mgt-model-ir-linear-import.json"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" validate \
+  --workspace "$mgt_linear_restarted" > "$e2e_root/mgt-model-ir-linear-validate.json"
+cp -- "$mgt_linear_restarted/workbench-session.json" \
+  "$e2e_root/mgt-model-ir-linear-validated-session.json"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" run \
+  --workspace "$mgt_linear_restarted" --step-budget 1 \
+  > "$e2e_root/mgt-model-ir-linear-run.json"
+test -s "$mgt_linear_restarted/03-run/checkpoint.mlpcp"
+cp -- "$e2e_root/mgt-model-ir-linear-validated-session.json" \
+  "$mgt_linear_restarted/workbench-session.json"
+for stage in resume compare report; do
+  stage_arguments=("$stage" --workspace "$mgt_linear_restarted")
+  if [[ "$stage" == "compare" ]]; then
+    stage_arguments+=(--require-pass)
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" "${stage_arguments[@]}" \
+    > "$e2e_root/mgt-model-ir-linear-$stage.json"
+done
+env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-mgt-model-linear \
+  "$mgt_linear_source" "$mgt_linear_request" \
+  --model-id workbench-mgt-linear-cantilever-v1 \
+  --external-result "$mgt_linear_external" \
+  --source-artifact "$mgt_linear_source_artifact" --workspace "$mgt_linear_direct" \
+  --step-budget 1 > "$e2e_root/mgt-model-ir-linear-workflow.json"
+grep -Fq '"stage":"reported"' "$e2e_root/mgt-model-ir-linear-workflow.json"
+grep -Fq '"analysis_profile":"model_ir_linear_cpu_v1"' \
+  "$mgt_linear_direct/workbench-session.json"
+grep -Fq '"status":"normalized"' "$mgt_linear_direct/01-import/import-health.json"
+grep -Fq '"schema_version":"structural-native-sparse-linear-pdf-report-receipt.v1"' \
+  "$mgt_linear_direct/06-report/pdf-receipt.json"
+grep -Fq '"schema_version":"structural-native-model-ir-linear-pdf-report-receipt.v1"' \
+  "$mgt_linear_direct/06-report/report-receipt.json"
+cmp "$mgt_linear_source" "$mgt_linear_direct/01-import/source.mgt"
+diff -r "$mgt_linear_restarted" "$mgt_linear_direct" \
+  > "$e2e_root/mgt-model-ir-linear-workbench-diff.txt"
+
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 mgt_restarted="$e2e_root/mgt-workbench-restarted"
@@ -221,6 +269,7 @@ exercise_operator_surface() {
 }
 exercise_operator_surface workbench "$direct"
 exercise_operator_surface model-ir-linear-workbench "$linear_direct"
+exercise_operator_surface mgt-model-ir-linear-workbench "$mgt_linear_direct"
 exercise_operator_surface mgt-workbench "$mgt_direct"
 
 exercise_localized_pdf_surface() {
@@ -639,6 +688,15 @@ linear_localized_pdf_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-localize
 linear_localized_pdf_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-ko-KR-first/report.pdf" | awk '{print $1}')"
 linear_localized_pdf_en_us_receipt_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-en-US-first/pdf-receipt.json" | awk '{print $1}')"
 linear_localized_pdf_ko_kr_receipt_hash="$(sha256sum "$e2e_root/model-ir-linear-localized-pdf-ko-KR-first/pdf-receipt.json" | awk '{print $1}')"
+mgt_linear_source_hash="$(sha256sum "$mgt_linear_direct/01-import/source.mgt" | awk '{print $1}')"
+mgt_linear_health_hash="$(sha256sum "$mgt_linear_direct/01-import/import-health.json" | awk '{print $1}')"
+mgt_linear_result_hash="$(sha256sum "$mgt_linear_direct/04-resume/result-ir.json" | awk '{print $1}')"
+mgt_linear_recovery_hash="$(sha256sum "$mgt_linear_direct/04-resume/result-recovery-ir.json" | awk '{print $1}')"
+mgt_linear_report_hash="$(sha256sum "$mgt_linear_direct/06-report/report.pdf" | awk '{print $1}')"
+mgt_linear_pdf_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
+mgt_linear_report_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
+mgt_linear_workbench_review_hash="$(sha256sum "$mgt_linear_direct/07-review/review.json" | awk '{print $1}')"
+mgt_linear_workbench_export_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-workbench-export.json" | awk '{print $1}')"
 mgt_source_hash="$(sha256sum "$mgt_direct/01-import/source.mgt" | awk '{print $1}')"
 mgt_health_hash="$(sha256sum "$mgt_direct/01-import/import-health.json" | awk '{print $1}')"
 mgt_result_hash="$(sha256sum "$mgt_direct/04-resume/result-ir.json" | awk '{print $1}')"
@@ -691,6 +749,10 @@ v15_receipt_json="${v14_receipt_json/structural-native-distribution-e2e.v14/stru
 linear_localized_pdf_fields="\"model_ir_linear_localized_pdf_surface_passed\":true,\"model_ir_linear_localized_pdf_en_us_sha256\":\"sha256:$linear_localized_pdf_en_us_hash\",\"model_ir_linear_localized_pdf_ko_kr_sha256\":\"sha256:$linear_localized_pdf_ko_kr_hash\",\"model_ir_linear_localized_pdf_en_us_receipt_sha256\":\"sha256:$linear_localized_pdf_en_us_receipt_hash\",\"model_ir_linear_localized_pdf_ko_kr_receipt_sha256\":\"sha256:$linear_localized_pdf_ko_kr_receipt_hash\","
 v15_receipt_json="${v15_receipt_json/\"mgt_workbench_restart_passed\":true,/${linear_localized_pdf_fields}\"mgt_workbench_restart_passed\":true,}"
 printf '%s\n' "$v15_receipt_json" > "$temporary_receipt"
+v16_receipt_json="${v15_receipt_json/structural-native-distribution-e2e.v15/structural-native-distribution-e2e.v16}"
+mgt_linear_receipt_fields="\"mgt_model_ir_linear_workbench_restart_passed\":true,\"mgt_model_ir_linear_workbench_direct_parity_passed\":true,\"mgt_model_ir_linear_workbench_operator_surface_passed\":true,\"mgt_model_ir_linear_workbench_review_decision\":\"review\",\"mgt_model_ir_linear_workbench_review_sha256\":\"sha256:$mgt_linear_workbench_review_hash\",\"mgt_model_ir_linear_workbench_export_sha256\":\"sha256:$mgt_linear_workbench_export_hash\",\"mgt_model_ir_linear_source_sha256\":\"sha256:$mgt_linear_source_hash\",\"mgt_model_ir_linear_import_health_sha256\":\"sha256:$mgt_linear_health_hash\",\"mgt_model_ir_linear_result_ir_sha256\":\"sha256:$mgt_linear_result_hash\",\"mgt_model_ir_linear_result_recovery_ir_sha256\":\"sha256:$mgt_linear_recovery_hash\",\"mgt_model_ir_linear_report_pdf_sha256\":\"sha256:$mgt_linear_report_hash\",\"mgt_model_ir_linear_pdf_receipt_sha256\":\"sha256:$mgt_linear_pdf_receipt_hash\",\"mgt_model_ir_linear_report_receipt_sha256\":\"sha256:$mgt_linear_report_receipt_hash\","
+v16_receipt_json="${v16_receipt_json/\"mgt_workbench_restart_passed\":true,/${mgt_linear_receipt_fields}\"mgt_workbench_restart_passed\":true,}"
+printf '%s\n' "$v16_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

@@ -30,7 +30,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V1: &str = "structural-native-rootfs-isolati
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V2: &str = "structural-native-rootfs-isolation-e2e.v2";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V3: &str = "structural-native-rootfs-isolation-e2e.v3";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V4: &str = "structural-native-rootfs-isolation-e2e.v4";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v5";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V5: &str = "structural-native-rootfs-isolation-e2e.v5";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v6";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -47,7 +48,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V1: &str = "This source-bound local C5 diagn
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V2: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, and handoff export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V3: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The exact MGT-linear flow binds original source bytes, normalized import health, typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. The ModelIR-linear flow also binds localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -132,6 +134,7 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub workbench_root: &'a Path,
     pub mgt_workbench_root: &'a Path,
     pub model_ir_linear_workbench_root: &'a Path,
+    pub mgt_model_ir_linear_workbench_root: &'a Path,
     pub workbench_inspect_before_review: &'a Path,
     pub workbench_review_show: &'a Path,
     pub workbench_inspect_after_review: &'a Path,
@@ -144,6 +147,10 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub model_ir_linear_workbench_review_show: &'a Path,
     pub model_ir_linear_workbench_inspect_after_review: &'a Path,
     pub model_ir_linear_workbench_export: &'a Path,
+    pub mgt_model_ir_linear_workbench_inspect_before_review: &'a Path,
+    pub mgt_model_ir_linear_workbench_review_show: &'a Path,
+    pub mgt_model_ir_linear_workbench_inspect_after_review: &'a Path,
+    pub mgt_model_ir_linear_workbench_export: &'a Path,
     pub model_ir_linear_workbench_session_before_localized_pdf: &'a Path,
     pub model_ir_linear_localized_pdf_en_us_first_root: &'a Path,
     pub model_ir_linear_localized_pdf_en_us_second_root: &'a Path,
@@ -426,6 +433,39 @@ pub struct RootfsIsolationReceiptV5 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV6 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV5,
+    pub mgt_model_ir_linear_workbench_stage: String,
+    pub mgt_model_ir_linear_workbench_terminal_status: String,
+    pub mgt_model_ir_linear_workbench_comparison_passed: bool,
+    pub mgt_model_ir_linear_workbench_operator_surface_passed: bool,
+    pub mgt_model_ir_linear_workbench_review_decision: String,
+    pub mgt_model_ir_linear_source_sha256: String,
+    pub mgt_model_ir_linear_import_health_sha256: String,
+    pub mgt_model_ir_linear_result_ir_sha256: String,
+    pub mgt_model_ir_linear_result_recovery_ir_sha256: String,
+    pub mgt_model_ir_linear_comparison_ir_sha256: String,
+    pub mgt_model_ir_linear_report_pdf_sha256: String,
+    pub mgt_model_ir_linear_report_document_sha256: String,
+    pub mgt_model_ir_linear_pdf_receipt_sha256: String,
+    pub mgt_model_ir_linear_report_receipt_sha256: String,
+    pub mgt_model_ir_linear_workbench_inspect_before_review_sha256: String,
+    pub mgt_model_ir_linear_workbench_review_sha256: String,
+    pub mgt_model_ir_linear_workbench_inspect_after_review_sha256: String,
+    pub mgt_model_ir_linear_workbench_export_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV6 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV6,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -434,6 +474,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V3(Box<RootfsIsolationReceiptV3>),
     V4(Box<RootfsIsolationReceiptV4>),
     V5(Box<RootfsIsolationReceiptV5>),
+    V6(Box<RootfsIsolationReceiptV6>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -715,13 +756,13 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 ///
 /// Returns an error unless the process is the fixed non-root runtime identity, the verified
 /// bundle and executing payload are identical, the root and payload reject writes with `EROFS`,
-/// the operator workspace accepts writes, only loopback networking is visible, and all three
+/// the operator workspace accepts writes, only loopback networking is visible, and all four
 /// native Workbench sessions reached their reported terminal state, including the typed
-/// ModelIR-linear report surface.
+/// ModelIR-linear and normalized-MGT-to-ModelIR-linear report surfaces.
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV5, DistributionError> {
+) -> Result<RootfsIsolationReceiptV6, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -850,6 +891,17 @@ pub fn create_rootfs_isolation_receipt(
         request.model_ir_linear_workbench_root,
         Some("model_ir_linear_cpu_v1"),
     )?;
+    let mgt_model_ir_linear_summary = inspect_reported_workbench(
+        &workspace,
+        request.mgt_model_ir_linear_workbench_root,
+        Some("model_ir_linear_cpu_v1"),
+    )?;
+    let (mgt_model_ir_linear_source_sha256, mgt_model_ir_linear_import_health_sha256) =
+        inspect_normalized_mgt_import_surface(
+            &workspace,
+            request.mgt_model_ir_linear_workbench_root,
+            &mgt_model_ir_linear_summary,
+        )?;
     let workbench_operator = inspect_workbench_operator_surface(
         &workspace,
         request.workbench_root,
@@ -892,6 +944,20 @@ pub fn create_rootfs_isolation_receipt(
             export: request.model_ir_linear_workbench_export,
         },
     )?;
+    let mgt_model_ir_linear_workbench_operator = inspect_workbench_operator_surface(
+        &workspace,
+        request.mgt_model_ir_linear_workbench_root,
+        &mgt_model_ir_linear_summary,
+        &OperatorSurfaceProbe {
+            import_kind: "mgt",
+            analysis_profile: Some("model_ir_linear_cpu_v1"),
+            expected_export_artifact_count: 8,
+            inspect_before_review: request.mgt_model_ir_linear_workbench_inspect_before_review,
+            review_show: request.mgt_model_ir_linear_workbench_review_show,
+            inspect_after_review: request.mgt_model_ir_linear_workbench_inspect_after_review,
+            export: request.mgt_model_ir_linear_workbench_export,
+        },
+    )?;
     let read_only_surfaces = inspect_workbench_read_only_surfaces(
         &workspace,
         request.workbench_catalog,
@@ -913,6 +979,11 @@ pub fn create_rootfs_isolation_receipt(
         &workspace,
         request.model_ir_linear_workbench_root,
         "ModelIR linear Workbench",
+    )?;
+    let mgt_model_ir_linear_root = resolve_workspace_child(
+        &workspace,
+        request.mgt_model_ir_linear_workbench_root,
+        "normalized MGT ModelIR linear Workbench",
     )?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
@@ -1004,7 +1075,7 @@ pub fn create_rootfs_isolation_receipt(
         container_image_built: false,
         customer_image_receipt: false,
     };
-    let evidence = RootfsIsolationEvidenceV5 {
+    let prior = RootfsIsolationEvidenceV5 {
         prior,
         model_ir_linear_localized_pdf_surface_passed: true,
         model_ir_linear_localized_pdf_en_us_sha256: localized_pdf_surface.en_us_pdf,
@@ -1012,7 +1083,52 @@ pub fn create_rootfs_isolation_receipt(
         model_ir_linear_localized_pdf_en_us_receipt_sha256: localized_pdf_surface.en_us_receipt,
         model_ir_linear_localized_pdf_ko_kr_receipt_sha256: localized_pdf_surface.ko_kr_receipt,
     };
-    validate_rootfs_isolation_evidence_v5(&evidence)?;
+    let evidence = RootfsIsolationEvidenceV6 {
+        prior,
+        mgt_model_ir_linear_workbench_stage: mgt_model_ir_linear_summary.stage,
+        mgt_model_ir_linear_workbench_terminal_status: mgt_model_ir_linear_summary.terminal_status,
+        mgt_model_ir_linear_workbench_comparison_passed: mgt_model_ir_linear_summary
+            .comparison_passed,
+        mgt_model_ir_linear_workbench_operator_surface_passed: true,
+        mgt_model_ir_linear_workbench_review_decision: mgt_model_ir_linear_workbench_operator
+            .decision,
+        mgt_model_ir_linear_source_sha256,
+        mgt_model_ir_linear_import_health_sha256,
+        mgt_model_ir_linear_result_ir_sha256: mgt_model_ir_linear_summary.result_ir_sha256,
+        mgt_model_ir_linear_result_recovery_ir_sha256: mgt_model_ir_linear_summary
+            .result_recovery_ir_sha256
+            .ok_or_else(|| {
+                DistributionError::new(
+                    "rootfs_workbench_incomplete",
+                    "normalized MGT ModelIR linear Workbench has no typed recovery artifact",
+                )
+            })?,
+        mgt_model_ir_linear_comparison_ir_sha256: mgt_model_ir_linear_summary.comparison_ir_sha256,
+        mgt_model_ir_linear_report_pdf_sha256: mgt_model_ir_linear_summary.report_pdf_sha256,
+        mgt_model_ir_linear_report_document_sha256: mgt_model_ir_linear_summary
+            .report_document_sha256
+            .ok_or_else(|| {
+                DistributionError::new(
+                    "rootfs_workbench_incomplete",
+                    "normalized MGT ModelIR linear Workbench has no report document",
+                )
+            })?,
+        mgt_model_ir_linear_pdf_receipt_sha256: sha256_file(
+            &mgt_model_ir_linear_root.join("06-report/pdf-receipt.json"),
+        )?,
+        mgt_model_ir_linear_report_receipt_sha256: sha256_file(
+            &mgt_model_ir_linear_root.join("06-report/report-receipt.json"),
+        )?,
+        mgt_model_ir_linear_workbench_inspect_before_review_sha256:
+            mgt_model_ir_linear_workbench_operator.inspect_before_review_sha256,
+        mgt_model_ir_linear_workbench_review_sha256: mgt_model_ir_linear_workbench_operator
+            .review_sha256,
+        mgt_model_ir_linear_workbench_inspect_after_review_sha256:
+            mgt_model_ir_linear_workbench_operator.inspect_after_review_sha256,
+        mgt_model_ir_linear_workbench_export_sha256: mgt_model_ir_linear_workbench_operator
+            .export_sha256,
+    };
+    validate_rootfs_isolation_evidence_v6(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -1110,7 +1226,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V4(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V5) => {
             let receipt: RootfsIsolationReceiptV5 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v5(&receipt.evidence)?;
@@ -1126,6 +1242,23 @@ pub fn verify_rootfs_isolation_receipt(
                 &receipt.evidence.prior.workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V5(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV6 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v6(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &receipt.evidence.prior.prior.release_id,
+                &receipt.evidence.prior.prior.source_sha256,
+                &receipt.evidence.prior.prior.bundle_manifest_hash,
+                &receipt.evidence.prior.prior.bundle_manifest_file_sha256,
+                &receipt.evidence.prior.prior.installer_sha256,
+                &receipt.evidence.prior.prior.workbench_sha256,
+                &receipt.evidence.prior.prior.workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V6(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -1749,6 +1882,8 @@ struct ReportedWorkbenchSummary {
     report_pdf_sha256: String,
     result_recovery_ir_sha256: Option<String>,
     report_document_sha256: Option<String>,
+    mgt_source_sha256: Option<String>,
+    mgt_import_health_sha256: Option<String>,
 }
 
 struct OperatorSurfaceProbe<'a> {
@@ -2132,6 +2267,14 @@ fn inspect_reported_workbench(
     let analysis_profile = session
         .get("analysis_profile")
         .and_then(serde_json::Value::as_str);
+    let mgt_source_sha256 = session
+        .get("mgt_source_hash")
+        .and_then(serde_json::Value::as_str)
+        .map(ToOwned::to_owned);
+    let mgt_import_health_sha256 = session
+        .get("mgt_import_health_artifact_hash")
+        .and_then(serde_json::Value::as_str)
+        .map(ToOwned::to_owned);
     if stage != "reported"
         || terminal_status != "completed"
         || !comparison_passed
@@ -2144,6 +2287,18 @@ fn inspect_reported_workbench(
     }
     validate_sha256_identity(session_id, "rootfs Workbench session ID")?;
     validate_sha256_identity(session_hash, "rootfs Workbench session hash")?;
+    if mgt_source_sha256.is_some() != mgt_import_health_sha256.is_some() {
+        return Err(DistributionError::new(
+            "rootfs_workbench_mgt_binding_incomplete",
+            "native Workbench MGT source and import-health identities must be present together",
+        ));
+    }
+    if let Some(value) = mgt_source_sha256.as_deref() {
+        validate_sha256_identity(value, "rootfs Workbench MGT source SHA-256")?;
+    }
+    if let Some(value) = mgt_import_health_sha256.as_deref() {
+        validate_sha256_identity(value, "rootfs Workbench MGT import-health SHA-256")?;
+    }
     let (result_recovery_ir_sha256, report_document_sha256) =
         if expected_analysis_profile == Some("model_ir_linear_cpu_v1") {
             (
@@ -2166,7 +2321,64 @@ fn inspect_reported_workbench(
         report_pdf_sha256: sha256_file(&root.join("06-report/report.pdf"))?,
         result_recovery_ir_sha256,
         report_document_sha256,
+        mgt_source_sha256,
+        mgt_import_health_sha256,
     })
+}
+
+fn inspect_normalized_mgt_import_surface(
+    workspace: &Path,
+    workbench_root: &Path,
+    reported: &ReportedWorkbenchSummary,
+) -> Result<(String, String), DistributionError> {
+    let root = resolve_workspace_child(workspace, workbench_root, "normalized MGT Workbench")?;
+    let source = read_bounded_regular_file(&root.join("01-import/source.mgt"), MAX_MANIFEST_BYTES)?;
+    let source_sha256 = sha256_identity(&source);
+    let health_bytes = read_bounded_regular_file(
+        &root.join("01-import/import-health.json"),
+        MAX_MANIFEST_BYTES,
+    )?;
+    let health: serde_json::Value = serde_json::from_slice(&health_bytes).map_err(|error| {
+        DistributionError::new(
+            "rootfs_mgt_import_health_invalid",
+            format!("normalized MGT import health is invalid JSON: {error}"),
+        )
+    })?;
+    if compact_operator_json(&health)? != health_bytes {
+        return Err(DistributionError::new(
+            "rootfs_mgt_import_health_noncanonical",
+            "normalized MGT import health is not canonical JSON",
+        ));
+    }
+    verify_operator_self_hash(&health, "health_hash", "normalized MGT import health")?;
+    let health_source_sha256 = health
+        .get("source")
+        .and_then(|source| source.get("source_hash"))
+        .and_then(serde_json::Value::as_str);
+    let normalized = health
+        .get("schema_version")
+        .and_then(serde_json::Value::as_str)
+        == Some("structural-native-mgt-import-health.v1")
+        && health.get("status").and_then(serde_json::Value::as_str) == Some("normalized")
+        && health
+            .get("blocker_count")
+            .and_then(serde_json::Value::as_u64)
+            == Some(0)
+        && health
+            .get("normalized_model")
+            .is_some_and(serde_json::Value::is_object)
+        && health_source_sha256 == Some(source_sha256.as_str());
+    let health_sha256 = sha256_identity(&health_bytes);
+    if !normalized
+        || reported.mgt_source_sha256.as_deref() != Some(source_sha256.as_str())
+        || reported.mgt_import_health_sha256.as_deref() != Some(health_sha256.as_str())
+    {
+        return Err(DistributionError::new(
+            "rootfs_mgt_import_binding_mismatch",
+            "original MGT source, normalized import health and durable session identities do not match",
+        ));
+    }
+    Ok((source_sha256, health_sha256))
 }
 
 fn read_operator_cli_json(
@@ -2654,10 +2866,10 @@ fn linux_ipv4_route_count() -> Result<u64, DistributionError> {
 }
 
 fn seal_rootfs_isolation_evidence(
-    evidence: RootfsIsolationEvidenceV5,
-) -> Result<RootfsIsolationReceiptV5, DistributionError> {
+    evidence: RootfsIsolationEvidenceV6,
+) -> Result<RootfsIsolationReceiptV6, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
-    Ok(RootfsIsolationReceiptV5 {
+    Ok(RootfsIsolationReceiptV6 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -3004,7 +3216,7 @@ fn validate_rootfs_isolation_evidence_v4(
 fn validate_rootfs_isolation_evidence_v5(
     evidence: &RootfsIsolationEvidenceV5,
 ) -> Result<(), DistributionError> {
-    if evidence.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    if evidence.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5
         || !evidence.model_ir_linear_localized_pdf_surface_passed
         || evidence.model_ir_linear_localized_pdf_en_us_sha256
             == evidence.model_ir_linear_localized_pdf_ko_kr_sha256
@@ -3037,6 +3249,83 @@ fn validate_rootfs_isolation_evidence_v5(
     let mut prior = evidence.prior.clone();
     ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4.clone_into(&mut prior.claim_boundary);
     validate_rootfs_isolation_evidence_v4(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v6(
+    evidence: &RootfsIsolationEvidenceV6,
+) -> Result<(), DistributionError> {
+    if evidence.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || evidence.mgt_model_ir_linear_workbench_stage != "reported"
+        || evidence.mgt_model_ir_linear_workbench_terminal_status != "completed"
+        || !evidence.mgt_model_ir_linear_workbench_comparison_passed
+        || !evidence.mgt_model_ir_linear_workbench_operator_surface_passed
+        || evidence.mgt_model_ir_linear_workbench_review_decision != "review"
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v6 receipt weakens or exceeds the exact normalized-MGT linear diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.mgt_model_ir_linear_source_sha256,
+            "rootfs normalized-MGT linear source SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_import_health_sha256,
+            "rootfs normalized-MGT linear import-health SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_result_ir_sha256,
+            "rootfs normalized-MGT linear ResultIR SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_result_recovery_ir_sha256,
+            "rootfs normalized-MGT linear recovery SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_comparison_ir_sha256,
+            "rootfs normalized-MGT linear comparison SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_report_pdf_sha256,
+            "rootfs normalized-MGT linear PDF SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_report_document_sha256,
+            "rootfs normalized-MGT linear report document SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_pdf_receipt_sha256,
+            "rootfs normalized-MGT linear PDF receipt SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_report_receipt_sha256,
+            "rootfs normalized-MGT linear report receipt SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_workbench_inspect_before_review_sha256,
+            "rootfs normalized-MGT linear pre-review inspection SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_workbench_review_sha256,
+            "rootfs normalized-MGT linear review SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_workbench_inspect_after_review_sha256,
+            "rootfs normalized-MGT linear post-review inspection SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_workbench_export_sha256,
+            "rootfs normalized-MGT linear export SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5.clone_into(&mut prior.prior.claim_boundary);
+    validate_rootfs_isolation_evidence_v5(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -3877,9 +4166,9 @@ mod tests {
         serde_json::from_value(value).expect("decode v4 rootfs evidence")
     }
 
-    fn rootfs_evidence() -> RootfsIsolationEvidenceV5 {
+    fn rootfs_evidence_v5() -> RootfsIsolationEvidenceV5 {
         let mut prior = rootfs_evidence_v4();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.claim_boundary);
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5.clone_into(&mut prior.claim_boundary);
         RootfsIsolationEvidenceV5 {
             prior,
             model_ir_linear_localized_pdf_surface_passed: true,
@@ -3887,6 +4176,33 @@ mod tests {
             model_ir_linear_localized_pdf_ko_kr_sha256: format!("sha256:{:064x}", 34),
             model_ir_linear_localized_pdf_en_us_receipt_sha256: format!("sha256:{:064x}", 35),
             model_ir_linear_localized_pdf_ko_kr_receipt_sha256: format!("sha256:{:064x}", 36),
+        }
+    }
+
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV6 {
+        let mut prior = rootfs_evidence_v5();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.claim_boundary);
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV6 {
+            prior,
+            mgt_model_ir_linear_workbench_stage: "reported".to_owned(),
+            mgt_model_ir_linear_workbench_terminal_status: "completed".to_owned(),
+            mgt_model_ir_linear_workbench_comparison_passed: true,
+            mgt_model_ir_linear_workbench_operator_surface_passed: true,
+            mgt_model_ir_linear_workbench_review_decision: "review".to_owned(),
+            mgt_model_ir_linear_source_sha256: identity(37),
+            mgt_model_ir_linear_import_health_sha256: identity(38),
+            mgt_model_ir_linear_result_ir_sha256: identity(39),
+            mgt_model_ir_linear_result_recovery_ir_sha256: identity(40),
+            mgt_model_ir_linear_comparison_ir_sha256: identity(41),
+            mgt_model_ir_linear_report_pdf_sha256: identity(42),
+            mgt_model_ir_linear_report_document_sha256: identity(43),
+            mgt_model_ir_linear_pdf_receipt_sha256: identity(44),
+            mgt_model_ir_linear_report_receipt_sha256: identity(45),
+            mgt_model_ir_linear_workbench_inspect_before_review_sha256: identity(46),
+            mgt_model_ir_linear_workbench_review_sha256: identity(47),
+            mgt_model_ir_linear_workbench_inspect_after_review_sha256: identity(48),
+            mgt_model_ir_linear_workbench_export_sha256: identity(49),
         }
     }
 
@@ -4083,35 +4399,88 @@ mod tests {
             .expect("frozen v3 evidence remains verifiable");
         validate_rootfs_isolation_evidence_v4(&rootfs_evidence_v4())
             .expect("frozen v4 evidence remains verifiable");
+        validate_rootfs_isolation_evidence_v5(&rootfs_evidence_v5())
+            .expect("frozen v5 evidence remains verifiable");
 
         let evidence = rootfs_evidence();
-        validate_rootfs_isolation_evidence_v5(&evidence).expect("valid bounded evidence");
+        validate_rootfs_isolation_evidence_v6(&evidence).expect("valid bounded evidence");
         let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
         assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
         assert_eq!(
             receipt.receipt_hash,
             sha256_identity(&canonical_json(&evidence).expect("canonical evidence"))
         );
-        assert!(!receipt.evidence.prior.container_image_built);
-        assert!(!receipt.evidence.prior.customer_image_receipt);
+        assert!(!receipt.evidence.prior.prior.container_image_built);
+        assert!(!receipt.evidence.prior.prior.customer_image_receipt);
 
         let mut promoting = evidence.clone();
-        promoting.prior.model_ir_linear_workbench_review_decision = "pass".to_owned();
+        promoting
+            .prior
+            .prior
+            .model_ir_linear_workbench_review_decision = "pass".to_owned();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v5(&promoting)
+            validate_rootfs_isolation_evidence_v6(&promoting)
                 .expect_err("promoting review decision must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
 
         let mut weakened = evidence;
-        weakened.prior.network_interfaces.push("eth0".to_owned());
+        weakened
+            .prior
+            .prior
+            .network_interfaces
+            .push("eth0".to_owned());
         assert_eq!(
-            validate_rootfs_isolation_evidence_v5(&weakened)
+            validate_rootfs_isolation_evidence_v6(&weakened)
                 .expect_err("external interface must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
+    }
+
+    #[test]
+    fn frozen_rootfs_v5_receipt_remains_bundle_verifiable() {
+        let temporary = TestDirectory::create("rootfs-v5-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v5-release", "v5");
+        let manifest = verify_bundle(&bundle).expect("verify v5 fixture bundle");
+        let payload = bundle.join(PAYLOAD_DIRECTORY);
+        let mut evidence = rootfs_evidence_v5();
+        evidence.prior.release_id.clone_from(&manifest.release_id);
+        evidence
+            .prior
+            .source_sha256
+            .clone_from(&manifest.source_sha256);
+        evidence
+            .prior
+            .bundle_manifest_hash
+            .clone_from(&manifest.manifest_hash);
+        evidence.prior.bundle_manifest_file_sha256 =
+            sha256_file(&bundle.join(MANIFEST_NAME)).expect("hash v5 fixture manifest");
+        evidence.prior.installer_sha256 = sha256_file(&payload.join("bin/structural-installer"))
+            .expect("hash v5 fixture installer");
+        evidence.prior.workbench_sha256 = sha256_file(&payload.join("bin/structural-workbench"))
+            .expect("hash v5 fixture Workbench");
+        evidence.prior.workbench_version = "structural-workbench 0.1.0".to_owned();
+        validate_rootfs_isolation_evidence_v5(&evidence).expect("validate frozen v5 evidence");
+        let receipt = RootfsIsolationReceiptV5 {
+            schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V5.to_owned(),
+            receipt_hash: sha256_identity(
+                &canonical_json(&evidence).expect("canonical frozen v5 evidence"),
+            ),
+            evidence,
+        };
+        let receipt_path = temporary.0.join("rootfs-v5-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical frozen v5 receipt"),
+        )
+        .expect("write frozen v5 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify frozen v5 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V5(_)
+        ));
     }
 
     #[cfg(unix)]
