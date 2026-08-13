@@ -16,9 +16,11 @@ browser, React, package-manager, or external-renderer runtime lookup.
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
 provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component and
 `model-edit-constraint-value` existing-restrained-DOF commands, plus the closed
-`model-edit-linear-material` and `model-edit-frame-section` existing-property commands.
-Distribution E2E v19 proves repeated edited model/receipt bytes, exact
-load/constraint/material/section identity, fixed law/family/version and SI value bindings,
+`model-edit-linear-material`, `model-edit-frame-section`, and
+`model-edit-frame-element-orientation` existing-property commands.
+Distribution E2E v20 proves repeated edited model/receipt bytes, exact
+load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
+value bindings,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

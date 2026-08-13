@@ -40,7 +40,9 @@ restrained by the named existing constraint. It cannot add/remove restraints or 
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`
-section. Neither command changes identities, families/laws, versions, topology, or references.
+section. The frame-element orientation editor replaces only the finite local-axis rotation of one
+existing `frame_3d` element. None changes identities, families/laws, versions, connectivity,
+formulation, topology, or references.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -106,6 +108,9 @@ structural-workbench model-edit-frame-section MODEL.json \
   --torsional-constant-m4 0.000012 \
   --shear-area-y-m2 0.02 --shear-area-z-m2 0.02 \
   --output-dir EDITED-SECTION-MODEL
+structural-workbench model-edit-frame-element-orientation MODEL.json \
+  --element E1 --rotation-rad 0.25 \
+  --output-dir EDITED-ELEMENT-MODEL
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -190,12 +195,15 @@ load/constraint retargeting, combinations, restraint-mask changes, or general to
 editing. Two further closed property commands replace all parameters of one existing v1
 `linear_elastic_isotropic` material or one existing v1 `frame_3d` section. They require physical SI
 ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and
-cannot create, delete, retarget, or change type. See
+cannot create, delete, retarget, or change type. A further frame-element orientation command edits
+one existing `frame_3d` local-axis rotation in radians, degrades only its matching element row, and
+retains connectivity, formulation, offsets, releases, and references. See
 `docs/native/modelir-node-coordinate-edit-v1.md`,
 `docs/native/modelir-nodal-load-edit-v1.md`,
 `docs/native/modelir-constraint-value-edit-v1.md`,
-`docs/native/modelir-linear-material-edit-v1.md`, and
-`docs/native/modelir-frame-section-edit-v1.md`.
+`docs/native/modelir-linear-material-edit-v1.md`,
+`docs/native/modelir-frame-section-edit-v1.md`, and
+`docs/native/modelir-frame-element-orientation-edit-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is

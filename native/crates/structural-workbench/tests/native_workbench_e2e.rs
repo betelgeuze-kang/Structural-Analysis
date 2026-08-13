@@ -502,6 +502,24 @@ fn run_frame_section_edit(
     ])
 }
 
+fn run_frame_element_orientation_edit(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    rotation_rad: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-frame-element-orientation"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--rotation-rad"),
+        text(rotation_rad),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn assert_self_hashed_edit_receipt(receipt: &mut Value) {
     let expected_receipt_hash = receipt
         .as_object_mut()
@@ -621,6 +639,54 @@ fn assert_published_frame_section_edit(destination: &Path) {
     assert_self_hashed_edit_receipt(&mut receipt);
 }
 
+fn assert_published_frame_element_orientation_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let element = edited
+        .value()
+        .get("elements")
+        .and_then(Value::as_array)
+        .and_then(|elements| {
+            elements
+                .iter()
+                .find(|element| element.get("id").and_then(Value::as_str) == Some("E1"))
+        })
+        .expect("edited element");
+    assert_eq!(
+        element["local_axis_rotation_rad"]
+            .as_f64()
+            .expect("finite frame-element orientation")
+            .to_bits(),
+        0.25_f64.to_bits()
+    );
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-frame-element-orientation.v1")
+        .is_some());
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame-element orientation edit receipt"),
+    )
+    .expect("frame-element orientation edit receipt JSON");
+    assert_eq!(receipt["operation"], "frame_element_local_axis_rotation");
+    assert_eq!(receipt["element_id"], "E1");
+    assert_eq!(receipt["element_type"], "frame_3d");
+    assert_eq!(receipt["formulation"], "euler_bernoulli_3d");
+    assert_eq!(receipt["previous_local_axis_rotation_rad"], 0.0);
+    assert_eq!(receipt["edited_local_axis_rotation_rad"], 0.25);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
 fn assert_rejected_linear_material_edit(
     source: &Path,
     temporary: &Path,
@@ -646,6 +712,22 @@ fn assert_rejected_frame_section_edit(
 ) {
     let destination = temporary.join(name);
     let rejected = run_frame_section_edit(source, &destination, section_id, parameters);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
+fn assert_rejected_frame_element_orientation_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    element_id: &str,
+    rotation_rad: &str,
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected =
+        run_frame_element_orientation_edit(source, &destination, element_id, rotation_rad);
     assert_eq!(rejected.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
     assert!(!destination.exists());
@@ -1439,6 +1521,163 @@ fn frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
         "S1",
         edited_parameters,
         "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blockers() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_before = std::fs::read(&source).expect("source ModelIR bytes");
+    let first = temporary.0.join("element-orientation-edit-first");
+    let second = temporary.0.join("element-orientation-edit-second");
+    for destination in [&first, &second] {
+        let output = run_frame_element_orientation_edit(&source, destination, "E1", "0.25");
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame-element orientation edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first orientation edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second orientation edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after orientation edit"),
+        source_before
+    );
+    assert_published_frame_element_orientation_edit(&first);
+
+    let repeated = run_frame_element_orientation_edit(&source, &first, "E1", "0.25");
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, element_id, rotation, expected_code) in [
+        (
+            "element-orientation-missing",
+            "MISSING",
+            "0.25",
+            "workbench_model_edit_element_missing",
+        ),
+        (
+            "element-orientation-no-op",
+            "E1",
+            "0",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "element-orientation-signed-zero-no-op",
+            "E1",
+            "-0",
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        assert_rejected_frame_element_orientation_edit(
+            &source,
+            &temporary.0,
+            name,
+            element_id,
+            rotation,
+            expected_code,
+        );
+    }
+
+    let wrong_type = repository_root().join("examples/bounded_planar_frame_alpha.model-ir.v2.json");
+    assert_rejected_frame_element_orientation_edit(
+        &wrong_type,
+        &temporary.0,
+        "element-orientation-wrong-type",
+        "E1",
+        "0.25",
+        "workbench_model_edit_element_type_unsupported",
+    );
+
+    let mut invalid_source: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for invalid element edit");
+    invalid_source["elements"][0]["node_ids"][1] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary
+        .0
+        .join("invalid-element-orientation-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid element source bytes"),
+    )
+    .expect("write invalid element orientation source");
+    assert_rejected_frame_element_orientation_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-element-orientation-source-edit",
+        "E1",
+        "0.25",
+        "workbench_model_edit_source_semantics_invalid",
+    );
+
+    let mut blocked: Value =
+        serde_json::from_slice(&source_before).expect("source ModelIR for blocked element edit");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.element-orientation-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Element orientation editing must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:E1",
+            "entity_kind": "element",
+            "model_ir_entity_id": "E1",
+            "mapping_status": "canonicalized",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:S1",
+            "entity_kind": "section",
+            "model_ir_entity_id": "S1",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let blocked_source = temporary
+        .0
+        .join("blocked-element-orientation-source.model-ir.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked element edit source bytes"),
+    )
+    .expect("write blocked element orientation edit source");
+    let blocked_destination = temporary.0.join("blocked-element-orientation-edit");
+    let blocked_output =
+        run_frame_element_orientation_edit(&blocked_source, &blocked_destination, "E1", "0.25");
+    assert_success(&blocked_output);
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked element orientation receipt"),
+    )
+    .expect("blocked element orientation receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.element-orientation-edit-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked element orientation edited model"),
+    )
+    .expect("blocked element orientation edited JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        blocked_edited["roundtrip_map"][1]["mapping_status"],
+        "exact"
     );
 }
 

@@ -697,6 +697,69 @@ exercise_frame_section_edit_surface() {
 }
 exercise_frame_section_edit_surface
 
+exercise_frame_element_orientation_edit_surface() {
+  local edit_source="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$edit_source" | awk '{print $1}')"
+  local label output_directory
+  for label in first second; do
+    output_directory="$e2e_root/frame-element-orientation-edit-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-frame-element-orientation "$edit_source" --element E1 \
+      --rotation-rad 0.25 --output-dir "$output_directory" \
+      > "$e2e_root/frame-element-orientation-edit-$label.stdout.json"
+    test -s "$output_directory/model-ir.json"
+    test -s "$output_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"operation":"frame_element_local_axis_rotation"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"element_id":"E1"' "$output_directory/edit-receipt.json"
+    grep -Fq '"element_type":"frame_3d"' "$output_directory/edit-receipt.json"
+    grep -Fq '"formulation":"euler_bernoulli_3d"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"previous_local_axis_rotation_rad":0.0' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"edited_local_axis_rotation_rad":0.25' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$output_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"normalizer_id":"structural-native-model-editor"' \
+      "$output_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-frame-element-orientation.v1"' \
+      "$output_directory/model-ir.json"
+    grep -Fq '"local_axis_rotation_rad":0.25' \
+      "$output_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$output_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-element-orientation-edit-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$output_directory/model-ir.json" \
+      > "$e2e_root/frame-element-orientation-edit-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/frame-element-orientation-edit-$label-view.txt"
+  done
+  diff -r "$e2e_root/frame-element-orientation-edit-first" \
+    "$e2e_root/frame-element-orientation-edit-second" \
+    > "$e2e_root/frame-element-orientation-edit-diff.txt"
+  cmp "$e2e_root/frame-element-orientation-edit-first.stdout.json" \
+    "$e2e_root/frame-element-orientation-edit-second.stdout.json"
+  cmp "$e2e_root/frame-element-orientation-edit-first-validation.json" \
+    "$e2e_root/frame-element-orientation-edit-second-validation.json"
+  cmp "$e2e_root/frame-element-orientation-edit-first-view.txt" \
+    "$e2e_root/frame-element-orientation-edit-second-view.txt"
+  if [[ "$(sha256sum "$edit_source" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame-element orientation edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_frame_element_orientation_edit_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -971,6 +1034,8 @@ linear_material_edit_model_hash="$(sha256sum "$e2e_root/linear-material-edit-fir
 linear_material_edit_receipt_hash="$(sha256sum "$e2e_root/linear-material-edit-first/edit-receipt.json" | awk '{print $1}')"
 frame_section_edit_model_hash="$(sha256sum "$e2e_root/frame-section-edit-first/model-ir.json" | awk '{print $1}')"
 frame_section_edit_receipt_hash="$(sha256sum "$e2e_root/frame-section-edit-first/edit-receipt.json" | awk '{print $1}')"
+frame_element_orientation_edit_model_hash="$(sha256sum "$e2e_root/frame-element-orientation-edit-first/model-ir.json" | awk '{print $1}')"
+frame_element_orientation_edit_receipt_hash="$(sha256sum "$e2e_root/frame-element-orientation-edit-first/edit-receipt.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -1012,6 +1077,10 @@ v19_receipt_json="${v18_receipt_json/structural-native-distribution-e2e.v18/stru
 property_edit_receipt_fields="\"workbench_linear_material_edit_surface_passed\":true,\"workbench_linear_material_edit_model_sha256\":\"sha256:$linear_material_edit_model_hash\",\"workbench_linear_material_edit_receipt_sha256\":\"sha256:$linear_material_edit_receipt_hash\",\"workbench_frame_section_edit_surface_passed\":true,\"workbench_frame_section_edit_model_sha256\":\"sha256:$frame_section_edit_model_hash\",\"workbench_frame_section_edit_receipt_sha256\":\"sha256:$frame_section_edit_receipt_hash\","
 v19_receipt_json="${v19_receipt_json/\"workbench_result_view_surface_passed\":true,/${property_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v19_receipt_json" > "$temporary_receipt"
+v20_receipt_json="${v19_receipt_json/structural-native-distribution-e2e.v19/structural-native-distribution-e2e.v20}"
+frame_element_orientation_edit_receipt_fields="\"workbench_frame_element_orientation_edit_surface_passed\":true,\"workbench_frame_element_orientation_edit_model_sha256\":\"sha256:$frame_element_orientation_edit_model_hash\",\"workbench_frame_element_orientation_edit_receipt_sha256\":\"sha256:$frame_element_orientation_edit_receipt_hash\","
+v20_receipt_json="${v20_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_element_orientation_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v20_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

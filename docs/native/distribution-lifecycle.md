@@ -109,37 +109,42 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
     model and receipt output, unchanged source bytes, exact section/family/version and
     previous/edited SI parameter bindings, strict C++ revalidation, analysis readiness and
     deterministic topology rendering with an empty `PATH`;
-16. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+16. runs the installed existing-`frame_3d`-element local-axis rotation edit twice, proves
+    byte-identical model and receipt output, unchanged source bytes, exact element/type/formulation
+    and previous/edited radian bindings, strict C++ revalidation, analysis readiness and
+    deterministic topology rendering with an empty `PATH`;
+17. renders all four closed NDTHA response channels twice from the installed Workbench, proves
     exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
     window, and proves the durable session remains unchanged;
-17. renders all four fixed-guided original/deformed projections twice plus an explicit selected
+18. renders all four fixed-guided original/deformed projections twice plus an explicit selected
     step and magnification, proves ANSI-free byte determinism, distinct identities, exact C++
     snapshot/terminal-adapter binding, and durable-session nonmutation;
-18. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
+19. renders the Korean top-displacement response and Korean isometric fixed-guided deformed view
     twice, proving UTF-8/ANSI-free byte determinism, English/Korean identity separation, exact
     ResultIR/ModelIR provenance and durable-session nonmutation;
-19. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
+20. exports the installed ModelIR-linear sparse report twice in each exact `en-US` and `ko-KR`
     embedded-font locale, proves deterministic bytes, distinct locale identities, typed sparse
     receipts, exact redistributed font/license/provenance bindings and durable-session nonmutation;
-20. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
+21. imports the exact normalized cantilever MGT profile into the installed ModelIR-linear path,
     restores the validated session after creating a one-iteration PCG checkpoint to simulate
     process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
     exercises the same non-promoting inspect/review/reopen/export surface;
-21. installs an immutable update, rolls back and re-verifies activation;
-22. emits an append-only v19 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+22. installs an immutable update, rolls back and re-verifies activation;
+23. emits an append-only v20 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
    view identity, node-edited, nodal-load-edited, constraint-value-edited,
-   linear-material-edited and frame-section-edited ModelIR plus all five edit-receipt identities,
+   linear-material-edited, frame-section-edited and frame-element-orientation-edited ModelIR plus
+   all six edit-receipt identities,
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v18 receipts without treating them as
-   v19 installed linear-material/frame-section-edit package authority.
+   The receipt checker continues to accept frozen v1 through v19 receipts without treating them as
+   v20 installed frame-element-orientation-edit package authority.
 
 The reference command is:
 
