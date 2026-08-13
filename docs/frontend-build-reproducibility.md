@@ -10,7 +10,9 @@ The frontend shell now uses a pinned `package.json` plus a committed `package-lo
   - Works even when `node_modules/` is missing.
   - Emits a canonical self-hashed receipt with command and network execution counts fixed at zero.
 - `npm run verify:frontend-smoke`
-  - Runs the contract check, executes `npm ci`, and then runs `npm run build`.
+  - Invokes the Rust-native `structural-frontend-contract smoke` process orchestrator. Rust first validates the pinned contract, directly executes the frozen `npm ci` then `npm run build` sequence with stop-on-failure semantics, rejects package/lock contract mutation across execution, and performs the built-tree delivery check before success.
+  - `cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root . --dry-run` emits a canonical self-hashed plan without spawning a process.
+  - The execution receipt records only direct child-process exit codes. npm executable resolution and registry/cache access are explicitly not instrumented, and JavaScript/browser behavior remains outside this check.
   - This is the clean-checkout smoke path for CI or local verification.
 - `npm run verify:workbench-viewer-delivery`
   - Invokes the Rust-native `structural-frontend-contract delivery` checker after every `npm run build` and verifies that the production output contains distinct Workbench and Static Viewer HTML entries with bounded, non-symlinked emitted assets.

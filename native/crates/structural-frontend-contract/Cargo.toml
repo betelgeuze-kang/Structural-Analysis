@@ -5,7 +5,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Strict native checker for transitional frontend build and Viewer static contracts"
+description = "Strict native checker and process orchestrator for transitional frontend contracts"
 
 [[bin]]
 name = "structural-frontend-contract"

@@ -2,6 +2,7 @@
 
 #![forbid(unsafe_code)]
 
+mod smoke;
 mod viewer_manifest;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -15,6 +16,8 @@ use serde_json::{Map, Value};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
 use structural_contracts::product_ir::sha256_identity;
 
+pub use smoke::{canonical_smoke_receipt_json, run_frontend_smoke, FrontendSmokeReceiptV1};
+use smoke::{validate_frontend_smoke_source, FrontendSmokeSourceV1};
 pub use viewer_manifest::{
     canonical_viewer_manifest_receipt_json, check_viewer_manifest, ViewerArtifactCountCheckV1,
     ViewerManifestMinimumsV1, ViewerManifestReceiptV1, ViewerManifestSummaryV1,
@@ -80,6 +83,7 @@ struct FrontendSourceMapV1 {
     expected_dependencies: BTreeMap<String, String>,
     expected_dev_dependencies: BTreeMap<String, String>,
     delivery_contract: FrontendDeliverySourceV1,
+    smoke_contract: FrontendSmokeSourceV1,
     viewer_manifest_contract: ViewerManifestSourceV1,
     claim_boundary: String,
 }
@@ -459,6 +463,7 @@ fn validate_source_map(source_map: &FrontendSourceMapV1) -> Result<(), FrontendC
         }
     }
     validate_delivery_source(&source_map.delivery_contract)?;
+    validate_frontend_smoke_source(&source_map.smoke_contract)?;
     validate_viewer_manifest_source(&source_map.viewer_manifest_contract)?;
     Ok(())
 }

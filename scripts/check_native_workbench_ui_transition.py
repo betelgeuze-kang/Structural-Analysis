@@ -20,6 +20,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
+    Path("native/crates/structural-frontend-contract/src/smoke.rs"),
     Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
     Path("native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"),
     Path("native/crates/structural-evidence/src/lib.rs"),
@@ -168,6 +169,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         blockers.append("workbench_ui_native_benchmark_catalog_flow_invalid")
     if native.get("legacy_frontend_contract_flow") != [
         "structural-frontend-contract check",
+        "structural-frontend-contract smoke",
         "structural-frontend-contract delivery",
         "structural-frontend-contract viewer-manifest",
     ]:
@@ -266,6 +268,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "-p structural-frontend-contract -- check --root ."
     ):
         blockers.append("workbench_ui_frontend_contract_authority_invalid")
+    if not isinstance(scripts, dict) or scripts.get("verify:frontend-smoke") != (
+        "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- smoke --root ."
+    ):
+        blockers.append("workbench_ui_frontend_smoke_authority_invalid")
     if not isinstance(scripts, dict) or scripts.get(
         "verify:workbench-viewer-delivery"
     ) != (
@@ -319,6 +326,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     viewer_manifest = _text(
         root,
         Path("native/crates/structural-frontend-contract/src/viewer_manifest.rs"),
+        blockers,
+    )
+    frontend_smoke = _text(
+        root, Path("native/crates/structural-frontend-contract/src/smoke.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-frontend-contract/src/smoke.rs"),
+        frontend_smoke,
+        (
+            "pub fn run_frontend_smoke",
+            "frontend_smoke_command_failed",
+            "frontend_smoke_contract_changed",
+            "not_instrumented_npm_ci_may_access_registry",
+            "direct_processes_spawned",
+            "delivery_receipt_hash",
+        ),
         blockers,
     )
     _require_tokens(
@@ -396,8 +419,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "catalog and copied-evidence browsing",
             "Rust-native evidence-bundle builder",
             "Rust-native benchmark-catalog builder",
-            "structural-frontend-contract check/delivery/viewer-manifest",
-            "static build, built-tree delivery, and default",
+            "structural-frontend-contract check/smoke/delivery/viewer-manifest",
+            "frontend clean-build orchestration, static contract",
             "Viewer project-manifest checks are Rust-native",
             "removal remains forbidden",
             "`removal_allowed` and `c6_complete` stay false",
@@ -443,7 +466,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
 
     claim = str(manifest.get("claim_boundary", ""))
     for token in (
-        "active React/TypeScript/JavaScript and Node verification dependency visible",
+        "active React/TypeScript/JavaScript and Node build/verification dependency visible",
         "does not authorize source deletion",
         "approved HIP C2",
         "C6",

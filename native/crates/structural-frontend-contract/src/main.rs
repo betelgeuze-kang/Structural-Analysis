@@ -6,9 +6,9 @@ use std::process::ExitCode;
 use serde_json::json;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_receipt_json,
+    canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest, FrontendContractError,
+    check_viewer_manifest, run_frontend_smoke, FrontendContractError,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -56,6 +56,11 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
         .first()
         .and_then(|value| value.to_str())
         .ok_or_else(|| usage_error("missing or non-UTF-8 command"))?;
+    if command == "smoke" {
+        let (root, dry_run) = parse_smoke_arguments(&arguments[1..])?;
+        let receipt = run_frontend_smoke(&root, dry_run)?;
+        return canonical_smoke_receipt_json(&receipt).map_err(Into::into);
+    }
     let options = parse_options(&arguments[1..])?;
     match command {
         "check" => {
@@ -74,9 +79,45 @@ fn run(arguments: &[OsString]) -> Result<String, CliError> {
             canonical_viewer_manifest_receipt_json(&receipt).map_err(Into::into)
         }
         _ => Err(usage_error(
-            "command must be check, delivery, or viewer-manifest",
+            "command must be check, delivery, smoke, or viewer-manifest",
         )),
     }
+}
+
+fn parse_smoke_arguments(arguments: &[OsString]) -> Result<(PathBuf, bool), CliError> {
+    let mut root = None;
+    let mut dry_run = false;
+    let mut index = 0;
+    while index < arguments.len() {
+        let name = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("smoke option names must be UTF-8"))?;
+        match name {
+            "--dry-run" => {
+                if dry_run {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                dry_run = true;
+                index += 1;
+            }
+            "--root" => {
+                if root.is_some() {
+                    return Err(usage_error("duplicate options are not allowed"));
+                }
+                let value = arguments
+                    .get(index + 1)
+                    .filter(|value| !value.is_empty())
+                    .ok_or_else(|| usage_error("--root must have one non-empty value"))?;
+                root = Some(PathBuf::from(value));
+                index += 2;
+            }
+            _ => return Err(usage_error("smoke options are missing or unknown")),
+        }
+    }
+    Ok((
+        root.ok_or_else(|| usage_error("--root must be non-empty"))?,
+        dry_run,
+    ))
 }
 
 fn parse_options(arguments: &[OsString]) -> Result<BTreeMap<String, OsString>, CliError> {
@@ -136,14 +177,15 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> &'static str {
-    "usage: structural-frontend-contract check|delivery|viewer-manifest --root DIR"
+    "usage: structural-frontend-contract check|delivery|viewer-manifest --root DIR; structural-frontend-contract smoke --root DIR [--dry-run]"
 }
 
 #[cfg(test)]
 mod tests {
     use std::ffi::OsString;
+    use std::path::PathBuf;
 
-    use super::run;
+    use super::{parse_smoke_arguments, run};
 
     #[test]
     fn parser_rejects_unknown_duplicate_and_incomplete_options() {
@@ -163,5 +205,22 @@ mod tests {
             OsString::from("a"),
         ])
         .is_err());
+        assert!(parse_smoke_arguments(&[]).is_err());
+        assert!(parse_smoke_arguments(&[
+            OsString::from("--root"),
+            OsString::from("a"),
+            OsString::from("--dry-run"),
+            OsString::from("--dry-run"),
+        ])
+        .is_err());
+        assert_eq!(
+            parse_smoke_arguments(&[
+                OsString::from("--dry-run"),
+                OsString::from("--root"),
+                OsString::from("a"),
+            ])
+            .expect("valid smoke arguments"),
+            (PathBuf::from("a"), true)
+        );
     }
 }

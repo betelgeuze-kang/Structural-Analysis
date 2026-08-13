@@ -29,20 +29,24 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   language-neutral source map under `native/catalog`. It strictly checks all 21 open-data reports
   and five PEER snapshots, reproduces the prior 26 cases, rejects drift and unsafe metadata, and
   never fetches or executes a catalog string.
-- `structural-frontend-contract check/delivery/viewer-manifest`: a Rust-native frontend build,
-  static-delivery, and Viewer project-manifest contract checker driven by the language-neutral
-  transition map under `native/decommission`. It replaces the prior Node package, built-tree, and
-  Viewer manifest checkers with strict duplicate-key JSON parsing, an exact neutral-JSON-to-JavaScript
-  projection, repo-confined non-symlink path and emitted-asset inventories, eager/lazy chunk
-  separation, and canonical self-hashed read-only receipts. It does not build or execute the UI.
+- `structural-frontend-contract check/smoke/delivery/viewer-manifest`: a Rust-native frontend
+  contract checker and clean-build process orchestrator driven by the language-neutral transition
+  map under `native/decommission`. It replaces the prior Node package, built-tree, and Viewer
+  manifest checkers and the former Node smoke wrapper with strict duplicate-key JSON parsing, an
+  exact neutral-JSON-to-JavaScript projection, repo-confined non-symlink path and emitted-asset
+  inventories, eager/lazy chunk separation, a fixed stop-on-failure `npm ci` / `npm run build`
+  process sequence, and canonical self-hashed receipts. npm/Vite/TypeScript still perform the
+  actual legacy install and build; the native orchestrator does not execute UI behavior or a
+  browser.
 
 This closes bounded results inspection, review/export, and catalog and copied-evidence browsing for
 the current native product. The canonical benchmark JSON and its Rust-native benchmark-catalog
 builder now live under `native/catalog`; the legacy React browser consumes that native-owned file.
 Both catalog and evidence-bundle generators and their contract tests are Rust-native; the legacy
-npm commands are wrappers only. The legacy frontend static build, built-tree delivery, and default
-Viewer project-manifest checks are Rust-native as well; browser, viewer runtime, and Vite execution
-remain Node-owned. It does not provide a
+npm commands are wrappers only. The legacy frontend clean-build orchestration, static contract,
+built-tree delivery, and default Viewer project-manifest checks are Rust-native as well; npm
+package installation, Vite/TypeScript execution, browser checks, and viewer runtime remain
+Node-owned. It does not provide a
 general visual model editor or 3D result explorer. Broader fixture/oracle migration is still needed
 before language-neutral golden ownership is complete.
 
@@ -50,8 +54,8 @@ before language-neutral golden ownership is complete.
 
 `native/decommission/workbench-ui-transition-v1.json` freezes the current source and CI inventory.
 The product deployment, benchmark-catalog generation, and evidence-bundle generation authorities
-have left React/Node, and the static frontend build/delivery plus Viewer manifest contract
-authorities have left Node,
+have left React/Node, and the frontend smoke orchestration, static/delivery, and Viewer manifest
+contract authorities have left Node,
 but seven active workflows still use Node for frontend, viewer, AI-contract, or broader quality
 verification. React/Vite source, TypeScript tests, static JavaScript viewer modules, remaining Node
 scripts, and their package manifest remain active verification or parity material. They are not a

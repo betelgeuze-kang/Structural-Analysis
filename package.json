@@ -14,7 +14,7 @@
     "build": "tsc --noEmit && vite build && cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- delivery --root .",
     "preview": "vite preview",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
-    "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
+    "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
     "verify:workbench-prototype-dom-contract": "node ./scripts/verify-workbench-prototype-dom-contract.mjs",

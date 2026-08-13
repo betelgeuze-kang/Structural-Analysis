@@ -14,7 +14,6 @@
     "vite.config.ts",
     "src/main.tsx",
     "src/App.tsx",
-    "scripts/verify-frontend-smoke.mjs",
     "scripts/verify-frontend-browser-smoke.mjs",
     "scripts/verify-structure-viewer-callout-docking.mjs",
     "scripts/verify-structure-viewer-critical-callout-focus.mjs",
@@ -48,6 +47,7 @@
     "native/decommission/legacy-frontend-build-contract-v1.json",
     "native/crates/structural-frontend-contract/src/lib.rs",
     "native/crates/structural-frontend-contract/src/main.rs",
+    "native/crates/structural-frontend-contract/src/smoke.rs",
     "native/crates/structural-frontend-contract/tests/frontend_contract_product.rs"
   ],
   "forbidden_paths": [
@@ -61,7 +61,7 @@
     "preview": "vite preview",
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
     "verify:frontend-contract": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- check --root .",
-    "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
+    "verify:frontend-smoke": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- smoke --root .",
     "verify:viewer-manifest": "cargo run --quiet --locked --manifest-path native/Cargo.toml -p structural-frontend-contract -- viewer-manifest --root .",
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
@@ -100,6 +100,20 @@
       "release-gap-review-state"
     ],
     "claim_boundary": "This read-only transitional C0 check proves only that one already-built local Vite tree has the two expected HTML entries, bounded regular local assets, an eager Workbench graph without legacy ownership markers, and exactly one referenced lazy legacy App chunk containing all frozen markers. It does not execute JavaScript or a browser, prove runtime UI behavior, promote native UI parity, or authorize React/TypeScript/Node removal."
+  },
+  "smoke_contract": {
+    "schema_version": "structural-native-frontend-smoke-contract.v1",
+    "install_command": [
+      "npm",
+      "ci"
+    ],
+    "build_command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "network_access_accounting": "not_instrumented_npm_ci_may_access_registry",
+    "claim_boundary": "This transitional C0 process receipt proves only that Rust validated the pinned frontend contract and either planned or directly spawned the frozen npm ci and npm run build sequence, stopping on failure, rejecting package/lock contract mutation across execution, and validating the resulting bounded Vite delivery tree before success. npm executable resolution, registry/cache access, package lifecycle internals, JavaScript runtime behavior, browser behavior, native UI parity, and React/TypeScript/Node removal remain outside this receipt."
   },
   "viewer_manifest_contract": {
     "contract": "structure-viewer-project-manifest-verification.v1",

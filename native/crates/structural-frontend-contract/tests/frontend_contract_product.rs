@@ -6,9 +6,9 @@ use serde_json::Value;
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::product_ir::sha256_identity;
 use structural_frontend_contract::{
-    canonical_delivery_receipt_json, canonical_receipt_json,
+    canonical_delivery_receipt_json, canonical_receipt_json, canonical_smoke_receipt_json,
     canonical_viewer_manifest_receipt_json, check_frontend_contract, check_frontend_delivery,
-    check_viewer_manifest,
+    check_viewer_manifest, run_frontend_smoke,
 };
 
 static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -108,6 +108,22 @@ fn write_viewer_manifest_and_projection(root: &Path, manifest: &str) {
     std::fs::write(&projection_path, projection).expect("write Viewer manifest projection");
 }
 
+#[cfg(unix)]
+fn write_fake_npm(root: &Path, script: &[u8]) -> PathBuf {
+    use std::os::unix::fs::PermissionsExt;
+
+    let bin = root.join("fake-bin");
+    std::fs::create_dir(&bin).expect("create fake bin");
+    let npm = bin.join("npm");
+    std::fs::write(&npm, script).expect("write fake npm");
+    let mut permissions = std::fs::metadata(&npm)
+        .expect("fake npm metadata")
+        .permissions();
+    permissions.set_mode(0o700);
+    std::fs::set_permissions(&npm, permissions).expect("make fake npm executable");
+    bin
+}
+
 fn verify_receipt_hash(value: &Value) {
     let mut unsigned = value.clone();
     let expected = unsigned
@@ -141,6 +157,138 @@ fn tracked_frontend_contract_is_canonical_self_hashed_and_read_only() {
     let receipt = canonical_receipt_json(&first).expect("canonical receipt");
     let value: Value = serde_json::from_str(&receipt).expect("receipt JSON");
     verify_receipt_hash(&value);
+}
+
+#[test]
+fn frontend_smoke_dry_run_is_deterministic_native_and_process_free() {
+    let root = repository_root();
+    let first = run_frontend_smoke(&root, true).expect("frontend smoke dry-run");
+    let second = run_frontend_smoke(&root, true).expect("repeat frontend smoke dry-run");
+    assert_eq!(first, second);
+    assert_eq!(first.mode, "dry_run");
+    assert_eq!(first.status, "planned");
+    assert_eq!(
+        first.logical_commands,
+        vec![
+            vec!["npm".to_owned(), "ci".to_owned()],
+            vec!["npm".to_owned(), "run".to_owned(), "build".to_owned()],
+        ]
+    );
+    assert_eq!(first.direct_processes_spawned, 0);
+    assert!(first.successful_exit_codes.is_empty());
+    assert!(first.delivery_receipt_hash.is_none());
+    assert_eq!(
+        first.network_access_accounting,
+        "not_instrumented_npm_ci_may_access_registry"
+    );
+    let encoded = canonical_smoke_receipt_json(&first).expect("canonical smoke receipt");
+    let value: Value = serde_json::from_str(&encoded).expect("smoke receipt JSON");
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn clean_environment_smoke_cli_owns_exact_process_order_and_delivery_postcheck() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$PWD/npm-invocations.log\"\nexit 0\n",
+    );
+
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["smoke", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run native frontend smoke");
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("npm-invocations.log"))
+            .expect("read npm invocation log"),
+        "ci\nrun build\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("smoke receipt JSON");
+    assert_eq!(value["mode"], "execute");
+    assert_eq!(value["status"], "ready");
+    assert_eq!(value["direct_processes_spawned"], 2);
+    assert_eq!(value["successful_exit_codes"], serde_json::json!([0, 0]));
+    assert!(value["delivery_receipt_hash"]
+        .as_str()
+        .is_some_and(|hash| hash.starts_with("sha256:")));
+    verify_receipt_hash(&value);
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_smoke_stops_after_the_first_nonzero_child_exit() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$PWD/npm-invocations.log\"\nexit 17\n",
+    );
+
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["smoke", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run failing native frontend smoke");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    assert_eq!(
+        std::fs::read_to_string(test.0.join("npm-invocations.log"))
+            .expect("read npm invocation log"),
+        "ci\n"
+    );
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("error JSON");
+    assert_eq!(
+        value["schema_version"],
+        "structural-frontend-contract-error.v1"
+    );
+    assert_eq!(value["code"], "frontend_smoke_command_failed");
+    assert!(value["detail"]
+        .as_str()
+        .is_some_and(|detail| detail.contains("command 1 failed with exit code 17")));
+}
+
+#[cfg(unix)]
+#[test]
+fn frontend_smoke_rejects_contract_mutation_before_delivery_publication() {
+    let test = TestRoot::create();
+    copy_contract_inventory(&test.0);
+    write_delivery_fixture(&test.0);
+    let bin = write_fake_npm(
+        &test.0,
+        b"#!/bin/sh\nprintf ' ' >> \"$PWD/package.json\"\nexit 0\n",
+    );
+
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-frontend-contract"))
+        .args(["smoke", "--root"])
+        .arg(&test.0)
+        .env_clear()
+        .env("PATH", &bin)
+        .output()
+        .expect("run mutating native frontend smoke");
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stderr.is_empty());
+    let bytes = output.stdout.strip_suffix(b"\n").expect("one JSON line");
+    let value: Value = serde_json::from_slice(bytes).expect("error JSON");
+    assert_eq!(value["code"], "frontend_smoke_contract_changed");
+    assert!(value["detail"]
+        .as_str()
+        .is_some_and(|detail| detail.contains("changed while the smoke sequence executed")));
 }
 
 #[test]

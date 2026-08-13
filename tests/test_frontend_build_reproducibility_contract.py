@@ -30,7 +30,11 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     assert package_json["scripts"]["build"].endswith(
         "structural-frontend-contract -- delivery --root ."
     )
-    assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
+    assert (
+        package_json["scripts"]["verify:frontend-smoke"]
+        == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
+        "-p structural-frontend-contract -- smoke --root ."
+    )
     assert (
         package_json["scripts"]["verify:viewer-manifest"]
         == "cargo run --quiet --locked --manifest-path native/Cargo.toml "
@@ -107,9 +111,23 @@ def test_native_frontend_contract_helper_runs_without_installed_packages() -> No
     assert payload["network_access_count"] == 0
 
 
-def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
+def test_native_frontend_smoke_dry_run_is_process_free_and_self_hashed() -> None:
     result = subprocess.run(
-        ["node", "scripts/verify-frontend-smoke.mjs", "--dry-run"],
+        [
+            "cargo",
+            "run",
+            "--quiet",
+            "--locked",
+            "--manifest-path",
+            "native/Cargo.toml",
+            "-p",
+            "structural-frontend-contract",
+            "--",
+            "smoke",
+            "--root",
+            ".",
+            "--dry-run",
+        ],
         cwd=ROOT,
         check=False,
         capture_output=True,
@@ -117,6 +135,12 @@ def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
     )
 
     assert result.returncode == 0, result.stderr
-    assert "npm run verify:frontend-contract" in result.stdout
-    assert "npm ci" in result.stdout
-    assert "npm run build" in result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema_version"] == "structural-native-frontend-smoke-receipt.v1"
+    assert payload["mode"] == "dry_run"
+    assert payload["status"] == "planned"
+    assert payload["logical_commands"] == [["npm", "ci"], ["npm", "run", "build"]]
+    assert payload["direct_processes_spawned"] == 0
+    assert payload["delivery_receipt_hash"] is None
+    assert payload["network_access_accounting"] == "not_instrumented_npm_ci_may_access_registry"
+    assert payload["receipt_hash"].startswith("sha256:")
