@@ -31,6 +31,7 @@ mod evidence;
 mod model_edit;
 mod model_view;
 mod report_view;
+mod result_view;
 
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,
@@ -44,6 +45,10 @@ pub use model_view::{
     render_model_topology_view, render_model_topology_view_file, ModelTopologyProjectionV1,
 };
 pub use report_view::WorkbenchReportLocaleV1;
+pub use result_view::{
+    WorkbenchResultChannelV1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
+};
 
 const SESSION_SCHEMA_V1: &str = "structural-native-workbench-session.v1";
 const IMPORT_RECEIPT_SCHEMA_V1: &str = "structural-native-workbench-import-receipt.v1";
@@ -1018,6 +1023,40 @@ impl NativeWorkbench {
                     }),
             },
         )
+    }
+
+    /// Return a deterministic bounded window over one verified terminal NDTHA response channel.
+    ///
+    /// The view uses only the completed `ResultIR` prefix, preserves exact numeric values in a
+    /// table, and uses a fixed-width ASCII plot whose extent is stable across windows. It does not
+    /// infer timestamps because `ResultIR` v1 does not carry the analysis time increment.
+    ///
+    /// # Errors
+    ///
+    /// Requires at least the terminal stage and rejects receipt drift, invalid `ResultIR`, an
+    /// unsupported channel window, or an unsafe terminal projection.
+    pub fn ndtha_response_view_text(
+        &self,
+        channel: WorkbenchResultChannelV1,
+        start_step: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
+        if self.session.stage < WorkbenchStageV1::Terminal {
+            return Err(WorkbenchError::new(
+                "workbench_transition_invalid",
+                format!(
+                    "terminal or later is required but the durable stage is {}",
+                    self.session.stage.label()
+                ),
+            ));
+        }
+        let result_bytes = read_bounded_regular_file(
+            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_result_view_result_invalid", &error))?;
+        result_view::render_ndtha_response_view(result.result(), channel, start_step, count)
     }
 
     /// Publish a deterministic embedded-font English or Korean PDF from a verified report session.

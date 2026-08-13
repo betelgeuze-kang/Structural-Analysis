@@ -1044,6 +1044,139 @@ fn native_review_inspect_and_export_are_deterministic_and_tamper_evident() {
     assert!(String::from_utf8_lossy(&rejected.stdout).contains("workbench_hashed_json"));
 }
 
+fn verified_response_channel_views(workspace: &Path, result_hash: &str) -> Vec<String> {
+    let mut outputs = Vec::new();
+    for (channel, unit) in [
+        ("top-displacement", "m"),
+        ("drift-ratio", "percent"),
+        ("base-shear", "kN"),
+        ("residual-inf", "N"),
+    ] {
+        let arguments = [
+            text("result-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--channel"),
+            text(channel),
+        ];
+        let first = run_workbench(&arguments);
+        let second = run_workbench(&arguments);
+        assert_success(&first);
+        assert_eq!(first.stdout, second.stdout);
+        assert!(!first.stdout.contains(&0x1b));
+        let view = String::from_utf8(first.stdout).expect("ASCII response view");
+        assert!(view.starts_with("Structural Native Workbench - NDTHA response history\n"));
+        assert!(view.contains("Schema: structural-native-workbench-ndtha-response-view.v1\n"));
+        assert!(view.contains(&format!("Channel: {channel}\n")));
+        assert!(view.contains(&format!("Unit: {unit}\n")));
+        assert!(view.contains("Completed steps: 5\n"));
+        assert!(view.contains("Displayed steps: 1-5 of 5\n"));
+        assert!(view.contains(result_hash));
+        assert!(view.contains("ResultIR v1 does not carry dt_s"));
+        assert!(view.contains("not a time reconstruction, 3D/deformed/modal/contour view"));
+        let (unsigned, hash_line) = view
+            .rsplit_once("View hash: ")
+            .expect("response view hash line");
+        assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+        outputs.push(view);
+    }
+    for left in 0..outputs.len() {
+        for right in (left + 1)..outputs.len() {
+            assert_ne!(outputs[left], outputs[right]);
+        }
+    }
+    outputs
+}
+
+#[test]
+fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated() {
+    let (model, request, external, source) = inputs();
+    let temporary = TestDirectory::create();
+    let workspace = temporary.0.join("response-view");
+    let mut import = import_arguments("import", &model, &request, &external, &source, &workspace);
+    import.truncate(9);
+    assert_success(&run_workbench(&import));
+
+    let premature = run_workbench(&[
+        text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(premature.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&premature.stdout).contains("workbench_transition_invalid"));
+
+    for command in ["validate", "run", "resume"] {
+        assert_success(&run_workbench(&stage_arguments(command, &workspace)));
+    }
+    let result: Value = serde_json::from_slice(
+        &std::fs::read(workspace.join("04-resume/result-ir.json")).expect("terminal ResultIR"),
+    )
+    .expect("terminal ResultIR JSON");
+    let result_hash = result["result_hash"].as_str().expect("result hash");
+    let channel_outputs = verified_response_channel_views(&workspace, result_hash);
+    assert_eq!(channel_outputs.len(), 4);
+
+    let window = run_workbench(&[
+        text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--channel"),
+        text("drift-ratio"),
+        text("--start-step"),
+        text("2"),
+        text("--count"),
+        text("2"),
+    ]);
+    assert_success(&window);
+    let window = String::from_utf8(window.stdout).expect("windowed response view");
+    assert!(window.contains("Displayed steps: 2-3 of 5\n"));
+    assert!(!window.lines().any(|line| line.starts_with("000001 ")));
+    assert!(window.lines().any(|line| line.starts_with("000002 ")));
+    assert!(window.lines().any(|line| line.starts_with("000003 ")));
+    assert!(!window.lines().any(|line| line.starts_with("000004 ")));
+
+    for arguments in [
+        vec![
+            text("result-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--channel"),
+            text("energy"),
+        ],
+        vec![
+            text("result-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--count"),
+            text("257"),
+        ],
+        vec![
+            text("result-view"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--start-step"),
+            text("6"),
+        ],
+    ] {
+        let rejected = run_workbench(&arguments);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+
+    let result_path = workspace.join("04-resume/result-ir.json");
+    let mut tampered = std::fs::read(&result_path).expect("terminal ResultIR bytes");
+    tampered[0] ^= 1;
+    std::fs::write(result_path, tampered).expect("tamper terminal ResultIR");
+    let rejected = run_workbench(&[
+        text("result-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(rejected.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
+}
+
 #[test]
 fn localized_linear_report_view_is_utf8_deterministic_and_hash_bound() {
     let (model, request, external, source) = inputs();

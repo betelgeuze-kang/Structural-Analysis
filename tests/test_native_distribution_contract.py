@@ -228,6 +228,22 @@ def valid_v9_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v10_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v9_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v10",
+            "workbench_result_view_surface_passed": True,
+            "workbench_result_view_top_displacement_sha256": "sha256:" + "e" * 64,
+            "workbench_result_view_drift_ratio_sha256": "sha256:" + "f" * 64,
+            "workbench_result_view_base_shear_sha256": "sha256:" + "0" * 64,
+            "workbench_result_view_residual_inf_sha256": "sha256:" + "1" * 64,
+            "workbench_result_view_window_sha256": "sha256:" + "2" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -418,6 +434,43 @@ def test_distribution_receipt_rejects_invalid_v9_model_edit_identity(tmp_path: P
     )
 
 
+def test_distribution_receipt_accepts_ndtha_response_view_v10_contract(tmp_path: Path):
+    receipt, manifest = valid_v10_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_missing_v10_response_view_authority(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v10_contract()
+    receipt["workbench_result_view_surface_passed"] = False
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_result_view_surface_passed" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_duplicate_v10_response_identity(tmp_path: Path):
+    receipt, manifest = valid_v10_contract()
+    receipt["workbench_result_view_window_sha256"] = receipt[
+        "workbench_result_view_drift_ratio_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "response channel and explicit-window identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -491,7 +544,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v9" in e2e
+    assert "structural-native-distribution-e2e.v10" in e2e
     assert "exercise_localized_pdf_surface" in e2e
     assert "report-export-pdf" in e2e
     assert "workbench_localized_pdf_surface_passed" in e2e
@@ -504,6 +557,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-edit-node" in e2e
     assert "workbench_model_edit_surface_passed" in e2e
     assert "workbench_model_edit_receipt_sha256" in e2e
+    assert "exercise_result_view_surface" in e2e
+    assert "result-view" in e2e
+    assert "workbench_result_view_surface_passed" in e2e
+    assert "workbench_result_view_window_sha256" in e2e
     assert "structural-catalog" in e2e
     assert "catalog_builder_build_passed" in e2e
     assert "structural-evidence" in e2e
@@ -525,7 +582,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert "exercise_operator_surface" in rocm_e2e
     assert "workbench_operator_surface_passed" in rocm_e2e
-    assert "structural-native-distribution-e2e.v9" in rocm_e2e
+    assert "structural-native-distribution-e2e.v10" in rocm_e2e
     assert "exercise_localized_pdf_surface" in rocm_e2e
     assert "report-export-pdf" in rocm_e2e
     assert "workbench_localized_pdf_surface_passed" in rocm_e2e
@@ -538,6 +595,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-edit-node" in rocm_e2e
     assert "workbench_model_edit_surface_passed" in rocm_e2e
     assert "workbench_model_edit_receipt_sha256" in rocm_e2e
+    assert "exercise_result_view_surface" in rocm_e2e
+    assert "result-view" in rocm_e2e
+    assert "workbench_result_view_surface_passed" in rocm_e2e
+    assert "workbench_result_view_window_sha256" in rocm_e2e
     assert "structural-catalog" in rocm_e2e
     assert "catalog_builder_build_passed" in rocm_e2e
     assert "structural-evidence" in rocm_e2e

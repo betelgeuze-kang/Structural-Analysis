@@ -28,6 +28,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
   not WCAG/PDF-UA certification; the durable fixed-font v1 PDF remains ASCII-only.
+- `result-view`: a deterministic self-hashed ANSI-free table and fixed-width plot over one verified
+  terminal NDTHA ResultIR. It exposes exact top-displacement, drift-ratio, base-shear or
+  residual-infinity values plus per-step convergence metadata through a maximum 256-row window.
+  ResultIR v1 has no `dt_s`, so the view preserves step indices and does not invent timestamps;
+  general 3D/deformed/modal/contour exploration remains open.
 - `report-export-pdf`: a deterministic bounded embedded-font PDF export in `en-US` or `ko-KR`.
   It re-verifies the stored v1 report chain, embeds a renamed OFL-1.1 Type0/ToUnicode subset,
   publishes to a new directory, and leaves the Workbench unchanged. Fixed labels and printable
@@ -160,7 +165,8 @@ well. Viewer report PDF verification plus Viewer sample-workflow, performance, a
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only one
-bounded command-level node-coordinate edit, not a general visual model editor or 3D result explorer.
+bounded command-level node-coordinate edit and one bounded response-history table, not a general
+visual model editor or 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
 
@@ -177,6 +183,11 @@ not solver selection/execution, perspective interaction, or deformed/modal/conto
 exploration. The separate C++-revalidated node-coordinate command closes only one provenance-bound
 edit operation; visual dragging and general property/material/section/load/constraint/topology
 editing remain open, so the composite visual parity row stays open.
+
+The bounded NDTHA response-history view is C5-implemented for four closed response channels and
+arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table
+inspection for the current profile, not time reconstruction or 3D/deformed/modal/contour result
+exploration, so the composite visual parity row remains open.
 
 ## Legacy authority still active
 

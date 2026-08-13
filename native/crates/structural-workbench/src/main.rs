@@ -8,7 +8,8 @@ use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
     BenchmarkTruthClassV1, ModelTopologyProjectionV1, NativeWorkbench, WorkbenchError,
-    WorkbenchReportLocaleV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -55,6 +56,14 @@ struct ModelEditNodeCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ResultViewCommand {
+    workspace: PathBuf,
+    channel: WorkbenchResultChannelV1,
+    start_step: u32,
+    count: u32,
+}
+
 fn main() -> ExitCode {
     let arguments = std::env::args_os().skip(1).collect::<Vec<_>>();
     run(&arguments)
@@ -62,8 +71,7 @@ fn main() -> ExitCode {
 
 fn run(arguments: &[OsString]) -> ExitCode {
     if arguments.len() == 1 && arguments[0] == "--version" {
-        println!("structural-workbench {}", env!("CARGO_PKG_VERSION"));
-        return ExitCode::SUCCESS;
+        return print_version();
     }
     let result = match arguments.first().and_then(|argument| argument.to_str()) {
         Some("import") => {
@@ -126,6 +134,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
             print!("{}", workbench.linear_report_text(locale)?);
             Ok(())
         }),
+        Some("result-view") => {
+            parse_result_view(arguments).and_then(|command| run_result_view(&command))
+        }
         Some("report-export-pdf") => {
             parse_report_pdf_export(arguments).and_then(|(workspace, output_directory, locale)| {
                 let workbench = NativeWorkbench::open(&workspace)?;
@@ -161,6 +172,11 @@ fn run(arguments: &[OsString]) -> ExitCode {
     finish(result)
 }
 
+fn print_version() -> ExitCode {
+    println!("structural-workbench {}", env!("CARGO_PKG_VERSION"));
+    ExitCode::SUCCESS
+}
+
 fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
     match result {
         Ok(()) => ExitCode::SUCCESS,
@@ -184,6 +200,7 @@ fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
                     | "workbench_evidence_artifact_id_invalid"
                     | "workbench_evidence_artifact_not_found"
                     | "workbench_evidence_as_of_invalid"
+                    | "workbench_result_view_window_invalid"
             ) {
                 EXIT_USAGE_OR_POLICY
             } else {
@@ -210,6 +227,15 @@ fn run_workflow(command: &ImportCommand) -> Result<(), WorkbenchError> {
     workbench.compare(true)?;
     workbench.report()?;
     print_session(&workbench)
+}
+
+fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    print!(
+        "{}",
+        workbench.ndtha_response_view_text(command.channel, command.start_step, command.count)?
+    );
+    Ok(())
 }
 
 fn initialize(command: &ImportCommand) -> Result<NativeWorkbench, WorkbenchError> {
@@ -535,6 +561,62 @@ fn parse_report_view(
     ))
 }
 
+fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut channel = WorkbenchResultChannelV1::TopDisplacement;
+    let mut channel_seen = false;
+    let mut start_step = 1;
+    let mut start_seen = false;
+    let mut count = WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1;
+    let mut count_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("result-view option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("result-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--channel" if !channel_seen => {
+                channel_seen = true;
+                channel = value
+                    .to_str()
+                    .and_then(WorkbenchResultChannelV1::parse)
+                    .ok_or_else(|| {
+                        usage_error(
+                            "result-view channel must be top-displacement, drift-ratio, base-shear or residual-inf",
+                        )
+                    })?;
+            }
+            "--start-step" if !start_seen => {
+                start_seen = true;
+                start_step = parse_u32(value, "result-view start step")?;
+                if start_step == 0 {
+                    return Err(usage_error("result-view start step must be at least 1"));
+                }
+            }
+            "--count" if !count_seen => {
+                count_seen = true;
+                count = parse_u32(value, "result-view count")?;
+                if count == 0 || count > WORKBENCH_RESULT_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error("result-view count must be in 1..=256"));
+                }
+            }
+            _ => return Err(usage_error("duplicate or unknown result-view option")),
+        }
+        index += 2;
+    }
+    Ok(ResultViewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        channel,
+        start_step,
+        count,
+    })
+}
+
 fn parse_report_pdf_export(
     arguments: &[OsString],
 ) -> Result<(PathBuf, PathBuf, WorkbenchReportLocaleV1), WorkbenchError> {
@@ -808,7 +890,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
@@ -820,8 +902,8 @@ mod tests {
 
     use super::{
         parse_catalog, parse_catalog_show, parse_evidence, parse_import, parse_model_edit_node,
-        parse_model_view, parse_report_pdf_export, parse_report_view, parse_review,
-        parse_stage_command,
+        parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
+        parse_review, parse_stage_command,
     };
 
     #[test]
@@ -989,6 +1071,42 @@ mod tests {
         let mut invalid = korean;
         invalid[2] = OsString::from("ko-kr");
         assert!(parse_report_view(&invalid).is_err());
+    }
+
+    #[test]
+    fn result_view_parser_has_bounded_closed_channel_and_window_options() {
+        let default = [
+            OsString::from("result-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_result_view(&default).expect("default result view");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.channel.label(), "top-displacement");
+        assert_eq!(parsed.start_step, 1);
+        assert_eq!(parsed.count, 64);
+
+        let window = [
+            OsString::from("result-view"),
+            OsString::from("--count"),
+            OsString::from("2"),
+            OsString::from("--channel"),
+            OsString::from("base-shear"),
+            OsString::from("--start-step"),
+            OsString::from("3"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_result_view(&window).expect("explicit result window");
+        assert_eq!(parsed.channel.label(), "base-shear");
+        assert_eq!(parsed.start_step, 3);
+        assert_eq!(parsed.count, 2);
+
+        for (index, invalid_value) in [(2, "257"), (4, "energy"), (6, "0")] {
+            let mut invalid = window.clone();
+            invalid[index] = OsString::from(invalid_value);
+            assert!(parse_result_view(&invalid).is_err());
+        }
     }
 
     #[test]

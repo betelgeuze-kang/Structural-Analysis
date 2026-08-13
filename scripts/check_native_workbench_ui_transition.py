@@ -129,6 +129,7 @@ EXPECTED_FEATURES = {
     "deterministic_result_inspect_human_review_export": ("c5_implemented", False),
     "bounded_general_modelir_terminal_topology_view": ("c5_implemented", False),
     "bounded_cpp_revalidated_modelir_node_coordinate_edit": ("c5_implemented", False),
+    "bounded_ndtha_terminal_response_history_view": ("c5_implemented", False),
     "general_visual_model_editing_and_3d_result_exploration": ("open", True),
     "arbitrary_modelir_topology_and_solver_selection": ("open", True),
     "benchmark_and_evidence_catalog_browsing": ("c5_implemented", False),
@@ -255,6 +256,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     if native.get("operator_flow") != [
         "inspect",
         "report-view",
+        "result-view",
         "report-export-pdf",
         "review",
         "export",
@@ -717,6 +719,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native-workbench-export.v1",
             "pub fn inspect_json",
             "pub fn linear_report_text",
+            "pub fn ndtha_response_view_text",
             "pub fn publish_review",
             "pub fn export_json",
             "automatically_inferred",
@@ -738,6 +741,21 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             '"ko-KR"',
             "safe_terminal_text",
             "not WCAG, PDF/UA",
+        ),
+        blockers,
+    )
+    native_result_view = _text(
+        root, Path("native/crates/structural-workbench/src/result_view.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/result_view.rs"),
+        native_result_view,
+        (
+            "structural-native-workbench-ndtha-response-view.v1",
+            "WorkbenchResultChannelV1",
+            "WORKBENCH_RESULT_VIEW_MAX_COUNT_V1",
+            "ResultIR v1 does not carry dt_s",
+            "not a time reconstruction, 3D/deformed/modal/contour view",
         ),
         blockers,
     )
@@ -1298,6 +1316,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             'Some("inspect")',
             'Some("report-view")',
+            'Some("result-view")',
             'Some("report-export-pdf")',
             'Some("review")',
             'Some("export")',
@@ -1351,6 +1370,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "not a C6 removal receipt",
             "bounded terminal UTF-8 linear report view is C5-implemented",
             "bounded embedded-font PDF export is C5-implemented",
+            "bounded NDTHA response-history view is C5-implemented",
             "never infers this decision",
             "seven active workflows",
             "catalog and copied-evidence browsing",

@@ -45,7 +45,12 @@ strictly reparses and C++-revalidates the result, and publishes only to a new ar
 9. `Report-export-pdf` is a bounded embedded-font PDF export in `en-US` or `ko-KR`. It first
    reproduces the stored v1 PDF/receipt, then publishes a separate deterministic Type0/ToUnicode
    PDF and self-hashed receipt to a new directory without mutating the durable session.
-10. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
+10. `Result-view` opens a verified terminal-or-later session and emits a self-hashed, ANSI-free,
+   bounded NDTHA response-history view for top displacement, drift ratio, base shear, or residual
+   infinity norm. Output is windowed to at most 256 exact rows and uses the whole completed channel
+   as a stable ASCII plot extent. It uses one-based step indices and does not invent time values
+   because ResultIR v1 does not carry `dt_s`.
+11. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
    acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
    it never reads protected source evidence or generates a readiness verdict.
 
@@ -73,6 +78,8 @@ structural-workbench resume --workspace SESSION
 structural-workbench compare --workspace SESSION --require-pass
 structural-workbench report --workspace SESSION
 structural-workbench report-view --workspace SESSION --locale ko-KR
+structural-workbench result-view --workspace SESSION --channel drift-ratio \
+  --start-step 1 --count 64
 structural-workbench report-export-pdf --workspace SESSION \
   --output-dir LOCALIZED-REPORT --locale ko-KR
 structural-workbench status --workspace SESSION
@@ -118,6 +125,12 @@ into a self-hashed receipt.
 It does not provide visual dragging or general property, constraint, load, topology, or solver
 editing; see `docs/native/modelir-node-coordinate-edit-v1.md`.
 
+The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
+convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is
+an inspection aid, while the scientific-notation table remains the numeric authority. It is not a
+time reconstruction, deformed/3D/contour/modal renderer, arbitrary ResultIR query language, or
+engineering verdict; see `docs/native/ndtha-response-view-v1.md`.
+
 Catalog outputs preserve the legacy lifecycle and comparability rules, reject duplicate IDs and
 unknown fields, and are canonical self-hashed JSON. Evidence paths must be relative beneath a real
 non-symlink bundle directory; every artifact is bounded and must match the manifest SHA-256. An
@@ -151,7 +164,10 @@ evidence checksum tampering. A separate cleared-environment E2E publishes Korean
 text, proves byte-identical `en-US` and `ko-KR` linear projections, verifies the localized view
 hash, and rejects an unsupported locale. Another cleared-environment E2E proves the embedded-font
 PDF export is byte-identical per locale, distinct across locales, self-hashed, non-mutating, and
-create-new, while invalid locale and existing-destination cases fail closed.
+create-new, while invalid locale and existing-destination cases fail closed. The response-view E2E
+proves all four closed channels are byte-deterministic and distinct, verifies the view self-hash
+and ResultIR binding, exercises a bounded window, and rejects pre-terminal access, invalid options,
+out-of-range windows and a one-byte terminal ResultIR mutation.
 
 ## Claim boundary
 
@@ -164,6 +180,8 @@ general graphical accessibility/localization, arbitrary-Unicode or tagged PDF ou
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
 removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
 broader UI and document requirements, nor does the fixed-label embedded-font PDF v2 export.
+Likewise, the bounded response-history table does not close the remaining general 3D result
+exploration requirement.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 

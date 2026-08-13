@@ -89,14 +89,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 10. runs the installed provenance-bound node-coordinate edit twice, proves byte-identical model and
     receipt output, unchanged source bytes, strict C++ revalidation, analysis readiness and
     deterministic topology rendering with an empty `PATH`;
-11. installs an immutable update, rolls back and re-verifies activation;
-12. emits an append-only v9 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+11. renders all four closed NDTHA response channels twice from the installed Workbench, proves
+    exact deterministic ANSI-free output and distinct identities, exercises a two-row explicit
+    window, and proves the durable session remains unchanged;
+12. installs an immutable update, rolls back and re-verifies activation;
+13. emits an append-only v10 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, and edited ModelIR
-   plus edit-receipt identities, Python/Node lookup count 0 and fallback count 0. The receipt checker
-   continues to accept frozen v1 through v8 receipts without treating them as v9 model-edit
-   authority.
+   plus edit-receipt identities, all four default response views and the explicit-window identity,
+   Python/Node lookup count 0 and fallback count 0. The receipt checker continues to accept frozen
+   v1 through v9 receipts without treating them as v10 response-view authority.
 
 The reference command is:
 
