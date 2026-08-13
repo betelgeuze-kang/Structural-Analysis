@@ -370,6 +370,22 @@ def valid_v18_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v19_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v18_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v19",
+            "workbench_linear_material_edit_surface_passed": True,
+            "workbench_linear_material_edit_model_sha256": "sha256:" + "3" * 64,
+            "workbench_linear_material_edit_receipt_sha256": "sha256:" + "4" * 64,
+            "workbench_frame_section_edit_surface_passed": True,
+            "workbench_frame_section_edit_model_sha256": "sha256:" + "5" * 64,
+            "workbench_frame_section_edit_receipt_sha256": "sha256:" + "6" * 64,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -879,6 +895,32 @@ def test_distribution_receipt_rejects_unbound_v18_constraint_value_edit(
     )
 
 
+def test_distribution_receipt_accepts_property_edits_v19_contract(tmp_path: Path):
+    receipt, manifest = valid_v19_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v19_property_edits(tmp_path: Path):
+    receipt, manifest = valid_v19_contract()
+    receipt["workbench_linear_material_edit_surface_passed"] = False
+    receipt["workbench_frame_section_edit_receipt_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_linear_material_edit_surface_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_frame_section_edit_receipt_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -960,7 +1002,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
-    assert "structural-native-distribution-e2e.v18" in e2e
+    assert "structural-native-distribution-e2e.v19" in e2e
     assert "workflow-model-linear" in e2e
     assert "model_ir_linear_workbench_restart_passed" in e2e
     assert "model_ir_linear_workbench_direct_parity_passed" in e2e
@@ -1001,6 +1043,14 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-edit-constraint-value" in e2e
     assert "workbench_constraint_value_edit_surface_passed" in e2e
     assert "workbench_constraint_value_edit_receipt_sha256" in e2e
+    assert "exercise_linear_material_edit_surface" in e2e
+    assert "model-edit-linear-material" in e2e
+    assert "workbench_linear_material_edit_surface_passed" in e2e
+    assert "workbench_linear_material_edit_receipt_sha256" in e2e
+    assert "exercise_frame_section_edit_surface" in e2e
+    assert "model-edit-frame-section" in e2e
+    assert "workbench_frame_section_edit_surface_passed" in e2e
+    assert "workbench_frame_section_edit_receipt_sha256" in e2e
     assert "exercise_result_view_surface" in e2e
     assert "result-view" in e2e
     assert "workbench_result_view_surface_passed" in e2e

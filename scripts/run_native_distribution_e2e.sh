@@ -573,6 +573,130 @@ exercise_constraint_value_edit_surface() {
 }
 exercise_constraint_value_edit_surface
 
+exercise_linear_material_edit_surface() {
+  local edit_source="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$edit_source" | awk '{print $1}')"
+  local label output_directory
+  for label in first second; do
+    output_directory="$e2e_root/linear-material-edit-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-linear-material "$edit_source" --material M1 \
+      --elastic-modulus-pa 210000000000 --poisson-ratio 0.29 \
+      --density-kg-m3 7850 --output-dir "$output_directory" \
+      > "$e2e_root/linear-material-edit-$label.stdout.json"
+    test -s "$output_directory/model-ir.json"
+    test -s "$output_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"operation":"linear_elastic_material_parameters"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"material_id":"M1"' "$output_directory/edit-receipt.json"
+    grep -Fq '"law_id":"linear_elastic_isotropic"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"parameter_set_version":"1"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"elastic_modulus_pa":210000000000' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"poisson_ratio":0.29' "$output_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$output_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"normalizer_id":"structural-native-model-editor"' \
+      "$output_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-linear-material.v1"' \
+      "$output_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$output_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-material-edit-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$output_directory/model-ir.json" \
+      > "$e2e_root/linear-material-edit-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/linear-material-edit-$label-view.txt"
+  done
+  diff -r "$e2e_root/linear-material-edit-first" \
+    "$e2e_root/linear-material-edit-second" \
+    > "$e2e_root/linear-material-edit-diff.txt"
+  cmp "$e2e_root/linear-material-edit-first.stdout.json" \
+    "$e2e_root/linear-material-edit-second.stdout.json"
+  cmp "$e2e_root/linear-material-edit-first-validation.json" \
+    "$e2e_root/linear-material-edit-second-validation.json"
+  cmp "$e2e_root/linear-material-edit-first-view.txt" \
+    "$e2e_root/linear-material-edit-second-view.txt"
+  if [[ "$(sha256sum "$edit_source" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear-material edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_linear_material_edit_surface
+
+exercise_frame_section_edit_surface() {
+  local edit_source="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$edit_source" | awk '{print $1}')"
+  local label output_directory
+  for label in first second; do
+    output_directory="$e2e_root/frame-section-edit-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-frame-section "$edit_source" --section S1 \
+      --area-m2 0.025 --iy-m4 0.00009 --iz-m4 0.00006 \
+      --torsional-constant-m4 0.000012 --shear-area-y-m2 0.02 \
+      --shear-area-z-m2 0.02 --output-dir "$output_directory" \
+      > "$e2e_root/frame-section-edit-$label.stdout.json"
+    test -s "$output_directory/model-ir.json"
+    test -s "$output_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"operation":"frame_section_parameters"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"section_id":"S1"' "$output_directory/edit-receipt.json"
+    grep -Fq '"family_id":"frame_3d"' "$output_directory/edit-receipt.json"
+    grep -Fq '"parameter_set_version":"1"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"area_m2":0.025' "$output_directory/edit-receipt.json"
+    grep -Fq '"torsional_constant_m4":0.000012' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$output_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$output_directory/edit-receipt.json"
+    grep -Fq "\"source_input_sha256\":\"sha256:$source_before_hash\"" \
+      "$output_directory/edit-receipt.json"
+    grep -Fq '"normalizer_id":"structural-native-model-editor"' \
+      "$output_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-frame-section.v1"' \
+      "$output_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$output_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-section-edit-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$output_directory/model-ir.json" \
+      > "$e2e_root/frame-section-edit-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/frame-section-edit-$label-view.txt"
+  done
+  diff -r "$e2e_root/frame-section-edit-first" \
+    "$e2e_root/frame-section-edit-second" \
+    > "$e2e_root/frame-section-edit-diff.txt"
+  cmp "$e2e_root/frame-section-edit-first.stdout.json" \
+    "$e2e_root/frame-section-edit-second.stdout.json"
+  cmp "$e2e_root/frame-section-edit-first-validation.json" \
+    "$e2e_root/frame-section-edit-second-validation.json"
+  cmp "$e2e_root/frame-section-edit-first-view.txt" \
+    "$e2e_root/frame-section-edit-second-view.txt"
+  if [[ "$(sha256sum "$edit_source" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame-section edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_frame_section_edit_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -843,6 +967,10 @@ nodal_load_edit_model_hash="$(sha256sum "$e2e_root/nodal-load-edit-first/model-i
 nodal_load_edit_receipt_hash="$(sha256sum "$e2e_root/nodal-load-edit-first/edit-receipt.json" | awk '{print $1}')"
 constraint_value_edit_model_hash="$(sha256sum "$e2e_root/constraint-value-edit-first/model-ir.json" | awk '{print $1}')"
 constraint_value_edit_receipt_hash="$(sha256sum "$e2e_root/constraint-value-edit-first/edit-receipt.json" | awk '{print $1}')"
+linear_material_edit_model_hash="$(sha256sum "$e2e_root/linear-material-edit-first/model-ir.json" | awk '{print $1}')"
+linear_material_edit_receipt_hash="$(sha256sum "$e2e_root/linear-material-edit-first/edit-receipt.json" | awk '{print $1}')"
+frame_section_edit_model_hash="$(sha256sum "$e2e_root/frame-section-edit-first/model-ir.json" | awk '{print $1}')"
+frame_section_edit_receipt_hash="$(sha256sum "$e2e_root/frame-section-edit-first/edit-receipt.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -880,6 +1008,10 @@ v18_receipt_json="${v17_receipt_json/structural-native-distribution-e2e.v17/stru
 constraint_value_edit_receipt_fields="\"workbench_constraint_value_edit_surface_passed\":true,\"workbench_constraint_value_edit_model_sha256\":\"sha256:$constraint_value_edit_model_hash\",\"workbench_constraint_value_edit_receipt_sha256\":\"sha256:$constraint_value_edit_receipt_hash\","
 v18_receipt_json="${v18_receipt_json/\"workbench_result_view_surface_passed\":true,/${constraint_value_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v18_receipt_json" > "$temporary_receipt"
+v19_receipt_json="${v18_receipt_json/structural-native-distribution-e2e.v18/structural-native-distribution-e2e.v19}"
+property_edit_receipt_fields="\"workbench_linear_material_edit_surface_passed\":true,\"workbench_linear_material_edit_model_sha256\":\"sha256:$linear_material_edit_model_hash\",\"workbench_linear_material_edit_receipt_sha256\":\"sha256:$linear_material_edit_receipt_hash\",\"workbench_frame_section_edit_surface_passed\":true,\"workbench_frame_section_edit_model_sha256\":\"sha256:$frame_section_edit_model_hash\",\"workbench_frame_section_edit_receipt_sha256\":\"sha256:$frame_section_edit_receipt_hash\","
+v19_receipt_json="${v19_receipt_json/\"workbench_result_view_surface_passed\":true,/${property_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v19_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

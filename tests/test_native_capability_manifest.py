@@ -641,12 +641,15 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v16" in distribution["claim"]
     assert "append-only v17" in distribution["claim"]
     assert "append-only v18" in distribution["claim"]
+    assert "append-only v19" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
+    assert "existing-v1-linear-elastic-material" in distribution["claim"]
+    assert "existing-v1-frame3d-section" in distribution["claim"]
     assert "NDTHA response-history channels" in distribution["claim"]
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
-    assert "frozen v1 through v17 receipts" in distribution["claim"]
+    assert "frozen v1 through v18 receipts" in distribution["claim"]
     assert "structural-catalog" in distribution["claim"]
     assert "structural-evidence" in distribution["claim"]
     assert "explicit non-promoting review" in distribution["claim"]
@@ -670,9 +673,9 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "bounded English/Korean ModelIR topology" in deployment["claim"]
     assert "bounded English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v18 E2E" in deployment["claim"]
+    assert "distribution v19 E2E" in deployment["claim"]
     assert (
-        "existing-nodal-load component and existing-constraint prescribed-value edits"
+        "existing-nodal-load component, existing-constraint prescribed-value, existing-linear-material parameter and existing-frame-section parameter edits"
         in deployment["claim"]
     )
     assert "normalized-MGT-linear" in deployment["claim"]
