@@ -57,19 +57,20 @@ pub use deformed_view::{
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
-    add_model_frame3d_member, add_model_nodal_load, edit_model_constraint_value,
-    edit_model_element_connectivity, edit_model_frame_element_orientation,
-    edit_model_frame_section, edit_model_linear_material, edit_model_nodal_load_components,
-    edit_model_node_coordinates, publish_model_constraint_value_edit,
-    publish_model_element_connectivity_edit, publish_model_frame3d_member_add,
+    add_model_fixed_constraint, add_model_frame3d_member, add_model_nodal_load,
+    edit_model_constraint_value, edit_model_element_connectivity,
+    edit_model_frame_element_orientation, edit_model_frame_section, edit_model_linear_material,
+    edit_model_nodal_load_components, edit_model_node_coordinates,
+    publish_model_constraint_value_edit, publish_model_element_connectivity_edit,
+    publish_model_fixed_constraint_add, publish_model_frame3d_member_add,
     publish_model_frame_element_orientation_edit, publish_model_frame_section_edit,
     publish_model_linear_material_edit, publish_model_nodal_load_add,
     publish_model_nodal_load_components_edit, publish_model_node_coordinate_edit,
     FrameSectionParametersV1, LinearElasticMaterialParametersV1, ModelConstraintValueEditOutcomeV1,
-    ModelElementConnectivityEditOutcomeV1, ModelFrame3dMemberAddOutcomeV1,
-    ModelFrameElementOrientationEditOutcomeV1, ModelFrameSectionEditOutcomeV1,
-    ModelLinearMaterialEditOutcomeV1, ModelNodalLoadAddOutcomeV1, ModelNodalLoadEditOutcomeV1,
-    ModelNodeEditOutcomeV1,
+    ModelElementConnectivityEditOutcomeV1, ModelFixedConstraintAddOutcomeV1,
+    ModelFrame3dMemberAddOutcomeV1, ModelFrameElementOrientationEditOutcomeV1,
+    ModelFrameSectionEditOutcomeV1, ModelLinearMaterialEditOutcomeV1, ModelNodalLoadAddOutcomeV1,
+    ModelNodalLoadEditOutcomeV1, ModelNodeEditOutcomeV1,
 };
 pub use model_view::{
     render_model_topology_view, render_model_topology_view_file,

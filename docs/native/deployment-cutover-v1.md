@@ -23,11 +23,14 @@ The installed `model-add-frame3d-member` command appends one connected linear fr
 pair using existing compatible material/section identities and strict C++ revalidation.
 The installed `model-add-nodal-load` command appends one nonzero six-component SI load to an
 existing linear-static pattern and existing node with strict C++ revalidation.
+The installed `model-add-fixed-constraint` command appends one homogeneous six-DOF zero constraint
+to an existing unconstrained node with strict C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v24 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v25 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
-value/endpoint bindings, contiguous new topology/load indices, exact added N3-UY external load,
-changed displacement, and added-model linear execution,
+value/endpoint bindings, contiguous new topology/load/constraint indices, exact added N3-UY
+external load, six-DOF N3 fixation, active-DOF reduction, changed displacement, and added-model
+linear execution,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

@@ -609,6 +609,24 @@ fn run_nodal_load_add(
     ])
 }
 
+fn run_fixed_constraint_add(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    node_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-add-fixed-constraint"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--node"),
+        text(node_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_linear_request_create(
     source: &Path,
     destination: &Path,
@@ -941,6 +959,52 @@ fn assert_published_nodal_load_add(destination: &Path) {
     assert_eq!(receipt["nodal_load_index"], 1);
     assert_eq!(receipt["node_id"], "N3");
     assert_eq!(receipt["components_si"]["FY"], -1_000.0);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
+fn assert_published_fixed_constraint_add(destination: &Path) {
+    let edited_bytes =
+        std::fs::read(destination.join("model-ir.json")).expect("constraint-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict constraint-added ModelIR");
+    let constraints = edited.value()["constraints"]
+        .as_array()
+        .expect("constraints");
+    assert_eq!(constraints.len(), 2);
+    let constraint = &constraints[1];
+    assert_eq!(constraint["id"], "BC_N3");
+    assert_eq!(constraint["index"], 1);
+    assert_eq!(constraint["type"], "fixed_dofs");
+    assert_eq!(constraint["node_id"], "N3");
+    assert_eq!(
+        constraint["dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY", "RZ"])
+    );
+    assert_eq!(
+        constraint["prescribed_values_si"],
+        serde_json::json!({"UX": 0, "UY": 0, "UZ": 0, "RX": 0, "RY": 0, "RZ": 0})
+    );
+    assert_eq!(constraint["source_id"], Value::Null);
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-add-fixed-constraint.v1")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json")).expect("constraint-add receipt"),
+    )
+    .expect("constraint-add receipt JSON");
+    assert_eq!(receipt["operation"], "fixed_constraint_add");
+    assert_eq!(receipt["constraint_id"], "BC_N3");
+    assert_eq!(receipt["constraint_index"], 1);
+    assert_eq!(receipt["constraint_type"], "fixed_dofs");
+    assert_eq!(receipt["node_id"], "N3");
+    assert_eq!(receipt["dofs"], constraint["dofs"]);
+    assert_eq!(
+        receipt["prescribed_values_si"],
+        constraint["prescribed_values_si"]
+    );
     assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
     assert_eq!(receipt["analysis_ready"], true);
     assert_eq!(receipt["edited_content_hash"], edited.content_hash());
@@ -2621,6 +2685,220 @@ fn nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution(
         blocked_edited["roundtrip_map"][1]["mapping_status"],
         "exact"
     );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_constraint_add_is_deterministic_cpp_revalidated_and_changes_linear_execution() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("constraint-add-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("constraint-add-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let loaded_source = load_directory.join("model-ir.json");
+    let loaded_source_before = std::fs::read(&loaded_source).expect("loaded source bytes");
+
+    let first = temporary.0.join("fixed-constraint-add-first");
+    let second = temporary.0.join("fixed-constraint-add-second");
+    for destination in [&first, &second] {
+        let output = run_fixed_constraint_add(&loaded_source, destination, "BC_N3", "N3");
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("fixed-constraint add receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&loaded_source).expect("source after fixed-constraint addition"),
+        loaded_source_before
+    );
+    assert_published_fixed_constraint_add(&first);
+
+    let view = run_workbench(&[text("model-view"), first.join("model-ir.json").as_os_str()]);
+    assert_success(&view);
+    assert!(String::from_utf8_lossy(&view.stdout).contains("constraints=2"));
+
+    let baseline_request_directory = temporary.0.join("constraint-add-baseline-request");
+    let supported_request_directory = temporary.0.join("constraint-add-supported-request");
+    assert_success(&run_model_linear_request_create(
+        &loaded_source,
+        &baseline_request_directory,
+        "added-fixed-constraint-linear-c5",
+        "LC_WEAK",
+    ));
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &supported_request_directory,
+        "added-fixed-constraint-linear-c5",
+        "LC_WEAK",
+    ));
+    let baseline = execute_model_ir_linear_analysis(
+        &loaded_source_before,
+        &std::fs::read(baseline_request_directory.join("analysis-request.json"))
+            .expect("baseline request"),
+        None,
+        u32::MAX,
+    )
+    .expect("baseline loaded-model execution");
+    let supported_model =
+        std::fs::read(first.join("model-ir.json")).expect("fixed-constraint-added model");
+    let supported = execute_model_ir_linear_analysis(
+        &supported_model,
+        &std::fs::read(supported_request_directory.join("analysis-request.json"))
+            .expect("fixed-constraint request"),
+        None,
+        u32::MAX,
+    )
+    .expect("fixed-constraint native linear execution");
+    assert!(baseline.is_complete());
+    assert!(supported.is_complete());
+    let baseline_recovery: Value = serde_json::from_str(
+        baseline
+            .result_recovery_ir_json()
+            .expect("baseline result recovery"),
+    )
+    .expect("baseline recovery JSON");
+    let supported_recovery: Value = serde_json::from_str(
+        supported
+            .result_recovery_ir_json()
+            .expect("fixed-constraint result recovery"),
+    )
+    .expect("fixed-constraint recovery JSON");
+    assert_eq!(
+        supported_recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        baseline_recovery["active_dof_indices"]
+            .as_array()
+            .expect("baseline active DOFs")
+            .len(),
+        12
+    );
+    assert!(supported_recovery["global_displacement"]
+        .as_array()
+        .expect("supported global displacement")[12..18]
+        .iter()
+        .all(|value| value.as_f64() == Some(0.0)));
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        supported_recovery["global_displacement"]
+    );
+    assert_eq!(supported_recovery["fallback_count"], 0);
+
+    let existing = run_fixed_constraint_add(&loaded_source, &first, "BC_N3", "N3");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, constraint_id, node_id, code) in [
+        (
+            "constraint-add-duplicate-id",
+            "BC1",
+            "N3",
+            "workbench_model_add_fixed_constraint_identity_exists",
+        ),
+        (
+            "constraint-add-missing-node",
+            "BC_MISSING",
+            "MISSING",
+            "workbench_model_add_fixed_constraint_node_missing",
+        ),
+        (
+            "constraint-add-overlapping-node",
+            "BC_N1_AGAIN",
+            "N1",
+            "workbench_model_add_fixed_constraint_node_already_constrained",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_fixed_constraint_add(&loaded_source, &destination, constraint_id, node_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked: Value =
+        serde_json::from_slice(&loaded_source_before).expect("constraint source JSON");
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.fixed-constraint-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Constraint authoring must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:BC1",
+            "entity_kind": "constraint",
+            "model_ir_entity_id": "BC1",
+            "mapping_status": "exact",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:N3",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N3",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let blocked_source = temporary.0.join("blocked-constraint-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked constraint-add source bytes"),
+    )
+    .expect("write blocked constraint-add source");
+    let blocked_destination = temporary.0.join("blocked-constraint-add");
+    assert_success(&run_fixed_constraint_add(
+        &blocked_source,
+        &blocked_destination,
+        "BC_N3",
+        "N3",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked constraint-add receipt"),
+    )
+    .expect("blocked constraint-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.fixed-constraint-add-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked constraint-added model"),
+    )
+    .expect("blocked constraint-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], blocked["roundtrip_map"]);
 }
 
 #[test]

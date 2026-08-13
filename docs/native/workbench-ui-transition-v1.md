@@ -78,6 +78,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   and proves that value in typed recovery plus changed displacement and fallback 0. Pattern/node
   creation, retargeting, deletion, combinations, other load families and visual authoring remain
   open.
+- `model-add-fixed-constraint`: deterministic creation of one homogeneous six-DOF `fixed_dofs`
+  constraint with zero prescribed SI values on one existing unconstrained node. Rust assigns the
+  next contiguous constraint index and neutral source ownership, preserves every existing
+  round-trip row and blocker, then strictly reparses and C++-revalidates before create-new
+  publication. Installed E2E composes the connected-member and nodal-load additions, reduces the
+  active linear DOFs from twelve to six, proves changed recovery and fallback 0. Partial/nonzero
+  restraint, already constrained nodes, MPC/contact/support sets, retargeting, deletion and visual
+  authoring remain open.
 - `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
   load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
   same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before

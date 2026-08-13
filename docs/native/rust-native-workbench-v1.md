@@ -53,6 +53,10 @@ The bounded nodal-load creator appends one globally unique, nonzero finite six-c
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and
 revalidates through C++. It does not create or retarget patterns/nodes or broaden to other loads.
+The bounded fixed-constraint creator appends one unique contiguous-index homogeneous six-DOF
+`fixed_dofs` row with zero prescribed values to one existing unconstrained node, preserves every
+existing round-trip row and blocker, and revalidates through C++. It does not support partial or
+nonzero restraints, overlapping constraints, MPC/contact/support sets, deletion, or retargeting.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -133,6 +137,8 @@ structural-workbench model-add-frame3d-member MODEL.json \
 structural-workbench model-add-nodal-load ADDED-MEMBER-MODEL/model-ir.json \
   --load-pattern LC_WEAK --load L_WEAK_N3 --node N3 \
   --components 0 -1000 0 0 0 0 --output-dir ADDED-LOAD-MODEL
+structural-workbench model-add-fixed-constraint ADDED-LOAD-MODEL/model-ir.json \
+  --constraint BC_N3 --node N3 --output-dir ADDED-CONSTRAINT-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \
   --case model-frame-linear-c5 --load-pattern LC_WEAK \
   --max-iterations 100 --absolute-residual-tolerance 1e-11 \
