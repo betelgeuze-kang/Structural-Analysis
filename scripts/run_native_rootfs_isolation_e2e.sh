@@ -111,12 +111,18 @@ unshare -Urn bwrap \
       > /mnt/mgt-export.json
     /opt/payload/bin/structural-workbench catalog --truth geometry_only --size large \
       > /mnt/workbench-catalog.json
-    grep -Fq '"'"'"schema_version"'"'":"'"'"structural-native-benchmark-catalog-view.v1"'"'"' \
-      /mnt/workbench-catalog.json
+    IFS= read -r catalog_line < /mnt/workbench-catalog.json
+    case "$catalog_line" in
+      *\"schema_version\":\"structural-native-benchmark-catalog-view.v1\"*) ;;
+      *) exit 1 ;;
+    esac
     /opt/payload/bin/structural-workbench evidence --bundle "$7" \
       --as-of-unix 1786579200 > /mnt/workbench-evidence.json
-    grep -Fq '"'"'"schema_version"'"'":"'"'"structural-native-evidence-bundle-view.v1"'"'"' \
-      /mnt/workbench-evidence.json
+    IFS= read -r evidence_line < /mnt/workbench-evidence.json
+    case "$evidence_line" in
+      *\"schema_version\":\"structural-native-evidence-bundle-view.v1\"*) ;;
+      *) exit 1 ;;
+    esac
     /opt/payload/bin/structural-installer runtime-probe \
       --bundle /opt --payload-root /opt/payload --workspace /mnt \
       --workbench-root /mnt/modelir-workbench \

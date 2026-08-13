@@ -288,4 +288,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--workbench-evidence" in rootfs_e2e
     assert "structural-workbench catalog" in rootfs_e2e
     assert "structural-workbench evidence" in rootfs_e2e
+    assert "IFS= read -r catalog_line" in rootfs_e2e
+    assert "IFS= read -r evidence_line" in rootfs_e2e
+    assert "grep -Fq" not in rootfs_e2e
     assert "runtime-receipt-verify" in rootfs_e2e
