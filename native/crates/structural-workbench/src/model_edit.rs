@@ -19,6 +19,8 @@ const LINEAR_MATERIAL_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-l
 const FRAME_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-frame-section.v1";
 const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-element-orientation.v1";
+const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-element-connectivity.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -26,6 +28,7 @@ const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
+const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 
@@ -86,6 +89,13 @@ pub struct ModelFrameSectionEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded frame-element orientation edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameElementOrientationEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded element-connectivity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelElementConnectivityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -228,6 +238,30 @@ pub fn publish_model_frame_element_orientation_edit(
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome =
         edit_model_frame_element_orientation(&source, element_id, local_axis_rotation_rad)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Retarget the two endpoints of one existing element and atomically publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing element or node identities,
+/// identical endpoints, no-op edits, or create-new publication failures.
+pub fn publish_model_element_connectivity_edit(
+    source_path: &Path,
+    element_id: &str,
+    node_ids: [&str; 2],
+    output_directory: &Path,
+) -> Result<ModelElementConnectivityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_element_connectivity(&source, element_id, node_ids)?;
     publish_new_directory(
         output_directory,
         &[
@@ -821,6 +855,102 @@ pub fn edit_model_frame_element_orientation(
     })
 }
 
+/// Produce one provenance-bound, C++-revalidated two-node element connectivity edit.
+///
+/// # Errors
+///
+/// Rejects invalid identities, identical endpoints, an invalid source model, a missing element or
+/// endpoint node, a no-op edit, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_element_connectivity(
+    source_bytes: &[u8],
+    element_id: &str,
+    node_ids: [&str; 2],
+) -> Result<ModelElementConnectivityEditOutcomeV1, WorkbenchError> {
+    validate_element_connectivity_edit_request(source_bytes.len(), element_id, node_ids)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let (previous_node_ids, element_type, formulation) =
+        replace_element_connectivity(&mut edited, element_id, node_ids)?;
+    let edited_node_ids = [node_ids[0].to_owned(), node_ids[1].to_owned()];
+    if previous_node_ids == edited_node_ids {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "edited connectivity is canonically identical to the source element",
+        ));
+    }
+    bind_element_connectivity_edit_provenance(
+        &mut edited,
+        element_id,
+        &element_type,
+        &formulation,
+        &previous_node_ids,
+        &edited_node_ids,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "element", element_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "element_connectivity",
+        "model_id": edited_validation.report.model_id,
+        "element_id": element_id,
+        "element_type": element_type,
+        "formulation": formulation,
+        "previous_node_ids": previous_node_ids,
+        "edited_node_ids": edited_node_ids,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelElementConnectivityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 fn validate_edit_request(
     source_length: usize,
     node_id: &str,
@@ -974,6 +1104,23 @@ fn validate_frame_element_orientation_edit_request(
         return Err(WorkbenchError::new(
             "workbench_model_edit_element_orientation_invalid",
             "edited frame-element local-axis rotation must be a finite radian value",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_element_connectivity_edit_request(
+    source_length: usize,
+    element_id: &str,
+    node_ids: [&str; 2],
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, element_id, "element")?;
+    validate_bounded_edit_identity(0, node_ids[0], "i-node")?;
+    validate_bounded_edit_identity(0, node_ids[1], "j-node")?;
+    if node_ids[0] == node_ids[1] {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_connectivity_invalid",
+            "edited element endpoints must reference two distinct node identities",
         ));
     }
     Ok(())
@@ -1292,6 +1439,72 @@ fn replace_frame_element_orientation(
     Ok((previous_local_axis_rotation_rad, formulation))
 }
 
+fn replace_element_connectivity(
+    model: &mut Value,
+    element_id: &str,
+    node_ids: [&str; 2],
+) -> Result<([String; 2], String, String), WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    for node_id in node_ids {
+        if !nodes
+            .iter()
+            .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+        {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_connectivity_node_missing",
+                format!("ModelIR has no endpoint node with identity {node_id}"),
+            ));
+        }
+    }
+
+    let elements = model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    let element = elements
+        .iter_mut()
+        .find(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_element_missing",
+                format!("ModelIR has no element with identity {element_id}"),
+            )
+        })?;
+    let element_type = element
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("element type"))?
+        .to_owned();
+    let formulation = element
+        .get("formulation")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("element formulation"))?
+        .to_owned();
+    let previous = element
+        .get("node_ids")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == 2)
+        .ok_or_else(|| snapshot_error("element node_ids"))?;
+    let previous_node_ids = [
+        previous[0]
+            .as_str()
+            .ok_or_else(|| snapshot_error("element i-node identity"))?
+            .to_owned(),
+        previous[1]
+            .as_str()
+            .ok_or_else(|| snapshot_error("element j-node identity"))?
+            .to_owned(),
+    ];
+    element
+        .as_object_mut()
+        .ok_or_else(|| snapshot_error("element"))?
+        .insert("node_ids".to_owned(), json!([node_ids[0], node_ids[1]]));
+    Ok((previous_node_ids, element_type, formulation))
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_edit_provenance(
     model: &mut Value,
@@ -1592,6 +1805,37 @@ fn bind_frame_element_orientation_edit_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_element_connectivity_edit_provenance(
+    model: &mut Value,
+    element_id: &str,
+    element_type: &str,
+    formulation: &str,
+    previous_node_ids: &[String; 2],
+    edited_node_ids: &[String; 2],
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "element_connectivity",
+            "element_id": element_id,
+            "element_type": element_type,
+            "formulation": formulation,
+            "previous_node_ids": previous_node_ids,
+            "edited_node_ids": edited_node_ids,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_parameter_edit_provenance(
     model: &mut Value,
     extension_key: &str,
@@ -1788,6 +2032,7 @@ mod tests {
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits,
         validate_constraint_value_edit_request, validate_edit_request,
+        validate_element_connectivity_edit_request,
         validate_frame_element_orientation_edit_request, validate_frame_section_edit_request,
         validate_linear_material_edit_request, validate_nodal_load_edit_request,
         FrameSectionParametersV1, LinearElasticMaterialParametersV1, MAX_MODEL_BYTES,
@@ -1999,6 +2244,30 @@ mod tests {
                 .expect_err("non-finite element orientation")
                 .code,
             "workbench_model_edit_element_orientation_invalid"
+        );
+    }
+
+    #[test]
+    fn element_connectivity_request_requires_bounded_distinct_identities() {
+        validate_element_connectivity_edit_request(0, "E1", ["N1", "N2"])
+            .expect("valid element connectivity request");
+        assert_eq!(
+            validate_element_connectivity_edit_request(0, "", ["N1", "N2"])
+                .expect_err("empty element identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        assert_eq!(
+            validate_element_connectivity_edit_request(0, "E1", ["N1", ""])
+                .expect_err("empty endpoint identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        assert_eq!(
+            validate_element_connectivity_edit_request(0, "E1", ["N1", "N1"])
+                .expect_err("identical endpoints")
+                .code,
+            "workbench_model_edit_element_connectivity_invalid"
         );
     }
 }

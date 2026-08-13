@@ -221,7 +221,13 @@ fn assert_rejected_node_edit(
 ) {
     let destination = temporary.join(name);
     let rejected = run_node_edit(source, &destination, node_id, coordinates);
-    assert_eq!(rejected.status.code(), Some(1));
+    assert_eq!(
+        rejected.status.code(),
+        Some(1),
+        "unexpected node edit status for {name}: stdout={} stderr={}",
+        String::from_utf8_lossy(&rejected.stdout),
+        String::from_utf8_lossy(&rejected.stderr)
+    );
     assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
     assert!(!destination.exists());
 }
@@ -520,6 +526,25 @@ fn run_frame_element_orientation_edit(
     ])
 }
 
+fn run_element_connectivity_edit(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    node_ids: [&str; 2],
+) -> Output {
+    run_workbench(&[
+        text("model-edit-element-connectivity"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--nodes"),
+        text(node_ids[0]),
+        text(node_ids[1]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn assert_self_hashed_edit_receipt(receipt: &mut Value) {
     let expected_receipt_hash = receipt
         .as_object_mut()
@@ -687,6 +712,53 @@ fn assert_published_frame_element_orientation_edit(destination: &Path) {
     assert_self_hashed_edit_receipt(&mut receipt);
 }
 
+fn assert_published_element_connectivity_edit(destination: &Path) {
+    let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
+    let element = edited
+        .value()
+        .get("elements")
+        .and_then(Value::as_array)
+        .and_then(|elements| {
+            elements
+                .iter()
+                .find(|element| element.get("id").and_then(Value::as_str) == Some("E1"))
+        })
+        .expect("edited element");
+    assert_eq!(element["node_ids"], serde_json::json!(["N1", "N3"]));
+    assert_eq!(element["type"], "frame_3d");
+    assert_eq!(element["formulation"], "euler_bernoulli_3d");
+    assert!(edited.value()["extensions"]
+        .get("structural-native:model-edit-element-connectivity.v1")
+        .is_some());
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(destination.join("edit-receipt.json"))
+            .expect("element connectivity edit receipt"),
+    )
+    .expect("element connectivity edit receipt JSON");
+    assert_eq!(receipt["operation"], "element_connectivity");
+    assert_eq!(receipt["element_id"], "E1");
+    assert_eq!(receipt["element_type"], "frame_3d");
+    assert_eq!(receipt["formulation"], "euler_bernoulli_3d");
+    assert_eq!(
+        receipt["previous_node_ids"],
+        serde_json::json!(["N1", "N2"])
+    );
+    assert_eq!(receipt["edited_node_ids"], serde_json::json!(["N1", "N3"]));
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+}
+
 fn assert_rejected_linear_material_edit(
     source: &Path,
     temporary: &Path,
@@ -729,6 +801,27 @@ fn assert_rejected_frame_element_orientation_edit(
     let rejected =
         run_frame_element_orientation_edit(source, &destination, element_id, rotation_rad);
     assert_eq!(rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+    assert!(!destination.exists());
+}
+
+fn assert_rejected_element_connectivity_edit(
+    source: &Path,
+    temporary: &Path,
+    name: &str,
+    element_id: &str,
+    node_ids: [&str; 2],
+    expected_code: &str,
+) {
+    let destination = temporary.join(name);
+    let rejected = run_element_connectivity_edit(source, &destination, element_id, node_ids);
+    assert_eq!(
+        rejected.status.code(),
+        Some(1),
+        "unexpected connectivity edit status for {name}: stdout={} stderr={}",
+        String::from_utf8_lossy(&rejected.stdout),
+        String::from_utf8_lossy(&rejected.stderr)
+    );
     assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
     assert!(!destination.exists());
 }
@@ -1671,6 +1764,215 @@ fn frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blo
             .expect("blocked element orientation edited model"),
     )
     .expect("blocked element orientation edited JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        blocked_edited["roundtrip_map"][1]["mapping_status"],
+        "exact"
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let mut source_model: Value = serde_json::from_slice(
+        &std::fs::read(&fixture).expect("element connectivity source fixture"),
+    )
+    .expect("element connectivity source JSON");
+    source_model["nodes"]
+        .as_array_mut()
+        .expect("source nodes")
+        .push(serde_json::json!({
+            "id": "N3",
+            "index": 2,
+            "coordinates_m": [2.0, 1.0, 0.0],
+            "source_id": "generated:N3",
+            "extensions": {}
+        }));
+    let mut second_element = source_model["elements"][0].clone();
+    second_element["id"] = Value::String("E2".to_owned());
+    second_element["index"] = serde_json::json!(1);
+    second_element["node_ids"] = serde_json::json!(["N2", "N3"]);
+    second_element["source_id"] = Value::String("generated:E2".to_owned());
+    source_model["elements"]
+        .as_array_mut()
+        .expect("source elements")
+        .push(second_element);
+    let source = temporary.0.join("three-node-frame.model-ir.json");
+    let source_before = serde_json::to_vec(&source_model).expect("connectivity source bytes");
+    std::fs::write(&source, &source_before).expect("write connectivity source");
+
+    let first = temporary.0.join("element-connectivity-edit-first");
+    let second = temporary.0.join("element-connectivity-edit-second");
+    for destination in [&first, &second] {
+        let output = run_element_connectivity_edit(&source, destination, "E1", ["N1", "N3"]);
+        assert_success(&output);
+        let receipt_bytes = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("element connectivity edit receipt");
+        assert_eq!(output.stdout, [receipt_bytes.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first connectivity edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second connectivity edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("source after connectivity edit"),
+        source_before
+    );
+    assert_published_element_connectivity_edit(&first);
+
+    let repeated = run_element_connectivity_edit(&source, &first, "E1", ["N1", "N3"]);
+    assert_eq!(repeated.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&repeated.stdout).contains("workbench_stage_destination_exists")
+    );
+    for (name, element_id, node_ids, expected_code) in [
+        (
+            "element-connectivity-missing-element",
+            "MISSING",
+            ["N1", "N3"],
+            "workbench_model_edit_element_missing",
+        ),
+        (
+            "element-connectivity-missing-node",
+            "E1",
+            ["N1", "MISSING"],
+            "workbench_model_edit_connectivity_node_missing",
+        ),
+        (
+            "element-connectivity-no-op",
+            "E1",
+            ["N1", "N2"],
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        assert_rejected_element_connectivity_edit(
+            &source,
+            &temporary.0,
+            name,
+            element_id,
+            node_ids,
+            expected_code,
+        );
+    }
+
+    let identical_destination = temporary.0.join("element-connectivity-identical-endpoints");
+    let identical =
+        run_element_connectivity_edit(&source, &identical_destination, "E1", ["N1", "N1"]);
+    assert_eq!(identical.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&identical.stdout).contains("workbench_usage_error"));
+    assert!(!identical_destination.exists());
+
+    let reversed_destination = temporary.0.join("element-connectivity-reversed-endpoints");
+    let reversed =
+        run_element_connectivity_edit(&source, &reversed_destination, "E1", ["N3", "N2"]);
+    assert_success(&reversed);
+    let reversed_model: Value = serde_json::from_slice(
+        &std::fs::read(reversed_destination.join("model-ir.json"))
+            .expect("reversed connectivity edited model"),
+    )
+    .expect("reversed connectivity edited JSON");
+    assert_eq!(
+        reversed_model["elements"][0]["node_ids"],
+        serde_json::json!(["N3", "N2"])
+    );
+
+    let mut zero_length = source_model.clone();
+    zero_length["nodes"][2]["coordinates_m"] = serde_json::json!([0.0, 0.0, 0.0]);
+    let zero_length_source = temporary.0.join("zero-length-target.model-ir.json");
+    std::fs::write(
+        &zero_length_source,
+        serde_json::to_vec(&zero_length).expect("zero-length target source bytes"),
+    )
+    .expect("write zero-length target source");
+    assert_rejected_element_connectivity_edit(
+        &zero_length_source,
+        &temporary.0,
+        "element-connectivity-zero-length",
+        "E1",
+        ["N1", "N3"],
+        "workbench_model_edit_semantics_invalid",
+    );
+
+    let mut invalid_source = source_model.clone();
+    invalid_source["elements"][1]["node_ids"][1] = Value::String("MISSING".to_owned());
+    let invalid_source_path = temporary
+        .0
+        .join("invalid-connectivity-source.model-ir.json");
+    std::fs::write(
+        &invalid_source_path,
+        serde_json::to_vec(&invalid_source).expect("invalid connectivity source bytes"),
+    )
+    .expect("write invalid connectivity source");
+    assert_rejected_element_connectivity_edit(
+        &invalid_source_path,
+        &temporary.0,
+        "invalid-connectivity-source-edit",
+        "E1",
+        ["N1", "N3"],
+        "workbench_model_edit_source_semantics_invalid",
+    );
+
+    let mut blocked = source_model;
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.connectivity-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Connectivity editing must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:E1",
+            "entity_kind": "element",
+            "model_ir_entity_id": "E1",
+            "mapping_status": "canonicalized",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:N1",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N1",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let blocked_source = temporary
+        .0
+        .join("blocked-connectivity-source.model-ir.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked connectivity source bytes"),
+    )
+    .expect("write blocked connectivity source");
+    let blocked_destination = temporary.0.join("blocked-connectivity-edit");
+    let blocked_output =
+        run_element_connectivity_edit(&blocked_source, &blocked_destination, "E1", ["N1", "N3"]);
+    assert_success(&blocked_output);
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked connectivity receipt"),
+    )
+    .expect("blocked connectivity receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.connectivity-edit-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked connectivity edited model"),
+    )
+    .expect("blocked connectivity edited JSON");
     assert_eq!(
         blocked_edited["roundtrip_map"][0]["mapping_status"],
         "approximated"

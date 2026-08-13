@@ -130,21 +130,22 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
     process death, resumes it, compares the complete artifact tree with a direct one-shot run, and
     exercises the same non-promoting inspect/review/reopen/export surface;
 22. installs an immutable update, rolls back and re-verifies activation;
-23. emits an append-only v20 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+23. emits an append-only v21 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
    view identity, node-edited, nodal-load-edited, constraint-value-edited,
-   linear-material-edited, frame-section-edited and frame-element-orientation-edited ModelIR plus
-   all six edit-receipt identities,
+   linear-material-edited, frame-section-edited, frame-element-orientation-edited and
+   element-connectivity-edited ModelIR plus all seven edit-receipt identities,
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v19 receipts without treating them as
-   v20 installed frame-element-orientation-edit package authority.
+   The receipt checker continues to accept frozen v1 through v20 receipts; v1 through v19 are not
+   installed frame-element-orientation-edit authority, and no pre-v21 receipt is installed
+   element-connectivity-edit authority.
 
 The reference command is:
 

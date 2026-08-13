@@ -91,6 +91,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-linear-material.v1",
         "structural-native:model-edit-frame-section.v1",
         "structural-native:model-edit-frame-element-orientation.v1",
+        "structural-native:model-edit-element-connectivity.v1",
         "structural-native:upstream-provenance",
         "structural-native-model-editor",
         "edit_model_nodal_load_components",
@@ -98,6 +99,7 @@ REQUIRED_TOKENS = {
         "edit_model_linear_material",
         "edit_model_frame_section",
         "edit_model_frame_element_orientation",
+        "edit_model_element_connectivity",
         "validate_model_bytes",
         "workbench_model_edit_no_change",
         "workbench_model_edit_semantics_invalid",
@@ -107,6 +109,7 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit",
         "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit",
         "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit",
+        "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit",
     ),
     "native/crates/structural-workbench/src/main.rs": (
         'Some("model-view")',
@@ -116,6 +119,7 @@ REQUIRED_TOKENS = {
         'Some("model-edit-linear-material")',
         'Some("model-edit-frame-section")',
         'Some("model-edit-frame-element-orientation")',
+        'Some("model-edit-element-connectivity")',
         'Some("import")',
         'Some("import-mgt")',
         'Some("import-mgt-model-linear")',
@@ -161,6 +165,7 @@ REQUIRED_TOKENS = {
         "linear_material_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blockers",
+        "element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
         'view["human_review"]["automatically_inferred"]',
@@ -247,6 +252,14 @@ REQUIRED_TOKENS = {
         "element` round-trip row",
         "C6 remain open",
     ),
+    "docs/native/modelir-element-connectivity-edit-v1.md": (
+        "model-edit-element-connectivity",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-edit-element-connectivity.v1",
+        "two-node",
+        "element` round-trip row",
+        "C6 remain open",
+    ),
 }
 
 
@@ -286,6 +299,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "linear-material editor",
         "frame-section editor",
         "frame-element orientation editor",
+        "element-connectivity editor",
         "English/Korean bounded self-hashed NDTHA response-history view",
         "English/Korean exact-profile deformed-shape view",
         "React/TypeScript removal",

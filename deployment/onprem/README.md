@@ -18,7 +18,8 @@ absent from the runtime image.
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
   `model-edit-frame-section` parameter replacement for an existing v1 linear-elastic material or
   `frame_3d` section, plus `model-edit-frame-element-orientation` rotation replacement for one
-  existing `frame_3d` element.
+  existing `frame_3d` element and `model-edit-element-connectivity` endpoint retargeting for one
+  existing two-node element.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
   OFL-1.1 redistribution notice; PDF generation itself needs no runtime font lookup.
 - `STRUCTURAL_RELEASE_ID` and `STRUCTURAL_SOURCE_SHA256` bind the image to an immutable native
@@ -88,6 +89,9 @@ structural-workbench model-edit-frame-section /workspace/model.json \
 structural-workbench model-edit-frame-element-orientation /workspace/model.json \
   --element E1 --rotation-rad 0.25 \
   --output-dir /workspace/edited-element-model
+structural-workbench model-edit-element-connectivity /workspace/model.json \
+  --element E1 --nodes N1 N3 \
+  --output-dir /workspace/edited-connectivity-model
 ```
 
 With Compose, override the default `--version` command while retaining the entrypoint:
@@ -109,7 +113,10 @@ one prescribed value only for an already restrained DOF. The material and sectio
 only the fixed closed SI parameter objects of one existing v1 linear-elastic material or
 `frame_3d` section. The element-orientation editor changes only the finite local-axis rotation of
 one existing `frame_3d` element; it cannot change type, formulation, connectivity, offsets,
-releases, identity, topology, or references. None proves visual dragging, broader model editing,
+releases, identity, topology, or references. The element-connectivity editor retargets only the
+ordered endpoint pair of one existing two-node element and leaves every other element/entity field
+intact; C++ rejects invalid resulting geometry, references, graphs, or profile constraints. None
+proves visual dragging, broader model editing,
 solver execution,
 deformed/result visualization, or engineering approval. The local rootfs diagnostic is not an OCI
 image receipt. A

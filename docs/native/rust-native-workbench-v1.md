@@ -41,8 +41,10 @@ The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, a
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`
 section. The frame-element orientation editor replaces only the finite local-axis rotation of one
-existing `frame_3d` element. None changes identities, families/laws, versions, connectivity,
-formulation, topology, or references.
+existing `frame_3d` element. The element-connectivity editor retargets only the ordered endpoints
+of one existing two-node element and delegates all resulting geometry, graph, reference, and
+profile checks to the C++ validator. None creates/deletes entities or changes identities,
+families/laws, versions, formulation, property references, offsets, or releases.
 
 1. `Import` strictly parses and canonicalizes ModelIR, the analysis request, and a language-neutral
    external-result contract. For MGT, the original MGT bytes, import-health diagnostics, C++
@@ -111,6 +113,9 @@ structural-workbench model-edit-frame-section MODEL.json \
 structural-workbench model-edit-frame-element-orientation MODEL.json \
   --element E1 --rotation-rad 0.25 \
   --output-dir EDITED-ELEMENT-MODEL
+structural-workbench model-edit-element-connectivity MODEL.json \
+  --element E1 --nodes N1 N3 \
+  --output-dir EDITED-CONNECTIVITY-MODEL
 structural-workbench import MODEL.json MODEL-REQUEST.json \
   --external-result EXTERNAL.json --source-artifact SOURCE \
   --workspace SESSION
@@ -197,13 +202,17 @@ editing. Two further closed property commands replace all parameters of one exis
 ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and
 cannot create, delete, retarget, or change type. A further frame-element orientation command edits
 one existing `frame_3d` local-axis rotation in radians, degrades only its matching element row, and
-retains connectivity, formulation, offsets, releases, and references. See
+retains connectivity, formulation, offsets, releases, and references. A further element-connectivity
+command changes only the ordered endpoint pair of one existing two-node element, degrades only its
+matching element row, and retains all other element fields. The edited topology must still pass the
+C++ validator. See
 `docs/native/modelir-node-coordinate-edit-v1.md`,
 `docs/native/modelir-nodal-load-edit-v1.md`,
 `docs/native/modelir-constraint-value-edit-v1.md`,
 `docs/native/modelir-linear-material-edit-v1.md`,
-`docs/native/modelir-frame-section-edit-v1.md`, and
-`docs/native/modelir-frame-element-orientation-edit-v1.md`.
+`docs/native/modelir-frame-section-edit-v1.md`,
+`docs/native/modelir-frame-element-orientation-edit-v1.md`, and
+`docs/native/modelir-element-connectivity-edit-v1.md`.
 
 The bounded NDTHA response-history view exposes exact completed-prefix values and per-step
 convergence, iteration, plastic-story and residual metadata for one selected channel. Its plot is

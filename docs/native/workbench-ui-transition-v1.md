@@ -56,6 +56,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   round-trip row approximated, then strictly reparses and C++-revalidates before create-new
   publication. Connectivity, formulation, references, offsets, releases, creation/deletion,
   topology, visual manipulation, and solver selection remain open.
+- `model-edit-element-connectivity`: deterministic replacement of the ordered endpoint pair for
+  one existing two-node element. Rust binds the retained element type/formulation, previous/new
+  node identities and source hashes, marks only a matching element round-trip row approximated,
+  then strictly reparses and C++-revalidates geometry, references, graph and profile constraints
+  before create-new publication. Node/element creation or deletion, identity/type/formulation/
+  property/offset/release changes, broad topology authoring, visual manipulation, and solver
+  selection remain open.
 - `report-view`: a deterministic self-hashed UTF-8 linear alternative in `en-US` or `ko-KR` that
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
@@ -207,7 +214,7 @@ checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It p
 bounded command-level node-coordinate edit, one bounded existing-nodal-load component edit, one
 bounded existing-constraint prescribed-value edit, one bounded existing-linear-material parameter
 edit, one bounded existing-frame-section parameter edit, one bounded existing-frame-element
-orientation edit, one
+orientation edit, one bounded existing-two-node-element connectivity edit, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
@@ -225,9 +232,10 @@ profiles and all four fixed projections. It closes native semantic-snapshot geom
 not solver selection/execution, perspective interaction, or deformed/modal/contour result
 exploration. The separate C++-revalidated node-coordinate, existing-nodal-load component,
 existing-restrained-DOF prescribed-value, existing-linear-elastic-material parameter, and
-existing-frame3d-section parameter and existing-frame3d-element orientation commands close only
-six provenance-bound edit operations; visual dragging, entity creation/deletion/retargeting,
-connectivity/formulation/type/version changes, restraint-mask changes,
+existing-frame3d-section parameter, existing-frame3d-element orientation, and
+existing-two-node-element connectivity commands close only seven provenance-bound edit operations;
+visual dragging, entity creation/deletion, broad retargeting, formulation/type/version changes,
+restraint-mask changes,
 and general property/material/section/load-combination/constraint-topology editing remain open, so
 the composite visual parity row stays open.
 
