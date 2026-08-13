@@ -16,8 +16,9 @@ browser, React, package-manager, or external-renderer runtime lookup.
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
 provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component and
 `model-edit-constraint-value` existing-restrained-DOF commands, plus the closed
-`model-edit-linear-material`, `model-edit-frame-section`, and
-`model-edit-frame-element-orientation` existing-property commands, plus
+`model-edit-linear-material`, `model-edit-frame-section`,
+`model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
+existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
 The installed `model-add-frame3d-member` command appends one connected linear frame3d node/member
 pair using existing compatible material/section identities and strict C++ revalidation.
@@ -35,12 +36,13 @@ The installed `model-add-frame-section` command appends one v1 frame3d section w
 finite SI parameters, then strictly revalidates it through C++ without changing existing
 references.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v28 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v29 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
 displacement, added-model linear execution, and newly added material and section rows each
 referenced by a composed member with changed recovered displacement under the same active load,
+compatible M2/S2 assignment to E1 with the same active load and changed recovered displacement,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

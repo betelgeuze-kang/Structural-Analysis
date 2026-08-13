@@ -56,6 +56,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   round-trip row approximated, then strictly reparses and C++-revalidates before create-new
   publication. Connectivity, formulation, references, offsets, releases, creation/deletion,
   topology, visual manipulation, and solver selection remain open.
+- `model-edit-frame-element-properties`: atomic replacement of `material_id` and `section_id` for
+  one existing `frame_3d` element using an existing v1 `linear_elastic_isotropic` material and v1
+  `frame_3d` section. Rust retains identity/type/formulation/connectivity/orientation/offsets/
+  releases, binds previous/new references and source hashes, marks only a matching element
+  round-trip row approximated, then strictly reparses and C++-revalidates before create-new
+  publication. Other families, property creation/deletion, nonlinear state, visual manipulation,
+  and solver selection remain open.
 - `model-edit-element-connectivity`: deterministic replacement of the ordered endpoint pair for
   one existing two-node element. Rust binds the retained element type/formulation, previous/new
   node identities and source hashes, marks only a matching element round-trip row approximated,
@@ -265,7 +272,8 @@ checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It p
 bounded command-level node-coordinate edit, one bounded existing-nodal-load component edit, one
 bounded existing-constraint prescribed-value edit, one bounded existing-linear-material parameter
 edit, one bounded existing-frame-section parameter edit, one bounded existing-frame-element
-orientation edit, one bounded existing-two-node-element connectivity edit, one
+orientation edit, one bounded compatible frame-element material/section assignment edit, one
+bounded existing-two-node-element connectivity edit, one
 bounded connected-frame3d-member creator, one bounded existing-pattern nodal-load creator, one
 bounded homogeneous fixed-constraint creator, one atomic linear-static-pattern/first-load creator,
 one bounded stateless linear-elastic-material creator, one bounded frame3d-section creator,

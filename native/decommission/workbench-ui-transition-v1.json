@@ -21,6 +21,7 @@
       "model-edit-linear-material",
       "model-edit-frame-section",
       "model-edit-frame-element-orientation",
+      "model-edit-frame-element-properties",
       "model-edit-element-connectivity",
       "model-add-frame3d-member",
       "model-add-nodal-load",

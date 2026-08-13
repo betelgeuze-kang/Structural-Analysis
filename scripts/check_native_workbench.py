@@ -91,6 +91,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-linear-material.v1",
         "structural-native:model-edit-frame-section.v1",
         "structural-native:model-edit-frame-element-orientation.v1",
+        "structural-native:model-edit-frame-element-properties.v1",
         "structural-native:model-edit-element-connectivity.v1",
         "structural-native:model-add-frame3d-member.v1",
         "structural-native:model-add-nodal-load.v1",
@@ -105,6 +106,7 @@ REQUIRED_TOKENS = {
         "edit_model_linear_material",
         "edit_model_frame_section",
         "edit_model_frame_element_orientation",
+        "edit_model_frame_element_properties",
         "edit_model_element_connectivity",
         "add_model_frame3d_member",
         "add_model_nodal_load",
@@ -145,6 +147,7 @@ REQUIRED_TOKENS = {
         'Some("model-edit-linear-material")',
         'Some("model-edit-frame-section")',
         'Some("model-edit-frame-element-orientation")',
+        'Some("model-edit-frame-element-properties")',
         'Some("model-edit-element-connectivity")',
         'Some("model-add-frame3d-member")',
         'Some("model-add-nodal-load")',
@@ -198,6 +201,7 @@ REQUIRED_TOKENS = {
         "linear_material_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_section_edit_is_provenance_bound_cpp_revalidated_and_create_new",
         "frame_element_orientation_edit_is_deterministic_fail_closed_and_preserves_blockers",
+        "frame_element_properties_edit_is_deterministic_executable_and_fail_closed",
         "element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers",
         "frame3d_member_add_is_deterministic_cpp_revalidated_and_linear_executable",
         "nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution",
@@ -294,6 +298,15 @@ REQUIRED_TOKENS = {
         "element` round-trip row",
         "C6 remain open",
     ),
+    "docs/native/modelir-frame-element-properties-edit-v1.md": (
+        "model-edit-frame-element-properties",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-edit-frame-element-properties.v1",
+        "linear_elastic_isotropic",
+        "active external load",
+        "fallback 0",
+        "C6",
+    ),
     "docs/native/modelir-element-connectivity-edit-v1.md": (
         "model-edit-element-connectivity",
         "Rust -> C ABI -> C++",
@@ -375,6 +388,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     load_pattern_add_row: dict[str, object] = {}
     material_add_row: dict[str, object] = {}
     section_add_row: dict[str, object] = {}
+    property_edit_row: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
@@ -386,6 +400,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         load_pattern_add_row = payload["capabilities"]["modelir_linear_load_pattern_add"]
         material_add_row = payload["capabilities"]["modelir_linear_material_add"]
         section_add_row = payload["capabilities"]["modelir_frame_section_add"]
+        property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
         row = {}
@@ -518,6 +533,26 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     ):
         if token not in section_add_claim:
             blockers.append(f"native_workbench_section_add_claim_token_missing:{token}")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if property_edit_row.get(field) != expected:
+            blockers.append(f"native_workbench_property_edit_capability_invalid:{field}")
+    property_edit_claim = str(property_edit_row.get("claim", ""))
+    for token in (
+        "material_id and section_id",
+        "existing frame_3d element",
+        "v1 linear_elastic_isotropic material",
+        "v1 frame_3d section",
+        "changed recovered displacement",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in property_edit_claim:
+            blockers.append(f"native_workbench_property_edit_claim_token_missing:{token}")
     claim = str(row.get("claim", ""))
     for token in (
         "Import -> Validate -> Run -> Resume -> Compare -> Report",
@@ -537,6 +572,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "linear-material editor",
         "frame-section editor",
         "frame-element orientation editor",
+        "frame-element property editor",
         "element-connectivity editor",
         "model-bound CPU linear request",
         "fixed-constraint creator",

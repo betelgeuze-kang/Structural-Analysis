@@ -41,7 +41,9 @@ The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, a
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`
 section. The frame-element orientation editor replaces only the finite local-axis rotation of one
-existing `frame_3d` element. The element-connectivity editor retargets only the ordered endpoints
+existing `frame_3d` element. The frame-element property editor atomically replaces only its
+material and section references with existing compatible v1 identities while retaining every
+other element field. The element-connectivity editor retargets only the ordered endpoints
 of one existing two-node element and delegates all resulting geometry, graph, reference, and
 profile checks to the C++ validator. These existing-entity editors do not create/delete entities
 or change identities, families/laws, versions, formulation, property references, offsets, or
@@ -147,6 +149,9 @@ structural-workbench model-edit-frame-section MODEL.json \
 structural-workbench model-edit-frame-element-orientation MODEL.json \
   --element E1 --rotation-rad 0.25 \
   --output-dir EDITED-ELEMENT-MODEL
+structural-workbench model-edit-frame-element-properties MODEL.json \
+  --element E1 --material M2 --section S2 \
+  --output-dir EDITED-ELEMENT-PROPERTIES-MODEL
 structural-workbench model-edit-element-connectivity MODEL.json \
   --element E1 --nodes N1 N3 \
   --output-dir EDITED-CONNECTIVITY-MODEL
@@ -261,7 +266,10 @@ editing. Two further closed property commands replace all parameters of one exis
 ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and
 cannot create, delete, retarget, or change type. A further frame-element orientation command edits
 one existing `frame_3d` local-axis rotation in radians, degrades only its matching element row, and
-retains connectivity, formulation, offsets, releases, and references. A further element-connectivity
+retains connectivity, formulation, offsets, releases, and references. A further frame-element
+property command atomically assigns existing compatible v1 material/section references while
+retaining identity/type/formulation/connectivity/orientation/offsets/releases and degrading only
+the matching element row. A further element-connectivity
 command changes only the ordered endpoint pair of one existing two-node element, degrades only its
 matching element row, and retains all other element fields. The edited topology must still pass the
 C++ validator. See
@@ -271,6 +279,7 @@ C++ validator. See
 `docs/native/modelir-linear-material-edit-v1.md`,
 `docs/native/modelir-frame-section-edit-v1.md`,
 `docs/native/modelir-frame-element-orientation-edit-v1.md`,
+`docs/native/modelir-frame-element-properties-edit-v1.md`,
 `docs/native/modelir-element-connectivity-edit-v1.md`, and
 `docs/native/modelir-frame-section-add-v1.md`. The separate model-bound CPU linear request
 creator does not edit the model; it validates the selection/config, performs authoritative C++

@@ -147,6 +147,15 @@ struct ModelEditFrameElementOrientationCommand {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelEditFrameElementPropertiesCommand {
+    model: PathBuf,
+    element_id: String,
+    material_id: String,
+    section_id: String,
+    output_directory: PathBuf,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct ModelEditElementConnectivityCommand {
     model: PathBuf,
     element_id: String,
@@ -251,6 +260,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("model-edit-frame-element-orientation") => {
             parse_model_edit_frame_element_orientation(arguments)
                 .and_then(|command| run_model_edit_frame_element_orientation(&command))
+        }
+        Some("model-edit-frame-element-properties") => {
+            parse_model_edit_frame_element_properties(arguments)
+                .and_then(|command| run_model_edit_frame_element_properties(&command))
         }
         Some("model-edit-element-connectivity") => parse_model_edit_element_connectivity(arguments)
             .and_then(|command| run_model_edit_element_connectivity(&command)),
@@ -645,6 +658,20 @@ fn run_model_edit_frame_element_orientation(
         &command.model,
         &command.element_id,
         command.local_axis_rotation_rad,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_frame_element_properties(
+    command: &ModelEditFrameElementPropertiesCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_frame_element_properties_edit(
+        &command.model,
+        &command.element_id,
+        &command.material_id,
+        &command.section_id,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -1359,6 +1386,37 @@ fn parse_model_edit_frame_element_orientation(
     })
 }
 
+fn parse_model_edit_frame_element_properties(
+    arguments: &[OsString],
+) -> Result<ModelEditFrameElementPropertiesCommand, WorkbenchError> {
+    if arguments.len() != 10
+        || arguments[2] != "--element"
+        || arguments[4] != "--material"
+        || arguments[6] != "--section"
+        || arguments[8] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-frame-element-properties requires MODEL.json --element ID --material ID --section ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditFrameElementPropertiesCommand {
+        model: PathBuf::from(&arguments[1]),
+        element_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-frame-element-properties element ID",
+        )?,
+        material_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-frame-element-properties material ID",
+        )?,
+        section_id: parse_bounded_edit_id(
+            &arguments[7],
+            "model-edit-frame-element-properties section ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[9]),
+    })
+}
+
 fn parse_model_edit_element_connectivity(
     arguments: &[OsString],
 ) -> Result<ModelEditElementConnectivityCommand, WorkbenchError> {
@@ -1961,7 +2019,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 fn usage() -> &'static str {
     concat!(
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
-        "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
+        "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
     )
 }
 
@@ -1977,10 +2035,10 @@ mod tests {
         parse_model_add_linear_material, parse_model_add_nodal_load,
         parse_model_create_linear_analysis_request, parse_model_edit_constraint_value,
         parse_model_edit_element_connectivity, parse_model_edit_frame_element_orientation,
-        parse_model_edit_frame_section, parse_model_edit_linear_material,
-        parse_model_edit_nodal_load, parse_model_edit_node, parse_model_view,
-        parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
-        parse_stage_command,
+        parse_model_edit_frame_element_properties, parse_model_edit_frame_section,
+        parse_model_edit_linear_material, parse_model_edit_nodal_load, parse_model_edit_node,
+        parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
+        parse_review, parse_stage_command,
     };
 
     #[test]
@@ -2457,6 +2515,35 @@ mod tests {
         let mut invalid = arguments;
         invalid[5] = OsString::from("NaN");
         assert!(parse_model_edit_frame_element_orientation(&invalid).is_err());
+    }
+
+    #[test]
+    fn model_edit_frame_element_properties_parser_requires_all_bounded_ids() {
+        let arguments = [
+            OsString::from("model-edit-frame-element-properties"),
+            OsString::from("model.json"),
+            OsString::from("--element"),
+            OsString::from("E1"),
+            OsString::from("--material"),
+            OsString::from("M2"),
+            OsString::from("--section"),
+            OsString::from("S2"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_frame_element_properties(&arguments)
+            .expect("valid frame-element property edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.element_id, "E1");
+        assert_eq!(parsed.material_id, "M2");
+        assert_eq!(parsed.section_id, "S2");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        for index in [3, 5, 7] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::new();
+            assert!(parse_model_edit_frame_element_properties(&invalid).is_err());
+        }
     }
 
     #[test]

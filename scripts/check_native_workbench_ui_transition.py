@@ -87,6 +87,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-linear-material-edit-v1.md"),
     Path("docs/native/modelir-frame-section-edit-v1.md"),
     Path("docs/native/modelir-frame-element-orientation-edit-v1.md"),
+    Path("docs/native/modelir-frame-element-properties-edit-v1.md"),
     Path("docs/native/modelir-element-connectivity-edit-v1.md"),
     Path("docs/native/modelir-frame3d-member-add-v1.md"),
     Path("docs/native/modelir-nodal-load-add-v1.md"),
@@ -340,6 +341,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-edit-linear-material",
         "model-edit-frame-section",
         "model-edit-frame-element-orientation",
+        "model-edit-frame-element-properties",
         "model-edit-element-connectivity",
         "model-add-frame3d-member",
         "model-add-nodal-load",
@@ -913,6 +915,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-edit-linear-material.v1",
             "structural-native:model-edit-frame-section.v1",
             "structural-native:model-edit-frame-element-orientation.v1",
+            "structural-native:model-edit-frame-element-properties.v1",
             "structural-native:model-edit-element-connectivity.v1",
             "structural-native:model-add-frame3d-member.v1",
             "structural-native:model-add-nodal-load.v1",
@@ -923,6 +926,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn edit_model_linear_material",
             "pub fn edit_model_frame_section",
             "pub fn edit_model_frame_element_orientation",
+            "pub fn edit_model_frame_element_properties",
             "pub fn edit_model_element_connectivity",
             "pub fn add_model_frame3d_member",
             "pub fn add_model_nodal_load",
@@ -1522,6 +1526,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-edit-linear-material")',
             'Some("model-edit-frame-section")',
             'Some("model-edit-frame-element-orientation")',
+            'Some("model-edit-frame-element-properties")',
             'Some("model-edit-element-connectivity")',
             'Some("model-add-frame3d-member")',
             'Some("model-add-nodal-load")',
@@ -1668,6 +1673,22 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    frame_element_properties_doc = _text(
+        root, Path("docs/native/modelir-frame-element-properties-edit-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-frame-element-properties-edit-v1.md"),
+        frame_element_properties_doc,
+        (
+            "model-edit-frame-element-properties",
+            "Rust -> C ABI -> C++",
+            "structural-native:model-edit-frame-element-properties.v1",
+            "active external load",
+            "fallback 0",
+            "C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -1686,6 +1707,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-edit-linear-material",
             "model-edit-frame-section",
             "model-edit-frame-element-orientation",
+            "model-edit-frame-element-properties",
             "model-edit-element-connectivity",
             "model-add-frame3d-member",
             "model-add-nodal-load",

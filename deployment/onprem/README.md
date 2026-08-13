@@ -18,7 +18,8 @@ absent from the runtime image.
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
   `model-edit-frame-section` parameter replacement for an existing v1 linear-elastic material or
   `frame_3d` section, plus `model-edit-frame-element-orientation` rotation replacement for one
-  existing `frame_3d` element and `model-edit-element-connectivity` endpoint retargeting for one
+  existing `frame_3d` element, `model-edit-frame-element-properties` compatible material/section
+  assignment for one existing frame3d element, and `model-edit-element-connectivity` endpoint retargeting for one
   existing two-node element. `model-add-frame3d-member` adds one new node and one connected linear
   frame3d member using existing compatible material/section identities. `model-add-nodal-load`
   adds one nonzero six-component SI load to an existing linear-static pattern and node.
@@ -100,6 +101,9 @@ structural-workbench model-edit-frame-section /workspace/model.json \
 structural-workbench model-edit-frame-element-orientation /workspace/model.json \
   --element E1 --rotation-rad 0.25 \
   --output-dir /workspace/edited-element-model
+structural-workbench model-edit-frame-element-properties /workspace/model.json \
+  --element E1 --material M2 --section S2 \
+  --output-dir /workspace/edited-element-properties-model
 structural-workbench model-edit-element-connectivity /workspace/model.json \
   --element E1 --nodes N1 N3 \
   --output-dir /workspace/edited-connectivity-model

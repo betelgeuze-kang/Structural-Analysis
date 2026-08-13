@@ -19,6 +19,8 @@ const LINEAR_MATERIAL_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-l
 const FRAME_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-frame-section.v1";
 const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-element-orientation.v1";
+const FRAME_ELEMENT_PROPERTIES_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-frame-element-properties.v1";
 const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
 const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
@@ -35,6 +37,7 @@ const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
+const FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_material_and_section_reference_edit_not_identity_type_formulation_connectivity_orientation_offset_release_property_creation_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
@@ -102,6 +105,13 @@ pub struct ModelFrameSectionEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded frame-element orientation edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameElementOrientationEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded frame-element property edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFrameElementPropertiesEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -429,6 +439,32 @@ pub fn publish_model_frame_element_orientation_edit(
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome =
         edit_model_frame_element_orientation(&source, element_id, local_axis_rotation_rad)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Assign compatible material and section references to one existing `frame_3d` element.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities, invalid source or edited semantics, missing or
+/// incompatible element/property identities, complete no-op edits, or publication failures.
+pub fn publish_model_frame_element_properties_edit(
+    source_path: &Path,
+    element_id: &str,
+    material_id: &str,
+    section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFrameElementPropertiesEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome =
+        edit_model_frame_element_properties(&source, element_id, material_id, section_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1550,6 +1586,111 @@ pub fn edit_model_frame_element_orientation(
     })
 }
 
+/// Produce one provenance-bound, C++-revalidated frame-element property-reference edit.
+///
+/// # Errors
+///
+/// Rejects invalid identities, an invalid source model, a missing or non-`frame_3d` element,
+/// missing or incompatible v1 property references, a complete no-op, schema drift, or edited
+/// semantics rejected by C++.
+pub fn edit_model_frame_element_properties(
+    source_bytes: &[u8],
+    element_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<ModelFrameElementPropertiesEditOutcomeV1, WorkbenchError> {
+    validate_frame_element_properties_edit_request(
+        source_bytes.len(),
+        element_id,
+        material_id,
+        section_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let (previous_material_id, previous_section_id, formulation) =
+        replace_frame_element_properties(&mut edited, element_id, material_id, section_id)?;
+    if previous_material_id == material_id && previous_section_id == section_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "edited material and section references are identical to the source element",
+        ));
+    }
+    bind_frame_element_properties_edit_provenance(
+        &mut edited,
+        element_id,
+        &formulation,
+        &previous_material_id,
+        material_id,
+        &previous_section_id,
+        section_id,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "element", element_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "frame_element_properties",
+        "model_id": edited_validation.report.model_id,
+        "element_id": element_id,
+        "element_type": "frame_3d",
+        "formulation": formulation,
+        "previous_material_id": previous_material_id,
+        "edited_material_id": material_id,
+        "previous_section_id": previous_section_id,
+        "edited_section_id": section_id,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFrameElementPropertiesEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 /// Produce one provenance-bound, C++-revalidated two-node element connectivity edit.
 ///
 /// # Errors
@@ -1920,6 +2061,18 @@ fn validate_frame_element_orientation_edit_request(
             "edited frame-element local-axis rotation must be a finite radian value",
         ));
     }
+    Ok(())
+}
+
+fn validate_frame_element_properties_edit_request(
+    source_length: usize,
+    element_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, element_id, "element")?;
+    validate_bounded_edit_identity(0, material_id, "material")?;
+    validate_bounded_edit_identity(0, section_id, "section")?;
     Ok(())
 }
 
@@ -2670,6 +2823,116 @@ fn replace_frame_element_orientation(
     Ok((previous_local_axis_rotation_rad, formulation))
 }
 
+fn replace_frame_element_properties(
+    model: &mut Value,
+    element_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(String, String, String), WorkbenchError> {
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    let element = elements
+        .iter()
+        .find(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_element_missing",
+                format!("ModelIR has no element with identity {element_id}"),
+            )
+        })?;
+    if element.get("type").and_then(Value::as_str) != Some("frame_3d") {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_type_unsupported",
+            format!("element {element_id} is not a frame_3d element"),
+        ));
+    }
+    let formulation = element
+        .get("formulation")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("element formulation"))?
+        .to_owned();
+    let previous_material_id = element
+        .get("material_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("element material_id"))?
+        .to_owned();
+    let previous_section_id = element
+        .get("section_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("element section_id"))?
+        .to_owned();
+    validate_frame_element_property_references(model, material_id, section_id)?;
+    let element = model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?
+        .iter_mut()
+        .find(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+        .ok_or_else(|| snapshot_error("element"))?;
+    let object = element
+        .as_object_mut()
+        .ok_or_else(|| snapshot_error("element"))?;
+    object.insert("material_id".to_owned(), json!(material_id));
+    object.insert("section_id".to_owned(), json!(section_id));
+    Ok((previous_material_id, previous_section_id, formulation))
+}
+
+fn validate_frame_element_property_references(
+    model: &Value,
+    material_id: &str,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    let material = materials
+        .iter()
+        .find(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_frame_element_material_missing",
+                format!("ModelIR has no material with identity {material_id}"),
+            )
+        })?;
+    if material.get("law_id").and_then(Value::as_str) != Some("linear_elastic_isotropic")
+        || material
+            .get("parameter_set_version")
+            .and_then(Value::as_str)
+            != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_element_material_unsupported",
+            "frame_3d element assignment requires a v1 linear_elastic_isotropic material",
+        ));
+    }
+
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    let section = sections
+        .iter()
+        .find(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_frame_element_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if section.get("family_id").and_then(Value::as_str) != Some("frame_3d")
+        || section.get("parameter_set_version").and_then(Value::as_str) != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_element_section_unsupported",
+            "frame_3d element assignment requires a v1 frame_3d section",
+        ));
+    }
+    Ok(())
+}
+
 fn replace_element_connectivity(
     model: &mut Value,
     element_id: &str,
@@ -3361,6 +3624,40 @@ fn bind_frame_element_orientation_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_frame_element_properties_edit_provenance(
+    model: &mut Value,
+    element_id: &str,
+    formulation: &str,
+    previous_material_id: &str,
+    edited_material_id: &str,
+    previous_section_id: &str,
+    edited_section_id: &str,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FRAME_ELEMENT_PROPERTIES_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "frame_element_properties",
+            "element_id": element_id,
+            "element_type": "frame_3d",
+            "formulation": formulation,
+            "previous_material_id": previous_material_id,
+            "edited_material_id": edited_material_id,
+            "previous_section_id": previous_section_id,
+            "edited_section_id": edited_section_id,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_element_connectivity_edit_provenance(
     model: &mut Value,
     element_id: &str,
@@ -3643,6 +3940,7 @@ mod tests {
         validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
+        validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_material_add_request,
         validate_linear_material_edit_request, validate_nodal_load_add_request,
@@ -3856,6 +4154,48 @@ mod tests {
                 .expect_err("non-finite element orientation")
                 .code,
             "workbench_model_edit_element_orientation_invalid"
+        );
+    }
+
+    #[test]
+    fn frame_element_properties_request_requires_all_bounded_identities() {
+        validate_frame_element_properties_edit_request(0, "E1", "M2", "S2")
+            .expect("valid frame-element property request");
+        for (element, material, section) in [("", "M2", "S2"), ("E1", "", "S2"), ("E1", "M2", "")] {
+            assert_eq!(
+                validate_frame_element_properties_edit_request(0, element, material, section)
+                    .expect_err("empty property-edit identity")
+                    .code,
+                "workbench_model_edit_entity_id_invalid"
+            );
+        }
+    }
+
+    #[test]
+    fn frame_element_property_references_require_compatible_v1_families() {
+        let model = json!({
+            "materials": [
+                {"id": "M1", "law_id": "linear_elastic_isotropic", "parameter_set_version": "1"},
+                {"id": "M_NONLINEAR", "law_id": "bilinear_combined_hardening_steel", "parameter_set_version": "1"}
+            ],
+            "sections": [
+                {"id": "S1", "family_id": "frame_3d", "parameter_set_version": "1"},
+                {"id": "S_PLANAR", "family_id": "rectangular_rc_fiber_2d", "parameter_set_version": "1"}
+            ]
+        });
+        validate_frame_element_property_references(&model, "M1", "S1")
+            .expect("compatible frame-element properties");
+        assert_eq!(
+            validate_frame_element_property_references(&model, "M_NONLINEAR", "S1")
+                .expect_err("nonlinear material is outside assignment slice")
+                .code,
+            "workbench_model_edit_frame_element_material_unsupported"
+        );
+        assert_eq!(
+            validate_frame_element_property_references(&model, "M1", "S_PLANAR")
+                .expect_err("planar section is outside assignment slice")
+                .code,
+            "workbench_model_edit_frame_element_section_unsupported"
         );
     }
 

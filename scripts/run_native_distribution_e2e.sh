@@ -1619,6 +1619,145 @@ exercise_frame_section_add_surface() {
 }
 exercise_frame_section_add_surface
 
+exercise_frame_element_properties_edit_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local baseline_request="$e2e_root/frame-element-properties-baseline-request"
+  local baseline_run="$e2e_root/frame-element-properties-baseline-run"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-create-linear-analysis-request "$source_model" \
+    --case frame-element-properties-c5 --load-pattern LC_WEAK \
+    --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+    --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+    --output-dir "$baseline_request" \
+    > "$e2e_root/frame-element-properties-baseline-request.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+    model-linear-run "$source_model" "$baseline_request/analysis-request.json" \
+    --output-dir "$baseline_run" \
+    > "$e2e_root/frame-element-properties-baseline-run.stdout.json"
+  grep -Fq '"status":"completed"' "$baseline_run/run-receipt.json"
+  grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+    "$baseline_run/result-recovery-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-ir.json"
+  grep -Fq '"fallback_count":0' "$baseline_run/result-recovery-ir.json"
+  local baseline_maximum_displacement
+  baseline_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$baseline_run/result-recovery-ir.json")"
+  if [[ -z "$baseline_maximum_displacement" ]]; then
+    echo "installed property-assignment baseline recovery has no displacement summary" >&2
+    exit 1
+  fi
+
+  local label material_directory section_directory edit_directory request_directory run_directory
+  local edited_maximum_displacement
+  for label in first second; do
+    material_directory="$e2e_root/frame-element-properties-$label-material"
+    section_directory="$e2e_root/frame-element-properties-$label-section"
+    edit_directory="$e2e_root/frame-element-properties-edit-$label"
+    request_directory="$e2e_root/frame-element-properties-$label-request"
+    run_directory="$e2e_root/frame-element-properties-$label-run"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-linear-material "$source_model" --material M2 \
+      --elastic-modulus-pa 100000000000 --poisson-ratio 0.3 --density-kg-m3 2700 \
+      --output-dir "$material_directory" \
+      > "$e2e_root/frame-element-properties-$label-material.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-frame-section "$material_directory/model-ir.json" --section S2 \
+      --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
+      --torsional-constant-m4 0.000005 \
+      --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
+      --output-dir "$section_directory" \
+      > "$e2e_root/frame-element-properties-$label-section.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-frame-element-properties "$section_directory/model-ir.json" \
+      --element E1 --material M2 --section S2 --output-dir "$edit_directory" \
+      > "$e2e_root/frame-element-properties-edit-$label.stdout.json"
+    test -s "$edit_directory/model-ir.json"
+    test -s "$edit_directory/edit-receipt.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"frame_element_properties"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"element_id":"E1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"element_type":"frame_3d"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"formulation":"euler_bernoulli_3d"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"previous_material_id":"M1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_material_id":"M2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"previous_section_id":"S1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_section_id":"S2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-edit-frame-element-properties.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-element-properties-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case frame-element-properties-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/frame-element-properties-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$run_directory" \
+      > "$e2e_root/frame-element-properties-$label-run.stdout.json"
+    grep -Fq '"status":"completed"' "$run_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$run_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$run_directory/result-recovery-ir.json"
+    edited_maximum_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$run_directory/result-recovery-ir.json")"
+    if [[ -z "$edited_maximum_displacement" \
+      || "$edited_maximum_displacement" == "$baseline_maximum_displacement" ]]; then
+      echo "installed frame-element property assignment did not change recovered displacement" >&2
+      exit 1
+    fi
+  done
+  for suffix in material section; do
+    diff -r "$e2e_root/frame-element-properties-first-$suffix" \
+      "$e2e_root/frame-element-properties-second-$suffix" \
+      > "$e2e_root/frame-element-properties-$suffix-diff.txt"
+    cmp "$e2e_root/frame-element-properties-first-$suffix.stdout.json" \
+      "$e2e_root/frame-element-properties-second-$suffix.stdout.json"
+  done
+  diff -r "$e2e_root/frame-element-properties-edit-first" \
+    "$e2e_root/frame-element-properties-edit-second" \
+    > "$e2e_root/frame-element-properties-edit-diff.txt"
+  diff -r "$e2e_root/frame-element-properties-first-request" \
+    "$e2e_root/frame-element-properties-second-request" \
+    > "$e2e_root/frame-element-properties-request-diff.txt"
+  diff -r "$e2e_root/frame-element-properties-first-run" \
+    "$e2e_root/frame-element-properties-second-run" \
+    > "$e2e_root/frame-element-properties-run-diff.txt"
+  cmp "$e2e_root/frame-element-properties-edit-first.stdout.json" \
+    "$e2e_root/frame-element-properties-edit-second.stdout.json"
+  cmp "$e2e_root/frame-element-properties-edit-first-validation.json" \
+    "$e2e_root/frame-element-properties-edit-second-validation.json"
+  cmp "$e2e_root/frame-element-properties-first-request.stdout.json" \
+    "$e2e_root/frame-element-properties-second-request.stdout.json"
+  cmp "$e2e_root/frame-element-properties-first-run.stdout.json" \
+    "$e2e_root/frame-element-properties-second-run.stdout.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame-element property assignment mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_frame_element_properties_edit_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -1930,6 +2069,11 @@ frame_section_add_composed_model_hash="$(sha256sum "$e2e_root/frame-section-add-
 frame_section_add_request_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 frame_section_add_result_ir_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 frame_section_add_recovery_hash="$(sha256sum "$e2e_root/frame-section-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+frame_element_properties_edit_model_hash="$(sha256sum "$e2e_root/frame-element-properties-edit-first/model-ir.json" | awk '{print $1}')"
+frame_element_properties_edit_receipt_hash="$(sha256sum "$e2e_root/frame-element-properties-edit-first/edit-receipt.json" | awk '{print $1}')"
+frame_element_properties_edit_request_hash="$(sha256sum "$e2e_root/frame-element-properties-first-request/analysis-request.json" | awk '{print $1}')"
+frame_element_properties_edit_result_ir_hash="$(sha256sum "$e2e_root/frame-element-properties-first-run/result-ir.json" | awk '{print $1}')"
+frame_element_properties_edit_recovery_hash="$(sha256sum "$e2e_root/frame-element-properties-first-run/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -2007,6 +2151,10 @@ v28_receipt_json="${v27_receipt_json/structural-native-distribution-e2e.v27/stru
 frame_section_add_receipt_fields="\"workbench_frame_section_add_surface_passed\":true,\"workbench_frame_section_add_model_sha256\":\"sha256:$frame_section_add_model_hash\",\"workbench_frame_section_add_receipt_sha256\":\"sha256:$frame_section_add_receipt_hash\",\"workbench_frame_section_add_composed_model_sha256\":\"sha256:$frame_section_add_composed_model_hash\",\"workbench_frame_section_add_request_sha256\":\"sha256:$frame_section_add_request_hash\",\"workbench_frame_section_add_result_ir_sha256\":\"sha256:$frame_section_add_result_ir_hash\",\"workbench_frame_section_add_recovery_sha256\":\"sha256:$frame_section_add_recovery_hash\","
 v28_receipt_json="${v28_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_section_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v28_receipt_json" > "$temporary_receipt"
+v29_receipt_json="${v28_receipt_json/structural-native-distribution-e2e.v28/structural-native-distribution-e2e.v29}"
+frame_element_properties_edit_receipt_fields="\"workbench_frame_element_properties_edit_surface_passed\":true,\"workbench_frame_element_properties_edit_model_sha256\":\"sha256:$frame_element_properties_edit_model_hash\",\"workbench_frame_element_properties_edit_receipt_sha256\":\"sha256:$frame_element_properties_edit_receipt_hash\",\"workbench_frame_element_properties_edit_request_sha256\":\"sha256:$frame_element_properties_edit_request_hash\",\"workbench_frame_element_properties_edit_result_ir_sha256\":\"sha256:$frame_element_properties_edit_result_ir_hash\",\"workbench_frame_element_properties_edit_recovery_sha256\":\"sha256:$frame_element_properties_edit_recovery_hash\","
+v29_receipt_json="${v29_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_element_properties_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v29_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
