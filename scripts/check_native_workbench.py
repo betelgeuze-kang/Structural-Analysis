@@ -90,8 +90,10 @@ REQUIRED_TOKENS = {
         "structural-native:model-edit-constraint-value.v1",
         "structural-native:model-edit-linear-material.v1",
         "structural-native:model-edit-frame-section.v1",
+        "structural-native:model-edit-truss-section.v1",
         "structural-native:model-edit-frame-element-orientation.v1",
         "structural-native:model-edit-frame-element-properties.v1",
+        "structural-native:model-edit-truss-element-properties.v1",
         "structural-native:model-edit-element-connectivity.v1",
         "structural-native:model-add-frame3d-member.v1",
         "structural-native:model-add-truss3d-member.v1",
@@ -107,8 +109,10 @@ REQUIRED_TOKENS = {
         "edit_model_constraint_value",
         "edit_model_linear_material",
         "edit_model_frame_section",
+        "edit_model_truss_section",
         "edit_model_frame_element_orientation",
         "edit_model_frame_element_properties",
+        "edit_model_truss_element_properties",
         "edit_model_element_connectivity",
         "add_model_frame3d_member",
         "add_model_nodal_load",
@@ -124,7 +128,9 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit",
         "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit",
         "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit",
+        "bounded_cpp_revalidated_existing_modelir_truss3d_section_area_edit",
         "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit",
+        "bounded_cpp_revalidated_existing_modelir_truss3d_element_material_and_section_reference_edit",
         "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit",
         "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition",
         "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition",
@@ -148,8 +154,10 @@ REQUIRED_TOKENS = {
         'Some("model-edit-constraint-value")',
         'Some("model-edit-linear-material")',
         'Some("model-edit-frame-section")',
+        'Some("model-edit-truss-section")',
         'Some("model-edit-frame-element-orientation")',
         'Some("model-edit-frame-element-properties")',
+        'Some("model-edit-truss-element-properties")',
         'Some("model-edit-element-connectivity")',
         'Some("model-add-frame3d-member")',
         'Some("model-add-truss3d-member")',
@@ -214,6 +222,7 @@ REQUIRED_TOKENS = {
         "linear_material_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
         "frame_section_add_is_deterministic_cpp_revalidated_and_used_by_member_execution",
         "truss3d_authoring_is_deterministic_fail_closed_restartable_and_cpu_executable",
+        "truss3d_edits_are_deterministic_fail_closed_restartable_and_cpu_executable",
         "model_linear_request_creation_is_deterministic_cpp_preflighted_and_product_executable",
         "material_and_section_edits_preserve_blockers_and_degrade_only_matching_roundtrip_rows",
         "workbench_review_exists",
@@ -244,6 +253,8 @@ REQUIRED_TOKENS = {
         "linear-material editor",
         "frame-section",
         "frame-element orientation",
+        "truss-section area",
+        "truss element's compatible",
         "frame3d-member creator",
         "nodal-load creator",
         "does not infer the human decision",
@@ -393,6 +404,17 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-truss3d-editing-v1.md": (
+        "model-edit-truss-section",
+        "model-edit-truss-element-properties",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-edit-truss-section.v1",
+        "structural-native:model-edit-truss-element-properties.v1",
+        "one-real-iteration checkpoint",
+        "typed recovery identities",
+        "fallback 0",
+        "C6",
+    ),
 }
 
 
@@ -406,6 +428,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     material_add_row: dict[str, object] = {}
     section_add_row: dict[str, object] = {}
     truss_authoring_row: dict[str, object] = {}
+    truss_editing_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     try:
         payload = json.loads(
@@ -419,6 +442,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         material_add_row = payload["capabilities"]["modelir_linear_material_add"]
         section_add_row = payload["capabilities"]["modelir_frame_section_add"]
         truss_authoring_row = payload["capabilities"]["modelir_truss3d_authoring"]
+        truss_editing_row = payload["capabilities"]["modelir_truss3d_editing"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
@@ -577,6 +601,27 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         ("cutover_gate", "C5"),
         ("owner", "structural-workbench"),
     ):
+        if truss_editing_row.get(field) != expected:
+            blockers.append(f"native_workbench_truss_editing_capability_invalid:{field}")
+    truss_editing_claim = str(truss_editing_row.get("claim", ""))
+    for token in (
+        "existing v1 truss_3d section",
+        "existing truss_3d element",
+        "linear_elastic_isotropic material and v1 truss_3d section",
+        "single C ABI into C++",
+        "distinct baseline/section/property displacement",
+        "byte-identical restart",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in truss_editing_claim:
+            blockers.append(f"native_workbench_truss_editing_claim_token_missing:{token}")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
         if property_edit_row.get(field) != expected:
             blockers.append(f"native_workbench_property_edit_capability_invalid:{field}")
     property_edit_claim = str(property_edit_row.get("claim", ""))
@@ -605,14 +650,15 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "English/Korean embedded-font PDF export",
         "general ModelIR terminal topology view",
         "closed `en-US`/`ko-KR` paths",
-        "provenance-bound ModelIR node-coordinate edit",
-        "nodal-load edit",
-        "constraint-value editor",
-        "linear-material editor",
-        "frame-section editor",
-        "frame-element orientation editor",
-        "frame-element property editor",
-        "element-connectivity editor",
+        "provenance-bound existing-entity editors",
+        "node coordinates",
+        "nodal loads",
+        "prescribed constraint values",
+        "v1 linear materials",
+        "v1 frame and truss sections",
+        "frame orientation",
+        "compatible frame and truss element property references",
+        "two-node connectivity",
         "model-bound CPU linear request",
         "fixed-constraint creator",
         "linear-load-pattern creator",

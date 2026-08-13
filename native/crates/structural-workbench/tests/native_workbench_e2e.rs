@@ -4,7 +4,7 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::Value;
-use structural_cli::execute_model_ir_linear_analysis;
+use structural_cli::{execute_model_ir_linear_analysis, ModelIrLinearAnalysisOutcomeV1};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
 use structural_contracts::product_ir::sha256_identity;
@@ -510,6 +510,24 @@ fn run_frame_section_edit(
     ])
 }
 
+fn run_truss_section_edit(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    area_m2: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-truss-section"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--area-m2"),
+        text(area_m2),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_frame_element_orientation_edit(
     source: &Path,
     destination: &Path,
@@ -537,6 +555,27 @@ fn run_frame_element_properties_edit(
 ) -> Output {
     run_workbench(&[
         text("model-edit-frame-element-properties"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--material"),
+        text(material_id),
+        text("--section"),
+        text(section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn run_truss_element_properties_edit(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    material_id: &str,
+    section_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-truss-element-properties"),
         source.as_os_str(),
         text("--element"),
         text(element_id),
@@ -5991,6 +6030,407 @@ fn truss3d_authoring_is_deterministic_fail_closed_restartable_and_cpu_executable
         &blocked_member.join("model-ir.json"),
         &blocked_request_directory,
         "blocked-truss",
+        "LC_WEAK",
+    );
+    assert_eq!(blocked_request.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&blocked_request.stdout)
+        .contains("workbench_model_linear_request_source_not_ready"));
+    assert!(!blocked_request_directory.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn truss3d_edits_are_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let t1 = temporary.0.join("truss-edit-t1");
+    let t2 = temporary.0.join("truss-edit-t2");
+    let m2 = temporary.0.join("truss-edit-m2");
+    let member = temporary.0.join("truss-edit-member");
+    let fixed = temporary.0.join("truss-edit-fixed");
+    assert_success(&run_truss_section_add(&source, &t1, "T1", "0.005"));
+    assert_success(&run_truss_section_add(
+        &t1.join("model-ir.json"),
+        &t2,
+        "T2",
+        "0.0025",
+    ));
+    assert_success(&run_linear_material_add(
+        &t2.join("model-ir.json"),
+        &m2,
+        "M2",
+        ["105000000000", "0.3", "7850"],
+    ));
+    assert_success(&run_truss3d_member_add(
+        &m2.join("model-ir.json"),
+        &member,
+        "N3",
+        ["2", "1", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "T1",
+    ));
+    assert_success(&run_fixed_constraint_add(
+        &member.join("model-ir.json"),
+        &fixed,
+        "BC_N3",
+        "N3",
+    ));
+    let fixed_path = fixed.join("model-ir.json");
+    let fixed_bytes = std::fs::read(&fixed_path).expect("truss edit source");
+    let fixed_model = parse_model_ir_v2(&fixed_bytes).expect("strict truss edit source");
+
+    let section_first = temporary.0.join("truss-section-edit-first");
+    let section_second = temporary.0.join("truss-section-edit-second");
+    for destination in [&section_first, &section_second] {
+        let output = run_truss_section_edit(&fixed_path, destination, "T1", "0.01");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("truss section edit receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(section_first.join(artifact)).expect("first truss section edit"),
+            std::fs::read(section_second.join(artifact)).expect("second truss section edit")
+        );
+    }
+    let section_bytes =
+        std::fs::read(section_first.join("model-ir.json")).expect("edited truss section model");
+    let section_model = parse_model_ir_v2(&section_bytes).expect("strict edited truss section");
+    assert_eq!(section_model.value()["sections"][1]["id"], "T1");
+    assert_eq!(
+        section_model.value()["sections"][1]["parameters"],
+        serde_json::json!({"area_m2": 0.01})
+    );
+    assert_eq!(
+        section_model.value()["roundtrip_map"],
+        fixed_model.value()["roundtrip_map"]
+    );
+    assert!(section_model.value()["extensions"]
+        .get("structural-native:model-edit-truss-section.v1")
+        .is_some());
+    let mut section_receipt: Value = serde_json::from_slice(
+        &std::fs::read(section_first.join("edit-receipt.json"))
+            .expect("truss section edit receipt"),
+    )
+    .expect("truss section edit receipt JSON");
+    assert_eq!(section_receipt["operation"], "truss_section_parameters");
+    assert_eq!(section_receipt["section_id"], "T1");
+    assert_eq!(section_receipt["family_id"], "truss_3d");
+    assert_eq!(
+        section_receipt["previous_parameters_si"],
+        serde_json::json!({"area_m2": 0.005})
+    );
+    assert_eq!(
+        section_receipt["edited_parameters_si"],
+        serde_json::json!({"area_m2": 0.01})
+    );
+    assert_eq!(section_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(section_receipt["analysis_ready"], true);
+    assert_eq!(
+        section_receipt["edited_content_hash"],
+        section_model.content_hash()
+    );
+    assert_self_hashed_edit_receipt(&mut section_receipt);
+
+    let properties_first = temporary.0.join("truss-properties-edit-first");
+    let properties_second = temporary.0.join("truss-properties-edit-second");
+    for destination in [&properties_first, &properties_second] {
+        let output = run_truss_element_properties_edit(
+            &section_first.join("model-ir.json"),
+            destination,
+            "E2",
+            "M2",
+            "T2",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("truss property edit receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(properties_first.join(artifact)).expect("first truss property edit"),
+            std::fs::read(properties_second.join(artifact)).expect("second truss property edit")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&fixed_path).expect("unchanged truss source"),
+        fixed_bytes
+    );
+    let properties_bytes =
+        std::fs::read(properties_first.join("model-ir.json")).expect("edited truss property model");
+    let properties_model =
+        parse_model_ir_v2(&properties_bytes).expect("strict edited truss property model");
+    let edited_element = &properties_model.value()["elements"][1];
+    let source_element = &section_model.value()["elements"][1];
+    assert_eq!(edited_element["id"], source_element["id"]);
+    assert_eq!(edited_element["index"], source_element["index"]);
+    assert_eq!(edited_element["type"], "truss_3d");
+    assert_eq!(edited_element["formulation"], "linear_truss_3d");
+    assert_eq!(edited_element["node_ids"], source_element["node_ids"]);
+    assert_eq!(edited_element["offsets"], source_element["offsets"]);
+    assert_eq!(edited_element["material_id"], "M2");
+    assert_eq!(edited_element["section_id"], "T2");
+    assert_eq!(
+        properties_model.value()["roundtrip_map"],
+        section_model.value()["roundtrip_map"]
+    );
+    assert!(properties_model.value()["extensions"]
+        .get("structural-native:model-edit-truss-element-properties.v1")
+        .is_some());
+    let mut properties_receipt: Value = serde_json::from_slice(
+        &std::fs::read(properties_first.join("edit-receipt.json"))
+            .expect("truss property edit receipt"),
+    )
+    .expect("truss property edit receipt JSON");
+    assert_eq!(properties_receipt["operation"], "truss_element_properties");
+    assert_eq!(properties_receipt["element_id"], "E2");
+    assert_eq!(properties_receipt["element_type"], "truss_3d");
+    assert_eq!(properties_receipt["formulation"], "linear_truss_3d");
+    assert_eq!(properties_receipt["previous_material_id"], "M1");
+    assert_eq!(properties_receipt["edited_material_id"], "M2");
+    assert_eq!(properties_receipt["previous_section_id"], "T1");
+    assert_eq!(properties_receipt["edited_section_id"], "T2");
+    assert_eq!(properties_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(properties_receipt["analysis_ready"], true);
+    assert_eq!(
+        properties_receipt["edited_content_hash"],
+        properties_model.content_hash()
+    );
+    assert_self_hashed_edit_receipt(&mut properties_receipt);
+
+    let baseline_request = temporary.0.join("truss-edit-baseline-request");
+    let section_request = temporary.0.join("truss-edit-section-request");
+    let properties_request = temporary.0.join("truss-edit-properties-request");
+    for (model, destination) in [
+        (&fixed_path, &baseline_request),
+        (&section_first.join("model-ir.json"), &section_request),
+        (&properties_first.join("model-ir.json"), &properties_request),
+    ] {
+        assert_success(&run_model_linear_request_create(
+            model,
+            destination,
+            "truss-editing-c5",
+            "LC_WEAK",
+        ));
+    }
+    let execute = |model: &[u8], request_directory: &Path| {
+        execute_model_ir_linear_analysis(
+            model,
+            &std::fs::read(request_directory.join("analysis-request.json"))
+                .expect("truss edit request"),
+            None,
+            u32::MAX,
+        )
+        .expect("truss edit execution")
+    };
+    let baseline = execute(&fixed_bytes, &baseline_request);
+    let section_result = execute(&section_bytes, &section_request);
+    let properties_result = execute(&properties_bytes, &properties_request);
+    assert!(baseline.is_complete());
+    assert!(section_result.is_complete());
+    assert!(properties_result.is_complete());
+    let recovery = |result: &ModelIrLinearAnalysisOutcomeV1| {
+        serde_json::from_str::<Value>(
+            result
+                .result_recovery_ir_json()
+                .expect("completed truss edit recovery"),
+        )
+        .expect("truss edit recovery JSON")
+    };
+    let baseline_recovery = recovery(&baseline);
+    let section_recovery = recovery(&section_result);
+    let properties_recovery = recovery(&properties_result);
+    for value in [&baseline_recovery, &section_recovery, &properties_recovery] {
+        assert_eq!(
+            value["active_external_load"],
+            serde_json::json!([0, -10000, 0, 0, 0, 0])
+        );
+        assert_eq!(value["recovery_element_types"], serde_json::json!([1, 2]));
+        assert_eq!(value["recovery_offsets"], serde_json::json!([0, 12, 15]));
+        assert_eq!(value["fallback_count"], 0);
+    }
+    assert_ne!(
+        baseline_recovery["global_displacement"],
+        section_recovery["global_displacement"]
+    );
+    assert_ne!(
+        section_recovery["global_displacement"],
+        properties_recovery["global_displacement"]
+    );
+    let properties_request_bytes =
+        std::fs::read(properties_request.join("analysis-request.json")).expect("property request");
+    let partial =
+        execute_model_ir_linear_analysis(&properties_bytes, &properties_request_bytes, None, 1)
+            .expect("partial truss edit execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &properties_bytes,
+        &properties_request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed truss edit execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), properties_result.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        properties_result.result_recovery_ir_json()
+    );
+
+    for (name, section_id, area, status, code) in [
+        (
+            "truss-section-edit-missing",
+            "MISSING",
+            "0.01",
+            1,
+            "workbench_model_edit_truss_section_missing",
+        ),
+        (
+            "truss-section-edit-wrong-family",
+            "S1",
+            "0.01",
+            1,
+            "workbench_model_edit_truss_section_family_unsupported",
+        ),
+        (
+            "truss-section-edit-noop",
+            "T1",
+            "0.005",
+            1,
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "truss-section-edit-zero",
+            "T1",
+            "0",
+            2,
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_truss_section_edit(&fixed_path, &destination, section_id, area);
+        assert_eq!(rejected.status.code(), Some(status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+    for (name, element_id, material_id, section_id, code) in [
+        (
+            "truss-property-edit-missing-element",
+            "MISSING",
+            "M2",
+            "T2",
+            "workbench_model_edit_truss_element_missing",
+        ),
+        (
+            "truss-property-edit-wrong-element",
+            "E1",
+            "M2",
+            "T2",
+            "workbench_model_edit_truss_element_type_unsupported",
+        ),
+        (
+            "truss-property-edit-missing-material",
+            "E2",
+            "MISSING",
+            "T2",
+            "workbench_model_edit_truss_element_material_missing",
+        ),
+        (
+            "truss-property-edit-missing-section",
+            "E2",
+            "M2",
+            "MISSING",
+            "workbench_model_edit_truss_element_section_missing",
+        ),
+        (
+            "truss-property-edit-wrong-section",
+            "E2",
+            "M2",
+            "S1",
+            "workbench_model_edit_truss_element_section_unsupported",
+        ),
+        (
+            "truss-property-edit-noop",
+            "E2",
+            "M1",
+            "T1",
+            "workbench_model_edit_no_change",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_truss_element_properties_edit(
+            &section_first.join("model-ir.json"),
+            &destination,
+            element_id,
+            material_id,
+            section_id,
+        );
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+    let existing_destination = run_truss_element_properties_edit(
+        &section_first.join("model-ir.json"),
+        &properties_first,
+        "E2",
+        "M2",
+        "T2",
+    );
+    assert_eq!(existing_destination.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&existing_destination.stdout)
+        .contains("workbench_stage_destination_exists"));
+
+    let mut blocked = fixed_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.truss-edit-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Truss editing must not promote unsupported solver authority.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-truss-edit-source.json");
+    std::fs::write(
+        &blocked_source,
+        serde_json::to_vec(&blocked).expect("blocked truss edit bytes"),
+    )
+    .expect("write blocked truss edit source");
+    let blocked_section = temporary.0.join("blocked-truss-section-edit");
+    let blocked_properties = temporary.0.join("blocked-truss-properties-edit");
+    assert_success(&run_truss_section_edit(
+        &blocked_source,
+        &blocked_section,
+        "T1",
+        "0.01",
+    ));
+    assert_success(&run_truss_element_properties_edit(
+        &blocked_section.join("model-ir.json"),
+        &blocked_properties,
+        "E2",
+        "M2",
+        "T2",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_properties.join("edit-receipt.json"))
+            .expect("blocked truss edit receipt"),
+    )
+    .expect("blocked truss edit receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.truss-edit-visible-not-runnable"])
+    );
+    let blocked_request_directory = temporary.0.join("blocked-truss-edit-request");
+    let blocked_request = run_model_linear_request_create(
+        &blocked_properties.join("model-ir.json"),
+        &blocked_request_directory,
+        "blocked-truss-edit",
         "LC_WEAK",
     );
     assert_eq!(blocked_request.status.code(), Some(1));

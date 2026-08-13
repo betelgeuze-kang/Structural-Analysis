@@ -83,6 +83,11 @@ The bounded truss3d authoring pair appends one v1 `truss_3d` area section and th
 round-trip row, omits frame-only rotation/release fields, revalidates through C++, and composes
 with the fixed-support creator into typed frame-plus-truss CPU recovery and byte-identical restart.
 See `docs/native/modelir-truss3d-authoring-v1.md` for its exact boundary.
+The bounded truss3d editing pair replaces only one existing v1 truss-section area or one existing
+truss element's compatible v1 material/section references. Both commands preserve all other
+fields, bind previous and edited values, revalidate through C++, and compose into distinct typed
+CPU recovery with byte-identical restart. See `docs/native/modelir-truss3d-editing-v1.md` for the
+exact boundary.
 The model-bound CPU linear request creator selects one existing `linear_static` load pattern and
 bounded PCG controls, binds all three ModelIR identities, and requires the same ABI v1.13 C++
 assembly and generated sparse-request preflight used by execution before publishing.
@@ -157,6 +162,12 @@ structural-workbench model-edit-frame-element-orientation MODEL.json \
 structural-workbench model-edit-frame-element-properties MODEL.json \
   --element E1 --material M2 --section S2 \
   --output-dir EDITED-ELEMENT-PROPERTIES-MODEL
+structural-workbench model-edit-truss-section MODEL.json \
+  --section T1 --area-m2 0.01 \
+  --output-dir EDITED-TRUSS-SECTION-MODEL
+structural-workbench model-edit-truss-element-properties MODEL.json \
+  --element E2 --material M2 --section T2 \
+  --output-dir EDITED-TRUSS-PROPERTIES-MODEL
 structural-workbench model-edit-element-connectivity MODEL.json \
   --element E1 --nodes N1 N3 \
   --output-dir EDITED-CONNECTIVITY-MODEL

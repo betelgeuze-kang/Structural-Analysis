@@ -63,6 +63,7 @@ pub use model_edit::{
     edit_model_element_connectivity, edit_model_frame_element_orientation,
     edit_model_frame_element_properties, edit_model_frame_section, edit_model_linear_material,
     edit_model_nodal_load_components, edit_model_node_coordinates,
+    edit_model_truss_element_properties, edit_model_truss_section,
     publish_model_constraint_value_edit, publish_model_element_connectivity_edit,
     publish_model_fixed_constraint_add, publish_model_frame3d_member_add,
     publish_model_frame_element_orientation_edit, publish_model_frame_element_properties_edit,
@@ -70,7 +71,8 @@ pub use model_edit::{
     publish_model_linear_load_pattern_add, publish_model_linear_material_add,
     publish_model_linear_material_edit, publish_model_nodal_load_add,
     publish_model_nodal_load_components_edit, publish_model_node_coordinate_edit,
-    publish_model_truss3d_member_add, publish_model_truss_section_add, FrameSectionParametersV1,
+    publish_model_truss3d_member_add, publish_model_truss_element_properties_edit,
+    publish_model_truss_section_add, publish_model_truss_section_edit, FrameSectionParametersV1,
     LinearElasticMaterialParametersV1, ModelConstraintValueEditOutcomeV1,
     ModelElementConnectivityEditOutcomeV1, ModelFixedConstraintAddOutcomeV1,
     ModelFrame3dMemberAddOutcomeV1, ModelFrameElementOrientationEditOutcomeV1,
@@ -78,7 +80,8 @@ pub use model_edit::{
     ModelFrameSectionEditOutcomeV1, ModelLinearLoadPatternAddOutcomeV1,
     ModelLinearMaterialAddOutcomeV1, ModelLinearMaterialEditOutcomeV1, ModelNodalLoadAddOutcomeV1,
     ModelNodalLoadEditOutcomeV1, ModelNodeEditOutcomeV1, ModelTruss3dMemberAddOutcomeV1,
-    ModelTrussSectionAddOutcomeV1, TrussSectionParametersV1,
+    ModelTrussElementPropertiesEditOutcomeV1, ModelTrussSectionAddOutcomeV1,
+    ModelTrussSectionEditOutcomeV1, TrussSectionParametersV1,
 };
 pub use model_view::{
     render_model_topology_view, render_model_topology_view_file,

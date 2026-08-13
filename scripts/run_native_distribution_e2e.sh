@@ -1895,6 +1895,148 @@ exercise_truss3d_authoring_surface() {
 }
 exercise_truss3d_authoring_surface
 
+exercise_truss3d_editing_surface() {
+  local authored_model="$e2e_root/truss3d-authoring-first-composed/model-ir.json"
+  local alternate_section="$e2e_root/truss3d-editing-alternate-section"
+  local edit_source="$e2e_root/truss3d-editing-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-truss-section "$authored_model" --section T2 --area-m2 0.0025 \
+    --output-dir "$alternate_section" \
+    > "$e2e_root/truss3d-editing-alternate-section.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-material "$alternate_section/model-ir.json" --material M2 \
+    --elastic-modulus-pa 105000000000 --poisson-ratio 0.3 --density-kg-m3 7850 \
+    --output-dir "$edit_source" \
+    > "$e2e_root/truss3d-editing-source.stdout.json"
+
+  local source_model="$edit_source/model-ir.json"
+  local source_before_hash baseline_displacement
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  baseline_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$e2e_root/truss3d-authoring-first-direct/result-recovery-ir.json")"
+  if [[ -z "$baseline_displacement" ]]; then
+    echo "installed truss3d editing baseline has no displacement summary" >&2
+    exit 1
+  fi
+
+  local label section_directory section_request section_run properties_directory
+  local request_directory direct_directory partial_directory resumed_directory
+  local section_displacement properties_displacement
+  for label in first second; do
+    section_directory="$e2e_root/truss3d-editing-$label-section"
+    section_request="$e2e_root/truss3d-editing-$label-section-request"
+    section_run="$e2e_root/truss3d-editing-$label-section-run"
+    properties_directory="$e2e_root/truss3d-editing-$label-properties"
+    request_directory="$e2e_root/truss3d-editing-$label-request"
+    direct_directory="$e2e_root/truss3d-editing-$label-direct"
+    partial_directory="$e2e_root/truss3d-editing-$label-partial"
+    resumed_directory="$e2e_root/truss3d-editing-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-truss-section "$source_model" --section T1 --area-m2 0.01 \
+      --output-dir "$section_directory" \
+      > "$e2e_root/truss3d-editing-$label-section.stdout.json"
+    grep -Fq '"operation":"truss_section_parameters"' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"previous_parameters_si":{"area_m2":0.005}' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"edited_parameters_si":{"area_m2":0.01}' \
+      "$section_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-edit-truss-section.v1"' \
+      "$section_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$section_directory/model-ir.json" \
+      --case truss3d-editing-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$section_request" \
+      > "$e2e_root/truss3d-editing-$label-section-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$section_directory/model-ir.json" \
+      "$section_request/analysis-request.json" --output-dir "$section_run" \
+      > "$e2e_root/truss3d-editing-$label-section-run.stdout.json"
+    grep -Fq '"status":"completed"' "$section_run/run-receipt.json"
+    section_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$section_run/result-recovery-ir.json")"
+    if [[ -z "$section_displacement" || "$section_displacement" == "$baseline_displacement" ]]; then
+      echo "installed truss-section edit did not change recovered displacement" >&2
+      exit 1
+    fi
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-truss-element-properties "$section_directory/model-ir.json" \
+      --element E2 --material M2 --section T2 --output-dir "$properties_directory" \
+      > "$e2e_root/truss3d-editing-$label-properties.stdout.json"
+    grep -Fq '"operation":"truss_element_properties"' \
+      "$properties_directory/edit-receipt.json"
+    grep -Fq '"previous_material_id":"M1"' "$properties_directory/edit-receipt.json"
+    grep -Fq '"edited_material_id":"M2"' "$properties_directory/edit-receipt.json"
+    grep -Fq '"previous_section_id":"T1"' "$properties_directory/edit-receipt.json"
+    grep -Fq '"edited_section_id":"T2"' "$properties_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-edit-truss-element-properties.v1"' \
+      "$properties_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$properties_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/truss3d-editing-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$properties_directory/model-ir.json" \
+      --case truss3d-editing-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/truss3d-editing-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$properties_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/truss3d-editing-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1,2]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12,15]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+    properties_displacement="$(sed -n 's/.*"maximum_absolute_displacement":\([^,}]*\).*/\1/p' "$direct_directory/result-recovery-ir.json")"
+    if [[ -z "$properties_displacement" \
+      || "$properties_displacement" == "$section_displacement" \
+      || "$properties_displacement" == "$baseline_displacement" ]]; then
+      echo "installed truss property edit did not produce a distinct recovered displacement" >&2
+      exit 1
+    fi
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$properties_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 1 \
+      > "$e2e_root/truss3d-editing-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$properties_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/truss3d-editing-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/truss3d-editing-$label-restart-diff.txt"
+  done
+
+  for suffix in section section-request section-run properties request direct partial resumed; do
+    diff -r "$e2e_root/truss3d-editing-first-$suffix" \
+      "$e2e_root/truss3d-editing-second-$suffix" \
+      > "$e2e_root/truss3d-editing-$suffix-diff.txt"
+    cmp "$e2e_root/truss3d-editing-first-$suffix.stdout.json" \
+      "$e2e_root/truss3d-editing-second-$suffix.stdout.json"
+  done
+  cmp "$e2e_root/truss3d-editing-first-validation.json" \
+    "$e2e_root/truss3d-editing-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed truss3d editing mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_truss3d_editing_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -2219,6 +2361,14 @@ truss3d_authoring_composed_model_hash="$(sha256sum "$e2e_root/truss3d-authoring-
 truss3d_authoring_request_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-request/analysis-request.json" | awk '{print $1}')"
 truss3d_authoring_result_ir_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-ir.json" | awk '{print $1}')"
 truss3d_authoring_recovery_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
+truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
+truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
+truss3d_editing_properties_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/edit-receipt.json" | awk '{print $1}')"
+truss3d_editing_section_result_ir_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section-run/result-ir.json" | awk '{print $1}')"
+truss3d_editing_request_hash="$(sha256sum "$e2e_root/truss3d-editing-first-request/analysis-request.json" | awk '{print $1}')"
+truss3d_editing_result_ir_hash="$(sha256sum "$e2e_root/truss3d-editing-first-direct/result-ir.json" | awk '{print $1}')"
+truss3d_editing_recovery_hash="$(sha256sum "$e2e_root/truss3d-editing-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -2304,6 +2454,10 @@ v30_receipt_json="${v29_receipt_json/structural-native-distribution-e2e.v29/stru
 truss3d_authoring_receipt_fields="\"workbench_truss3d_authoring_surface_passed\":true,\"workbench_truss3d_authoring_section_model_sha256\":\"sha256:$truss3d_authoring_section_model_hash\",\"workbench_truss3d_authoring_section_receipt_sha256\":\"sha256:$truss3d_authoring_section_receipt_hash\",\"workbench_truss3d_authoring_member_model_sha256\":\"sha256:$truss3d_authoring_member_model_hash\",\"workbench_truss3d_authoring_member_receipt_sha256\":\"sha256:$truss3d_authoring_member_receipt_hash\",\"workbench_truss3d_authoring_composed_model_sha256\":\"sha256:$truss3d_authoring_composed_model_hash\",\"workbench_truss3d_authoring_request_sha256\":\"sha256:$truss3d_authoring_request_hash\",\"workbench_truss3d_authoring_result_ir_sha256\":\"sha256:$truss3d_authoring_result_ir_hash\",\"workbench_truss3d_authoring_recovery_sha256\":\"sha256:$truss3d_authoring_recovery_hash\","
 v30_receipt_json="${v30_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss3d_authoring_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v30_receipt_json" > "$temporary_receipt"
+v31_receipt_json="${v30_receipt_json/structural-native-distribution-e2e.v30/structural-native-distribution-e2e.v31}"
+truss3d_editing_receipt_fields="\"workbench_truss3d_editing_surface_passed\":true,\"workbench_truss3d_editing_section_model_sha256\":\"sha256:$truss3d_editing_section_model_hash\",\"workbench_truss3d_editing_section_receipt_sha256\":\"sha256:$truss3d_editing_section_receipt_hash\",\"workbench_truss3d_editing_properties_model_sha256\":\"sha256:$truss3d_editing_properties_model_hash\",\"workbench_truss3d_editing_properties_receipt_sha256\":\"sha256:$truss3d_editing_properties_receipt_hash\",\"workbench_truss3d_editing_section_result_ir_sha256\":\"sha256:$truss3d_editing_section_result_ir_hash\",\"workbench_truss3d_editing_request_sha256\":\"sha256:$truss3d_editing_request_hash\",\"workbench_truss3d_editing_result_ir_sha256\":\"sha256:$truss3d_editing_result_ir_hash\",\"workbench_truss3d_editing_recovery_sha256\":\"sha256:$truss3d_editing_recovery_hash\","
+v31_receipt_json="${v31_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss3d_editing_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v31_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

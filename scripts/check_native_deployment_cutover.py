@@ -39,12 +39,14 @@ REQUIRED_FILES = (
     Path("deployment/legacy-python-onprem/signed-update-package.example.json"),
     Path("scripts/build_native_distribution.sh"),
     Path("scripts/run_native_distribution_e2e.sh"),
+    Path("scripts/check_native_distribution_receipt.py"),
     Path("scripts/run_native_rootfs_isolation_e2e.sh"),
     Path("scripts/build_onprem_deployment_packaging_manifest.py"),
     Path("native/capabilities.json"),
     Path("docs/native/deployment-cutover-v1.md"),
     Path("docs/native/distribution-lifecycle.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
+    Path("docs/native/modelir-truss3d-editing-v1.md"),
 )
 
 
@@ -182,8 +184,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-edit-frame-section",
             "model-edit-frame-element-orientation",
             "model-edit-frame-element-properties",
+            "model-edit-truss-section",
+            "model-edit-truss-element-properties",
             "model-edit-element-connectivity",
             "model-add-frame3d-member",
+            "model-add-truss-section",
+            "model-add-truss3d-member",
             "model-add-nodal-load",
             "model-add-frame-section",
             "model-create-linear-analysis-request",
@@ -310,7 +316,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v30",
+        "structural-native-distribution-e2e.v31",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -398,6 +404,18 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_truss3d_authoring_request_sha256",
         "workbench_truss3d_authoring_result_ir_sha256",
         "workbench_truss3d_authoring_recovery_sha256",
+        "exercise_truss3d_editing_surface",
+        "model-edit-truss-section",
+        "model-edit-truss-element-properties",
+        "workbench_truss3d_editing_surface_passed",
+        "workbench_truss3d_editing_section_model_sha256",
+        "workbench_truss3d_editing_section_receipt_sha256",
+        "workbench_truss3d_editing_properties_model_sha256",
+        "workbench_truss3d_editing_properties_receipt_sha256",
+        "workbench_truss3d_editing_section_result_ir_sha256",
+        "workbench_truss3d_editing_request_sha256",
+        "workbench_truss3d_editing_result_ir_sha256",
+        "workbench_truss3d_editing_recovery_sha256",
         "exercise_model_linear_request_create_surface",
         "model-create-linear-analysis-request",
         "workbench_model_linear_request_create_surface_passed",
@@ -455,6 +473,51 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         if token not in rootfs_e2e:
             blockers.append(f"native_rootfs_e2e_token_missing:{token}")
 
+    distribution_receipt_check = _text(
+        root, Path("scripts/check_native_distribution_receipt.py"), blockers
+    )
+    _require_tokens(
+        relative=Path("scripts/check_native_distribution_receipt.py"),
+        text=distribution_receipt_check,
+        tokens=(
+            "structural-native-distribution-e2e.v31",
+            "V31_TRUSS3D_EDITING_KEYS",
+            "workbench_truss3d_editing_surface_passed",
+            "workbench_truss3d_editing_recovery_sha256",
+        ),
+        blockers=blockers,
+    )
+
+    distribution_doc = _text(
+        root, Path("docs/native/distribution-lifecycle.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/distribution-lifecycle.md"),
+        text=distribution_doc,
+        tokens=(
+            "append-only v31 hash-bound receipt",
+            "frozen v1 through v30 receipts",
+            "no pre-v31 receipt",
+        ),
+        blockers=blockers,
+    )
+
+    truss_editing_doc = _text(
+        root, Path("docs/native/modelir-truss3d-editing-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-truss3d-editing-v1.md"),
+        text=truss_editing_doc,
+        tokens=(
+            "model-edit-truss-section",
+            "model-edit-truss-element-properties",
+            "Installed static and shared package E2E v31",
+            "Frozen v1 through v30",
+            "receipts preserve their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
         "schema_version": "native-production-deployment-cutover.v1",
@@ -496,6 +559,33 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         root, Path("native/capabilities.json"), blockers
     )
     capabilities = capabilities_payload.get("capabilities")
+    truss_editing_capability = capabilities.get("modelir_truss3d_editing") if isinstance(
+        capabilities, dict
+    ) else None
+    if not isinstance(truss_editing_capability, dict):
+        blockers.append("modelir_truss3d_editing_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if truss_editing_capability.get(field) != expected:
+                blockers.append(
+                    f"modelir_truss3d_editing_capability_field_invalid:{field}"
+                )
+        truss_editing_claim = str(truss_editing_capability.get("claim", ""))
+        for token in (
+            "replaces one finite positive area",
+            "atomically reassigns one existing truss_3d element",
+            "installed static/shared E2E",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in truss_editing_claim:
+                blockers.append(
+                    f"modelir_truss3d_editing_capability_claim_missing:{token}"
+                )
     capability = capabilities.get("native_deployment") if isinstance(
         capabilities, dict
     ) else None

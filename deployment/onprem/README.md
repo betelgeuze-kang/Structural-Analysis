@@ -19,8 +19,11 @@ absent from the runtime image.
   `model-edit-frame-section` parameter replacement for an existing v1 linear-elastic material or
   `frame_3d` section, plus `model-edit-frame-element-orientation` rotation replacement for one
   existing `frame_3d` element, `model-edit-frame-element-properties` compatible material/section
-  assignment for one existing frame3d element, and `model-edit-element-connectivity` endpoint retargeting for one
-  existing two-node element. `model-add-frame3d-member` adds one new node and one connected linear
+  assignment for one existing frame3d element, `model-edit-truss-section` positive-area
+  replacement for one existing v1 truss section, `model-edit-truss-element-properties`
+  compatible material/section assignment for one existing truss3d element, and
+  `model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
+  `model-add-frame3d-member` adds one new node and one connected linear
   frame3d member using existing compatible material/section identities. `model-add-nodal-load`
   adds one nonzero six-component SI load to an existing linear-static pattern and node.
   `model-add-fixed-constraint` adds one homogeneous six-DOF zero constraint to an existing
@@ -29,7 +32,9 @@ absent from the runtime image.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
-  parameters without changing existing references. The
+  parameters without changing existing references. `model-add-truss-section` adds one bounded v1
+  truss section, and `model-add-truss3d-member` adds one node plus one connected linear truss3d
+  member using existing compatible identities. The
   `model-create-linear-analysis-request` surface binds one existing linear-static pattern and
   bounded PCG controls through C++ assembly preflight.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
@@ -104,6 +109,12 @@ structural-workbench model-edit-frame-element-orientation /workspace/model.json 
 structural-workbench model-edit-frame-element-properties /workspace/model.json \
   --element E1 --material M2 --section S2 \
   --output-dir /workspace/edited-element-properties-model
+structural-workbench model-edit-truss-section /workspace/model.json \
+  --section T1 --area-m2 0.01 \
+  --output-dir /workspace/edited-truss-section-model
+structural-workbench model-edit-truss-element-properties /workspace/model.json \
+  --element E2 --material M2 --section T2 \
+  --output-dir /workspace/edited-truss-properties-model
 structural-workbench model-edit-element-connectivity /workspace/model.json \
   --element E1 --nodes N1 N3 \
   --output-dir /workspace/edited-connectivity-model
@@ -127,6 +138,11 @@ structural-workbench model-add-frame-section /workspace/model.json \
   --torsional-constant-m4 0.000005 \
   --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
   --output-dir /workspace/added-section-model
+structural-workbench model-add-truss-section /workspace/model.json \
+  --section T1 --area-m2 0.005 --output-dir /workspace/added-truss-section-model
+structural-workbench model-add-truss3d-member /workspace/added-truss-section-model/model-ir.json \
+  --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
+  --material M1 --section T1 --output-dir /workspace/added-truss-member-model
 structural-workbench model-create-linear-analysis-request /workspace/added-pattern-model/model-ir.json \
   --case case-1 --load-pattern LC_CUSTOM --max-iterations 100 \
   --absolute-residual-tolerance 1e-11 --relative-residual-tolerance 1e-13 \
@@ -158,6 +174,10 @@ intact; C++ rejects invalid resulting geometry, references, graphs, or profile c
 frame3d-member creator appends only one new node and one connected fixed-formulation member with
 existing compatible properties and C++-validated contiguous indices; it does not expose arbitrary
 creation or deletion.
+The truss-section editor replaces only one existing v1 truss section's positive finite SI area.
+The truss-property editor reassigns only one existing fixed-formulation `truss_3d` element to an
+existing v1 linear-elastic material and v1 truss section. Neither changes topology, identity,
+formulation or any unrelated entity.
 The nodal-load creator appends one globally unique nonzero load to an existing linear-static
 pattern and existing node with a contiguous index; it cannot create or retarget either identity,
 add other load families, or alter combinations.
@@ -175,6 +195,9 @@ remain outside the command.
 The frame-section creator appends one v1 `frame_3d` section with six positive finite SI parameters;
 other families, material creation, reference assignment/editing and deletion remain outside the
 command.
+The truss creators append only one v1 positive-area truss section or one node plus one connected
+fixed-formulation `truss_3d` member; arbitrary topology, formulation, nonlinear behavior and
+deletion remain outside those commands.
 The model-bound CPU linear request creator performs ABI v1.13 C++ assembly preflight but neither
 starts execution nor supplies arbitrary solver/backend selection. None proves visual dragging,
 broader model editing,

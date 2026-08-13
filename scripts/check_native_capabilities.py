@@ -48,6 +48,7 @@ EXPECTED_OWNERS = {
     "modelir_linear_material_add": "structural-workbench",
     "modelir_frame_section_add": "structural-workbench",
     "modelir_truss3d_authoring": "structural-workbench",
+    "modelir_truss3d_editing": "structural-workbench",
     "modelir_frame_element_properties_edit": "structural-workbench",
     "modelir_linear_workbench": "structural-workbench",
     "native_benchmark_catalog": "structural-catalog",

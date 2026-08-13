@@ -173,7 +173,12 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 31. exercises repeated truss3d section/member/fixed-support composition, direct CPU execution and
     one-real-iteration restart with exact active load, changed displacement, typed frame/truss
     recovery and fallback 0;
-32. emits an append-only v30 hash-bound receipt with ModelIR/MGT result, report, MGT source,
+32. edits an existing v1 truss section area and reassigns one existing `truss_3d` element to a
+    second compatible v1 linear material/truss section twice, proves byte-identical ModelIR and
+    receipt output, unchanged source bytes, exact prior/edited bindings and strict C++
+    revalidation, then proves distinct baseline/area/property CPU responses, exact active load,
+    typed truss recovery, one-real-iteration restart parity and fallback 0;
+33. emits an append-only v31 hash-bound receipt with ModelIR/MGT result, report, MGT source,
    import-health, review, export, catalog-builder check/build/output,
    evidence-builder check/build/manifest, catalog and evidence-view, localized PDF/receipt,
    installed font/license/provenance, all four topology projection identities, the Korean topology
@@ -198,13 +203,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    recovery identities,
    the truss3d section and member ModelIR/edit-receipt identities, fixed-support composed ModelIR,
    generated request, completed ResultIR and typed frame-plus-truss recovery identities,
+   the truss-section-area-edited ModelIR and edit receipt, its completed ResultIR, plus the
+   material/section-reassigned truss ModelIR and edit receipt, generated request, completed
+   ResultIR and typed truss recovery identities,
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v29 receipts; v1 through v19 are not
+   The receipt checker continues to accept frozen v1 through v30 receipts; v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
@@ -216,7 +224,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    no pre-v28 receipt is installed frame3d-section creation plus composed-member execution
    authority; no pre-v29 receipt is compatible frame3d material/section assignment plus native
    linear execution authority; and no pre-v30 receipt is truss3d section/member authoring,
-   fixed-support composition, typed truss recovery and restart authority.
+   fixed-support composition, typed truss recovery and restart authority; no pre-v31 receipt is
+   installed truss-section-area editing plus compatible truss material/section reassignment,
+   distinct native CPU response, typed recovery and restart authority.
 
 The reference command is:
 
