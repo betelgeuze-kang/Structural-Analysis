@@ -818,6 +818,20 @@ V72_NODE_IDENTITY_EDIT_KEYS = {
     "workbench_node_identity_edit_restart_passed",
 }
 V72_EXPECTED_KEYS = V71_EXPECTED_KEYS | V72_NODE_IDENTITY_EDIT_KEYS
+V73_ELEMENT_IDENTITY_EDIT_KEYS = {
+    "workbench_element_identity_edit_surface_passed",
+    "workbench_element_identity_edit_model_sha256",
+    "workbench_element_identity_edit_receipt_sha256",
+    "workbench_element_identity_edit_request_receipt_sha256",
+    "workbench_element_identity_edit_request_sha256",
+    "workbench_element_identity_edit_assembly_receipt_sha256",
+    "workbench_element_identity_edit_checkpoint_sha256",
+    "workbench_element_identity_edit_result_ir_sha256",
+    "workbench_element_identity_edit_recovery_sha256",
+    "workbench_element_identity_edit_report_ir_sha256",
+    "workbench_element_identity_edit_restart_passed",
+}
+V73_EXPECTED_KEYS = V72_EXPECTED_KEYS | V73_ELEMENT_IDENTITY_EDIT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -859,6 +873,11 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v73_receipt = (
+        receipt_schema_version == "structural-native-distribution-e2e.v73"
+    )
+    if is_v73_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v72"
     is_v57_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v57",
         "structural-native-distribution-e2e.v58",
@@ -1121,6 +1140,7 @@ def validate(
         "structural-native-distribution-e2e.v70": V70_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v71": V71_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v72": V72_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v73": V73_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -2870,6 +2890,26 @@ def validate(
             "workbench_node_identity_edit_result_ir_sha256",
             "workbench_node_identity_edit_recovery_sha256",
             "workbench_node_identity_edit_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v73_receipt:
+        for name in (
+            "workbench_element_identity_edit_surface_passed",
+            "workbench_element_identity_edit_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_element_identity_edit_model_sha256",
+            "workbench_element_identity_edit_receipt_sha256",
+            "workbench_element_identity_edit_request_receipt_sha256",
+            "workbench_element_identity_edit_request_sha256",
+            "workbench_element_identity_edit_assembly_receipt_sha256",
+            "workbench_element_identity_edit_checkpoint_sha256",
+            "workbench_element_identity_edit_result_ir_sha256",
+            "workbench_element_identity_edit_recovery_sha256",
+            "workbench_element_identity_edit_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

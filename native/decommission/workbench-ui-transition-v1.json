@@ -35,6 +35,7 @@
       "model-edit-truss-section",
       "model-edit-truss-element-properties",
       "model-edit-element-connectivity",
+      "model-edit-element-identity",
       "model-add-frame3d-member",
       "model-add-nodal-load",
       "model-delete-nodal-load",

@@ -29,7 +29,8 @@ identity, `model-edit-nodal-load` existing-load component,
 `model-edit-frame-section-identity`, `model-edit-truss-section-identity`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
-`model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
+`model-edit-element-connectivity` endpoint retargeting and `model-edit-element-identity`
+unreferenced stable-identity replacement for one existing element.
 The installed `model-add-frame3d-member` command appends one connected linear frame3d node/member
 pair using existing compatible material/section identities and strict C++ revalidation.
 The installed `model-add-nodal-load` command appends one nonzero six-component SI load to an
@@ -124,7 +125,13 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v72 proves repeated node-identity-edited/request/artifact
+assembly preflight. Distribution E2E v73 proves repeated element-identity-edited/request/artifact
+bytes and retains every v72 assertion while replacing unreferenced `E1` with `E1_RENAMED` through
+`model-edit-element-identity`, preserving its index and exact typed row, rejecting malformed,
+no-op and colliding identities plus construction-stage, unsupported-feature and round-trip
+ownership without cascade, and proving exact typed frame recovery `[1]`, offsets `[0,12]`, active
+DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, byte-identical initialized-checkpoint
+restart and fallback 0. Distribution E2E v72 proves repeated node-identity-edited/request/artifact
 bytes and retains every v71 assertion while replacing neutral unreferenced `N3` with `N3_RENAMED`
 through `model-edit-node-identity`, preserving its index/exact SI coordinates/source identity/
 extensions, rejecting malformed, no-op and colliding identities plus element, constraint,

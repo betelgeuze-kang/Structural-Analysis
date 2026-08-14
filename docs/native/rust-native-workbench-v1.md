@@ -107,6 +107,10 @@ The separate `model-edit-node-identity` command changes only one unreferenced no
 preserves its index/exact SI coordinates/source/extensions, rejects element, constraint, nodal-load,
 unsupported-feature and round-trip ownership without cascade, and C++-revalidates the edited
 snapshot. See `docs/native/modelir-node-identity-edit-v1.md`.
+The separate `model-edit-element-identity` command changes only one unreferenced element's stable
+ID, preserves its index and exact typed row, rejects construction-stage, unsupported-feature and
+round-trip ownership without cascade, and C++-revalidates the edited snapshot. See
+`docs/native/modelir-element-identity-edit-v1.md`.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and

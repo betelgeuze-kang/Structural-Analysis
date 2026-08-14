@@ -528,6 +528,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-edit-truss-section",
         "model-edit-truss-element-properties",
         "model-edit-element-connectivity",
+        "model-edit-element-identity",
         "model-add-frame3d-member",
         "model-add-nodal-load",
         "model-delete-nodal-load",
@@ -1126,6 +1127,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-node.v1",
             "structural-native:model-edit-node-identity.v1",
             "node_identity_edit",
+            "structural-native:model-edit-element-identity.v1",
+            "element_identity_edit",
             "structural-native:model-delete-orphan-node.v1",
             "structural-native:model-edit-frame-section.v1",
             "structural-native:model-edit-frame-element-orientation.v1",
@@ -1813,6 +1816,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-edit-linear-material")',
             'Some("model-edit-linear-material-identity")',
             'Some("model-edit-node-identity")',
+            'Some("model-edit-element-identity")',
             'Some("model-add-node")',
             'Some("model-delete-orphan-node")',
             'Some("model-edit-frame-section")',
@@ -2796,6 +2800,30 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    element_identity_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-element-identity-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-element-identity-edit-v1.md"),
+        element_identity_edit_doc,
+        (
+            "model-edit-element-identity",
+            "single C ABI into C++",
+            "structural-native:model-edit-element-identity.v1",
+            "element_identity_edit",
+            "append-only v73",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2825,6 +2853,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-edit-frame-section-identity",
             "model-edit-truss-section-identity",
             "model-edit-node-identity",
+            "model-edit-element-identity",
             "model-edit-frame-element-orientation",
             "model-edit-frame-element-properties",
             "model-edit-element-connectivity",

@@ -733,6 +733,24 @@ fn run_element_connectivity_edit(
     ])
 }
 
+fn run_element_identity_edit(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    replacement_element_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-element-identity"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--new-element"),
+        text(replacement_element_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 #[allow(clippy::too_many_arguments)]
 fn run_frame3d_member_add(
     source: &Path,
@@ -3024,6 +3042,313 @@ fn node_identity_edit_is_deterministic_fail_closed_restartable_and_cpu_executabl
         u32::MAX,
     )
     .expect("node identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn element_identity_edit_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("source ModelIR bytes");
+    let source_validation = validate_model_bytes(&source_bytes).expect("C++-validated source");
+    let source_model = source_validation.snapshot.value().clone();
+
+    let first = temporary.0.join("element-identity-edit-first");
+    let second = temporary.0.join("element-identity-edit-second");
+    for destination in [&first, &second] {
+        let output = run_element_identity_edit(&source, destination, "E1", "E1_RENAMED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published element-identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first element-identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second element-identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged element source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("element identity-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict element identity-edited ModelIR");
+    let edited_validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated identity-edited ModelIR");
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    let source_elements = source_model["elements"]
+        .as_array()
+        .expect("source elements");
+    let edited_elements = edited.value()["elements"]
+        .as_array()
+        .expect("edited elements");
+    assert_eq!(edited_elements.len(), source_elements.len());
+    assert_eq!(edited_elements[0]["id"], "E1_RENAMED");
+    for (key, value) in source_elements[0]
+        .as_object()
+        .expect("source element object")
+    {
+        if key != "id" {
+            assert_eq!(&edited_elements[0][key], value);
+        }
+    }
+    assert_eq!(&edited_elements[1..], &source_elements[1..]);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+    let mut retained_element = source_elements[0]
+        .as_object()
+        .expect("source element object")
+        .clone();
+    retained_element.remove("id");
+    let retained_element = Value::Object(retained_element);
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-element-identity.v1")
+        .expect("element identity provenance extension");
+    assert_eq!(extension["operation"], "element_identity_edit");
+    assert_eq!(extension["source_element_id"], "E1");
+    assert_eq!(extension["replacement_element_id"], "E1_RENAMED");
+    assert_eq!(extension["element_index"], 0);
+    assert_eq!(
+        extension["retained_element_without_identity"],
+        retained_element
+    );
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("element identity receipt"),
+    )
+    .expect("element identity receipt JSON");
+    assert_eq!(receipt["operation"], "element_identity_edit");
+    assert_eq!(receipt["source_element_id"], "E1");
+    assert_eq!(receipt["replacement_element_id"], "E1_RENAMED");
+    assert_eq!(receipt["element_index"], 0);
+    assert_eq!(
+        receipt["retained_element_without_identity"],
+        retained_element
+    );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, element_id, replacement, expected_code) in [
+        (
+            "missing",
+            "E404",
+            "E3",
+            "workbench_model_edit_element_identity_element_missing",
+        ),
+        ("no-op", "E1", "E1", "workbench_model_edit_no_change"),
+        (
+            "invalid-replacement",
+            "E1",
+            "1_INVALID",
+            "workbench_model_edit_element_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("element-identity-{name}"));
+        let rejected = run_element_identity_edit(&source, &destination, element_id, replacement);
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+    let collision_source = temporary.0.join("element-identity-collision-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &collision_source,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let collision_destination = temporary.0.join("element-identity-collision-output");
+    let collision = run_element_identity_edit(
+        &collision_source.join("model-ir.json"),
+        &collision_destination,
+        "E1",
+        "E2",
+    );
+    assert_eq!(collision.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&collision.stdout)
+        .contains("workbench_model_edit_element_identity_replacement_exists"));
+    assert!(!collision_destination.exists());
+    let existing = run_element_identity_edit(&source, &first, "E1", "E1_RENAMED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, owned_value, expected_code) in [
+        (
+            "stage",
+            serde_json::json!([{
+                "id": "STAGE_E1",
+                "index": 0,
+                "active_element_ids": ["E1"],
+                "active_constraint_ids": [],
+                "load_pattern_ids": [],
+                "extensions": {}
+            }]),
+            "workbench_model_edit_element_identity_referenced_by_stage",
+        ),
+        (
+            "unsupported-feature",
+            serde_json::json!([{
+                "feature_id": "feature.element-identity-owned",
+                "kind": "unsupported_solver_feature",
+                "source_entity_id": "E1",
+                "disposition": "blocked",
+                "blocking": true,
+                "detail": "Element identity remains externally owned.",
+                "extensions": {}
+            }]),
+            "workbench_model_edit_element_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip",
+            serde_json::json!([{
+                "source_entity_id": "source:E1",
+                "entity_kind": "element",
+                "model_ir_entity_id": "E1",
+                "mapping_status": "exact",
+                "extensions": {}
+            }]),
+            "workbench_model_edit_element_identity_roundtrip_owned",
+        ),
+    ] {
+        let mut owned = source_model.clone();
+        let field = match name {
+            "stage" => "construction_stages",
+            "unsupported-feature" => "unsupported_features",
+            "roundtrip" => "roundtrip_map",
+            _ => unreachable!(),
+        };
+        owned[field] = owned_value;
+        let owned_path = temporary
+            .0
+            .join(format!("element-identity-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned element source")
+                .as_bytes(),
+        )
+        .expect("write owned element source");
+        let destination = temporary.0.join(format!("element-identity-{name}-output"));
+        let rejected = run_element_identity_edit(&owned_path, &destination, "E1", "E1_RENAMED");
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let malformed_path = temporary.0.join("element-identity-malformed-source.json");
+    let mut malformed = source_model;
+    malformed["elements"][0]["index"] = serde_json::json!(7);
+    std::fs::write(
+        &malformed_path,
+        canonicalize_model_ir_v2(&malformed)
+            .expect("canonical malformed element source")
+            .as_bytes(),
+    )
+    .expect("write malformed element source");
+    let malformed_destination = temporary.0.join("element-identity-malformed-output");
+    let malformed_rejection =
+        run_element_identity_edit(&malformed_path, &malformed_destination, "E1", "E1_RENAMED");
+    assert_eq!(malformed_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&malformed_rejection.stdout)
+        .contains("workbench_model_edit_source_semantics_invalid"));
+    assert!(!malformed_destination.exists());
+
+    let request_directory = temporary.0.join("element-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "element-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("element identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("element identity direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("element identity direct recovery"),
+    )
+    .expect("element identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("element identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("element identity resumed execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(
