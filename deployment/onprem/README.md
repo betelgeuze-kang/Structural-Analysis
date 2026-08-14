@@ -42,7 +42,10 @@ absent from the runtime image.
   material while retaining another material and rejecting element, section, mapped, source-owned,
   minimum-material or nonterminal candidates.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
-  parameters without changing existing references. `model-add-truss-section` adds one bounded v1
+  parameters without changing existing references. `model-delete-frame-section` removes only the
+  last contiguous neutral unreferenced parameter-set-v1 frame3d section while retaining another
+  section and rejecting element, mapped, source-owned, minimum-section or nonterminal candidates.
+  `model-add-truss-section` adds one bounded v1
   truss section, and `model-add-truss3d-member` adds one node plus one connected linear truss3d
   member using existing compatible identities. `model-delete-frame3d-leaf-member` and
   `model-delete-truss3d-leaf-member` remove only a last contiguous neutral member of their exact
@@ -160,6 +163,8 @@ structural-workbench model-add-frame-section /workspace/model.json \
   --torsional-constant-m4 0.000005 \
   --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
   --output-dir /workspace/added-section-model
+structural-workbench model-delete-frame-section /workspace/added-section-model/model-ir.json \
+  --section S2 --output-dir /workspace/deleted-section-model
 structural-workbench model-add-truss-section /workspace/model.json \
   --section T1 --area-m2 0.005 --output-dir /workspace/added-truss-section-model
 structural-workbench model-add-truss3d-member /workspace/added-truss-section-model/model-ir.json \

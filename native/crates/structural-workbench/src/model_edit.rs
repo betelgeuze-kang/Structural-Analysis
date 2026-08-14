@@ -45,6 +45,7 @@ const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-lin
 const LINEAR_MATERIAL_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-material.v1";
 const FRAME_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame-section.v1";
+const FRAME_SECTION_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-frame-section.v1";
 const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
@@ -70,6 +71,7 @@ const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const FRAME_SECTION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_frame3d_section_deletion_with_one_section_retained_not_source_owned_element_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_truss3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
@@ -256,6 +258,13 @@ pub struct ModelLinearMaterialDeleteOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded frame-section addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameSectionAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded frame-section deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFrameSectionDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -540,6 +549,30 @@ pub fn publish_model_frame_section_add(
 ) -> Result<ModelFrameSectionAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_frame_section(&source, section_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral unreferenced v1 frame section atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing or non-terminal sections,
+/// source-owned or malformed rows, element references, unsupported-feature or round-trip
+/// ownership, and publication failures.
+pub fn publish_model_frame_section_delete(
+    source_path: &Path,
+    section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFrameSectionDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_frame_section(&source, section_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1935,6 +1968,96 @@ pub fn add_model_frame_section(
         "claim_boundary": FRAME_SECTION_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFrameSectionAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedFrameSectionV1 {
+    section_index: usize,
+    parameters_si: Value,
+}
+
+/// Delete one provenance-bound terminal neutral v1 frame section in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal sections, source-owned or malformed
+/// rows, element references, unsupported-feature or round-trip ownership, schema drift, or edited
+/// semantics rejected by the C++ validator.
+pub fn delete_model_frame_section(
+    source_bytes: &[u8],
+    section_id: &str,
+) -> Result<ModelFrameSectionDeleteOutcomeV1, WorkbenchError> {
+    validate_frame_section_delete_request(source_bytes.len(), section_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_frame_section(&mut edited, section_id)?;
+    bind_frame_section_delete_provenance(
+        &mut edited,
+        section_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "frame_section_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_section_id": section_id,
+        "removed_section_index": removed.section_index,
+        "removed_family_id": "frame_3d",
+        "removed_parameter_set_version": "1",
+        "removed_parameters_si": removed.parameters_si,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FRAME_SECTION_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFrameSectionDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3705,6 +3828,13 @@ fn validate_frame_section_add_request(
     Ok(())
 }
 
+fn validate_frame_section_delete_request(
+    source_length: usize,
+    section_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, section_id, "section")
+}
+
 fn validate_truss_section_add_request(
     source_length: usize,
     section_id: &str,
@@ -4847,6 +4977,144 @@ fn append_frame_section(
             "extensions": {}
         }));
     Ok(section_index)
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_frame_section(
+    model: &mut Value,
+    section_id: &str,
+) -> Result<RemovedFrameSectionV1, WorkbenchError> {
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    if sections.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_minimum_model",
+            "frame-section deletion must retain at least one section",
+        ));
+    }
+    let section_index = sections
+        .iter()
+        .position(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_frame_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if section_index + 1 != sections.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_not_terminal",
+            "deleted frame section must be the last contiguous section row",
+        ));
+    }
+    let section = &sections[section_index];
+    if section.get("index").and_then(Value::as_u64) != u64::try_from(section_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_index_mismatch",
+            "deleted frame-section index must match its last contiguous position",
+        ));
+    }
+    if section.get("family_id").and_then(Value::as_str) != Some("frame_3d") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_family_unsupported",
+            "frame-section deletion accepts only a frame_3d section",
+        ));
+    }
+    if section.get("parameter_set_version").and_then(Value::as_str) != Some("1") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_version_unsupported",
+            "frame-section deletion accepts only parameter_set_version 1",
+        ));
+    }
+    if !section.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_source_owned",
+            "frame-section deletion accepts only a neutral row with null source_id",
+        ));
+    }
+    let parameters = section
+        .get("parameters")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 6)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_frame_section_parameters_invalid",
+                "deleted frame section must contain exactly six SI parameters",
+            )
+        })?;
+    for key in [
+        "area_m2",
+        "iy_m4",
+        "iz_m4",
+        "torsional_constant_m4",
+        "shear_area_y_m2",
+        "shear_area_z_m2",
+    ] {
+        if !parameters
+            .get(key)
+            .and_then(Value::as_f64)
+            .is_some_and(|value| value.is_finite() && value > 0.0)
+        {
+            return Err(WorkbenchError::new(
+                "workbench_model_delete_frame_section_parameters_invalid",
+                format!("deleted frame section has no finite positive {key}"),
+            ));
+        }
+    }
+
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| element.get("section_id").and_then(Value::as_str) == Some(section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_referenced_by_element",
+            format!("section {section_id} is referenced by an element"),
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| feature.get("source_entity_id").and_then(Value::as_str) == Some(section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_unsupported_feature_owned",
+            "frame-section deletion refuses a row referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| row.get("model_ir_entity_id").and_then(Value::as_str) == Some(section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_frame_section_roundtrip_owned",
+            "frame-section deletion refuses a row with a direct round-trip mapping",
+        ));
+    }
+
+    let parameters_si = section["parameters"].clone();
+    model
+        .get_mut("sections")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("sections"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last section"))?;
+    Ok(RemovedFrameSectionV1 {
+        section_index,
+        parameters_si,
+    })
 }
 
 fn append_truss_section(
@@ -6564,6 +6832,33 @@ fn bind_frame_section_add_provenance(
     )
 }
 
+fn bind_frame_section_delete_provenance(
+    model: &mut Value,
+    section_id: &str,
+    removed: &RemovedFrameSectionV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FRAME_SECTION_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "frame_section_delete",
+            "removed_section_id": section_id,
+            "removed_section_index": removed.section_index,
+            "removed_family_id": "frame_3d",
+            "removed_parameter_set_version": "1",
+            "removed_parameters_si": removed.parameters_si,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FRAME_SECTION_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_truss_section_add_provenance(
     model: &mut Value,
@@ -7252,23 +7547,24 @@ mod tests {
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_linear_load_pattern, remove_linear_material,
-        remove_nodal_load, remove_truss3d_leaf_member, validate_constraint_value_edit_request,
-        validate_edit_request, validate_element_connectivity_edit_request,
-        validate_fixed_constraint_add_request, validate_fixed_constraint_delete_request,
-        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
-        validate_frame_element_orientation_edit_request,
+        remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_pattern,
+        remove_linear_material, remove_nodal_load, remove_truss3d_leaf_member,
+        validate_constraint_value_edit_request, validate_edit_request,
+        validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
+        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
+        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
-        validate_frame_section_add_request, validate_frame_section_edit_request,
-        validate_linear_load_pattern_add_request, validate_linear_load_pattern_delete_request,
-        validate_linear_material_add_request, validate_linear_material_delete_request,
-        validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_delete_request, validate_nodal_load_edit_request,
-        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
-        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
-        validate_truss_element_property_references, validate_truss_section_add_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        validate_frame_section_add_request, validate_frame_section_delete_request,
+        validate_frame_section_edit_request, validate_linear_load_pattern_add_request,
+        validate_linear_load_pattern_delete_request, validate_linear_material_add_request,
+        validate_linear_material_delete_request, validate_linear_material_edit_request,
+        validate_nodal_load_add_request, validate_nodal_load_delete_request,
+        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
+        validate_truss3d_member_add_request, validate_truss3d_member_properties,
+        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
+        validate_truss_section_add_request, validate_truss_section_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -8230,6 +8526,152 @@ mod tests {
                 .expect_err("minimum retained model")
                 .code,
             "workbench_model_delete_linear_material_minimum_model"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn frame_section_delete_requires_terminal_neutral_unreferenced_v1_section() {
+        validate_frame_section_delete_request(0, "S2")
+            .expect("valid frame-section deletion request");
+        assert_eq!(
+            validate_frame_section_delete_request(0, "")
+                .expect_err("empty section identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        let frame_parameters = json!({
+            "area_m2": 0.01,
+            "iy_m4": 0.00004,
+            "iz_m4": 0.000_025,
+            "torsional_constant_m4": 0.000_005,
+            "shear_area_y_m2": 0.008,
+            "shear_area_z_m2": 0.008
+        });
+        let model = json!({
+            "sections": [
+                {
+                    "id": "S1",
+                    "index": 0,
+                    "family_id": "frame_3d",
+                    "parameter_set_version": "1",
+                    "parameters": frame_parameters,
+                    "source_id": "source:S1"
+                },
+                {
+                    "id": "S2",
+                    "index": 1,
+                    "family_id": "frame_3d",
+                    "parameter_set_version": "1",
+                    "parameters": frame_parameters,
+                    "source_id": null
+                }
+            ],
+            "elements": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed =
+            remove_frame_section(&mut deleted, "S2").expect("delete terminal frame section");
+        assert_eq!(removed.section_index, 1);
+        assert_eq!(removed.parameters_si["area_m2"], 0.01);
+        assert_eq!(deleted["sections"].as_array().expect("sections").len(), 1);
+
+        let mut missing = model.clone();
+        assert_eq!(
+            remove_frame_section(&mut missing, "S404")
+                .expect_err("missing frame section")
+                .code,
+            "workbench_model_delete_frame_section_missing"
+        );
+        let mut nonterminal = model.clone();
+        nonterminal["sections"]
+            .as_array_mut()
+            .expect("sections")
+            .push(json!({
+                "id": "S3",
+                "index": 2,
+                "family_id": "frame_3d",
+                "parameter_set_version": "1",
+                "parameters": frame_parameters,
+                "source_id": null
+            }));
+        assert_eq!(
+            remove_frame_section(&mut nonterminal, "S2")
+                .expect_err("nonterminal frame section")
+                .code,
+            "workbench_model_delete_frame_section_not_terminal"
+        );
+        let mut source_owned = model.clone();
+        source_owned["sections"][1]["source_id"] = json!("source:S2");
+        assert_eq!(
+            remove_frame_section(&mut source_owned, "S2")
+                .expect_err("source-owned frame section")
+                .code,
+            "workbench_model_delete_frame_section_source_owned"
+        );
+        let mut index_drift = model.clone();
+        index_drift["sections"][1]["index"] = json!(0);
+        assert_eq!(
+            remove_frame_section(&mut index_drift, "S2")
+                .expect_err("frame-section index drift")
+                .code,
+            "workbench_model_delete_frame_section_index_mismatch"
+        );
+        let mut family_drift = model.clone();
+        family_drift["sections"][1]["family_id"] = json!("truss_3d");
+        assert_eq!(
+            remove_frame_section(&mut family_drift, "S2")
+                .expect_err("frame-section family drift")
+                .code,
+            "workbench_model_delete_frame_section_family_unsupported"
+        );
+        let mut version_drift = model.clone();
+        version_drift["sections"][1]["parameter_set_version"] = json!("2");
+        assert_eq!(
+            remove_frame_section(&mut version_drift, "S2")
+                .expect_err("frame-section parameter-set drift")
+                .code,
+            "workbench_model_delete_frame_section_version_unsupported"
+        );
+        let mut parameter_drift = model.clone();
+        parameter_drift["sections"][1]["parameters"]["area_m2"] = json!(0);
+        assert_eq!(
+            remove_frame_section(&mut parameter_drift, "S2")
+                .expect_err("frame-section parameter drift")
+                .code,
+            "workbench_model_delete_frame_section_parameters_invalid"
+        );
+        let mut element_referenced = model.clone();
+        element_referenced["elements"] = json!([{"section_id": "S2"}]);
+        assert_eq!(
+            remove_frame_section(&mut element_referenced, "S2")
+                .expect_err("element-referenced frame section")
+                .code,
+            "workbench_model_delete_frame_section_referenced_by_element"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "S2"}]);
+        assert_eq!(
+            remove_frame_section(&mut feature_owned, "S2")
+                .expect_err("unsupported-feature-owned frame section")
+                .code,
+            "workbench_model_delete_frame_section_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "S2"}]);
+        assert_eq!(
+            remove_frame_section(&mut mapped, "S2")
+                .expect_err("round-trip-owned frame section")
+                .code,
+            "workbench_model_delete_frame_section_roundtrip_owned"
+        );
+        assert_eq!(
+            remove_frame_section(&mut deleted, "S1")
+                .expect_err("minimum retained model")
+                .code,
+            "workbench_model_delete_frame_section_minimum_model"
         );
     }
 

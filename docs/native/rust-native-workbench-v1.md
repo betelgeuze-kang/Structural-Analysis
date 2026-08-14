@@ -91,6 +91,10 @@ six positive finite SI parameters, neutral source ownership, and empty extension
 every existing round-trip row and blocker, revalidates through C++, and does not edit member
 references or broaden to other section families. See
 `docs/native/modelir-frame-section-add-v1.md` for the exact artifact and installed E2E boundary.
+Its bounded inverse removes only the last contiguous neutral unreferenced parameter-set-v1
+`frame_3d` section while retaining another section and rejecting element, unsupported-feature and
+direct round-trip references without cascade, reindexing, or retargeting. See
+`docs/native/modelir-frame-section-deletion-v1.md`.
 The bounded truss3d authoring pair appends one v1 `truss_3d` area section and then one connected
 `truss_3d`/`linear_truss_3d` node/member using an existing compatible material. It preserves every
 round-trip row, omits frame-only rotation/release fields, revalidates through C++, and composes
@@ -225,6 +229,8 @@ structural-workbench model-add-frame-section MODEL.json \
   --torsional-constant-m4 0.000005 \
   --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
   --output-dir ADDED-SECTION-MODEL
+structural-workbench model-delete-frame-section ADDED-SECTION-MODEL/model-ir.json \
+  --section S2 --output-dir DELETED-SECTION-MODEL
 structural-workbench model-add-truss-section MODEL.json \
   --section T1 --area-m2 0.005 --output-dir ADDED-TRUSS-SECTION-MODEL
 structural-workbench model-add-truss3d-member ADDED-TRUSS-SECTION-MODEL/model-ir.json \

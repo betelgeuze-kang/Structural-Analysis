@@ -202,6 +202,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-linear-load-pattern",
             "model-delete-linear-material",
             "model-add-frame-section",
+            "model-delete-frame-section",
             "model-create-linear-analysis-request",
             "customer-approved image build",
             "not final C6",
@@ -384,6 +385,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_linear_material_delete_request_sha256",
         "workbench_linear_material_delete_result_ir_sha256",
         "workbench_linear_material_delete_recovery_sha256",
+        "exercise_frame_section_deletion_surface",
+        "model-delete-frame-section",
+        "workbench_frame_section_delete_surface_passed",
+        "workbench_frame_section_delete_model_sha256",
+        "workbench_frame_section_delete_receipt_sha256",
+        "workbench_frame_section_delete_request_sha256",
+        "workbench_frame_section_delete_result_ir_sha256",
+        "workbench_frame_section_delete_recovery_sha256",
         "exercise_fixed_constraint_add_surface",
         "model-add-fixed-constraint",
         "workbench_fixed_constraint_add_surface_passed",
@@ -538,6 +547,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v38",
+            "V38_FRAME_SECTION_DELETE_KEYS",
+            "workbench_frame_section_delete_surface_passed",
+            "workbench_frame_section_delete_recovery_sha256",
             "structural-native-distribution-e2e.v37",
             "V37_LINEAR_MATERIAL_DELETE_KEYS",
             "workbench_linear_material_delete_surface_passed",
@@ -568,8 +581,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v38 hash-bound receipt",
+            "frozen v1 through v37 receipts",
+            "no pre-v38 receipt",
             "append-only v37 hash-bound receipt",
-            "frozen v1 through v36 receipts",
             "no pre-v37 receipt",
         ),
         blockers=blockers,
@@ -676,6 +691,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-linear-material",
             "Installed static and shared package E2E v37",
             "Frozen v1 through v36",
+            "receipts retain their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    frame_section_deletion_doc = _text(
+        root, Path("docs/native/modelir-frame-section-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-frame-section-deletion-v1.md"),
+        text=frame_section_deletion_doc,
+        tokens=(
+            "model-delete-frame-section",
+            "Installed static and shared package E2E v38",
+            "Frozen v1 through v37",
             "receipts retain their narrower authority",
         ),
         blockers=blockers,
@@ -847,6 +877,39 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                     "modelir_linear_material_deletion_capability_"
                     f"claim_missing:{token}"
                 )
+    frame_section_deletion_capability = (
+        capabilities.get("modelir_frame_section_deletion")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(frame_section_deletion_capability, dict):
+        blockers.append("modelir_frame_section_deletion_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if frame_section_deletion_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_frame_section_deletion_capability_"
+                    f"field_invalid:{field}"
+                )
+        frame_section_deletion_claim = str(
+            frame_section_deletion_capability.get("claim", "")
+        )
+        for token in (
+            "last contiguous neutral unreferenced parameter-set-v1 frame_3d section",
+            "element section_id references",
+            "installed static/shared E2E",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in frame_section_deletion_claim:
+                blockers.append(
+                    "modelir_frame_section_deletion_capability_"
+                    f"claim_missing:{token}"
+                )
     frame_leaf_deletion_capability = (
         capabilities.get("modelir_frame3d_leaf_deletion")
         if isinstance(capabilities, dict)
@@ -928,11 +991,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v37 E2E",
+            "CPU static/shared distribution v38 E2E",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",
             "last-neutral linear-material deletion",
+            "last-neutral frame-section deletion",
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",

@@ -246,6 +246,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "model-delete-truss3d-leaf-member" in workbench["claim"]
     assert "model-delete-fixed-constraint" in workbench["claim"]
     assert "model-delete-linear-material" in workbench["claim"]
+    assert "model-delete-frame-section" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
@@ -376,6 +377,27 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in material_deletion["claim"]
     assert "HIP C2" in material_deletion["claim"]
     assert "C6" in material_deletion["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_frame_section_deletion"
+        )
+        is True
+    )
+    frame_section_deletion = payload["capabilities"][
+        "modelir_frame_section_deletion"
+    ]
+    assert frame_section_deletion["cutover_gate"] == "C5"
+    assert frame_section_deletion["owner"] == "structural-workbench"
+    assert (
+        "last contiguous neutral unreferenced parameter-set-v1 frame_3d section"
+        in frame_section_deletion["claim"]
+    )
+    assert "element section_id references" in frame_section_deletion["claim"]
+    assert "single C ABI into C++" in frame_section_deletion["claim"]
+    assert "exact retained section and active load" in frame_section_deletion["claim"]
+    assert "fallback 0" in frame_section_deletion["claim"]
+    assert "HIP C2" in frame_section_deletion["claim"]
+    assert "C6" in frame_section_deletion["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "modelir_truss3d_leaf_deletion")
         is True
@@ -801,6 +823,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v35" in distribution["claim"]
     assert "append-only v36" in distribution["claim"]
     assert "append-only v37" in distribution["claim"]
+    assert "append-only v38" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -810,9 +833,10 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v36 receipts" in distribution["claim"]
+    assert "frozen v1 through v37 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
+    assert "last-neutral-frame-section deletion" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
     assert "last-neutral-nodal-load deletion" in distribution["claim"]
@@ -843,10 +867,11 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v37 E2E" in deployment["claim"]
+    assert "distribution v38 E2E" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]
+    assert "last-neutral frame-section deletion" in deployment["claim"]
     assert "compatible truss material/section reassignment" in deployment["claim"]
     assert "last-neutral-truss-leaf deletion" in deployment["claim"]
     assert "last-neutral-frame-leaf deletion" in deployment["claim"]

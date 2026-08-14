@@ -890,6 +890,17 @@ fn run_frame_section_add(
     ])
 }
 
+fn run_frame_section_delete(source: &Path, destination: &Path, section_id: &str) -> Output {
+    run_workbench(&[
+        text("model-delete-frame-section"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_truss_section_add(
     source: &Path,
     destination: &Path,
@@ -5507,6 +5518,295 @@ fn frame_section_add_is_deterministic_cpp_revalidated_and_used_by_member_executi
     )
     .expect("blocked section-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame_section_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let parameters = ["0.01", "0.00004", "0.000025", "0.000005", "0.008", "0.008"];
+    let added_directory = temporary.0.join("frame-section-delete-source");
+    assert_success(&run_frame_section_add(
+        &source,
+        &added_directory,
+        "S2",
+        parameters,
+    ));
+    let added_path = added_directory.join("model-ir.json");
+    let added_bytes = std::fs::read(&added_path).expect("frame-section delete source bytes");
+    let added = parse_model_ir_v2(&added_bytes).expect("strict frame-section-delete source");
+
+    let first = temporary.0.join("frame-section-delete-first");
+    let second = temporary.0.join("frame-section-delete-second");
+    for destination in [&first, &second] {
+        let output = run_frame_section_delete(&added_path, destination, "S2");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame-section delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first frame-section-delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second frame-section-delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&added_path).expect("unchanged frame-section-delete source"),
+        added_bytes
+    );
+
+    let deleted_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("frame-section-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict frame-section-deleted ModelIR");
+    for family in [
+        "nodes",
+        "materials",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(deleted.value()[family], added.value()[family]);
+    }
+    let source_sections = added.value()["sections"]
+        .as_array()
+        .expect("source sections");
+    let deleted_sections = deleted.value()["sections"]
+        .as_array()
+        .expect("deleted sections");
+    assert_eq!(source_sections.len(), deleted_sections.len() + 1);
+    assert_eq!(deleted_sections, &source_sections[..deleted_sections.len()]);
+    assert_eq!(
+        source_sections.last().expect("terminal section")["id"],
+        "S2"
+    );
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-frame-section.v1")
+        .expect("frame-section delete provenance extension");
+    assert_eq!(extension["operation"], "frame_section_delete");
+    assert_eq!(extension["removed_section_id"], "S2");
+    assert_eq!(extension["removed_section_index"], 1);
+    assert_eq!(extension["removed_family_id"], "frame_3d");
+    assert_eq!(extension["removed_parameter_set_version"], "1");
+    assert_eq!(extension["removed_parameters_si"]["area_m2"], 0.01);
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("frame-section delete receipt"),
+    )
+    .expect("frame-section delete receipt JSON");
+    assert_eq!(receipt["operation"], "frame_section_delete");
+    assert_eq!(receipt["removed_section_id"], "S2");
+    assert_eq!(receipt["removed_section_index"], 1);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("frame-section-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "frame-section-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("frame-section-delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("frame-section-delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("frame-section-delete direct recovery"),
+    )
+    .expect("frame-section-delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 0)
+        .expect("frame-section-delete partial execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("frame-section-delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let referenced_directory = temporary.0.join("frame-section-delete-referenced-source");
+    assert_success(&run_frame3d_member_add(
+        &added_path,
+        &referenced_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S2",
+    ));
+    let referenced_destination = temporary.0.join("frame-section-delete-referenced");
+    let referenced = run_frame_section_delete(
+        &referenced_directory.join("model-ir.json"),
+        &referenced_destination,
+        "S2",
+    );
+    assert_eq!(referenced.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&referenced.stdout)
+        .contains("workbench_model_delete_frame_section_referenced_by_element"));
+    assert!(!referenced_destination.exists());
+
+    let later_directory = temporary.0.join("frame-section-delete-later-source");
+    assert_success(&run_frame_section_add(
+        &added_path,
+        &later_directory,
+        "S3",
+        parameters,
+    ));
+    let nonterminal_destination = temporary.0.join("frame-section-delete-nonterminal");
+    let nonterminal = run_frame_section_delete(
+        &later_directory.join("model-ir.json"),
+        &nonterminal_destination,
+        "S2",
+    );
+    assert_eq!(nonterminal.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&nonterminal.stdout)
+        .contains("workbench_model_delete_frame_section_not_terminal"));
+    assert!(!nonterminal_destination.exists());
+
+    let mut source_owned = added.value().clone();
+    source_owned["sections"][1]["source_id"] = serde_json::json!("source:S2");
+    let source_owned_path = temporary.0.join("frame-section-delete-source-owned.json");
+    std::fs::write(
+        &source_owned_path,
+        canonicalize_model_ir_v2(&source_owned)
+            .expect("canonical source-owned frame section")
+            .as_bytes(),
+    )
+    .expect("write source-owned frame section");
+    let source_owned_destination = temporary.0.join("frame-section-delete-source-owned");
+    let source_owned_rejection =
+        run_frame_section_delete(&source_owned_path, &source_owned_destination, "S2");
+    assert_eq!(source_owned_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&source_owned_rejection.stdout)
+        .contains("workbench_model_delete_frame_section_source_owned"));
+    assert!(!source_owned_destination.exists());
+
+    for (name, field, value, code) in [
+        (
+            "feature-owned",
+            "unsupported_features",
+            serde_json::json!([{
+                "feature_id": "feature.frame-section-delete-owned",
+                "kind": "source_owned_section",
+                "source_entity_id": "S2",
+                "disposition": "preserved_only",
+                "blocking": false,
+                "detail": "The source feature directly owns the candidate frame section.",
+                "extensions": {}
+            }]),
+            "workbench_model_delete_frame_section_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned",
+            "roundtrip_map",
+            serde_json::json!([{
+                "source_entity_id": "source:S2",
+                "entity_kind": "section",
+                "model_ir_entity_id": "S2",
+                "mapping_status": "exact",
+                "extensions": {}
+            }]),
+            "workbench_model_delete_frame_section_roundtrip_owned",
+        ),
+    ] {
+        let mut guarded = added.value().clone();
+        guarded[field] = value;
+        let guarded_path = temporary
+            .0
+            .join(format!("frame-section-delete-{name}.json"));
+        std::fs::write(
+            &guarded_path,
+            canonicalize_model_ir_v2(&guarded)
+                .expect("canonical guarded frame-section-delete source")
+                .as_bytes(),
+        )
+        .expect("write guarded frame-section-delete source");
+        let destination = temporary.0.join(format!("frame-section-delete-{name}"));
+        let rejection = run_frame_section_delete(&guarded_path, &destination, "S2");
+        assert_eq!(rejection.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejection.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let minimum_destination = temporary.0.join("frame-section-delete-minimum");
+    let minimum = run_frame_section_delete(&source, &minimum_destination, "S1");
+    assert_eq!(minimum.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&minimum.stdout)
+        .contains("workbench_model_delete_frame_section_minimum_model"));
+    assert!(!minimum_destination.exists());
+
+    let existing = run_frame_section_delete(&added_path, &first, "S2");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut blocked = added.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.frame-section-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Frame-section deletion must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-frame-section-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked frame-section-delete source")
+            .as_bytes(),
+    )
+    .expect("write blocked frame-section-delete source");
+    let blocked_destination = temporary.0.join("blocked-frame-section-delete-output");
+    assert_success(&run_frame_section_delete(
+        &blocked_source,
+        &blocked_destination,
+        "S2",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked frame-section-delete receipt"),
+    )
+    .expect("blocked frame-section-delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.frame-section-delete-visible-not-runnable"])
+    );
 }
 
 #[test]

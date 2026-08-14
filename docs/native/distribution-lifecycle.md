@@ -256,7 +256,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
    source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
-   The receipt checker continues to accept frozen v1 through v36 receipts; v1 through v19 are not
+40. removes the last contiguous neutral unreferenced parameter-set-v1 `frame_3d` section twice
+   while retaining the original section, proves byte-identical ModelIR/receipt output and unchanged
+   source bytes, rejects element-referenced and nonterminal sections without publishing output,
+   binds the removed identity/index/family/version/SI-parameter fields, then proves strict C++
+   validation, the exact retained active load, typed frame recovery, initialized-active checkpoint
+   restart parity and fallback 0;
+41. emits an append-only v38 hash-bound receipt that inherits every v37 identity and additionally
+   binds the last-neutral-frame-section-deleted ModelIR and edit receipt, generated request,
+   completed ResultIR and typed frame recovery identities.
+   The receipt checker continues to accept frozen v1 through v37 receipts; v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
@@ -279,7 +288,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    recovery and restart authority; and no pre-v36 receipt is installed last-neutral
    linear-load-pattern deletion, retained-active-load, typed recovery and restart authority; and
    no pre-v37 receipt is installed last-neutral linear-material deletion, retained-material/load,
-   typed recovery and restart authority.
+   typed recovery and restart authority; and no pre-v38 receipt is installed last-neutral
+   frame-section deletion, retained-section/load, typed recovery and restart authority.
 
 The reference command is:
 

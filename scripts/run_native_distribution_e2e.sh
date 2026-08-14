@@ -2149,6 +2149,156 @@ exercise_frame_section_add_surface() {
 }
 exercise_frame_section_add_surface
 
+exercise_frame_section_deletion_surface() {
+  local source_model="$e2e_root/frame-section-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/frame-section-delete-$label"
+    request_directory="$e2e_root/frame-section-delete-$label-request"
+    direct_directory="$e2e_root/frame-section-delete-$label-direct"
+    partial_directory="$e2e_root/frame-section-delete-$label-partial"
+    resumed_directory="$e2e_root/frame-section-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-frame-section "$source_model" \
+      --section S2 --output-dir "$delete_directory" \
+      > "$e2e_root/frame-section-delete-$label.stdout.json"
+    grep -Fq '"operation":"frame_section_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_section_id":"S2"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_section_index":1' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_family_id":"frame_3d"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameter_set_version":"1"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameters_si":{"area_m2":0.01,"iy_m4":4e-05,"iz_m4":2.5e-05,"shear_area_y_m2":0.008,"shear_area_z_m2":0.008,"torsional_constant_m4":5e-06}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-frame-section.v1"' \
+      "$delete_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame-section-delete-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":2,"materials":1,"sections":1' \
+      "$e2e_root/frame-section-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/frame-section-delete-$label-view.txt"
+    grep -Fq 'Inventory: nodes=2 elements=1 constraints=1 load_patterns=4' \
+      "$e2e_root/frame-section-delete-$label-view.txt"
+    grep -Fq '"family_id":"frame_3d","id":"S1","index":0' \
+      "$delete_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case frame-section-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/frame-section-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/frame-section-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/frame-section-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/frame-section-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/frame-section-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/frame-section-delete-first$suffix" \
+      "$e2e_root/frame-section-delete-second$suffix" \
+      > "$e2e_root/frame-section-delete-$diff_label-diff.txt"
+    cmp "$e2e_root/frame-section-delete-first$suffix.stdout.json" \
+      "$e2e_root/frame-section-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/frame-section-delete-first-validation.json" \
+    "$e2e_root/frame-section-delete-second-validation.json"
+  cmp "$e2e_root/frame-section-delete-first-view.txt" \
+    "$e2e_root/frame-section-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame-section deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local referenced_source="$e2e_root/frame-section-delete-referenced-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-frame3d-member "$source_model" --node N3 \
+    --coordinates 4 0 0 --element E2 --from-node N2 \
+    --material M1 --section S2 --output-dir "$referenced_source" \
+    > "$e2e_root/frame-section-delete-referenced-source.stdout.json"
+  local referenced_destination="$e2e_root/frame-section-delete-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-frame-section "$referenced_source/model-ir.json" --section S2 \
+    --output-dir "$referenced_destination" \
+    > "$e2e_root/frame-section-delete-referenced-rejected.stdout.json"; then
+    echo "installed frame-section deletion accepted an element-referenced section" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_frame_section_referenced_by_element' \
+    "$e2e_root/frame-section-delete-referenced-rejected.stdout.json"
+  test ! -e "$referenced_destination"
+
+  local later_source="$e2e_root/frame-section-delete-later-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-frame-section "$source_model" --section S3 \
+    --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
+    --torsional-constant-m4 0.000005 \
+    --shear-area-y-m2 0.008 --shear-area-z-m2 0.008 \
+    --output-dir "$later_source" \
+    > "$e2e_root/frame-section-delete-later-source.stdout.json"
+  local nonterminal_destination="$e2e_root/frame-section-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-frame-section "$later_source/model-ir.json" --section S2 \
+    --output-dir "$nonterminal_destination" \
+    > "$e2e_root/frame-section-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed frame-section deletion accepted a nonterminal section" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_frame_section_not_terminal' \
+    "$e2e_root/frame-section-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$nonterminal_destination"
+}
+exercise_frame_section_deletion_surface
+
 exercise_frame_element_properties_edit_surface() {
   local source_model="$linear_model"
   local source_before_hash
@@ -3146,6 +3296,11 @@ linear_material_delete_receipt_hash="$(sha256sum "$e2e_root/linear-material-dele
 linear_material_delete_request_hash="$(sha256sum "$e2e_root/linear-material-delete-first-request/analysis-request.json" | awk '{print $1}')"
 linear_material_delete_result_ir_hash="$(sha256sum "$e2e_root/linear-material-delete-first-direct/result-ir.json" | awk '{print $1}')"
 linear_material_delete_recovery_hash="$(sha256sum "$e2e_root/linear-material-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+frame_section_delete_model_hash="$(sha256sum "$e2e_root/frame-section-delete-first/model-ir.json" | awk '{print $1}')"
+frame_section_delete_receipt_hash="$(sha256sum "$e2e_root/frame-section-delete-first/edit-receipt.json" | awk '{print $1}')"
+frame_section_delete_request_hash="$(sha256sum "$e2e_root/frame-section-delete-first-request/analysis-request.json" | awk '{print $1}')"
+frame_section_delete_result_ir_hash="$(sha256sum "$e2e_root/frame-section-delete-first-direct/result-ir.json" | awk '{print $1}')"
+frame_section_delete_recovery_hash="$(sha256sum "$e2e_root/frame-section-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 frame_section_add_model_hash="$(sha256sum "$e2e_root/frame-section-add-first/model-ir.json" | awk '{print $1}')"
 frame_section_add_receipt_hash="$(sha256sum "$e2e_root/frame-section-add-first/edit-receipt.json" | awk '{print $1}')"
 frame_section_add_composed_model_hash="$(sha256sum "$e2e_root/frame-section-add-first-supported/model-ir.json" | awk '{print $1}')"
@@ -3296,6 +3451,10 @@ v37_receipt_json="${v36_receipt_json/structural-native-distribution-e2e.v36/stru
 linear_material_delete_receipt_fields="\"workbench_linear_material_delete_surface_passed\":true,\"workbench_linear_material_delete_model_sha256\":\"sha256:$linear_material_delete_model_hash\",\"workbench_linear_material_delete_receipt_sha256\":\"sha256:$linear_material_delete_receipt_hash\",\"workbench_linear_material_delete_request_sha256\":\"sha256:$linear_material_delete_request_hash\",\"workbench_linear_material_delete_result_ir_sha256\":\"sha256:$linear_material_delete_result_ir_hash\",\"workbench_linear_material_delete_recovery_sha256\":\"sha256:$linear_material_delete_recovery_hash\","
 v37_receipt_json="${v37_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_material_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v37_receipt_json" > "$temporary_receipt"
+v38_receipt_json="${v37_receipt_json/structural-native-distribution-e2e.v37/structural-native-distribution-e2e.v38}"
+frame_section_delete_receipt_fields="\"workbench_frame_section_delete_surface_passed\":true,\"workbench_frame_section_delete_model_sha256\":\"sha256:$frame_section_delete_model_hash\",\"workbench_frame_section_delete_receipt_sha256\":\"sha256:$frame_section_delete_receipt_hash\",\"workbench_frame_section_delete_request_sha256\":\"sha256:$frame_section_delete_request_hash\",\"workbench_frame_section_delete_result_ir_sha256\":\"sha256:$frame_section_delete_result_ir_hash\",\"workbench_frame_section_delete_recovery_sha256\":\"sha256:$frame_section_delete_recovery_hash\","
+v38_receipt_json="${v38_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_section_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v38_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
