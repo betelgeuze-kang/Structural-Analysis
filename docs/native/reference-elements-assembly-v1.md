@@ -68,5 +68,6 @@ composition; the caller-supplied dense/CSR reference path itself remains outside
 
 Still open: protected-runner C2 promotion, broader formulation/material parity,
 element-state aggregation, general ModelIR graph assembly beyond the bounded linear subset,
-nonzero constraint handling, self-weight/combinations/stages, sparse resident execution, broader
+nonzero constraint handling, self-weight, nested or arbitrary-term combinations/stages, sparse
+resident execution, broader
 checkpoint/restart and product E2E, and C6 decommission.

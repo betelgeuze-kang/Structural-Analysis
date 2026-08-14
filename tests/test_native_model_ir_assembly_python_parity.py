@@ -242,6 +242,8 @@ def _oracle() -> dict[str, np.ndarray]:
         mass_values.extend(float(reduced_mass[row, column]) for column in row_columns)
         row_offsets.append(len(columns))
     external = np.asarray([10.0, -20.0, 0.0, 0.0, 0.0, 0.0, 30.0])
+    secondary = np.asarray([0.0, 0.0, 8.0, 0.0, 0.0, 0.0, 0.0])
+    combination_external = 1.2 * external - 0.5 * secondary
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -254,6 +256,9 @@ def _oracle() -> dict[str, np.ndarray]:
         "model_assembly.jvp": jvp[active],
         "model_assembly.frame_recovery": frame[4],
         "model_assembly.truss_recovery": truss[4],
+        "model_assembly.combination_external_load": combination_external,
+        "model_assembly.combination_equilibrium_residual": internal[active]
+        - combination_external,
     }
 
 

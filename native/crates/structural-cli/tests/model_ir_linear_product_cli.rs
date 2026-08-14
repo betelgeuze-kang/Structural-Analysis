@@ -7,7 +7,7 @@ use serde_json::{json, Value};
 use structural_cli::{
     execute_model_ir_linear_analysis, validate_model_ir_linear_analysis_compatibility,
 };
-use structural_contracts::model_ir::canonicalize_model_ir_v2;
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::product_ir::sha256_identity;
 use structural_contracts::sparse_product::{
     parse_sparse_linear_report_ir_v1, parse_sparse_linear_result_ir_v1,
@@ -63,6 +63,39 @@ fn request_bytes(max_iterations: u32) -> Vec<u8> {
     let mut value: Value = serde_json::from_slice(&bytes).expect("request fixture JSON");
     value["config"]["max_iterations"] = json!(max_iterations);
     serde_json::to_vec(&value).expect("request JSON")
+}
+
+fn combination_model_bytes() -> Vec<u8> {
+    let mut value: Value = serde_json::from_slice(&model_bytes()).expect("ModelIR fixture JSON");
+    value["load_combinations"] = json!([{
+        "id": "COMBO_SERVICE",
+        "index": 0,
+        "combination_type": "linear",
+        "terms": [
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+        ],
+        "source_id": null,
+        "extensions": {}
+    }]);
+    canonicalize_model_ir_v2(&value)
+        .expect("canonical combination ModelIR")
+        .into_bytes()
+}
+
+fn rebound_request_bytes(model: &[u8], selector_id: &str, max_iterations: u32) -> Vec<u8> {
+    let document = parse_model_ir_v2(model).expect("strict rebound ModelIR");
+    let mut value: Value =
+        serde_json::from_slice(&request_bytes(max_iterations)).expect("request fixture JSON");
+    value["model_identity"] = json!({
+        "content_hash": document.content_hash(),
+        "semantic_hash": document.semantic_hash(),
+        "provenance_hash": document.provenance_hash(),
+    });
+    value["load_pattern_id"] = json!(selector_id);
+    canonicalize_model_ir_v2(&value)
+        .expect("canonical rebound request")
+        .into_bytes()
 }
 
 fn verify_self_hash(value: &Value, field: &str) {
@@ -122,6 +155,89 @@ fn compatibility_preflight_is_deterministic_and_uses_cpp_assembly() {
     rebound["load_pattern_id"] = json!("LP1");
     let unsupported = serde_json::to_vec(&rebound).expect("rebound request");
     assert!(validate_model_ir_linear_analysis_compatibility(&planar, &unsupported).is_err());
+}
+
+#[test]
+fn bounded_two_pattern_combination_executes_and_restarts_exactly() {
+    let model = combination_model_bytes();
+    let request = rebound_request_bytes(&model, "COMBO_SERVICE", 100);
+    let first = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("bounded combination compatibility");
+    let repeated = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("deterministic bounded combination compatibility");
+    assert_eq!(first, repeated);
+
+    let direct = execute_model_ir_linear_analysis(&model, &request, None, u32::MAX)
+        .expect("bounded combination execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("combination recovery IR"),
+    )
+    .expect("combination recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_SERVICE");
+    assert_eq!(recovery["load_pattern_index"], 0);
+    assert_eq!(
+        recovery["active_external_load"]
+            .as_array()
+            .expect("combination external load")
+            .iter()
+            .map(|value| value.as_f64().expect("finite external load"))
+            .collect::<Vec<_>>(),
+        vec![0.0, -12000.0, 5000.0, 0.0, 0.0, 0.0]
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    assert!(
+        recovery["summary"]["active_residual_inf"]
+            .as_f64()
+            .expect("combination residual")
+            <= 1.0e-8
+    );
+
+    let partial = execute_model_ir_linear_analysis(&model, &request, None, 0)
+        .expect("initial combination checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &model,
+        &request,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed combination execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+    assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
+
+    let direct_pattern_request = rebound_request_bytes(&model, "LC_WEAK", 100);
+    let direct_pattern =
+        execute_model_ir_linear_analysis(&model, &direct_pattern_request, None, u32::MAX)
+            .expect("direct pattern remains executable beside a combination");
+    let original =
+        execute_model_ir_linear_analysis(&model_bytes(), &request_bytes(100), None, u32::MAX)
+            .expect("original direct pattern execution");
+    let direct_pattern_result = parse_sparse_linear_result_ir_v1(
+        direct_pattern
+            .result_ir_json()
+            .expect("direct pattern ResultIR")
+            .as_bytes(),
+    )
+    .expect("strict direct-pattern ResultIR");
+    let original_result = parse_sparse_linear_result_ir_v1(
+        original
+            .result_ir_json()
+            .expect("original ResultIR")
+            .as_bytes(),
+    )
+    .expect("strict original ResultIR");
+    assert_eq!(
+        direct_pattern_result.result().solution,
+        original_result.result().solution
+    );
 }
 
 #[test]

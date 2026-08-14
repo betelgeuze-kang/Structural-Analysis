@@ -600,7 +600,9 @@ typedef struct sa_reference_element_result_v1 {
  * v1.13 exposes the bounded typed ModelIR linear frame3d/truss3d graph through the existing
  * reference element and canonical CSR sources. The immutable sizes query returns exact lengths;
  * execute requires caller-owned disjoint host buffers with exactly those lengths and publishes
- * them only after the complete operation succeeds.
+ * them only after the complete operation succeeds. The frozen load_pattern_id/index names are
+ * legacy load-case aliases: they select either one pattern or one bounded two-pattern linear
+ * combination, and cross-family ambiguity fails closed.
  */
 typedef struct sa_model_ir_linear_assembly_sizes_v1 {
     uint32_t abi_version;

@@ -235,7 +235,7 @@ buffer를 받고 다음을 한 번에 게시한다.
 - tangent, consistent mass, internal force, external load, equilibrium residual, JVP
 - stable element index/type/offset과 element recovery values
 - content, semantic, provenance identity bytes
-- CPU backend, fallback zero, selected load-pattern index와 exact result counts
+- CPU backend, fallback zero, selected legacy load-case index와 exact result counts
 
 길이 부족·과다, type/stride/memory-space/device/alignment 오류, descriptor/output alias,
 output 상호 alias, reserved/flag 오염과 overflow는 모두 복사 전에 거부한다. 조립·회복

@@ -2596,11 +2596,11 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
             SA_ERR_ANALYSIS_NOT_READY,
             "ModelIR linear reference assembly graph size is outside the bounded domain");
     }
-    if (!model.load_combinations.empty() || !model.time_functions.empty()
-        || !model.construction_stages.empty() || !model.unsupported_features.empty()) {
+    if (!model.time_functions.empty() || !model.construction_stages.empty()
+        || !model.unsupported_features.empty()) {
         fail(
             SA_ERR_ANALYSIS_NOT_READY,
-            "ModelIR linear reference assembly does not consume combinations, time functions, stages, or unsupported features");
+            "ModelIR linear reference assembly does not consume time functions, stages, or unsupported features");
     }
 
     struct NodeProjection final {
@@ -2760,6 +2760,19 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
             projected.nodal_loads.push_back({node->second.stable_index, load.components});
         }
         output.load_patterns.push_back(std::move(projected));
+    }
+    output.load_combinations.reserve(model.load_combinations.size());
+    for (const auto& combination : model.load_combinations) {
+        LinearReferenceLoadCombination projected {
+            combination.identity.id,
+            combination.identity.index,
+            {},
+        };
+        projected.terms.reserve(combination.terms.size());
+        for (const auto& term : combination.terms) {
+            projected.terms.push_back({term.ref_id, term.ref_kind, term.factor});
+        }
+        output.load_combinations.push_back(std::move(projected));
     }
     return output;
 }

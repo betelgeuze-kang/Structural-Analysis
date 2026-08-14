@@ -23,6 +23,17 @@ struct OwnedContribution final {
     elements::ElementOperatorResponse response;
 };
 
+struct SelectedLoadPattern final {
+    const model_ir::LinearReferenceLoadPattern* pattern {};
+    double factor {};
+};
+
+struct SelectedLoadCase final {
+    std::string_view id;
+    std::uint64_t stable_index {};
+    std::vector<SelectedLoadPattern> patterns;
+};
+
 [[nodiscard]] bool all_finite(const std::span<const double> values) {
     return std::all_of(values.begin(), values.end(), [](const double value) {
         return std::isfinite(value);
@@ -33,6 +44,67 @@ struct OwnedContribution final {
     const std::uint32_t node_index,
     const std::uint32_t component) {
     return node_index * 6U + component;
+}
+
+[[nodiscard]] SelectedLoadCase select_load_case(
+    const model_ir::LinearReferenceGraph& graph,
+    const std::string_view selector_id) {
+    const auto pattern = std::find_if(
+        graph.load_patterns.begin(),
+        graph.load_patterns.end(),
+        [selector_id](const auto& candidate) { return candidate.id == selector_id; });
+    const auto combination = std::find_if(
+        graph.load_combinations.begin(),
+        graph.load_combinations.end(),
+        [selector_id](const auto& candidate) { return candidate.id == selector_id; });
+    if (pattern != graph.load_patterns.end() && combination != graph.load_combinations.end()) {
+        throw model_ir::Error(
+            SA_ERR_INVALID_ARGUMENT,
+            "ModelIR load-case selector is ambiguous across patterns and combinations");
+    }
+    if (pattern != graph.load_patterns.end()) {
+        return {pattern->id, pattern->stable_index, {{&*pattern, 1.0}}};
+    }
+    if (combination == graph.load_combinations.end()) {
+        throw model_ir::Error(
+            SA_ERR_INVALID_ARGUMENT,
+            "ModelIR load-case selector does not identify a bounded linear pattern or combination");
+    }
+    if (combination->terms.size() != 2U) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR linear reference assembly requires exactly two combination terms");
+    }
+
+    SelectedLoadCase selected {combination->id, combination->stable_index, {}};
+    selected.patterns.reserve(combination->terms.size());
+    for (const auto& term : combination->terms) {
+        if (term.ref_kind != SA_LOAD_REF_PATTERN || !std::isfinite(term.factor)
+            || term.factor == 0.0) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference assembly requires finite nonzero direct-pattern combination terms");
+        }
+        const auto referenced = std::find_if(
+            graph.load_patterns.begin(),
+            graph.load_patterns.end(),
+            [&term](const auto& candidate) { return candidate.id == term.ref_id; });
+        if (referenced == graph.load_patterns.end()) {
+            throw model_ir::Error(
+                SA_ERR_INTERNAL,
+                "validated ModelIR combination pattern reference became unavailable");
+        }
+        if (std::any_of(
+                selected.patterns.begin(),
+                selected.patterns.end(),
+                [&referenced](const auto& prior) { return prior.pattern == &*referenced; })) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR linear reference assembly requires two distinct combination patterns");
+        }
+        selected.patterns.push_back({&*referenced, term.factor});
+    }
+    return selected;
 }
 
 template <std::size_t Size>
@@ -168,7 +240,7 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     const std::span<const double> displacement,
     const std::span<const double> direction) {
     if (load_pattern_id.empty()) {
-        throw model_ir::Error(SA_ERR_INVALID_ARGUMENT, "ModelIR load-pattern selector is empty");
+        throw model_ir::Error(SA_ERR_INVALID_ARGUMENT, "ModelIR load-case selector is empty");
     }
     const auto graph = model.project_linear_reference_graph();
     if (graph.constrained_dof_indices.size() >= graph.global_dof_count) {
@@ -190,15 +262,7 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                 "ModelIR homogeneous constrained DOFs require zero state and direction");
         }
     }
-    const auto pattern = std::find_if(
-        graph.load_patterns.begin(),
-        graph.load_patterns.end(),
-        [load_pattern_id](const auto& candidate) { return candidate.id == load_pattern_id; });
-    if (pattern == graph.load_patterns.end()) {
-        throw model_ir::Error(
-            SA_ERR_INVALID_ARGUMENT,
-            "ModelIR load-pattern selector does not identify a bounded linear pattern");
-    }
+    const auto load_case = select_load_case(graph, load_pattern_id);
 
     std::vector<OwnedContribution> owned;
     owned.reserve(graph.elements.size());
@@ -288,10 +352,19 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     }
 
     std::vector<double> full_external_load(graph.global_dof_count, 0.0);
-    for (const auto& load : pattern->nodal_loads) {
-        for (auto component = std::uint32_t {0U}; component < 6U; ++component) {
-            full_external_load[global_dof(load.node_index, component)] +=
-                load.components_si[component];
+    for (const auto& selected : load_case.patterns) {
+        for (const auto& load : selected.pattern->nodal_loads) {
+            for (auto component = std::uint32_t {0U}; component < 6U; ++component) {
+                const auto scaled = selected.factor * load.components_si[component];
+                const auto index = global_dof(load.node_index, component);
+                const auto accumulated = full_external_load[index] + scaled;
+                if (!std::isfinite(scaled) || !std::isfinite(accumulated)) {
+                    throw model_ir::Error(
+                        SA_ERR_RESIDUAL_LIMIT,
+                        "ModelIR load-case accumulation exceeds the finite numerical domain");
+                }
+                full_external_load[index] = accumulated;
+            }
         }
     }
     if (!all_finite(full_external_load)) {
@@ -304,8 +377,8 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     output.model_content_hash = graph.content_hash;
     output.model_semantic_hash = graph.semantic_hash;
     output.model_provenance_hash = graph.provenance_hash;
-    output.load_pattern_id = pattern->id;
-    output.load_pattern_index = pattern->stable_index;
+    output.load_pattern_id = load_case.id;
+    output.load_pattern_index = load_case.stable_index;
     output.external_load.reserve(operator_result.active_dof_indices.size());
     output.equilibrium_residual.reserve(operator_result.active_dof_indices.size());
     for (std::size_t index = 0U; index < operator_result.active_dof_indices.size(); ++index) {

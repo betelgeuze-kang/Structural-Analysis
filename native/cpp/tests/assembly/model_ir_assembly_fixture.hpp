@@ -63,7 +63,10 @@ struct ModelIrAssemblyFixture final {
     std::array<sa_element_descriptor_v1, 2> elements {};
     std::array<sa_constraint_descriptor_v1, 2> constraints {};
     std::array<sa_nodal_load_descriptor_v1, 2> nodal_loads {};
-    std::array<sa_load_pattern_descriptor_v1, 1> load_patterns {};
+    std::array<sa_nodal_load_descriptor_v1, 1> secondary_nodal_loads {};
+    std::array<sa_load_pattern_descriptor_v1, 2> load_patterns {};
+    std::array<sa_load_combination_term_v1, 2> load_combination_terms {};
+    std::array<sa_load_combination_descriptor_v1, 1> load_combinations {};
     sa_model_ir_descriptor_v1 descriptor {};
 
     ModelIrAssemblyFixture() {
@@ -179,6 +182,44 @@ struct ModelIrAssemblyFixture final {
         load_patterns[0].nodal_loads = nodal_loads.data();
         load_patterns[0].nodal_load_count = nodal_loads.size();
 
+        secondary_nodal_loads[0].abi_version = SA_ABI_V1_1;
+        secondary_nodal_loads[0].struct_size =
+            static_cast<std::uint32_t>(sizeof(sa_nodal_load_descriptor_v1));
+        secondary_nodal_loads[0].identity = entity("l2", 0U);
+        secondary_nodal_loads[0].node_id = text("n1");
+        secondary_nodal_loads[0].components_si[2] = 8.0;
+        load_patterns[1].abi_version = SA_ABI_V1_1;
+        load_patterns[1].struct_size =
+            static_cast<std::uint32_t>(sizeof(sa_load_pattern_descriptor_v1));
+        load_patterns[1].identity = entity("lp2", 1U);
+        load_patterns[1].analysis_type = SA_ANALYSIS_LINEAR_STATIC;
+        load_patterns[1].nodal_loads = secondary_nodal_loads.data();
+        load_patterns[1].nodal_load_count = secondary_nodal_loads.size();
+
+        load_combination_terms[0] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            text("lp"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            1.2,
+        };
+        load_combination_terms[1] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            text("lp2"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            -0.5,
+        };
+        load_combinations[0] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            entity("combo", 0U),
+            load_combination_terms.data(),
+            load_combination_terms.size(),
+        };
+
         descriptor.abi_version = SA_ABI_V1_1;
         descriptor.struct_size =
             static_cast<std::uint32_t>(sizeof(sa_model_ir_descriptor_v1));
@@ -237,7 +278,7 @@ struct ModelIrAssemblyFixture final {
         descriptor.constraints = constraints.data();
         descriptor.constraint_count = constraints.size();
         descriptor.load_patterns = load_patterns.data();
-        descriptor.load_pattern_count = load_patterns.size();
+        descriptor.load_pattern_count = 1U;
         descriptor.extensions_json = text("{}");
         descriptor.canonical_json = {canonical.data(), canonical.size()};
         descriptor.content_hash = text(
@@ -246,6 +287,12 @@ struct ModelIrAssemblyFixture final {
             "sha256:1111111111111111111111111111111111111111111111111111111111111111");
         descriptor.provenance_hash = text(
             "sha256:2222222222222222222222222222222222222222222222222222222222222222");
+    }
+
+    void enable_linear_combination() {
+        descriptor.load_pattern_count = load_patterns.size();
+        descriptor.load_combinations = load_combinations.data();
+        descriptor.load_combination_count = load_combinations.size();
     }
 };
 

@@ -96,6 +96,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-linear-load-pattern-add-v1.md"),
     Path("docs/native/modelir-linear-load-combination-add-v1.md"),
+    Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
     Path("docs/native/modelir-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-linear-material-add-v1.md"),
     Path("docs/native/modelir-frame-section-add-v1.md"),
@@ -231,6 +232,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_two_pattern_linear_load_combination_add": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_two_pattern_linear_load_combination_execution": (
         "c5_implemented",
         False,
     ),
@@ -1056,7 +1061,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         native_analysis_request,
         (
             "structural-native-model-linear-request-create-receipt.v1",
+            "structural-native-model-linear-combination-request-create-receipt.v1",
             "pub fn create_model_linear_analysis_request",
+            "pub fn create_model_linear_combination_analysis_request",
             "build_model_ir_linear_analysis_request_v1",
             "validate_model_ir_linear_analysis_compatibility",
             "cpp_linear_assembly_preflight_verified",
@@ -1803,8 +1810,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "single C ABI",
             "structural-native:model-add-linear-load-combination.v1",
             "two distinct",
-            "workbench_model_linear_request_preflight_failed",
-            "solver execution",
+            "--load-combination",
+            "structural-native-model-linear-combination-request-create-receipt.v1",
+            "active external load",
+            "fallback 0",
+            "C6",
+        ),
+        blockers,
+    )
+    linear_load_combination_execution_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
+        linear_load_combination_execution_doc,
+        (
+            "load-case selector",
+            "exactly two terms",
+            "structural-native-model-linear-combination-request-create-receipt.v1",
+            "Installed CPU static/shared distribution E2E v44",
+            "fallback is zero",
             "C6",
         ),
         blockers,
@@ -2088,7 +2115,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     extension_claim = manifest.get("native_surface_extension_claim")
     expected_extension_claim = (
         "standalone neutral-node authoring and orphan-node deletion, two-pattern "
-        "linear-load-combination authoring and last-neutral deletion, compatible frame3d element and truss3d "
+        "linear-load-combination authoring, bounded CPU execution and last-neutral deletion, "
+        "compatible frame3d element and truss3d "
         "material/section edits, truss3d "
         "section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, "
         "frame3d-section, truss3d-section and fixed-constraint deletion, and "
@@ -2099,8 +2127,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     claim = f"{manifest.get('claim_boundary', '')} {extension_claim or ''}"
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
-        "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one standalone neutral node addition, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one two-pattern linear-load-combination addition with fail-closed solver preflight and its last-neutral deletion restoring native linear execution, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
-        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and last-neutral deletion, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+        "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one standalone neutral node addition, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one two-pattern linear-load-combination addition plus bounded CPU execution with a frozen selector alias, exact active load, typed recovery and checkpoint/restart parity, and its last-neutral deletion restoring direct-pattern native linear execution, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
+        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring, bounded CPU execution and last-neutral deletion, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

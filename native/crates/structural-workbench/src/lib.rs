@@ -45,7 +45,8 @@ mod report_view;
 mod result_view;
 
 pub use analysis_request::{
-    create_model_linear_analysis_request, publish_model_linear_analysis_request,
+    create_model_linear_analysis_request, create_model_linear_combination_analysis_request,
+    publish_model_linear_analysis_request, publish_model_linear_combination_analysis_request,
     ModelLinearAnalysisRequestCreateOutcomeV1,
 };
 pub use catalog::{

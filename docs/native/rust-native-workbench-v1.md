@@ -90,9 +90,14 @@ exactly two distinct existing `linear_static` patterns and two finite nonzero fa
 all other rows and blockers and revalidates through the C++ reference/cycle checks. Its bounded
 inverse deletes only the last contiguous neutral unreferenced row with that exact two-pattern shape,
 then proves direct load-pattern CPU execution and checkpoint/restart parity are restored. Nested
-terms, arbitrary term counts, term editing, general deletion, combination evaluation, and solver
-selection remain outside these commands. See `docs/native/modelir-linear-load-combination-add-v1.md`
-and `docs/native/modelir-linear-load-combination-deletion-v1.md`.
+terms, arbitrary term counts, term editing, and general deletion remain outside these commands. A
+separate bounded `--load-combination` request surface uses the frozen v1 selector alias to assemble
+and execute exactly this two-pattern shape through C++ and CPU PCG, with exact active load, typed
+recovery, fallback 0, and checkpoint/restart parity. General combination evaluation, solver
+selection, HIP parity and engineering acceptance remain open. See
+`docs/native/modelir-linear-load-combination-add-v1.md`,
+`docs/native/modelir-linear-load-combination-execution-v1.md`, and
+`docs/native/modelir-linear-load-combination-deletion-v1.md`.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It

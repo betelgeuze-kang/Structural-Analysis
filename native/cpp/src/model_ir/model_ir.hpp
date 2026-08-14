@@ -58,6 +58,18 @@ struct LinearReferenceLoadPattern final {
     std::vector<LinearReferenceNodalLoad> nodal_loads;
 };
 
+struct LinearReferenceLoadCombinationTerm final {
+    std::string ref_id;
+    std::uint32_t ref_kind {};
+    double factor {};
+};
+
+struct LinearReferenceLoadCombination final {
+    std::string id;
+    std::uint64_t stable_index {};
+    std::vector<LinearReferenceLoadCombinationTerm> terms;
+};
+
 /// Deep, pointer-free projection from validated ModelIR into the bounded linear C1 graph slice.
 struct LinearReferenceGraph final {
     std::string content_hash;
@@ -67,6 +79,7 @@ struct LinearReferenceGraph final {
     std::vector<LinearReferenceElement> elements;
     std::vector<std::uint32_t> constrained_dof_indices;
     std::vector<LinearReferenceLoadPattern> load_patterns;
+    std::vector<LinearReferenceLoadCombination> load_combinations;
 };
 
 class Error final : public std::runtime_error {

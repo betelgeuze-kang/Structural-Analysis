@@ -1027,6 +1027,32 @@ fn run_model_linear_request_create(
     ])
 }
 
+fn run_model_linear_combination_request_create(
+    source: &Path,
+    destination: &Path,
+    case_id: &str,
+    load_combination_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-create-linear-analysis-request"),
+        source.as_os_str(),
+        text("--case"),
+        text(case_id),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--max-iterations"),
+        text("100"),
+        text("--absolute-residual-tolerance"),
+        text("1e-11"),
+        text("--relative-residual-tolerance"),
+        text("1e-13"),
+        text("--maximum-increment"),
+        text("0"),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn assert_self_hashed_edit_receipt(receipt: &mut Value) {
     let expected_receipt_hash = receipt
         .as_object_mut()
@@ -5123,7 +5149,7 @@ fn linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executabl
 
 #[test]
 #[allow(clippy::too_many_lines)]
-fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_solver_fail_closed() {
+fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_cpu_executable() {
     let temporary = TestDirectory::create();
     let source =
         repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
@@ -5235,17 +5261,83 @@ fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_solver_fail_
     assert_success(&view);
     assert!(String::from_utf8_lossy(&view.stdout).contains("C++ semantic snapshot: verified"));
 
-    let unsupported_request = temporary.0.join("combination-solver-request-rejected");
-    let preflight = run_model_linear_request_create(
+    let direct_pattern_request = temporary.0.join("combination-adjacent-pattern-request");
+    assert_success(&run_model_linear_request_create(
         &first.join("model-ir.json"),
-        &unsupported_request,
-        "linear-combination-not-yet-executable",
+        &direct_pattern_request,
+        "linear-pattern-beside-combination",
         "LC_WEAK",
+    ));
+
+    let combination_request = temporary.0.join("combination-solver-request");
+    let preflight = run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &combination_request,
+        "linear-combination-c5",
+        "COMBO_SERVICE",
     );
-    assert_eq!(preflight.status.code(), Some(1));
-    assert!(String::from_utf8_lossy(&preflight.stdout)
-        .contains("workbench_model_linear_request_preflight_failed"));
-    assert!(!unsupported_request.exists());
+    assert_success(&preflight);
+    let request_receipt_bytes = std::fs::read(combination_request.join("request-receipt.json"))
+        .expect("combination request receipt");
+    assert_eq!(
+        preflight.stdout,
+        [request_receipt_bytes.as_slice(), b"\n"].concat()
+    );
+    let mut request_receipt: Value =
+        serde_json::from_slice(&request_receipt_bytes).expect("combination request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-combination-request-create-receipt.v1"
+    );
+    assert_eq!(request_receipt["load_selector_kind"], "load_combination");
+    assert_eq!(request_receipt["load_combination_id"], "COMBO_SERVICE");
+    assert_eq!(
+        request_receipt["frozen_request_selector_field"],
+        "load_pattern_id"
+    );
+    assert_eq!(
+        request_receipt["cpp_linear_assembly_preflight_verified"],
+        true
+    );
+    assert_self_hashed_edit_receipt(&mut request_receipt);
+
+    let combination_request_bytes =
+        std::fs::read(combination_request.join("analysis-request.json"))
+            .expect("combination analysis request");
+    let direct =
+        execute_model_ir_linear_analysis(&edited_bytes, &combination_request_bytes, None, u32::MAX)
+            .expect("combination direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("combination direct recovery"),
+    )
+    .expect("combination recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_SERVICE");
+    assert_eq!(recovery["load_pattern_index"], 0);
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial =
+        execute_model_ir_linear_analysis(&edited_bytes, &combination_request_bytes, None, 0)
+            .expect("combination initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &combination_request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("combination resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
 
     let append_second = temporary.0.join("linear-load-combination-add-next-index");
     assert_success(&run_linear_load_combination_add(

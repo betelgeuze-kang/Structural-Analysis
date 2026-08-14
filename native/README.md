@@ -89,15 +89,17 @@ buffers through one safe Rust wrapper; deterministic dense plus homogeneous-cons
 canonical CSR assembly remains a separate C++ reference target. The CSR projection publishes the
 sorted active-DOF map, canonical structure and the same four numerical channels. A separate
 `structural_model_assembly` target now resolves a bounded typed ModelIR linear frame3d/truss3d
-graph, selected nodal loads and element recovery through those exact sources; its mixed
-three-node/18-DOF graph matches an independent NumPy oracle after reduction to seven active DOFs
-and 43 structural entries. ABI v1.13 exposes an immutable exact-size query and failure-atomic
+graph, selected direct nodal loads or one bounded two-pattern signed linear combination, and
+element recovery through those exact sources; its mixed three-node/18-DOF graph matches an
+independent NumPy oracle after reduction to seven active DOFs and 43 structural entries. ABI v1.13
+exposes an immutable exact-size query and failure-atomic
 assembly operation, and the safe Rust wrapper independently revalidates the canonical CSR,
-recovery layout, selected load-pattern index and all three ModelIR identities. That boundary is a
+recovery layout, selected legacy load-case index and all three ModelIR identities. That boundary is a
 C3 integration candidate,
 not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
-does not cover nonzero constraints, offsets/releases, self-weight, combinations/stages,
-shell/nonlinear graphs or constrained reactions. A separate Rust composition path binds this exact
+does not cover nonzero constraints, offsets/releases, self-weight, nested or arbitrary-term
+combinations, stages, shell/nonlinear graphs or constrained reactions. A separate Rust composition
+path binds this exact
 assembly to the ABI v1.10 resumable PCG operation, `SAMLPC01` ModelIR provenance envelope,
 self-hashed ResultIR/ReportIR/Markdown, and terminal active-DOF plus element recovery. Public
 `model-linear-run`/`model-linear-resume` direct and real-iteration resumed directories are
@@ -105,7 +107,8 @@ byte-identical in a clean environment, providing bounded CPU C4/C5 implementatio
 without changing the sequential C1 numerical gate. See
 `docs/native/reference-elements-assembly-v1.md` and
 `docs/native/modelir-linear-reference-assembly-v1.md`, and
-`docs/native/modelir-linear-product-e2e-v1.md`.
+`docs/native/modelir-linear-product-e2e-v1.md`. The bounded combination request and execution
+contract is recorded in `docs/native/modelir-linear-load-combination-execution-v1.md`.
 
 With `STRUCTURAL_ENABLE_HIP=ON`, `structural_elements_hip` evaluates the same five-profile FP64
 reference batch and performs stable-order non-atomic dense assembly without an intermediate host

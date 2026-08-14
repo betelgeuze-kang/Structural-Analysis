@@ -113,6 +113,89 @@ int main() {
     expect(repeated.external_load == result.external_load, "repeat external load");
     expect(repeated.equilibrium_residual == result.equilibrium_residual, "repeat equilibrium");
 
+    structural::tests::ModelIrAssemblyFixture combination_fixture;
+    combination_fixture.enable_linear_combination();
+    const structural::model_ir::Model combination_model(combination_fixture.descriptor);
+    const auto combination = structural::assembly::assemble_model_ir_linear_reference(
+        combination_model, "combo", displacement, direction);
+    expect(combination.load_pattern_id == "combo", "selected combination identity");
+    expect(combination.load_pattern_index == 0U, "selected combination stable index");
+    expect(
+        combination.external_load
+            == std::vector<double>({12.0, -24.0, -4.0, 0.0, 0.0, 0.0, 36.0}),
+        "two-pattern combination uses deterministic signed factors");
+    const auto direct_with_combination = structural::assembly::assemble_model_ir_linear_reference(
+        combination_model, "lp", displacement, direction);
+    expect(
+        direct_with_combination.external_load == result.external_load,
+        "combination presence preserves direct-pattern loads");
+    expect(
+        direct_with_combination.operator_result.tangent == result.operator_result.tangent,
+        "combination presence preserves direct-pattern operator");
+
+    structural::tests::ModelIrAssemblyFixture short_combination_fixture;
+    short_combination_fixture.enable_linear_combination();
+    short_combination_fixture.load_combinations[0].term_count = 1U;
+    const structural::model_ir::Model short_combination_model(
+        short_combination_fixture.descriptor);
+    expect_status(
+        [&short_combination_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                short_combination_model, "combo", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "combination with other than two terms must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture duplicate_term_fixture;
+    duplicate_term_fixture.enable_linear_combination();
+    duplicate_term_fixture.load_combination_terms[1].ref_id = structural::tests::text("lp");
+    const structural::model_ir::Model duplicate_term_model(duplicate_term_fixture.descriptor);
+    expect_status(
+        [&duplicate_term_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                duplicate_term_model, "combo", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "combination with duplicate patterns must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture zero_factor_fixture;
+    zero_factor_fixture.enable_linear_combination();
+    zero_factor_fixture.load_combination_terms[1].factor = 0.0;
+    const structural::model_ir::Model zero_factor_model(zero_factor_fixture.descriptor);
+    expect_status(
+        [&zero_factor_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                zero_factor_model, "combo", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "combination with a zero factor must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture ambiguous_fixture;
+    ambiguous_fixture.enable_linear_combination();
+    ambiguous_fixture.load_combinations[0].identity.id = structural::tests::text("lp");
+    const structural::model_ir::Model ambiguous_model(ambiguous_fixture.descriptor);
+    expect_status(
+        [&ambiguous_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                ambiguous_model, "lp", displacement, direction));
+        },
+        SA_ERR_INVALID_ARGUMENT,
+        "cross-family selector ambiguity must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture scaled_overflow_fixture;
+    scaled_overflow_fixture.enable_linear_combination();
+    scaled_overflow_fixture.load_combination_terms[0].factor =
+        std::numeric_limits<double>::max();
+    const structural::model_ir::Model scaled_overflow_model(
+        scaled_overflow_fixture.descriptor);
+    expect_status(
+        [&scaled_overflow_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                scaled_overflow_model, "combo", displacement, direction));
+        },
+        SA_ERR_RESIDUAL_LIMIT,
+        "combination scaling overflow must use residual-limit taxonomy");
+
     expect_status(
         [&model, &displacement, &direction] {
             static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(

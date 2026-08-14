@@ -46,9 +46,10 @@ a direct `LC_WEAK` CPU request,
 and executes it through the product library. The evidence binds the deleted model, edit receipt,
 analysis request, ResultIR, and typed recovery hashes. Exact active DOFs, active external load,
 frame recovery, checkpoint/restart byte parity, and fallback 0 are verified. This proves that
-deleting the sole supported combination restores direct load-pattern CPU execution; it does not
-prove load-combination evaluation.
+deleting the sole supported combination restores direct load-pattern CPU execution. Bounded
+two-pattern combination evaluation is separately covered by installed distribution E2E v44.
 
 General or nonterminal combination deletion, arbitrary term counts, term editing, cascade or
-reindexing, combination evaluation and solver selection, visual editing, engineering acceptance,
-approved HIP C2, React/TypeScript removal, and C6 decommission remain open.
+reindexing, nested/arbitrary-term or nonlinear combination evaluation, general solver selection,
+visual editing, engineering acceptance, approved HIP C2, React/TypeScript removal, and C6
+decommission remain open.

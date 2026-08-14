@@ -3422,10 +3422,15 @@ exercise_linear_load_combination_add_surface() {
   local source_before_hash
   source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
 
-  local label add_directory rejection_directory
+  local label add_directory rejection_directory request_directory direct_directory
+  local partial_directory resumed_directory
   for label in first second; do
     add_directory="$e2e_root/linear-load-combination-add-$label"
     rejection_directory="$e2e_root/linear-load-combination-add-$label-solver-rejected"
+    request_directory="$e2e_root/linear-load-combination-add-$label-request"
+    direct_directory="$e2e_root/linear-load-combination-add-$label-direct"
+    partial_directory="$e2e_root/linear-load-combination-add-$label-partial"
+    resumed_directory="$e2e_root/linear-load-combination-add-$label-resumed"
     env -i PATH="$empty_path" "$active/bin/structural-workbench" \
       model-add-linear-load-combination "$source_model" \
       --load-combination COMBO_SERVICE \
@@ -3461,17 +3466,69 @@ exercise_linear_load_combination_add_surface() {
     grep -Fq 'C++ semantic snapshot: verified' \
       "$e2e_root/linear-load-combination-add-$label-view.txt"
 
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$add_directory/model-ir.json" \
+      --case linear-load-combination-c5 --load-combination COMBO_SERVICE \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-load-combination-add-$label-request.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-combination-request-create-receipt.v1"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"load_selector_kind":"load_combination"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"load_combination_id":"COMBO_SERVICE"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"frozen_request_selector_field":"load_pattern_id"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/linear-load-combination-add-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_SERVICE"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"load_pattern_index":0' "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-12000,5000,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/linear-load-combination-add-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-add-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-add-$label-restart-diff.txt"
+
     if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
       model-create-linear-analysis-request "$add_directory/model-ir.json" \
-      --case linear-combination-not-yet-executable --load-pattern LC_WEAK \
+      --case linear-combination-missing-rejected --load-combination COMBO_MISSING \
       --max-iterations 100 --absolute-residual-tolerance 1e-11 \
       --relative-residual-tolerance 1e-13 --maximum-increment 0 \
       --output-dir "$rejection_directory" \
       > "$e2e_root/linear-load-combination-add-$label-solver-rejection.json"; then
-      echo "installed linear load-combination model reached unsupported solver assembly" >&2
+      echo "installed linear load-combination request accepted a missing selector" >&2
       exit 1
     fi
-    grep -Fq 'workbench_model_linear_request_preflight_failed' \
+    grep -Fq 'workbench_model_linear_combination_request_missing' \
       "$e2e_root/linear-load-combination-add-$label-solver-rejection.json"
     test ! -e "$rejection_directory"
   done
@@ -3487,6 +3544,14 @@ exercise_linear_load_combination_add_surface() {
     "$e2e_root/linear-load-combination-add-second-view.txt"
   cmp "$e2e_root/linear-load-combination-add-first-solver-rejection.json" \
     "$e2e_root/linear-load-combination-add-second-solver-rejection.json"
+  local suffix
+  for suffix in request direct partial resumed; do
+    diff -r "$e2e_root/linear-load-combination-add-first-$suffix" \
+      "$e2e_root/linear-load-combination-add-second-$suffix" \
+      > "$e2e_root/linear-load-combination-add-$suffix-diff.txt"
+    cmp "$e2e_root/linear-load-combination-add-first-$suffix.stdout.json" \
+      "$e2e_root/linear-load-combination-add-second-$suffix.stdout.json"
+  done
   if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
     echo "installed linear load-combination addition mutated its source ModelIR" >&2
     exit 1
@@ -4081,6 +4146,13 @@ linear_load_combination_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-com
 linear_load_combination_add_validation_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-validation.json" | awk '{print $1}')"
 linear_load_combination_add_view_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-view.txt" | awk '{print $1}')"
 linear_load_combination_add_solver_rejection_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-solver-rejection.json" | awk '{print $1}')"
+linear_load_combination_request_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-request/request-receipt.json" | awk '{print $1}')"
+linear_load_combination_request_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-request/analysis-request.json" | awk '{print $1}')"
+linear_load_combination_assembly_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/assembly-receipt.json" | awk '{print $1}')"
+linear_load_combination_checkpoint_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+linear_load_combination_result_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/result-ir.json" | awk '{print $1}')"
+linear_load_combination_recovery_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+linear_load_combination_report_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/report-ir.json" | awk '{print $1}')"
 linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
 linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
 linear_load_combination_delete_request_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first-request/analysis-request.json" | awk '{print $1}')"
@@ -4241,6 +4313,10 @@ v43_receipt_json="${v42_receipt_json/structural-native-distribution-e2e.v42/stru
 linear_load_combination_delete_receipt_fields="\"workbench_linear_load_combination_delete_surface_passed\":true,\"workbench_linear_load_combination_delete_model_sha256\":\"sha256:$linear_load_combination_delete_model_hash\",\"workbench_linear_load_combination_delete_receipt_sha256\":\"sha256:$linear_load_combination_delete_receipt_hash\",\"workbench_linear_load_combination_delete_request_sha256\":\"sha256:$linear_load_combination_delete_request_hash\",\"workbench_linear_load_combination_delete_result_ir_sha256\":\"sha256:$linear_load_combination_delete_result_ir_hash\",\"workbench_linear_load_combination_delete_recovery_sha256\":\"sha256:$linear_load_combination_delete_recovery_hash\","
 v43_receipt_json="${v43_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v43_receipt_json" > "$temporary_receipt"
+v44_receipt_json="${v43_receipt_json/structural-native-distribution-e2e.v43/structural-native-distribution-e2e.v44}"
+linear_load_combination_execution_receipt_fields="\"workbench_linear_load_combination_execution_surface_passed\":true,\"workbench_linear_load_combination_request_receipt_sha256\":\"sha256:$linear_load_combination_request_receipt_hash\",\"workbench_linear_load_combination_request_sha256\":\"sha256:$linear_load_combination_request_hash\",\"workbench_linear_load_combination_assembly_receipt_sha256\":\"sha256:$linear_load_combination_assembly_receipt_hash\",\"workbench_linear_load_combination_checkpoint_sha256\":\"sha256:$linear_load_combination_checkpoint_hash\",\"workbench_linear_load_combination_result_ir_sha256\":\"sha256:$linear_load_combination_result_ir_hash\",\"workbench_linear_load_combination_recovery_sha256\":\"sha256:$linear_load_combination_recovery_hash\",\"workbench_linear_load_combination_report_ir_sha256\":\"sha256:$linear_load_combination_report_ir_hash\",\"workbench_linear_load_combination_restart_passed\":true,"
+v44_receipt_json="${v44_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_execution_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v44_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

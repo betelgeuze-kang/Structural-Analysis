@@ -1410,7 +1410,7 @@ impl Api {
         let semantic_hash = try_clone_str(document.semantic_hash(), "ModelIR semantic identity")?;
         let provenance_hash =
             try_clone_str(document.provenance_hash(), "ModelIR provenance identity")?;
-        let load_pattern_indices = clone_model_ir_load_pattern_indices(document)?;
+        let load_case_indices = clone_model_ir_load_case_indices(document)?;
         let arena = DescriptorArena::build(document)?;
         let create = self.table.model_ir_create.ok_or_else(invalid_table)?;
         let mut output = ptr::null_mut();
@@ -1432,7 +1432,7 @@ impl Api {
             content_hash,
             semantic_hash,
             provenance_hash,
-            load_pattern_indices,
+            load_case_indices,
         })
     }
 
@@ -3278,7 +3278,7 @@ pub struct ModelIr {
     content_hash: String,
     semantic_hash: String,
     provenance_hash: String,
-    load_pattern_indices: Vec<(String, u64)>,
+    load_case_indices: Vec<(String, u64)>,
 }
 
 // SAFETY: the C ABI contract declares immutable ModelIR handles movable across threads and the
@@ -3343,10 +3343,7 @@ impl ModelIr {
     ) -> Result<ModelIrLinearAssembly, Error> {
         let counts = self.linear_assembly_counts()?;
         self.assemble_linear_reference(&ModelIrLinearAssemblyRequest {
-            load_pattern_id: try_clone_str(
-                load_pattern_id,
-                "ModelIR linear load-pattern selector",
-            )?,
+            load_pattern_id: try_clone_str(load_pattern_id, "ModelIR linear load-case selector")?,
             displacement: allocate_f64_output(counts.global_dof_count)?,
             direction: allocate_f64_output(counts.global_dof_count)?,
         })
@@ -3399,7 +3396,7 @@ impl ModelIr {
         if !valid_model_ir_selector(&request.load_pattern_id) {
             return Err(Error {
                 code: sys::SA_ERR_INVALID_ARGUMENT,
-                message: "ModelIR linear load-pattern selector is invalid".to_owned(),
+                message: "ModelIR linear load-case selector is invalid".to_owned(),
             });
         }
         let counts = self.linear_assembly_counts()?;
@@ -3457,7 +3454,7 @@ impl ModelIr {
             &self.content_hash,
             &self.semantic_hash,
             &self.provenance_hash,
-            self.load_pattern_indices
+            self.load_case_indices
                 .iter()
                 .find_map(|(id, index)| (id == &request.load_pattern_id).then_some(*index)),
         )
@@ -3878,28 +3875,34 @@ fn try_clone_str(value: &str, label: &str) -> Result<String, Error> {
     Ok(output)
 }
 
-fn clone_model_ir_load_pattern_indices(
+fn clone_model_ir_load_case_indices(
     document: &ModelIrV2Document,
 ) -> Result<Vec<(String, u64)>, Error> {
-    let rows = document
-        .value()
+    let root = document.value();
+    let patterns = root
         .get("load_patterns")
+        .and_then(serde_json::Value::as_array)
+        .ok_or_else(model_ir_linear_contract_error)?;
+    let combinations = root
+        .get("load_combinations")
         .and_then(serde_json::Value::as_array)
         .ok_or_else(model_ir_linear_contract_error)?;
     let mut output = Vec::new();
     output
-        .try_reserve_exact(rows.len())
-        .map_err(|_| allocation_error("ModelIR load-pattern identity"))?;
-    for row in rows {
-        let id = row
-            .get("id")
-            .and_then(serde_json::Value::as_str)
-            .ok_or_else(model_ir_linear_contract_error)?;
-        let index = row
-            .get("index")
-            .and_then(serde_json::Value::as_u64)
-            .ok_or_else(model_ir_linear_contract_error)?;
-        output.push((try_clone_str(id, "ModelIR load-pattern identity")?, index));
+        .try_reserve_exact(patterns.len().saturating_add(combinations.len()))
+        .map_err(|_| allocation_error("ModelIR load-case identity"))?;
+    for rows in [patterns, combinations] {
+        for row in rows {
+            let id = row
+                .get("id")
+                .and_then(serde_json::Value::as_str)
+                .ok_or_else(model_ir_linear_contract_error)?;
+            let index = row
+                .get("index")
+                .and_then(serde_json::Value::as_u64)
+                .ok_or_else(model_ir_linear_contract_error)?;
+            output.push((try_clone_str(id, "ModelIR load-case identity")?, index));
+        }
     }
     Ok(output)
 }

@@ -37,7 +37,8 @@ linear-static pattern and its first nonzero nodal load on an existing node with 
 revalidation.
 The installed `model-add-linear-load-combination` command appends one neutral contiguous linear
 combination from exactly two distinct existing linear-static patterns and finite nonzero factors,
-then C++-validates the reference graph while preserving the explicit solver-preflight boundary.
+then C++-validates the reference graph. The installed `--load-combination` request surface records
+the frozen v1 selector alias and executes that bounded combination through C++ assembly and CPU PCG.
 The installed `model-delete-linear-load-combination` command removes only the last contiguous
 neutral, extension-free and unreferenced row with that exact two-pattern shape. It rejects nested,
 mapped, source-owned, feature-owned, referenced or nonterminal candidates, C++-revalidates the
@@ -76,7 +77,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v43 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v44 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -102,7 +103,9 @@ six-DOF fixed support, exact unchanged active DOFs/load, typed frame recovery an
 plus last-neutral orphan-node deletion with source/extension/reference guards, exact restored
 two-node topology and active DOFs/load, typed frame recovery and restart parity,
 plus two-pattern linear-load-combination creation with exact ordered factor bindings, C++ reference
-validation, deterministic topology view and an explicit no-output solver-preflight rejection,
+validation and deterministic topology view, followed by bounded combination request creation,
+exact signed-factor external-load assembly, native CPU execution, typed recovery, fallback 0 and
+byte-identical checkpoint/restart output,
 plus last-neutral linear-load-combination deletion with exact removed term bindings, restored
 direct load-pattern CPU execution, typed frame recovery, checkpoint/restart parity and fallback 0,
 and source nonmutation plus deterministic bounded NDTHA response-history,

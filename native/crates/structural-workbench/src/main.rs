@@ -307,6 +307,7 @@ struct ModelCreateLinearAnalysisRequestCommand {
     model: PathBuf,
     case_id: String,
     load_pattern_id: String,
+    load_combination: bool,
     config: SparseLinearConfigV1,
     output_directory: PathBuf,
 }
@@ -1087,13 +1088,23 @@ fn run_model_delete_truss3d_leaf_member(
 fn run_model_create_linear_analysis_request(
     command: &ModelCreateLinearAnalysisRequestCommand,
 ) -> Result<(), WorkbenchError> {
-    let outcome = structural_workbench::publish_model_linear_analysis_request(
-        &command.model,
-        &command.case_id,
-        &command.load_pattern_id,
-        command.config,
-        &command.output_directory,
-    )?;
+    let outcome = if command.load_combination {
+        structural_workbench::publish_model_linear_combination_analysis_request(
+            &command.model,
+            &command.case_id,
+            &command.load_pattern_id,
+            command.config,
+            &command.output_directory,
+        )?
+    } else {
+        structural_workbench::publish_model_linear_analysis_request(
+            &command.model,
+            &command.case_id,
+            &command.load_pattern_id,
+            command.config,
+            &command.output_directory,
+        )?
+    };
     println!("{}", outcome.receipt_json);
     Ok(())
 }
@@ -2279,7 +2290,7 @@ fn parse_model_create_linear_analysis_request(
 ) -> Result<ModelCreateLinearAnalysisRequestCommand, WorkbenchError> {
     if arguments.len() != 16
         || arguments[2] != "--case"
-        || arguments[4] != "--load-pattern"
+        || (arguments[4] != "--load-pattern" && arguments[4] != "--load-combination")
         || arguments[6] != "--max-iterations"
         || arguments[8] != "--absolute-residual-tolerance"
         || arguments[10] != "--relative-residual-tolerance"
@@ -2287,7 +2298,7 @@ fn parse_model_create_linear_analysis_request(
         || arguments[14] != "--output-dir"
     {
         return Err(usage_error(
-            "model-create-linear-analysis-request requires MODEL.json --case ID --load-pattern ID --max-iterations N --absolute-residual-tolerance VALUE --relative-residual-tolerance VALUE --maximum-increment VALUE --output-dir DIR",
+            "model-create-linear-analysis-request requires MODEL.json --case ID (--load-pattern ID | --load-combination ID) --max-iterations N --absolute-residual-tolerance VALUE --relative-residual-tolerance VALUE --maximum-increment VALUE --output-dir DIR",
         ));
     }
     let max_iterations = arguments[7]
@@ -2324,8 +2335,9 @@ fn parse_model_create_linear_analysis_request(
         )?,
         load_pattern_id: parse_bounded_edit_id(
             &arguments[5],
-            "model-create-linear-analysis-request load-pattern ID",
+            "model-create-linear-analysis-request load-case ID",
         )?,
+        load_combination: arguments[4] == "--load-combination",
         config: SparseLinearConfigV1 {
             max_iterations,
             absolute_residual_tolerance,
@@ -2807,6 +2819,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN-A> <FACTOR-A> --term <PATTERN-B> <FACTOR-B> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
+        "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
 }
@@ -3869,12 +3882,21 @@ mod tests {
         assert_eq!(parsed.model, PathBuf::from("model.json"));
         assert_eq!(parsed.case_id, "case-1");
         assert_eq!(parsed.load_pattern_id, "LC1");
+        assert!(!parsed.load_combination);
         assert_eq!(parsed.config.max_iterations, 100);
         assert_eq!(
             parsed.config.absolute_residual_tolerance.to_bits(),
             1.0e-11_f64.to_bits()
         );
         assert_eq!(parsed.output_directory, PathBuf::from("request"));
+
+        let mut combination = arguments.clone();
+        combination[4] = OsString::from("--load-combination");
+        combination[5] = OsString::from("COMBO_SERVICE");
+        let parsed_combination = parse_model_create_linear_analysis_request(&combination)
+            .expect("valid ModelIR linear-combination request creation command");
+        assert_eq!(parsed_combination.load_pattern_id, "COMBO_SERVICE");
+        assert!(parsed_combination.load_combination);
 
         for (index, value) in [(7, "0"), (9, "-1"), (11, "NaN"), (13, "-1")] {
             let mut invalid = arguments.clone();

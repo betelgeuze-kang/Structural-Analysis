@@ -84,10 +84,12 @@ Symlink inputs and existing destinations fail without partial publication.
 ## Honest boundary
 
 This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous constraints, direct
-nodal loads, active-DOF solution and residual, and element recovery.
+nodal loads or one exactly two-pattern signed linear combination, active-DOF solution and residual,
+and element recovery.
 It does not expose constrained reactions; ABI v1.13 intentionally returns the reduced active system
 only. It also excludes
-nonzero prescribed constraints, releases/offsets, self-weight, member loads, combinations/stages,
+nonzero prescribed constraints, releases/offsets, self-weight, member loads, nested or
+arbitrary-term combinations/stages,
 shells, nonlinear constitutive epochs, reordering/preconditioning authority, native Workbench
 integration, PDF specialization, HIP execution, design-code compliance, and C6 decommission.
 The separately bounded durable job and loopback-service C5 path is documented in

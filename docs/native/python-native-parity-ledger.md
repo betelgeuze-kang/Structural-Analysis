@@ -131,12 +131,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   and constraint input order. The complete dense three-DOF/two-contribution output and an irregular
   constrained three-element CSR graph match an independent NumPy oracle. A separate C++
   composition target now resolves every element in a bounded typed ModelIR linear
-  frame3d/truss3d graph, maps six canonical DOFs per node, selects one direct nodal-load pattern,
-  and emits reduced tangent, mass, internal/external/equilibrium residual, JVP and per-element
-  recovery. Its three-node mixed graph independently matches NumPy for all 43 structural entries.
-  This is not general ModelIR assembly: nonzero constraints, offsets/releases, self-weight,
-  combinations/stages, shell/nonlinear formulations, reordering and stateful epoch propagation
-  remain open. ABI v1.13 and safe Rust now provide a bounded C3 integration candidate. A separate
+  frame3d/truss3d graph, maps six canonical DOFs per node, selects one direct nodal-load pattern or
+  one exactly two-pattern signed linear combination, and emits reduced tangent, mass,
+  internal/external/equilibrium residual, JVP and per-element recovery. Its three-node mixed graph
+  and both the direct and combined external-load vectors independently match NumPy for all 43
+  structural entries. This is not general ModelIR assembly: nonzero constraints, offsets/releases,
+  self-weight, nested or arbitrary-term combinations, stages, shell/nonlinear formulations,
+  reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust now provide a
+  bounded C3 integration candidate. A separate
   CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,
   `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts and terminal
   active-DOF/element recovery; direct and resumed 14-file terminal directories are byte-identical

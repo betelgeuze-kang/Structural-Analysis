@@ -340,6 +340,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
         "structural-native-distribution-e2e.v43",
+        "structural-native-distribution-e2e.v44",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -365,6 +366,17 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_linear_load_combination_add_validation_sha256",
         "workbench_linear_load_combination_add_view_sha256",
         "workbench_linear_load_combination_add_solver_rejection_sha256",
+        "--load-combination COMBO_SERVICE",
+        "structural-native-model-linear-combination-request-create-receipt.v1",
+        "workbench_linear_load_combination_execution_surface_passed",
+        "workbench_linear_load_combination_request_receipt_sha256",
+        "workbench_linear_load_combination_request_sha256",
+        "workbench_linear_load_combination_assembly_receipt_sha256",
+        "workbench_linear_load_combination_checkpoint_sha256",
+        "workbench_linear_load_combination_result_ir_sha256",
+        "workbench_linear_load_combination_recovery_sha256",
+        "workbench_linear_load_combination_report_ir_sha256",
+        "workbench_linear_load_combination_restart_passed",
         "exercise_linear_load_combination_delete_surface",
         "model-delete-linear-load-combination",
         "workbench_linear_load_combination_delete_surface_passed",
@@ -600,6 +612,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v44",
+            "V44_LINEAR_LOAD_COMBINATION_EXECUTION_KEYS",
+            "workbench_linear_load_combination_execution_surface_passed",
+            "workbench_linear_load_combination_request_receipt_sha256",
+            "workbench_linear_load_combination_report_ir_sha256",
+            "workbench_linear_load_combination_restart_passed",
             "structural-native-distribution-e2e.v43",
             "V43_LINEAR_LOAD_COMBINATION_DELETE_KEYS",
             "workbench_linear_load_combination_delete_surface_passed",
@@ -654,6 +672,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v44 hash-bound receipt",
+            "frozen v1 through v43 receipts",
+            "no pre-v44 receipt",
             "append-only v43 hash-bound receipt",
             "frozen v1 through v42 receipts",
             "no pre-v43 receipt",
@@ -872,9 +893,29 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=linear_load_combination_add_doc,
         tokens=(
             "model-add-linear-load-combination",
-            "Installed CPU static/shared E2E v42",
-            "workbench_model_linear_request_preflight_failed",
-            "solver execution",
+            "Installed CPU static/shared E2E v44",
+            "--load-combination",
+            "active external load",
+            "fallback 0",
+            "C6",
+        ),
+        blockers=blockers,
+    )
+
+    linear_load_combination_execution_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
+        text=linear_load_combination_execution_doc,
+        tokens=(
+            "load-case selector",
+            "exactly two terms",
+            "structural-native-model-linear-combination-request-create-receipt.v1",
+            "Installed CPU static/shared distribution E2E v44",
+            "fallback is zero",
             "C6",
         ),
         blockers=blockers,
@@ -953,6 +994,41 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in linear_load_combination_deletion_claim:
                 blockers.append(
                     "modelir_linear_load_combination_deletion_capability_"
+                    f"claim_missing:{token}"
+                )
+    linear_load_combination_execution_capability = (
+        capabilities.get("modelir_linear_load_combination_execution")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(linear_load_combination_execution_capability, dict):
+        blockers.append("modelir_linear_load_combination_execution_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if linear_load_combination_execution_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_linear_load_combination_execution_capability_"
+                    f"field_invalid:{field}"
+                )
+        linear_load_combination_execution_claim = str(
+            linear_load_combination_execution_capability.get("claim", "")
+        )
+        for token in (
+            "frozen ABI v1.13 table",
+            "unambiguous load-case selector",
+            "exactly two distinct direct linear_static patterns",
+            "distribution v44 E2E",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in linear_load_combination_execution_claim:
+                blockers.append(
+                    "modelir_linear_load_combination_execution_capability_"
                     f"claim_missing:{token}"
                 )
     truss_editing_capability = capabilities.get("modelir_truss3d_editing") if isinstance(
@@ -1228,12 +1304,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v43 E2E",
+            "CPU static/shared distribution v44 E2E",
             "standalone neutral-node creation",
             "last-neutral orphan-node deletion",
             "two-pattern linear-load-combination creation",
             "last-neutral linear-load-combination deletion",
-            "fail-closed no-output solver preflight",
+            "bounded two-pattern linear-load-combination CPU execution",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",

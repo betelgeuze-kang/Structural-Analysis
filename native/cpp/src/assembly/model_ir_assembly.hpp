@@ -29,7 +29,7 @@ struct ModelIrLinearAssemblySizes final {
     std::size_t model_identity_length {};
 };
 
-/// Bounded C1 output for one explicit linear-static ModelIR load pattern.
+/// Bounded C1 output for one explicit linear-static ModelIR load-case selector.
 ///
 /// `operator_result.residual` is the assembled internal force. `external_load` and
 /// `equilibrium_residual = internal - external` use the same reduced active-DOF order.
@@ -50,7 +50,9 @@ struct ModelIrLinearAssemblyResult final {
     const model_ir::Model& model);
 
 /// Project a validated typed ModelIR graph through the reference frame/truss sources and assemble
-/// one canonical homogeneous-constraint-reduced operator.
+/// one canonical homogeneous-constraint-reduced operator. The frozen ABI v1.13
+/// `load_pattern_id` selector accepts either one pattern or one bounded two-pattern linear
+/// combination; nested or ambiguous selectors fail closed.
 [[nodiscard]] ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     const model_ir::Model& model,
     std::string_view load_pattern_id,

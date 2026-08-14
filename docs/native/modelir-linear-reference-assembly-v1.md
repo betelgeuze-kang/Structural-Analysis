@@ -18,10 +18,11 @@ pattern it:
   reference response source;
 - removes homogeneous constrained DOFs, then emits the sorted active map and canonical CSR
   structure with structural zero entries retained;
-- projects the selected nodal loads into the same active order and emits both external load and
+- projects the selected direct nodal loads, or one exactly two-pattern signed combination, into the
+  same active order and emits both external load and
   `equilibrium_residual = internal_force - external_load`;
-- carries the exact ModelIR content, semantic, and provenance hashes plus selected load-pattern
-  identity into the pointer-free result.
+- carries the exact ModelIR content, semantic, and provenance hashes plus selected legacy
+  load-case identity into the pointer-free result.
 
 The request owns exact-length finite full-state and direction vectors. Every constrained entry in
 both vectors must be zero. The composition target itself returns pointer-free C++ storage and does
@@ -36,8 +37,8 @@ not link Python or Rust.
 - C1: `tests/test_native_model_ir_assembly_python_parity.py` compiles a test-only C++ consumer. An
   independent NumPy implementation evaluates a rolled frame and orthogonal truss, scatters their
   18-DOF graph, reduces it to seven active DOFs and 43 structural entries, and compares the exact
-  active map, CSR rows/columns, tangent, mass, internal force, external load, equilibrium residual,
-  JVP, and both recovery records.
+  active map, CSR rows/columns, tangent, mass, internal force, direct and combined external load,
+  equilibrium residual, JVP, and both recovery records.
 - C3 integration candidate: ABI v1.13 preserves the complete 184-byte v1.12 prefix and appends an
   immutable exact-sizes query plus a failure-atomic execute slot. Execute requires 16 disjoint
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
@@ -45,7 +46,7 @@ not link Python or Rust.
   pointer/stride/length/alias, exact-size, concurrent immutable and failure-atomic tests cover the
   boundary. `structural-ffi` mirrors the 200-byte table, performs bounded sizes-to-allocation,
   revalidates canonical CSR, recovery offsets, finite values, CPU/fallback metadata and exact model
-  identities plus the selected load pattern's stable index, and has deterministic/concurrent Rust
+  identities plus the selected legacy load-case stable index, and has deterministic/concurrent Rust
   integration coverage. Public bounds cap global DOFs and recovery records at 1,000,000 and
   structural entries at 100,000,000 on both sides of the ABI. The nightly bounded
   libFuzzer target mutates both size and execute descriptors, every output-view metadata family,
@@ -59,14 +60,15 @@ implemented C3 integration candidate, not a promoted sequential C3 gate.
 ## Fail-closed boundary
 
 The projection rejects non-linear material or formulation state, frame2d, shell, rigid offsets,
-end releases, member loads, nonzero prescribed constraints, self-weight, load combinations, time
-functions, construction stages, and declared unsupported features. It does not solve the assembled
+end releases, member loads, nonzero prescribed constraints, self-weight, nested combinations,
+combinations other than exactly two distinct direct linear-static patterns with finite nonzero
+factors, time functions, construction stages, and declared unsupported features. It does not solve the assembled
 operator by itself, compute constrained reactions, reorder DOFs, or propagate constitutive epochs.
 The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
 to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,
 and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
 does not promote this numerical family past C1.
 
-Still open: those excluded formulations and load semantics, shell graph support, stateful
+Still open: those excluded formulations and general load semantics, shell graph support, stateful
 trial/commit/rollback aggregation, constrained reactions, authoritative sequential C2/C3
 promotion, durable job/service integration for this profile, and C6 decommission.

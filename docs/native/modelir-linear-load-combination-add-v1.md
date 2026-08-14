@@ -33,6 +33,37 @@ Publication is create-new and atomic. It emits `model-ir.json` plus a self-hashe
 pattern terms and factors, source input hash, source and edited identities, C++ snapshot status,
 analysis readiness, blockers, artifact hash, and claim boundary.
 
+## Product execution
+
+The same installed Workbench creates a bounded combination request with:
+
+```text
+structural-workbench model-create-linear-analysis-request MODEL.json \
+  --case CASE-ID \
+  --load-combination COMBINATION-ID \
+  --max-iterations 100 \
+  --absolute-residual-tolerance 1e-11 \
+  --relative-residual-tolerance 1e-13 \
+  --maximum-increment 0 \
+  --output-dir REQUEST
+```
+
+The analysis request remains `structural-model-ir-linear-analysis-request.v1`. Its frozen selector
+field is named `load_pattern_id`; for this bounded path it carries the unambiguous combination ID.
+The separate self-hashed
+`structural-native-model-linear-combination-request-create-receipt.v1` records
+`load_selector_kind: load_combination`, the exact two ordered terms, and
+`frozen_request_selector_field: load_pattern_id`. A pattern and combination with the same ID fail
+closed.
+
+C++ projects the validated combination alongside the load patterns, resolves the selector, and
+accumulates each nodal component in declared term order using its signed FP64 factor. Exactly two
+distinct direct `linear_static` pattern references with finite nonzero factors are accepted.
+Nested terms, other term counts, duplicate references, missing selectors, nonzero self-weight,
+scaling/accumulation overflow, time functions, stages, and unsupported features fail closed. The
+existing stiffness, mass, internal force, JVP and recovery kernels remain shared with direct-pattern
+execution; only the external load is linearly combined.
+
 ## Product evidence and execution boundary
 
 Focused Rust E2E repeats the command byte-for-byte, proves source nonmutation and next-index
@@ -41,16 +72,15 @@ zero/non-finite factors, invalid destinations, and invalid source semantics with
 publication. An unrelated explicit blocker and round-trip mapping are preserved without readiness
 promotion.
 
-Installed CPU static/shared E2E v42 repeats the same creation under an empty `PATH`, validates the
-edited artifact through the installed C++ boundary, renders the native topology view, and binds the
-model, edit receipt, validation, view, and expected solver-preflight rejection identities into the
-distribution receipt.
+Installed CPU static/shared E2E v44 repeats the same creation under an empty `PATH`, validates the
+edited artifact through the installed C++ boundary, renders the native topology view, creates the
+combination-bound request, and executes `1.2 * LC_WEAK - 0.5 * LC_STRONG`. It proves the exact
+active external load `[0, -12000, 5000, 0, 0, 0]`, typed frame recovery, CPU FP64, fallback 0, and
+byte-identical direct/checkpoint/restart output. The append-only receipt binds the combination model
+and edit receipt inherited from v42 plus the v44 request receipt, analysis request, assembly receipt,
+checkpoint, ResultIR, recovery, and ReportIR identities. A missing combination selector still
+fails without publication.
 
-The current ModelIR linear reference assembly intentionally rejects every model containing load
-combinations. The product test proves `model-create-linear-analysis-request` fails closed before
-publication with `workbench_model_linear_request_preflight_failed`. Consequently this slice proves
-native combination authoring and validation, not combination expansion or solver execution.
-
-Nested combinations, arbitrary term counts, term editing/deletion, combination evaluation, general
-solver selection, visual manipulation, engineering acceptance, approved HIP C2, React/TypeScript
-removal, and C6 decommission remain open.
+Nested combinations, arbitrary term counts, term editing, general solver selection, self-weight,
+time functions, stages, shell/nonlinear combination execution, visual manipulation, engineering
+acceptance, approved HIP C2, React/TypeScript removal, and C6 decommission remain open.
