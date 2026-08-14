@@ -594,6 +594,20 @@ V56_NESTED_LINEAR_LOAD_COMBINATION_TERM_DELETE_KEYS = {
     "workbench_nested_linear_load_combination_term_delete_restart_passed",
 }
 V56_EXPECTED_KEYS = V55_EXPECTED_KEYS | V56_NESTED_LINEAR_LOAD_COMBINATION_TERM_DELETE_KEYS
+V57_NESTED_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS = {
+    "workbench_nested_linear_load_combination_term_reorder_surface_passed",
+    "workbench_nested_linear_load_combination_term_reorder_model_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_receipt_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_request_receipt_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_request_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_assembly_receipt_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_result_ir_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_recovery_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_report_ir_sha256",
+    "workbench_nested_linear_load_combination_term_reorder_restart_passed",
+}
+V57_EXPECTED_KEYS = V56_EXPECTED_KEYS | V57_NESTED_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -635,7 +649,12 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
-    latest_receipt_schema_version = receipt_schema_version
+    is_v57_receipt = receipt_schema_version == "structural-native-distribution-e2e.v57"
+    latest_receipt_schema_version = (
+        "structural-native-distribution-e2e.v56"
+        if receipt_schema_version == "structural-native-distribution-e2e.v57"
+        else receipt_schema_version
+    )
     expected_keys = {
         "structural-native-distribution-e2e.v1": V1_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v2": V2_EXPECTED_KEYS,
@@ -693,11 +712,14 @@ def validate(
         "structural-native-distribution-e2e.v54": V54_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v55": V55_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v56": V56_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v57": V57_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v57":
+        receipt_schema_version = "structural-native-distribution-e2e.v56"
     if receipt_schema_version == "structural-native-distribution-e2e.v56":
         receipt_schema_version = "structural-native-distribution-e2e.v55"
     if receipt_schema_version == "structural-native-distribution-e2e.v55":
@@ -2090,6 +2112,26 @@ def validate(
             "workbench_nested_linear_load_combination_term_delete_result_ir_sha256",
             "workbench_nested_linear_load_combination_term_delete_recovery_sha256",
             "workbench_nested_linear_load_combination_term_delete_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v57_receipt:
+        for name in (
+            "workbench_nested_linear_load_combination_term_reorder_surface_passed",
+            "workbench_nested_linear_load_combination_term_reorder_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_nested_linear_load_combination_term_reorder_model_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_request_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_assembly_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_result_ir_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_recovery_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

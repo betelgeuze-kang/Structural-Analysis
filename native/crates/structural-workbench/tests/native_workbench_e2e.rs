@@ -998,6 +998,30 @@ fn run_nested_linear_load_combination_term_delete(
     ])
 }
 
+fn run_nested_linear_load_combination_term_reorder(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    reference_kind: &str,
+    reference_id: &str,
+    target_index: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-reorder-nested-linear-load-combination-term"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--ref-kind"),
+        text(reference_kind),
+        text("--ref-id"),
+        text(reference_id),
+        text("--to-index"),
+        text(target_index),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_direct_linear_load_combination_factor_edit(
     source: &Path,
     destination: &Path,
@@ -7235,6 +7259,252 @@ fn nested_linear_load_combination_term_delete_executes_and_restarts_without_fall
     assert!(String::from_utf8_lossy(&rejected.stdout)
         .contains("workbench_model_delete_nested_linear_load_combination_term_direct_degradation"));
     assert!(!degradation_destination.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nested_linear_load_combination_term_reorder_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base = temporary.0.join("nested-term-reorder-base");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &base,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let nested = temporary.0.join("nested-term-reorder-authored");
+    assert_success(&run_nested_linear_load_combination_add(
+        &base.join("model-ir.json"),
+        &nested,
+        "COMBO_NESTED",
+        &[
+            ["--combination-term", "COMBO_SERVICE", "0.5"],
+            ["--pattern-term", "LC_AXIAL", "0.25"],
+        ],
+    ));
+    let appended = temporary.0.join("nested-term-reorder-appended");
+    assert_success(&run_nested_linear_load_combination_term_add(
+        &nested.join("model-ir.json"),
+        &appended,
+        "COMBO_NESTED",
+        "load_pattern",
+        "LC_STRONG",
+        "0.1",
+    ));
+    let reduced = temporary.0.join("nested-term-reorder-source");
+    assert_success(&run_nested_linear_load_combination_term_delete(
+        &appended.join("model-ir.json"),
+        &reduced,
+        "COMBO_NESTED",
+        "load_pattern",
+        "LC_AXIAL",
+    ));
+    let reduced_path = reduced.join("model-ir.json");
+    let reduced_bytes = std::fs::read(&reduced_path).expect("nested term-reorder source");
+    let source_document =
+        parse_model_ir_v2(&reduced_bytes).expect("strict nested term-reorder source");
+
+    let first = temporary.0.join("nested-term-reorder-first");
+    let second = temporary.0.join("nested-term-reorder-second");
+    for destination in [&first, &second] {
+        let output = run_nested_linear_load_combination_term_reorder(
+            &reduced_path,
+            destination,
+            "COMBO_NESTED",
+            "load_pattern",
+            "LC_STRONG",
+            "0",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nested term-reorder receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nested term-reorder artifact"),
+            std::fs::read(second.join(artifact)).expect("second nested term-reorder artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&reduced_path).expect("unchanged nested term-reorder source"),
+        reduced_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("nested term-reordered ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict nested term-reordered ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated nested term reorder");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][1]["terms"],
+        serde_json::json!([
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 0.1},
+            {"ref_id": "COMBO_SERVICE", "ref_kind": "load_combination", "factor": 0.5}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0],
+        source_document.value()["load_combinations"][0]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-reorder-nested-linear-load-combination-term.v1")
+        .expect("nested term-reorder provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "nested_linear_load_combination_term_reorder"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    );
+    assert_eq!(extension["load_combination_index"], 1);
+    assert_eq!(extension["reference_kind"], "load_pattern");
+    assert_eq!(extension["reference_id"], "LC_STRONG");
+    assert_eq!(extension["factor"], 0.1);
+    assert_eq!(extension["source_term_index"], 1);
+    assert_eq!(extension["target_term_index"], 0);
+    assert_eq!(extension["term_count"], 2);
+    assert_eq!(extension["source_combination_depth"], 2);
+    assert_eq!(extension["edited_combination_depth"], 2);
+    assert_eq!(extension["source_expanded_term_count"], 3);
+    assert_eq!(extension["edited_expanded_term_count"], 3);
+    assert_eq!(extension["source_expanded_pattern_count"], 2);
+    assert_eq!(extension["edited_expanded_pattern_count"], 2);
+    assert_eq!(
+        extension["source_expanded_pattern_terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.15}
+        ])
+    );
+    assert_eq!(
+        extension["edited_expanded_pattern_terms"],
+        serde_json::json!([
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.15},
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6}
+        ])
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nested term-reorder receipt"),
+    )
+    .expect("nested term-reorder receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "nested_linear_load_combination_term_reorder"
+    );
+    assert_eq!(edit_receipt["reference_kind"], "load_pattern");
+    assert_eq!(edit_receipt["reference_id"], "LC_STRONG");
+    assert_eq!(edit_receipt["factor"], 0.1);
+    assert_eq!(edit_receipt["source_term_index"], 1);
+    assert_eq!(edit_receipt["target_term_index"], 0);
+    assert_eq!(edit_receipt["term_count"], 2);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("nested-term-reorder-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nested-term-reorder-c5",
+        "COMBO_NESTED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nested term-reorder request");
+    let request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("nested term-reorder request receipt"),
+    )
+    .expect("nested term-reorder request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-nested-combination-request-create-receipt.v3"
+    );
+    assert_eq!(request_receipt["combination_depth"], 2);
+    assert_eq!(request_receipt["expanded_term_count"], 3);
+    assert_eq!(request_receipt["expanded_pattern_count"], 2);
+
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("nested term-reordered direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nested term-reorder recovery"),
+    )
+    .expect("nested term-reorder recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_NESTED");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -6000, 1500, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("nested term-reorder initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nested term-reorder resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let rejected_cases = [
+        (
+            "no-op",
+            "load_pattern",
+            "LC_STRONG",
+            "1",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "out-of-range",
+            "load_pattern",
+            "LC_STRONG",
+            "2",
+            "workbench_model_reorder_nested_linear_load_combination_term_target_index_invalid",
+        ),
+        (
+            "missing-typed",
+            "load_combination",
+            "LC_STRONG",
+            "0",
+            "workbench_model_reorder_nested_linear_load_combination_term_reference_missing",
+        ),
+    ];
+    for (label, reference_kind, reference_id, target_index, expected_code) in rejected_cases {
+        let destination = temporary
+            .0
+            .join(format!("nested-term-reorder-{label}-rejected"));
+        let rejected = run_nested_linear_load_combination_term_reorder(
+            &reduced_path,
+            &destination,
+            "COMBO_NESTED",
+            reference_kind,
+            reference_id,
+            target_index,
+        );
+        assert!(!rejected.status.success(), "accepted {label} reorder");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "unexpected {label} error: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
 }
 
 #[test]

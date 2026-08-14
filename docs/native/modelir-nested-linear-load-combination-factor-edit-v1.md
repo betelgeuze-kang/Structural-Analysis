@@ -36,8 +36,8 @@ checkpoint, ResultIR, recovery and ReportIR. Native CPU execution proves exact
 `active_external_load` `[25000,-9000,3750,0,0,0]`, byte-identical direct/restart results, FP64
 execution, fallback 0, and Python/Node lookup count 0.
 
-This is not general combination editing. Root reference replacement and append-only root-term
-addition are separate bounded C5 surfaces. Root-term removal/reorder, arbitrary-position insertion,
+This is not general combination editing. Root reference replacement, append-only root-term
+addition, root-term removal and root-term reorder are separate bounded C5 surfaces. Arbitrary-position insertion and bulk permutation,
 descendant mutation, downstream-referenced root editing,
 source-format writeback, visual editing, arbitrary solver selection, approved HIP C2, engineering
 acceptance and C6 remain open.

@@ -137,6 +137,11 @@ root term from any position in a neutral, extension-free, unreferenced three-thr
 nested root. It preserves retained order and descendants, refuses direct degradation, and requires
 source and edited graphs to remain acyclic, depth-eight/64-leaf bounded and C++ valid. See
 `docs/native/modelir-nested-linear-load-combination-term-delete-v1.md`.
+The bounded `model-reorder-nested-linear-load-combination-term` surface moves one existing typed
+root term to a distinct final index in a neutral, extension-free, unreferenced two-through-64-term
+nested root. It preserves every factor, reference, descendant and unrelated row; source and edited
+graphs remain acyclic, depth-eight/64-leaf bounded and C++ valid. See
+`docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md`.
 The bounded `--load-combination` request surface uses the frozen v1
 selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
@@ -154,6 +159,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-term-add-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-term-delete-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-deletion-v1.md` boundaries.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral

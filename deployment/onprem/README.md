@@ -54,7 +54,10 @@ absent from the runtime image.
   pattern consolidation, exact active load, restart parity and fallback 0.
   `model-delete-nested-linear-load-combination-term` removes one existing typed root term from any
   position in a neutral, extension-free, unreferenced three-through-64-term nested root while
-  preserving retained order and descendants and refusing direct degradation; installed v56 E2E
+  preserving retained order and descendants and refusing direct degradation; the installed
+  `model-reorder-nested-linear-load-combination-term` moves one typed root term to a distinct final
+  index while preserving factors and descendants, and installed v57 E2E proves order-only mutation,
+  exact retained load and restart parity; installed v56 E2E
   proves exact active load, restart parity and fallback 0.
   `model-edit-linear-load-combination-factor` changes exactly one existing direct-pattern factor in
   a neutral, extension-free and unreferenced two-through-64-term combination while preserving every

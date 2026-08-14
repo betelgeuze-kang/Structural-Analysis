@@ -200,8 +200,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   combination reference to remain, and requires source and edited graphs to stay acyclic,
   root-inclusive depth-eight/64-leaf bounded and C++ valid. Installed E2E v56 proves exact active
   load `[0,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Root-term reorder, descendant or downstream-root mutation, HIP parity and engineering
-  acceptance remain open.
+  output. Root-term reorder is a separate bounded surface; descendant or downstream-root mutation,
+  HIP parity and engineering acceptance remain open.
+- `model-reorder-nested-linear-load-combination-term`: deterministic movement of one existing
+  typed root term to a distinct final index in a neutral, extension-free, unreferenced
+  two-through-64-term nested root. Rust preserves every factor, reference and descendant while
+  changing declaration order only; source and edited graphs remain acyclic, root-inclusive
+  depth-eight/64-leaf bounded and C++ valid. Installed E2E v57 proves the expansion-order change,
+  exact retained active load `[0,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical
+  checkpoint/restart output. Bulk permutation, descendant or downstream-root mutation, HIP parity
+  and engineering acceptance remain open.
 - `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
   in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
   preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then

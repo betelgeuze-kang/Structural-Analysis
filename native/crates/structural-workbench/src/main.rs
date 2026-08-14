@@ -182,6 +182,16 @@ struct ModelDeleteNestedLinearLoadCombinationTermCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelReorderNestedLinearLoadCombinationTermCommand {
+    model: PathBuf,
+    load_combination_id: String,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: String,
+    target_index: usize,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 struct ModelEditDirectLinearLoadCombinationFactorCommand {
     model: PathBuf,
@@ -492,6 +502,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("model-delete-nested-linear-load-combination-term") => {
             parse_model_delete_nested_linear_load_combination_term(arguments)
                 .and_then(|command| run_model_delete_nested_linear_load_combination_term(&command))
+        }
+        Some("model-reorder-nested-linear-load-combination-term") => {
+            parse_model_reorder_nested_linear_load_combination_term(arguments)
+                .and_then(|command| run_model_reorder_nested_linear_load_combination_term(&command))
         }
         Some("model-edit-linear-load-combination-factor") => {
             parse_model_edit_direct_linear_load_combination_factor(arguments)
@@ -1005,6 +1019,21 @@ fn run_model_delete_nested_linear_load_combination_term(
         &command.load_combination_id,
         command.reference_kind,
         &command.reference_id,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_reorder_nested_linear_load_combination_term(
+    command: &ModelReorderNestedLinearLoadCombinationTermCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_nested_linear_load_combination_term_reorder(
+        &command.model,
+        &command.load_combination_id,
+        command.reference_kind,
+        &command.reference_id,
+        command.target_index,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -2142,6 +2171,54 @@ fn parse_model_delete_nested_linear_load_combination_term(
             "model-delete-nested-linear-load-combination-term typed reference ID",
         )?,
         output_directory: PathBuf::from(&arguments[9]),
+    })
+}
+
+fn parse_model_reorder_nested_linear_load_combination_term(
+    arguments: &[OsString],
+) -> Result<ModelReorderNestedLinearLoadCombinationTermCommand, WorkbenchError> {
+    if arguments.len() != 12
+        || arguments[2] != "--load-combination"
+        || arguments[4] != "--ref-kind"
+        || arguments[6] != "--ref-id"
+        || arguments[8] != "--to-index"
+        || arguments[10] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-reorder-nested-linear-load-combination-term requires MODEL.json --load-combination ID --ref-kind load_pattern|load_combination --ref-id ID --to-index 0..63 --output-dir DIR",
+        ));
+    }
+    let reference_kind = if arguments[5] == "load_pattern" {
+        LinearLoadCombinationReferenceKindV1::LoadPattern
+    } else if arguments[5] == "load_combination" {
+        LinearLoadCombinationReferenceKindV1::LoadCombination
+    } else {
+        return Err(usage_error(
+            "model-reorder-nested-linear-load-combination-term --ref-kind must be load_pattern or load_combination",
+        ));
+    };
+    let target_index = arguments[9]
+        .to_str()
+        .and_then(|value| value.parse::<usize>().ok())
+        .filter(|value| *value < MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+        .ok_or_else(|| {
+            usage_error(
+                "model-reorder-nested-linear-load-combination-term --to-index must be an integer between zero and 63",
+            )
+        })?;
+    Ok(ModelReorderNestedLinearLoadCombinationTermCommand {
+        model: PathBuf::from(&arguments[1]),
+        load_combination_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-reorder-nested-linear-load-combination-term load-combination ID",
+        )?,
+        reference_kind,
+        reference_id: parse_bounded_edit_id(
+            &arguments[7],
+            "model-reorder-nested-linear-load-combination-term typed reference ID",
+        )?,
+        target_index,
+        output_directory: PathBuf::from(&arguments[11]),
     })
 }
 
@@ -3474,6 +3551,7 @@ fn usage() -> &'static str {
         ,
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
+        "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
@@ -3507,9 +3585,9 @@ mod tests {
         parse_model_edit_linear_material, parse_model_edit_nested_linear_load_combination_factor,
         parse_model_edit_nested_linear_load_combination_reference, parse_model_edit_nodal_load,
         parse_model_edit_node, parse_model_edit_truss_element_properties,
-        parse_model_edit_truss_section, parse_model_view, parse_report_pdf_export,
-        parse_report_view, parse_result_view, parse_review, parse_stage_command,
-        LinearLoadCombinationReferenceKindV1,
+        parse_model_edit_truss_section, parse_model_reorder_nested_linear_load_combination_term,
+        parse_model_view, parse_report_pdf_export, parse_report_view, parse_result_view,
+        parse_review, parse_stage_command, LinearLoadCombinationReferenceKindV1,
     };
 
     #[test]
@@ -4118,6 +4196,66 @@ mod tests {
         wrong_flag[6] = OsString::from("--load-pattern");
         assert!(parse_model_delete_nested_linear_load_combination_term(&wrong_flag).is_err());
         assert!(parse_model_delete_nested_linear_load_combination_term(&arguments[..9]).is_err());
+    }
+
+    #[test]
+    fn model_reorder_nested_linear_load_combination_term_parser_is_typed_and_strict() {
+        let arguments = [
+            OsString::from("model-reorder-nested-linear-load-combination-term"),
+            OsString::from("model.json"),
+            OsString::from("--load-combination"),
+            OsString::from("COMBO_NESTED"),
+            OsString::from("--ref-kind"),
+            OsString::from("load_pattern"),
+            OsString::from("--ref-id"),
+            OsString::from("LC_STRONG"),
+            OsString::from("--to-index"),
+            OsString::from("0"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_reorder_nested_linear_load_combination_term(&arguments)
+            .expect("valid nested term-reorder command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.load_combination_id, "COMBO_NESTED");
+        assert_eq!(
+            parsed.reference_kind,
+            LinearLoadCombinationReferenceKindV1::LoadPattern
+        );
+        assert_eq!(parsed.reference_id, "LC_STRONG");
+        assert_eq!(parsed.target_index, 0);
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut combination = arguments.clone();
+        combination[5] = OsString::from("load_combination");
+        combination[7] = OsString::from("COMBO_SERVICE");
+        combination[9] = OsString::from("63");
+        let parsed = parse_model_reorder_nested_linear_load_combination_term(&combination)
+            .expect("valid nested combination term-reorder command");
+        assert_eq!(
+            parsed.reference_kind,
+            LinearLoadCombinationReferenceKindV1::LoadCombination
+        );
+        assert_eq!(parsed.target_index, 63);
+
+        let mut invalid_kind = arguments.clone();
+        invalid_kind[5] = OsString::from("pattern");
+        assert!(parse_model_reorder_nested_linear_load_combination_term(&invalid_kind).is_err());
+        let mut missing_reference = arguments.clone();
+        missing_reference[7] = OsString::new();
+        assert!(
+            parse_model_reorder_nested_linear_load_combination_term(&missing_reference).is_err()
+        );
+        let mut out_of_bounds = arguments.clone();
+        out_of_bounds[9] = OsString::from("64");
+        assert!(parse_model_reorder_nested_linear_load_combination_term(&out_of_bounds).is_err());
+        let mut negative = arguments.clone();
+        negative[9] = OsString::from("-1");
+        assert!(parse_model_reorder_nested_linear_load_combination_term(&negative).is_err());
+        let mut wrong_flag = arguments.clone();
+        wrong_flag[8] = OsString::from("--index");
+        assert!(parse_model_reorder_nested_linear_load_combination_term(&wrong_flag).is_err());
+        assert!(parse_model_reorder_nested_linear_load_combination_term(&arguments[..11]).is_err());
     }
 
     #[test]

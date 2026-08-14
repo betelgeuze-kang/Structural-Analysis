@@ -50,7 +50,7 @@ checkpoint resume. Installed CPU static/shared distribution E2E starts with
 edited ModelIR, edit receipt, request receipt, analysis request, assembly receipt, checkpoint,
 ResultIR, recovery and ReportIR.
 
-This is not general nested combination editing. Root factor replacement, reference replacement
-and term addition are separate bounded surfaces. Root-term reorder, descendant or
+This is not general nested combination editing. Root factor replacement, reference replacement,
+term addition and root-term reorder are separate bounded surfaces. Bulk permutation, descendant or
 downstream-referenced mutation, source-format writeback, visual editing, arbitrary solver
 selection, approved HIP C2, engineering acceptance and C6 remain open.

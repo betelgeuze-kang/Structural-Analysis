@@ -214,10 +214,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-linear-load-combination-term",
             "model-add-nested-linear-load-combination-term",
             "model-delete-nested-linear-load-combination-term",
+            "model-reorder-nested-linear-load-combination-term",
             "model-edit-linear-load-combination-factor",
             "model-edit-linear-load-combination-reference",
             "model-edit-nested-linear-load-combination-factor",
             "model-edit-nested-linear-load-combination-reference",
+            "installed v57 E2E",
             "installed v56 E2E",
             "installed v55 E2E",
             "installed v54 E2E",
@@ -245,6 +247,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v57",
+            "model-reorder-nested-linear-load-combination-term",
             "Distribution E2E v56",
             "model-delete-nested-linear-load-combination-term",
             "[0,-6000,1500,0,0,0]",
@@ -396,6 +400,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v54",
         "structural-native-distribution-e2e.v55",
         "structural-native-distribution-e2e.v56",
+        "structural-native-distribution-e2e.v57",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -557,6 +562,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_nested_linear_load_combination_term_delete_recovery_sha256",
         "workbench_nested_linear_load_combination_term_delete_report_ir_sha256",
         "workbench_nested_linear_load_combination_term_delete_restart_passed",
+        "exercise_nested_linear_load_combination_term_reorder_surface",
+        "model-reorder-nested-linear-load-combination-term",
+        "structural-native:model-reorder-nested-linear-load-combination-term.v1",
+        "workbench_nested_linear_load_combination_term_reorder_surface_passed",
+        "workbench_nested_linear_load_combination_term_reorder_model_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_request_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_request_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_assembly_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_result_ir_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_recovery_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_report_ir_sha256",
+        "workbench_nested_linear_load_combination_term_reorder_restart_passed",
         "exercise_nested_linear_load_combination_surface",
         "model-add-nested-linear-load-combination",
         "structural-native-model-linear-nested-combination-request-create-receipt.v3",
@@ -831,6 +850,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v57",
+            "V57_NESTED_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS",
+            "workbench_nested_linear_load_combination_term_reorder_surface_passed",
+            "workbench_nested_linear_load_combination_term_reorder_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_recovery_sha256",
+            "workbench_nested_linear_load_combination_term_reorder_restart_passed",
             "structural-native-distribution-e2e.v56",
             "V56_NESTED_LINEAR_LOAD_COMBINATION_TERM_DELETE_KEYS",
             "workbench_nested_linear_load_combination_term_delete_surface_passed",
@@ -972,6 +998,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v57 receipt",
+            "frozen v1 through v56 receipts",
+            "no pre-v57 receipt",
             "append-only v56 receipt",
             "frozen v1 through v55 receipts",
             "no pre-v56 receipt",
@@ -1531,6 +1560,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    nested_linear_load_combination_term_reorder_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md"
+        ),
+        text=nested_linear_load_combination_term_reorder_doc,
+        tokens=(
+            "model-reorder-nested-linear-load-combination-term",
+            "two through 64",
+            "root-inclusive depth at most eight",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-reorder-nested-linear-load-combination-term.v1",
+            "nested_linear_load_combination_term_reorder",
+            "append-only v57",
+            "[0,-6000,1500,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
 
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
@@ -1918,6 +1972,47 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in nested_linear_load_combination_term_delete_claim:
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_delete_capability_"
+                    f"claim_missing:{token}"
+                )
+    nested_linear_load_combination_term_reorder_capability = (
+        capabilities.get("modelir_nested_linear_load_combination_term_reorder")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(nested_linear_load_combination_term_reorder_capability, dict):
+        blockers.append(
+            "modelir_nested_linear_load_combination_term_reorder_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if nested_linear_load_combination_term_reorder_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_reorder_capability_"
+                    f"field_invalid:{field}"
+                )
+        nested_linear_load_combination_term_reorder_claim = str(
+            nested_linear_load_combination_term_reorder_capability.get("claim", "")
+        )
+        for token in (
+            "moves exactly one existing explicitly typed load_pattern or load_combination root term",
+            "two through 64 ordered unique typed terms",
+            "distinct final zero-based index",
+            "root-inclusive depth at most eight",
+            "at most 64 expanded leaf contributions",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v57 E2E",
+            "exact retained active load [0,-6000,1500,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nested_linear_load_combination_term_reorder_claim:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_reorder_capability_"
                     f"claim_missing:{token}"
                 )
     direct_linear_load_combination_deletion_capability = (

@@ -114,7 +114,12 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v56 proves repeated edited/request/artifact bytes and retains
+assembly preflight. Distribution E2E v57 proves repeated edited/request/artifact bytes and retains
+all Distribution E2E v56 assertions, including an order-only typed nested-root term move from index
+one to zero, deterministic expansion-order change and exact retained active load
+`[0,-6000,1500,0,0,0]` through
+`model-reorder-nested-linear-load-combination-term`. Distribution E2E v56 proves repeated
+edited/request/artifact bytes and retains
 all Distribution E2E v55 assertions, including typed nested-root term removal, retained order and
 descendants, repeated-pattern consolidation and exact active load `[0,-6000,1500,0,0,0]` through
 `model-delete-nested-linear-load-combination-term`. Distribution E2E v55 retains all Distribution

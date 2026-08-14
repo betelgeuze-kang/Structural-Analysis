@@ -276,6 +276,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_nested_linear_load_combination_term_reorder": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_nested_linear_load_combination_factor_edit": (
         "c5_implemented",
         False,
@@ -1093,6 +1097,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "nested_linear_load_combination_term_add",
             "structural-native:model-delete-nested-linear-load-combination-term.v1",
             "nested_linear_load_combination_term_delete",
+            "structural-native:model-reorder-nested-linear-load-combination-term.v1",
+            "nested_linear_load_combination_term_reorder",
             "structural-native:model-edit-nested-linear-load-combination-factor.v1",
             "nested_linear_load_combination_factor_edit",
             "structural-native:model-edit-nested-linear-load-combination-reference.v1",
@@ -2063,6 +2069,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         Path("docs/native/modelir-nested-linear-load-combination-term-delete-v1.md"),
         blockers,
     )
+    nested_linear_load_combination_term_reorder_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md"),
+        blockers,
+    )
     _require_tokens(
         Path("docs/native/modelir-direct-linear-load-combination-term-add-v1.md"),
         direct_linear_load_combination_term_add_doc,
@@ -2126,6 +2137,24 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-delete-nested-linear-load-combination-term.v1",
             "nested_linear_load_combination_term_delete",
             "append-only v56",
+            "[0,-6000,1500,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-nested-linear-load-combination-term-reorder-v1.md"),
+        nested_linear_load_combination_term_reorder_doc,
+        (
+            "model-reorder-nested-linear-load-combination-term",
+            "two through 64",
+            "root-inclusive depth at most eight",
+            "single C ABI into C++",
+            "structural-native:model-reorder-nested-linear-load-combination-term.v1",
+            "nested_linear_load_combination_term_reorder",
+            "append-only v57",
             "[0,-6000,1500,0,0,0]",
             "fallback 0",
             "approved HIP C2",
