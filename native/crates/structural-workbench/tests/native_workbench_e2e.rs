@@ -1,4 +1,4 @@
-use std::ffi::OsStr;
+use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -854,20 +854,38 @@ fn run_linear_load_combination_add(
     first_term: [&str; 2],
     second_term: [&str; 2],
 ) -> Output {
-    run_workbench(&[
-        text("model-add-linear-load-combination"),
-        source.as_os_str(),
-        text("--load-combination"),
-        text(load_combination_id),
-        text("--term"),
-        text(first_term[0]),
-        text(first_term[1]),
-        text("--term"),
-        text(second_term[0]),
-        text(second_term[1]),
-        text("--output-dir"),
-        destination.as_os_str(),
-    ])
+    run_direct_linear_load_combination_add(
+        source,
+        destination,
+        load_combination_id,
+        &[first_term, second_term],
+    )
+}
+
+fn run_direct_linear_load_combination_add(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    terms: &[[&str; 2]],
+) -> Output {
+    let mut arguments = vec![
+        OsString::from("model-add-linear-load-combination"),
+        source.as_os_str().to_owned(),
+        OsString::from("--load-combination"),
+        OsString::from(load_combination_id),
+    ];
+    for term in terms {
+        arguments.push(OsString::from("--term"));
+        arguments.push(OsString::from(term[0]));
+        arguments.push(OsString::from(term[1]));
+    }
+    arguments.push(OsString::from("--output-dir"));
+    arguments.push(destination.as_os_str().to_owned());
+    let borrowed = arguments
+        .iter()
+        .map(OsString::as_os_str)
+        .collect::<Vec<_>>();
+    run_workbench(&borrowed)
 }
 
 fn run_linear_load_combination_delete(
@@ -5472,6 +5490,133 @@ fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_cpu_executab
     )
     .expect("blocked combination-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn direct_three_pattern_linear_load_combination_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let terms = [
+        ["LC_AXIAL", "0.25"],
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ];
+    let first = temporary.0.join("direct-combination-add-first");
+    let second = temporary.0.join("direct-combination-add-second");
+    for destination in [&first, &second] {
+        assert_success(&run_direct_linear_load_combination_add(
+            &source,
+            destination,
+            "COMBO_DIRECT",
+            &terms,
+        ));
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first direct-combination artifact"),
+            std::fs::read(second.join(artifact)).expect("second direct-combination artifact")
+        );
+    }
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("direct-combination ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict direct-combination ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated direct-combination ModelIR");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][0]["terms"],
+        serde_json::json!([
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+        ])
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-add-direct-linear-load-combination.v2")
+        .expect("direct-combination provenance extension");
+    assert_eq!(extension["operation"], "direct_linear_load_combination_add");
+    assert_eq!(
+        extension["authoring_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_eq!(extension["term_count"], 3);
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("direct-combination edit receipt"),
+    )
+    .expect("direct-combination edit receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "direct_linear_load_combination_add"
+    );
+    assert_eq!(
+        edit_receipt["authoring_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_eq!(edit_receipt["term_count"], 3);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("direct-combination-request");
+    let preflight = run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "direct-combination-c5",
+        "COMBO_DIRECT",
+    );
+    assert_success(&preflight);
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("direct-combination request");
+    let mut request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("direct-combination request receipt"),
+    )
+    .expect("direct-combination request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-direct-combination-request-create-receipt.v2"
+    );
+    assert_eq!(request_receipt["combination_term_count"], 3);
+    assert_eq!(
+        request_receipt["request_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_self_hashed_edit_receipt(&mut request_receipt);
+
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("three-pattern direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("three-pattern direct recovery"),
+    )
+    .expect("three-pattern recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_DIRECT");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("three-pattern initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("three-pattern resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
 }
 
 #[test]

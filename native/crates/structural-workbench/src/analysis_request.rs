@@ -9,6 +9,10 @@ use structural_contracts::model_linear_product::{
 use structural_contracts::product_ir::{sha256_identity, ModelIrIdentityV1};
 use structural_contracts::sparse_product::SparseLinearConfigV1;
 
+use super::model_edit::{
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
+};
 use super::{
     artifact_entry, canonical_self_hashed, input_error, publish_new_directory,
     read_bounded_regular_file, WorkbenchError, MAX_MODEL_BYTES,
@@ -17,8 +21,11 @@ use super::{
 const REQUEST_RECEIPT_SCHEMA_V1: &str = "structural-native-model-linear-request-create-receipt.v1";
 const COMBINATION_REQUEST_RECEIPT_SCHEMA_V1: &str =
     "structural-native-model-linear-combination-request-create-receipt.v1";
+const DIRECT_COMBINATION_REQUEST_RECEIPT_SCHEMA_V2: &str =
+    "structural-native-model-linear-direct-combination-request-create-receipt.v2";
 const CLAIM_BOUNDARY: &str = "bounded_cpp_assembly_preflighted_modelir_linear_cpu_request_creation_not_arbitrary_solver_backend_model_editing_execution_convergence_engineering_acceptance_or_c6";
 const COMBINATION_CLAIM_BOUNDARY: &str = "bounded_exact_two_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
+const DIRECT_COMBINATION_CLAIM_BOUNDARY: &str = "bounded_two_to_64_unique_direct_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum LoadSelectorKindV1 {
@@ -56,7 +63,7 @@ pub fn publish_model_linear_analysis_request(
     )
 }
 
-/// Construct and atomically publish one bounded two-pattern linear-combination CPU request.
+/// Construct and atomically publish one bounded two-to-64-pattern direct linear-combination CPU request.
 ///
 /// The frozen request v1 field remains named `load_pattern_id`; the combination receipt records
 /// that this field is intentionally carrying a load-combination selector.
@@ -132,7 +139,7 @@ pub fn create_model_linear_analysis_request(
     )
 }
 
-/// Construct one canonical CPU request for a bounded two-pattern linear combination.
+/// Construct one canonical CPU request for a bounded two-to-64-pattern direct linear combination.
 ///
 /// # Errors
 ///
@@ -212,16 +219,13 @@ fn create_model_linear_analysis_request_for_selector(
         "application/json",
         analysis_request_json.as_bytes(),
     )?;
-    let receipt_json = match selector_kind {
-        LoadSelectorKindV1::Pattern => canonical_self_hashed(json!({
-            "schema_version": REQUEST_RECEIPT_SCHEMA_V1,
-            "operation": "create_model_ir_linear_analysis_request",
+    let receipt_json = build_model_linear_request_receipt(
+        json!({
             "model_id": source_validation.report.model_id,
             "model_identity": request.request().model_identity,
             "source_input_sha256": sha256_identity(source_bytes),
             "case_id": request.request().case_id,
             "backend": "cpu",
-            "load_pattern_id": request.request().load_pattern_id,
             "config": request.request().config,
             "analysis_request_hash": request.request_hash(),
             "cpp_semantic_snapshot_verified": true,
@@ -230,35 +234,54 @@ fn create_model_linear_analysis_request_for_selector(
             "generated_sparse_request_hash": compatibility.generated_request_hash,
             "execution_started": false,
             "artifacts": [request_artifact],
-            "claim_boundary": CLAIM_BOUNDARY,
-        }))?,
-        LoadSelectorKindV1::Combination => canonical_self_hashed(json!({
-            "schema_version": COMBINATION_REQUEST_RECEIPT_SCHEMA_V1,
-            "operation": "create_model_ir_linear_combination_analysis_request",
-            "model_id": source_validation.report.model_id,
-            "model_identity": request.request().model_identity,
-            "source_input_sha256": sha256_identity(source_bytes),
-            "case_id": request.request().case_id,
-            "backend": "cpu",
-            "load_selector_kind": "load_combination",
-            "load_combination_id": request.request().load_pattern_id,
-            "combination_terms": combination_terms,
-            "frozen_request_selector_field": "load_pattern_id",
-            "config": request.request().config,
-            "analysis_request_hash": request.request_hash(),
-            "cpp_semantic_snapshot_verified": true,
-            "cpp_linear_assembly_preflight_verified": true,
-            "assembly_hash": compatibility.assembly_hash,
-            "generated_sparse_request_hash": compatibility.generated_request_hash,
-            "execution_started": false,
-            "artifacts": [request_artifact],
-            "claim_boundary": COMBINATION_CLAIM_BOUNDARY,
-        }))?,
-    };
+        }),
+        selector_kind,
+        &request.request().load_pattern_id,
+        combination_terms.as_ref(),
+    )?;
     Ok(ModelLinearAnalysisRequestCreateOutcomeV1 {
         analysis_request_json,
         receipt_json,
     })
+}
+
+fn build_model_linear_request_receipt(
+    mut receipt: serde_json::Value,
+    selector_kind: LoadSelectorKindV1,
+    selector_id: &str,
+    combination_terms: Option<&serde_json::Value>,
+) -> Result<String, WorkbenchError> {
+    if selector_kind == LoadSelectorKindV1::Pattern {
+        receipt["schema_version"] = json!(REQUEST_RECEIPT_SCHEMA_V1);
+        receipt["operation"] = json!("create_model_ir_linear_analysis_request");
+        receipt["load_pattern_id"] = json!(selector_id);
+        receipt["claim_boundary"] = json!(CLAIM_BOUNDARY);
+        return canonical_self_hashed(receipt);
+    }
+
+    let terms = combination_terms.ok_or_else(|| {
+        WorkbenchError::new(
+            "workbench_model_linear_combination_request_terms_invalid",
+            "validated load-combination terms became unavailable",
+        )
+    })?;
+    let term_count = terms.as_array().map_or(0, Vec::len);
+    if term_count == 2 {
+        receipt["schema_version"] = json!(COMBINATION_REQUEST_RECEIPT_SCHEMA_V1);
+        receipt["operation"] = json!("create_model_ir_linear_combination_analysis_request");
+        receipt["claim_boundary"] = json!(COMBINATION_CLAIM_BOUNDARY);
+    } else {
+        receipt["schema_version"] = json!(DIRECT_COMBINATION_REQUEST_RECEIPT_SCHEMA_V2);
+        receipt["operation"] = json!("create_model_ir_linear_direct_combination_analysis_request");
+        receipt["request_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
+        receipt["combination_term_count"] = json!(term_count);
+        receipt["claim_boundary"] = json!(DIRECT_COMBINATION_CLAIM_BOUNDARY);
+    }
+    receipt["load_selector_kind"] = json!("load_combination");
+    receipt["load_combination_id"] = json!(selector_id);
+    receipt["combination_terms"] = terms.clone();
+    receipt["frozen_request_selector_field"] = json!("load_pattern_id");
+    canonical_self_hashed(receipt)
 }
 
 fn require_load_selector(
@@ -388,20 +411,27 @@ fn require_bounded_linear_load_combination(
                 "selected load combination has no term array",
             )
         })?;
-    if terms.len() != 2 {
+    if !(MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
+        ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+        .contains(&terms.len())
+    {
         return Err(WorkbenchError::new(
             "workbench_model_linear_combination_request_term_count_unsupported",
-            "selected load combination must contain exactly two terms",
+            "selected direct load combination must contain between two and 64 terms",
         ));
     }
     let referenced_ids = terms
         .iter()
         .map(|term| require_bounded_linear_load_combination_term(term, patterns))
         .collect::<Result<Vec<_>, _>>()?;
-    if referenced_ids[0] == referenced_ids[1] {
+    if referenced_ids
+        .iter()
+        .enumerate()
+        .any(|(index, id)| referenced_ids[..index].iter().any(|prior| prior == id))
+    {
         return Err(WorkbenchError::new(
             "workbench_model_linear_combination_request_duplicate_pattern",
-            "selected load combination must reference two distinct load patterns",
+            "selected direct load combination must reference unique load patterns",
         ));
     }
     Ok(serde_json::Value::Array(terms.clone()))
@@ -554,6 +584,35 @@ mod tests {
         assert_eq!(receipt["load_combination_id"], "COMBO_SERVICE");
         assert_eq!(receipt["combination_terms"], terms);
         assert_eq!(receipt["frozen_request_selector_field"], "load_pattern_id");
+        assert_eq!(receipt["cpp_linear_assembly_preflight_verified"], true);
+    }
+
+    #[test]
+    fn three_pattern_direct_combination_uses_the_versioned_bounded_receipt() {
+        let terms = json!([
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+        ]);
+        let source = model_with_combinations(json!([combination("COMBO_DIRECT", &terms)]));
+        let outcome = create_model_linear_combination_analysis_request(
+            &source,
+            "direct-combination-case",
+            "COMBO_DIRECT",
+            config(),
+        )
+        .expect("bounded direct combination request");
+        let receipt: Value = serde_json::from_str(&outcome.receipt_json).expect("receipt JSON");
+        assert_eq!(
+            receipt["schema_version"],
+            "structural-native-model-linear-direct-combination-request-create-receipt.v2"
+        );
+        assert_eq!(
+            receipt["request_profile"],
+            "unique_direct_linear_static_patterns_2_to_64"
+        );
+        assert_eq!(receipt["combination_term_count"], 3);
+        assert_eq!(receipt["combination_terms"], terms);
         assert_eq!(receipt["cpp_linear_assembly_preflight_verified"], true);
     }
 

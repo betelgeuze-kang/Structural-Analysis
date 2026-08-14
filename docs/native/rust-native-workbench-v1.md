@@ -86,18 +86,20 @@ reindex, or delete the target node.
 See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
 boundary and `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary.
 The bounded linear-load-combination creator appends one contiguous-index neutral `linear` row from
-exactly two distinct existing `linear_static` patterns and two finite nonzero factors. It preserves
-all other rows and blockers and revalidates through the C++ reference/cycle checks. Its bounded
-inverse deletes only the last contiguous neutral unreferenced row with that exact two-pattern shape,
-then proves direct load-pattern CPU execution and checkpoint/restart parity are restored. Nested
-terms, arbitrary term counts, term editing, and general deletion remain outside these commands. A
-separate bounded `--load-combination` request surface uses the frozen v1 selector alias to assemble
-and execute exactly this two-pattern shape through C++ and CPU PCG, with exact active load, typed
-recovery, fallback 0, and checkpoint/restart parity. General combination evaluation, solver
-selection, HIP parity and engineering acceptance remain open. See
+two through 64 unique existing `linear_static` patterns and finite nonzero factors. It preserves all
+other rows and blockers and revalidates through the C++ reference/cycle checks. Exact-two authoring
+and request receipts retain their frozen v1 bytes; three through 64 terms use explicit v2
+provenance/request receipts. The bounded inverse still deletes only the last contiguous neutral
+unreferenced row with the exact two-pattern shape, then proves direct load-pattern CPU execution and
+checkpoint/restart parity are restored. Nested terms, general term editing and general deletion
+remain outside these commands. The bounded `--load-combination` request surface uses the frozen v1
+selector alias to assemble and execute the direct terms through C++ and CPU PCG, with exact active
+load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
+solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-linear-load-combination-add-v1.md`,
 `docs/native/modelir-linear-load-combination-execution-v1.md`, and
-`docs/native/modelir-linear-load-combination-deletion-v1.md`.
+`docs/native/modelir-linear-load-combination-deletion-v1.md`, plus the additive
+`docs/native/modelir-direct-linear-load-combination-v1.md` boundary.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
@@ -251,6 +253,10 @@ structural-workbench model-add-linear-load-combination MODEL.json \
   --load-combination COMBO_SERVICE \
   --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
   --output-dir ADDED-COMBINATION-MODEL
+structural-workbench model-add-linear-load-combination MODEL.json \
+  --load-combination COMBO_DIRECT \
+  --term LC_AXIAL 0.25 --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
+  --output-dir ADDED-DIRECT-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE \
   --output-dir DELETED-COMBINATION-MODEL

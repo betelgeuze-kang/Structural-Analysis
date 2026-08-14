@@ -99,6 +99,8 @@ pub use model_edit::{
     ModelTruss3dMemberAddOutcomeV1, ModelTrussElementPropertiesEditOutcomeV1,
     ModelTrussSectionAddOutcomeV1, ModelTrussSectionDeleteOutcomeV1,
     ModelTrussSectionEditOutcomeV1, TrussSectionParametersV1,
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
 };
 pub use model_view::{
     render_model_topology_view, render_model_topology_view_file,

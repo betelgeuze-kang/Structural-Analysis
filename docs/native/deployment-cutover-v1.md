@@ -36,9 +36,11 @@ The installed `model-add-linear-load-pattern` command atomically appends one zer
 linear-static pattern and its first nonzero nodal load on an existing node with strict C++
 revalidation.
 The installed `model-add-linear-load-combination` command appends one neutral contiguous linear
-combination from exactly two distinct existing linear-static patterns and finite nonzero factors,
-then C++-validates the reference graph. The installed `--load-combination` request surface records
-the frozen v1 selector alias and executes that bounded combination through C++ assembly and CPU PCG.
+combination from two through 64 unique existing linear-static patterns and finite nonzero factors,
+then C++-validates the reference graph. Exact-two v1 provenance/request receipt bytes remain frozen;
+three through 64 terms use explicit v2 receipts. The installed `--load-combination` request surface
+records the frozen v1 selector alias and executes that bounded direct combination through C++
+assembly and CPU PCG.
 The installed `model-delete-linear-load-combination` command removes only the last contiguous
 neutral, extension-free and unreferenced row with that exact two-pattern shape. It rejects nested,
 mapped, source-owned, feature-owned, referenced or nonterminal candidates, C++-revalidates the
@@ -106,6 +108,9 @@ plus two-pattern linear-load-combination creation with exact ordered factor bind
 validation and deterministic topology view, followed by bounded combination request creation,
 exact signed-factor external-load assembly, native CPU execution, typed recovery, fallback 0 and
 byte-identical checkpoint/restart output,
+plus bounded two-through-64 direct linear-load-combination authoring and CPU execution with v2
+provenance/request receipts beyond two terms, exact three-pattern active load, typed recovery,
+fallback 0 and byte-identical checkpoint/restart output,
 plus last-neutral linear-load-combination deletion with exact removed term bindings, restored
 direct load-pattern CPU execution, typed frame recovery, checkpoint/restart parity and fallback 0,
 and source nonmutation plus deterministic bounded NDTHA response-history,

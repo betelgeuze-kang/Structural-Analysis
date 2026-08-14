@@ -315,8 +315,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    checkpoint/restart output, while a missing combination selector fails without publication;
 53. emits an append-only v44 hash-bound receipt that inherits every v43 identity and additionally
    binds the combination request receipt, analysis request, assembly receipt, final checkpoint,
-   ResultIR, recovery and ReportIR identities plus explicit restart parity.
-   The receipt checker continues to accept frozen v1 through v43 receipts (including frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+   ResultIR, recovery and ReportIR identities plus explicit restart parity;
+54. authors one three-pattern direct linear combination twice with the bounded two-through-64
+   command profile, preserves the exact two-term v1 path, emits v2 provenance and request receipts,
+   executes the exact active load `[25000,-12000,5000,0,0,0]`, proves typed recovery, fallback 0
+   and byte-identical initialized checkpoint/restart output under the installed empty `PATH`;
+55. emits an append-only v45 hash-bound receipt that inherits every v44 identity and additionally
+   binds the direct-combination edited ModelIR, edit receipt, request receipt, analysis request,
+   assembly receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit
+   restart parity.
+   The receipt checker continues to accept frozen v1 through v44 receipts (including frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
@@ -352,7 +360,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    authority; and no pre-v43 receipt is installed last-neutral linear-load-combination deletion,
    restored direct-pattern CPU execution, typed recovery and restart authority; and no pre-v44 receipt
    is installed bounded two-pattern linear-load-combination assembly, CPU execution,
-   typed recovery and restart authority.
+   typed recovery and restart authority; and no pre-v45 receipt is installed bounded
+   two-through-64 direct linear-load-combination authoring, v2 provenance/request binding, CPU
+   execution, typed recovery and restart authority.
 
 The reference command is:
 

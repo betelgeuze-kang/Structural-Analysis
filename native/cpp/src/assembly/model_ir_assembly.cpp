@@ -70,10 +70,11 @@ struct SelectedLoadCase final {
             SA_ERR_INVALID_ARGUMENT,
             "ModelIR load-case selector does not identify a bounded linear pattern or combination");
     }
-    if (combination->terms.size() != 2U) {
+    if (combination->terms.size() < 2U
+        || combination->terms.size() > SA_MODEL_IR_LINEAR_MAX_DIRECT_COMBINATION_TERMS) {
         throw model_ir::Error(
             SA_ERR_ANALYSIS_NOT_READY,
-            "ModelIR linear reference assembly requires exactly two combination terms");
+            "ModelIR linear reference assembly requires between two and 64 direct combination terms");
     }
 
     SelectedLoadCase selected {combination->id, combination->stable_index, {}};
@@ -100,7 +101,7 @@ struct SelectedLoadCase final {
                 [&referenced](const auto& prior) { return prior.pattern == &*referenced; })) {
             throw model_ir::Error(
                 SA_ERR_ANALYSIS_NOT_READY,
-                "ModelIR linear reference assembly requires two distinct combination patterns");
+                "ModelIR linear reference assembly requires unique direct combination patterns");
         }
         selected.patterns.push_back({&*referenced, term.factor});
     }

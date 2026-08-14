@@ -81,6 +81,9 @@ and edit receipt inherited from v42 plus the v44 request receipt, analysis reque
 checkpoint, ResultIR, recovery, and ReportIR identities. A missing combination selector still
 fails without publication.
 
-Nested combinations, arbitrary term counts, term editing, general solver selection, self-weight,
-time functions, stages, shell/nonlinear combination execution, visual manipulation, engineering
-acceptance, approved HIP C2, React/TypeScript removal, and C6 decommission remain open.
+This exact-two v1 receipt profile remains frozen. The additive two-through-64 direct-pattern
+profile, its v2 provenance/request receipt and installed v45 evidence are specified in
+`docs/native/modelir-direct-linear-load-combination-v1.md`; they do not change these v1 bytes.
+Nested combinations, term editing, general solver selection, self-weight, time functions, stages,
+shell/nonlinear combination execution, visual manipulation, engineering acceptance, approved HIP
+C2, React/TypeScript removal, and C6 decommission remain open.

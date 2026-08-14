@@ -340,6 +340,28 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in load_combination_execution["claim"]
     assert "HIP C2" in load_combination_execution["claim"]
     assert "C6" in load_combination_execution["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_direct_linear_load_combination_authoring_execution"
+        )
+        is True
+    )
+    direct_combination = payload["capabilities"][
+        "modelir_direct_linear_load_combination_authoring_execution"
+    ]
+    assert direct_combination["cutover_gate"] == "C5"
+    assert direct_combination["owner"] == "structural-workbench"
+    assert "two through 64 ordered terms" in direct_combination["claim"]
+    assert "exact two-term v1 provenance and request-receipt contract" in direct_combination["claim"]
+    assert "three through 64 terms" in direct_combination["claim"]
+    assert "frozen ABI v1.13 table" in direct_combination["claim"]
+    assert "distribution v45 E2E" in direct_combination["claim"]
+    assert "exact three-pattern active external load" in direct_combination["claim"]
+    assert "byte-identical direct/restart output" in direct_combination["claim"]
+    assert "fallback 0" in direct_combination["claim"]
+    assert "nested combinations" in direct_combination["claim"]
+    assert "HIP C2" in direct_combination["claim"]
+    assert "C6" in direct_combination["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_truss3d_authoring") is True
     truss_authoring = payload["capabilities"]["modelir_truss3d_authoring"]
     assert truss_authoring["cutover_gate"] == "C5"
@@ -939,6 +961,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v42" in distribution["claim"]
     assert "append-only v43" in distribution["claim"]
     assert "append-only v44" in distribution["claim"]
+    assert "append-only v45" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -948,7 +971,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v43 receipts" in distribution["claim"]
+    assert "frozen v1 through v44 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-section deletion" in distribution["claim"]
@@ -958,6 +981,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "two-pattern linear-load-combination creation" in distribution["claim"]
     assert "last-neutral linear-load-combination deletion" in distribution["claim"]
     assert "bounded two-pattern linear-load-combination assembly" in distribution["claim"]
+    assert "bounded two-through-64 direct linear-load-combination authoring" in distribution["claim"]
     assert "exact unchanged active DOFs/load" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
@@ -989,12 +1013,13 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v44 E2E" in deployment["claim"]
+    assert "distribution v45 E2E" in deployment["claim"]
     assert "standalone neutral-node creation" in deployment["claim"]
     assert "last-neutral orphan-node deletion" in deployment["claim"]
     assert "two-pattern linear-load-combination creation" in deployment["claim"]
     assert "last-neutral linear-load-combination deletion" in deployment["claim"]
     assert "bounded two-pattern linear-load-combination CPU execution" in deployment["claim"]
+    assert "bounded two-through-64 direct linear-load-combination authoring and CPU execution" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]

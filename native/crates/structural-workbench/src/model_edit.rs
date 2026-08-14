@@ -45,6 +45,8 @@ const LINEAR_LOAD_PATTERN_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-pattern.v1";
 const LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-combination.v1";
+const DIRECT_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
+    "structural-native:model-add-direct-linear-load-combination.v2";
 const LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-combination.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
@@ -78,6 +80,7 @@ const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_la
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_zero_self_weight_linear_static_pattern_with_single_neutral_nonzero_six_component_nodal_load_deletion_not_source_owned_combined_staged_mapped_general_pattern_load_node_or_topology_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_distinct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_solver_execution_or_selection_visual_editing_engineering_acceptance_or_c6";
+const DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_to_64_unique_direct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_distinct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
@@ -87,6 +90,9 @@ const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_
 const TRUSS_SECTION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_truss3d_section_deletion_with_one_truss_section_retained_not_source_owned_element_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
+
+pub const MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1: usize = 2;
+pub const MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1: usize = 64;
 
 /// Complete deterministic artifact pair produced by one bounded node-coordinate edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -564,7 +570,7 @@ pub fn publish_model_linear_load_pattern_add(
     Ok(outcome)
 }
 
-/// Add one two-pattern linear load combination and atomically publish it.
+/// Add one bounded direct-pattern linear load combination and atomically publish it.
 ///
 /// # Errors
 ///
@@ -573,7 +579,7 @@ pub fn publish_model_linear_load_pattern_add(
 pub fn publish_model_linear_load_combination_add(
     source_path: &Path,
     load_combination_id: &str,
-    terms: &[LinearLoadCombinationTermV1; 2],
+    terms: &[LinearLoadCombinationTermV1],
     output_directory: &Path,
 ) -> Result<ModelLinearLoadCombinationAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
@@ -1963,7 +1969,7 @@ pub fn add_model_linear_load_pattern(
     })
 }
 
-/// Add one provenance-bound two-pattern linear load combination in memory.
+/// Add one provenance-bound two-to-64-pattern direct linear load combination in memory.
 ///
 /// # Errors
 ///
@@ -1973,7 +1979,7 @@ pub fn add_model_linear_load_pattern(
 pub fn add_model_linear_load_combination(
     source_bytes: &[u8],
     load_combination_id: &str,
-    terms: &[LinearLoadCombinationTermV1; 2],
+    terms: &[LinearLoadCombinationTermV1],
 ) -> Result<ModelLinearLoadCombinationAddOutcomeV1, WorkbenchError> {
     validate_linear_load_combination_add_request(source_bytes.len(), load_combination_id, terms)?;
 
@@ -2022,27 +2028,53 @@ pub fn add_model_linear_load_combination(
         "application/json",
         model_ir_json.as_bytes(),
     )?;
-    let receipt_json = canonical_self_hashed(json!({
-        "schema_version": EDIT_SCHEMA_V1,
-        "operation": "linear_load_combination_add",
-        "model_id": edited_validation.report.model_id,
-        "load_combination_id": load_combination_id,
-        "load_combination_index": load_combination_index,
-        "combination_type": "linear",
-        "terms": linear_load_combination_terms_value(terms),
-        "source_input_sha256": source_input_sha256,
-        "source_content_hash": source_content_hash,
-        "source_semantic_hash": source_semantic_hash,
-        "source_provenance_hash": source_provenance_hash,
-        "edited_content_hash": edited_validation.report.content_hash,
-        "edited_semantic_hash": edited_validation.report.semantic_hash,
-        "edited_provenance_hash": edited_validation.report.provenance_hash,
-        "cpp_semantic_snapshot_verified": true,
-        "analysis_ready": edited_validation.report.analysis_ready,
-        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
-        "artifacts": [model_artifact],
-        "claim_boundary": LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
-    }))?;
+    let receipt_json = if terms.len() == 2 {
+        canonical_self_hashed(json!({
+            "schema_version": EDIT_SCHEMA_V1,
+            "operation": "linear_load_combination_add",
+            "model_id": edited_validation.report.model_id,
+            "load_combination_id": load_combination_id,
+            "load_combination_index": load_combination_index,
+            "combination_type": "linear",
+            "terms": linear_load_combination_terms_value(terms),
+            "source_input_sha256": source_input_sha256,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "edited_content_hash": edited_validation.report.content_hash,
+            "edited_semantic_hash": edited_validation.report.semantic_hash,
+            "edited_provenance_hash": edited_validation.report.provenance_hash,
+            "cpp_semantic_snapshot_verified": true,
+            "analysis_ready": edited_validation.report.analysis_ready,
+            "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+            "artifacts": [model_artifact],
+            "claim_boundary": LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
+        }))?
+    } else {
+        canonical_self_hashed(json!({
+            "schema_version": EDIT_SCHEMA_V1,
+            "operation": "direct_linear_load_combination_add",
+            "authoring_profile": "unique_direct_linear_static_patterns_2_to_64",
+            "model_id": edited_validation.report.model_id,
+            "load_combination_id": load_combination_id,
+            "load_combination_index": load_combination_index,
+            "combination_type": "linear",
+            "term_count": terms.len(),
+            "terms": linear_load_combination_terms_value(terms),
+            "source_input_sha256": source_input_sha256,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "edited_content_hash": edited_validation.report.content_hash,
+            "edited_semantic_hash": edited_validation.report.semantic_hash,
+            "edited_provenance_hash": edited_validation.report.provenance_hash,
+            "cpp_semantic_snapshot_verified": true,
+            "analysis_ready": edited_validation.report.analysis_ready,
+            "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+            "artifacts": [model_artifact],
+            "claim_boundary": DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
+        }))?
+    };
     Ok(ModelLinearLoadCombinationAddOutcomeV1 {
         model_ir_json,
         receipt_json,
@@ -4409,9 +4441,18 @@ fn validate_linear_load_pattern_add_request(
 fn validate_linear_load_combination_add_request(
     source_length: usize,
     load_combination_id: &str,
-    terms: &[LinearLoadCombinationTermV1; 2],
+    terms: &[LinearLoadCombinationTermV1],
 ) -> Result<(), WorkbenchError> {
     validate_bounded_edit_identity(source_length, load_combination_id, "new load combination")?;
+    if !(MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
+        ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+        .contains(&terms.len())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_linear_load_combination_term_count_invalid",
+            "direct load combinations require between two and 64 terms",
+        ));
+    }
     for term in terms {
         validate_bounded_edit_identity(0, &term.load_pattern_id, "load-combination term pattern")?;
         if !term.factor.is_finite() || term.factor == 0.0 {
@@ -4421,10 +4462,14 @@ fn validate_linear_load_combination_add_request(
             ));
         }
     }
-    if terms[0].load_pattern_id == terms[1].load_pattern_id {
+    if terms.iter().enumerate().any(|(index, term)| {
+        terms[..index]
+            .iter()
+            .any(|prior| prior.load_pattern_id == term.load_pattern_id)
+    }) {
         return Err(WorkbenchError::new(
             "workbench_model_add_linear_load_combination_pattern_duplicate",
-            "the two load-combination terms must reference distinct load patterns",
+            "direct load-combination terms must reference unique load patterns",
         ));
     }
     Ok(())
@@ -5183,7 +5228,7 @@ fn append_linear_load_pattern(
 fn append_linear_load_combination(
     model: &mut Value,
     load_combination_id: &str,
-    terms: &[LinearLoadCombinationTermV1; 2],
+    terms: &[LinearLoadCombinationTermV1],
 ) -> Result<usize, WorkbenchError> {
     let load_combinations = model
         .get("load_combinations")
@@ -5239,7 +5284,7 @@ fn append_linear_load_combination(
     Ok(load_combination_index)
 }
 
-fn linear_load_combination_terms_value(terms: &[LinearLoadCombinationTermV1; 2]) -> Value {
+fn linear_load_combination_terms_value(terms: &[LinearLoadCombinationTermV1]) -> Value {
     Value::Array(
         terms
             .iter()
@@ -7986,27 +8031,40 @@ fn bind_linear_load_combination_add_provenance(
     model: &mut Value,
     load_combination_id: &str,
     load_combination_index: usize,
-    terms: &[LinearLoadCombinationTermV1; 2],
+    terms: &[LinearLoadCombinationTermV1],
     source_content_hash: &str,
     source_semantic_hash: &str,
     source_provenance_hash: &str,
 ) -> Result<(), WorkbenchError> {
-    bind_parameter_edit_provenance(
-        model,
-        LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY,
-        json!({
-            "operation": "linear_load_combination_add",
-            "load_combination_id": load_combination_id,
-            "load_combination_index": load_combination_index,
-            "combination_type": "linear",
-            "terms": linear_load_combination_terms_value(terms),
-            "source_content_hash": source_content_hash,
-            "source_semantic_hash": source_semantic_hash,
-            "source_provenance_hash": source_provenance_hash,
-            "claim_boundary": LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY
-        }),
-        source_content_hash,
-    )
+    let (extension_key, operation, claim_boundary) = if terms.len() == 2 {
+        (
+            LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY,
+            "linear_load_combination_add",
+            LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
+        )
+    } else {
+        (
+            DIRECT_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY,
+            "direct_linear_load_combination_add",
+            DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
+        )
+    };
+    let mut provenance = json!({
+        "operation": operation,
+        "load_combination_id": load_combination_id,
+        "load_combination_index": load_combination_index,
+        "combination_type": "linear",
+        "terms": linear_load_combination_terms_value(terms),
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "claim_boundary": claim_boundary
+    });
+    if terms.len() != 2 {
+        provenance["authoring_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
+        provenance["term_count"] = json!(terms.len());
+    }
+    bind_parameter_edit_provenance(model, extension_key, provenance, source_content_hash)
 }
 
 fn bind_linear_load_combination_delete_provenance(
@@ -8949,14 +9007,15 @@ mod tests {
 
     use super::{
         append_linear_load_combination, append_node, constraint_value_unit,
-        mark_roundtrip_entity_approximated, mark_roundtrip_node_approximated,
-        normalized_number_bits, remove_fixed_constraint, remove_frame3d_leaf_member,
-        remove_frame_section, remove_linear_load_combination, remove_linear_load_pattern,
-        remove_linear_material, remove_nodal_load, remove_orphan_node, remove_truss3d_leaf_member,
-        remove_truss_section, validate_constraint_value_edit_request, validate_edit_request,
-        validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
-        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
-        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
+        linear_load_combination_terms_value, mark_roundtrip_entity_approximated,
+        mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
+        remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_combination,
+        remove_linear_load_pattern, remove_linear_material, remove_nodal_load, remove_orphan_node,
+        remove_truss3d_leaf_member, remove_truss_section, validate_constraint_value_edit_request,
+        validate_edit_request, validate_element_connectivity_edit_request,
+        validate_fixed_constraint_add_request, validate_fixed_constraint_delete_request,
+        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
+        validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_delete_request,
         validate_frame_section_edit_request, validate_linear_load_combination_add_request,
@@ -8971,7 +9030,7 @@ mod tests {
         validate_truss_section_add_request, validate_truss_section_delete_request,
         validate_truss_section_edit_request, FrameSectionParametersV1,
         LinearElasticMaterialParametersV1, LinearLoadCombinationTermV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES,
+        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -9823,6 +9882,70 @@ mod tests {
                 .expect_err("unsupported load pattern")
                 .code,
             "workbench_model_add_linear_load_combination_pattern_unsupported"
+        );
+    }
+
+    #[test]
+    fn direct_linear_load_combination_add_accepts_three_to_64_unique_patterns() {
+        let direct_terms = vec![
+            LinearLoadCombinationTermV1 {
+                load_pattern_id: "LC_AXIAL".to_owned(),
+                factor: 0.25,
+            },
+            LinearLoadCombinationTermV1 {
+                load_pattern_id: "LC_WEAK".to_owned(),
+                factor: 1.2,
+            },
+            LinearLoadCombinationTermV1 {
+                load_pattern_id: "LC_STRONG".to_owned(),
+                factor: -0.5,
+            },
+        ];
+        validate_linear_load_combination_add_request(0, "COMBO_DIRECT", &direct_terms)
+            .expect("valid three-pattern direct combination");
+        assert_eq!(
+            validate_linear_load_combination_add_request(0, "COMBO_ONE", &direct_terms[..1])
+                .expect_err("one direct term is unsupported")
+                .code,
+            "workbench_model_add_linear_load_combination_term_count_invalid"
+        );
+
+        let maximum_terms = (0..MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+            .map(|index| LinearLoadCombinationTermV1 {
+                load_pattern_id: format!("LC_{index:02}"),
+                factor: 1.0,
+            })
+            .collect::<Vec<_>>();
+        validate_linear_load_combination_add_request(0, "COMBO_MAX", &maximum_terms)
+            .expect("64 direct terms remain bounded");
+        let mut excessive_terms = maximum_terms;
+        excessive_terms.push(LinearLoadCombinationTermV1 {
+            load_pattern_id: "LC_64".to_owned(),
+            factor: 1.0,
+        });
+        assert_eq!(
+            validate_linear_load_combination_add_request(0, "COMBO_TOO_LARGE", &excessive_terms)
+                .expect_err("65 direct terms are unsupported")
+                .code,
+            "workbench_model_add_linear_load_combination_term_count_invalid"
+        );
+
+        let mut model = json!({
+            "load_patterns": [
+                {"id": "LC_AXIAL", "analysis_type": "linear_static"},
+                {"id": "LC_WEAK", "analysis_type": "linear_static"},
+                {"id": "LC_STRONG", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": []
+        });
+        assert_eq!(
+            append_linear_load_combination(&mut model, "COMBO_DIRECT", &direct_terms)
+                .expect("append three-pattern direct combination"),
+            0
+        );
+        assert_eq!(
+            model["load_combinations"][0]["terms"],
+            linear_load_combination_terms_value(&direct_terms)
         );
     }
 

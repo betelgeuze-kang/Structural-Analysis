@@ -61,6 +61,8 @@ REQUIRED_TOKENS = {
         "read_bounded_regular_file",
     ),
     "native/crates/structural-cli/tests/model_ir_linear_product_cli.rs": (
+        "bounded_two_pattern_combination_executes_and_restarts_exactly",
+        "bounded_three_pattern_direct_combination_executes_and_restarts_exactly",
         "clean_environment_direct_and_real_iteration_resume_are_byte_identical",
         "every_checkpoint_byte_and_request_drift_fail_before_resume",
         "numerical_failure_publishes_both_terminal_checkpoints_without_result_files",

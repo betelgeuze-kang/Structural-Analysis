@@ -83,6 +83,25 @@ fn combination_model_bytes() -> Vec<u8> {
         .into_bytes()
 }
 
+fn direct_combination_model_bytes() -> Vec<u8> {
+    let mut value: Value = serde_json::from_slice(&model_bytes()).expect("ModelIR fixture JSON");
+    value["load_combinations"] = json!([{
+        "id": "COMBO_DIRECT",
+        "index": 0,
+        "combination_type": "linear",
+        "terms": [
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+        ],
+        "source_id": null,
+        "extensions": {}
+    }]);
+    canonicalize_model_ir_v2(&value)
+        .expect("canonical direct-combination ModelIR")
+        .into_bytes()
+}
+
 fn rebound_request_bytes(model: &[u8], selector_id: &str, max_iterations: u32) -> Vec<u8> {
     let document = parse_model_ir_v2(model).expect("strict rebound ModelIR");
     let mut value: Value =
@@ -238,6 +257,51 @@ fn bounded_two_pattern_combination_executes_and_restarts_exactly() {
         direct_pattern_result.result().solution,
         original_result.result().solution
     );
+}
+
+#[test]
+fn bounded_three_pattern_direct_combination_executes_and_restarts_exactly() {
+    let model = direct_combination_model_bytes();
+    let request = rebound_request_bytes(&model, "COMBO_DIRECT", 100);
+    let first = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("bounded direct-combination compatibility");
+    let repeated = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("deterministic direct-combination compatibility");
+    assert_eq!(first, repeated);
+
+    let direct = execute_model_ir_linear_analysis(&model, &request, None, u32::MAX)
+        .expect("bounded direct-combination execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct-combination recovery IR"),
+    )
+    .expect("direct-combination recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_DIRECT");
+    assert_eq!(
+        recovery["active_external_load"],
+        json!([25000, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&model, &request, None, 0)
+        .expect("initial direct-combination checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &model,
+        &request,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed direct-combination execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+    assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
 }
 
 #[test]

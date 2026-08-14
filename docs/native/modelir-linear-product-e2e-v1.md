@@ -84,12 +84,13 @@ Symlink inputs and existing destinations fail without partial publication.
 ## Honest boundary
 
 This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous constraints, direct
-nodal loads or one exactly two-pattern signed linear combination, active-DOF solution and residual,
-and element recovery.
+nodal loads or one signed direct linear combination of two through 64 unique patterns, active-DOF
+solution and residual, and element recovery. The exact-two receipt path remains frozen while the
+three-through-64 Workbench path uses the additive v2 provenance/request contract.
 It does not expose constrained reactions; ABI v1.13 intentionally returns the reduced active system
 only. It also excludes
-nonzero prescribed constraints, releases/offsets, self-weight, member loads, nested or
-arbitrary-term combinations/stages,
+nonzero prescribed constraints, releases/offsets, self-weight, member loads, nested combinations,
+more-than-64-term combinations or stages,
 shells, nonlinear constitutive epochs, reordering/preconditioning authority, native Workbench
 integration, PDF specialization, HIP execution, design-code compliance, and C6 decommission.
 The separately bounded durable job and loopback-service C5 path is documented in

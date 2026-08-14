@@ -403,7 +403,10 @@ provenance-bound operations. The frame/truss member, nodal-load, fixed-constrain
 linear-static-pattern/first-load, two-pattern linear-combination, stateless linear-elastic-material
 and frame/truss-section creators close only their documented fixed constructions. The bounded
 combination deleter closes only the last contiguous neutral unreferenced two-pattern linear row and
-restores direct-pattern CPU execution. The two leaf deleters close only one
+restores direct-pattern CPU execution. The additive two-to-64 direct linear-combination surface
+closes ordered unique-pattern authoring, v2 provenance/request receipts beyond two terms, C++ CPU
+assembly, typed recovery and checkpoint/restart parity; the exact-two v1 receipt path remains
+frozen. The two leaf deleters close only one
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
 endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
 homogeneous six-DOF zero row while retaining the base constraint.
@@ -411,7 +414,7 @@ The nodal-load deleter closes only one last contiguous neutral unreferenced nonz
 row while retaining another nonzero load in the same linear-static pattern.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
-property/material/section/nested-or-arbitrary-load-combination/constraint-topology editing and
+property/material/section/nested-load-combination/constraint-topology editing and
 general combination deletion remain open, so the
 composite visual parity row stays open.
 

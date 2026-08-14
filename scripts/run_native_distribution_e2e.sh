@@ -3628,6 +3628,98 @@ exercise_linear_load_combination_add_surface() {
 }
 exercise_linear_load_combination_add_surface
 
+exercise_direct_linear_load_combination_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label add_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    add_directory="$e2e_root/direct-linear-load-combination-$label"
+    request_directory="$e2e_root/direct-linear-load-combination-$label-request"
+    direct_directory="$e2e_root/direct-linear-load-combination-$label-direct"
+    partial_directory="$e2e_root/direct-linear-load-combination-$label-partial"
+    resumed_directory="$e2e_root/direct-linear-load-combination-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-linear-load-combination "$source_model" \
+      --load-combination COMBO_DIRECT \
+      --term LC_AXIAL 0.25 --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
+      --output-dir "$add_directory" \
+      > "$e2e_root/direct-linear-load-combination-$label.stdout.json"
+    grep -Fq '"operation":"direct_linear_load_combination_add"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"authoring_profile":"unique_direct_linear_static_patterns_2_to_64"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"term_count":3' "$add_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-direct-linear-load-combination.v2"' \
+      "$add_directory/model-ir.json"
+    grep -Fq '"terms":[{"factor":0.25,"ref_id":"LC_AXIAL","ref_kind":"load_pattern"},{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"},{"factor":-0.5,"ref_id":"LC_STRONG","ref_kind":"load_pattern"}]' \
+      "$add_directory/edit-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$add_directory/model-ir.json" \
+      --case direct-linear-load-combination-c5 --load-combination COMBO_DIRECT \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/direct-linear-load-combination-$label-request.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-direct-combination-request-create-receipt.v2"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"request_profile":"unique_direct_linear_static_patterns_2_to_64"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"combination_term_count":3' "$request_directory/request-receipt.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/direct-linear-load-combination-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_DIRECT"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[25000,-12000,5000,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/direct-linear-load-combination-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$add_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/direct-linear-load-combination-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/direct-linear-load-combination-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/direct-linear-load-combination-first$suffix" \
+      "$e2e_root/direct-linear-load-combination-second$suffix" \
+      > "$e2e_root/direct-linear-load-combination$suffix-diff.txt"
+  done
+  cmp "$e2e_root/direct-linear-load-combination-first.stdout.json" \
+    "$e2e_root/direct-linear-load-combination-second.stdout.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/direct-linear-load-combination-first-$suffix.stdout.json" \
+      "$e2e_root/direct-linear-load-combination-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed direct linear load-combination addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_direct_linear_load_combination_surface
+
 exercise_linear_load_combination_delete_surface() {
   local source_model="$e2e_root/linear-load-combination-add-first/model-ir.json"
   local source_before_hash
@@ -4153,6 +4245,15 @@ linear_load_combination_checkpoint_hash="$(sha256sum "$e2e_root/linear-load-comb
 linear_load_combination_result_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/result-ir.json" | awk '{print $1}')"
 linear_load_combination_recovery_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 linear_load_combination_report_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-direct/report-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_model_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first/model-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_edit_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first/edit-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_request_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-request/request-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_request_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-request/analysis-request.json" | awk '{print $1}')"
+direct_linear_load_combination_assembly_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-direct/assembly-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_checkpoint_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+direct_linear_load_combination_result_ir_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-direct/result-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_recovery_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_report_ir_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-first-direct/report-ir.json" | awk '{print $1}')"
 linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
 linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
 linear_load_combination_delete_request_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first-request/analysis-request.json" | awk '{print $1}')"
@@ -4317,6 +4418,10 @@ v44_receipt_json="${v43_receipt_json/structural-native-distribution-e2e.v43/stru
 linear_load_combination_execution_receipt_fields="\"workbench_linear_load_combination_execution_surface_passed\":true,\"workbench_linear_load_combination_request_receipt_sha256\":\"sha256:$linear_load_combination_request_receipt_hash\",\"workbench_linear_load_combination_request_sha256\":\"sha256:$linear_load_combination_request_hash\",\"workbench_linear_load_combination_assembly_receipt_sha256\":\"sha256:$linear_load_combination_assembly_receipt_hash\",\"workbench_linear_load_combination_checkpoint_sha256\":\"sha256:$linear_load_combination_checkpoint_hash\",\"workbench_linear_load_combination_result_ir_sha256\":\"sha256:$linear_load_combination_result_ir_hash\",\"workbench_linear_load_combination_recovery_sha256\":\"sha256:$linear_load_combination_recovery_hash\",\"workbench_linear_load_combination_report_ir_sha256\":\"sha256:$linear_load_combination_report_ir_hash\",\"workbench_linear_load_combination_restart_passed\":true,"
 v44_receipt_json="${v44_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_execution_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v44_receipt_json" > "$temporary_receipt"
+v45_receipt_json="${v44_receipt_json/structural-native-distribution-e2e.v44/structural-native-distribution-e2e.v45}"
+direct_linear_load_combination_receipt_fields="\"workbench_direct_linear_load_combination_surface_passed\":true,\"workbench_direct_linear_load_combination_model_sha256\":\"sha256:$direct_linear_load_combination_model_hash\",\"workbench_direct_linear_load_combination_edit_receipt_sha256\":\"sha256:$direct_linear_load_combination_edit_receipt_hash\",\"workbench_direct_linear_load_combination_request_receipt_sha256\":\"sha256:$direct_linear_load_combination_request_receipt_hash\",\"workbench_direct_linear_load_combination_request_sha256\":\"sha256:$direct_linear_load_combination_request_hash\",\"workbench_direct_linear_load_combination_assembly_receipt_sha256\":\"sha256:$direct_linear_load_combination_assembly_receipt_hash\",\"workbench_direct_linear_load_combination_checkpoint_sha256\":\"sha256:$direct_linear_load_combination_checkpoint_hash\",\"workbench_direct_linear_load_combination_result_ir_sha256\":\"sha256:$direct_linear_load_combination_result_ir_hash\",\"workbench_direct_linear_load_combination_recovery_sha256\":\"sha256:$direct_linear_load_combination_recovery_hash\",\"workbench_direct_linear_load_combination_report_ir_sha256\":\"sha256:$direct_linear_load_combination_report_ir_hash\",\"workbench_direct_linear_load_combination_restart_passed\":true,"
+v45_receipt_json="${v45_receipt_json/\"workbench_result_view_surface_passed\":true,/${direct_linear_load_combination_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v45_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

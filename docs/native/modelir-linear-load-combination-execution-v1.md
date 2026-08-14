@@ -61,6 +61,8 @@ assembly receipt, final checkpoint, ResultIR, recovery, and ReportIR. It proves 
 `1.2 * LC_WEAK - 0.5 * LC_STRONG` is exactly `[0, -12000, 5000, 0, 0, 0]`, direct/restart bytes are
 identical, and fallback is zero.
 
-This does not claim nested or arbitrary-term combinations, self-weight, time-dependent or staged
-combinations, shell or nonlinear combination execution, HIP parity, engineering acceptance, or C6
-decommission.
+This exact-two v1 receipt profile remains frozen. The additive two-through-64 direct-pattern
+profile, its v2 provenance/request receipt and installed v45 evidence are specified in
+`docs/native/modelir-direct-linear-load-combination-v1.md`; they do not change these v1 bytes.
+This does not claim nested combinations, self-weight, time-dependent or staged combinations, shell
+or nonlinear combination execution, HIP parity, engineering acceptance, or C6 decommission.

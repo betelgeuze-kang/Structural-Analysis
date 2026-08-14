@@ -133,6 +133,16 @@ int main() {
         direct_with_combination.operator_result.tangent == result.operator_result.tangent,
         "combination presence preserves direct-pattern operator");
 
+    structural::tests::ModelIrAssemblyFixture direct_terms_fixture;
+    direct_terms_fixture.enable_three_pattern_linear_combination();
+    const structural::model_ir::Model direct_terms_model(direct_terms_fixture.descriptor);
+    const auto direct_terms = structural::assembly::assemble_model_ir_linear_reference(
+        direct_terms_model, "combo", displacement, direction);
+    expect(
+        direct_terms.external_load
+            == std::vector<double>({12.0, -24.0, -4.0, 0.0, 0.0, 0.0, 40.0}),
+        "three-pattern combination preserves declared signed-factor order");
+
     structural::tests::ModelIrAssemblyFixture short_combination_fixture;
     short_combination_fixture.enable_linear_combination();
     short_combination_fixture.load_combinations[0].term_count = 1U;
@@ -144,7 +154,23 @@ int main() {
                 short_combination_model, "combo", displacement, direction));
         },
         SA_ERR_ANALYSIS_NOT_READY,
-        "combination with other than two terms must fail closed");
+        "combination with fewer than two terms must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture oversized_combination_fixture;
+    oversized_combination_fixture.enable_linear_combination();
+    std::array<sa_load_combination_term_v1, 65> oversized_terms {};
+    oversized_terms.fill(oversized_combination_fixture.load_combination_terms[0]);
+    oversized_combination_fixture.load_combinations[0].terms = oversized_terms.data();
+    oversized_combination_fixture.load_combinations[0].term_count = oversized_terms.size();
+    const structural::model_ir::Model oversized_combination_model(
+        oversized_combination_fixture.descriptor);
+    expect_status(
+        [&oversized_combination_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                oversized_combination_model, "combo", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "combination with more than 64 direct terms must fail closed");
 
     structural::tests::ModelIrAssemblyFixture duplicate_term_fixture;
     duplicate_term_fixture.enable_linear_combination();

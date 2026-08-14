@@ -243,7 +243,9 @@ def _oracle() -> dict[str, np.ndarray]:
         row_offsets.append(len(columns))
     external = np.asarray([10.0, -20.0, 0.0, 0.0, 0.0, 0.0, 30.0])
     secondary = np.asarray([0.0, 0.0, 8.0, 0.0, 0.0, 0.0, 0.0])
+    tertiary = np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 16.0])
     combination_external = 1.2 * external - 0.5 * secondary
+    direct_terms_external = combination_external + 0.25 * tertiary
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -259,6 +261,9 @@ def _oracle() -> dict[str, np.ndarray]:
         "model_assembly.combination_external_load": combination_external,
         "model_assembly.combination_equilibrium_residual": internal[active]
         - combination_external,
+        "model_assembly.direct_terms_external_load": direct_terms_external,
+        "model_assembly.direct_terms_equilibrium_residual": internal[active]
+        - direct_terms_external,
     }
 
 

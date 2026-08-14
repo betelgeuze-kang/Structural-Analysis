@@ -104,6 +104,7 @@ enum {
 #define SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT UINT64_C(1000000)
 #define SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES UINT64_C(100000000)
 #define SA_MODEL_IR_LINEAR_MAX_RECOVERY_RECORD_COUNT UINT64_C(1000000)
+#define SA_MODEL_IR_LINEAR_MAX_DIRECT_COMBINATION_TERMS UINT64_C(64)
 #define SA_GENERALIZED_EIGEN_MAX_ORDER UINT64_C(128)
 #define SA_GENERALIZED_EIGEN_MAX_SWEEPS UINT32_C(4096)
 
@@ -601,8 +602,8 @@ typedef struct sa_reference_element_result_v1 {
  * reference element and canonical CSR sources. The immutable sizes query returns exact lengths;
  * execute requires caller-owned disjoint host buffers with exactly those lengths and publishes
  * them only after the complete operation succeeds. The frozen load_pattern_id/index names are
- * legacy load-case aliases: they select either one pattern or one bounded two-pattern linear
- * combination, and cross-family ambiguity fails closed.
+ * legacy load-case aliases: they select either one pattern or one bounded linear combination of
+ * two through 64 unique direct patterns, and cross-family ambiguity fails closed.
  */
 typedef struct sa_model_ir_linear_assembly_sizes_v1 {
     uint32_t abi_version;

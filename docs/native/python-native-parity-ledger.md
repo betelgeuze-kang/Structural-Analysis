@@ -132,11 +132,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   constrained three-element CSR graph match an independent NumPy oracle. A separate C++
   composition target now resolves every element in a bounded typed ModelIR linear
   frame3d/truss3d graph, maps six canonical DOFs per node, selects one direct nodal-load pattern or
-  one exactly two-pattern signed linear combination, and emits reduced tangent, mass,
+  one bounded two-through-64-pattern signed direct linear combination, and emits reduced tangent, mass,
   internal/external/equilibrium residual, JVP and per-element recovery. Its three-node mixed graph
-  and both the direct and combined external-load vectors independently match NumPy for all 43
+  and the direct, exact-two and explicit three-pattern external-load vectors independently match NumPy for all 43
   structural entries. This is not general ModelIR assembly: nonzero constraints, offsets/releases,
-  self-weight, nested or arbitrary-term combinations, stages, shell/nonlinear formulations,
+  self-weight, nested or more-than-64-term combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust now provide a
   bounded C3 integration candidate. A separate
   CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,

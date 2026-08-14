@@ -53,5 +53,14 @@ int main() {
     emit(
         "model_assembly.combination_equilibrium_residual",
         combination.equilibrium_residual);
+    structural::tests::ModelIrAssemblyFixture direct_terms_fixture;
+    direct_terms_fixture.enable_three_pattern_linear_combination();
+    const structural::model_ir::Model direct_terms_model(direct_terms_fixture.descriptor);
+    const auto direct_terms = structural::assembly::assemble_model_ir_linear_reference(
+        direct_terms_model, "combo", displacement, direction);
+    emit("model_assembly.direct_terms_external_load", direct_terms.external_load);
+    emit(
+        "model_assembly.direct_terms_equilibrium_residual",
+        direct_terms.equilibrium_residual);
     return 0;
 }

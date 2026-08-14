@@ -51,8 +51,8 @@ struct ModelIrLinearAssemblyResult final {
 
 /// Project a validated typed ModelIR graph through the reference frame/truss sources and assemble
 /// one canonical homogeneous-constraint-reduced operator. The frozen ABI v1.13
-/// `load_pattern_id` selector accepts either one pattern or one bounded two-pattern linear
-/// combination; nested or ambiguous selectors fail closed.
+/// `load_pattern_id` selector accepts either one pattern or one bounded two-to-64-term linear
+/// combination of unique direct patterns; nested or ambiguous selectors fail closed.
 [[nodiscard]] ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     const model_ir::Model& model,
     std::string_view load_pattern_id,

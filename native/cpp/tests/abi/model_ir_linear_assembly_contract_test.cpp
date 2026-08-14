@@ -276,10 +276,10 @@ struct OutputStorage final {
     return true;
 }
 
-[[nodiscard]] bool bounded_linear_combination_crosses_the_frozen_abi() {
+[[nodiscard]] bool bounded_direct_linear_combination_crosses_the_frozen_abi() {
     const auto api = load_api(SA_ABI_V1_13);
     structural::tests::ModelIrAssemblyFixture fixture;
-    fixture.enable_linear_combination();
+    fixture.enable_three_pattern_linear_combination();
     sa_model_ir_handle_v1* handle = nullptr;
     CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
 
@@ -304,7 +304,7 @@ struct OutputStorage final {
     CHECK(result.execution_backend == SA_EXECUTION_BACKEND_CPU);
     CHECK(result.fallback_count == 0U);
     CHECK(storage.external_load
-          == std::vector<double>({12.0, -24.0, -4.0, 0.0, 0.0, 0.0, 36.0}));
+          == std::vector<double>({12.0, -24.0, -4.0, 0.0, 0.0, 0.0, 40.0}));
 
     OutputStorage repeated(sizes);
     auto repeated_outputs = repeated.descriptor();
@@ -455,7 +455,7 @@ int main() {
     const std::array tests {
         table_is_append_only,
         successful_assembly_is_canonical_and_deterministic,
-        bounded_linear_combination_crosses_the_frozen_abi,
+        bounded_direct_linear_combination_crosses_the_frozen_abi,
         failures_are_atomic_and_aliases_fail_closed,
         immutable_calls_are_concurrent,
         unsupported_graph_sizes_fail_atomically,
