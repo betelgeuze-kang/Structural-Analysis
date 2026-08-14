@@ -51,6 +51,10 @@ stable ID, enforces uniqueness across every pattern, preserves every non-identit
 valid containing-pattern round-trip claim and refuses unsupported-feature ownership without
 cascade. See `docs/native/modelir-nodal-load-target-edit-v1.md` and
 `docs/native/modelir-nodal-load-identity-edit-v1.md`.
+The separate `model-edit-linear-load-pattern-identity` command changes only one unreferenced
+`linear_static` pattern's stable ID. It preserves the full pattern contents and refuses
+load-combination, construction-stage, unsupported-feature, or round-trip ownership without
+cascade; see `docs/native/modelir-linear-load-pattern-identity-edit-v1.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. The separate `model-edit-constraint-target` command
 changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves
@@ -102,13 +106,14 @@ revalidates through C++. General constraint or topology deletion remains open. S
 The bounded linear-load-pattern creator atomically appends one contiguous-index `linear_static`
 pattern with zero self-weight and one globally unique, nonzero index-zero nodal load on an existing
 node. It preserves every existing round-trip row and blocker and revalidates through C++; no empty
-pattern is published. Self-weight, time functions, other load families, pattern editing, and
-retargeting remain outside the command. Its bounded inverse removes only the last
+pattern is published. Self-weight, time functions, other load families, pattern content editing,
+and retargeting remain outside the command. Its bounded inverse removes only the last
 contiguous neutral zero-self-weight pattern with one neutral nonzero nodal load after rejecting
 combination, stage, unsupported-feature and direct round-trip references; it does not cascade,
 reindex, or delete the target node.
 See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
-boundary and `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary.
+boundary, `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary, and
+`docs/native/modelir-linear-load-pattern-identity-edit-v1.md` for bounded identity replacement.
 The bounded linear-load-combination creator appends one contiguous-index neutral `linear` row from
 two through 64 unique existing `linear_static` patterns and finite nonzero factors. It preserves all
 other rows and blockers and revalidates through the C++ reference/cycle checks. Exact-two authoring

@@ -956,6 +956,24 @@ fn run_nodal_load_identity_edit(
     ])
 }
 
+fn run_linear_load_pattern_identity_edit(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    replacement_load_pattern_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-load-pattern-identity"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--new-load-pattern"),
+        text(replacement_load_pattern_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_add(
     source: &Path,
     destination: &Path,
@@ -7214,6 +7232,276 @@ fn nodal_load_identity_edit_is_deterministic_globally_unique_and_cpu_executable(
 
     let existing =
         run_nodal_load_identity_edit(&source, &first, "LC_WEAK", "L_WEAK_N2", "L_WEAK_N2_RENAMED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_pattern_identity_edit_is_deterministic_fail_closed_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("load-pattern identity source bytes");
+    let source_model = validate_model_bytes(&source_bytes)
+        .expect("C++ load-pattern identity source validation")
+        .snapshot;
+
+    let first = temporary.0.join("load-pattern-identity-first");
+    let second = temporary.0.join("load-pattern-identity-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_pattern_identity_edit(
+            &source,
+            destination,
+            "LC_WEAK",
+            "LC_WEAK_RENAMED",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("load-pattern identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first load-pattern identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second load-pattern identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged load-pattern identity source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("identity-edited load-pattern ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict identity-edited load pattern");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++ load-pattern identity validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model.value()[family]);
+    }
+    let source_patterns = source_model.value()["load_patterns"]
+        .as_array()
+        .expect("source load patterns");
+    let edited_patterns = edited.value()["load_patterns"]
+        .as_array()
+        .expect("edited load patterns");
+    assert_eq!(source_patterns.len(), edited_patterns.len());
+    for (source_pattern, edited_pattern) in source_patterns.iter().zip(edited_patterns) {
+        if source_pattern["id"] == "LC_WEAK" {
+            assert_eq!(edited_pattern["id"], "LC_WEAK_RENAMED");
+            for key in [
+                "index",
+                "analysis_type",
+                "self_weight",
+                "nodal_loads",
+                "source_id",
+                "extensions",
+            ] {
+                assert_eq!(edited_pattern[key], source_pattern[key]);
+            }
+        } else {
+            assert_eq!(edited_pattern, source_pattern);
+        }
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-load-pattern-identity.v1")
+        .expect("load-pattern identity provenance extension");
+    assert_eq!(extension["operation"], "linear_load_pattern_identity_edit");
+    assert_eq!(extension["source_load_pattern_id"], "LC_WEAK");
+    assert_eq!(extension["replacement_load_pattern_id"], "LC_WEAK_RENAMED");
+    assert_eq!(extension["load_pattern_index"], 1);
+    assert_eq!(extension["analysis_type"], "linear_static");
+    assert_eq!(
+        extension["retained_self_weight"],
+        serde_json::json!([0, 0, 0])
+    );
+    assert_eq!(
+        extension["retained_nodal_loads"],
+        source_model.value()["load_patterns"][1]["nodal_loads"]
+    );
+    assert_eq!(extension["retained_source_id"], "generated:LC_WEAK");
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("load-pattern identity receipt"),
+    )
+    .expect("load-pattern identity receipt JSON");
+    assert_eq!(receipt["operation"], "linear_load_pattern_identity_edit");
+    assert_eq!(receipt["source_load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["replacement_load_pattern_id"], "LC_WEAK_RENAMED");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("load-pattern-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "load-pattern-identity-c5",
+        "LC_WEAK_RENAMED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("load-pattern identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("load-pattern identity direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("load-pattern identity direct recovery"),
+    )
+    .expect("load-pattern identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("load-pattern identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("load-pattern identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, source_id, replacement_id, code) in [
+        (
+            "load-pattern-identity-missing",
+            "MISSING",
+            "LC_NEW",
+            "workbench_model_edit_linear_load_pattern_identity_pattern_missing",
+        ),
+        (
+            "load-pattern-identity-collision",
+            "LC_WEAK",
+            "LC_AXIAL",
+            "workbench_model_edit_linear_load_pattern_identity_replacement_exists",
+        ),
+        (
+            "load-pattern-identity-no-op",
+            "LC_WEAK",
+            "LC_WEAK",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "load-pattern-identity-invalid",
+            "LC_WEAK",
+            "1_INVALID",
+            "workbench_model_edit_linear_load_pattern_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_linear_load_pattern_identity_edit(&source, &destination, source_id, replacement_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let write_model = |name: &str, value: &Value| {
+        let path = temporary.0.join(name);
+        std::fs::write(
+            &path,
+            canonicalize_model_ir_v2(value)
+                .expect("canonical load-pattern identity rejection source")
+                .as_bytes(),
+        )
+        .expect("write load-pattern identity rejection source");
+        path
+    };
+    let mut combination_owned = source_model.value().clone();
+    combination_owned["load_combinations"] = serde_json::json!([{
+        "id": "COMB_PATTERN_REF", "index": 0, "combination_type": "linear",
+        "terms": [{"ref_kind": "load_pattern", "ref_id": "LC_WEAK", "factor": 1.0}],
+        "source_id": null, "extensions": {}
+    }]);
+    let mut stage_owned = source_model.value().clone();
+    stage_owned["construction_stages"] = serde_json::json!([{
+        "id": "STAGE1", "index": 0, "active_element_ids": ["E1"],
+        "active_constraint_ids": ["BC1"], "load_pattern_ids": ["LC_WEAK"],
+        "extensions": {}
+    }]);
+    let mut feature_owned = source_model.value().clone();
+    feature_owned["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.pattern-identity-owned", "kind": "unsupported_solver_feature",
+        "source_entity_id": "LC_WEAK", "disposition": "blocked", "blocking": true,
+        "detail": "Pattern identity is externally owned.", "extensions": {}
+    }]);
+    let mut roundtrip_owned = source_model.value().clone();
+    roundtrip_owned["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:LC_WEAK", "entity_kind": "load_pattern",
+        "model_ir_entity_id": "LC_WEAK", "mapping_status": "exact", "extensions": {}
+    }]);
+    for (name, value, code) in [
+        (
+            "combination-owned-pattern.json",
+            combination_owned,
+            "workbench_model_edit_linear_load_pattern_identity_referenced_by_combination",
+        ),
+        (
+            "stage-owned-pattern.json",
+            stage_owned,
+            "workbench_model_edit_linear_load_pattern_identity_referenced_by_stage",
+        ),
+        (
+            "feature-owned-pattern.json",
+            feature_owned,
+            "workbench_model_edit_linear_load_pattern_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned-pattern.json",
+            roundtrip_owned,
+            "workbench_model_edit_linear_load_pattern_identity_roundtrip_owned",
+        ),
+    ] {
+        let owned_source = write_model(name, &value);
+        let destination = temporary.0.join(format!("{name}.output"));
+        let rejected = run_linear_load_pattern_identity_edit(
+            &owned_source,
+            &destination,
+            "LC_WEAK",
+            "LC_WEAK_RENAMED",
+        );
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let existing =
+        run_linear_load_pattern_identity_edit(&source, &first, "LC_WEAK", "LC_WEAK_RENAMED");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

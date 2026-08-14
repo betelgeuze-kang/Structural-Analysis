@@ -21,6 +21,7 @@
       "model-edit-nodal-load",
       "model-edit-nodal-load-target",
       "model-edit-nodal-load-identity",
+      "model-edit-linear-load-pattern-identity",
       "model-edit-constraint-target",
       "model-edit-constraint-value",
       "model-edit-linear-material",

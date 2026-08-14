@@ -40,6 +40,8 @@ with Python and Node lookup counts both zero.
 ## Claim boundary
 
 This closes only target-node replacement for one existing nodal load. Component and identity edits,
-creation and deletion are separate bounded C5 surfaces; pattern editing remains open. General
+creation and deletion are separate bounded C5 surfaces; pattern content editing and reference
+cascades remain open, while unreferenced linear-pattern identity replacement is the separate v68
+surface. General
 topology, solver or visual editing, engineering acceptance, React/TypeScript removal, approved HIP C2,
 and C6 remain open.

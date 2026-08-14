@@ -47,6 +47,7 @@ initialized-checkpoint restart, and fallback 0 with Python and Node lookup count
 
 This closes only identity replacement for one existing nodal load. It does not cascade unsupported
 feature ownership; change the target, components or containing pattern; create or delete loads;
-edit load-pattern or combination identities; change constraints or topology; select a solver;
-provide general visual editing or engineering acceptance; remove React/TypeScript; prove
+edit combination identities or cascade pattern references (bounded unreferenced linear-pattern
+identity replacement is the separate v68 surface); change constraints or topology; select a
+solver; provide general visual editing or engineering acceptance; remove React/TypeScript; prove
 approved HIP C2; or authorize C6.
