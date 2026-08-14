@@ -35,6 +35,9 @@ source-owned, partial, nonzero or nonterminal rows before strict C++ revalidatio
 The installed `model-add-linear-load-pattern` command atomically appends one zero-self-weight
 linear-static pattern and its first nonzero nodal load on an existing node with strict C++
 revalidation.
+The installed `model-add-linear-load-combination` command appends one neutral contiguous linear
+combination from exactly two distinct existing linear-static patterns and finite nonzero factors,
+then C++-validates the reference graph while preserving the explicit solver-preflight boundary.
 The installed `model-delete-linear-load-pattern` command removes only the last contiguous neutral
 zero-self-weight linear-static pattern with one neutral nonzero nodal load, and rejects combined,
 staged, mapped, source-owned, multiple-load, minimum-pattern or nonterminal candidates before
@@ -69,7 +72,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v41 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v42 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -94,6 +97,8 @@ plus standalone neutral-node creation with duplicate identity/coordinate rejecti
 six-DOF fixed support, exact unchanged active DOFs/load, typed frame recovery and restart parity,
 plus last-neutral orphan-node deletion with source/extension/reference guards, exact restored
 two-node topology and active DOFs/load, typed frame recovery and restart parity,
+plus two-pattern linear-load-combination creation with exact ordered factor bindings, C++ reference
+validation, deterministic topology view and an explicit no-output solver-preflight rejection,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

@@ -291,7 +291,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 47. emits an append-only v41 hash-bound receipt that inherits every v40 identity and additionally
    binds the orphan-node-deleted ModelIR and edit receipt, generated request, completed ResultIR and
    typed frame recovery identities.
-   The receipt checker continues to accept frozen v1 through v40 receipts (including frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+48. appends one neutral contiguous `linear` load combination twice from exactly two distinct
+   existing `linear_static` patterns and finite nonzero factors, proves byte-identical
+   ModelIR/edit-receipt bytes and unchanged source bytes, rejects duplicate identities, missing or
+   repeated patterns and zero/non-finite factors without partial output, then proves strict C++
+   reference validation, deterministic topology rendering and fail-closed no-output linear-solver
+   request preflight;
+49. emits an append-only v42 hash-bound receipt that inherits every v41 identity and additionally
+   binds the combination-added ModelIR, edit receipt, installed validation/view and expected
+   solver-preflight rejection identities.
+   The receipt checker continues to accept frozen v1 through v41 receipts (including frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
@@ -322,7 +331,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    standalone neutral-node addition, fixed-support composition, unchanged active-DOF/load, typed
    frame recovery and restart authority; and no pre-v41 receipt is installed terminal neutral
    orphan-node deletion, restored two-node topology/active-DOF/load, typed frame recovery and
-   restart authority.
+   restart authority; and no pre-v42 receipt is installed two-pattern linear-load-combination
+   authoring, C++ reference validation, deterministic view and solver-preflight rejection authority.
 
 The reference command is:
 

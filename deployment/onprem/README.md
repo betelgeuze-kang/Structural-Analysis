@@ -36,6 +36,10 @@ absent from the runtime image.
   `model-delete-linear-load-pattern` removes only the last contiguous neutral zero-self-weight
   linear-static pattern with one neutral nonzero load while rejecting combined, staged, mapped,
   source-owned, multiple-load, minimum-pattern or nonterminal candidates.
+  `model-add-linear-load-combination` adds one neutral contiguous linear combination from exactly
+  two distinct existing linear-static patterns and finite nonzero factors. The installed surface
+  C++-validates the reference graph and intentionally fails solver preflight until combination
+  evaluation is implemented.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
   `model-delete-linear-material` removes only the last contiguous neutral unreferenced v1 linear

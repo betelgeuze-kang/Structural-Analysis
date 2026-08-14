@@ -251,6 +251,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "one standalone neutral node" in workbench["claim"]
     assert "model-add-node" in workbench["claim"]
     assert "model-delete-orphan-node" in workbench["claim"]
+    assert "model-add-linear-load-combination" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
@@ -280,6 +281,25 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in orphan_node_delete["claim"]
     assert "HIP C2" in orphan_node_delete["claim"]
     assert "C6" in orphan_node_delete["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_linear_load_combination_add"
+        )
+        is True
+    )
+    load_combination_add = payload["capabilities"][
+        "modelir_linear_load_combination_add"
+    ]
+    assert load_combination_add["cutover_gate"] == "C5"
+    assert load_combination_add["owner"] == "structural-workbench"
+    assert "exactly two ordered terms" in load_combination_add["claim"]
+    assert "distinct existing linear_static load patterns" in load_combination_add["claim"]
+    assert "finite nonzero factors" in load_combination_add["claim"]
+    assert "single C ABI into C++" in load_combination_add["claim"]
+    assert "fail-closed no-output model-linear request preflight" in load_combination_add["claim"]
+    assert "nested combination references" in load_combination_add["claim"]
+    assert "approved HIP C2" in load_combination_add["claim"]
+    assert "C6" in load_combination_add["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_truss3d_authoring") is True
     truss_authoring = payload["capabilities"]["modelir_truss3d_authoring"]
     assert truss_authoring["cutover_gate"] == "C5"
@@ -876,6 +896,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v39" in distribution["claim"]
     assert "append-only v40" in distribution["claim"]
     assert "append-only v41" in distribution["claim"]
+    assert "append-only v42" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -885,13 +906,15 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v40 receipts" in distribution["claim"]
+    assert "frozen v1 through v41 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-section deletion" in distribution["claim"]
     assert "last-neutral-truss-section deletion" in distribution["claim"]
     assert "standalone neutral-node creation" in distribution["claim"]
     assert "last-neutral orphan-node deletion" in distribution["claim"]
+    assert "two-pattern linear-load-combination creation" in distribution["claim"]
+    assert "fail-closed no-output solver preflight" in distribution["claim"]
     assert "exact unchanged active DOFs/load" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
@@ -923,9 +946,11 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v41 E2E" in deployment["claim"]
+    assert "distribution v42 E2E" in deployment["claim"]
     assert "standalone neutral-node creation" in deployment["claim"]
     assert "last-neutral orphan-node deletion" in deployment["claim"]
+    assert "two-pattern linear-load-combination creation" in deployment["claim"]
+    assert "fail-closed no-output solver preflight" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]

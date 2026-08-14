@@ -52,6 +52,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-truss-section-deletion-v1.md"),
     Path("docs/native/modelir-node-add-v1.md"),
     Path("docs/native/modelir-orphan-node-delete-v1.md"),
+    Path("docs/native/modelir-linear-load-combination-add-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
@@ -204,6 +205,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-nodal-load",
             "model-delete-nodal-load",
             "model-delete-linear-load-pattern",
+            "model-add-linear-load-combination",
             "model-delete-linear-material",
             "model-add-frame-section",
             "model-delete-frame-section",
@@ -334,6 +336,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "node_lookup_count",
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
+        "structural-native-distribution-e2e.v42",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -351,6 +354,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_orphan_node_delete_request_sha256",
         "workbench_orphan_node_delete_result_ir_sha256",
         "workbench_orphan_node_delete_recovery_sha256",
+        "exercise_linear_load_combination_add_surface",
+        "model-add-linear-load-combination",
+        "workbench_linear_load_combination_add_surface_passed",
+        "workbench_linear_load_combination_add_model_sha256",
+        "workbench_linear_load_combination_add_receipt_sha256",
+        "workbench_linear_load_combination_add_validation_sha256",
+        "workbench_linear_load_combination_add_view_sha256",
+        "workbench_linear_load_combination_add_solver_rejection_sha256",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -578,6 +589,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v42",
+            "V42_LINEAR_LOAD_COMBINATION_ADD_KEYS",
+            "workbench_linear_load_combination_add_surface_passed",
+            "workbench_linear_load_combination_add_solver_rejection_sha256",
             "structural-native-distribution-e2e.v41",
             "V41_ORPHAN_NODE_DELETE_KEYS",
             "workbench_orphan_node_delete_surface_passed",
@@ -624,6 +639,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v42 hash-bound receipt",
+            "frozen v1 through v41 receipts",
+            "no pre-v42 receipt",
             "append-only v41 hash-bound receipt",
             "frozen v1 through v40 receipts",
             "no pre-v41 receipt",
@@ -805,6 +823,22 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Frozen v1 through v40",
             "receipts retain their narrower authority",
             "fallback 0",
+        ),
+        blockers=blockers,
+    )
+
+    linear_load_combination_add_doc = _text(
+        root, Path("docs/native/modelir-linear-load-combination-add-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-linear-load-combination-add-v1.md"),
+        text=linear_load_combination_add_doc,
+        tokens=(
+            "model-add-linear-load-combination",
+            "Installed CPU static/shared E2E v42",
+            "workbench_model_linear_request_preflight_failed",
+            "solver execution",
+            "C6",
         ),
         blockers=blockers,
     )
@@ -1123,9 +1157,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v41 E2E",
+            "CPU static/shared distribution v42 E2E",
             "standalone neutral-node creation",
             "last-neutral orphan-node deletion",
+            "two-pattern linear-load-combination creation",
+            "fail-closed no-output solver preflight",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",

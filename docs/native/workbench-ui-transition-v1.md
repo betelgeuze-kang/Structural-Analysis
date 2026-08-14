@@ -160,8 +160,15 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   blockers, then strictly reparses and C++-revalidates before create-new publication. Installed
   E2E composes the connected-member, nodal-load and fixed-constraint additions, selects the new
   pattern in a bound request, proves the exact N2-FX active load, changed recovery and fallback 0.
-  Empty patterns, self-weight, combinations, time functions, other load families, editing,
+  Empty patterns, self-weight, time functions, other load families, editing,
   deletion, retargeting and visual authoring remain open.
+- `model-add-linear-load-combination`: deterministic creation of one contiguous neutral `linear`
+  combination from exactly two distinct existing `linear_static` patterns and finite nonzero
+  factors. Rust preserves every unrelated row, blocker and round-trip mapping, then strictly
+  reparses and C++-revalidates the reference graph before create-new publication. Installed E2E
+  proves deterministic validation/view output and that the unsupported linear-solver preflight
+  fails before publication. Nested/arbitrary terms, editing/deletion, evaluation and solver
+  selection remain open.
 - `model-add-linear-material`: deterministic creation of one v1 `linear_elastic_isotropic`
   material with a unique contiguous index, complete finite physical SI parameters, neutral source
   ownership, empty extensions and the fixed stateless trial/commit/rollback schema. Rust preserves
@@ -383,8 +390,8 @@ existing-restrained-DOF prescribed-value, existing-linear-elastic-material param
 existing frame/truss-section parameters, frame orientation, compatible frame/truss property
 references, and existing-two-node-element connectivity commands close only their documented
 provenance-bound operations. The frame/truss member, nodal-load, fixed-constraint, atomic
-linear-static-pattern/first-load, stateless linear-elastic-material and frame/truss-section
-creators close only their documented fixed constructions. The two leaf deleters close only one
+linear-static-pattern/first-load, two-pattern linear-combination, stateless linear-elastic-material
+and frame/truss-section creators close only their documented fixed constructions. The two leaf deleters close only one
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
 endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
 homogeneous six-DOF zero row while retaining the base constraint.
@@ -392,7 +399,7 @@ The nodal-load deleter closes only one last contiguous neutral unreferenced nonz
 row while retaining another nonzero load in the same linear-static pattern.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
-property/material/section/load-combination/constraint-topology editing remain open, so the
+property/material/section/nested-or-arbitrary-load-combination/constraint-topology editing remain open, so the
 composite visual parity row stays open.
 
 The model-bound CPU linear request creator additionally closes selection of one existing

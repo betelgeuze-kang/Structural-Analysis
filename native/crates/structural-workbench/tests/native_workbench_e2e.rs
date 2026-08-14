@@ -847,6 +847,29 @@ fn run_linear_load_pattern_add(
     ])
 }
 
+fn run_linear_load_combination_add(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    first_term: [&str; 2],
+    second_term: [&str; 2],
+) -> Output {
+    run_workbench(&[
+        text("model-add-linear-load-combination"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--term"),
+        text(first_term[0]),
+        text(first_term[1]),
+        text("--term"),
+        text(second_term[0]),
+        text(second_term[1]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_delete(
     source: &Path,
     destination: &Path,
@@ -5080,6 +5103,267 @@ fn linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executabl
             .expect("blocked pattern-added model"),
     )
     .expect("blocked pattern-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_solver_fail_closed() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("load-combination source bytes");
+    let source_validation =
+        validate_model_bytes(&source_bytes).expect("C++-validated load-combination source");
+    let source_model = &source_validation.snapshot;
+
+    let first = temporary.0.join("linear-load-combination-add-first");
+    let second = temporary.0.join("linear-load-combination-add-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_combination_add(
+            &source,
+            destination,
+            "COMBO_SERVICE",
+            ["LC_WEAK", "1.2"],
+            ["LC_STRONG", "-0.5"],
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-load-combination add receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first combination-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second combination-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged combination-add source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("combination-added ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict combination-added ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++-validated combination model");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    assert_eq!(validation.report.entity_counts.load_combinations, 1);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(edited.value()[family], source_model.value()[family]);
+    }
+    assert_eq!(
+        edited.value()["load_combinations"],
+        serde_json::json!([{
+            "id": "COMBO_SERVICE",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+            ],
+            "source_id": null,
+            "extensions": {}
+        }])
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-add-linear-load-combination.v1")
+        .expect("load-combination provenance extension");
+    assert_eq!(extension["operation"], "linear_load_combination_add");
+    assert_eq!(extension["load_combination_id"], "COMBO_SERVICE");
+    assert_eq!(extension["load_combination_index"], 0);
+    assert_eq!(
+        extension["terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("linear-load-combination receipt"),
+    )
+    .expect("linear-load-combination receipt JSON");
+    assert_eq!(receipt["operation"], "linear_load_combination_add");
+    assert_eq!(receipt["load_combination_id"], "COMBO_SERVICE");
+    assert_eq!(receipt["load_combination_index"], 0);
+    assert_eq!(receipt["combination_type"], "linear");
+    assert_eq!(
+        receipt["terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let view = run_workbench(&[text("model-view"), first.join("model-ir.json").as_os_str()]);
+    assert_success(&view);
+    assert!(String::from_utf8_lossy(&view.stdout).contains("C++ semantic snapshot: verified"));
+
+    let unsupported_request = temporary.0.join("combination-solver-request-rejected");
+    let preflight = run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &unsupported_request,
+        "linear-combination-not-yet-executable",
+        "LC_WEAK",
+    );
+    assert_eq!(preflight.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&preflight.stdout)
+        .contains("workbench_model_linear_request_preflight_failed"));
+    assert!(!unsupported_request.exists());
+
+    let append_second = temporary.0.join("linear-load-combination-add-next-index");
+    assert_success(&run_linear_load_combination_add(
+        &first.join("model-ir.json"),
+        &append_second,
+        "COMBO_STRENGTH",
+        ["LC_AXIAL", "1.4"],
+        ["LC_TORSION", "0.7"],
+    ));
+    let appended: Value = serde_json::from_slice(
+        &std::fs::read(append_second.join("model-ir.json")).expect("second combination model"),
+    )
+    .expect("second combination JSON");
+    assert_eq!(appended["load_combinations"][1]["index"], 1);
+    assert_eq!(appended["load_combinations"][1]["id"], "COMBO_STRENGTH");
+
+    for (name, combination, first_term, second_term, expected_status, expected_code) in [
+        (
+            "duplicate-combination",
+            "COMBO_SERVICE",
+            ["LC_AXIAL", "1"],
+            ["LC_TORSION", "1"],
+            1,
+            "workbench_model_add_linear_load_combination_identity_exists",
+        ),
+        (
+            "missing-pattern",
+            "COMBO_MISSING",
+            ["LC_WEAK", "1"],
+            ["LC_MISSING", "1"],
+            1,
+            "workbench_model_add_linear_load_combination_pattern_missing",
+        ),
+        (
+            "duplicate-pattern",
+            "COMBO_DUPLICATE",
+            ["LC_WEAK", "1"],
+            ["LC_WEAK", "2"],
+            2,
+            "workbench_usage_error",
+        ),
+        (
+            "zero-factor",
+            "COMBO_ZERO",
+            ["LC_WEAK", "0"],
+            ["LC_STRONG", "1"],
+            2,
+            "workbench_usage_error",
+        ),
+        (
+            "nonfinite-factor",
+            "COMBO_NONFINITE",
+            ["LC_WEAK", "NaN"],
+            ["LC_STRONG", "1"],
+            2,
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("combination-{name}-rejected"));
+        let input = if name == "duplicate-combination" {
+            first.join("model-ir.json")
+        } else {
+            source.clone()
+        };
+        let rejected = run_linear_load_combination_add(
+            &input,
+            &destination,
+            combination,
+            first_term,
+            second_term,
+        );
+        assert_eq!(rejected.status.code(), Some(expected_status));
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let existing_destination = run_linear_load_combination_add(
+        &source,
+        &first,
+        "COMBO_OTHER",
+        ["LC_AXIAL", "1"],
+        ["LC_TORSION", "1"],
+    );
+    assert_eq!(existing_destination.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&existing_destination.stdout)
+        .contains("workbench_stage_destination_exists"));
+
+    let mut blocked = source_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.linear-load-combination-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Combination authoring must preserve unrelated analysis blockers.",
+        "extensions": {}
+    }]);
+    let original_roundtrip_map = blocked["roundtrip_map"].clone();
+    let blocked_source = temporary.0.join("blocked-combination-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked combination source")
+            .as_bytes(),
+    )
+    .expect("write blocked combination source");
+    let blocked_destination = temporary.0.join("blocked-combination-add");
+    assert_success(&run_linear_load_combination_add(
+        &blocked_source,
+        &blocked_destination,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked combination-add receipt"),
+    )
+    .expect("blocked combination-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.linear-load-combination-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked combination-added model"),
+    )
+    .expect("blocked combination-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
 }
 

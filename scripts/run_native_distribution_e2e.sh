@@ -3417,6 +3417,152 @@ exercise_orphan_node_delete_surface() {
 }
 exercise_orphan_node_delete_surface
 
+exercise_linear_load_combination_add_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label add_directory rejection_directory
+  for label in first second; do
+    add_directory="$e2e_root/linear-load-combination-add-$label"
+    rejection_directory="$e2e_root/linear-load-combination-add-$label-solver-rejected"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-linear-load-combination "$source_model" \
+      --load-combination COMBO_SERVICE \
+      --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
+      --output-dir "$add_directory" \
+      > "$e2e_root/linear-load-combination-add-$label.stdout.json"
+    grep -Fq '"operation":"linear_load_combination_add"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"load_combination_id":"COMBO_SERVICE"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"load_combination_index":0' "$add_directory/edit-receipt.json"
+    grep -Fq '"combination_type":"linear"' "$add_directory/edit-receipt.json"
+    grep -Fq '"terms":[{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"},{"factor":-0.5,"ref_id":"LC_STRONG","ref_kind":"load_pattern"}]' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$add_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-linear-load-combination.v1"' \
+      "$add_directory/model-ir.json"
+    grep -Fq '"load_combinations":[{"combination_type":"linear","extensions":{},"id":"COMBO_SERVICE","index":0,"source_id":null,"terms":[{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"},{"factor":-0.5,"ref_id":"LC_STRONG","ref_kind":"load_pattern"}]' \
+      "$add_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$add_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-load-combination-add-$label-validation.json"
+    grep -Fq '"load_patterns":4,"load_combinations":1' \
+      "$e2e_root/linear-load-combination-add-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$add_directory/model-ir.json" \
+      > "$e2e_root/linear-load-combination-add-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/linear-load-combination-add-$label-view.txt"
+
+    if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$add_directory/model-ir.json" \
+      --case linear-combination-not-yet-executable --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$rejection_directory" \
+      > "$e2e_root/linear-load-combination-add-$label-solver-rejection.json"; then
+      echo "installed linear load-combination model reached unsupported solver assembly" >&2
+      exit 1
+    fi
+    grep -Fq 'workbench_model_linear_request_preflight_failed' \
+      "$e2e_root/linear-load-combination-add-$label-solver-rejection.json"
+    test ! -e "$rejection_directory"
+  done
+
+  diff -r "$e2e_root/linear-load-combination-add-first" \
+    "$e2e_root/linear-load-combination-add-second" \
+    > "$e2e_root/linear-load-combination-add-model-diff.txt"
+  cmp "$e2e_root/linear-load-combination-add-first.stdout.json" \
+    "$e2e_root/linear-load-combination-add-second.stdout.json"
+  cmp "$e2e_root/linear-load-combination-add-first-validation.json" \
+    "$e2e_root/linear-load-combination-add-second-validation.json"
+  cmp "$e2e_root/linear-load-combination-add-first-view.txt" \
+    "$e2e_root/linear-load-combination-add-second-view.txt"
+  cmp "$e2e_root/linear-load-combination-add-first-solver-rejection.json" \
+    "$e2e_root/linear-load-combination-add-second-solver-rejection.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear load-combination addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local appended_destination="$e2e_root/linear-load-combination-add-next-index"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination \
+    "$e2e_root/linear-load-combination-add-first/model-ir.json" \
+    --load-combination COMBO_STRENGTH \
+    --term LC_AXIAL 1.4 --term LC_TORSION 0.7 \
+    --output-dir "$appended_destination" \
+    > "$e2e_root/linear-load-combination-add-next-index.stdout.json"
+  grep -Fq '"load_combination_id":"COMBO_STRENGTH"' \
+    "$appended_destination/edit-receipt.json"
+  grep -Fq '"load_combination_index":1' "$appended_destination/edit-receipt.json"
+
+  local duplicate_destination="$e2e_root/linear-load-combination-add-duplicate-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination \
+    "$e2e_root/linear-load-combination-add-first/model-ir.json" \
+    --load-combination COMBO_SERVICE \
+    --term LC_AXIAL 1 --term LC_TORSION 1 \
+    --output-dir "$duplicate_destination" \
+    > "$e2e_root/linear-load-combination-add-duplicate-rejected.stdout.json"; then
+    echo "installed linear load-combination addition accepted a duplicate identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_add_linear_load_combination_identity_exists' \
+    "$e2e_root/linear-load-combination-add-duplicate-rejected.stdout.json"
+  test ! -e "$duplicate_destination"
+
+  local missing_destination="$e2e_root/linear-load-combination-add-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination "$source_model" \
+    --load-combination COMBO_MISSING \
+    --term LC_WEAK 1 --term LC_MISSING 1 \
+    --output-dir "$missing_destination" \
+    > "$e2e_root/linear-load-combination-add-missing-rejected.stdout.json"; then
+    echo "installed linear load-combination addition accepted a missing pattern" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_add_linear_load_combination_pattern_missing' \
+    "$e2e_root/linear-load-combination-add-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local repeated_destination="$e2e_root/linear-load-combination-add-repeated-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination "$source_model" \
+    --load-combination COMBO_REPEATED \
+    --term LC_WEAK 1 --term LC_WEAK 2 \
+    --output-dir "$repeated_destination" \
+    > "$e2e_root/linear-load-combination-add-repeated-rejected.stdout.json"; then
+    echo "installed linear load-combination addition accepted repeated patterns" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_usage_error' \
+    "$e2e_root/linear-load-combination-add-repeated-rejected.stdout.json"
+  test ! -e "$repeated_destination"
+
+  local zero_destination="$e2e_root/linear-load-combination-add-zero-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination "$source_model" \
+    --load-combination COMBO_ZERO \
+    --term LC_WEAK 0 --term LC_STRONG 1 \
+    --output-dir "$zero_destination" \
+    > "$e2e_root/linear-load-combination-add-zero-rejected.stdout.json"; then
+    echo "installed linear load-combination addition accepted a zero factor" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_usage_error' \
+    "$e2e_root/linear-load-combination-add-zero-rejected.stdout.json"
+  test ! -e "$zero_destination"
+}
+exercise_linear_load_combination_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -3782,6 +3928,11 @@ orphan_node_delete_receipt_hash="$(sha256sum "$e2e_root/orphan-node-delete-first
 orphan_node_delete_request_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-request/analysis-request.json" | awk '{print $1}')"
 orphan_node_delete_result_ir_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-direct/result-ir.json" | awk '{print $1}')"
 orphan_node_delete_recovery_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+linear_load_combination_add_model_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first/model-ir.json" | awk '{print $1}')"
+linear_load_combination_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first/edit-receipt.json" | awk '{print $1}')"
+linear_load_combination_add_validation_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-validation.json" | awk '{print $1}')"
+linear_load_combination_add_view_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-view.txt" | awk '{print $1}')"
+linear_load_combination_add_solver_rejection_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-solver-rejection.json" | awk '{print $1}')"
 truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
 truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
 truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
@@ -3929,6 +4080,10 @@ v41_receipt_json="${v40_receipt_json/structural-native-distribution-e2e.v40/stru
 orphan_node_delete_receipt_fields="\"workbench_orphan_node_delete_surface_passed\":true,\"workbench_orphan_node_delete_model_sha256\":\"sha256:$orphan_node_delete_model_hash\",\"workbench_orphan_node_delete_receipt_sha256\":\"sha256:$orphan_node_delete_receipt_hash\",\"workbench_orphan_node_delete_request_sha256\":\"sha256:$orphan_node_delete_request_hash\",\"workbench_orphan_node_delete_result_ir_sha256\":\"sha256:$orphan_node_delete_result_ir_hash\",\"workbench_orphan_node_delete_recovery_sha256\":\"sha256:$orphan_node_delete_recovery_hash\","
 v41_receipt_json="${v41_receipt_json/\"workbench_result_view_surface_passed\":true,/${orphan_node_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v41_receipt_json" > "$temporary_receipt"
+v42_receipt_json="${v41_receipt_json/structural-native-distribution-e2e.v41/structural-native-distribution-e2e.v42}"
+linear_load_combination_add_receipt_fields="\"workbench_linear_load_combination_add_surface_passed\":true,\"workbench_linear_load_combination_add_model_sha256\":\"sha256:$linear_load_combination_add_model_hash\",\"workbench_linear_load_combination_add_receipt_sha256\":\"sha256:$linear_load_combination_add_receipt_hash\",\"workbench_linear_load_combination_add_validation_sha256\":\"sha256:$linear_load_combination_add_validation_hash\",\"workbench_linear_load_combination_add_view_sha256\":\"sha256:$linear_load_combination_add_view_hash\",\"workbench_linear_load_combination_add_solver_rejection_sha256\":\"sha256:$linear_load_combination_add_solver_rejection_hash\","
+v42_receipt_json="${v42_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v42_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

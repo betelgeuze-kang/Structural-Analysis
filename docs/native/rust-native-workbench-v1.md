@@ -78,13 +78,18 @@ revalidates through C++. General constraint or topology deletion remains open. S
 The bounded linear-load-pattern creator atomically appends one contiguous-index `linear_static`
 pattern with zero self-weight and one globally unique, nonzero index-zero nodal load on an existing
 node. It preserves every existing round-trip row and blocker and revalidates through C++; no empty
-pattern is published. Self-weight, combinations, time functions, other load families, pattern
-editing, and retargeting remain outside the command. Its bounded inverse removes only the last
+pattern is published. Self-weight, time functions, other load families, pattern editing, and
+retargeting remain outside the command. Its bounded inverse removes only the last
 contiguous neutral zero-self-weight pattern with one neutral nonzero nodal load after rejecting
 combination, stage, unsupported-feature and direct round-trip references; it does not cascade,
 reindex, or delete the target node.
 See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
 boundary and `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary.
+The bounded linear-load-combination creator appends one contiguous-index neutral `linear` row from
+exactly two distinct existing `linear_static` patterns and two finite nonzero factors. It preserves
+all other rows and blockers and revalidates through the C++ reference/cycle checks. Nested terms,
+arbitrary term counts, term editing/deletion, combination evaluation, and solver selection remain
+outside the command. See `docs/native/modelir-linear-load-combination-add-v1.md`.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
@@ -234,6 +239,10 @@ structural-workbench model-add-linear-load-pattern ADDED-CONSTRAINT-MODEL/model-
   --components 2500 0 0 0 0 0 --output-dir ADDED-PATTERN-MODEL
 structural-workbench model-delete-linear-load-pattern ADDED-PATTERN-MODEL/model-ir.json \
   --load-pattern LC_CUSTOM --output-dir DELETED-PATTERN-MODEL
+structural-workbench model-add-linear-load-combination MODEL.json \
+  --load-combination COMBO_SERVICE \
+  --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
+  --output-dir ADDED-COMBINATION-MODEL
 structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
@@ -342,9 +351,9 @@ The sibling nodal-load edit replaces exactly six SI force/moment components for 
 inside one named pattern under the same provenance and C++ revalidation policy; its matching
 load-pattern round-trip row is conservatively marked approximated. The constraint-value editor
 changes one existing restrained DOF's finite prescribed metre/radian value and similarly degrades a
-matching constraint row. None of the commands provides visual dragging, entity creation/deletion,
-load/constraint retargeting, combinations, restraint-mask changes, or general topology or solver
-editing. Two further closed property commands replace all parameters of one existing v1
+matching constraint row. None of these existing-entity editors provides visual dragging,
+load/constraint retargeting, existing-combination term editing, restraint-mask changes, or general
+topology or solver editing. Two further closed property commands replace all parameters of one existing v1
 `linear_elastic_isotropic` material or one existing v1 `frame_3d` section. They require physical SI
 ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and
 cannot create, delete, retarget, or change type. A further frame-element orientation command edits

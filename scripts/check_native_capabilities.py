@@ -50,6 +50,7 @@ EXPECTED_OWNERS = {
     "modelir_fixed_constraint_add": "structural-workbench",
     "modelir_fixed_constraint_deletion": "structural-workbench",
     "modelir_linear_load_pattern_add": "structural-workbench",
+    "modelir_linear_load_combination_add": "structural-workbench",
     "modelir_linear_load_pattern_deletion": "structural-workbench",
     "modelir_linear_material_add": "structural-workbench",
     "modelir_linear_material_deletion": "structural-workbench",
