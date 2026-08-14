@@ -170,7 +170,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   request whose frozen selector alias is explicit. C++ deterministically assembles the two signed
   pattern loads, executes CPU PCG, and publishes typed recovery with exact active load, fallback 0,
   and byte-identical initialized checkpoint/restart output. This command remains direct-pattern
-  only; term editing, general solver selection, HIP parity and engineering acceptance remain open.
+  only; general solver selection, HIP parity and engineering acceptance remain open.
+- `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
+  in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
+  preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then
+  strictly reparses and C++-revalidates before create-new publication. Installed E2E v49 proves
+  exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
+  checkpoint/restart output. Reference replacement, term insertion/removal/reorder, nested or
+  downstream-referenced editing, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
   `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at
   most eight, at most 64 expanded leaf contributions and two through 64 resolved nonzero unique

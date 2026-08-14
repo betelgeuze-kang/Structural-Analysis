@@ -97,6 +97,11 @@ combination for CPU execution and checkpoint/restart parity. General term editin
 referenced, cascading and general graph deletion remain outside the command. The separate bounded
 nested author accepts explicit pattern/combination terms, depth eight and 64 expanded leaves, with
 v3 provenance/request receipts.
+The bounded `model-edit-linear-load-combination-factor` surface changes exactly one existing
+direct-pattern factor in a neutral, extension-free, unreferenced two-through-64-term combination.
+It preserves term references, order and count, rejects no-op/nested/owned inputs, and publishes
+only after strict Rust plus C++ revalidation. See
+`docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md`.
 The bounded `--load-combination` request surface uses the frozen v1
 selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
@@ -105,6 +110,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-linear-load-combination-execution-v1.md`, and
 `docs/native/modelir-linear-load-combination-deletion-v1.md`, plus the additive
 `docs/native/modelir-direct-linear-load-combination-v1.md` and
+`docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-deletion-v1.md` boundaries.
@@ -265,6 +271,10 @@ structural-workbench model-add-linear-load-combination MODEL.json \
   --load-combination COMBO_DIRECT \
   --term LC_AXIAL 0.25 --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
   --output-dir ADDED-DIRECT-COMBINATION-MODEL
+structural-workbench model-edit-linear-load-combination-factor \
+  ADDED-DIRECT-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_DIRECT --load-pattern LC_WEAK --factor 1.35 \
+  --output-dir EDITED-DIRECT-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE \
   --output-dir DELETED-COMBINATION-MODEL

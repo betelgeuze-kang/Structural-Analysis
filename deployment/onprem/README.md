@@ -40,6 +40,10 @@ absent from the runtime image.
   two through 64 unique existing linear-static patterns and finite nonzero factors. Exact-two
   authoring keeps the frozen v1 receipts; larger direct combinations use v2 receipts. The installed
   surface C++-validates, assembles and executes the selected combination through native CPU PCG.
+  `model-edit-linear-load-combination-factor` changes exactly one existing direct-pattern factor in
+  a neutral, extension-free and unreferenced two-through-64-term combination while preserving every
+  term reference, order and count; installed v49 E2E proves exact changed load, restart parity and
+  fallback 0.
   `model-add-nested-linear-load-combination` adds one bounded acyclic root with explicitly typed
   pattern/combination terms, root-inclusive depth at most eight and at most 64 expanded leaves.
   Rust and C++ independently flatten and validate it before native CPU execution; v3 receipts bind

@@ -39,7 +39,9 @@ ReportIR identities; verifies exact active load `[0,-10000,0,0,0,0]`; proves byt
 and resumed output; and requires fallback 0 with Python/Node lookup 0.
 
 Bounded last-neutral nested-root deletion is the separate additive v3 profile documented in
-`docs/native/modelir-nested-linear-load-combination-deletion-v1.md`. Direct or nested term editing,
-nonterminal/referenced/general graph deletion, self-weight, time functions, stages,
+`docs/native/modelir-nested-linear-load-combination-deletion-v1.md`. One existing direct factor can
+be changed only through the separately bounded v49 surface documented in
+`docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md`. Reference/order/count or
+nested term editing, nonterminal/referenced/general graph deletion, self-weight, time functions, stages,
 shell/nonlinear execution, visual manipulation, engineering acceptance, approved HIP C2 and C6
 remain open.
