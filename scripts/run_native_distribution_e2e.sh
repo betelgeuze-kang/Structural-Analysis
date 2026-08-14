@@ -3013,6 +3013,162 @@ exercise_linear_material_add_surface() {
 }
 exercise_linear_material_add_surface
 
+exercise_linear_material_identity_edit_surface() {
+  local source_model="$e2e_root/linear-material-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/linear-material-identity-edit-$label"
+    request_directory="$e2e_root/linear-material-identity-edit-$label-request"
+    direct_directory="$e2e_root/linear-material-identity-edit-$label-direct"
+    partial_directory="$e2e_root/linear-material-identity-edit-$label-partial"
+    resumed_directory="$e2e_root/linear-material-identity-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-linear-material-identity "$source_model" \
+      --material M2 --new-material M2_RENAMED --output-dir "$edit_directory" \
+      > "$e2e_root/linear-material-identity-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"linear_material_identity_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_material_id":"M2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_material_id":"M2_RENAMED"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"material_index":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"law_id":"linear_elastic_isotropic"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"parameter_set_version":"1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_parameters_si":{"density_kg_m3":2700,"elastic_modulus_pa":100000000000,"poisson_ratio":0.3}' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_state_schema":{"state_update_epoch":"none","stateful":false,"supports_trial_commit_rollback":true}' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_source_id":null' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_extensions":{}' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"id":"M2_RENAMED","index":1,"law_id":"linear_elastic_isotropic"' \
+      "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-linear-material-identity.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-material-identity-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case linear-material-identity-edit-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-material-identity-edit-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/linear-material-identity-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/linear-material-identity-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/linear-material-identity-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/linear-material-identity-edit-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/linear-material-identity-edit-first$suffix" \
+      "$e2e_root/linear-material-identity-edit-second$suffix" \
+      > "$e2e_root/linear-material-identity-edit$suffix-diff.txt"
+  done
+  cmp "$e2e_root/linear-material-identity-edit-first.stdout.json" \
+    "$e2e_root/linear-material-identity-edit-second.stdout.json"
+  cmp "$e2e_root/linear-material-identity-edit-first-validation.json" \
+    "$e2e_root/linear-material-identity-edit-second-validation.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/linear-material-identity-edit-first-$suffix.stdout.json" \
+      "$e2e_root/linear-material-identity-edit-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear-material identity edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/linear-material-identity-edit-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-material-identity "$source_model" \
+    --material M404 --new-material M3 --output-dir "$missing_destination" \
+    > "$e2e_root/linear-material-identity-edit-missing-rejected.stdout.json"; then
+    echo "installed linear-material identity edit accepted a missing material" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_material_identity_material_missing' \
+    "$e2e_root/linear-material-identity-edit-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local collision_destination="$e2e_root/linear-material-identity-edit-collision-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-material-identity "$source_model" \
+    --material M2 --new-material M1 --output-dir "$collision_destination" \
+    > "$e2e_root/linear-material-identity-edit-collision-rejected.stdout.json"; then
+    echo "installed linear-material identity edit accepted a colliding identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_material_identity_replacement_exists' \
+    "$e2e_root/linear-material-identity-edit-collision-rejected.stdout.json"
+  test ! -e "$collision_destination"
+
+  local no_op_destination="$e2e_root/linear-material-identity-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-material-identity "$source_model" \
+    --material M2 --new-material M2 --output-dir "$no_op_destination" \
+    > "$e2e_root/linear-material-identity-edit-no-op-rejected.stdout.json"; then
+    echo "installed linear-material identity edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/linear-material-identity-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/linear-material-identity-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-material-identity "$source_model" \
+    --material M2 --new-material 1_INVALID --output-dir "$invalid_destination" \
+    > "$e2e_root/linear-material-identity-edit-invalid-rejected.stdout.json"; then
+    echo "installed linear-material identity edit accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_material_identity_replacement_invalid' \
+    "$e2e_root/linear-material-identity-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+}
+exercise_linear_material_identity_edit_surface
+
 exercise_linear_material_deletion_surface() {
   local source_model="$e2e_root/linear-material-add-first/model-ir.json"
   local source_before_hash
@@ -7311,6 +7467,15 @@ linear_load_pattern_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/linear
 linear_load_pattern_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/linear-load-pattern-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
 linear_load_pattern_identity_edit_recovery_hash="$(sha256sum "$e2e_root/linear-load-pattern-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 linear_load_pattern_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/linear-load-pattern-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
+linear_material_identity_edit_model_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first/model-ir.json" | awk '{print $1}')"
+linear_material_identity_edit_receipt_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first/edit-receipt.json" | awk '{print $1}')"
+linear_material_identity_edit_request_receipt_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-request/request-receipt.json" | awk '{print $1}')"
+linear_material_identity_edit_request_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-request/analysis-request.json" | awk '{print $1}')"
+linear_material_identity_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+linear_material_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+linear_material_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
+linear_material_identity_edit_recovery_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+linear_material_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/linear-material-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -7807,6 +7972,10 @@ v68_receipt_json="${v67_receipt_json/structural-native-distribution-e2e.v67/stru
 linear_load_pattern_identity_edit_receipt_fields="\"workbench_linear_load_pattern_identity_edit_surface_passed\":true,\"workbench_linear_load_pattern_identity_edit_model_sha256\":\"sha256:$linear_load_pattern_identity_edit_model_hash\",\"workbench_linear_load_pattern_identity_edit_receipt_sha256\":\"sha256:$linear_load_pattern_identity_edit_receipt_hash\",\"workbench_linear_load_pattern_identity_edit_request_receipt_sha256\":\"sha256:$linear_load_pattern_identity_edit_request_receipt_hash\",\"workbench_linear_load_pattern_identity_edit_request_sha256\":\"sha256:$linear_load_pattern_identity_edit_request_hash\",\"workbench_linear_load_pattern_identity_edit_assembly_receipt_sha256\":\"sha256:$linear_load_pattern_identity_edit_assembly_receipt_hash\",\"workbench_linear_load_pattern_identity_edit_checkpoint_sha256\":\"sha256:$linear_load_pattern_identity_edit_checkpoint_hash\",\"workbench_linear_load_pattern_identity_edit_result_ir_sha256\":\"sha256:$linear_load_pattern_identity_edit_result_ir_hash\",\"workbench_linear_load_pattern_identity_edit_recovery_sha256\":\"sha256:$linear_load_pattern_identity_edit_recovery_hash\",\"workbench_linear_load_pattern_identity_edit_report_ir_sha256\":\"sha256:$linear_load_pattern_identity_edit_report_ir_hash\",\"workbench_linear_load_pattern_identity_edit_restart_passed\":true,"
 v68_receipt_json="${v68_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_pattern_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v68_receipt_json" > "$temporary_receipt"
+v69_receipt_json="${v68_receipt_json/structural-native-distribution-e2e.v68/structural-native-distribution-e2e.v69}"
+linear_material_identity_edit_receipt_fields="\"workbench_linear_material_identity_edit_surface_passed\":true,\"workbench_linear_material_identity_edit_model_sha256\":\"sha256:$linear_material_identity_edit_model_hash\",\"workbench_linear_material_identity_edit_receipt_sha256\":\"sha256:$linear_material_identity_edit_receipt_hash\",\"workbench_linear_material_identity_edit_request_receipt_sha256\":\"sha256:$linear_material_identity_edit_request_receipt_hash\",\"workbench_linear_material_identity_edit_request_sha256\":\"sha256:$linear_material_identity_edit_request_hash\",\"workbench_linear_material_identity_edit_assembly_receipt_sha256\":\"sha256:$linear_material_identity_edit_assembly_receipt_hash\",\"workbench_linear_material_identity_edit_checkpoint_sha256\":\"sha256:$linear_material_identity_edit_checkpoint_hash\",\"workbench_linear_material_identity_edit_result_ir_sha256\":\"sha256:$linear_material_identity_edit_result_ir_hash\",\"workbench_linear_material_identity_edit_recovery_sha256\":\"sha256:$linear_material_identity_edit_recovery_hash\",\"workbench_linear_material_identity_edit_report_ir_sha256\":\"sha256:$linear_material_identity_edit_report_ir_hash\",\"workbench_linear_material_identity_edit_restart_passed\":true,"
+v69_receipt_json="${v69_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_material_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v69_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

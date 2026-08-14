@@ -25,6 +25,7 @@
       "model-edit-constraint-target",
       "model-edit-constraint-value",
       "model-edit-linear-material",
+      "model-edit-linear-material-identity",
       "model-edit-frame-section",
       "model-edit-frame-element-orientation",
       "model-edit-frame-element-properties",

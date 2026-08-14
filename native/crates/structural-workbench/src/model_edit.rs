@@ -28,6 +28,8 @@ const NODAL_LOAD_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-nodal-
 const CONSTRAINT_VALUE_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-constraint-value.v1";
 const LINEAR_MATERIAL_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-linear-material.v1";
+const LINEAR_MATERIAL_IDENTITY_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-linear-material-identity.v1";
 const FRAME_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-frame-section.v1";
 const TRUSS_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-truss-section.v1";
 const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
@@ -126,6 +128,7 @@ const FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidat
 const FIXED_CONSTRAINT_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_fixed_dofs_constraint_identity_replacement_to_distinct_unique_stable_id_with_index_type_node_dofs_prescribed_values_source_extensions_and_unrelated_rows_preserved_without_stage_unsupported_feature_or_roundtrip_cascade_not_target_value_mask_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
+const LINEAR_MATERIAL_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_linear_elastic_isotropic_material_identity_replacement_to_distinct_unique_stable_id_with_index_law_version_parameters_state_schema_source_extensions_and_unrelated_rows_preserved_without_element_section_unsupported_feature_or_roundtrip_cascade_not_parameter_law_state_material_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_truss3d_section_area_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -265,6 +268,13 @@ pub struct LinearElasticMaterialParametersV1 {
 /// Complete deterministic artifact pair produced by one bounded material edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearMaterialEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded linear-material identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelLinearMaterialIdentityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -1698,6 +1708,32 @@ pub fn publish_model_linear_material_edit(
 ) -> Result<ModelLinearMaterialEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_linear_material(&source, material_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one unreferenced v1 linear-elastic material identity and atomically publish it.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// unsupported material rows, element/section references, unsupported-feature or round-trip
+/// ownership, no-op edits, or create-new publication failures.
+pub fn publish_model_linear_material_identity_edit(
+    source_path: &Path,
+    material_id: &str,
+    replacement_material_id: &str,
+    output_directory: &Path,
+) -> Result<ModelLinearMaterialIdentityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome =
+        edit_model_linear_material_identity(&source, material_id, replacement_material_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -3609,6 +3645,112 @@ pub fn edit_model_linear_load_pattern_identity(
         "claim_boundary": LINEAR_LOAD_PATTERN_IDENTITY_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearLoadPatternIdentityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RenamedLinearMaterialV1 {
+    material_index: usize,
+    law_id: String,
+    parameter_set_version: String,
+    parameters: Value,
+    state_schema: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Replace one unreferenced v1 linear-elastic material identity in memory.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing or unsupported
+/// materials, no-op edits, element/section references, unsupported-feature or round-trip
+/// ownership, malformed retained fields, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_linear_material_identity(
+    source_bytes: &[u8],
+    material_id: &str,
+    replacement_material_id: &str,
+) -> Result<ModelLinearMaterialIdentityEditOutcomeV1, WorkbenchError> {
+    validate_linear_material_identity_edit_request(
+        source_bytes.len(),
+        material_id,
+        replacement_material_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let renamed =
+        replace_linear_material_identity(&mut edited, material_id, replacement_material_id)?;
+    bind_linear_material_identity_edit_provenance(
+        &mut edited,
+        material_id,
+        replacement_material_id,
+        &renamed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the material identity-edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "linear_material_identity_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_material_id": material_id,
+        "replacement_material_id": replacement_material_id,
+        "material_index": renamed.material_index,
+        "law_id": renamed.law_id,
+        "parameter_set_version": renamed.parameter_set_version,
+        "retained_parameters_si": renamed.parameters,
+        "retained_state_schema": renamed.state_schema,
+        "retained_source_id": renamed.retained_source_id,
+        "retained_extensions": renamed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": LINEAR_MATERIAL_IDENTITY_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearMaterialIdentityEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -7724,6 +7866,36 @@ fn validate_linear_load_pattern_identity_edit_request(
     Ok(())
 }
 
+fn validate_linear_material_identity_edit_request(
+    source_length: usize,
+    material_id: &str,
+    replacement_material_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, material_id, "material")?;
+    validate_bounded_edit_identity(0, replacement_material_id, "replacement material")?;
+    let replacement_bytes = replacement_material_id.as_bytes();
+    if !replacement_bytes
+        .first()
+        .is_some_and(u8::is_ascii_alphabetic)
+        || !replacement_bytes
+            .iter()
+            .skip(1)
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'.' | b':' | b'-'))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_replacement_invalid",
+            "replacement material identity must satisfy the ModelIR stable-ID grammar",
+        ));
+    }
+    if material_id == replacement_material_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement material identity is identical to the source identity",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -8940,6 +9112,199 @@ fn replace_linear_load_pattern_identity(
         analysis_type,
         self_weight,
         nodal_loads,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_linear_material_identity(
+    model: &mut Value,
+    material_id: &str,
+    replacement_material_id: &str,
+) -> Result<RenamedLinearMaterialV1, WorkbenchError> {
+    if material_id == replacement_material_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement material identity is identical to the source identity",
+        ));
+    }
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    let material_index = materials
+        .iter()
+        .position(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_linear_material_identity_material_missing",
+                format!("ModelIR has no material with identity {material_id}"),
+            )
+        })?;
+    if materials
+        .iter()
+        .any(|material| material.get("id").and_then(Value::as_str) == Some(replacement_material_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_replacement_exists",
+            format!("ModelIR already has a material with identity {replacement_material_id}"),
+        ));
+    }
+    let material = &materials[material_index];
+    if material.get("index").and_then(Value::as_u64) != u64::try_from(material_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_index_mismatch",
+            "identity-edited material index must match its contiguous position",
+        ));
+    }
+    let law_id = material
+        .get("law_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("material law_id"))?
+        .to_owned();
+    if law_id != "linear_elastic_isotropic" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_law_unsupported",
+            "material identity editing accepts only a linear_elastic_isotropic material",
+        ));
+    }
+    let parameter_set_version = material
+        .get("parameter_set_version")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("material parameter_set_version"))?
+        .to_owned();
+    if parameter_set_version != "1" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_version_unsupported",
+            "material identity editing accepts only parameter_set_version 1",
+        ));
+    }
+    let parameter_values = material
+        .get("parameters")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| snapshot_error("material parameters"))?;
+    let read_parameter = |key: &'static str| {
+        parameter_values
+            .get(key)
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| snapshot_error(key))
+    };
+    let elastic_modulus_pa = read_parameter("elastic_modulus_pa")?;
+    let poisson_ratio = read_parameter("poisson_ratio")?;
+    let density_kg_m3 = read_parameter("density_kg_m3")?;
+    if elastic_modulus_pa <= 0.0
+        || poisson_ratio <= -1.0
+        || poisson_ratio >= 0.5
+        || density_kg_m3 < 0.0
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_parameters_invalid",
+            "retained linear-material parameters are outside the closed v1 physical ranges",
+        ));
+    }
+    let state_values = material
+        .get("state_schema")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| snapshot_error("material state_schema"))?;
+    if state_values.get("stateful").and_then(Value::as_bool) != Some(false)
+        || state_values
+            .get("state_update_epoch")
+            .and_then(Value::as_str)
+            != Some("none")
+        || state_values
+            .get("supports_trial_commit_rollback")
+            .and_then(Value::as_bool)
+            != Some(true)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_state_schema_unsupported",
+            "material identity editing accepts only the exact stateless v1 state schema",
+        ));
+    }
+    let parameters = Value::Object(parameter_values.clone());
+    let state_schema = Value::Object(state_values.clone());
+    let retained_source_id = material
+        .get("source_id")
+        .filter(|value| value.is_null() || value.is_string())
+        .ok_or_else(|| snapshot_error("material source_id"))?
+        .clone();
+    let retained_extensions = material
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("material extensions"))?
+        .clone();
+
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == material_id || id == replacement_material_id);
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| identity_matches(element.get("material_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_referenced_by_element",
+            "material identity editing refuses source or replacement references from elements",
+        ));
+    }
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    if sections.iter().any(|section| {
+        identity_matches(section.get("steel_material_id").and_then(Value::as_str))
+            || identity_matches(section.get("concrete_material_id").and_then(Value::as_str))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_referenced_by_section",
+            "material identity editing refuses source or replacement references from sections",
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_unsupported_feature_owned",
+            "material identity editing refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| identity_matches(row.get("model_ir_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_material_identity_roundtrip_owned",
+            "material identity editing refuses source or replacement ownership by a round-trip mapping",
+        ));
+    }
+
+    model
+        .get_mut("materials")
+        .and_then(Value::as_array_mut)
+        .and_then(|rows| rows.get_mut(material_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("material"))?
+        .insert("id".to_owned(), json!(replacement_material_id));
+    Ok(RenamedLinearMaterialV1 {
+        material_index,
+        law_id,
+        parameter_set_version,
+        parameters,
+        state_schema,
         retained_source_id,
         retained_extensions,
     })
@@ -15950,6 +16315,39 @@ fn bind_linear_load_pattern_identity_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_linear_material_identity_edit_provenance(
+    model: &mut Value,
+    material_id: &str,
+    replacement_material_id: &str,
+    renamed: &RenamedLinearMaterialV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        LINEAR_MATERIAL_IDENTITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "linear_material_identity_edit",
+            "source_material_id": material_id,
+            "replacement_material_id": replacement_material_id,
+            "material_index": renamed.material_index,
+            "law_id": renamed.law_id.clone(),
+            "parameter_set_version": renamed.parameter_set_version.clone(),
+            "retained_parameters_si": renamed.parameters.clone(),
+            "retained_state_schema": renamed.state_schema.clone(),
+            "retained_source_id": renamed.retained_source_id.clone(),
+            "retained_extensions": renamed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": LINEAR_MATERIAL_IDENTITY_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -17741,7 +18139,8 @@ mod tests {
         remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference, replace_fixed_constraint_identity,
-        replace_linear_load_pattern_identity, replace_nested_linear_load_combination_factor,
+        replace_linear_load_pattern_identity, replace_linear_material_identity,
+        replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
         replace_nodal_load_target, validate_constraint_target_edit_request,
         validate_constraint_value_edit_request,
@@ -17765,6 +18164,7 @@ mod tests {
         validate_linear_load_pattern_delete_request,
         validate_linear_load_pattern_identity_edit_request, validate_linear_material_add_request,
         validate_linear_material_delete_request, validate_linear_material_edit_request,
+        validate_linear_material_identity_edit_request,
         validate_nested_linear_load_combination_add_request,
         validate_nested_linear_load_combination_factor_edit_request,
         validate_nested_linear_load_combination_reference_edit_request,
@@ -18306,6 +18706,128 @@ mod tests {
                 .expect_err("round-trip-owned pattern")
                 .code,
             "workbench_model_edit_linear_load_pattern_identity_roundtrip_owned"
+        );
+    }
+
+    #[test]
+    fn linear_material_identity_edit_is_unreferenced_and_field_preserving() {
+        validate_linear_material_identity_edit_request(0, "M2", "M2_RENAMED")
+            .expect("valid material identity request");
+        assert_eq!(
+            validate_linear_material_identity_edit_request(0, "M2", "1_INVALID")
+                .expect_err("invalid replacement stable ID")
+                .code,
+            "workbench_model_edit_linear_material_identity_replacement_invalid"
+        );
+        assert_eq!(
+            validate_linear_material_identity_edit_request(0, "M2", "M2")
+                .expect_err("no-op identity")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+
+        let model = linear_material_identity_fixture();
+        let source_material = model["materials"][1].clone();
+        let mut edited = model.clone();
+        let renamed = replace_linear_material_identity(&mut edited, "M2", "M2_RENAMED")
+            .expect("rename unreferenced linear material");
+        assert_eq!(renamed.material_index, 1);
+        assert_eq!(renamed.law_id, "linear_elastic_isotropic");
+        assert_eq!(renamed.parameter_set_version, "1");
+        assert_eq!(renamed.parameters, source_material["parameters"]);
+        assert_eq!(renamed.state_schema, source_material["state_schema"]);
+        assert_eq!(renamed.retained_source_id, source_material["source_id"]);
+        assert_eq!(renamed.retained_extensions, source_material["extensions"]);
+        assert_eq!(edited["materials"][1]["id"], "M2_RENAMED");
+        for key in [
+            "index",
+            "law_id",
+            "parameter_set_version",
+            "parameters",
+            "state_schema",
+            "source_id",
+            "extensions",
+        ] {
+            assert_eq!(edited["materials"][1][key], source_material[key]);
+        }
+        assert_eq!(edited["materials"][0], model["materials"][0]);
+
+        assert_linear_material_identity_rejections(model);
+    }
+
+    fn linear_material_identity_fixture() -> Value {
+        json!({
+            "materials": [
+                {
+                    "id": "M1", "index": 0, "law_id": "linear_elastic_isotropic",
+                    "parameter_set_version": "1",
+                    "parameters": {"elastic_modulus_pa": 200_000_000_000.0, "poisson_ratio": 0.3, "density_kg_m3": 7850.0},
+                    "state_schema": {"stateful": false, "state_update_epoch": "none", "supports_trial_commit_rollback": true},
+                    "source_id": "source:M1", "extensions": {}
+                },
+                {
+                    "id": "M2", "index": 1, "law_id": "linear_elastic_isotropic",
+                    "parameter_set_version": "1",
+                    "parameters": {"elastic_modulus_pa": 70_000_000_000.0, "poisson_ratio": 0.33, "density_kg_m3": 2700.0},
+                    "state_schema": {"stateful": false, "state_update_epoch": "none", "supports_trial_commit_rollback": true},
+                    "source_id": "generated:M2", "extensions": {"fixture": true}
+                }
+            ],
+            "sections": [], "elements": [], "unsupported_features": [], "roundtrip_map": []
+        })
+    }
+
+    fn assert_linear_material_identity_rejections(model: Value) {
+        for (source, replacement, code) in [
+            (
+                "M404",
+                "M3",
+                "workbench_model_edit_linear_material_identity_material_missing",
+            ),
+            (
+                "M2",
+                "M1",
+                "workbench_model_edit_linear_material_identity_replacement_exists",
+            ),
+        ] {
+            assert_eq!(
+                replace_linear_material_identity(&mut model.clone(), source, replacement)
+                    .expect_err("invalid identity edit")
+                    .code,
+                code
+            );
+        }
+        let mut element_owned = model.clone();
+        element_owned["elements"] = json!([{"material_id": "M2"}]);
+        assert_eq!(
+            replace_linear_material_identity(&mut element_owned, "M2", "M3")
+                .expect_err("element-owned material")
+                .code,
+            "workbench_model_edit_linear_material_identity_referenced_by_element"
+        );
+        let mut section_owned = model.clone();
+        section_owned["sections"] = json!([{"steel_material_id": "M2"}]);
+        assert_eq!(
+            replace_linear_material_identity(&mut section_owned, "M2", "M3")
+                .expect_err("section-owned material")
+                .code,
+            "workbench_model_edit_linear_material_identity_referenced_by_section"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "M2"}]);
+        assert_eq!(
+            replace_linear_material_identity(&mut feature_owned, "M2", "M3")
+                .expect_err("unsupported-feature-owned material")
+                .code,
+            "workbench_model_edit_linear_material_identity_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "M2"}]);
+        assert_eq!(
+            replace_linear_material_identity(&mut mapped, "M2", "M3")
+                .expect_err("round-trip-owned material")
+                .code,
+            "workbench_model_edit_linear_material_identity_roundtrip_owned"
         );
     }
 

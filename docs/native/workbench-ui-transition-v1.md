@@ -116,7 +116,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   strictly reparses and C++-revalidates before create-new publication. Installed E2E v66 replaces
   `BC_N3` with `BC_N3_RENAMED` while proving unchanged active DOFs `[12,13,14,15,16,17]`, active
   load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Other
-  entity identity editing, reference cascades and MPC/contact/support sets remain open.
+  bounded identity surfaces are separate; reference cascades and MPC/contact/support sets remain
+  open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint
@@ -127,8 +128,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   density for one existing v1 `linear_elastic_isotropic` material. Rust binds the fixed law and
   version, previous/new SI parameter objects and source hashes, marks only a matching material
   round-trip row approximated, then strictly reparses and C++-revalidates before create-new
-  publication. Other laws, state schemas, creation/deletion, retargeting, and broader property
-  editing remain open.
+  publication. Identity replacement is the separate v69 surface. Other laws, state schemas,
+  creation/deletion, retargeting, and broader property editing remain open.
+- `model-edit-linear-material-identity`: deterministic replacement of one existing unreferenced v1
+  linear-elastic material identity with a distinct unique ModelIR stable ID. Rust preserves the
+  contiguous index, law/version, exact SI parameters, stateless trial/commit/rollback schema,
+  source identity, extensions and unrelated rows; rejects element/composite-section/
+  unsupported-feature/round-trip ownership without cascade; and strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v69 replaces neutral `M2` with
+  `M2_RENAMED` while proving active DOFs `[6,7,8,9,10,11]`, active load
+  `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Material
+  parameter/law/state editing, reference cascades and visual dragging remain separate or open.
 - `model-edit-frame-section`: deterministic replacement of area, two second moments, torsional
   constant, and two shear areas for one existing v1 `frame_3d` section. Every SI value is positive;
   Rust binds the fixed family/version and previous/new parameter objects, marks only a matching

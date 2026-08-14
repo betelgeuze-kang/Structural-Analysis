@@ -73,7 +73,8 @@ preserving complete mask membership and prescribed values; see
 constraint identity with a distinct unique stable ID, preserves every non-identity field, rejects
 stage/unsupported-feature/round-trip ownership without cascade, and C++-revalidates the edited
 snapshot. See `docs/native/modelir-fixed-constraint-identity-edit-v1.md`. Other entity identity
-editing and reference cascades remain open.
+editing remains split into separate bounded surfaces; node, section, element and combination
+identity replacement plus every reference cascade remain open.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`
@@ -88,6 +89,11 @@ releases. The bounded frame3d-member creator separately appends exactly one new 
 connected linear `frame_3d`/`euler_bernoulli_3d` element, reuses one existing compatible material
 and section, assigns contiguous indices, and fixes rotation/offsets/releases to zero/empty before
 C++ revalidation. It does not broaden to arbitrary topology authoring.
+The separate `model-edit-linear-material-identity` command changes only one unreferenced v1
+linear-elastic material's stable ID, preserves its index/law/version/parameters/state/source/
+extensions, rejects element, composite-section, unsupported-feature and round-trip ownership
+without cascade, and C++-revalidates the edited snapshot. See
+`docs/native/modelir-linear-material-identity-edit-v1.md`.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and

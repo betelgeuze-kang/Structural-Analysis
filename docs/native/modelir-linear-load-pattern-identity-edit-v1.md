@@ -45,7 +45,8 @@ fallback 0 with Python and Node lookup counts both zero.
 
 This closes only stable-identity replacement for one unreferenced existing `linear_static` load
 pattern. It does not cascade load-combination, construction-stage, unsupported-feature, or
-round-trip references; edit nonlinear patterns or other entity identities; change self-weight,
+round-trip references; edit nonlinear patterns or other entity identities beyond the separate
+bounded linear-material surface; change self-weight,
 loads, nodes, combinations, constraints, or topology; create or delete patterns; select a solver;
 provide general visual editing or engineering acceptance; remove React/TypeScript;
 prove approved HIP C2; or authorize C6.

@@ -536,6 +536,24 @@ fn run_linear_material_edit(
     ])
 }
 
+fn run_linear_material_identity_edit(
+    source: &Path,
+    destination: &Path,
+    material_id: &str,
+    replacement_material_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-material-identity"),
+        source.as_os_str(),
+        text("--material"),
+        text(material_id),
+        text("--new-material"),
+        text(replacement_material_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_frame_section_edit(
     source: &Path,
     destination: &Path,
@@ -7502,6 +7520,257 @@ fn linear_load_pattern_identity_edit_is_deterministic_fail_closed_and_cpu_execut
 
     let existing =
         run_linear_load_pattern_identity_edit(&source, &first, "LC_WEAK", "LC_WEAK_RENAMED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_material_identity_edit_is_deterministic_fail_closed_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let material_add = temporary.0.join("material-identity-source");
+    assert_success(&run_linear_material_add(
+        &base,
+        &material_add,
+        "M2",
+        ["70000000000", "0.33", "2700"],
+    ));
+    let source = material_add.join("model-ir.json");
+    let source_bytes = std::fs::read(&source).expect("material identity source bytes");
+    let source_model = validate_model_bytes(&source_bytes)
+        .expect("C++ material identity source validation")
+        .snapshot;
+
+    let first = temporary.0.join("material-identity-first");
+    let second = temporary.0.join("material-identity-second");
+    for destination in [&first, &second] {
+        let output = run_linear_material_identity_edit(&source, destination, "M2", "M2_RENAMED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("material identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first material identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second material identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged material identity source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("identity-edited material ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict identity-edited material");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++ material identity validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model.value()[family]);
+    }
+    let source_materials = source_model.value()["materials"]
+        .as_array()
+        .expect("source materials");
+    let edited_materials = edited.value()["materials"]
+        .as_array()
+        .expect("edited materials");
+    assert_eq!(source_materials.len(), edited_materials.len());
+    assert_eq!(edited_materials[0], source_materials[0]);
+    assert_eq!(edited_materials[1]["id"], "M2_RENAMED");
+    for key in [
+        "index",
+        "law_id",
+        "parameter_set_version",
+        "parameters",
+        "state_schema",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(edited_materials[1][key], source_materials[1][key]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-material-identity.v1")
+        .expect("material identity provenance extension");
+    assert_eq!(extension["operation"], "linear_material_identity_edit");
+    assert_eq!(extension["source_material_id"], "M2");
+    assert_eq!(extension["replacement_material_id"], "M2_RENAMED");
+    assert_eq!(extension["material_index"], 1);
+    assert_eq!(extension["law_id"], "linear_elastic_isotropic");
+    assert_eq!(extension["parameter_set_version"], "1");
+    assert_eq!(
+        extension["retained_parameters_si"],
+        source_materials[1]["parameters"]
+    );
+    assert_eq!(
+        extension["retained_state_schema"],
+        source_materials[1]["state_schema"]
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("material identity receipt"),
+    )
+    .expect("material identity receipt JSON");
+    assert_eq!(receipt["operation"], "linear_material_identity_edit");
+    assert_eq!(receipt["source_material_id"], "M2");
+    assert_eq!(receipt["replacement_material_id"], "M2_RENAMED");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("material-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "material-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("material identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("material identity direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("material identity direct recovery"),
+    )
+    .expect("material identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("material identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("material identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, source_id, replacement_id, code) in [
+        (
+            "material-identity-missing",
+            "MISSING",
+            "M_NEW",
+            "workbench_model_edit_linear_material_identity_material_missing",
+        ),
+        (
+            "material-identity-collision",
+            "M2",
+            "M1",
+            "workbench_model_edit_linear_material_identity_replacement_exists",
+        ),
+        (
+            "material-identity-no-op",
+            "M2",
+            "M2",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "material-identity-invalid",
+            "M2",
+            "1_INVALID",
+            "workbench_model_edit_linear_material_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_linear_material_identity_edit(&source, &destination, source_id, replacement_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let write_model = |name: &str, value: &Value| {
+        let path = temporary.0.join(name);
+        std::fs::write(
+            &path,
+            canonicalize_model_ir_v2(value)
+                .expect("canonical material identity rejection source")
+                .as_bytes(),
+        )
+        .expect("write material identity rejection source");
+        path
+    };
+    let mut element_owned = source_model.value().clone();
+    element_owned["elements"][0]["material_id"] = serde_json::json!("M2");
+    let mut feature_owned = source_model.value().clone();
+    feature_owned["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.material-identity-owned", "kind": "unsupported_solver_feature",
+        "source_entity_id": "M2", "disposition": "blocked", "blocking": true,
+        "detail": "Material identity is externally owned.", "extensions": {}
+    }]);
+    let mut roundtrip_owned = source_model.value().clone();
+    roundtrip_owned["roundtrip_map"]
+        .as_array_mut()
+        .expect("round-trip rows")
+        .push(serde_json::json!({
+            "source_entity_id": "source:M2", "entity_kind": "material",
+            "model_ir_entity_id": "M2", "mapping_status": "exact", "extensions": {}
+        }));
+    for (name, value, code) in [
+        (
+            "element-owned-material.json",
+            element_owned,
+            "workbench_model_edit_linear_material_identity_referenced_by_element",
+        ),
+        (
+            "feature-owned-material.json",
+            feature_owned,
+            "workbench_model_edit_linear_material_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned-material.json",
+            roundtrip_owned,
+            "workbench_model_edit_linear_material_identity_roundtrip_owned",
+        ),
+    ] {
+        let owned_source = write_model(name, &value);
+        let destination = temporary.0.join(format!("{name}.output"));
+        let rejected =
+            run_linear_material_identity_edit(&owned_source, &destination, "M2", "M2_RENAMED");
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let existing = run_linear_material_identity_edit(&source, &first, "M2", "M2_RENAMED");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

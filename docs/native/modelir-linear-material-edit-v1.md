@@ -22,7 +22,9 @@ The command strictly parses the source and crosses Rust -> C ABI -> C++ before e
 one stable material identity from the canonical C++ snapshot and requires exactly
 `law_id: linear_elastic_isotropic` and `parameter_set_version: "1"`. It replaces the complete
 closed parameter object; it cannot change the law, version, material state schema, identity, or
-references.
+references. Stable-identity replacement is the separate bounded
+`model-edit-linear-material-identity` surface documented in
+`docs/native/modelir-linear-material-identity-edit-v1.md`.
 
 Direct provenance is rewritten to `structural-native-model-editor`, prior provenance is retained
 under `structural-native:upstream-provenance`, and
@@ -46,7 +48,7 @@ through v18 receipts retain their narrower authority.
 ## Claim boundary
 
 This closes only the three parameters of one existing v1 isotropic linear-elastic material. It
-does not create/delete materials, change identities, laws, versions or state epochs, edit nonlinear
+does not create/delete materials, perform the separate bounded identity replacement, change laws, versions or state epochs, edit nonlinear
 constitutive parameters, retarget elements, select a solver, provide visual property panels or undo
 history, or make an engineering acceptance decision. General material/property editing,
 React/TypeScript removal, approved HIP C2, and C6 remain open.
