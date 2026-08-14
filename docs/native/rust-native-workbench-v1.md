@@ -48,7 +48,11 @@ It cannot create, delete, retarget, or combine loads. A separate bounded
 existing node while preserving both indices, analysis type, components, source identity and
 extensions. See `docs/native/modelir-nodal-load-target-edit-v1.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
-restrained by the named existing constraint. It cannot add/remove restraints or retarget a node.
+restrained by the named existing constraint. The separate `model-edit-constraint-target` command
+changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves
+its index, mask, prescribed values, source identity and extensions, and rejects target-node DOF
+overlap before C++ revalidation. See `docs/native/modelir-constraint-target-edit-v1.md`. Neither
+surface adds/removes restrained DOFs or creates multi-point constraints.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`

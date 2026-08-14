@@ -46,6 +46,8 @@ const TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-truss3d-leaf-member.v1";
 const NODAL_LOAD_TARGET_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-nodal-load-target.v1";
+const CONSTRAINT_TARGET_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-constraint-target.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const NODAL_LOAD_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
@@ -104,6 +106,7 @@ const NODE_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_contiguou
 const ORPHAN_NODE_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_orphan_node_deletion_with_two_nodes_retained_not_source_owned_extended_element_constraint_load_mapped_unsupported_feature_owned_cascade_reindexing_general_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_target_replacement_to_distinct_existing_node_with_identity_index_components_source_and_extensions_preserved_not_load_component_identity_pattern_creation_deletion_combination_constraint_topology_solver_visual_editing_engineering_acceptance_or_c6";
+const CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_target_replacement_to_distinct_existing_node_without_overlapping_restrained_dofs_with_identity_index_type_dofs_prescribed_values_source_and_extensions_preserved_not_constraint_value_mask_identity_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -180,6 +183,13 @@ pub struct ModelNodalLoadEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded nodal-load target edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodalLoadTargetEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded constraint-target edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelConstraintTargetEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -611,6 +621,30 @@ pub fn publish_model_nodal_load_target_edit(
 ) -> Result<ModelNodalLoadTargetEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_nodal_load_target(&source, load_pattern_id, nodal_load_id, node_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Retarget one existing fixed-DOF constraint to a distinct existing node and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities, invalid source or edited semantics, missing constraint
+/// or node identities, no-op target edits, overlapping restrained DOFs, or publication failure.
+pub fn publish_model_constraint_target_edit(
+    source_path: &Path,
+    constraint_id: &str,
+    node_id: &str,
+    output_directory: &Path,
+) -> Result<ModelConstraintTargetEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_constraint_target(&source, constraint_id, node_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2206,6 +2240,108 @@ pub fn edit_model_nodal_load_target(
         "claim_boundary": NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodalLoadTargetEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RetargetedConstraintV1 {
+    constraint_index: usize,
+    constraint_type: String,
+    previous_node_id: String,
+    dofs: Value,
+    prescribed_values_si: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Retarget one existing fixed-DOF constraint to a distinct existing node in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identities, invalid source semantics, missing constraint or node identities,
+/// no-op edits, target-node DOF overlap, malformed retained fields, schema drift, or edited
+/// semantics rejected by C++.
+pub fn edit_model_constraint_target(
+    source_bytes: &[u8],
+    constraint_id: &str,
+    node_id: &str,
+) -> Result<ModelConstraintTargetEditOutcomeV1, WorkbenchError> {
+    validate_constraint_target_edit_request(source_bytes.len(), constraint_id, node_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let retargeted = replace_constraint_target(&mut edited, constraint_id, node_id)?;
+    bind_constraint_target_edit_provenance(
+        &mut edited,
+        constraint_id,
+        node_id,
+        &retargeted,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "constraint", constraint_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the retargeted constraint ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "constraint_target",
+        "model_id": edited_validation.report.model_id,
+        "constraint_id": constraint_id,
+        "constraint_index": retargeted.constraint_index,
+        "constraint_type": retargeted.constraint_type,
+        "previous_node_id": retargeted.previous_node_id,
+        "edited_node_id": node_id,
+        "dofs": retargeted.dofs,
+        "prescribed_values_si": retargeted.prescribed_values_si,
+        "retained_source_id": retargeted.retained_source_id,
+        "retained_extensions": retargeted.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelConstraintTargetEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -6539,6 +6675,15 @@ fn validate_nodal_load_target_edit_request(
     validate_bounded_edit_identity(0, node_id, "replacement load target node")
 }
 
+fn validate_constraint_target_edit_request(
+    source_length: usize,
+    constraint_id: &str,
+    node_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, constraint_id, "constraint")?;
+    validate_bounded_edit_identity(0, node_id, "replacement constraint target node")
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -7456,6 +7601,127 @@ fn replace_nodal_load_target(
         analysis_type,
         previous_node_id,
         components_si,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_constraint_target(
+    model: &mut Value,
+    constraint_id: &str,
+    node_id: &str,
+) -> Result<RetargetedConstraintV1, WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if !nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_target_node_missing",
+            format!("ModelIR has no replacement constraint target node with identity {node_id}"),
+        ));
+    }
+
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    let constraint_index = constraints
+        .iter()
+        .position(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_constraint_target_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    let constraint = &constraints[constraint_index];
+    if constraint.get("index").and_then(Value::as_u64) != u64::try_from(constraint_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_target_index_mismatch",
+            "retargeted constraint index must match its contiguous position",
+        ));
+    }
+    let constraint_type = constraint
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint type"))?
+        .to_owned();
+    if constraint_type != "fixed_dofs" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_target_type_unsupported",
+            "constraint target editing accepts only a fixed_dofs constraint",
+        ));
+    }
+    let previous_node_id = constraint
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint node_id"))?
+        .to_owned();
+    if previous_node_id == node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_target_no_change",
+            "replacement constraint target node is identical to the source target",
+        ));
+    }
+    let dofs = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraint dofs"))?;
+    if dofs.is_empty() || dofs.iter().any(|dof| dof.as_str().is_none()) {
+        return Err(snapshot_error("constraint dofs"));
+    }
+    let retained_dofs = constraint["dofs"].clone();
+    let prescribed_values_si = constraint
+        .get("prescribed_values_si")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?;
+    for value in prescribed_values_si.values() {
+        finite_number(value, "constraint prescribed value")?;
+    }
+    let retained_prescribed_values_si = constraint["prescribed_values_si"].clone();
+    let retained_source_id = constraint
+        .get("source_id")
+        .ok_or_else(|| snapshot_error("constraint source_id"))?
+        .clone();
+    let retained_extensions = constraint
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("constraint extensions"))?
+        .clone();
+
+    let overlapping = constraints.iter().enumerate().any(|(index, candidate)| {
+        index != constraint_index
+            && candidate.get("node_id").and_then(Value::as_str) == Some(node_id)
+            && candidate
+                .get("dofs")
+                .and_then(Value::as_array)
+                .is_some_and(|candidate_dofs| dofs.iter().any(|dof| candidate_dofs.contains(dof)))
+    });
+    if overlapping {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_constraint_target_dof_overlap",
+            format!("replacement node {node_id} already has an overlapping restrained DOF"),
+        ));
+    }
+
+    model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .and_then(|constraints| constraints.get_mut(constraint_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("constraint"))?
+        .insert("node_id".to_owned(), json!(node_id));
+    Ok(RetargetedConstraintV1 {
+        constraint_index,
+        constraint_type,
+        previous_node_id,
+        dofs: retained_dofs,
+        prescribed_values_si: retained_prescribed_values_si,
         retained_source_id,
         retained_extensions,
     })
@@ -13575,6 +13841,39 @@ fn bind_nodal_load_target_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_constraint_target_edit_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    node_id: &str,
+    retargeted: &RetargetedConstraintV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        CONSTRAINT_TARGET_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "constraint_target",
+            "constraint_id": constraint_id,
+            "constraint_index": retargeted.constraint_index,
+            "constraint_type": retargeted.constraint_type.clone(),
+            "previous_node_id": retargeted.previous_node_id.clone(),
+            "edited_node_id": node_id,
+            "dofs": retargeted.dofs.clone(),
+            "prescribed_values_si": retargeted.prescribed_values_si.clone(),
+            "retained_source_id": retargeted.retained_source_id.clone(),
+            "retained_extensions": retargeted.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -15362,12 +15661,12 @@ mod tests {
         remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_combination,
         remove_linear_load_pattern, remove_linear_material,
         remove_nested_linear_load_combination_term, remove_nodal_load, remove_orphan_node,
-        remove_truss3d_leaf_member, remove_truss_section,
+        remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference,
         replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_target,
-        validate_constraint_value_edit_request,
+        validate_constraint_target_edit_request, validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request,
         validate_direct_linear_load_combination_term_add_request,
@@ -15703,6 +16002,78 @@ mod tests {
                 .expect_err("missing load")
                 .code,
             "workbench_model_edit_nodal_load_target_load_missing"
+        );
+    }
+
+    #[test]
+    fn constraint_target_edit_preserves_fields_and_rejects_overlapping_dofs() {
+        validate_constraint_target_edit_request(0, "BC2", "N2")
+            .expect("valid constraint-target request");
+        assert!(validate_constraint_target_edit_request(0, "", "N2").is_err());
+        assert!(validate_constraint_target_edit_request(0, "BC2", "").is_err());
+
+        let model = json!({
+            "nodes": [{"id": "N1"}, {"id": "N2"}, {"id": "N3"}],
+            "constraints": [
+                {
+                    "id": "BC1", "index": 0, "type": "fixed_dofs", "node_id": "N1",
+                    "dofs": ["UX", "UZ"], "prescribed_values_si": {"UX": 0.0, "UZ": 0.0},
+                    "source_id": null, "extensions": {}
+                },
+                {
+                    "id": "BC2", "index": 1, "type": "fixed_dofs", "node_id": "N3",
+                    "dofs": ["UZ", "RX"], "prescribed_values_si": {"UZ": 0.25, "RX": 0.0},
+                    "source_id": "generated:BC2", "extensions": {"fixture": true}
+                }
+            ]
+        });
+        let source_constraint = model["constraints"][1].clone();
+        let mut edited = model.clone();
+        let retargeted = replace_constraint_target(&mut edited, "BC2", "N2")
+            .expect("retarget existing constraint");
+        assert_eq!(retargeted.constraint_index, 1);
+        assert_eq!(retargeted.constraint_type, "fixed_dofs");
+        assert_eq!(retargeted.previous_node_id, "N3");
+        assert_eq!(retargeted.dofs, source_constraint["dofs"]);
+        assert_eq!(
+            retargeted.prescribed_values_si,
+            source_constraint["prescribed_values_si"]
+        );
+        assert_eq!(
+            retargeted.retained_source_id,
+            source_constraint["source_id"]
+        );
+        assert_eq!(
+            retargeted.retained_extensions,
+            source_constraint["extensions"]
+        );
+        let mut expected_constraint = source_constraint;
+        expected_constraint["node_id"] = json!("N2");
+        assert_eq!(edited["constraints"][1], expected_constraint);
+
+        assert_eq!(
+            replace_constraint_target(&mut model.clone(), "BC2", "N3")
+                .expect_err("no-op target")
+                .code,
+            "workbench_model_edit_constraint_target_no_change"
+        );
+        assert_eq!(
+            replace_constraint_target(&mut model.clone(), "BC2", "MISSING")
+                .expect_err("missing node")
+                .code,
+            "workbench_model_edit_constraint_target_node_missing"
+        );
+        assert_eq!(
+            replace_constraint_target(&mut model.clone(), "MISSING", "N2")
+                .expect_err("missing constraint")
+                .code,
+            "workbench_model_edit_constraint_target_constraint_missing"
+        );
+        assert_eq!(
+            replace_constraint_target(&mut model.clone(), "BC2", "N1")
+                .expect_err("overlapping target DOFs")
+                .code,
+            "workbench_model_edit_constraint_target_dof_overlap"
         );
     }
 

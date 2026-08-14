@@ -112,6 +112,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-linear-analysis-request-create-v1.md"),
     Path("docs/native/modelir-nodal-load-edit-v1.md"),
     Path("docs/native/modelir-nodal-load-target-edit-v1.md"),
+    Path("docs/native/modelir-constraint-target-edit-v1.md"),
     Path("docs/native/workbench-ui-transition-v1.md"),
     Path("package.json"),
     Path("vite.config.ts"),
@@ -182,6 +183,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_existing_modelir_nodal_load_target_edit": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_existing_modelir_fixed_constraint_target_edit": (
         "c5_implemented",
         False,
     ),
@@ -495,6 +500,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-delete-orphan-node",
         "model-edit-nodal-load",
         "model-edit-nodal-load-target",
+        "model-edit-constraint-target",
         "model-edit-constraint-value",
         "model-edit-linear-material",
         "model-edit-frame-section",
@@ -1104,6 +1110,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-nodal-load.v1",
             "structural-native:model-edit-nodal-load-target.v1",
             "nodal_load_target",
+            "structural-native:model-edit-constraint-target.v1",
+            "constraint_target",
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
             "structural-native:model-add-linear-load-combination.v1",
@@ -1151,6 +1159,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn add_model_frame3d_member",
             "pub fn add_model_nodal_load",
             "pub fn edit_model_nodal_load_target",
+            "pub fn edit_model_constraint_target",
             "pub fn add_model_fixed_constraint",
             "pub fn add_model_linear_load_pattern",
             "pub fn add_model_linear_load_combination",
@@ -1766,6 +1775,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-add-frame3d-member")',
             'Some("model-add-nodal-load")',
             'Some("model-edit-nodal-load-target")',
+            'Some("model-edit-constraint-target")',
             'Some("model-delete-nodal-load")',
             'Some("model-add-fixed-constraint")',
             'Some("model-add-linear-load-pattern")',
@@ -2502,6 +2512,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    constraint_target_edit_doc = _text(
+        root, Path("docs/native/modelir-constraint-target-edit-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-constraint-target-edit-v1.md"),
+        constraint_target_edit_doc,
+        (
+            "model-edit-constraint-target",
+            "single C ABI into C++",
+            "structural-native:model-edit-constraint-target.v1",
+            "constraint_target",
+            "append-only v62",
+            "[12,13,14,15,16,17]",
+            "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6 remain open",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2517,6 +2547,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "localized NDTHA result views are C5-implemented",
             "model-edit-nodal-load",
             "model-edit-nodal-load-target",
+            "model-edit-constraint-target",
             "model-edit-constraint-value",
             "model-edit-linear-material",
             "model-edit-frame-section",

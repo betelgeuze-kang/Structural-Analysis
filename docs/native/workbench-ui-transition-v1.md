@@ -54,6 +54,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   active load `[0,0,0,0,0,0,0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-
   checkpoint restart. Component/identity/pattern editing, general topology and visual dragging
   remain separate or open.
+- `model-edit-constraint-target`: deterministic replacement of one existing `fixed_dofs`
+  constraint's target with a distinct existing node. Rust preserves identity, index, type, DOFs,
+  prescribed values, source identity, extensions and unrelated rows; rejects any target-node DOF
+  overlap; degrades only a matching constraint round-trip claim; and strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v62 proves exact N3-only active DOFs
+  `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-
+  checkpoint restart. Constraint-value/mask/identity editing, MPC/contact/support sets and visual
+  dragging remain separate or open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint

@@ -15,8 +15,9 @@ browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
 provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component,
-`model-edit-nodal-load-target` existing-load target-node and `model-edit-constraint-value`
-existing-restrained-DOF commands, plus the closed
+`model-edit-nodal-load-target` existing-load target-node, `model-edit-constraint-target`
+existing-fixed-constraint target-node and `model-edit-constraint-value` existing-restrained-DOF
+commands, plus the closed
 `model-edit-linear-material`, `model-edit-frame-section`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
@@ -115,7 +116,12 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v61 proves repeated target-edited/request/artifact bytes and
+assembly preflight. Distribution E2E v62 proves repeated constraint-target-edited/request/artifact
+bytes and retains every v61 assertion while composing a connected N3 member, N3 load and N3 fixed
+constraint, moving that constraint to N2 through `model-edit-constraint-target`, preserving every
+constraint field except `node_id`, and proving exact active DOFs `[12,13,14,15,16,17]`, active load
+`[0,-1000,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback 0. Distribution E2E v61
+proves repeated target-edited/request/artifact bytes and
 retains every v60 assertion while moving `LC_WEAK/L_WEAK_N2` from N2 to the existing N3 through
 `model-edit-nodal-load-target`, preserving all load fields except `node_id`, and proving exact active
 load `[0,0,0,0,0,0,0,-10000,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback

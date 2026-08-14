@@ -20,6 +20,7 @@
       "model-delete-orphan-node",
       "model-edit-nodal-load",
       "model-edit-nodal-load-target",
+      "model-edit-constraint-target",
       "model-edit-constraint-value",
       "model-edit-linear-material",
       "model-edit-frame-section",
@@ -301,6 +302,12 @@
     },
     {
       "feature": "bounded_cpp_revalidated_existing_modelir_nodal_load_target_edit",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_cpp_revalidated_existing_modelir_fixed_constraint_target_edit",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false
