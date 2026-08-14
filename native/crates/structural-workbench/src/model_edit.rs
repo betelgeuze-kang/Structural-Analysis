@@ -54,6 +54,8 @@ const FIXED_CONSTRAINT_DOF_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-fixed-constraint-dof.v1";
 const FIXED_CONSTRAINT_DOF_REORDER_EXTENSION_KEY: &str =
     "structural-native:model-reorder-fixed-constraint-dof.v1";
+const FIXED_CONSTRAINT_IDENTITY_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-fixed-constraint-identity.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const NODAL_LOAD_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
@@ -116,6 +118,7 @@ const CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_exi
 const FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_and_matching_explicit_prescribed_value_deletion_with_at_least_one_dof_retained_and_identity_index_type_node_source_extensions_preserved_not_dof_addition_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_unrestrained_dof_append_with_explicit_finite_prescribed_value_and_identity_index_type_node_existing_dof_order_values_source_extensions_preserved_without_same_node_overlap_not_dof_deletion_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_order_only_move_to_distinct_bounded_index_with_identity_index_type_node_complete_dof_membership_prescribed_values_source_extensions_and_unrelated_rows_preserved_not_dof_addition_deletion_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
+const FIXED_CONSTRAINT_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_fixed_dofs_constraint_identity_replacement_to_distinct_unique_stable_id_with_index_type_node_dofs_prescribed_values_source_extensions_and_unrelated_rows_preserved_without_stage_unsupported_feature_or_roundtrip_cascade_not_target_value_mask_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -220,6 +223,13 @@ pub struct ModelFixedConstraintDofAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded fixed-constraint DOF reorder.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFixedConstraintDofReorderOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded fixed-constraint identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFixedConstraintIdentityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -750,6 +760,32 @@ pub fn publish_model_fixed_constraint_dof_reorder(
 ) -> Result<ModelFixedConstraintDofReorderOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = reorder_model_fixed_constraint_dof(&source, constraint_id, dof, target_index)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one unreferenced fixed constraint identity and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// missing or non-fixed constraints, no-op edits, stage/unsupported-feature/round-trip references,
+/// malformed retained fields, or publication failure.
+pub fn publish_model_fixed_constraint_identity_edit(
+    source_path: &Path,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFixedConstraintIdentityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome =
+        edit_model_fixed_constraint_identity(&source, constraint_id, replacement_constraint_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2684,6 +2720,17 @@ struct ReorderedConstraintDofV1 {
     retained_extensions: Value,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct RenamedFixedConstraintV1 {
+    constraint_index: usize,
+    constraint_type: String,
+    node_id: String,
+    dofs: Value,
+    prescribed_values_si: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
 /// Move one restrained DOF to a distinct final index in an existing fixed constraint in memory.
 ///
 /// # Errors
@@ -2782,6 +2829,101 @@ pub fn reorder_model_fixed_constraint_dof(
         "claim_boundary": FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFixedConstraintDofReorderOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Replace one unreferenced fixed constraint identity in memory.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing or non-fixed
+/// constraints, no-op edits, stage/unsupported-feature/round-trip references, malformed retained
+/// fields, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_fixed_constraint_identity(
+    source_bytes: &[u8],
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+) -> Result<ModelFixedConstraintIdentityEditOutcomeV1, WorkbenchError> {
+    validate_fixed_constraint_identity_edit_request(
+        source_bytes.len(),
+        constraint_id,
+        replacement_constraint_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let renamed =
+        replace_fixed_constraint_identity(&mut edited, constraint_id, replacement_constraint_id)?;
+    bind_fixed_constraint_identity_edit_provenance(
+        &mut edited,
+        constraint_id,
+        replacement_constraint_id,
+        &renamed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the fixed-constraint identity-edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "fixed_constraint_identity_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_constraint_id": constraint_id,
+        "replacement_constraint_id": replacement_constraint_id,
+        "constraint_index": renamed.constraint_index,
+        "constraint_type": renamed.constraint_type,
+        "node_id": renamed.node_id,
+        "retained_dofs": renamed.dofs,
+        "retained_prescribed_values_si": renamed.prescribed_values_si,
+        "retained_source_id": renamed.retained_source_id,
+        "retained_extensions": renamed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FIXED_CONSTRAINT_IDENTITY_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFixedConstraintIdentityEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -7183,6 +7325,40 @@ fn validate_fixed_constraint_dof_reorder_request(
     Ok(())
 }
 
+fn validate_fixed_constraint_identity_edit_request(
+    source_length: usize,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, constraint_id, "constraint")?;
+    validate_bounded_edit_identity(
+        source_length,
+        replacement_constraint_id,
+        "replacement constraint",
+    )?;
+    let replacement_bytes = replacement_constraint_id.as_bytes();
+    if !replacement_bytes
+        .first()
+        .is_some_and(u8::is_ascii_alphabetic)
+        || !replacement_bytes
+            .iter()
+            .skip(1)
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'.' | b':' | b'-'))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_replacement_invalid",
+            "replacement constraint identity must satisfy the ModelIR stable-ID grammar",
+        ));
+    }
+    if constraint_id == replacement_constraint_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement constraint identity is identical to the source identity",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -8590,6 +8766,162 @@ fn move_fixed_constraint_dof(
         source_dofs,
         edited_dofs: Value::Array(dofs.clone()),
         retained_prescribed_values_si,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_fixed_constraint_identity(
+    model: &mut Value,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+) -> Result<RenamedFixedConstraintV1, WorkbenchError> {
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    let constraint_index = constraints
+        .iter()
+        .position(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_fixed_constraint_identity_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    if constraints.iter().any(|constraint| {
+        constraint.get("id").and_then(Value::as_str) == Some(replacement_constraint_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_replacement_exists",
+            format!("ModelIR already has a constraint with identity {replacement_constraint_id}"),
+        ));
+    }
+    let constraint = &constraints[constraint_index];
+    if constraint.get("index").and_then(Value::as_u64) != u64::try_from(constraint_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_index_mismatch",
+            "identity-edited constraint index must match its contiguous position",
+        ));
+    }
+    let constraint_type = constraint
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint type"))?
+        .to_owned();
+    if constraint_type != "fixed_dofs" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_type_unsupported",
+            "constraint identity editing accepts only a fixed_dofs constraint",
+        ));
+    }
+    let node_id = constraint
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint node_id"))?
+        .to_owned();
+    let dofs = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .filter(|values| !values.is_empty() && values.len() <= DOF_KEYS.len())
+        .ok_or_else(|| snapshot_error("constraint dofs"))?;
+    let mut seen_dofs = Vec::with_capacity(dofs.len());
+    for dof in dofs {
+        let dof = dof
+            .as_str()
+            .filter(|dof| DOF_KEYS.contains(dof))
+            .ok_or_else(|| snapshot_error("constraint dofs"))?;
+        if seen_dofs.contains(&dof) {
+            return Err(snapshot_error("constraint dofs"));
+        }
+        seen_dofs.push(dof);
+    }
+    let prescribed_values_si = constraint
+        .get("prescribed_values_si")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?;
+    for value in prescribed_values_si.values() {
+        finite_number(value, "constraint prescribed value")?;
+    }
+    let retained_source_id = constraint
+        .get("source_id")
+        .ok_or_else(|| snapshot_error("constraint source_id"))?
+        .clone();
+    let retained_extensions = constraint
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("constraint extensions"))?
+        .clone();
+
+    let construction_stages = model
+        .get("construction_stages")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("construction_stages"))?;
+    if construction_stages.iter().any(|stage| {
+        stage
+            .get("active_constraint_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| {
+                ids.iter().any(|id| {
+                    matches!(
+                        id.as_str(),
+                        Some(id) if id == constraint_id || id == replacement_constraint_id
+                    )
+                })
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_referenced_by_stage",
+            "constraint identity editing refuses a source or replacement identity referenced by a construction stage",
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        matches!(
+            feature.get("source_entity_id").and_then(Value::as_str),
+            Some(id) if id == constraint_id || id == replacement_constraint_id
+        )
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_unsupported_feature_owned",
+            "constraint identity editing refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows.iter().any(|row| {
+        matches!(
+            row.get("model_ir_entity_id").and_then(Value::as_str),
+            Some(id) if id == constraint_id || id == replacement_constraint_id
+        )
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_fixed_constraint_identity_roundtrip_owned",
+            "constraint identity editing refuses source or replacement ownership by a round-trip mapping",
+        ));
+    }
+
+    let retained_dofs = constraint["dofs"].clone();
+    let retained_prescribed_values_si = constraint["prescribed_values_si"].clone();
+    model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .and_then(|constraints| constraints.get_mut(constraint_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("constraint"))?
+        .insert("id".to_owned(), json!(replacement_constraint_id));
+    Ok(RenamedFixedConstraintV1 {
+        constraint_index,
+        constraint_type,
+        node_id,
+        dofs: retained_dofs,
+        prescribed_values_si: retained_prescribed_values_si,
         retained_source_id,
         retained_extensions,
     })
@@ -14854,6 +15186,39 @@ fn bind_fixed_constraint_dof_reorder_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_fixed_constraint_identity_edit_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+    renamed: &RenamedFixedConstraintV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FIXED_CONSTRAINT_IDENTITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "fixed_constraint_identity_edit",
+            "source_constraint_id": constraint_id,
+            "replacement_constraint_id": replacement_constraint_id,
+            "constraint_index": renamed.constraint_index,
+            "constraint_type": renamed.constraint_type.clone(),
+            "node_id": renamed.node_id.clone(),
+            "retained_dofs": renamed.dofs.clone(),
+            "retained_prescribed_values_si": renamed.prescribed_values_si.clone(),
+            "retained_source_id": renamed.retained_source_id.clone(),
+            "retained_extensions": renamed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FIXED_CONSTRAINT_IDENTITY_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -16644,7 +17009,7 @@ mod tests {
         remove_nested_linear_load_combination_term, remove_nodal_load, remove_orphan_node,
         remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
         replace_direct_linear_load_combination_factor,
-        replace_direct_linear_load_combination_reference,
+        replace_direct_linear_load_combination_reference, replace_fixed_constraint_identity,
         replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_target,
         validate_constraint_target_edit_request, validate_constraint_value_edit_request,
@@ -16657,8 +17022,10 @@ mod tests {
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_fixed_constraint_delete_request, validate_fixed_constraint_dof_add_request,
         validate_fixed_constraint_dof_delete_request,
-        validate_fixed_constraint_dof_reorder_request, validate_frame3d_leaf_member_delete_request,
-        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
+        validate_fixed_constraint_dof_reorder_request,
+        validate_fixed_constraint_identity_edit_request,
+        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
+        validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_delete_request,
         validate_frame_section_edit_request, validate_linear_load_combination_add_request,
@@ -17277,6 +17644,96 @@ mod tests {
                 .expect_err("missing constraint")
                 .code,
             "workbench_model_reorder_fixed_constraint_dof_constraint_missing"
+        );
+    }
+
+    #[test]
+    fn fixed_constraint_identity_edit_is_reference_closed_and_order_preserving() {
+        validate_fixed_constraint_identity_edit_request(0, "BC2", "BC_RENAMED")
+            .expect("valid fixed-constraint identity edit request");
+        assert_eq!(
+            validate_fixed_constraint_identity_edit_request(0, "BC2", "1_INVALID")
+                .expect_err("invalid replacement stable ID")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_replacement_invalid"
+        );
+        assert_eq!(
+            validate_fixed_constraint_identity_edit_request(0, "BC2", "BC2")
+                .expect_err("no-op identity")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+
+        let model = json!({
+            "constraints": [
+                {
+                    "id": "BC1", "index": 0, "type": "fixed_dofs", "node_id": "N1",
+                    "dofs": ["UX"], "prescribed_values_si": {"UX": 0},
+                    "source_id": "source:BC1", "extensions": {"first": true}
+                },
+                {
+                    "id": "BC2", "index": 1, "type": "fixed_dofs", "node_id": "N2",
+                    "dofs": ["RZ", "UX", "UY"],
+                    "prescribed_values_si": {"RZ": -0.25, "UX": 0.125},
+                    "source_id": "source:BC2", "extensions": {"fixture": true}
+                }
+            ],
+            "construction_stages": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut edited = model.clone();
+        let renamed = replace_fixed_constraint_identity(&mut edited, "BC2", "BC_RENAMED")
+            .expect("rename unreferenced fixed constraint");
+        assert_eq!(renamed.constraint_index, 1);
+        assert_eq!(renamed.constraint_type, "fixed_dofs");
+        assert_eq!(renamed.node_id, "N2");
+        assert_eq!(renamed.dofs, json!(["RZ", "UX", "UY"]));
+        assert_eq!(
+            renamed.prescribed_values_si,
+            json!({"RZ": -0.25, "UX": 0.125})
+        );
+        assert_eq!(renamed.retained_source_id, "source:BC2");
+        assert_eq!(renamed.retained_extensions, json!({"fixture": true}));
+        assert_eq!(edited["constraints"][0], model["constraints"][0]);
+        assert_eq!(edited["constraints"][1]["id"], "BC_RENAMED");
+        assert_eq!(edited["constraints"][1]["index"], 1);
+
+        assert_eq!(
+            replace_fixed_constraint_identity(&mut model.clone(), "BC2", "BC1")
+                .expect_err("colliding replacement")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_replacement_exists"
+        );
+        assert_eq!(
+            replace_fixed_constraint_identity(&mut model.clone(), "MISSING", "BC3")
+                .expect_err("missing constraint")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_constraint_missing"
+        );
+        let mut staged = model.clone();
+        staged["construction_stages"] = json!([{"active_constraint_ids": ["BC2"]}]);
+        assert_eq!(
+            replace_fixed_constraint_identity(&mut staged, "BC2", "BC_RENAMED")
+                .expect_err("staged constraint")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_referenced_by_stage"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "BC2"}]);
+        assert_eq!(
+            replace_fixed_constraint_identity(&mut feature_owned, "BC2", "BC_RENAMED")
+                .expect_err("unsupported-feature-owned constraint")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "BC2"}]);
+        assert_eq!(
+            replace_fixed_constraint_identity(&mut mapped, "BC2", "BC_RENAMED")
+                .expect_err("round-trip-owned constraint")
+                .code,
+            "workbench_model_edit_fixed_constraint_identity_roundtrip_owned"
         );
     }
 

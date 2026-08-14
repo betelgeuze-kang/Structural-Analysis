@@ -2013,6 +2013,158 @@ exercise_fixed_constraint_dof_reorder_surface() {
 }
 exercise_fixed_constraint_dof_reorder_surface
 
+exercise_fixed_constraint_identity_edit_surface() {
+  local source_model="$e2e_root/fixed-constraint-dof-reorder-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/fixed-constraint-identity-edit-$label"
+    request_directory="$e2e_root/fixed-constraint-identity-edit-$label-request"
+    direct_directory="$e2e_root/fixed-constraint-identity-edit-$label-direct"
+    partial_directory="$e2e_root/fixed-constraint-identity-edit-$label-partial"
+    resumed_directory="$e2e_root/fixed-constraint-identity-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-fixed-constraint-identity "$source_model" \
+      --constraint BC_N3 --new-constraint BC_N3_RENAMED \
+      --output-dir "$edit_directory" \
+      > "$e2e_root/fixed-constraint-identity-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"fixed_constraint_identity_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_constraint_id":"BC_N3"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_constraint_id":"BC_N3_RENAMED"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_index":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_type":"fixed_dofs"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_dofs":["RZ","UX","UY","UZ","RX","RY"]' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_prescribed_values_si":{"RX":0,"RY":0,"RZ":0,"UX":0,"UY":0,"UZ":0}' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_source_id":null' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_extensions":{}' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"id":"BC_N3_RENAMED"' "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-fixed-constraint-identity.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case fixed-constraint-identity-edit-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[12,13,14,15,16,17]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-1000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-identity-edit-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/fixed-constraint-identity-edit-first$suffix" \
+      "$e2e_root/fixed-constraint-identity-edit-second$suffix" \
+      > "$e2e_root/fixed-constraint-identity-edit$suffix-diff.txt"
+  done
+  cmp "$e2e_root/fixed-constraint-identity-edit-first.stdout.json" \
+    "$e2e_root/fixed-constraint-identity-edit-second.stdout.json"
+  cmp "$e2e_root/fixed-constraint-identity-edit-first-validation.json" \
+    "$e2e_root/fixed-constraint-identity-edit-second-validation.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/fixed-constraint-identity-edit-first-$suffix.stdout.json" \
+      "$e2e_root/fixed-constraint-identity-edit-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed fixed-constraint identity edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/fixed-constraint-identity-edit-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity "$source_model" \
+    --constraint BC_MISSING --new-constraint BC_NEW --output-dir "$missing_destination" \
+    > "$e2e_root/fixed-constraint-identity-edit-missing-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity edit accepted a missing constraint" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_constraint_missing' \
+    "$e2e_root/fixed-constraint-identity-edit-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local collision_destination="$e2e_root/fixed-constraint-identity-edit-collision-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity "$source_model" \
+    --constraint BC_N3 --new-constraint BC1 --output-dir "$collision_destination" \
+    > "$e2e_root/fixed-constraint-identity-edit-collision-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity edit accepted a colliding identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_replacement_exists' \
+    "$e2e_root/fixed-constraint-identity-edit-collision-rejected.stdout.json"
+  test ! -e "$collision_destination"
+
+  local no_op_destination="$e2e_root/fixed-constraint-identity-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity "$source_model" \
+    --constraint BC_N3 --new-constraint BC_N3 --output-dir "$no_op_destination" \
+    > "$e2e_root/fixed-constraint-identity-edit-no-op-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/fixed-constraint-identity-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/fixed-constraint-identity-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity "$source_model" \
+    --constraint BC_N3 --new-constraint 1_INVALID --output-dir "$invalid_destination" \
+    > "$e2e_root/fixed-constraint-identity-edit-invalid-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity edit accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_replacement_invalid' \
+    "$e2e_root/fixed-constraint-identity-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+}
+exercise_fixed_constraint_identity_edit_surface
+
 exercise_fixed_constraint_deletion_surface() {
   local source_model="$e2e_root/fixed-constraint-add-first/model-ir.json"
   local source_before_hash
@@ -6816,6 +6968,15 @@ fixed_constraint_dof_reorder_checkpoint_hash="$(sha256sum "$e2e_root/fixed-const
 fixed_constraint_dof_reorder_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/result-ir.json" | awk '{print $1}')"
 fixed_constraint_dof_reorder_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 fixed_constraint_dof_reorder_report_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/report-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_model_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first/model-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first/edit-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_request_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-request/request-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_request_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-request/analysis-request.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+fixed_constraint_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -7300,6 +7461,10 @@ v65_receipt_json="${v64_receipt_json/structural-native-distribution-e2e.v64/stru
 fixed_constraint_dof_reorder_receipt_fields="\"workbench_fixed_constraint_dof_reorder_surface_passed\":true,\"workbench_fixed_constraint_dof_reorder_model_sha256\":\"sha256:$fixed_constraint_dof_reorder_model_hash\",\"workbench_fixed_constraint_dof_reorder_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_request_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_request_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_request_sha256\":\"sha256:$fixed_constraint_dof_reorder_request_hash\",\"workbench_fixed_constraint_dof_reorder_assembly_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_assembly_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_checkpoint_sha256\":\"sha256:$fixed_constraint_dof_reorder_checkpoint_hash\",\"workbench_fixed_constraint_dof_reorder_result_ir_sha256\":\"sha256:$fixed_constraint_dof_reorder_result_ir_hash\",\"workbench_fixed_constraint_dof_reorder_recovery_sha256\":\"sha256:$fixed_constraint_dof_reorder_recovery_hash\",\"workbench_fixed_constraint_dof_reorder_report_ir_sha256\":\"sha256:$fixed_constraint_dof_reorder_report_ir_hash\",\"workbench_fixed_constraint_dof_reorder_restart_passed\":true,"
 v65_receipt_json="${v65_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_dof_reorder_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v65_receipt_json" > "$temporary_receipt"
+v66_receipt_json="${v65_receipt_json/structural-native-distribution-e2e.v65/structural-native-distribution-e2e.v66}"
+fixed_constraint_identity_edit_receipt_fields="\"workbench_fixed_constraint_identity_edit_surface_passed\":true,\"workbench_fixed_constraint_identity_edit_model_sha256\":\"sha256:$fixed_constraint_identity_edit_model_hash\",\"workbench_fixed_constraint_identity_edit_receipt_sha256\":\"sha256:$fixed_constraint_identity_edit_receipt_hash\",\"workbench_fixed_constraint_identity_edit_request_receipt_sha256\":\"sha256:$fixed_constraint_identity_edit_request_receipt_hash\",\"workbench_fixed_constraint_identity_edit_request_sha256\":\"sha256:$fixed_constraint_identity_edit_request_hash\",\"workbench_fixed_constraint_identity_edit_assembly_receipt_sha256\":\"sha256:$fixed_constraint_identity_edit_assembly_receipt_hash\",\"workbench_fixed_constraint_identity_edit_checkpoint_sha256\":\"sha256:$fixed_constraint_identity_edit_checkpoint_hash\",\"workbench_fixed_constraint_identity_edit_result_ir_sha256\":\"sha256:$fixed_constraint_identity_edit_result_ir_hash\",\"workbench_fixed_constraint_identity_edit_recovery_sha256\":\"sha256:$fixed_constraint_identity_edit_recovery_hash\",\"workbench_fixed_constraint_identity_edit_report_ir_sha256\":\"sha256:$fixed_constraint_identity_edit_report_ir_hash\",\"workbench_fixed_constraint_identity_edit_restart_passed\":true,"
+v66_receipt_json="${v66_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v66_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

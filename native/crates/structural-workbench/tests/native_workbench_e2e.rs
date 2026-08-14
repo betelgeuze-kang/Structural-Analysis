@@ -917,6 +917,24 @@ fn run_fixed_constraint_dof_reorder(
     ])
 }
 
+fn run_fixed_constraint_identity_edit(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-fixed-constraint-identity"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--new-constraint"),
+        text(replacement_constraint_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_add(
     source: &Path,
     destination: &Path,
@@ -6590,6 +6608,300 @@ fn fixed_constraint_dof_reorder_is_deterministic_restartable_and_cpu_executable(
     );
 
     let existing = run_fixed_constraint_dof_reorder(&add_path, &first, "BC_N3", "RZ", "0");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_constraint_identity_edit_is_deterministic_reference_closed_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("constraint-identity-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("constraint-identity-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let fixed_directory = temporary.0.join("constraint-identity-fixed-source");
+    assert_success(&run_fixed_constraint_add(
+        &load_directory.join("model-ir.json"),
+        &fixed_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let target_directory = temporary.0.join("constraint-identity-target-source");
+    assert_success(&run_constraint_target_edit(
+        &fixed_directory.join("model-ir.json"),
+        &target_directory,
+        "BC_N3",
+        "N2",
+    ));
+    let delete_directory = temporary.0.join("constraint-identity-delete-source");
+    assert_success(&run_fixed_constraint_dof_delete(
+        &target_directory.join("model-ir.json"),
+        &delete_directory,
+        "BC_N3",
+        "RZ",
+    ));
+    let add_directory = temporary.0.join("constraint-identity-add-source");
+    assert_success(&run_fixed_constraint_dof_add(
+        &delete_directory.join("model-ir.json"),
+        &add_directory,
+        "BC_N3",
+        "RZ",
+        "0",
+    ));
+    let reorder_directory = temporary.0.join("constraint-identity-reorder-source");
+    assert_success(&run_fixed_constraint_dof_reorder(
+        &add_directory.join("model-ir.json"),
+        &reorder_directory,
+        "BC_N3",
+        "RZ",
+        "0",
+    ));
+    let reorder_path = reorder_directory.join("model-ir.json");
+    let source_bytes = std::fs::read(&reorder_path).expect("constraint identity source bytes");
+    let source_model = parse_model_ir_v2(&source_bytes).expect("strict constraint identity source");
+
+    let first = temporary.0.join("constraint-identity-first");
+    let second = temporary.0.join("constraint-identity-second");
+    for destination in [&first, &second] {
+        let output = run_fixed_constraint_identity_edit(
+            &reorder_path,
+            destination,
+            "BC_N3",
+            "BC_N3_RENAMED",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("constraint identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&reorder_path).expect("unchanged constraint identity source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("constraint identity-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict identity-edited ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++ identity-edited validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model.value()[family]);
+    }
+    let source_constraints = source_model.value()["constraints"]
+        .as_array()
+        .expect("source constraints");
+    let edited_constraints = edited.value()["constraints"]
+        .as_array()
+        .expect("edited constraints");
+    assert_eq!(edited_constraints[0], source_constraints[0]);
+    assert_eq!(source_constraints[1]["id"], "BC_N3");
+    assert_eq!(edited_constraints[1]["id"], "BC_N3_RENAMED");
+    for key in [
+        "index",
+        "type",
+        "node_id",
+        "dofs",
+        "prescribed_values_si",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(edited_constraints[1][key], source_constraints[1][key]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-fixed-constraint-identity.v1")
+        .expect("constraint identity provenance extension");
+    assert_eq!(extension["operation"], "fixed_constraint_identity_edit");
+    assert_eq!(extension["source_constraint_id"], "BC_N3");
+    assert_eq!(extension["replacement_constraint_id"], "BC_N3_RENAMED");
+    assert_eq!(extension["constraint_index"], 1);
+    assert_eq!(extension["constraint_type"], "fixed_dofs");
+    assert_eq!(extension["node_id"], "N2");
+    assert_eq!(extension["retained_dofs"], source_constraints[1]["dofs"]);
+    assert_eq!(
+        extension["retained_prescribed_values_si"],
+        source_constraints[1]["prescribed_values_si"]
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("constraint identity receipt"),
+    )
+    .expect("constraint identity receipt JSON");
+    assert_eq!(receipt["operation"], "fixed_constraint_identity_edit");
+    assert_eq!(receipt["source_constraint_id"], "BC_N3");
+    assert_eq!(receipt["replacement_constraint_id"], "BC_N3_RENAMED");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("constraint-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "constraint-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("constraint identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("constraint identity direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("constraint identity direct recovery"),
+    )
+    .expect("constraint identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([12, 13, 14, 15, 16, 17])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -1000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("constraint identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("constraint identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, source_id, replacement_id, status, code) in [
+        (
+            "constraint-identity-missing",
+            "BC_MISSING",
+            "BC_NEW",
+            1,
+            "workbench_model_edit_fixed_constraint_identity_constraint_missing",
+        ),
+        (
+            "constraint-identity-collision",
+            "BC_N3",
+            "BC1",
+            1,
+            "workbench_model_edit_fixed_constraint_identity_replacement_exists",
+        ),
+        (
+            "constraint-identity-no-op",
+            "BC_N3",
+            "BC_N3",
+            1,
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "constraint-identity-invalid-stable-id",
+            "BC_N3",
+            "1_INVALID",
+            1,
+            "workbench_model_edit_fixed_constraint_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_fixed_constraint_identity_edit(
+            &reorder_path,
+            &destination,
+            source_id,
+            replacement_id,
+        );
+        assert_eq!(rejected.status.code(), Some(status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked = source_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.constraint-identity-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Constraint identity editing must preserve unrelated blockers.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-constraint-identity-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked constraint identity source")
+            .as_bytes(),
+    )
+    .expect("write blocked constraint identity source");
+    let blocked_destination = temporary.0.join("blocked-constraint-identity-output");
+    assert_success(&run_fixed_constraint_identity_edit(
+        &blocked_source,
+        &blocked_destination,
+        "BC_N3",
+        "BC_N3_RENAMED",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked constraint identity receipt"),
+    )
+    .expect("blocked constraint identity receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.constraint-identity-visible-not-runnable"])
+    );
+
+    let existing =
+        run_fixed_constraint_identity_edit(&reorder_path, &first, "BC_N3", "BC_N3_RENAMED");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

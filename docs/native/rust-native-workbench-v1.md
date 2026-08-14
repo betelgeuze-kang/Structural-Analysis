@@ -60,7 +60,12 @@ DOF with an explicit finite prescribed SI value while rejecting same-node overla
 `docs/native/modelir-fixed-constraint-dof-addition-v1.md`. The separate
 `model-reorder-fixed-constraint-dof` command moves one restrained DOF to a distinct index while
 preserving complete mask membership and prescribed values; see
-`docs/native/modelir-fixed-constraint-dof-reorder-v1.md`. Constraint identity editing remains open.
+`docs/native/modelir-fixed-constraint-dof-reorder-v1.md`. The bounded
+`model-edit-fixed-constraint-identity` command replaces only one unreferenced `fixed_dofs`
+constraint identity with a distinct unique stable ID, preserves every non-identity field, rejects
+stage/unsupported-feature/round-trip ownership without cascade, and C++-revalidates the edited
+snapshot. See `docs/native/modelir-fixed-constraint-identity-edit-v1.md`. Other entity identity
+editing and reference cascades remain open.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`

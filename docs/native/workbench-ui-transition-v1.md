@@ -60,15 +60,15 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   overlap; degrades only a matching constraint round-trip claim; and strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v62 proves exact N3-only active DOFs
   `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-
-  checkpoint restart. Constraint-value/mask/identity editing, MPC/contact/support sets and visual
-  dragging remain separate or open.
+  checkpoint restart. Constraint-value/mask editing and the v66 bounded identity surface remain
+  separate; MPC/contact/support sets and visual dragging remain open.
 - `model-delete-fixed-constraint-dof`: deterministic removal of one named restrained DOF and its
   matching explicit prescribed value, when present, from one existing `fixed_dofs` constraint.
   Rust retains at least one DOF plus identity/index/type/target/source/extensions, degrades only a
   matching constraint round-trip claim, and strictly reparses and C++-revalidates before create-new
   publication. Installed E2E v63 proves active DOFs `[11,12,13,14,15,16,17]`, active load
   `[0,0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. DOF
-  addition and reordering are separate v64/v65 surfaces; constraint identity editing and
+  addition, reordering and bounded identity replacement are separate v64/v65/v66 surfaces;
   MPC/contact/support sets remain open.
 - `model-add-fixed-constraint-dof`: deterministic append of one previously unrestrained DOF and
   explicit finite prescribed SI value to one existing `fixed_dofs` constraint. Rust preserves the
@@ -76,8 +76,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   DOFs, degrades only a matching constraint round-trip claim, and strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v64 restores `BC_N3/RZ=0` and proves
   active DOFs `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical
-  initialized-checkpoint restart. DOF reordering is the separate v65 surface; constraint identity
-  editing and MPC/contact/support sets remain open.
+  initialized-checkpoint restart. DOF reordering and bounded constraint identity replacement are
+  the separate v65/v66 surfaces; MPC/contact/support sets remain open.
 - `model-reorder-fixed-constraint-dof`: deterministic order-only movement of one named restrained
   DOF to a distinct index inside one existing `fixed_dofs` constraint. Rust preserves complete DOF
   membership, every explicit prescribed value and implicit-zero meaning, all non-order row fields
@@ -85,8 +85,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   constraint round-trip claim; and strictly reparses and C++-revalidates before create-new
   publication. Installed E2E v65 moves `BC_N3/RZ` from index 5 to 0 while proving unchanged active
   DOFs `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical
-  initialized-checkpoint restart. Constraint identity editing and MPC/contact/support sets remain
-  open.
+  initialized-checkpoint restart. Bounded unreferenced identity replacement is the separate v66
+  surface; MPC/contact/support sets remain open.
+- `model-edit-fixed-constraint-identity`: deterministic replacement of one existing unreferenced
+  `fixed_dofs` identity with a distinct unique ModelIR stable ID. Rust preserves the contiguous
+  index, type, target node, complete DOF order, prescribed values, source identity, extensions and
+  unrelated rows; rejects stage/unsupported-feature/round-trip ownership without cascade; and
+  strictly reparses and C++-revalidates before create-new publication. Installed E2E v66 replaces
+  `BC_N3` with `BC_N3_RENAMED` while proving unchanged active DOFs `[12,13,14,15,16,17]`, active
+  load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Other
+  entity identity editing, reference cascades and MPC/contact/support sets remain open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint

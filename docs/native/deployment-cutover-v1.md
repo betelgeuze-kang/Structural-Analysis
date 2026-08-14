@@ -19,7 +19,8 @@ provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-
 existing-fixed-constraint target-node and `model-edit-constraint-value` existing-restrained-DOF
 commands, plus `model-delete-fixed-constraint-dof` single-restraint deletion and the closed
 `model-add-fixed-constraint-dof` single-restraint addition plus
-`model-reorder-fixed-constraint-dof` order-only restraint movement, and the closed
+`model-reorder-fixed-constraint-dof` order-only restraint movement plus
+`model-edit-fixed-constraint-identity` unreferenced stable-identity replacement, and the closed
 `model-edit-linear-material`, `model-edit-frame-section`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
@@ -118,7 +119,13 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v65 proves repeated constraint-DOF-reordered/request/artifact
+assembly preflight. Distribution E2E v66 proves repeated constraint-identity-edited/request/artifact
+bytes and retains every v65 assertion while replacing unreferenced `BC_N3` with
+`BC_N3_RENAMED` through `model-edit-fixed-constraint-identity`, preserving every non-identity
+constraint field and unrelated row, rejecting identity collisions and owned references without
+cascade, and proving unchanged exact active DOFs `[12,13,14,15,16,17]`, active load
+`[0,-1000,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback 0.
+Distribution E2E v65 proves repeated constraint-DOF-reordered/request/artifact
 bytes and retains every v64 assertion while moving `BC_N3/RZ` from index 5 to index 0 through
 `model-reorder-fixed-constraint-dof`, preserving complete DOF membership, every prescribed value
 and every non-order constraint field, and proving unchanged exact active DOFs

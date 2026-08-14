@@ -530,6 +530,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-delete-fixed-constraint-dof",
         "model-add-fixed-constraint-dof",
         "model-reorder-fixed-constraint-dof",
+        "model-edit-fixed-constraint-identity",
         "model-add-linear-load-pattern",
         "model-add-linear-load-combination",
         "model-add-linear-load-combination-term",
@@ -1134,6 +1135,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "fixed_constraint_dof_add",
             "structural-native:model-reorder-fixed-constraint-dof.v1",
             "fixed_constraint_dof_reorder",
+            "structural-native:model-edit-fixed-constraint-identity.v1",
+            "fixed_constraint_identity_edit",
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
             "structural-native:model-add-linear-load-combination.v1",
@@ -2617,6 +2620,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    fixed_constraint_identity_edit_doc = _text(
+        root, Path("docs/native/modelir-fixed-constraint-identity-edit-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-fixed-constraint-identity-edit-v1.md"),
+        fixed_constraint_identity_edit_doc,
+        (
+            "model-edit-fixed-constraint-identity",
+            "single C ABI into C++",
+            "structural-native:model-edit-fixed-constraint-identity.v1",
+            "fixed_constraint_identity_edit",
+            "append-only v66",
+            "[12,13,14,15,16,17]",
+            "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2636,6 +2659,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-delete-fixed-constraint-dof",
             "model-add-fixed-constraint-dof",
             "model-reorder-fixed-constraint-dof",
+            "model-edit-fixed-constraint-identity",
             "model-edit-constraint-value",
             "model-edit-linear-material",
             "model-edit-frame-section",

@@ -163,6 +163,14 @@ struct ModelReorderFixedConstraintDofCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelEditFixedConstraintIdentityCommand {
+    model: PathBuf,
+    constraint_id: String,
+    replacement_constraint_id: String,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 struct ModelAddLinearLoadPatternCommand {
     model: PathBuf,
@@ -563,6 +571,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("model-reorder-fixed-constraint-dof") => {
             parse_model_reorder_fixed_constraint_dof(arguments)
                 .and_then(|command| run_model_reorder_fixed_constraint_dof(&command))
+        }
+        Some("model-edit-fixed-constraint-identity") => {
+            parse_model_edit_fixed_constraint_identity(arguments)
+                .and_then(|command| run_model_edit_fixed_constraint_identity(&command))
         }
         Some("model-add-linear-load-pattern") => parse_model_add_linear_load_pattern(arguments)
             .and_then(|command| run_model_add_linear_load_pattern(&command)),
@@ -1089,6 +1101,19 @@ fn run_model_reorder_fixed_constraint_dof(
         &command.constraint_id,
         &command.dof,
         command.target_index,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_fixed_constraint_identity(
+    command: &ModelEditFixedConstraintIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_fixed_constraint_identity_edit(
+        &command.model,
+        &command.constraint_id,
+        &command.replacement_constraint_id,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -2207,6 +2232,32 @@ fn parse_model_reorder_fixed_constraint_dof(
         dof,
         target_index,
         output_directory: PathBuf::from(&arguments[9]),
+    })
+}
+
+fn parse_model_edit_fixed_constraint_identity(
+    arguments: &[OsString],
+) -> Result<ModelEditFixedConstraintIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--constraint"
+        || arguments[4] != "--new-constraint"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-fixed-constraint-identity requires MODEL.json --constraint SOURCE-ID --new-constraint NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditFixedConstraintIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        constraint_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-fixed-constraint-identity source constraint ID",
+        )?,
+        replacement_constraint_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-fixed-constraint-identity replacement constraint ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
     })
 }
 
@@ -4067,7 +4118,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
-        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
+        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
 }
 
@@ -4096,9 +4147,10 @@ mod tests {
         parse_model_edit_constraint_target, parse_model_edit_constraint_value,
         parse_model_edit_direct_linear_load_combination_factor,
         parse_model_edit_direct_linear_load_combination_reference,
-        parse_model_edit_element_connectivity, parse_model_edit_frame_element_orientation,
-        parse_model_edit_frame_element_properties, parse_model_edit_frame_section,
-        parse_model_edit_linear_material, parse_model_edit_nested_linear_load_combination_factor,
+        parse_model_edit_element_connectivity, parse_model_edit_fixed_constraint_identity,
+        parse_model_edit_frame_element_orientation, parse_model_edit_frame_element_properties,
+        parse_model_edit_frame_section, parse_model_edit_linear_material,
+        parse_model_edit_nested_linear_load_combination_factor,
         parse_model_edit_nested_linear_load_combination_reference, parse_model_edit_nodal_load,
         parse_model_edit_nodal_load_target, parse_model_edit_node,
         parse_model_edit_truss_element_properties, parse_model_edit_truss_section,
@@ -4575,6 +4627,36 @@ mod tests {
         let mut empty_constraint = arguments;
         empty_constraint[3] = OsString::new();
         assert!(parse_model_reorder_fixed_constraint_dof(&empty_constraint).is_err());
+    }
+
+    #[test]
+    fn model_edit_fixed_constraint_identity_parser_is_closed_and_bounded() {
+        let arguments = [
+            OsString::from("model-edit-fixed-constraint-identity"),
+            OsString::from("model.json"),
+            OsString::from("--constraint"),
+            OsString::from("BC_N3"),
+            OsString::from("--new-constraint"),
+            OsString::from("BC_N3_RENAMED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_fixed_constraint_identity(&arguments)
+            .expect("valid fixed-constraint identity edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.constraint_id, "BC_N3");
+        assert_eq!(parsed.replacement_constraint_id, "BC_N3_RENAMED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut empty_source = arguments.clone();
+        empty_source[3] = OsString::new();
+        assert!(parse_model_edit_fixed_constraint_identity(&empty_source).is_err());
+        let mut empty_replacement = arguments.clone();
+        empty_replacement[5] = OsString::new();
+        assert!(parse_model_edit_fixed_constraint_identity(&empty_replacement).is_err());
+        let mut wrong_option = arguments;
+        wrong_option[4] = OsString::from("--replacement");
+        assert!(parse_model_edit_fixed_constraint_identity(&wrong_option).is_err());
     }
 
     #[test]

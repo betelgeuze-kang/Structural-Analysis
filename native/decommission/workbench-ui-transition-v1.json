@@ -37,6 +37,7 @@
       "model-delete-fixed-constraint-dof",
       "model-add-fixed-constraint-dof",
       "model-reorder-fixed-constraint-dof",
+      "model-edit-fixed-constraint-identity",
       "model-add-linear-load-pattern",
       "model-add-linear-load-combination",
       "model-add-linear-load-combination-term",
