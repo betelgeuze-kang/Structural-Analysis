@@ -56,15 +56,16 @@ Installed CPU static/shared distribution E2E v46 authors `COMBO_BASE`, then
 proves byte-identical direct and resumed output, and requires fallback 0 with Python/Node lookup 0.
 
 The same bounds now support deletion of one last neutral, extension-free, unreferenced nested root,
-editing one typed root factor, replacing one typed root reference, and append-only insertion of one
-typed root term. Those separate surfaces are documented in
+editing one typed root factor, replacing one typed root reference, append-only insertion of one
+typed root term, and bounded removal of one typed root term. Those separate surfaces are documented in
 `docs/native/modelir-nested-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md` and
-`docs/native/modelir-nested-linear-load-combination-term-add-v1.md`.
+`docs/native/modelir-nested-linear-load-combination-term-add-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-term-delete-v1.md`.
 
 This authoring slice does not claim general nested term/reference editing beyond the separate
-bounded root-factor, root-reference and append-only root-term editors; root-term removal/reorder,
+bounded root-factor, root-reference, root-term append and root-term deletion editors; root-term reorder,
 nonterminal or downstream-referenced editing, cascading or general
 graph deletion, depth beyond eight, more than 64 leaf contributions, self-weight, time functions,
 construction stages, shell/nonlinear combination execution, general solver selection, visual

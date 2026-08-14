@@ -392,7 +392,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    and byte-identical initialized checkpoint/restart output, then emits an append-only v55 receipt
    binding the source ModelIR, edited ModelIR, edit/request/assembly receipts, analysis request,
    checkpoint, ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
+71. removes middle typed term `0.25 LC_AXIAL` from that neutral unreferenced nested root,
+   preserves retained root factors, relative order and every descendant, rejects missing,
+   two-term and direct-degradation cases, proves exact active load `[0,-6000,1500,0,0,0]`, typed
+   recovery, fallback 0 and byte-identical initialized checkpoint/restart output, then emits an
+   append-only v56 receipt binding the source ModelIR, edited ModelIR, edit/request/assembly
+   receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
+   The receipt checker continues to accept frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -452,7 +458,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    factor/order, exact active-load, typed recovery and restart authority; and no pre-v55 receipt is
    installed bounded nested linear-load-combination append-only typed-root-term addition,
    source/edited expansion binding, repeated-pattern consolidation, exact active-load, typed
-   recovery and restart authority.
+   recovery and restart authority; and no pre-v56 receipt is installed bounded nested
+   linear-load-combination typed-root-term deletion, retained-order/source/edited expansion
+   binding, direct-degradation rejection, exact active-load, typed recovery and restart authority.
 
 The reference command is:
 

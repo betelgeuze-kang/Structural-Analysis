@@ -48,7 +48,7 @@ Consolidation yields `-0.15 LC_STRONG`; execution proves exact active load
 the edited ModelIR, edit receipt, request receipt, analysis request, assembly receipt, checkpoint,
 ResultIR, recovery and ReportIR.
 
-This is not general nested combination editing. Root factor and reference replacement are separate
-bounded surfaces. Root-term removal or reorder, arbitrary-position insertion, descendant or
+This is not general nested combination editing. Root factor and reference replacement, and bounded
+root-term removal, are separate surfaces. Root-term reorder, arbitrary-position insertion, descendant or
 downstream-referenced mutation, source-format writeback, visual editing, arbitrary solver
 selection, approved HIP C2, engineering acceptance and C6 remain open.

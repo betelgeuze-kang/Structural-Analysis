@@ -192,8 +192,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   source and edited graphs must remain acyclic, root-inclusive depth-eight/64-leaf bounded and
   C++ valid. Installed E2E v55 proves repeated-pattern consolidation, exact active load
   `[25000,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Root-term removal/reorder, arbitrary-position insertion, descendant or downstream-root
+  output. Root-term removal is a separate bounded surface; reorder, arbitrary-position insertion, descendant or downstream-root
   mutation, HIP parity and engineering acceptance remain open.
+- `model-delete-nested-linear-load-combination-term`: deterministic removal of one existing typed
+  root term from any position in a neutral, extension-free, unreferenced three-through-64-term
+  nested root. Rust preserves every retained root term and descendant, requires at least one
+  combination reference to remain, and requires source and edited graphs to stay acyclic,
+  root-inclusive depth-eight/64-leaf bounded and C++ valid. Installed E2E v56 proves exact active
+  load `[0,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+  output. Root-term reorder, descendant or downstream-root mutation, HIP parity and engineering
+  acceptance remain open.
 - `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
   in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
   preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then

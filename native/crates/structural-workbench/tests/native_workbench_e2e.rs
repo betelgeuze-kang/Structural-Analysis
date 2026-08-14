@@ -977,6 +977,27 @@ fn run_nested_linear_load_combination_term_add(
     ])
 }
 
+fn run_nested_linear_load_combination_term_delete(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    reference_kind: &str,
+    reference_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-nested-linear-load-combination-term"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--ref-kind"),
+        text(reference_kind),
+        text("--ref-id"),
+        text(reference_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_direct_linear_load_combination_factor_edit(
     source: &Path,
     destination: &Path,
@@ -6988,6 +7009,232 @@ fn nested_linear_load_combination_term_add_executes_and_restarts_without_fallbac
     assert!(String::from_utf8_lossy(&rejected.stdout)
         .contains("workbench_model_add_nested_linear_load_combination_term_direct_unsupported"));
     assert!(!direct_destination.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nested_linear_load_combination_term_delete_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base = temporary.0.join("nested-term-delete-base");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &base,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let nested = temporary.0.join("nested-term-delete-authored");
+    assert_success(&run_nested_linear_load_combination_add(
+        &base.join("model-ir.json"),
+        &nested,
+        "COMBO_NESTED",
+        &[
+            ["--combination-term", "COMBO_SERVICE", "0.5"],
+            ["--pattern-term", "LC_AXIAL", "0.25"],
+        ],
+    ));
+    let appended = temporary.0.join("nested-term-delete-appended");
+    assert_success(&run_nested_linear_load_combination_term_add(
+        &nested.join("model-ir.json"),
+        &appended,
+        "COMBO_NESTED",
+        "load_pattern",
+        "LC_STRONG",
+        "0.1",
+    ));
+    let appended_path = appended.join("model-ir.json");
+    let appended_bytes = std::fs::read(&appended_path).expect("nested term-delete source");
+    let source_document =
+        parse_model_ir_v2(&appended_bytes).expect("strict nested term-delete source");
+
+    let first = temporary.0.join("nested-term-delete-first");
+    let second = temporary.0.join("nested-term-delete-second");
+    for destination in [&first, &second] {
+        let output = run_nested_linear_load_combination_term_delete(
+            &appended_path,
+            destination,
+            "COMBO_NESTED",
+            "load_pattern",
+            "LC_AXIAL",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nested term-delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nested term-delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second nested term-delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&appended_path).expect("unchanged nested term-delete source"),
+        appended_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("nested term-reduced ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict nested term-reduced ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated nested term deletion");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][1]["terms"],
+        serde_json::json!([
+            {"ref_id": "COMBO_SERVICE", "ref_kind": "load_combination", "factor": 0.5},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 0.1}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0],
+        source_document.value()["load_combinations"][0]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-delete-nested-linear-load-combination-term.v1")
+        .expect("nested term-delete provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "nested_linear_load_combination_term_delete"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    );
+    assert_eq!(extension["load_combination_index"], 1);
+    assert_eq!(extension["reference_kind"], "load_pattern");
+    assert_eq!(extension["reference_id"], "LC_AXIAL");
+    assert_eq!(extension["term_index"], 1);
+    assert_eq!(extension["source_term_count"], 3);
+    assert_eq!(extension["term_count"], 2);
+    assert_eq!(extension["removed_factor"], 0.25);
+    assert_eq!(extension["source_combination_depth"], 2);
+    assert_eq!(extension["edited_combination_depth"], 2);
+    assert_eq!(extension["source_expanded_term_count"], 4);
+    assert_eq!(extension["edited_expanded_term_count"], 3);
+    assert_eq!(extension["source_expanded_pattern_count"], 3);
+    assert_eq!(extension["edited_expanded_pattern_count"], 2);
+    assert_eq!(
+        extension["edited_expanded_pattern_terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.15}
+        ])
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nested term-delete receipt"),
+    )
+    .expect("nested term-delete receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "nested_linear_load_combination_term_delete"
+    );
+    assert_eq!(edit_receipt["reference_kind"], "load_pattern");
+    assert_eq!(edit_receipt["reference_id"], "LC_AXIAL");
+    assert_eq!(edit_receipt["term_index"], 1);
+    assert_eq!(edit_receipt["source_term_count"], 3);
+    assert_eq!(edit_receipt["term_count"], 2);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("nested-term-delete-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nested-term-delete-c5",
+        "COMBO_NESTED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nested term-delete request");
+    let request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("nested term-delete request receipt"),
+    )
+    .expect("nested term-delete request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-nested-combination-request-create-receipt.v3"
+    );
+    assert_eq!(request_receipt["combination_depth"], 2);
+    assert_eq!(request_receipt["expanded_term_count"], 3);
+    assert_eq!(request_receipt["expanded_pattern_count"], 2);
+
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("nested term-deleted direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nested term-delete recovery"),
+    )
+    .expect("nested term-delete recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_NESTED");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -6000, 1500, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("nested term-delete initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nested term-delete resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let missing_destination = temporary.0.join("nested-term-delete-missing-rejected");
+    let rejected = run_nested_linear_load_combination_term_delete(
+        &appended_path,
+        &missing_destination,
+        "COMBO_NESTED",
+        "load_pattern",
+        "LC_MISSING",
+    );
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_delete_nested_linear_load_combination_term_reference_missing"));
+    assert!(!missing_destination.exists());
+
+    let minimum_destination = temporary.0.join("nested-term-delete-minimum-rejected");
+    let rejected = run_nested_linear_load_combination_term_delete(
+        &nested.join("model-ir.json"),
+        &minimum_destination,
+        "COMBO_NESTED",
+        "load_pattern",
+        "LC_AXIAL",
+    );
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_delete_nested_linear_load_combination_term_count_invalid"));
+    assert!(!minimum_destination.exists());
+
+    let degradation_destination = temporary
+        .0
+        .join("nested-term-delete-direct-degradation-rejected");
+    let rejected = run_nested_linear_load_combination_term_delete(
+        &appended_path,
+        &degradation_destination,
+        "COMBO_NESTED",
+        "load_combination",
+        "COMBO_SERVICE",
+    );
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_delete_nested_linear_load_combination_term_direct_degradation"));
+    assert!(!degradation_destination.exists());
 }
 
 #[test]
