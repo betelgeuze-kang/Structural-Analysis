@@ -5724,6 +5724,213 @@ exercise_direct_linear_load_combination_surface() {
 }
 exercise_direct_linear_load_combination_surface
 
+exercise_linear_load_combination_identity_edit_surface() {
+  local source_model="$e2e_root/direct-linear-load-combination-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/linear-load-combination-identity-edit-$label"
+    request_directory="$e2e_root/linear-load-combination-identity-edit-$label-request"
+    direct_directory="$e2e_root/linear-load-combination-identity-edit-$label-direct"
+    partial_directory="$e2e_root/linear-load-combination-identity-edit-$label-partial"
+    resumed_directory="$e2e_root/linear-load-combination-identity-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-linear-load-combination-identity "$source_model" \
+      --load-combination COMBO_DIRECT --new-load-combination COMBO_RENAMED \
+      --output-dir "$edit_directory" \
+      > "$e2e_root/linear-load-combination-identity-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"linear_load_combination_identity_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_load_combination_id":"COMBO_DIRECT"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_load_combination_id":"COMBO_RENAMED"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"load_combination_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"nested":false' "$edit_directory/edit-receipt.json"
+    grep -Fq '"root_term_count":3' "$edit_directory/edit-receipt.json"
+    grep -Fq '"combination_depth":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"expanded_term_count":3' "$edit_directory/edit-receipt.json"
+    grep -Fq '"expanded_pattern_count":3' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_combination_without_identity":{' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"id":"COMBO_RENAMED","index":0' "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-linear-load-combination-identity.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case linear-load-combination-identity-edit-c5 \
+      --load-combination COMBO_RENAMED \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-request.stdout.json"
+    grep -Fq '"load_combination_id":"COMBO_RENAMED"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_RENAMED"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[25000,-12000,5000,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-identity-edit-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/linear-load-combination-identity-edit-first$suffix" \
+      "$e2e_root/linear-load-combination-identity-edit-second$suffix" \
+      > "$e2e_root/linear-load-combination-identity-edit-$diff_label-diff.txt"
+    cmp "$e2e_root/linear-load-combination-identity-edit-first$suffix.stdout.json" \
+      "$e2e_root/linear-load-combination-identity-edit-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/linear-load-combination-identity-edit-first-validation.json" \
+    "$e2e_root/linear-load-combination-identity-edit-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed load-combination identity edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/linear-load-combination-identity-edit-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$source_model" \
+    --load-combination COMBO_MISSING --new-load-combination COMBO_NEW \
+    --output-dir "$missing_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-missing-rejected.stdout.json"; then
+    echo "installed load-combination identity edit accepted a missing combination" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_load_combination_identity_combination_missing' \
+    "$e2e_root/linear-load-combination-identity-edit-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local collision_source="$e2e_root/linear-load-combination-identity-edit-collision-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-load-combination "$source_model" \
+    --load-combination COMBO_OTHER --term LC_AXIAL 1 --term LC_TORSION 1 \
+    --output-dir "$collision_source" \
+    > "$e2e_root/linear-load-combination-identity-edit-collision-source.stdout.json"
+  local collision_destination="$e2e_root/linear-load-combination-identity-edit-collision-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$collision_source/model-ir.json" \
+    --load-combination COMBO_DIRECT --new-load-combination COMBO_OTHER \
+    --output-dir "$collision_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-collision-rejected.stdout.json"; then
+    echo "installed load-combination identity edit accepted a colliding identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_load_combination_identity_replacement_exists' \
+    "$e2e_root/linear-load-combination-identity-edit-collision-rejected.stdout.json"
+  test ! -e "$collision_destination"
+
+  local downstream_source="$e2e_root/linear-load-combination-identity-edit-downstream-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-nested-linear-load-combination "$source_model" \
+    --load-combination COMBO_DOWNSTREAM \
+    --combination-term COMBO_DIRECT 1 --pattern-term LC_TORSION 1 \
+    --output-dir "$downstream_source" \
+    > "$e2e_root/linear-load-combination-identity-edit-downstream-source.stdout.json"
+  local downstream_destination="$e2e_root/linear-load-combination-identity-edit-downstream-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$downstream_source/model-ir.json" \
+    --load-combination COMBO_DIRECT --new-load-combination COMBO_RENAMED \
+    --output-dir "$downstream_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-downstream-rejected.stdout.json"; then
+    echo "installed load-combination identity edit cascaded a downstream reference" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_load_combination_identity_referenced_by_combination' \
+    "$e2e_root/linear-load-combination-identity-edit-downstream-rejected.stdout.json"
+  test ! -e "$downstream_destination"
+
+  local no_op_destination="$e2e_root/linear-load-combination-identity-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$source_model" \
+    --load-combination COMBO_DIRECT --new-load-combination COMBO_DIRECT \
+    --output-dir "$no_op_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-no-op-rejected.stdout.json"; then
+    echo "installed load-combination identity edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/linear-load-combination-identity-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/linear-load-combination-identity-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$source_model" \
+    --load-combination COMBO_DIRECT --new-load-combination 1_INVALID \
+    --output-dir "$invalid_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-invalid-rejected.stdout.json"; then
+    echo "installed load-combination identity edit accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_load_combination_identity_replacement_invalid' \
+    "$e2e_root/linear-load-combination-identity-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+
+  local ambiguous_destination="$e2e_root/linear-load-combination-identity-edit-ambiguous-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-linear-load-combination-identity "$source_model" \
+    --load-combination COMBO_DIRECT --new-load-combination LC_WEAK \
+    --output-dir "$ambiguous_destination" \
+    > "$e2e_root/linear-load-combination-identity-edit-ambiguous-rejected.stdout.json"; then
+    echo "installed load-combination identity edit accepted an ambiguous pattern identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_linear_load_combination_identity_replacement_ambiguous' \
+    "$e2e_root/linear-load-combination-identity-edit-ambiguous-rejected.stdout.json"
+  test ! -e "$ambiguous_destination"
+}
+exercise_linear_load_combination_identity_edit_surface
+
 exercise_direct_linear_load_combination_factor_edit_surface() {
   local source_model="$e2e_root/direct-linear-load-combination-first/model-ir.json"
   local source_before_hash
@@ -8176,6 +8383,15 @@ element_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/element-identity-e
 element_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/element-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
 element_identity_edit_recovery_hash="$(sha256sum "$e2e_root/element-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 element_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/element-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_model_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first/model-ir.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first/edit-receipt.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_request_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-request/request-receipt.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_request_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-request/analysis-request.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+linear_load_combination_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_recovery_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+linear_load_combination_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -8692,6 +8908,10 @@ v73_receipt_json="${v72_receipt_json/structural-native-distribution-e2e.v72/stru
 element_identity_edit_receipt_fields="\"workbench_element_identity_edit_surface_passed\":true,\"workbench_element_identity_edit_model_sha256\":\"sha256:$element_identity_edit_model_hash\",\"workbench_element_identity_edit_receipt_sha256\":\"sha256:$element_identity_edit_receipt_hash\",\"workbench_element_identity_edit_request_receipt_sha256\":\"sha256:$element_identity_edit_request_receipt_hash\",\"workbench_element_identity_edit_request_sha256\":\"sha256:$element_identity_edit_request_hash\",\"workbench_element_identity_edit_assembly_receipt_sha256\":\"sha256:$element_identity_edit_assembly_receipt_hash\",\"workbench_element_identity_edit_checkpoint_sha256\":\"sha256:$element_identity_edit_checkpoint_hash\",\"workbench_element_identity_edit_result_ir_sha256\":\"sha256:$element_identity_edit_result_ir_hash\",\"workbench_element_identity_edit_recovery_sha256\":\"sha256:$element_identity_edit_recovery_hash\",\"workbench_element_identity_edit_report_ir_sha256\":\"sha256:$element_identity_edit_report_ir_hash\",\"workbench_element_identity_edit_restart_passed\":true,"
 v73_receipt_json="${v73_receipt_json/\"workbench_result_view_surface_passed\":true,/${element_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v73_receipt_json" > "$temporary_receipt"
+v74_receipt_json="${v73_receipt_json/structural-native-distribution-e2e.v73/structural-native-distribution-e2e.v74}"
+linear_load_combination_identity_edit_receipt_fields="\"workbench_linear_load_combination_identity_edit_surface_passed\":true,\"workbench_linear_load_combination_identity_edit_model_sha256\":\"sha256:$linear_load_combination_identity_edit_model_hash\",\"workbench_linear_load_combination_identity_edit_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_receipt_hash\",\"workbench_linear_load_combination_identity_edit_request_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_request_receipt_hash\",\"workbench_linear_load_combination_identity_edit_request_sha256\":\"sha256:$linear_load_combination_identity_edit_request_hash\",\"workbench_linear_load_combination_identity_edit_assembly_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_assembly_receipt_hash\",\"workbench_linear_load_combination_identity_edit_checkpoint_sha256\":\"sha256:$linear_load_combination_identity_edit_checkpoint_hash\",\"workbench_linear_load_combination_identity_edit_result_ir_sha256\":\"sha256:$linear_load_combination_identity_edit_result_ir_hash\",\"workbench_linear_load_combination_identity_edit_recovery_sha256\":\"sha256:$linear_load_combination_identity_edit_recovery_hash\",\"workbench_linear_load_combination_identity_edit_report_ir_sha256\":\"sha256:$linear_load_combination_identity_edit_report_ir_hash\",\"workbench_linear_load_combination_identity_edit_restart_passed\":true,"
+v74_receipt_json="${v74_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v74_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

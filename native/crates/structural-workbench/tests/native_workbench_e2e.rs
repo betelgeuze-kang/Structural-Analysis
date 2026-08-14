@@ -1108,6 +1108,24 @@ fn run_linear_load_combination_add(
     )
 }
 
+fn run_linear_load_combination_identity_edit(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    replacement_load_combination_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-load-combination-identity"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--new-load-combination"),
+        text(replacement_load_combination_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_direct_linear_load_combination_add(
     source: &Path,
     destination: &Path,
@@ -9992,6 +10010,343 @@ fn direct_three_pattern_linear_load_combination_executes_and_restarts_without_fa
         serde_json::json!([0, -10000, 0, 0, 0, 0])
     );
     assert_eq!(deleted_recovery["fallback_count"], 0);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_combination_identity_edit_is_deterministic_fail_closed_and_restartable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let authored = temporary.0.join("combination-identity-authored");
+    assert_success(&run_direct_linear_load_combination_add(
+        &source,
+        &authored,
+        "COMBO_DIRECT",
+        &[
+            ["LC_AXIAL", "0.25"],
+            ["LC_WEAK", "1.2"],
+            ["LC_STRONG", "-0.5"],
+        ],
+    ));
+    let authored_path = authored.join("model-ir.json");
+    let authored_bytes = std::fs::read(&authored_path).expect("authored combination ModelIR");
+    let authored_model = parse_model_ir_v2(&authored_bytes)
+        .expect("strict authored combination ModelIR")
+        .value()
+        .clone();
+
+    let first = temporary.0.join("combination-identity-first");
+    let second = temporary.0.join("combination-identity-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_combination_identity_edit(
+            &authored_path,
+            destination,
+            "COMBO_DIRECT",
+            "COMBO_RENAMED",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published combination-identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first combination-identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second combination-identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&authored_path).expect("unchanged authored combination"),
+        authored_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("combination identity-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict identity-edited ModelIR");
+    let edited_validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated identity-edited ModelIR");
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    let source_combinations = authored_model["load_combinations"]
+        .as_array()
+        .expect("source combinations");
+    let edited_combinations = edited.value()["load_combinations"]
+        .as_array()
+        .expect("edited combinations");
+    assert_eq!(edited_combinations.len(), source_combinations.len());
+    assert_eq!(edited_combinations[0]["id"], "COMBO_RENAMED");
+    for (key, value) in source_combinations[0]
+        .as_object()
+        .expect("source combination object")
+    {
+        if key != "id" {
+            assert_eq!(&edited_combinations[0][key], value);
+        }
+    }
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(edited.value()[family], authored_model[family]);
+    }
+    let mut retained_combination = source_combinations[0]
+        .as_object()
+        .expect("source combination object")
+        .clone();
+    retained_combination.remove("id");
+    let retained_combination = Value::Object(retained_combination);
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-load-combination-identity.v1")
+        .expect("combination identity provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "linear_load_combination_identity_edit"
+    );
+    assert_eq!(extension["source_load_combination_id"], "COMBO_DIRECT");
+    assert_eq!(
+        extension["replacement_load_combination_id"],
+        "COMBO_RENAMED"
+    );
+    assert_eq!(extension["load_combination_index"], 0);
+    assert_eq!(extension["nested"], false);
+    assert_eq!(extension["root_term_count"], 3);
+    assert_eq!(extension["combination_depth"], 1);
+    assert_eq!(extension["expanded_term_count"], 3);
+    assert_eq!(
+        extension["retained_combination_without_identity"],
+        retained_combination
+    );
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("combination identity receipt"),
+    )
+    .expect("combination identity receipt JSON");
+    assert_eq!(
+        receipt["operation"],
+        "linear_load_combination_identity_edit"
+    );
+    assert_eq!(receipt["source_load_combination_id"], "COMBO_DIRECT");
+    assert_eq!(receipt["replacement_load_combination_id"], "COMBO_RENAMED");
+    assert_eq!(receipt["load_combination_index"], 0);
+    assert_eq!(receipt["nested"], false);
+    assert_eq!(receipt["root_term_count"], 3);
+    assert_eq!(receipt["combination_depth"], 1);
+    assert_eq!(receipt["expanded_term_count"], 3);
+    assert_eq!(receipt["expanded_pattern_count"], 3);
+    assert_eq!(
+        receipt["retained_combination_without_identity"],
+        retained_combination
+    );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, source_id, replacement_id, expected_code) in [
+        (
+            "missing",
+            "COMBO_MISSING",
+            "COMBO_NEW",
+            "workbench_model_edit_linear_load_combination_identity_combination_missing",
+        ),
+        (
+            "no-op",
+            "COMBO_DIRECT",
+            "COMBO_DIRECT",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "invalid",
+            "COMBO_DIRECT",
+            "1_INVALID",
+            "workbench_model_edit_linear_load_combination_identity_replacement_invalid",
+        ),
+        (
+            "ambiguous",
+            "COMBO_DIRECT",
+            "LC_WEAK",
+            "workbench_model_edit_linear_load_combination_identity_replacement_ambiguous",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("combination-identity-{name}"));
+        let rejected = run_linear_load_combination_identity_edit(
+            &authored_path,
+            &destination,
+            source_id,
+            replacement_id,
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let collision_source = temporary.0.join("combination-identity-collision-source");
+    assert_success(&run_linear_load_combination_add(
+        &authored_path,
+        &collision_source,
+        "COMBO_OTHER",
+        ["LC_AXIAL", "1"],
+        ["LC_TORSION", "1"],
+    ));
+    let collision_destination = temporary.0.join("combination-identity-collision-output");
+    let collision = run_linear_load_combination_identity_edit(
+        &collision_source.join("model-ir.json"),
+        &collision_destination,
+        "COMBO_DIRECT",
+        "COMBO_OTHER",
+    );
+    assert_eq!(collision.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&collision.stdout)
+        .contains("workbench_model_edit_linear_load_combination_identity_replacement_exists"));
+    assert!(!collision_destination.exists());
+
+    let downstream_source = temporary.0.join("combination-identity-downstream-source");
+    assert_success(&run_nested_linear_load_combination_add(
+        &authored_path,
+        &downstream_source,
+        "COMBO_DOWNSTREAM",
+        &[
+            ["--combination-term", "COMBO_DIRECT", "1"],
+            ["--pattern-term", "LC_TORSION", "1"],
+        ],
+    ));
+    let downstream_destination = temporary.0.join("combination-identity-downstream-output");
+    let downstream = run_linear_load_combination_identity_edit(
+        &downstream_source.join("model-ir.json"),
+        &downstream_destination,
+        "COMBO_DIRECT",
+        "COMBO_RENAMED",
+    );
+    assert_eq!(downstream.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&downstream.stdout).contains(
+        "workbench_model_edit_linear_load_combination_identity_referenced_by_combination"
+    ));
+    assert!(!downstream_destination.exists());
+
+    for (name, field, owned_value, expected_code) in [
+        (
+            "unsupported-feature",
+            "unsupported_features",
+            serde_json::json!([{
+                "feature_id": "feature.combination-identity-owned",
+                "kind": "unsupported_solver_feature",
+                "source_entity_id": "COMBO_DIRECT",
+                "disposition": "blocked",
+                "blocking": true,
+                "detail": "Combination identity remains externally owned.",
+                "extensions": {}
+            }]),
+            "workbench_model_edit_linear_load_combination_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip",
+            "roundtrip_map",
+            serde_json::json!([{
+                "source_entity_id": "source:COMBO_DIRECT",
+                "entity_kind": "load_combination",
+                "model_ir_entity_id": "COMBO_DIRECT",
+                "mapping_status": "exact",
+                "extensions": {}
+            }]),
+            "workbench_model_edit_linear_load_combination_identity_roundtrip_owned",
+        ),
+    ] {
+        let mut owned = authored_model.clone();
+        owned[field] = owned_value;
+        let owned_path = temporary
+            .0
+            .join(format!("combination-identity-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned combination source")
+                .as_bytes(),
+        )
+        .expect("write owned combination source");
+        let destination = temporary
+            .0
+            .join(format!("combination-identity-{name}-output"));
+        let rejected = run_linear_load_combination_identity_edit(
+            &owned_path,
+            &destination,
+            "COMBO_DIRECT",
+            "COMBO_RENAMED",
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+    let existing = run_linear_load_combination_identity_edit(
+        &authored_path,
+        &first,
+        "COMBO_DIRECT",
+        "COMBO_RENAMED",
+    );
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("combination-identity-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "combination-identity-c5",
+        "COMBO_RENAMED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("combination identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("combination identity direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("combination identity direct recovery"),
+    )
+    .expect("combination identity recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_RENAMED");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("combination identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("combination identity resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
 }
 
 #[test]

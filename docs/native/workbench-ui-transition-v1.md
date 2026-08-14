@@ -179,6 +179,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical
   initialized-checkpoint restart. Connectivity/property/orientation/formulation editing,
   creation/deletion, reference cascades and visual dragging remain separate or open.
+- `model-edit-linear-load-combination-identity`: deterministic replacement of one existing
+  unreferenced bounded direct or acyclic nested linear load-combination identity with a distinct
+  unique ModelIR stable ID. Rust preserves the contiguous index, exact ordered typed terms,
+  factors, source identity, extensions and bounded expansion; rejects load-pattern ambiguity,
+  downstream-combination/unsupported-feature/round-trip ownership without cascade; and strictly
+  reparses and C++-revalidates before create-new publication. Installed E2E v74 replaces
+  `COMBO_DIRECT` with `COMBO_RENAMED` and proves frame recovery type `[1]`, offsets `[0,12]`, active
+  DOFs `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, fallback 0 and
+  byte-identical initialized-checkpoint restart. Term editing, creation/deletion, reference
+  cascades and visual manipulation remain separate or open.
 - `model-edit-frame-element-orientation`: deterministic replacement of the finite local-axis
   rotation in radians for one existing `frame_3d` element. Rust binds the element identity, fixed
   type, retained formulation, previous/new angle and source hashes, marks only a matching element

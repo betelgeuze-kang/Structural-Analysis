@@ -529,6 +529,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-edit-truss-element-properties",
         "model-edit-element-connectivity",
         "model-edit-element-identity",
+        "model-edit-linear-load-combination-identity",
         "model-add-frame3d-member",
         "model-add-nodal-load",
         "model-delete-nodal-load",
@@ -1129,6 +1130,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "node_identity_edit",
             "structural-native:model-edit-element-identity.v1",
             "element_identity_edit",
+            "structural-native:model-edit-linear-load-combination-identity.v1",
+            "linear_load_combination_identity_edit",
             "structural-native:model-delete-orphan-node.v1",
             "structural-native:model-edit-frame-section.v1",
             "structural-native:model-edit-frame-element-orientation.v1",
@@ -1817,6 +1820,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-edit-linear-material-identity")',
             'Some("model-edit-node-identity")',
             'Some("model-edit-element-identity")',
+            'Some("model-edit-linear-load-combination-identity")',
             'Some("model-add-node")',
             'Some("model-delete-orphan-node")',
             'Some("model-edit-frame-section")',
@@ -2824,6 +2828,30 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    linear_load_combination_identity_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
+        linear_load_combination_identity_edit_doc,
+        (
+            "model-edit-linear-load-combination-identity",
+            "single C ABI into C++",
+            "structural-native:model-edit-linear-load-combination-identity.v1",
+            "linear_load_combination_identity_edit",
+            "append-only v74",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2854,6 +2882,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-edit-truss-section-identity",
             "model-edit-node-identity",
             "model-edit-element-identity",
+            "model-edit-linear-load-combination-identity",
             "model-edit-frame-element-orientation",
             "model-edit-frame-element-properties",
             "model-edit-element-connectivity",
@@ -2954,7 +2983,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     expected_extension_claim = (
         "standalone neutral-node authoring and orphan-node deletion, two-pattern "
         "linear-load-combination authoring and bounded CPU execution, bounded direct and nested "
-        "typed-root linear-load-combination factor editing, last-neutral two-to-64 "
+        "linear-load-combination stable-identity editing plus typed-root factor editing, "
+        "last-neutral two-to-64 "
         "direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, "
         "two-to-64 direct plus depth-eight/64-leaf acyclic nested "
         "linear-load-combination authoring and CPU execution, "
@@ -2973,7 +3003,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity, plus one last-neutral depth-eight/64-leaf acyclic nested linear-load-combination deletion with v3 root/expanded-term provenance, retained child-combination CPU execution, exact active load [0,-12000,5000,0,0,0], typed recovery and checkpoint/restart parity",
         "one bounded direct linear-load-combination single-factor edit preserving reference kind/identity/order/count with exact active load [25000,-13500,5000,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
         "one bounded nested linear-load-combination typed-root-factor edit preserving root reference kind/identity/order/count and every descendant, binding source/edited depth-eight/64-leaf expansions with exact active load [25000,-9000,3750,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
-        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested typed-root linear-load-combination factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

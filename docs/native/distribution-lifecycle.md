@@ -520,6 +520,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    initialized checkpoint/restart output, then emits an append-only v73 receipt binding the edited
    ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and
    ReportIR.
+88. replaces only the stable identity of existing unreferenced bounded `COMBO_DIRECT` with
+   `COMBO_RENAMED`, preserves its contiguous index, exact ordered typed terms, factors, source,
+   extensions and bounded direct expansion plus every unrelated row, rejects missing/colliding/
+   no-op/malformed/load-pattern-ambiguous identities, out-of-profile expansion and downstream-
+   combination/unsupported-feature/round-trip ownership without cascade, selects the replacement
+   combination for CPU execution, proves frame recovery type `[1]`, offsets `[0,12]`, active DOFs
+   `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, fallback 0 and byte-
+   identical initialized checkpoint/restart output, then emits an append-only v74 receipt binding
+   the edited ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR,
+   recovery and ReportIR.
    The receipt checker continues to accept frozen v1 through v68 receipts, including frozen v1 through v67 receipts, including frozen v1 through v66 receipts, including frozen v1 through v65 receipts, including frozen v1 through v64 receipts, including frozen v1 through v63 receipts, including frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
@@ -620,7 +630,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    index/coordinate/source/extension binding, fixed-support composition, exact unchanged active-
    DOF/load, typed frame recovery and restart authority; and no pre-v73 receipt is installed bounded
    unreferenced element stable-identity replacement, exact retained-row binding, exact unchanged
-   active-DOF/load, typed frame recovery and restart authority.
+   active-DOF/load, typed frame recovery and restart authority; and no pre-v74 receipt is installed
+   bounded unreferenced direct-or-nested linear load-combination stable-identity replacement, exact
+   retained-row and expansion binding, replacement-selector combined-load execution, typed frame
+   recovery and restart authority.
 
 The reference command is:
 

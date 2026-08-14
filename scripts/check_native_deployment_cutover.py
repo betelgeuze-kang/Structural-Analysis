@@ -250,6 +250,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v74",
+            "model-edit-linear-load-combination-identity",
+            "COMBO_RENAMED",
             "Distribution E2E v73",
             "model-edit-element-identity",
             "E1_RENAMED",
@@ -922,6 +925,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_element_identity_edit_recovery_sha256",
         "workbench_element_identity_edit_report_ir_sha256",
         "workbench_element_identity_edit_restart_passed",
+        "exercise_linear_load_combination_identity_edit_surface",
+        "model-edit-linear-load-combination-identity",
+        "structural-native:model-edit-linear-load-combination-identity.v1",
+        "workbench_linear_load_combination_identity_edit_surface_passed",
+        "workbench_linear_load_combination_identity_edit_model_sha256",
+        "workbench_linear_load_combination_identity_edit_receipt_sha256",
+        "workbench_linear_load_combination_identity_edit_request_receipt_sha256",
+        "workbench_linear_load_combination_identity_edit_request_sha256",
+        "workbench_linear_load_combination_identity_edit_assembly_receipt_sha256",
+        "workbench_linear_load_combination_identity_edit_checkpoint_sha256",
+        "workbench_linear_load_combination_identity_edit_result_ir_sha256",
+        "workbench_linear_load_combination_identity_edit_recovery_sha256",
+        "workbench_linear_load_combination_identity_edit_report_ir_sha256",
+        "workbench_linear_load_combination_identity_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1124,6 +1141,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v74",
+            "V74_LINEAR_LOAD_COMBINATION_IDENTITY_EDIT_KEYS",
+            "workbench_linear_load_combination_identity_edit_surface_passed",
+            "workbench_linear_load_combination_identity_edit_receipt_sha256",
+            "workbench_linear_load_combination_identity_edit_request_receipt_sha256",
+            "workbench_linear_load_combination_identity_edit_recovery_sha256",
+            "workbench_linear_load_combination_identity_edit_restart_passed",
             "structural-native-distribution-e2e.v73",
             "V73_ELEMENT_IDENTITY_EDIT_KEYS",
             "workbench_element_identity_edit_surface_passed",
@@ -1818,6 +1842,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "[0,12]",
             "[6,7,8,9,10,11]",
             "[0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    linear_load_combination_identity_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
+        text=linear_load_combination_identity_edit_doc,
+        tokens=(
+            "model-edit-linear-load-combination-identity",
+            "single C ABI into C++ semantic validation",
+            "structural-native:model-edit-linear-load-combination-identity.v1",
+            "linear_load_combination_identity_edit",
+            "append-only v74",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[25000,-12000,5000,0,0,0]",
             "fallback 0",
             "approved HIP C2",
             "authorize C6",
@@ -2865,6 +2914,50 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in element_identity_edit_claim:
                 blockers.append(
                     "modelir_element_identity_edit_capability_" f"claim_missing:{token}"
+                )
+    linear_load_combination_identity_edit_capability = (
+        capabilities.get("modelir_linear_load_combination_identity_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(linear_load_combination_identity_edit_capability, dict):
+        blockers.append("modelir_linear_load_combination_identity_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if linear_load_combination_identity_edit_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_linear_load_combination_identity_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        linear_load_combination_identity_edit_claim = str(
+            linear_load_combination_identity_edit_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing unreferenced direct or acyclic nested linear combination ID",
+            "distinct unique stable ID",
+            "two through 64 unique linear-static pattern terms",
+            "depth at most eight and at most 64 expanded terms",
+            "load-pattern-ambiguous",
+            "downstream load-combination references",
+            "unsupported-feature source_entity_id ownership",
+            "direct round-trip model_ir_entity_id mappings",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v74 E2E",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "combined active load [25000,-12000,5000,0,0,0]",
+            "typed frame recovery [1] with offsets [0,12]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in linear_load_combination_identity_edit_claim:
+                blockers.append(
+                    "modelir_linear_load_combination_identity_edit_capability_"
+                    f"claim_missing:{token}"
                 )
     linear_load_combination_deletion_capability = (
         capabilities.get("modelir_linear_load_combination_deletion")
