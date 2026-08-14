@@ -909,6 +909,30 @@ fn run_direct_linear_load_combination_term_add(
     ])
 }
 
+fn run_direct_linear_load_combination_term_insert(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    load_pattern_id: &str,
+    factor: &str,
+    target_index: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-insert-linear-load-combination-term"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--factor"),
+        text(factor),
+        text("--at-index"),
+        text(target_index),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_direct_linear_load_combination_term_delete(
     source: &Path,
     destination: &Path,
@@ -6239,6 +6263,210 @@ fn direct_linear_load_combination_term_add_executes_and_restarts_without_fallbac
         );
         assert!(!rejected.status.success());
         assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+        assert!(!destination.exists());
+    }
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn direct_linear_load_combination_term_insert_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let authored = temporary.0.join("term-insert-authored");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &authored,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let authored_path = authored.join("model-ir.json");
+    let authored_bytes = std::fs::read(&authored_path).expect("term-insert source ModelIR");
+    let source_document = parse_model_ir_v2(&authored_bytes).expect("strict term-insert source");
+    let first = temporary.0.join("term-insert-first");
+    let second = temporary.0.join("term-insert-second");
+    for destination in [&first, &second] {
+        let output = run_direct_linear_load_combination_term_insert(
+            &authored_path,
+            destination,
+            "COMBO_SERVICE",
+            "LC_AXIAL",
+            "0.25",
+            "1",
+        );
+        assert_success(&output);
+        let receipt =
+            std::fs::read(destination.join("edit-receipt.json")).expect("term-insert receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first term-insert artifact"),
+            std::fs::read(second.join(artifact)).expect("second term-insert artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&authored_path).expect("unchanged term-insert source"),
+        authored_bytes
+    );
+
+    let edited_bytes = std::fs::read(first.join("model-ir.json")).expect("term-inserted ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict term-inserted ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++-validated term insertion");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][0]["terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["id"],
+        source_document.value()["load_combinations"][0]["id"]
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["index"],
+        source_document.value()["load_combinations"][0]["index"]
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["combination_type"],
+        source_document.value()["load_combinations"][0]["combination_type"]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-insert-direct-linear-load-combination-term.v1")
+        .expect("direct term-insert provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "direct_linear_load_combination_term_insert"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "unique_direct_linear_static_patterns_3_to_64"
+    );
+    assert_eq!(extension["load_combination_index"], 0);
+    assert_eq!(extension["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(extension["term_index"], 1);
+    assert_eq!(extension["source_term_count"], 2);
+    assert_eq!(extension["term_count"], 3);
+    assert_eq!(extension["factor"], 0.25);
+    assert_eq!(
+        extension["source_terms"],
+        source_document.value()["load_combinations"][0]["terms"]
+    );
+    assert_eq!(
+        extension["edited_terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("term-insert receipt"),
+    )
+    .expect("term-insert receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "direct_linear_load_combination_term_insert"
+    );
+    assert_eq!(edit_receipt["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(edit_receipt["term_index"], 1);
+    assert_eq!(edit_receipt["source_term_count"], 2);
+    assert_eq!(edit_receipt["term_count"], 3);
+    assert_eq!(edit_receipt["factor"], 0.25);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("term-insert-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "term-insert-c5",
+        "COMBO_SERVICE",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("term-insert request");
+    let request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("term-insert request receipt"),
+    )
+    .expect("term-insert request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-direct-combination-request-create-receipt.v2"
+    );
+    assert_eq!(
+        request_receipt["combination_terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("term-inserted direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("term-insert recovery"),
+    )
+    .expect("term-insert recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_SERVICE");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("term-insert initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("term-insert resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (label, pattern, target_index, expected_code) in [
+        (
+            "duplicate",
+            "LC_WEAK",
+            "1",
+            "workbench_model_insert_direct_linear_load_combination_term_pattern_duplicate",
+        ),
+        (
+            "out-of-range",
+            "LC_AXIAL",
+            "3",
+            "workbench_model_insert_direct_linear_load_combination_term_target_index_invalid",
+        ),
+        (
+            "missing",
+            "LC_MISSING",
+            "1",
+            "workbench_model_insert_direct_linear_load_combination_term_pattern_missing",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("term-insert-{label}-rejected"));
+        let rejected = run_direct_linear_load_combination_term_insert(
+            &authored_path,
+            &destination,
+            "COMBO_SERVICE",
+            pattern,
+            "0.25",
+            target_index,
+        );
+        assert!(!rejected.status.success(), "accepted {label} insertion");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "unexpected {label} error: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
         assert!(!destination.exists());
     }
 }

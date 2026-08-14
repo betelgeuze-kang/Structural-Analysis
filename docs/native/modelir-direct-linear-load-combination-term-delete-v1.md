@@ -36,6 +36,7 @@ append-only v54 hashes for the edited ModelIR, edit receipt, request receipt, an
 assembly receipt, checkpoint, ResultIR, recovery and ReportIR.
 
 This is not general combination editing. Factor/reference editing, append-only direct term
-addition and direct term reordering are separate bounded surfaces. Nested term insertion or removal,
+addition, explicit-position insertion and direct term reordering are separate bounded surfaces.
+Nested term insertion or removal,
 downstream-referenced editing, source-owned writeback, general solver selection, visual editing,
 approved HIP C2, engineering acceptance and C6 remain open.

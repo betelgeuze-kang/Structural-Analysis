@@ -41,6 +41,7 @@ append-only v51 distribution receipt.
 This is not general combination editing. Factor editing, bounded append-only direct term addition,
 single-term removal, direct term reorder and nested typed-reference replacement remain separate
 surfaces. Bulk permutation,
-arbitrary-position or nested insertion, descendant or downstream-referenced mutation,
+explicit-position insertion is a separate bounded surface; nested insertion, descendant or
+downstream-referenced mutation,
 source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
 engineering acceptance and C6 remain open.

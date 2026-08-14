@@ -44,6 +44,10 @@ absent from the runtime image.
   finite nonzero factor to the end of a neutral, extension-free, unreferenced two-through-63-term
   direct combination while preserving every existing term and order; installed v53 E2E proves
   exact active load, restart parity and fallback 0.
+  `model-insert-linear-load-combination-term` inserts one unique existing linear-static pattern
+  and finite nonzero factor at an explicit final index in the same bounded ownership profile while
+  preserving every existing term and relative order; installed v59 E2E proves exact ordered
+  terms, active load, restart parity and fallback 0.
   `model-delete-linear-load-combination-term` removes one existing pattern term from any position
   in a neutral, extension-free, unreferenced three-through-64-term direct combination while
   preserving every retained factor and relative order; installed v54 E2E proves exact active

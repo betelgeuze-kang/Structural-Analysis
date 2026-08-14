@@ -112,6 +112,12 @@ The bounded `model-add-linear-load-combination-term` surface appends exactly one
 unreferenced two-through-63-term direct combination. It preserves every existing term and order,
 rejects nested, owned, duplicate and 64-term sources, and publishes only after strict Rust plus C++
 revalidation. See `docs/native/modelir-direct-linear-load-combination-term-add-v1.md`.
+The bounded `model-insert-linear-load-combination-term` surface inserts one unique existing
+`linear_static` pattern and finite nonzero factor at an explicit final index in a neutral,
+extension-free, unreferenced two-through-63-term direct combination. It preserves every existing
+term and relative order, rejects nested, owned, duplicate, 64-term and out-of-range inputs, and
+publishes only after strict Rust plus C++ revalidation. See
+`docs/native/modelir-direct-linear-load-combination-term-insert-v1.md`.
 The bounded `model-delete-linear-load-combination-term` surface removes exactly one existing
 pattern term from any position in a neutral, extension-free, unreferenced three-through-64-term
 direct combination. It preserves every retained factor and relative order, rejects nested, owned,
@@ -158,6 +164,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-term-add-v1.md` and
+`docs/native/modelir-direct-linear-load-combination-term-insert-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` and

@@ -622,6 +622,20 @@ V58_DIRECT_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS = {
     "workbench_direct_linear_load_combination_term_reorder_restart_passed",
 }
 V58_EXPECTED_KEYS = V57_EXPECTED_KEYS | V58_DIRECT_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS
+V59_DIRECT_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS = {
+    "workbench_direct_linear_load_combination_term_insert_surface_passed",
+    "workbench_direct_linear_load_combination_term_insert_model_sha256",
+    "workbench_direct_linear_load_combination_term_insert_receipt_sha256",
+    "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256",
+    "workbench_direct_linear_load_combination_term_insert_request_sha256",
+    "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256",
+    "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256",
+    "workbench_direct_linear_load_combination_term_insert_result_ir_sha256",
+    "workbench_direct_linear_load_combination_term_insert_recovery_sha256",
+    "workbench_direct_linear_load_combination_term_insert_report_ir_sha256",
+    "workbench_direct_linear_load_combination_term_insert_restart_passed",
+}
+V59_EXPECTED_KEYS = V58_EXPECTED_KEYS | V59_DIRECT_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -666,14 +680,20 @@ def validate(
     is_v57_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v57",
         "structural-native-distribution-e2e.v58",
+        "structural-native-distribution-e2e.v59",
     }
-    is_v58_receipt = receipt_schema_version == "structural-native-distribution-e2e.v58"
+    is_v58_receipt = receipt_schema_version in {
+        "structural-native-distribution-e2e.v58",
+        "structural-native-distribution-e2e.v59",
+    }
+    is_v59_receipt = receipt_schema_version == "structural-native-distribution-e2e.v59"
     latest_receipt_schema_version = (
         "structural-native-distribution-e2e.v56"
         if receipt_schema_version
         in {
             "structural-native-distribution-e2e.v57",
             "structural-native-distribution-e2e.v58",
+            "structural-native-distribution-e2e.v59",
         }
         else receipt_schema_version
     )
@@ -736,11 +756,14 @@ def validate(
         "structural-native-distribution-e2e.v56": V56_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v57": V57_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v58": V58_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v59": V59_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v59":
+        receipt_schema_version = "structural-native-distribution-e2e.v58"
     if receipt_schema_version == "structural-native-distribution-e2e.v58":
         receipt_schema_version = "structural-native-distribution-e2e.v57"
     if receipt_schema_version == "structural-native-distribution-e2e.v57":
@@ -2177,6 +2200,26 @@ def validate(
             "workbench_direct_linear_load_combination_term_reorder_result_ir_sha256",
             "workbench_direct_linear_load_combination_term_reorder_recovery_sha256",
             "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v59_receipt:
+        for name in (
+            "workbench_direct_linear_load_combination_term_insert_surface_passed",
+            "workbench_direct_linear_load_combination_term_insert_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_direct_linear_load_combination_term_insert_model_sha256",
+            "workbench_direct_linear_load_combination_term_insert_receipt_sha256",
+            "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256",
+            "workbench_direct_linear_load_combination_term_insert_request_sha256",
+            "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256",
+            "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256",
+            "workbench_direct_linear_load_combination_term_insert_result_ir_sha256",
+            "workbench_direct_linear_load_combination_term_insert_recovery_sha256",
+            "workbench_direct_linear_load_combination_term_insert_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

@@ -36,8 +36,7 @@ This is not general combination editing. Direct pattern-reference replacement is
 bounded surface documented in
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`. Append-only direct term
 addition, single-term removal and direct term reorder are other bounded surfaces; bulk permutation,
-arbitrary-position or nested
-insertion,
+explicit-position insertion and nested insertion are separate or open boundaries;
 downstream-referenced editing and nested edits beyond the separate bounded typed-root-factor
 surface, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
 engineering acceptance and C6 remain open.

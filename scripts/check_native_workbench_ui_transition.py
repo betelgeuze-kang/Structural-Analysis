@@ -264,6 +264,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_direct_linear_load_combination_term_insert": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_direct_linear_load_combination_term_delete": (
         "c5_implemented",
         False,
@@ -497,6 +501,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-linear-load-pattern",
         "model-add-linear-load-combination",
         "model-add-linear-load-combination-term",
+        "model-insert-linear-load-combination-term",
         "model-delete-linear-load-combination-term",
         "model-add-nested-linear-load-combination-term",
         "model-edit-linear-load-combination-factor",
@@ -1095,6 +1100,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "direct_linear_load_combination_reference_edit",
             "structural-native:model-add-direct-linear-load-combination-term.v1",
             "direct_linear_load_combination_term_add",
+            "structural-native:model-insert-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_insert",
             "structural-native:model-delete-direct-linear-load-combination-term.v1",
             "direct_linear_load_combination_term_delete",
             "structural-native:model-reorder-direct-linear-load-combination-term.v1",
@@ -1747,6 +1754,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-add-linear-load-pattern")',
             'Some("model-add-linear-load-combination")',
             'Some("model-add-linear-load-combination-term")',
+            'Some("model-insert-linear-load-combination-term")',
             'Some("model-delete-linear-load-combination-term")',
             'Some("model-add-nested-linear-load-combination-term")',
             'Some("model-edit-linear-load-combination-factor")',
@@ -2060,6 +2068,11 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         Path("docs/native/modelir-direct-linear-load-combination-term-add-v1.md"),
         blockers,
     )
+    direct_linear_load_combination_term_insert_doc = _text(
+        root,
+        Path("docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"),
+        blockers,
+    )
     direct_linear_load_combination_term_delete_doc = _text(
         root,
         Path("docs/native/modelir-direct-linear-load-combination-term-delete-v1.md"),
@@ -2095,6 +2108,23 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-direct-linear-load-combination-term.v1",
             "direct_linear_load_combination_term_add",
             "append-only v53",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"),
+        direct_linear_load_combination_term_insert_doc,
+        (
+            "model-insert-linear-load-combination-term",
+            "two through 63",
+            "single C ABI into C++",
+            "structural-native:model-insert-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_insert",
+            "append-only v59",
             "[25000,-12000,5000,0,0,0]",
             "fallback 0",
             "approved HIP C2",

@@ -247,6 +247,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v59",
+            "model-insert-linear-load-combination-term",
+            "[LC_WEAK,LC_AXIAL,LC_STRONG]",
+            "Distribution E2E v58",
+            "model-reorder-linear-load-combination-term",
             "Distribution E2E v57",
             "model-reorder-nested-linear-load-combination-term",
             "Distribution E2E v56",
@@ -548,6 +553,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_direct_linear_load_combination_term_reorder_recovery_sha256",
         "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256",
         "workbench_direct_linear_load_combination_term_reorder_restart_passed",
+        "exercise_direct_linear_load_combination_term_insert_surface",
+        "model-insert-linear-load-combination-term",
+        "structural-native:model-insert-direct-linear-load-combination-term.v1",
+        "workbench_direct_linear_load_combination_term_insert_surface_passed",
+        "workbench_direct_linear_load_combination_term_insert_model_sha256",
+        "workbench_direct_linear_load_combination_term_insert_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_insert_request_sha256",
+        "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256",
+        "workbench_direct_linear_load_combination_term_insert_result_ir_sha256",
+        "workbench_direct_linear_load_combination_term_insert_recovery_sha256",
+        "workbench_direct_linear_load_combination_term_insert_report_ir_sha256",
+        "workbench_direct_linear_load_combination_term_insert_restart_passed",
         "exercise_nested_linear_load_combination_term_add_surface",
         "model-add-nested-linear-load-combination-term",
         "structural-native:model-add-nested-linear-load-combination-term.v1",
@@ -864,6 +883,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v59",
+            "V59_DIRECT_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS",
+            "workbench_direct_linear_load_combination_term_insert_surface_passed",
+            "workbench_direct_linear_load_combination_term_insert_receipt_sha256",
+            "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256",
+            "workbench_direct_linear_load_combination_term_insert_recovery_sha256",
+            "workbench_direct_linear_load_combination_term_insert_restart_passed",
             "structural-native-distribution-e2e.v57",
             "V57_NESTED_LINEAR_LOAD_COMBINATION_TERM_REORDER_KEYS",
             "workbench_nested_linear_load_combination_term_reorder_surface_passed",
@@ -1546,6 +1572,28 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    direct_linear_load_combination_term_insert_doc = _text(
+        root,
+        Path("docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"),
+        text=direct_linear_load_combination_term_insert_doc,
+        tokens=(
+            "model-insert-linear-load-combination-term",
+            "two through 63",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-insert-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_insert",
+            "append-only v59",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
     nested_linear_load_combination_term_add_doc = _text(
         root,
         Path("docs/native/modelir-nested-linear-load-combination-term-add-v1.md"),
@@ -1964,6 +2012,45 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in direct_linear_load_combination_term_reorder_claim:
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_reorder_capability_"
+                    f"claim_missing:{token}"
+                )
+    direct_linear_load_combination_term_insert_capability = (
+        capabilities.get("modelir_direct_linear_load_combination_term_insert")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(direct_linear_load_combination_term_insert_capability, dict):
+        blockers.append(
+            "modelir_direct_linear_load_combination_term_insert_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if direct_linear_load_combination_term_insert_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_direct_linear_load_combination_term_insert_capability_"
+                    f"field_invalid:{field}"
+                )
+        direct_linear_load_combination_term_insert_claim = str(
+            direct_linear_load_combination_term_insert_capability.get("claim", "")
+        )
+        for token in (
+            "inserts exactly one new load_pattern term",
+            "two through 63 ordered unique existing linear_static pattern terms",
+            "explicit final zero-based index from zero through the source term count",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v59 E2E",
+            "exact active load [25000,-12000,5000,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in direct_linear_load_combination_term_insert_claim:
+                blockers.append(
+                    "modelir_direct_linear_load_combination_term_insert_capability_"
                     f"claim_missing:{token}"
                 )
     nested_linear_load_combination_term_add_capability = (

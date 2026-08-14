@@ -177,9 +177,18 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   order, rejects nested/owned/duplicate/64-term inputs, then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v53 proves exact active load
   `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Direct term reorder is a separate bounded surface; arbitrary-position or nested
-  insertion, downstream-referenced editing, HIP
+  output. Direct term reorder and explicit-position insertion are separate bounded surfaces;
+  nested insertion, downstream-referenced editing, HIP
   parity and engineering acceptance remain open.
+- `model-insert-linear-load-combination-term`: deterministic insertion of one unique existing
+  `linear_static` pattern and finite nonzero factor at an explicit final index in a neutral,
+  extension-free, unreferenced two-through-63-term direct combination. Rust preserves every
+  existing reference, factor and relative order, rejects nested/owned/duplicate/64-term and
+  out-of-range inputs, then strictly reparses and C++-revalidates before create-new publication.
+  Installed E2E v59 proves exact ordered terms `[LC_WEAK,LC_AXIAL,LC_STRONG]`, active load
+  `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+  output. Bulk insertion or permutation, nested or downstream-referenced mutation, HIP parity and
+  engineering acceptance remain open.
 - `model-delete-linear-load-combination-term`: deterministic removal of one existing pattern term
   from any position in a neutral, extension-free, unreferenced three-through-64-term direct
   combination. Rust preserves each retained factor and relative order, rejects nested/owned,

@@ -50,8 +50,9 @@ reference can be replaced, with its factor/order/count preserved, only through t
 bounded v51 surface in
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`. One unique new direct
 pattern term can be appended only through the separately bounded v53 surface in
-`docs/native/modelir-direct-linear-load-combination-term-add-v1.md`. Term removal and reorder are
-separate bounded surfaces; general
-arbitrary-position or nested insertion, nested reference replacement, self-weight, time functions,
+`docs/native/modelir-direct-linear-load-combination-term-add-v1.md`. One unique new direct pattern
+term can be placed at an explicit final index only through the separately bounded v59 surface in
+`docs/native/modelir-direct-linear-load-combination-term-insert-v1.md`. Term removal and reorder are
+separate bounded surfaces; general nested insertion, nested reference replacement, self-weight, time functions,
 construction stages, shell/nonlinear combination execution, nested/general deletion,
 approved-device HIP C2, engineering acceptance and C6 remain open.

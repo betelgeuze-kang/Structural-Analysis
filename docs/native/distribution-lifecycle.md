@@ -478,7 +478,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    reorder, source/target-index and source/edited expansion-order binding, exact retained active-load,
    typed recovery and restart authority; and no pre-v58 receipt is installed bounded direct
    linear-load-combination term reorder, source/target-index and order-only term binding, exact
-   retained active-load, typed recovery and restart authority.
+   retained active-load, typed recovery and restart authority; and no pre-v59 receipt is installed
+   bounded direct linear-load-combination explicit-index single-term insertion, requested-index and
+   source/edited order binding, exact active-load, typed recovery and restart authority.
 
 The reference command is:
 

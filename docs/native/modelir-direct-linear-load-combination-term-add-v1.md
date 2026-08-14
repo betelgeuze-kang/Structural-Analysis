@@ -41,7 +41,7 @@ assembly receipt, checkpoint, ResultIR, recovery and ReportIR in the append-only
 receipt.
 
 This is not general combination editing. Existing factor, reference and single-term removal remain
-separate surfaces. Direct term reordering is a separate bounded surface; insertion at arbitrary
-positions, nested term insertion,
+separate surfaces. Direct term reordering and explicit-position insertion are separate bounded
+surfaces; nested term insertion,
 descendant or downstream-referenced mutation, source-format writeback, visual editing, arbitrary
 solver selection, approved HIP C2, engineering acceptance and C6 remain open.

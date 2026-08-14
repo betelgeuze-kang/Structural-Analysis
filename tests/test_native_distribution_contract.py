@@ -1219,6 +1219,36 @@ def valid_v58_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v59_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v58_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v59",
+            "workbench_direct_linear_load_combination_term_insert_surface_passed": True,
+            "workbench_direct_linear_load_combination_term_insert_model_sha256": "sha256:"
+            + "4" * 64,
+            "workbench_direct_linear_load_combination_term_insert_receipt_sha256": "sha256:"
+            + "5" * 64,
+            "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256": "sha256:"
+            + "6" * 64,
+            "workbench_direct_linear_load_combination_term_insert_request_sha256": "sha256:"
+            + "7" * 64,
+            "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256": "sha256:"
+            + "8" * 64,
+            "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256": "sha256:"
+            + "9" * 64,
+            "workbench_direct_linear_load_combination_term_insert_result_ir_sha256": "sha256:"
+            + "a" * 64,
+            "workbench_direct_linear_load_combination_term_insert_recovery_sha256": "sha256:"
+            + "b" * 64,
+            "workbench_direct_linear_load_combination_term_insert_report_ir_sha256": "sha256:"
+            + "c" * 64,
+            "workbench_direct_linear_load_combination_term_insert_restart_passed": True,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -2915,6 +2945,38 @@ def test_distribution_receipt_rejects_unbound_v58_direct_term_reorder(
     )
 
 
+def test_distribution_receipt_accepts_direct_linear_load_combination_term_insert_v59_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v59_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v59_direct_term_insert(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v59_contract()
+    receipt["workbench_direct_linear_load_combination_term_insert_restart_passed"] = False
+    receipt[
+        "workbench_direct_linear_load_combination_term_insert_recovery_sha256"
+    ] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_direct_linear_load_combination_term_insert_restart_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_direct_linear_load_combination_term_insert_recovery_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -3026,6 +3088,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v56" in e2e
     assert "structural-native-distribution-e2e.v57" in e2e
     assert "structural-native-distribution-e2e.v58" in e2e
+    assert "structural-native-distribution-e2e.v59" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
     assert "workbench_model_linear_request_create_surface_passed" in e2e
@@ -3537,6 +3600,28 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_direct_linear_load_combination_term_reorder_recovery_sha256" in e2e
     assert "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256" in e2e
     assert "workbench_direct_linear_load_combination_term_reorder_restart_passed" in e2e
+    assert "exercise_direct_linear_load_combination_term_insert_surface" in e2e
+    assert "model-insert-linear-load-combination-term" in e2e
+    assert (
+        "structural-native:model-insert-direct-linear-load-combination-term.v1" in e2e
+    )
+    assert "workbench_direct_linear_load_combination_term_insert_surface_passed" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_model_sha256" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_receipt_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_insert_request_receipt_sha256"
+        in e2e
+    )
+    assert "workbench_direct_linear_load_combination_term_insert_request_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256"
+        in e2e
+    )
+    assert "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_result_ir_sha256" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_recovery_sha256" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_report_ir_sha256" in e2e
+    assert "workbench_direct_linear_load_combination_term_insert_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_term_add_surface" in e2e
     assert "model-add-nested-linear-load-combination-term" in e2e
     assert "structural-native:model-add-nested-linear-load-combination-term.v1" in e2e
