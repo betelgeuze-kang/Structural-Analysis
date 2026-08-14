@@ -146,6 +146,13 @@ The separate `model-edit-element-identity` command changes only one unreferenced
 ID, preserves its index and exact typed row, rejects construction-stage, unsupported-feature and
 round-trip ownership without cascade, and C++-revalidates the edited snapshot. See
 `docs/native/modelir-element-identity-edit-v1.md`.
+The separate `model-edit-element-identity-cascade` command changes one referenced element's stable
+ID and atomically rewrites typed construction-stage plus direct element round-trip references. It
+preserves the element index and exact typed row, degrades exact or canonicalized direct mappings
+to approximated, requires at least one such reference, rejects unsupported-feature ownership, and
+C++-revalidates the edited snapshot. Installed distribution v82 uses the normalized MGT mapping to
+replace `E1` with `E1_LINKED`; stage-reference execution remains outside the current linear
+projection. See `docs/native/modelir-element-identity-cascade-edit-v2.md`.
 The separate `model-edit-linear-load-combination-identity` command changes only one unreferenced
 bounded direct or acyclic nested linear load combination's stable ID, preserves its index, exact
 ordered typed terms and bounded expansion, rejects downstream-combination, unsupported-feature and

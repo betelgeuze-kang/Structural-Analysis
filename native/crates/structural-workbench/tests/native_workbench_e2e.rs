@@ -823,6 +823,24 @@ fn run_element_identity_edit(
     ])
 }
 
+fn run_element_identity_cascade_edit(
+    source: &Path,
+    destination: &Path,
+    element_id: &str,
+    replacement_element_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-element-identity-cascade"),
+        source.as_os_str(),
+        text("--element"),
+        text(element_id),
+        text("--new-element"),
+        text(replacement_element_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_model_identity_edit(
     source: &Path,
     destination: &Path,
@@ -3782,6 +3800,361 @@ fn element_identity_edit_is_deterministic_fail_closed_restartable_and_cpu_execut
         u32::MAX,
     )
     .expect("element identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn element_identity_cascade_is_atomic_deterministic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base_bytes = std::fs::read(&base).expect("base element-cascade ModelIR bytes");
+    let base_validation = validate_model_bytes(&base_bytes).expect("C++-validated base ModelIR");
+    let base_model = base_validation.snapshot.value().clone();
+    let mut source_model = base_model.clone();
+    source_model["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "ELEMENT:1",
+            "entity_kind": "element",
+            "model_ir_entity_id": "E1",
+            "mapping_status": "canonicalized",
+            "extensions": {"structural-native:source-section": "ELEMENT"}
+        },
+        {
+            "source_entity_id": "NODE:1",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N1",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let source = temporary.0.join("element-identity-cascade-source.json");
+    std::fs::write(
+        &source,
+        canonicalize_model_ir_v2(&source_model)
+            .expect("canonical element-cascade source")
+            .as_bytes(),
+    )
+    .expect("write element-cascade source");
+    let source_bytes = std::fs::read(&source).expect("element-cascade source bytes");
+    let source_validation =
+        validate_model_bytes(&source_bytes).expect("C++-validated element-cascade source");
+    assert!(source_validation.report.analysis_ready);
+
+    let first = temporary.0.join("element-identity-cascade-first");
+    let second = temporary.0.join("element-identity-cascade-second");
+    for destination in [&first, &second] {
+        let output = run_element_identity_cascade_edit(&source, destination, "E1", "E1_LINKED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published element-cascade receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first element-cascade artifact"),
+            std::fs::read(second.join(artifact)).expect("second element-cascade artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged element-cascade source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("element identity-cascaded ModelIR");
+    let edited =
+        parse_model_ir_v2(&edited_bytes).expect("strict element identity-cascaded ModelIR");
+    let edited_validation = validate_model_bytes(&edited_bytes)
+        .expect("C++-validated element identity-cascaded ModelIR");
+    assert!(edited_validation.report.analysis_ready);
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(edited.value()["elements"][0]["id"], "E1_LINKED");
+    for (key, value) in source_model["elements"][0]
+        .as_object()
+        .expect("source element object")
+    {
+        if key != "id" {
+            assert_eq!(&edited.value()["elements"][0][key], value);
+        }
+    }
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["model_ir_entity_id"],
+        "E1_LINKED"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["extensions"],
+        source_model["roundtrip_map"][0]["extensions"]
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][1],
+        source_model["roundtrip_map"][1]
+    );
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+    let mut retained_element = source_model["elements"][0]
+        .as_object()
+        .expect("source element object")
+        .clone();
+    retained_element.remove("id");
+    let retained_element = Value::Object(retained_element);
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-element-identity-cascade.v2")
+        .expect("element identity cascade provenance extension");
+    assert_eq!(extension["operation"], "element_identity_cascade_edit");
+    assert_eq!(extension["source_element_id"], "E1");
+    assert_eq!(extension["replacement_element_id"], "E1_LINKED");
+    assert_eq!(extension["element_index"], 0);
+    assert_eq!(
+        extension["retained_element_without_identity"],
+        retained_element
+    );
+    assert_eq!(extension["construction_stage_reference_count"], 0);
+    assert_eq!(extension["roundtrip_reference_count"], 1);
+    assert_eq!(extension["typed_reference_cascade_verified"], true);
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("element identity cascade receipt"),
+    )
+    .expect("element identity cascade receipt JSON");
+    assert_eq!(receipt["operation"], "element_identity_cascade_edit");
+    assert_eq!(receipt["source_element_id"], "E1");
+    assert_eq!(receipt["replacement_element_id"], "E1_LINKED");
+    assert_eq!(receipt["element_index"], 0);
+    assert_eq!(
+        receipt["retained_element_without_identity"],
+        retained_element
+    );
+    assert_eq!(receipt["construction_stage_reference_count"], 0);
+    assert_eq!(receipt["roundtrip_reference_count"], 1);
+    assert_eq!(receipt["typed_reference_cascade_verified"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let mut staged_model = base_model.clone();
+    staged_model["construction_stages"] = serde_json::json!([{
+        "id": "STAGE_E1",
+        "index": 0,
+        "active_element_ids": ["E1"],
+        "active_constraint_ids": [],
+        "load_pattern_ids": [],
+        "extensions": {"structural-native:fixture": true}
+    }]);
+    let staged_source = temporary
+        .0
+        .join("element-identity-cascade-staged-source.json");
+    std::fs::write(
+        &staged_source,
+        canonicalize_model_ir_v2(&staged_model)
+            .expect("canonical staged element-cascade source")
+            .as_bytes(),
+    )
+    .expect("write staged element-cascade source");
+    let staged_destination = temporary.0.join("element-identity-cascade-staged");
+    assert_success(&run_element_identity_cascade_edit(
+        &staged_source,
+        &staged_destination,
+        "E1",
+        "E1_STAGED",
+    ));
+    let staged_edited_bytes = std::fs::read(staged_destination.join("model-ir.json"))
+        .expect("staged element identity-cascaded ModelIR");
+    let staged_edited = parse_model_ir_v2(&staged_edited_bytes)
+        .expect("strict staged element identity-cascaded ModelIR");
+    let staged_validation = validate_model_bytes(&staged_edited_bytes)
+        .expect("C++-validated staged element identity-cascaded ModelIR");
+    assert!(staged_validation.report.analysis_ready);
+    assert_eq!(staged_edited.value()["elements"][0]["id"], "E1_STAGED");
+    assert_eq!(
+        staged_edited.value()["construction_stages"][0]["active_element_ids"],
+        serde_json::json!(["E1_STAGED"])
+    );
+    assert_eq!(
+        staged_edited.value()["construction_stages"][0]["extensions"],
+        staged_model["construction_stages"][0]["extensions"]
+    );
+    let staged_receipt: Value = serde_json::from_slice(
+        &std::fs::read(staged_destination.join("edit-receipt.json"))
+            .expect("staged element cascade receipt"),
+    )
+    .expect("staged element cascade receipt JSON");
+    assert_eq!(staged_receipt["construction_stage_reference_count"], 1);
+    assert_eq!(staged_receipt["roundtrip_reference_count"], 0);
+    assert_eq!(staged_receipt["analysis_ready"], true);
+
+    for (name, element_id, replacement, expected_code) in [
+        (
+            "missing",
+            "E404",
+            "E3",
+            "workbench_model_edit_element_identity_element_missing",
+        ),
+        ("no-op", "E1", "E1", "workbench_model_edit_no_change"),
+        (
+            "invalid-replacement",
+            "E1",
+            "1_INVALID",
+            "workbench_model_edit_element_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("element-identity-cascade-{name}"));
+        let rejected =
+            run_element_identity_cascade_edit(&source, &destination, element_id, replacement);
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+    let orphan_destination = temporary.0.join("element-identity-cascade-orphan");
+    let orphan_rejection =
+        run_element_identity_cascade_edit(&base, &orphan_destination, "E1", "E1_LINKED");
+    assert_eq!(orphan_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&orphan_rejection.stdout)
+        .contains("workbench_model_edit_element_identity_cascade_unreferenced"));
+    assert!(!orphan_destination.exists());
+
+    let collision_source = temporary
+        .0
+        .join("element-identity-cascade-collision-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &collision_source,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let collision_destination = temporary
+        .0
+        .join("element-identity-cascade-collision-output");
+    let collision = run_element_identity_cascade_edit(
+        &collision_source.join("model-ir.json"),
+        &collision_destination,
+        "E1",
+        "E2",
+    );
+    assert_eq!(collision.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&collision.stdout)
+        .contains("workbench_model_edit_element_identity_replacement_exists"));
+    assert!(!collision_destination.exists());
+
+    let mut feature_owned = source_model.clone();
+    feature_owned["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.element-cascade-owned",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": "E1",
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Element identity remains externally owned.",
+        "extensions": {}
+    }]);
+    let feature_owned_path = temporary
+        .0
+        .join("element-identity-cascade-feature-owned-source.json");
+    std::fs::write(
+        &feature_owned_path,
+        canonicalize_model_ir_v2(&feature_owned)
+            .expect("canonical feature-owned element source")
+            .as_bytes(),
+    )
+    .expect("write feature-owned element source");
+    let feature_destination = temporary.0.join("element-identity-cascade-feature-owned");
+    let feature_rejection = run_element_identity_cascade_edit(
+        &feature_owned_path,
+        &feature_destination,
+        "E1",
+        "E1_LINKED",
+    );
+    assert_eq!(feature_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&feature_rejection.stdout)
+        .contains("workbench_model_edit_element_identity_cascade_unsupported_feature_owned"));
+    assert!(!feature_destination.exists());
+
+    let existing = run_element_identity_cascade_edit(&source, &first, "E1", "E1_LINKED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("element-identity-cascade-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "element-identity-cascade-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("element identity cascade request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("element identity cascade direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("element identity cascade direct recovery"),
+    )
+    .expect("element identity cascade recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("element identity cascade initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("element identity cascade resumed CPU execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(

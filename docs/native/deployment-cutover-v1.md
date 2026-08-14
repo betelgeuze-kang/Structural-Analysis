@@ -36,6 +36,8 @@ reference cascade,
 existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting and `model-edit-element-identity`
 unreferenced stable-identity replacement for one existing element, plus
+`model-edit-element-identity-cascade` referenced stable-identity replacement with typed
+construction-stage and direct element round-trip reference cascade, plus
 `model-edit-linear-load-combination-identity` bounded direct-or-nested unreferenced
 load-combination stable-identity replacement without reference cascade, plus
 `model-edit-linear-load-combination-identity-cascade` bounded direct-or-nested referenced
@@ -137,7 +139,16 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v81 proves repeated load-combination-identity-cascade-edited/
+assembly preflight. Distribution E2E v82 proves repeated element-identity-cascade-edited/request/
+artifact bytes from the normalized MGT cantilever source while replacing mapped `E1` with
+`E1_LINKED` through `model-edit-element-identity-cascade`. It atomically rewrites the direct
+element round-trip identity, degrades its canonicalized disposition to approximated, rejects
+malformed, no-op, colliding and unreferenced identities plus unsupported-feature ownership, and
+proves exact typed frame recovery `[1]`, offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active
+load `[200000,0,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback 0. Focused
+E2E separately proves construction-stage reference cascade and C++ validation; stage-bearing
+linear execution remains outside the current projection. Distribution E2E v81 proves repeated
+load-combination-identity-cascade-edited/
 request/artifact bytes and retains every v80 assertion while adding `COMBO_PARENT`, replacing its
 referenced child `COMBO_RENAMED` with `COMBO_BASE_LINKED` through
 `model-edit-linear-load-combination-identity-cascade`, and atomically updating the typed parent

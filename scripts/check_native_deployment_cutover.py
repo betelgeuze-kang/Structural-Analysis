@@ -209,6 +209,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-edit-truss-section-identity-cascade",
             "model-edit-linear-load-pattern-identity-cascade",
             "model-edit-linear-load-combination-identity-cascade",
+            "model-edit-element-identity-cascade",
             "model-edit-truss-element-properties",
             "model-edit-element-connectivity",
             "model-add-frame3d-member",
@@ -258,6 +259,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v82",
+            "model-edit-element-identity-cascade",
+            "E1_LINKED",
             "Distribution E2E v81",
             "model-edit-linear-load-combination-identity-cascade",
             "COMBO_BASE_LINKED",
@@ -954,6 +958,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_element_identity_edit_recovery_sha256",
         "workbench_element_identity_edit_report_ir_sha256",
         "workbench_element_identity_edit_restart_passed",
+        "exercise_element_identity_cascade_edit_surface",
+        "model-edit-element-identity-cascade",
+        "structural-native:model-edit-element-identity-cascade.v2",
+        "workbench_element_identity_cascade_edit_surface_passed",
+        "workbench_element_identity_cascade_edit_model_sha256",
+        "workbench_element_identity_cascade_edit_receipt_sha256",
+        "workbench_element_identity_cascade_edit_request_receipt_sha256",
+        "workbench_element_identity_cascade_edit_request_sha256",
+        "workbench_element_identity_cascade_edit_assembly_receipt_sha256",
+        "workbench_element_identity_cascade_edit_checkpoint_sha256",
+        "workbench_element_identity_cascade_edit_result_ir_sha256",
+        "workbench_element_identity_cascade_edit_recovery_sha256",
+        "workbench_element_identity_cascade_edit_report_ir_sha256",
+        "workbench_element_identity_cascade_edit_restart_passed",
         "exercise_linear_load_combination_identity_edit_surface",
         "model-edit-linear-load-combination-identity",
         "structural-native:model-edit-linear-load-combination-identity.v1",
@@ -1268,6 +1286,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v82",
+            "V82_ELEMENT_IDENTITY_CASCADE_EDIT_KEYS",
+            "workbench_element_identity_cascade_edit_surface_passed",
+            "workbench_element_identity_cascade_edit_receipt_sha256",
+            "workbench_element_identity_cascade_edit_request_receipt_sha256",
+            "workbench_element_identity_cascade_edit_recovery_sha256",
+            "workbench_element_identity_cascade_edit_restart_passed",
             "structural-native-distribution-e2e.v81",
             "V81_LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_KEYS",
             "workbench_linear_load_combination_identity_cascade_edit_surface_passed",
@@ -2018,6 +2043,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "[0,12]",
             "[6,7,8,9,10,11]",
             "[0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    element_identity_cascade_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-element-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-element-identity-cascade-edit-v2.md"),
+        text=element_identity_cascade_edit_doc,
+        tokens=(
+            "model-edit-element-identity-cascade",
+            "single C ABI into C++ semantic",
+            "structural-native:model-edit-element-identity-cascade.v2",
+            "element_identity_cascade_edit",
+            "append-only v82",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[200000,0,0,0,0,0]",
             "fallback 0",
             "approved HIP C2",
             "authorize C6",
@@ -3263,6 +3313,50 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in element_identity_edit_claim:
                 blockers.append(
                     "modelir_element_identity_edit_capability_" f"claim_missing:{token}"
+                )
+    element_identity_cascade_edit_capability = (
+        capabilities.get("modelir_element_identity_cascade_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(element_identity_cascade_edit_capability, dict):
+        blockers.append("modelir_element_identity_cascade_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if element_identity_cascade_edit_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_element_identity_cascade_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        element_identity_cascade_edit_claim = str(
+            element_identity_cascade_edit_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing referenced element ID",
+            "atomically updates every construction_stages[].active_element_ids reference",
+            "direct element round-trip model_ir_entity_id",
+            "exact or canonicalized direct mappings degrade to approximated",
+            "at least one typed construction-stage or direct round-trip reference is required",
+            "unsupported-feature source_entity_id ownership of either source or replacement",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v82 E2E",
+            "E1_LINKED",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "active load [200000,0,0,0,0,0]",
+            "typed frame recovery [1] with offsets [0,12]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "construction stages remain outside the current linear execution projection",
+            "C6 remain open",
+        ):
+            if token not in element_identity_cascade_edit_claim:
+                blockers.append(
+                    "modelir_element_identity_cascade_edit_capability_"
+                    f"claim_missing:{token}"
                 )
     model_identity_edit_capability = (
         capabilities.get("modelir_model_identity_edit")

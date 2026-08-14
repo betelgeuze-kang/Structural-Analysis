@@ -541,6 +541,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-edit-truss-element-properties",
         "model-edit-element-connectivity",
         "model-edit-element-identity",
+        "model-edit-element-identity-cascade",
         "model-edit-linear-load-combination-identity",
         "model-edit-linear-load-combination-identity-cascade",
         "model-add-frame3d-member",
@@ -1147,6 +1148,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "node_identity_cascade_edit",
             "structural-native:model-edit-element-identity.v1",
             "element_identity_edit",
+            "structural-native:model-edit-element-identity-cascade.v2",
+            "element_identity_cascade_edit",
             "structural-native:model-edit-linear-load-combination-identity.v1",
             "linear_load_combination_identity_edit",
             "structural-native:model-edit-linear-load-combination-identity-cascade.v2",
@@ -1851,6 +1854,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-edit-node-identity-cascade")',
             'Some("model-edit-linear-load-pattern-identity-cascade")',
             'Some("model-edit-element-identity")',
+            'Some("model-edit-element-identity-cascade")',
             'Some("model-edit-linear-load-combination-identity")',
             'Some("model-edit-linear-load-combination-identity-cascade")',
             'Some("model-add-node")',
@@ -2982,6 +2986,30 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    element_identity_cascade_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-element-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-element-identity-cascade-edit-v2.md"),
+        element_identity_cascade_edit_doc,
+        (
+            "model-edit-element-identity-cascade",
+            "single C ABI into C++",
+            "structural-native:model-edit-element-identity-cascade.v2",
+            "element_identity_cascade_edit",
+            "append-only v82",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[200000,0,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     linear_load_combination_identity_edit_doc = _text(
         root,
         Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
@@ -3088,6 +3116,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-edit-node-identity",
             "model-edit-node-identity-cascade",
             "model-edit-element-identity",
+            "model-edit-element-identity-cascade",
             "model-edit-linear-load-combination-identity",
             "model-edit-linear-load-combination-identity-cascade",
             "model-edit-frame-element-orientation",

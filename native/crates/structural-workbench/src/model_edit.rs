@@ -56,6 +56,8 @@ const ELEMENT_CONNECTIVITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-connectivity.v1";
 const ELEMENT_IDENTITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-element-identity.v1";
+const ELEMENT_IDENTITY_CASCADE_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-element-identity-cascade.v2";
 const FRAME3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame3d-member.v1";
 const TRUSS3D_MEMBER_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss3d-member.v1";
 const FRAME3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
@@ -166,6 +168,7 @@ const FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_e
 const TRUSS_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_truss3d_element_material_and_section_reference_edit_not_identity_type_formulation_connectivity_offset_property_creation_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const ELEMENT_CONNECTIVITY_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_two_node_element_connectivity_edit_not_element_or_node_creation_deletion_identity_type_formulation_property_offset_release_or_solver_editing_engineering_acceptance_or_c6";
 const ELEMENT_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_element_identity_replacement_to_distinct_unique_stable_id_with_index_type_formulation_connectivity_properties_orientation_offsets_releases_source_extensions_and_unrelated_rows_preserved_without_construction_stage_unsupported_feature_or_roundtrip_cascade_not_element_creation_deletion_topology_property_solver_visual_editing_engineering_acceptance_or_c6";
+const ELEMENT_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_modelir_element_identity_replacement_to_distinct_unique_stable_id_with_index_type_formulation_connectivity_properties_orientation_offsets_releases_source_extensions_and_unrelated_rows_preserved_and_typed_construction_stage_plus_direct_element_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_element_creation_deletion_topology_property_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_frame3d_node_and_member_addition_with_existing_material_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_truss3d_node_and_member_addition_with_existing_material_and_truss_section_not_general_topology_property_load_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_euler_bernoulli_frame3d_leaf_member_and_orphan_node_deletion_not_cascade_general_entity_or_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
@@ -435,6 +438,13 @@ pub struct ModelElementConnectivityEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded element identity edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelElementIdentityEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one referenced element identity cascade.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelElementIdentityCascadeEditOutcomeV2 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -2327,6 +2337,32 @@ pub fn publish_model_element_identity_edit(
 ) -> Result<ModelElementIdentityEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_element_identity(&source, element_id, replacement_element_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one referenced element identity, cascade its typed ownership, and atomically publish
+/// the edited `ModelIR`.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, an unreferenced source element, invalid
+/// source or edited semantics, unsupported-feature ownership, malformed stage or round-trip
+/// references, no-op edits, or create-new publication failures.
+pub fn publish_model_element_identity_cascade_edit(
+    source_path: &Path,
+    element_id: &str,
+    replacement_element_id: &str,
+    output_directory: &Path,
+) -> Result<ModelElementIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_element_identity_cascade(&source, element_id, replacement_element_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -8812,6 +8848,14 @@ struct RenamedElementV1 {
     retained_element_without_identity: Value,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct CascadedElementIdentityV2 {
+    element_index: usize,
+    retained_element_without_identity: Value,
+    construction_stage_reference_count: usize,
+    roundtrip_reference_count: usize,
+}
+
 /// Replace one unreferenced element identity in memory.
 ///
 /// # Errors
@@ -8892,6 +8936,96 @@ pub fn edit_model_element_identity(
         "claim_boundary": ELEMENT_IDENTITY_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelElementIdentityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Replace one referenced element identity and atomically cascade every typed `ModelIR`
+/// construction-stage or direct round-trip reference.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, an element with neither a
+/// construction-stage nor direct round-trip reference, malformed typed references,
+/// unsupported-feature ownership, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_element_identity_cascade(
+    source_bytes: &[u8],
+    element_id: &str,
+    replacement_element_id: &str,
+) -> Result<ModelElementIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    validate_element_identity_edit_request(source_bytes.len(), element_id, replacement_element_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let cascaded =
+        replace_element_identity_cascade(&mut edited, element_id, replacement_element_id)?;
+    bind_element_identity_cascade_edit_provenance(
+        &mut edited,
+        element_id,
+        replacement_element_id,
+        &cascaded,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the element identity-cascaded ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "element_identity_cascade_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_element_id": element_id,
+        "replacement_element_id": replacement_element_id,
+        "element_index": cascaded.element_index,
+        "retained_element_without_identity": cascaded.retained_element_without_identity,
+        "construction_stage_reference_count": cascaded.construction_stage_reference_count,
+        "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+        "typed_reference_cascade_verified": true,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": ELEMENT_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelElementIdentityCascadeEditOutcomeV2 {
         model_ir_json,
         receipt_json,
     })
@@ -19233,6 +19367,189 @@ fn replace_element_identity(
     })
 }
 
+#[allow(clippy::too_many_lines)]
+fn replace_element_identity_cascade(
+    model: &mut Value,
+    element_id: &str,
+    replacement_element_id: &str,
+) -> Result<CascadedElementIdentityV2, WorkbenchError> {
+    if element_id == replacement_element_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement element identity is identical to the source identity",
+        ));
+    }
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    let element_index = elements
+        .iter()
+        .position(|element| element.get("id").and_then(Value::as_str) == Some(element_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_element_identity_element_missing",
+                format!("ModelIR has no element with identity {element_id}"),
+            )
+        })?;
+    if elements
+        .iter()
+        .any(|element| element.get("id").and_then(Value::as_str) == Some(replacement_element_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_identity_replacement_exists",
+            format!("ModelIR already has an element with identity {replacement_element_id}"),
+        ));
+    }
+    let element = &elements[element_index];
+    if element.get("index").and_then(Value::as_u64) != u64::try_from(element_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_identity_index_mismatch",
+            "identity-cascaded element index must match its contiguous position",
+        ));
+    }
+    let mut retained_element = element
+        .as_object()
+        .ok_or_else(|| snapshot_error("element"))?
+        .clone();
+    if retained_element.remove("id").is_none() {
+        return Err(snapshot_error("element id"));
+    }
+    let retained_element_without_identity = Value::Object(retained_element);
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == element_id || id == replacement_element_id);
+
+    if model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_identity_cascade_unsupported_feature_owned",
+            "element identity cascade refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+
+    let construction_stages = model
+        .get("construction_stages")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("construction_stages"))?;
+    let mut construction_stage_reference_count = 0usize;
+    for stage in construction_stages {
+        for active_element_id in stage
+            .get("active_element_ids")
+            .and_then(Value::as_array)
+            .ok_or_else(|| snapshot_error("construction stage active_element_ids"))?
+        {
+            let active_element_id = active_element_id
+                .as_str()
+                .ok_or_else(|| snapshot_error("construction stage active element identity"))?;
+            if active_element_id == replacement_element_id {
+                return Err(WorkbenchError::new(
+                    "workbench_model_edit_element_identity_cascade_replacement_stage_owned",
+                    "replacement element identity is already referenced by a construction stage",
+                ));
+            }
+            if active_element_id == element_id {
+                construction_stage_reference_count += 1;
+            }
+        }
+    }
+
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    let mut roundtrip_reference_count = 0usize;
+    for row in roundtrip_rows {
+        let mapped = row
+            .get("model_ir_entity_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| snapshot_error("roundtrip model_ir_entity_id"))?;
+        if mapped == replacement_element_id {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_element_identity_cascade_replacement_roundtrip_owned",
+                "replacement element identity is already owned by a round-trip mapping",
+            ));
+        }
+        if mapped != element_id {
+            continue;
+        }
+        if row.get("entity_kind").and_then(Value::as_str) != Some("element") {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_element_identity_cascade_roundtrip_kind_mismatch",
+                "direct round-trip ownership of the source element must have entity_kind element",
+            ));
+        }
+        if !matches!(
+            row.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized" | "approximated" | "unsupported")
+        ) {
+            return Err(snapshot_error("roundtrip mapping_status"));
+        }
+        roundtrip_reference_count += 1;
+    }
+    if construction_stage_reference_count + roundtrip_reference_count == 0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_element_identity_cascade_unreferenced",
+            "element identity cascade requires at least one typed construction-stage or direct round-trip reference; use the non-cascading identity editor for an orphan",
+        ));
+    }
+
+    for stage in model
+        .get_mut("construction_stages")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("construction_stages"))?
+    {
+        for active_element_id in stage
+            .get_mut("active_element_ids")
+            .and_then(Value::as_array_mut)
+            .ok_or_else(|| snapshot_error("construction stage active_element_ids"))?
+        {
+            if active_element_id.as_str() == Some(element_id) {
+                *active_element_id = json!(replacement_element_id);
+            }
+        }
+    }
+    for row in model
+        .get_mut("roundtrip_map")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?
+    {
+        if row.get("model_ir_entity_id").and_then(Value::as_str) != Some(element_id) {
+            continue;
+        }
+        let object = row
+            .as_object_mut()
+            .ok_or_else(|| snapshot_error("roundtrip row"))?;
+        object.insert(
+            "model_ir_entity_id".to_owned(),
+            json!(replacement_element_id),
+        );
+        if matches!(
+            object.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized")
+        ) {
+            object.insert("mapping_status".to_owned(), json!("approximated"));
+        }
+    }
+    model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .and_then(|rows| rows.get_mut(element_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("element"))?
+        .insert("id".to_owned(), json!(replacement_element_id));
+
+    Ok(CascadedElementIdentityV2 {
+        element_index,
+        retained_element_without_identity,
+        construction_stage_reference_count,
+        roundtrip_reference_count,
+    })
+}
+
 fn append_node(
     model: &mut Value,
     node_id: &str,
@@ -22288,6 +22605,37 @@ fn bind_element_identity_edit_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_element_identity_cascade_edit_provenance(
+    model: &mut Value,
+    element_id: &str,
+    replacement_element_id: &str,
+    cascaded: &CascadedElementIdentityV2,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        ELEMENT_IDENTITY_CASCADE_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "element_identity_cascade_edit",
+            "source_element_id": element_id,
+            "replacement_element_id": replacement_element_id,
+            "element_index": cascaded.element_index,
+            "retained_element_without_identity": cascaded.retained_element_without_identity.clone(),
+            "construction_stage_reference_count": cascaded.construction_stage_reference_count,
+            "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+            "typed_reference_cascade_verified": true,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": ELEMENT_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_node_add_provenance(
     model: &mut Value,
     node_id: &str,
@@ -22822,12 +23170,12 @@ mod tests {
         remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference, replace_element_identity,
-        replace_fixed_constraint_identity, replace_frame_section_identity,
-        replace_frame_section_identity_cascade, replace_linear_load_combination_identity,
-        replace_linear_load_combination_identity_cascade, replace_linear_load_pattern_identity,
-        replace_linear_load_pattern_identity_cascade, replace_linear_material_identity,
-        replace_linear_material_identity_cascade, replace_model_identity,
-        replace_nested_linear_load_combination_factor,
+        replace_element_identity_cascade, replace_fixed_constraint_identity,
+        replace_frame_section_identity, replace_frame_section_identity_cascade,
+        replace_linear_load_combination_identity, replace_linear_load_combination_identity_cascade,
+        replace_linear_load_pattern_identity, replace_linear_load_pattern_identity_cascade,
+        replace_linear_material_identity, replace_linear_material_identity_cascade,
+        replace_model_identity, replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
         replace_nodal_load_target, replace_node_identity, replace_node_identity_cascade,
         replace_truss_section_identity, replace_truss_section_identity_cascade,
@@ -23332,6 +23680,107 @@ mod tests {
                 code
             );
         }
+    }
+
+    #[test]
+    fn element_identity_cascade_updates_stages_and_all_direct_mappings() {
+        let mut model = element_identity_fixture();
+        model["construction_stages"] = json!([
+            {"id": "STAGE1", "active_element_ids": ["E1", "E2"]},
+            {"id": "STAGE2", "active_element_ids": ["E1"]}
+        ]);
+        model["roundtrip_map"] = json!([
+            {"source_entity_id": "source:E1:exact", "entity_kind": "element", "model_ir_entity_id": "E1", "mapping_status": "exact"},
+            {"source_entity_id": "source:E1:canonicalized", "entity_kind": "element", "model_ir_entity_id": "E1", "mapping_status": "canonicalized"},
+            {"source_entity_id": "source:E1:approximated", "entity_kind": "element", "model_ir_entity_id": "E1", "mapping_status": "approximated"},
+            {"source_entity_id": "source:E1:unsupported", "entity_kind": "element", "model_ir_entity_id": "E1", "mapping_status": "unsupported"},
+            {"source_entity_id": "source:E2", "entity_kind": "element", "model_ir_entity_id": "E2", "mapping_status": "exact"}
+        ]);
+        let source_element = model["elements"][0].clone();
+        let unrelated_element = model["elements"][1].clone();
+        let unrelated_mapping = model["roundtrip_map"][4].clone();
+
+        let mut edited = model.clone();
+        let cascaded = replace_element_identity_cascade(&mut edited, "E1", "E1_LINKED")
+            .expect("cascade referenced element");
+        assert_eq!(cascaded.element_index, 0);
+        assert_eq!(cascaded.construction_stage_reference_count, 2);
+        assert_eq!(cascaded.roundtrip_reference_count, 4);
+        assert_eq!(edited["elements"][0]["id"], "E1_LINKED");
+        for (key, value) in source_element.as_object().expect("source element") {
+            if key != "id" {
+                assert_eq!(&edited["elements"][0][key], value);
+            }
+        }
+        assert_eq!(edited["elements"][1], unrelated_element);
+        assert_eq!(
+            edited["construction_stages"][0]["active_element_ids"],
+            json!(["E1_LINKED", "E2"])
+        );
+        assert_eq!(
+            edited["construction_stages"][1]["active_element_ids"],
+            json!(["E1_LINKED"])
+        );
+        for index in 0..4 {
+            assert_eq!(
+                edited["roundtrip_map"][index]["model_ir_entity_id"],
+                "E1_LINKED"
+            );
+        }
+        assert_eq!(edited["roundtrip_map"][0]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][1]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][2]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][3]["mapping_status"], "unsupported");
+        assert_eq!(edited["roundtrip_map"][4], unrelated_mapping);
+
+        let mut unreferenced = element_identity_fixture();
+        assert_eq!(
+            replace_element_identity_cascade(&mut unreferenced, "E1", "E1_LINKED")
+                .expect_err("orphan element uses non-cascading editor")
+                .code,
+            "workbench_model_edit_element_identity_cascade_unreferenced"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "E1"}]);
+        assert_eq!(
+            replace_element_identity_cascade(&mut feature_owned, "E1", "E1_LINKED")
+                .expect_err("unsupported feature owns element")
+                .code,
+            "workbench_model_edit_element_identity_cascade_unsupported_feature_owned"
+        );
+        let mut kind_mismatch = element_identity_fixture();
+        kind_mismatch["roundtrip_map"] = json!([{
+            "entity_kind": "node",
+            "model_ir_entity_id": "E1",
+            "mapping_status": "exact"
+        }]);
+        assert_eq!(
+            replace_element_identity_cascade(&mut kind_mismatch, "E1", "E1_LINKED")
+                .expect_err("direct source mapping kind mismatch")
+                .code,
+            "workbench_model_edit_element_identity_cascade_roundtrip_kind_mismatch"
+        );
+        let mut replacement_stage_owned = element_identity_fixture();
+        replacement_stage_owned["construction_stages"] =
+            json!([{"active_element_ids": ["E1_LINKED"]}]);
+        assert_eq!(
+            replace_element_identity_cascade(&mut replacement_stage_owned, "E1", "E1_LINKED",)
+                .expect_err("replacement stage ownership")
+                .code,
+            "workbench_model_edit_element_identity_cascade_replacement_stage_owned"
+        );
+        let mut replacement_mapping_owned = element_identity_fixture();
+        replacement_mapping_owned["roundtrip_map"] = json!([{
+            "entity_kind": "element",
+            "model_ir_entity_id": "E1_LINKED",
+            "mapping_status": "exact"
+        }]);
+        assert_eq!(
+            replace_element_identity_cascade(&mut replacement_mapping_owned, "E1", "E1_LINKED",)
+                .expect_err("replacement mapping ownership")
+                .code,
+            "workbench_model_edit_element_identity_cascade_replacement_roundtrip_owned"
+        );
     }
 
     #[test]

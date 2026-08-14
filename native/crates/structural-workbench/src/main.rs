@@ -804,6 +804,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             .and_then(|command| run_model_edit_element_connectivity(&command)),
         Some("model-edit-element-identity") => parse_model_edit_element_identity(arguments)
             .and_then(|command| run_model_edit_element_identity(&command)),
+        Some("model-edit-element-identity-cascade") => {
+            parse_model_edit_element_identity_cascade(arguments)
+                .and_then(|command| run_model_edit_element_identity_cascade(&command))
+        }
         Some("model-add-frame3d-member") => parse_model_add_frame3d_member(arguments)
             .and_then(|command| run_model_add_frame3d_member(&command)),
         Some("model-add-truss3d-member") => parse_model_add_truss3d_member(arguments)
@@ -1858,6 +1862,19 @@ fn run_model_edit_element_identity(
     command: &ModelEditElementIdentityCommand,
 ) -> Result<(), WorkbenchError> {
     let outcome = structural_workbench::publish_model_element_identity_edit(
+        &command.model,
+        &command.element_id,
+        &command.replacement_element_id,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_element_identity_cascade(
+    command: &ModelEditElementIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_element_identity_cascade_edit(
         &command.model,
         &command.element_id,
         &command.replacement_element_id,
@@ -4159,6 +4176,32 @@ fn parse_model_edit_element_identity(
     })
 }
 
+fn parse_model_edit_element_identity_cascade(
+    arguments: &[OsString],
+) -> Result<ModelEditElementIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--element"
+        || arguments[4] != "--new-element"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-element-identity-cascade requires MODEL.json --element SOURCE-ID --new-element NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditElementIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        element_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-element-identity-cascade source element ID",
+        )?,
+        replacement_element_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-element-identity-cascade replacement element ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
 fn parse_model_add_frame3d_member(
     arguments: &[OsString],
 ) -> Result<ModelAddFrame3dMemberCommand, WorkbenchError> {
@@ -4832,6 +4875,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-truss-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-element-identity <MODEL.json> --element <SOURCE-ID> --new-element <NEW-ID> --output-dir <DIR>",
+        "\n  structural-workbench model-edit-element-identity-cascade <MODEL.json> --element <SOURCE-ID> --new-element <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity-cascade <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
         "\n  structural-workbench model-insert-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
@@ -4867,9 +4911,10 @@ mod tests {
         parse_model_edit_direct_linear_load_combination_factor,
         parse_model_edit_direct_linear_load_combination_reference,
         parse_model_edit_element_connectivity, parse_model_edit_element_identity,
-        parse_model_edit_fixed_constraint_identity, parse_model_edit_frame_element_orientation,
-        parse_model_edit_frame_element_properties, parse_model_edit_frame_section,
-        parse_model_edit_frame_section_identity, parse_model_edit_frame_section_identity_cascade,
+        parse_model_edit_element_identity_cascade, parse_model_edit_fixed_constraint_identity,
+        parse_model_edit_frame_element_orientation, parse_model_edit_frame_element_properties,
+        parse_model_edit_frame_section, parse_model_edit_frame_section_identity,
+        parse_model_edit_frame_section_identity_cascade,
         parse_model_edit_linear_load_combination_identity,
         parse_model_edit_linear_load_combination_identity_cascade,
         parse_model_edit_linear_load_pattern_identity,
@@ -6943,6 +6988,31 @@ mod tests {
         empty[5] = OsString::new();
         assert!(parse_model_edit_element_identity(&empty).is_err());
         assert!(parse_model_edit_element_identity(&arguments[..7]).is_err());
+    }
+
+    #[test]
+    fn model_edit_element_identity_cascade_parser_requires_fixed_bounded_identities() {
+        let arguments = [
+            OsString::from("model-edit-element-identity-cascade"),
+            OsString::from("model.json"),
+            OsString::from("--element"),
+            OsString::from("E1"),
+            OsString::from("--new-element"),
+            OsString::from("E1_LINKED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_element_identity_cascade(&arguments)
+            .expect("valid element identity cascade command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.element_id, "E1");
+        assert_eq!(parsed.replacement_element_id, "E1_LINKED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut empty = arguments.clone();
+        empty[5] = OsString::new();
+        assert!(parse_model_edit_element_identity_cascade(&empty).is_err());
+        assert!(parse_model_edit_element_identity_cascade(&arguments[..7]).is_err());
     }
 
     #[test]

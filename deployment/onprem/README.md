@@ -20,7 +20,8 @@ absent from the runtime image.
   `model-edit-truss-section-identity-cascade` typed truss-section-reference cascade and
   `model-edit-linear-load-pattern-identity-cascade` typed pattern-reference cascade, plus
   `model-edit-linear-load-combination-identity-cascade` typed downstream-combination-reference
-  cascade, plus
+  cascade and `model-edit-element-identity-cascade` typed construction-stage/direct-element-
+  round-trip reference cascade, plus
   `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
@@ -203,6 +204,9 @@ structural-workbench model-edit-linear-load-pattern-identity-cascade /workspace/
 structural-workbench model-edit-linear-load-combination-identity-cascade /workspace/model.json \
   --load-combination COMBO_RENAMED --new-load-combination COMBO_BASE_LINKED \
   --output-dir /workspace/renamed-referenced-load-combination-model
+structural-workbench model-edit-element-identity-cascade /workspace/model.json \
+  --element E1 --new-element E1_LINKED \
+  --output-dir /workspace/renamed-referenced-element-model
 structural-workbench model-edit-constraint-value /workspace/model.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir /workspace/edited-constraint-model

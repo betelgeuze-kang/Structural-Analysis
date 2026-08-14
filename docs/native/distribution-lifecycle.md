@@ -596,6 +596,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    and byte-identical initialized checkpoint/restart, then emits an append-only v81 receipt binding
    the edited ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR,
    recovery and ReportIR.
+96. consumes the normalized MGT cantilever ModelIR, replaces mapped element `E1` with `E1_LINKED`,
+   atomically rewrites its direct element round-trip ownership, degrades the canonicalized mapping
+   to approximated, and rejects malformed/no-op/colliding/unreferenced identities plus unsupported-
+   feature ownership. Focused E2E separately proves construction-stage reference cascade and C++
+   revalidation while leaving stage-bearing linear execution outside the current projection. The
+   installed static/shared CPU path proves frame recovery type `[1]`, offsets `[0,12]`, active DOFs
+   `[6,7,8,9,10,11]`, active load `[200000,0,0,0,0,0]`, fallback 0 and byte-identical initialized
+   checkpoint/restart, then emits an append-only v82 receipt binding the edited ModelIR,
+   edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
    The receipt checker continues to accept frozen v1 through v68 receipts, including frozen v1 through v67 receipts, including frozen v1 through v66 receipts, including frozen v1 through v65 receipts, including frozen v1 through v64 receipts, including frozen v1 through v63 receipts, including frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
@@ -716,7 +725,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    restart authority; and no pre-v81 receipt is typed-reference-cascading linear-load-combination
    identity replacement, conservative direct-combination mapping degradation, unchanged target and
    downstream expansion, exact parent-combination execution, typed frame-plus-truss recovery and
-   restart authority.
+   restart authority; and no pre-v82 receipt is typed-reference-cascading element identity
+   replacement, conservative direct-element mapping degradation, exact normalized-MGT load,
+   typed frame recovery and restart authority.
 
 The reference command is:
 
