@@ -117,6 +117,11 @@ pattern term from any position in a neutral, extension-free, unreferenced three-
 direct combination. It preserves every retained factor and relative order, rejects nested, owned,
 missing and two-term sources, and publishes only after strict Rust plus C++ revalidation. See
 `docs/native/modelir-direct-linear-load-combination-term-delete-v1.md`.
+The bounded `model-reorder-linear-load-combination-term` surface moves one existing pattern term
+to a distinct final index in a neutral, extension-free, unreferenced two-through-64-term direct
+combination. It preserves every reference, factor and unrelated row and publishes only after
+strict Rust plus C++ validation. See
+`docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md`.
 The separate bounded `model-edit-nested-linear-load-combination-factor` surface selects one root
 term by explicit reference kind and identity. It preserves root references/order/count and every
 descendant, requires the source and edited graphs to remain within depth eight and 64 expanded
@@ -153,6 +158,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-term-add-v1.md` and
+`docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md` and

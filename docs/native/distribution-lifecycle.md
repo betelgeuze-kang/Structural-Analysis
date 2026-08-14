@@ -405,7 +405,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    initialized checkpoint/restart output, then emits an append-only v57 receipt binding the edited
    ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and
    ReportIR.
-   The receipt checker continues to accept frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
+73. moves direct term `0.25 LC_AXIAL` from index one to final index zero in the retained neutral
+   direct combination, preserves every reference and factor, changes only declaration order,
+   rejects no-op, out-of-range and missing-pattern requests, proves exact retained active load
+   `[25000,-12000,0,0,0,0]`, typed recovery, fallback 0 and byte-identical initialized
+   checkpoint/restart output, then emits an append-only v58 receipt binding the edited ModelIR,
+   edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
+   The receipt checker continues to accept frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -470,7 +476,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    binding, direct-degradation rejection, exact active-load, typed recovery and restart authority;
    and no pre-v57 receipt is installed bounded nested linear-load-combination typed-root-term
    reorder, source/target-index and source/edited expansion-order binding, exact retained active-load,
-   typed recovery and restart authority.
+   typed recovery and restart authority; and no pre-v58 receipt is installed bounded direct
+   linear-load-combination term reorder, source/target-index and order-only term binding, exact
+   retained active-load, typed recovery and restart authority.
 
 The reference command is:
 

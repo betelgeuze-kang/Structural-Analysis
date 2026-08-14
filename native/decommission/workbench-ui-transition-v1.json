@@ -423,6 +423,12 @@
       "removal_blocker": false
     },
     {
+      "feature": "bounded_cpp_revalidated_direct_linear_load_combination_term_reorder",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
       "feature": "bounded_cpp_revalidated_nested_linear_load_combination_term_add",
       "native_status": "c5_implemented",
       "legacy_status": "partial",

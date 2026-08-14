@@ -4848,6 +4848,144 @@ exercise_nested_linear_load_combination_term_reorder_surface() {
 }
 exercise_nested_linear_load_combination_term_reorder_surface
 
+exercise_direct_linear_load_combination_term_reorder_surface() {
+  local source_model="$e2e_root/direct-linear-load-combination-term-delete-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/direct-linear-load-combination-term-reorder-$label"
+    request_directory="$e2e_root/direct-linear-load-combination-term-reorder-$label-request"
+    direct_directory="$e2e_root/direct-linear-load-combination-term-reorder-$label-direct"
+    partial_directory="$e2e_root/direct-linear-load-combination-term-reorder-$label-partial"
+    resumed_directory="$e2e_root/direct-linear-load-combination-term-reorder-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-reorder-linear-load-combination-term "$source_model" \
+      --load-combination COMBO_SERVICE --load-pattern LC_AXIAL \
+      --to-index 0 --output-dir "$edit_directory" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label.stdout.json"
+    grep -Fq '"operation":"direct_linear_load_combination_term_reorder"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"editing_profile":"unique_direct_linear_static_patterns_2_to_64"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"load_combination_id":"COMBO_SERVICE"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_AXIAL"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"factor":0.25' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_term_index":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"target_term_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"term_count":2' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_terms":[{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"},{"factor":0.25,"ref_id":"LC_AXIAL","ref_kind":"load_pattern"}]' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_terms":[{"factor":0.25,"ref_id":"LC_AXIAL","ref_kind":"load_pattern"},{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"}]' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-reorder-direct-linear-load-combination-term.v1"' \
+      "$edit_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case direct-linear-load-combination-term-reorder-c5 \
+      --load-combination COMBO_SERVICE \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label-request.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-combination-request-create-receipt.v1"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"load_combination_id":"COMBO_SERVICE"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"combination_terms":[{"factor":0.25,"ref_id":"LC_AXIAL","ref_kind":"load_pattern"},{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"}]' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_SERVICE"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[25000,-12000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/direct-linear-load-combination-term-reorder-first$suffix" \
+      "$e2e_root/direct-linear-load-combination-term-reorder-second$suffix" \
+      > "$e2e_root/direct-linear-load-combination-term-reorder$suffix-diff.txt"
+  done
+  cmp "$e2e_root/direct-linear-load-combination-term-reorder-first.stdout.json" \
+    "$e2e_root/direct-linear-load-combination-term-reorder-second.stdout.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/direct-linear-load-combination-term-reorder-first-$suffix.stdout.json" \
+      "$e2e_root/direct-linear-load-combination-term-reorder-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed direct load-combination term reorder mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local no_op_destination="$e2e_root/direct-linear-load-combination-term-reorder-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-linear-load-combination-term "$source_model" \
+    --load-combination COMBO_SERVICE --load-pattern LC_AXIAL \
+    --to-index 1 --output-dir "$no_op_destination" \
+    > "$e2e_root/direct-linear-load-combination-term-reorder-no-op-rejected.stdout.json"; then
+    echo "installed direct load-combination term reorder accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/direct-linear-load-combination-term-reorder-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local range_destination="$e2e_root/direct-linear-load-combination-term-reorder-range-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-linear-load-combination-term "$source_model" \
+    --load-combination COMBO_SERVICE --load-pattern LC_AXIAL \
+    --to-index 2 --output-dir "$range_destination" \
+    > "$e2e_root/direct-linear-load-combination-term-reorder-range-rejected.stdout.json"; then
+    echo "installed direct load-combination term reorder accepted an out-of-range target" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_reorder_direct_linear_load_combination_term_target_index_invalid' \
+    "$e2e_root/direct-linear-load-combination-term-reorder-range-rejected.stdout.json"
+  test ! -e "$range_destination"
+
+  local missing_destination="$e2e_root/direct-linear-load-combination-term-reorder-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-linear-load-combination-term "$source_model" \
+    --load-combination COMBO_SERVICE --load-pattern LC_MISSING \
+    --to-index 0 --output-dir "$missing_destination" \
+    > "$e2e_root/direct-linear-load-combination-term-reorder-missing-rejected.stdout.json"; then
+    echo "installed direct load-combination term reorder accepted a missing pattern" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_reorder_direct_linear_load_combination_term_pattern_missing' \
+    "$e2e_root/direct-linear-load-combination-term-reorder-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+}
+exercise_direct_linear_load_combination_term_reorder_surface
+
 exercise_nested_linear_load_combination_reference_edit_surface() {
   local base_model="$e2e_root/linear-load-combination-add-first/model-ir.json"
   local alternate_directory="$e2e_root/nested-linear-load-combination-reference-edit-alternate-source"
@@ -5816,6 +5954,15 @@ nested_linear_load_combination_term_reorder_checkpoint_hash="$(sha256sum "$e2e_r
 nested_linear_load_combination_term_reorder_result_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-term-reorder-first-direct/result-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_term_reorder_recovery_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-term-reorder-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_term_reorder_report_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-term-reorder-first-direct/report-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_model_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first/model-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first/edit-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_request_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-request/request-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_request_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-request/analysis-request.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_assembly_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-direct/assembly-receipt.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_checkpoint_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_result_ir_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-direct/result-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_recovery_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+direct_linear_load_combination_term_reorder_report_ir_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-term-reorder-first-direct/report-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_reference_edit_model_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-reference-edit-first/model-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_reference_edit_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-reference-edit-first/edit-receipt.json" | awk '{print $1}')"
 nested_linear_load_combination_reference_edit_request_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-reference-edit-first-request/request-receipt.json" | awk '{print $1}')"
@@ -6058,6 +6205,10 @@ v57_receipt_json="${v56_receipt_json/structural-native-distribution-e2e.v56/stru
 nested_linear_load_combination_term_reorder_receipt_fields="\"workbench_nested_linear_load_combination_term_reorder_surface_passed\":true,\"workbench_nested_linear_load_combination_term_reorder_model_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_model_hash\",\"workbench_nested_linear_load_combination_term_reorder_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_receipt_hash\",\"workbench_nested_linear_load_combination_term_reorder_request_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_request_receipt_hash\",\"workbench_nested_linear_load_combination_term_reorder_request_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_request_hash\",\"workbench_nested_linear_load_combination_term_reorder_assembly_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_assembly_receipt_hash\",\"workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_checkpoint_hash\",\"workbench_nested_linear_load_combination_term_reorder_result_ir_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_result_ir_hash\",\"workbench_nested_linear_load_combination_term_reorder_recovery_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_recovery_hash\",\"workbench_nested_linear_load_combination_term_reorder_report_ir_sha256\":\"sha256:$nested_linear_load_combination_term_reorder_report_ir_hash\",\"workbench_nested_linear_load_combination_term_reorder_restart_passed\":true,"
 v57_receipt_json="${v57_receipt_json/\"workbench_result_view_surface_passed\":true,/${nested_linear_load_combination_term_reorder_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v57_receipt_json" > "$temporary_receipt"
+v58_receipt_json="${v57_receipt_json/structural-native-distribution-e2e.v57/structural-native-distribution-e2e.v58}"
+direct_linear_load_combination_term_reorder_receipt_fields="\"workbench_direct_linear_load_combination_term_reorder_surface_passed\":true,\"workbench_direct_linear_load_combination_term_reorder_model_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_model_hash\",\"workbench_direct_linear_load_combination_term_reorder_receipt_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_receipt_hash\",\"workbench_direct_linear_load_combination_term_reorder_request_receipt_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_request_receipt_hash\",\"workbench_direct_linear_load_combination_term_reorder_request_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_request_hash\",\"workbench_direct_linear_load_combination_term_reorder_assembly_receipt_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_assembly_receipt_hash\",\"workbench_direct_linear_load_combination_term_reorder_checkpoint_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_checkpoint_hash\",\"workbench_direct_linear_load_combination_term_reorder_result_ir_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_result_ir_hash\",\"workbench_direct_linear_load_combination_term_reorder_recovery_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_recovery_hash\",\"workbench_direct_linear_load_combination_term_reorder_report_ir_sha256\":\"sha256:$direct_linear_load_combination_term_reorder_report_ir_hash\",\"workbench_direct_linear_load_combination_term_reorder_restart_passed\":true,"
+v58_receipt_json="${v58_receipt_json/\"workbench_result_view_surface_passed\":true,/${direct_linear_load_combination_term_reorder_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v58_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

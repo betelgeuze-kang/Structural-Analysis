@@ -534,6 +534,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_direct_linear_load_combination_term_delete_recovery_sha256",
         "workbench_direct_linear_load_combination_term_delete_report_ir_sha256",
         "workbench_direct_linear_load_combination_term_delete_restart_passed",
+        "exercise_direct_linear_load_combination_term_reorder_surface",
+        "model-reorder-linear-load-combination-term",
+        "structural-native:model-reorder-direct-linear-load-combination-term.v1",
+        "workbench_direct_linear_load_combination_term_reorder_surface_passed",
+        "workbench_direct_linear_load_combination_term_reorder_model_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_request_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_request_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_assembly_receipt_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_checkpoint_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_result_ir_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_recovery_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256",
+        "workbench_direct_linear_load_combination_term_reorder_restart_passed",
         "exercise_nested_linear_load_combination_term_add_surface",
         "model-add-nested-linear-load-combination-term",
         "structural-native:model-add-nested-linear-load-combination-term.v1",
@@ -1510,6 +1524,28 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    direct_linear_load_combination_term_reorder_doc = _text(
+        root,
+        Path("docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md"),
+        text=direct_linear_load_combination_term_reorder_doc,
+        tokens=(
+            "model-reorder-linear-load-combination-term",
+            "two through 64",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-reorder-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_reorder",
+            "append-only v58",
+            "[25000,-12000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
     nested_linear_load_combination_term_add_doc = _text(
         root,
         Path("docs/native/modelir-nested-linear-load-combination-term-add-v1.md"),
@@ -1889,6 +1925,45 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in direct_linear_load_combination_term_delete_claim:
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_delete_capability_"
+                    f"claim_missing:{token}"
+                )
+    direct_linear_load_combination_term_reorder_capability = (
+        capabilities.get("modelir_direct_linear_load_combination_term_reorder")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(direct_linear_load_combination_term_reorder_capability, dict):
+        blockers.append(
+            "modelir_direct_linear_load_combination_term_reorder_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if direct_linear_load_combination_term_reorder_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_direct_linear_load_combination_term_reorder_capability_"
+                    f"field_invalid:{field}"
+                )
+        direct_linear_load_combination_term_reorder_claim = str(
+            direct_linear_load_combination_term_reorder_capability.get("claim", "")
+        )
+        for token in (
+            "moves exactly one existing load_pattern term selected by identity",
+            "two through 64 ordered unique existing linear_static pattern terms",
+            "distinct final zero-based index",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v58 E2E",
+            "exact retained active load [25000,-12000,0,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in direct_linear_load_combination_term_reorder_claim:
+                blockers.append(
+                    "modelir_direct_linear_load_combination_term_reorder_capability_"
                     f"claim_missing:{token}"
                 )
     nested_linear_load_combination_term_add_capability = (

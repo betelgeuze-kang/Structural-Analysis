@@ -177,15 +177,24 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   order, rejects nested/owned/duplicate/64-term inputs, then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v53 proves exact active load
   `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Arbitrary-position or nested insertion, reorder, downstream-referenced editing, HIP
+  output. Direct term reorder is a separate bounded surface; arbitrary-position or nested
+  insertion, downstream-referenced editing, HIP
   parity and engineering acceptance remain open.
 - `model-delete-linear-load-combination-term`: deterministic removal of one existing pattern term
   from any position in a neutral, extension-free, unreferenced three-through-64-term direct
   combination. Rust preserves each retained factor and relative order, rejects nested/owned,
   missing and two-term inputs, then strictly reparses and C++-revalidates before create-new
   publication. Installed E2E v54 proves exact active load `[25000,-12000,0,0,0,0]`, typed
-  recovery, fallback 0 and byte-identical checkpoint/restart output. Reorder, nested term removal,
+  recovery, fallback 0 and byte-identical checkpoint/restart output. Direct term reorder is a
+  separate bounded surface; nested term removal,
   downstream-referenced editing, HIP parity and engineering acceptance remain open.
+- `model-reorder-linear-load-combination-term`: deterministic movement of one existing pattern
+  term to a distinct final index in a neutral, extension-free, unreferenced two-through-64-term
+  direct combination. Rust preserves every reference and factor while changing declaration order
+  only, then strictly reparses and C++-revalidates before create-new publication. Installed E2E
+  v58 proves exact retained active load `[25000,-12000,0,0,0,0]`, typed recovery, fallback 0 and
+  byte-identical checkpoint/restart output. Bulk permutation, nested or downstream-referenced
+  mutation, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination-term`: deterministic append of one existing compatible
   typed reference and finite nonzero factor to a neutral, extension-free, unreferenced
   two-through-63-term nested root. Rust preserves every existing root term and descendant; both
@@ -216,7 +225,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   strictly reparses and C++-revalidates before create-new publication. Installed E2E v49 proves
   exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
   checkpoint/restart output. Reference replacement and bounded append-only term addition are
-  separate; reorder, nested or downstream-referenced editing, HIP parity and engineering
+  separate; direct term reorder is a separate bounded surface, while nested or
+  downstream-referenced editing, HIP parity and engineering
   acceptance remain open.
 - `model-edit-linear-load-combination-reference`: deterministic replacement of exactly one existing
   pattern identity in a neutral, extension-free and unreferenced two-through-64-term direct

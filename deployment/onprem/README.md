@@ -48,6 +48,10 @@ absent from the runtime image.
   in a neutral, extension-free, unreferenced three-through-64-term direct combination while
   preserving every retained factor and relative order; installed v54 E2E proves exact active
   load, restart parity and fallback 0.
+  `model-reorder-linear-load-combination-term` moves one existing pattern term to a distinct final
+  index in a neutral, extension-free, unreferenced two-through-64-term direct combination while
+  preserving all references and factors; installed v58 E2E proves order-only mutation, exact
+  retained load, restart parity and fallback 0.
   `model-add-nested-linear-load-combination-term` appends one compatible typed reference and finite
   nonzero factor to a neutral, extension-free, unreferenced two-through-63-term nested root while
   preserving every existing root term and descendant; installed v55 E2E proves bounded repeated-

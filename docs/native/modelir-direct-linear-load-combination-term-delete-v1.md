@@ -35,7 +35,7 @@ checkpoint/restart results. Installed CPU static/shared distribution E2E extends
 append-only v54 hashes for the edited ModelIR, edit receipt, request receipt, analysis request,
 assembly receipt, checkpoint, ResultIR, recovery and ReportIR.
 
-This is not general combination editing. Factor/reference editing and append-only direct term
-addition are separate bounded surfaces. Reordering, nested term insertion or removal,
+This is not general combination editing. Factor/reference editing, append-only direct term
+addition and direct term reordering are separate bounded surfaces. Nested term insertion or removal,
 downstream-referenced editing, source-owned writeback, general solver selection, visual editing,
 approved HIP C2, engineering acceptance and C6 remain open.

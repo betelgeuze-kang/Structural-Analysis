@@ -927,6 +927,27 @@ fn run_direct_linear_load_combination_term_delete(
     ])
 }
 
+fn run_direct_linear_load_combination_term_reorder(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    load_pattern_id: &str,
+    target_index: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-reorder-linear-load-combination-term"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--to-index"),
+        text(target_index),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_nested_linear_load_combination_add(
     source: &Path,
     destination: &Path,
@@ -6392,6 +6413,229 @@ fn direct_linear_load_combination_term_delete_executes_and_restarts_without_fall
     assert!(String::from_utf8_lossy(&rejected.stdout)
         .contains("workbench_model_delete_direct_linear_load_combination_term_count_invalid"));
     assert!(!minimum.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn direct_linear_load_combination_term_reorder_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base = temporary.0.join("term-reorder-base");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &base,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let appended = temporary.0.join("term-reorder-appended");
+    assert_success(&run_direct_linear_load_combination_term_add(
+        &base.join("model-ir.json"),
+        &appended,
+        "COMBO_SERVICE",
+        "LC_AXIAL",
+        "0.25",
+    ));
+    let reduced = temporary.0.join("term-reorder-source");
+    assert_success(&run_direct_linear_load_combination_term_delete(
+        &appended.join("model-ir.json"),
+        &reduced,
+        "COMBO_SERVICE",
+        "LC_STRONG",
+    ));
+    let reduced_path = reduced.join("model-ir.json");
+    let reduced_bytes = std::fs::read(&reduced_path).expect("direct term-reorder source");
+    let source_document =
+        parse_model_ir_v2(&reduced_bytes).expect("strict direct term-reorder source");
+    assert_eq!(
+        source_document.value()["load_combinations"][0]["terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+        ])
+    );
+
+    let first = temporary.0.join("term-reorder-first");
+    let second = temporary.0.join("term-reorder-second");
+    for destination in [&first, &second] {
+        let output = run_direct_linear_load_combination_term_reorder(
+            &reduced_path,
+            destination,
+            "COMBO_SERVICE",
+            "LC_AXIAL",
+            "0",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("direct term-reorder receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first direct term-reorder artifact"),
+            std::fs::read(second.join(artifact)).expect("second direct term-reorder artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&reduced_path).expect("unchanged direct term-reorder source"),
+        reduced_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("direct term-reordered ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict direct term-reordered ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated direct term reorder");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][0]["terms"],
+        serde_json::json!([
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["id"],
+        source_document.value()["load_combinations"][0]["id"]
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["index"],
+        source_document.value()["load_combinations"][0]["index"]
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["combination_type"],
+        source_document.value()["load_combinations"][0]["combination_type"]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-reorder-direct-linear-load-combination-term.v1")
+        .expect("direct term-reorder provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "direct_linear_load_combination_term_reorder"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_eq!(extension["load_combination_index"], 0);
+    assert_eq!(extension["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(extension["factor"], 0.25);
+    assert_eq!(extension["source_term_index"], 1);
+    assert_eq!(extension["target_term_index"], 0);
+    assert_eq!(extension["term_count"], 2);
+    assert_eq!(
+        extension["source_terms"],
+        source_document.value()["load_combinations"][0]["terms"]
+    );
+    assert_eq!(
+        extension["edited_terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("direct term-reorder receipt"),
+    )
+    .expect("direct term-reorder receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "direct_linear_load_combination_term_reorder"
+    );
+    assert_eq!(edit_receipt["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(edit_receipt["factor"], 0.25);
+    assert_eq!(edit_receipt["source_term_index"], 1);
+    assert_eq!(edit_receipt["target_term_index"], 0);
+    assert_eq!(edit_receipt["term_count"], 2);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("term-reorder-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "term-reorder-c5",
+        "COMBO_SERVICE",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("direct term-reorder request");
+    let request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("direct term-reorder request receipt"),
+    )
+    .expect("direct term-reorder request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-combination-request-create-receipt.v1"
+    );
+    assert_eq!(
+        request_receipt["combination_terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct term-reordered CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct term-reorder recovery"),
+    )
+    .expect("direct term-reorder recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_SERVICE");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -12000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("direct term-reorder initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("direct term-reorder resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (label, pattern, target_index, expected_code) in [
+        ("no-op", "LC_AXIAL", "1", "workbench_model_edit_no_change"),
+        (
+            "out-of-range",
+            "LC_AXIAL",
+            "2",
+            "workbench_model_reorder_direct_linear_load_combination_term_target_index_invalid",
+        ),
+        (
+            "missing",
+            "LC_MISSING",
+            "0",
+            "workbench_model_reorder_direct_linear_load_combination_term_pattern_missing",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("term-reorder-{label}-rejected"));
+        let rejected = run_direct_linear_load_combination_term_reorder(
+            &reduced_path,
+            &destination,
+            "COMBO_SERVICE",
+            pattern,
+            target_index,
+        );
+        assert!(!rejected.status.success(), "accepted {label} reorder");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "unexpected {label} error: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
 }
 
 #[test]
