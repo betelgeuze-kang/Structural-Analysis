@@ -385,7 +385,14 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    byte-identical initialized checkpoint/restart output, then emits an append-only v54 receipt
    binding the source ModelIR, edited ModelIR, edit/request/assembly receipts, analysis request,
    checkpoint, ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v53 receipts, including frozen v1 through v52 receipts
+70. appends explicit `0.1 LC_STRONG` to neutral unreferenced nested root
+   `0.5 COMBO_BASE + 0.25 LC_AXIAL`, preserves its existing typed root terms and every descendant,
+   consolidates the repeated expanded pattern deterministically, proves exact active load
+   `[25000,-6000,1500,0,0,0]`, typed recovery, duplicate/missing-reference rejection, fallback 0
+   and byte-identical initialized checkpoint/restart output, then emits an append-only v55 receipt
+   binding the source ModelIR, edited ModelIR, edit/request/assembly receipts, analysis request,
+   checkpoint, ResultIR, recovery and ReportIR.
+   The receipt checker continues to accept frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -442,7 +449,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    and no pre-v53 receipt is installed bounded direct linear-load-combination append-only
    term-addition, exact active-load, typed recovery and restart authority; and no pre-v54 receipt
    is installed bounded direct linear-load-combination single-term deletion with retained
-   factor/order, exact active-load, typed recovery and restart authority.
+   factor/order, exact active-load, typed recovery and restart authority; and no pre-v55 receipt is
+   installed bounded nested linear-load-combination append-only typed-root-term addition,
+   source/edited expansion binding, repeated-pattern consolidation, exact active-load, typed
+   recovery and restart authority.
 
 The reference command is:
 

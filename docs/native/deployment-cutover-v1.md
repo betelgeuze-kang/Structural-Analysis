@@ -54,6 +54,11 @@ term from any position in a neutral, extension-free and unreferenced three-throu
 combination. It preserves every retained factor and relative order, fails closed on
 missing/two-term/nested/owned inputs, and C++-revalidates the edited graph before create-new
 publication.
+The installed `model-add-nested-linear-load-combination-term` command appends one compatible typed
+reference and finite nonzero factor to a neutral, extension-free and unreferenced
+two-through-63-term nested root. It preserves every existing root term and descendant, requires
+source and edited graphs to remain acyclic within root-inclusive depth eight and 64 expanded leaf
+contributions, and C++-revalidates both snapshots before create-new publication.
 The installed `model-add-linear-load-combination-term` command appends one unique existing
 linear-static pattern with a finite nonzero factor to the final index of a neutral, extension-free,
 unreferenced two-through-63-term direct combination. It preserves every existing reference,
@@ -109,7 +114,10 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v54 proves repeated edited/request/artifact bytes and retains
+assembly preflight. Distribution E2E v55 proves repeated edited/request/artifact bytes and retains
+all Distribution E2E v54 assertions, including append-only typed nested-root term addition,
+repeated-pattern consolidation and exact active load `[25000,-6000,1500,0,0,0]` through
+`model-add-nested-linear-load-combination-term`. Distribution E2E v54 retains
 all Distribution E2E v53 assertions, including exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added

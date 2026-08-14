@@ -1099,6 +1099,36 @@ def valid_v54_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v55_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v54_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v55",
+            "workbench_nested_linear_load_combination_term_add_surface_passed": True,
+            "workbench_nested_linear_load_combination_term_add_model_sha256": "sha256:"
+            + "0" * 64,
+            "workbench_nested_linear_load_combination_term_add_receipt_sha256": "sha256:"
+            + "1" * 64,
+            "workbench_nested_linear_load_combination_term_add_request_receipt_sha256": "sha256:"
+            + "2" * 64,
+            "workbench_nested_linear_load_combination_term_add_request_sha256": "sha256:"
+            + "3" * 64,
+            "workbench_nested_linear_load_combination_term_add_assembly_receipt_sha256": "sha256:"
+            + "4" * 64,
+            "workbench_nested_linear_load_combination_term_add_checkpoint_sha256": "sha256:"
+            + "5" * 64,
+            "workbench_nested_linear_load_combination_term_add_result_ir_sha256": "sha256:"
+            + "6" * 64,
+            "workbench_nested_linear_load_combination_term_add_recovery_sha256": "sha256:"
+            + "7" * 64,
+            "workbench_nested_linear_load_combination_term_add_report_ir_sha256": "sha256:"
+            + "8" * 64,
+            "workbench_nested_linear_load_combination_term_add_restart_passed": True,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -2667,6 +2697,38 @@ def test_distribution_receipt_rejects_unbound_v54_direct_term_delete(
     )
 
 
+def test_distribution_receipt_accepts_nested_linear_load_combination_term_add_v55_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v55_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v55_nested_term_add(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v55_contract()
+    receipt["workbench_nested_linear_load_combination_term_add_restart_passed"] = False
+    receipt[
+        "workbench_nested_linear_load_combination_term_add_recovery_sha256"
+    ] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_nested_linear_load_combination_term_add_restart_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_nested_linear_load_combination_term_add_recovery_sha256" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -2774,6 +2836,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v52" in e2e
     assert "structural-native-distribution-e2e.v53" in e2e
     assert "structural-native-distribution-e2e.v54" in e2e
+    assert "structural-native-distribution-e2e.v55" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
     assert "workbench_model_linear_request_create_surface_passed" in e2e
@@ -3263,6 +3326,26 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_direct_linear_load_combination_term_delete_recovery_sha256" in e2e
     assert "workbench_direct_linear_load_combination_term_delete_report_ir_sha256" in e2e
     assert "workbench_direct_linear_load_combination_term_delete_restart_passed" in e2e
+    assert "exercise_nested_linear_load_combination_term_add_surface" in e2e
+    assert "model-add-nested-linear-load-combination-term" in e2e
+    assert "structural-native:model-add-nested-linear-load-combination-term.v1" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_surface_passed" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_model_sha256" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_receipt_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_add_request_receipt_sha256"
+        in e2e
+    )
+    assert "workbench_nested_linear_load_combination_term_add_request_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_add_assembly_receipt_sha256"
+        in e2e
+    )
+    assert "workbench_nested_linear_load_combination_term_add_checkpoint_sha256" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_result_ir_sha256" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_recovery_sha256" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_report_ir_sha256" in e2e
+    assert "workbench_nested_linear_load_combination_term_add_restart_passed" in e2e
     assert "exercise_linear_load_combination_delete_surface" in e2e
     assert "model-delete-linear-load-combination" in e2e
     assert "workbench_linear_load_combination_delete_surface_passed" in e2e

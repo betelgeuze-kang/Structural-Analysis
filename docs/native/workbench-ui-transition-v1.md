@@ -186,6 +186,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   publication. Installed E2E v54 proves exact active load `[25000,-12000,0,0,0,0]`, typed
   recovery, fallback 0 and byte-identical checkpoint/restart output. Reorder, nested term removal,
   downstream-referenced editing, HIP parity and engineering acceptance remain open.
+- `model-add-nested-linear-load-combination-term`: deterministic append of one existing compatible
+  typed reference and finite nonzero factor to a neutral, extension-free, unreferenced
+  two-through-63-term nested root. Rust preserves every existing root term and descendant; both
+  source and edited graphs must remain acyclic, root-inclusive depth-eight/64-leaf bounded and
+  C++ valid. Installed E2E v55 proves repeated-pattern consolidation, exact active load
+  `[25000,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+  output. Root-term removal/reorder, arbitrary-position insertion, descendant or downstream-root
+  mutation, HIP parity and engineering acceptance remain open.
 - `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
   in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
   preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then
@@ -209,7 +217,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   missing/incompatible/duplicate, cyclic and direct-degrading replacements; then strictly reparses
   and C++-revalidates before create-new publication. Installed E2E v52 proves exact active load
   `[0,-8000,2000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
-  Factor editing remains separate; root insertion/removal/reorder, descendant or downstream-root
+  Factor editing and bounded append-only root-term addition remain separate; root removal/reorder,
+  arbitrary-position insertion, descendant or downstream-root
   mutation, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
   `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at

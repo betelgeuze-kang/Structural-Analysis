@@ -127,6 +127,11 @@ reference while preserving its factor, root order/count and every descendant row
 graphs must both remain nested, acyclic, depth-eight/64-leaf bounded and C++ valid; duplicate,
 missing, cyclic and direct-degrading replacements fail closed. See
 `docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md`.
+The bounded `model-add-nested-linear-load-combination-term` surface appends one existing compatible
+typed reference and finite nonzero factor to a neutral, extension-free, unreferenced
+two-through-63-term nested root. It preserves every existing root term and descendant, and both
+source and edited graphs must remain acyclic, depth-eight/64-leaf bounded and C++ valid. See
+`docs/native/modelir-nested-linear-load-combination-term-add-v1.md`.
 The bounded `--load-combination` request surface uses the frozen v1
 selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
@@ -333,6 +338,10 @@ structural-workbench model-edit-nested-linear-load-combination-reference \
   --load-combination COMBO_NESTED --ref-kind load_pattern --ref-id LC_AXIAL \
   --replacement-ref-kind load_combination --replacement-ref-id COMBO_ALTERNATE \
   --output-dir REFERENCE-EDITED-NESTED-COMBINATION-MODEL
+structural-workbench model-add-nested-linear-load-combination-term \
+  ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_NESTED --ref-kind load_pattern --ref-id LC_STRONG \
+  --factor 0.1 --output-dir TERM-EXTENDED-NESTED-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination \
   ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_NESTED \

@@ -212,10 +212,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-linear-load-combination",
             "model-add-linear-load-combination-term",
             "model-delete-linear-load-combination-term",
+            "model-add-nested-linear-load-combination-term",
             "model-edit-linear-load-combination-factor",
             "model-edit-linear-load-combination-reference",
             "model-edit-nested-linear-load-combination-factor",
             "model-edit-nested-linear-load-combination-reference",
+            "installed v55 E2E",
             "installed v54 E2E",
             "installed v53 E2E",
             "installed v52 E2E",
@@ -241,6 +243,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v55",
+            "model-add-nested-linear-load-combination-term",
+            "[25000,-6000,1500,0,0,0]",
             "Distribution E2E v54",
             "model-delete-linear-load-combination-term",
             "[25000,-12000,0,0,0,0]",
@@ -384,6 +389,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v52",
         "structural-native-distribution-e2e.v53",
         "structural-native-distribution-e2e.v54",
+        "structural-native-distribution-e2e.v55",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -517,6 +523,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_direct_linear_load_combination_term_delete_recovery_sha256",
         "workbench_direct_linear_load_combination_term_delete_report_ir_sha256",
         "workbench_direct_linear_load_combination_term_delete_restart_passed",
+        "exercise_nested_linear_load_combination_term_add_surface",
+        "model-add-nested-linear-load-combination-term",
+        "structural-native:model-add-nested-linear-load-combination-term.v1",
+        "workbench_nested_linear_load_combination_term_add_surface_passed",
+        "workbench_nested_linear_load_combination_term_add_model_sha256",
+        "workbench_nested_linear_load_combination_term_add_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_add_request_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_add_request_sha256",
+        "workbench_nested_linear_load_combination_term_add_assembly_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_add_checkpoint_sha256",
+        "workbench_nested_linear_load_combination_term_add_result_ir_sha256",
+        "workbench_nested_linear_load_combination_term_add_recovery_sha256",
+        "workbench_nested_linear_load_combination_term_add_report_ir_sha256",
+        "workbench_nested_linear_load_combination_term_add_restart_passed",
         "exercise_nested_linear_load_combination_surface",
         "model-add-nested-linear-load-combination",
         "structural-native-model-linear-nested-combination-request-create-receipt.v3",
@@ -791,6 +811,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v55",
+            "V55_NESTED_LINEAR_LOAD_COMBINATION_TERM_ADD_KEYS",
+            "workbench_nested_linear_load_combination_term_add_surface_passed",
+            "workbench_nested_linear_load_combination_term_add_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_add_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_add_recovery_sha256",
+            "workbench_nested_linear_load_combination_term_add_restart_passed",
             "structural-native-distribution-e2e.v54",
             "V54_DIRECT_LINEAR_LOAD_COMBINATION_TERM_DELETE_KEYS",
             "workbench_direct_linear_load_combination_term_delete_surface_passed",
@@ -918,6 +945,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v55 receipt",
+            "frozen v1 through v54 receipts",
+            "no pre-v55 receipt",
             "append-only v54 receipt",
             "frozen v1 through v53 receipts",
             "no pre-v54 receipt",
@@ -1421,6 +1451,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    nested_linear_load_combination_term_add_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-term-add-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-term-add-v1.md"
+        ),
+        text=nested_linear_load_combination_term_add_doc,
+        tokens=(
+            "model-add-nested-linear-load-combination-term",
+            "two through 63",
+            "root-inclusive depth at most eight",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-add-nested-linear-load-combination-term.v1",
+            "nested_linear_load_combination_term_add",
+            "append-only v55",
+            "[25000,-6000,1500,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
 
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
@@ -1725,6 +1780,47 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in direct_linear_load_combination_term_delete_claim:
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_delete_capability_"
+                    f"claim_missing:{token}"
+                )
+    nested_linear_load_combination_term_add_capability = (
+        capabilities.get("modelir_nested_linear_load_combination_term_add")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(nested_linear_load_combination_term_add_capability, dict):
+        blockers.append(
+            "modelir_nested_linear_load_combination_term_add_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if nested_linear_load_combination_term_add_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_add_capability_"
+                    f"field_invalid:{field}"
+                )
+        nested_linear_load_combination_term_add_claim = str(
+            nested_linear_load_combination_term_add_capability.get("claim", "")
+        )
+        for token in (
+            "appends exactly one new explicitly typed load_pattern or load_combination term",
+            "two through 63 ordered unique typed terms",
+            "yielding three through 64 root terms",
+            "root-inclusive depth at most eight",
+            "at most 64 expanded leaf contributions",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v55 E2E",
+            "exact active load [25000,-6000,1500,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nested_linear_load_combination_term_add_claim:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_add_capability_"
                     f"claim_missing:{token}"
                 )
     direct_linear_load_combination_deletion_capability = (

@@ -501,6 +501,29 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in nested_combination["claim"]
     assert (
         capabilities.capability_is_enabled(
+            payload, "modelir_nested_linear_load_combination_term_add"
+        )
+        is True
+    )
+    nested_combination_term_add = payload["capabilities"][
+        "modelir_nested_linear_load_combination_term_add"
+    ]
+    assert nested_combination_term_add["cutover_gate"] == "C5"
+    assert nested_combination_term_add["owner"] == "structural-workbench"
+    assert "appends exactly one new explicitly typed" in nested_combination_term_add["claim"]
+    assert "two through 63 ordered unique typed terms" in nested_combination_term_add["claim"]
+    assert "yielding three through 64 root terms" in nested_combination_term_add["claim"]
+    assert "root-inclusive depth at most eight" in nested_combination_term_add["claim"]
+    assert "both complete expansions" in nested_combination_term_add["claim"]
+    assert "single C ABI into C++" in nested_combination_term_add["claim"]
+    assert "distribution v55 E2E" in nested_combination_term_add["claim"]
+    assert "[25000,-6000,1500,0,0,0]" in nested_combination_term_add["claim"]
+    assert "byte-identical direct/restart output" in nested_combination_term_add["claim"]
+    assert "fallback 0" in nested_combination_term_add["claim"]
+    assert "approved HIP C2" in nested_combination_term_add["claim"]
+    assert "C6" in nested_combination_term_add["claim"]
+    assert (
+        capabilities.capability_is_enabled(
             payload, "modelir_nested_linear_load_combination_factor_edit"
         )
         is True
