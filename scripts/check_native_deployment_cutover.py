@@ -50,6 +50,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss-section-deletion-v1.md"),
+    Path("docs/native/modelir-node-add-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
@@ -183,6 +184,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "no listener, exposed port, secret, or network namespace",
             "structural-installer",
             "model-edit-node",
+            "model-add-node",
             "model-edit-nodal-load",
             "model-edit-constraint-value",
             "model-edit-linear-material",
@@ -329,7 +331,16 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v39",
+        "structural-native-distribution-e2e.v40",
+        "exercise_node_add_surface",
+        "model-add-node",
+        "workbench_node_add_surface_passed",
+        "workbench_node_add_model_sha256",
+        "workbench_node_add_receipt_sha256",
+        "workbench_node_add_composed_model_sha256",
+        "workbench_node_add_request_sha256",
+        "workbench_node_add_result_ir_sha256",
+        "workbench_node_add_recovery_sha256",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -557,6 +568,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v40",
+            "V40_NODE_ADD_KEYS",
+            "workbench_node_add_surface_passed",
+            "workbench_node_add_recovery_sha256",
             "structural-native-distribution-e2e.v39",
             "V39_TRUSS_SECTION_DELETE_KEYS",
             "workbench_truss_section_delete_surface_passed",
@@ -595,11 +610,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v40 hash-bound receipt",
+            "frozen v1 through v39 receipts",
+            "no pre-v40 receipt",
             "append-only v39 hash-bound receipt",
             "frozen v1 through v38 receipts",
             "no pre-v39 receipt",
             "append-only v38 hash-bound receipt",
-            "frozen v1 through v37 receipts",
             "no pre-v38 receipt",
             "append-only v37 hash-bound receipt",
             "no pre-v37 receipt",
@@ -739,6 +756,22 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Installed static and shared package E2E v39",
             "Frozen v1 through v38",
             "receipts retain their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    node_add_doc = _text(
+        root, Path("docs/native/modelir-node-add-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-node-add-v1.md"),
+        text=node_add_doc,
+        tokens=(
+            "model-add-node",
+            "Installed static and shared package E2E v40",
+            "Frozen v1 through v39",
+            "receipts retain their narrower authority",
+            "fallback 0",
         ),
         blockers=blockers,
     )
@@ -1057,7 +1090,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v39 E2E",
+            "CPU static/shared distribution v40 E2E",
+            "standalone neutral-node creation",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",

@@ -12,6 +12,7 @@ use super::{
 
 const EDIT_SCHEMA_V1: &str = "structural-native-model-edit-receipt.v1";
 const NODE_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node.v1";
+const NODE_ADD_EXTENSION_KEY: &str = "structural-native:model-add-node.v1";
 const NODAL_LOAD_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-nodal-load.v1";
 const CONSTRAINT_VALUE_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-constraint-value.v1";
@@ -50,6 +51,7 @@ const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss
 const TRUSS_SECTION_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-truss-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
+const NODE_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_contiguous_neutral_node_addition_not_member_load_constraint_property_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
@@ -81,6 +83,13 @@ const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 /// Complete deterministic artifact pair produced by one bounded node-coordinate edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodeEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded node addition.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelNodeAddOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -299,6 +308,30 @@ pub fn publish_model_node_coordinate_edit(
 ) -> Result<ModelNodeEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_node_coordinates(&source, node_id, coordinates_m)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one neutral contiguous node to a bounded regular `ModelIR` file and publish it.
+///
+/// # Errors
+///
+/// Rejects unsafe input/output paths, invalid identities or coordinates, invalid source or edited
+/// semantics, duplicate identities or coordinates, index drift, or create-new publication failure.
+pub fn publish_model_node_add(
+    source_path: &Path,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+    output_directory: &Path,
+) -> Result<ModelNodeAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_node(&source, node_id, coordinates_m)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1052,6 +1085,90 @@ pub fn edit_model_node_coordinates(
         "claim_boundary": NODE_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodeEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Produce one provenance-bound, C++-revalidated neutral node addition in memory.
+///
+/// # Errors
+///
+/// Rejects non-finite coordinates, an invalid source model, duplicate node identity or exact
+/// coordinates, non-contiguous source indices, schema drift, or edited semantics rejected by C++.
+pub fn add_model_node(
+    source_bytes: &[u8],
+    node_id: &str,
+    coordinates_m: [f64; 3],
+) -> Result<ModelNodeAddOutcomeV1, WorkbenchError> {
+    validate_node_add_request(source_bytes.len(), node_id, coordinates_m)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let node_index = append_node(&mut edited, node_id, coordinates_m)?;
+    bind_node_add_provenance(
+        &mut edited,
+        node_id,
+        node_index,
+        coordinates_m,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "node_add",
+        "model_id": edited_validation.report.model_id,
+        "node_id": node_id,
+        "node_index": node_index,
+        "coordinates_m": coordinates_m,
+        "source_id": null,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NODE_ADD_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelNodeAddOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3536,6 +3653,24 @@ fn validate_edit_request(
     Ok(())
 }
 
+fn validate_node_add_request(
+    source_length: usize,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, node_id, "new node")?;
+    if coordinates_m
+        .iter()
+        .any(|coordinate| !coordinate.is_finite())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_node_coordinate_invalid",
+            "new node coordinates must be finite SI values",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_nodal_load_edit_request(
     source_length: usize,
     load_pattern_id: &str,
@@ -5957,6 +6092,52 @@ fn replace_element_connectivity(
     Ok((previous_node_ids, element_type, formulation))
 }
 
+fn append_node(
+    model: &mut Value,
+    node_id: &str,
+    coordinates_m: [f64; 3],
+) -> Result<usize, WorkbenchError> {
+    let nodes = model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_node_exists",
+            format!("ModelIR already has a node with identity {node_id}"),
+        ));
+    }
+    for node in nodes.iter() {
+        let existing = node
+            .get("coordinates_m")
+            .and_then(Value::as_array)
+            .filter(|values| values.len() == 3)
+            .ok_or_else(|| snapshot_error("node coordinates_m"))?;
+        let duplicates = existing.iter().zip(coordinates_m).all(|(left, right)| {
+            finite_number(left, "node coordinate")
+                .is_ok_and(|left| normalized_number_bits(left) == normalized_number_bits(right))
+        });
+        if duplicates {
+            return Err(WorkbenchError::new(
+                "workbench_model_add_node_coordinate_exists",
+                "new node coordinates duplicate an existing node",
+            ));
+        }
+    }
+    let node_index = nodes.len();
+    nodes.push(json!({
+        "id": node_id,
+        "index": node_index,
+        "coordinates_m": coordinates_m,
+        "source_id": null,
+        "extensions": {}
+    }));
+    Ok(node_index)
+}
+
 #[allow(clippy::too_many_arguments)]
 fn append_frame3d_member(
     model: &mut Value,
@@ -7467,6 +7648,33 @@ fn bind_element_connectivity_edit_provenance(
     )
 }
 
+fn bind_node_add_provenance(
+    model: &mut Value,
+    node_id: &str,
+    node_index: usize,
+    coordinates_m: [f64; 3],
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NODE_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "node_add",
+            "node_id": node_id,
+            "node_index": node_index,
+            "coordinates_m": coordinates_m,
+            "source_id": null,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": NODE_ADD_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_frame3d_member_add_provenance(
     model: &mut Value,
@@ -7833,10 +8041,10 @@ fn snapshot_error(field: &str) -> WorkbenchError {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
+    use serde_json::{json, Value};
 
     use super::{
-        constraint_value_unit, mark_roundtrip_entity_approximated,
+        append_node, constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
         remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_pattern,
         remove_linear_material, remove_nodal_load, remove_truss3d_leaf_member,
@@ -7850,18 +8058,57 @@ mod tests {
         validate_linear_load_pattern_delete_request, validate_linear_material_add_request,
         validate_linear_material_delete_request, validate_linear_material_edit_request,
         validate_nodal_load_add_request, validate_nodal_load_delete_request,
-        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
-        validate_truss3d_member_add_request, validate_truss3d_member_properties,
-        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
-        validate_truss_section_add_request, validate_truss_section_delete_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        validate_nodal_load_edit_request, validate_node_add_request,
+        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
+        validate_truss_element_property_references, validate_truss_section_add_request,
+        validate_truss_section_delete_request, validate_truss_section_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES,
     };
 
     #[test]
     fn signed_zero_is_the_same_canonical_coordinate() {
         assert_eq!(normalized_number_bits(0.0), normalized_number_bits(-0.0));
         assert_ne!(normalized_number_bits(1.0), normalized_number_bits(-1.0));
+    }
+
+    #[test]
+    fn node_add_requires_bounded_identity_finite_unique_coordinates_and_contiguous_index() {
+        validate_node_add_request(0, "N3", [2.0, 0.0, 0.0]).expect("valid node-add request");
+        assert_eq!(
+            validate_node_add_request(0, "N3", [f64::NAN, 0.0, 0.0])
+                .expect_err("non-finite coordinate")
+                .code,
+            "workbench_model_add_node_coordinate_invalid"
+        );
+        assert!(validate_node_add_request(0, "", [2.0, 0.0, 0.0]).is_err());
+
+        let mut model = json!({
+            "nodes": [
+                {"id": "N1", "index": 0, "coordinates_m": [0.0, 0.0, 0.0]},
+                {"id": "N2", "index": 1, "coordinates_m": [1.0, 0.0, 0.0]}
+            ]
+        });
+        assert_eq!(
+            append_node(&mut model, "N3", [2.0, 0.0, 0.0]).expect("append node"),
+            2
+        );
+        assert_eq!(model["nodes"][2]["index"], json!(2));
+        assert_eq!(model["nodes"][2]["source_id"], Value::Null);
+        assert_eq!(model["nodes"][2]["extensions"], json!({}));
+        assert_eq!(
+            append_node(&mut model, "N3", [3.0, 0.0, 0.0])
+                .expect_err("duplicate identity")
+                .code,
+            "workbench_model_add_node_exists"
+        );
+        assert_eq!(
+            append_node(&mut model, "N4", [2.0, -0.0, 0.0])
+                .expect_err("duplicate canonical coordinates")
+                .code,
+            "workbench_model_add_node_coordinate_exists"
+        );
     }
 
     #[test]

@@ -41,6 +41,9 @@ absent from the runtime image.
   `model-delete-linear-material` removes only the last contiguous neutral unreferenced v1 linear
   material while retaining another material and rejecting element, section, mapped, source-owned,
   minimum-material or nonterminal candidates.
+  `model-add-node` appends one unique finite-coordinate neutral node with the next contiguous
+  index while preserving every existing row, blocker, and round-trip mapping. It creates no
+  member, load, or constraint; operators compose those explicitly.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
   parameters without changing existing references. `model-delete-frame-section` removes only the
   last contiguous neutral unreferenced parameter-set-v1 frame3d section while retaining another
@@ -161,6 +164,8 @@ structural-workbench model-add-linear-material /workspace/model.json \
   --output-dir /workspace/added-material-model
 structural-workbench model-delete-linear-material /workspace/added-material-model/model-ir.json \
   --material M2 --output-dir /workspace/deleted-material-model
+structural-workbench model-add-node /workspace/model.json \
+  --node N3 --coordinates 4 1 0 --output-dir /workspace/added-node-model
 structural-workbench model-add-frame-section /workspace/model.json \
   --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
   --torsional-constant-m4 0.000005 \

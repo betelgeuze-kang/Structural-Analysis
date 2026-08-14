@@ -58,7 +58,7 @@ pub use deformed_view::{
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
     add_model_fixed_constraint, add_model_frame3d_member, add_model_frame_section,
-    add_model_linear_load_pattern, add_model_linear_material, add_model_nodal_load,
+    add_model_linear_load_pattern, add_model_linear_material, add_model_nodal_load, add_model_node,
     add_model_truss3d_member, add_model_truss_section, delete_model_fixed_constraint,
     delete_model_frame3d_leaf_member, delete_model_frame_section, delete_model_linear_load_pattern,
     delete_model_linear_material, delete_model_nodal_load, delete_model_truss3d_leaf_member,
@@ -75,7 +75,7 @@ pub use model_edit::{
     publish_model_linear_load_pattern_delete, publish_model_linear_material_add,
     publish_model_linear_material_delete, publish_model_linear_material_edit,
     publish_model_nodal_load_add, publish_model_nodal_load_components_edit,
-    publish_model_nodal_load_delete, publish_model_node_coordinate_edit,
+    publish_model_nodal_load_delete, publish_model_node_add, publish_model_node_coordinate_edit,
     publish_model_truss3d_leaf_member_delete, publish_model_truss3d_member_add,
     publish_model_truss_element_properties_edit, publish_model_truss_section_add,
     publish_model_truss_section_delete, publish_model_truss_section_edit, FrameSectionParametersV1,
@@ -88,10 +88,10 @@ pub use model_edit::{
     ModelLinearLoadPatternAddOutcomeV1, ModelLinearLoadPatternDeleteOutcomeV1,
     ModelLinearMaterialAddOutcomeV1, ModelLinearMaterialDeleteOutcomeV1,
     ModelLinearMaterialEditOutcomeV1, ModelNodalLoadAddOutcomeV1, ModelNodalLoadDeleteOutcomeV1,
-    ModelNodalLoadEditOutcomeV1, ModelNodeEditOutcomeV1, ModelTruss3dLeafMemberDeleteOutcomeV1,
-    ModelTruss3dMemberAddOutcomeV1, ModelTrussElementPropertiesEditOutcomeV1,
-    ModelTrussSectionAddOutcomeV1, ModelTrussSectionDeleteOutcomeV1,
-    ModelTrussSectionEditOutcomeV1, TrussSectionParametersV1,
+    ModelNodalLoadEditOutcomeV1, ModelNodeAddOutcomeV1, ModelNodeEditOutcomeV1,
+    ModelTruss3dLeafMemberDeleteOutcomeV1, ModelTruss3dMemberAddOutcomeV1,
+    ModelTrussElementPropertiesEditOutcomeV1, ModelTrussSectionAddOutcomeV1,
+    ModelTrussSectionDeleteOutcomeV1, ModelTrussSectionEditOutcomeV1, TrussSectionParametersV1,
 };
 pub use model_view::{
     render_model_topology_view, render_model_topology_view_file,

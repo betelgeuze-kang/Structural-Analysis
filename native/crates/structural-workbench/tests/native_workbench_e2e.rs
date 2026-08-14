@@ -4,7 +4,9 @@ use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::Value;
-use structural_cli::{execute_model_ir_linear_analysis, ModelIrLinearAnalysisOutcomeV1};
+use structural_cli::{
+    execute_model_ir_linear_analysis, validate_model_bytes, ModelIrLinearAnalysisOutcomeV1,
+};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
 use structural_contracts::product_ir::sha256_identity;
@@ -135,6 +137,26 @@ fn run_node_edit(
 ) -> Output {
     run_workbench(&[
         text("model-edit-node"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--coordinates"),
+        text(coordinates[0]),
+        text(coordinates[1]),
+        text(coordinates[2]),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
+fn run_node_add(
+    source: &Path,
+    destination: &Path,
+    node_id: &str,
+    coordinates: [&str; 3],
+) -> Output {
+    run_workbench(&[
+        text("model-add-node"),
         source.as_os_str(),
         text("--node"),
         text(node_id),
@@ -1816,6 +1838,258 @@ fn node_coordinate_edit_is_provenance_bound_cpp_revalidated_and_create_new() {
         "N2",
         ["2", "1", "1"],
         "workbench_model_edit_source_semantics_invalid",
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn node_add_is_deterministic_fail_closed_composable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("source ModelIR bytes");
+    let source_validation = validate_model_bytes(&source_bytes).expect("C++-validated source");
+    let source_model = &source_validation.snapshot;
+    let first = temporary.0.join("node-add-first");
+    let second = temporary.0.join("node-add-second");
+    for destination in [&first, &second] {
+        let output = run_node_add(&source, destination, "N3", ["4", "1", "0"]);
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published node-add receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first node-add artifact"),
+            std::fs::read(second.join(artifact)).expect("second node-add artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged node-add source"),
+        source_bytes
+    );
+
+    let added_bytes = std::fs::read(first.join("model-ir.json")).expect("node-added ModelIR");
+    let added = parse_model_ir_v2(&added_bytes).expect("strict node-added ModelIR");
+    let source_nodes = source_model.value()["nodes"]
+        .as_array()
+        .expect("source nodes");
+    let added_nodes = added.value()["nodes"].as_array().expect("added nodes");
+    assert_eq!(added_nodes.len(), source_nodes.len() + 1);
+    assert_eq!(&added_nodes[..source_nodes.len()], source_nodes);
+    assert_eq!(added_nodes[2]["id"], "N3");
+    assert_eq!(added_nodes[2]["index"], 2);
+    assert_eq!(
+        added_nodes[2]["coordinates_m"],
+        serde_json::json!([4, 1, 0])
+    );
+    assert_eq!(added_nodes[2]["source_id"], Value::Null);
+    assert_eq!(added_nodes[2]["extensions"], serde_json::json!({}));
+    for family in [
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(added.value()[family], source_model.value()[family]);
+    }
+    let extension = added.value()["extensions"]
+        .get("structural-native:model-add-node.v1")
+        .expect("node-add provenance extension");
+    assert_eq!(extension["operation"], "node_add");
+    assert_eq!(extension["node_id"], "N3");
+    assert_eq!(extension["node_index"], 2);
+    assert_eq!(extension["coordinates_m"], serde_json::json!([4, 1, 0]));
+    assert_eq!(extension["source_id"], Value::Null);
+    assert_eq!(
+        added.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(added.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("node-add receipt"),
+    )
+    .expect("node-add receipt JSON");
+    assert_eq!(receipt["operation"], "node_add");
+    assert_eq!(receipt["node_id"], "N3");
+    assert_eq!(receipt["node_index"], 2);
+    assert_eq!(receipt["coordinates_m"], serde_json::json!([4, 1, 0]));
+    assert_eq!(receipt["source_id"], Value::Null);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], added.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, node_id, coordinates, expected_code) in [
+        (
+            "duplicate-id",
+            "N2",
+            ["4", "1", "0"],
+            "workbench_model_add_node_exists",
+        ),
+        (
+            "duplicate-coordinate",
+            "N3",
+            ["2", "-0", "0"],
+            "workbench_model_add_node_coordinate_exists",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_node_add(&source, &destination, node_id, coordinates);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+        assert!(!destination.exists());
+    }
+    let existing = run_node_add(&source, &first, "N3", ["4", "1", "0"]);
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut index_drift = source_model.value().clone();
+    index_drift["nodes"][1]["index"] = serde_json::json!(7);
+    let index_drift_path = temporary.0.join("node-add-index-drift-source.json");
+    std::fs::write(
+        &index_drift_path,
+        canonicalize_model_ir_v2(&index_drift)
+            .expect("canonical node-index-drift source")
+            .as_bytes(),
+    )
+    .expect("write node-index-drift source");
+    let index_drift_destination = temporary.0.join("node-add-index-drift-output");
+    let index_drift_rejection = run_node_add(
+        &index_drift_path,
+        &index_drift_destination,
+        "N3",
+        ["4", "1", "0"],
+    );
+    assert_eq!(index_drift_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&index_drift_rejection.stdout)
+        .contains("workbench_model_edit_source_semantics_invalid"));
+    assert!(!index_drift_destination.exists());
+
+    let mut blocked = source_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.node-add-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Node addition must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:N2",
+        "entity_kind": "node",
+        "model_ir_entity_id": "N2",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-node-add-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked node-add source")
+            .as_bytes(),
+    )
+    .expect("write blocked node-add source");
+    let blocked_destination = temporary.0.join("blocked-node-add-output");
+    assert_success(&run_node_add(
+        &blocked_source,
+        &blocked_destination,
+        "N3",
+        ["4", "1", "0"],
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked node-add receipt"),
+    )
+    .expect("blocked node-add receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.node-add-visible-not-runnable"])
+    );
+    let blocked_added: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked node-added ModelIR"),
+    )
+    .expect("blocked node-added JSON");
+    assert_eq!(blocked_added["roundtrip_map"], blocked["roundtrip_map"]);
+
+    let supported = temporary.0.join("node-add-supported");
+    assert_success(&run_fixed_constraint_add(
+        &first.join("model-ir.json"),
+        &supported,
+        "BC_N3",
+        "N3",
+    ));
+    let supported_bytes =
+        std::fs::read(supported.join("model-ir.json")).expect("fixed node-added ModelIR");
+    let request_directory = temporary.0.join("node-add-request");
+    assert_success(&run_model_linear_request_create(
+        &supported.join("model-ir.json"),
+        &request_directory,
+        "node-add-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes =
+        std::fs::read(request_directory.join("analysis-request.json")).expect("node-add request");
+    let direct = execute_model_ir_linear_analysis(&supported_bytes, &request_bytes, None, u32::MAX)
+        .expect("node-add direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("node-add direct recovery"),
+    )
+    .expect("node-add recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&supported_bytes, &request_bytes, None, 0)
+        .expect("node-add initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &supported_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("node-add resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
     );
 }
 

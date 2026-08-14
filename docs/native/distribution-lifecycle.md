@@ -274,7 +274,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 43. emits an append-only v39 hash-bound receipt that inherits every v38 identity and additionally
    binds the last-neutral-truss-section-deleted ModelIR and edit receipt, generated request,
    completed ResultIR and typed frame-plus-truss recovery identities.
-   The receipt checker continues to accept frozen v1 through v38 receipts (including frozen v1 through v37 receipts); v1 through v19 are not
+44. appends one standalone neutral node twice with the next contiguous index, proves byte-identical
+   ModelIR/receipt output and unchanged source bytes, rejects duplicate identity and canonical
+   coordinates without publishing output, then composes a homogeneous six-DOF fixed support and
+   proves strict C++ validation, exact unchanged active DOFs/load, typed frame recovery,
+   initialized-active checkpoint/restart parity and fallback 0;
+45. emits an append-only v40 hash-bound receipt that inherits every v39 identity and additionally
+   binds the node-added ModelIR and edit receipt, fixed-support-composed ModelIR, generated request,
+   completed ResultIR and typed frame recovery identities.
+   The receipt checker continues to accept frozen v1 through v39 receipts (including frozen v1 through v38 receipts); v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
@@ -300,7 +308,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    typed recovery and restart authority; and no pre-v38 receipt is installed last-neutral
    frame-section deletion, retained-section/load, typed recovery and restart authority; and no pre-v39 receipt
    is installed last-neutral truss-section deletion, retained-truss-section/load,
-   typed frame-plus-truss recovery and restart authority.
+   typed frame-plus-truss recovery and restart authority; and no pre-v40 receipt is installed
+   standalone neutral-node addition, fixed-support composition, unchanged active-DOF/load, typed
+   frame recovery and restart authority.
 
 The reference command is:
 

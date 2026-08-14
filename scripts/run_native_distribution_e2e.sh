@@ -3136,6 +3136,145 @@ exercise_truss3d_leaf_deletion_surface() {
 }
 exercise_truss3d_leaf_deletion_surface
 
+exercise_node_add_surface() {
+  local source_model="$linear_model"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label add_directory composed_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    add_directory="$e2e_root/node-add-$label"
+    composed_directory="$e2e_root/node-add-$label-composed"
+    request_directory="$e2e_root/node-add-$label-request"
+    direct_directory="$e2e_root/node-add-$label-direct"
+    partial_directory="$e2e_root/node-add-$label-partial"
+    resumed_directory="$e2e_root/node-add-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-node "$source_model" --node N3 --coordinates 4 1 0 \
+      --output-dir "$add_directory" \
+      > "$e2e_root/node-add-$label.stdout.json"
+    grep -Fq '"operation":"node_add"' "$add_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N3"' "$add_directory/edit-receipt.json"
+    grep -Fq '"node_index":2' "$add_directory/edit-receipt.json"
+    grep -Fq '"coordinates_m":[4,1,0]' "$add_directory/edit-receipt.json"
+    grep -Fq '"source_id":null' "$add_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$add_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$add_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$add_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-node.v1"' "$add_directory/model-ir.json"
+    grep -Fq '"coordinates_m":[4,1,0],"extensions":{},"id":"N3","index":2,"source_id":null' \
+      "$add_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$add_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/node-add-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":3,"materials":1,"sections":1,"elements":1,"constraints":1' \
+      "$e2e_root/node-add-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$add_directory/model-ir.json" > "$e2e_root/node-add-$label-view.txt"
+    grep -Fq 'Inventory: nodes=3 elements=1 constraints=1 load_patterns=4' \
+      "$e2e_root/node-add-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-fixed-constraint "$add_directory/model-ir.json" \
+      --constraint BC_N3 --node N3 --output-dir "$composed_directory" \
+      > "$e2e_root/node-add-$label-composed.stdout.json"
+    grep -Fq '"structural-native:model-add-node.v1"' "$composed_directory/model-ir.json"
+    grep -Fq '"id":"BC_N3","index":1,"node_id":"N3"' \
+      "$composed_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$composed_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/node-add-$label-composed-validation.json"
+    grep -Fq '"entity_counts":{"nodes":3,"materials":1,"sections":1,"elements":1,"constraints":2' \
+      "$e2e_root/node-add-$label-composed-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$composed_directory/model-ir.json" \
+      --case node-add-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/node-add-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/node-add-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 > "$e2e_root/node-add-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/node-add-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/node-add-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -composed -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/node-add-first$suffix" "$e2e_root/node-add-second$suffix" \
+      > "$e2e_root/node-add-$diff_label-diff.txt"
+    cmp "$e2e_root/node-add-first$suffix.stdout.json" \
+      "$e2e_root/node-add-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/node-add-first-validation.json" \
+    "$e2e_root/node-add-second-validation.json"
+  cmp "$e2e_root/node-add-first-composed-validation.json" \
+    "$e2e_root/node-add-second-composed-validation.json"
+  cmp "$e2e_root/node-add-first-view.txt" "$e2e_root/node-add-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed node addition mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local duplicate_id_destination="$e2e_root/node-add-duplicate-id-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-node "$source_model" --node N2 --coordinates 4 1 0 \
+    --output-dir "$duplicate_id_destination" \
+    > "$e2e_root/node-add-duplicate-id-rejected.stdout.json"; then
+    echo "installed node addition accepted a duplicate identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_add_node_exists' \
+    "$e2e_root/node-add-duplicate-id-rejected.stdout.json"
+  test ! -e "$duplicate_id_destination"
+
+  local duplicate_coordinate_destination="$e2e_root/node-add-duplicate-coordinate-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-node "$source_model" --node N3 --coordinates 2 -0 0 \
+    --output-dir "$duplicate_coordinate_destination" \
+    > "$e2e_root/node-add-duplicate-coordinate-rejected.stdout.json"; then
+    echo "installed node addition accepted duplicate canonical coordinates" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_add_node_coordinate_exists' \
+    "$e2e_root/node-add-duplicate-coordinate-rejected.stdout.json"
+  test ! -e "$duplicate_coordinate_destination"
+}
+exercise_node_add_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -3490,6 +3629,12 @@ truss_section_delete_receipt_hash="$(sha256sum "$e2e_root/truss-section-delete-f
 truss_section_delete_request_hash="$(sha256sum "$e2e_root/truss-section-delete-first-request/analysis-request.json" | awk '{print $1}')"
 truss_section_delete_result_ir_hash="$(sha256sum "$e2e_root/truss-section-delete-first-direct/result-ir.json" | awk '{print $1}')"
 truss_section_delete_recovery_hash="$(sha256sum "$e2e_root/truss-section-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+node_add_model_hash="$(sha256sum "$e2e_root/node-add-first/model-ir.json" | awk '{print $1}')"
+node_add_receipt_hash="$(sha256sum "$e2e_root/node-add-first/edit-receipt.json" | awk '{print $1}')"
+node_add_composed_model_hash="$(sha256sum "$e2e_root/node-add-first-composed/model-ir.json" | awk '{print $1}')"
+node_add_request_hash="$(sha256sum "$e2e_root/node-add-first-request/analysis-request.json" | awk '{print $1}')"
+node_add_result_ir_hash="$(sha256sum "$e2e_root/node-add-first-direct/result-ir.json" | awk '{print $1}')"
+node_add_recovery_hash="$(sha256sum "$e2e_root/node-add-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
 truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
 truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
@@ -3629,6 +3774,10 @@ v39_receipt_json="${v38_receipt_json/structural-native-distribution-e2e.v38/stru
 truss_section_delete_receipt_fields="\"workbench_truss_section_delete_surface_passed\":true,\"workbench_truss_section_delete_model_sha256\":\"sha256:$truss_section_delete_model_hash\",\"workbench_truss_section_delete_receipt_sha256\":\"sha256:$truss_section_delete_receipt_hash\",\"workbench_truss_section_delete_request_sha256\":\"sha256:$truss_section_delete_request_hash\",\"workbench_truss_section_delete_result_ir_sha256\":\"sha256:$truss_section_delete_result_ir_hash\",\"workbench_truss_section_delete_recovery_sha256\":\"sha256:$truss_section_delete_recovery_hash\","
 v39_receipt_json="${v39_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss_section_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v39_receipt_json" > "$temporary_receipt"
+v40_receipt_json="${v39_receipt_json/structural-native-distribution-e2e.v39/structural-native-distribution-e2e.v40}"
+node_add_receipt_fields="\"workbench_node_add_surface_passed\":true,\"workbench_node_add_model_sha256\":\"sha256:$node_add_model_hash\",\"workbench_node_add_receipt_sha256\":\"sha256:$node_add_receipt_hash\",\"workbench_node_add_composed_model_sha256\":\"sha256:$node_add_composed_model_hash\",\"workbench_node_add_request_sha256\":\"sha256:$node_add_request_hash\",\"workbench_node_add_result_ir_sha256\":\"sha256:$node_add_result_ir_hash\",\"workbench_node_add_recovery_sha256\":\"sha256:$node_add_recovery_hash\","
+v40_receipt_json="${v40_receipt_json/\"workbench_result_view_surface_passed\":true,/${node_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v40_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

@@ -46,6 +46,9 @@ The installed `model-delete-linear-material` command removes only the last conti
 unreferenced v1 linear-elastic material while retaining another material, and rejects element,
 section, mapped, source-owned, minimum-material or nonterminal candidates before strict C++
 revalidation.
+The installed `model-add-node` command appends one unique finite-coordinate neutral node with the
+next contiguous index while preserving all existing rows, blockers, and round-trip mappings. Its
+installed execution proof explicitly composes a homogeneous six-DOF fixed support before solving.
 The installed `model-add-frame-section` command appends one v1 frame3d section with six positive
 finite SI parameters, then strictly revalidates it through C++ without changing existing
 references.
@@ -63,7 +66,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v39 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v40 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -84,6 +87,8 @@ plus last-neutral frame-section deletion with exact retained section and N2-FY a
 typed frame recovery, referenced/nonterminal rejection and restart parity,
 plus last-neutral truss-section deletion with an exact retained truss section and N2-FY active
 load, typed frame-plus-truss recovery, referenced/nonterminal rejection and restart parity,
+plus standalone neutral-node creation with duplicate identity/coordinate rejection, a composed
+six-DOF fixed support, exact unchanged active DOFs/load, typed frame recovery and restart parity,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

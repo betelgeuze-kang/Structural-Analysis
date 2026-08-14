@@ -26,6 +26,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   status of any matching exact/canonicalized round-trip row as approximated, strictly reparses and
   C++-revalidates the result, and atomically publishes a new model plus self-hashed receipt. Visual
   dragging and broader model editing remain open.
+- `model-add-node`: deterministic creation of one unique finite-coordinate neutral node with the
+  next contiguous index. Rust preserves all existing rows, blockers, and round-trip mappings,
+  strictly reparses and C++-revalidates, and publishes only a new canonical model plus self-hashed
+  receipt. Installed E2E composes a six-DOF fixed constraint before CPU execution and proves exact
+  unchanged active DOFs/load, typed frame recovery, restart parity, and fallback 0. Member/load/
+  constraint creation in the same operation, visual placement, and orphan deletion remain open.
 - `model-edit-nodal-load`: deterministic replacement of the six finite SI components of one
   existing nodal load inside one named load pattern. Rust edits only the canonical C++ snapshot,
   binds both identities plus previous/new components and source hashes, conservatively marks a

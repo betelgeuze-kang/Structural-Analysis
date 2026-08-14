@@ -41,6 +41,7 @@ EXPECTED_OWNERS = {
     "external_comparison": "structural-cli",
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
+    "modelir_node_add": "structural-workbench",
     "modelir_frame3d_member_add": "structural-workbench",
     "modelir_frame3d_leaf_deletion": "structural-workbench",
     "modelir_nodal_load_add": "structural-workbench",
