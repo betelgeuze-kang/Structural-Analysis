@@ -94,6 +94,11 @@ linear-elastic material's stable ID, preserves its index/law/version/parameters/
 extensions, rejects element, composite-section, unsupported-feature and round-trip ownership
 without cascade, and C++-revalidates the edited snapshot. See
 `docs/native/modelir-linear-material-identity-edit-v1.md`.
+The separate `model-edit-frame-section-identity` command changes only one unreferenced v1
+`frame_3d` section's stable ID, preserves its index/family/version/six SI parameters/source/
+extensions, rejects element, unsupported-feature and round-trip ownership without cascade, and
+C++-revalidates the edited snapshot. See
+`docs/native/modelir-frame-section-identity-edit-v1.md`.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and

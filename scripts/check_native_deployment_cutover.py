@@ -250,6 +250,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v70",
+            "model-edit-frame-section-identity",
+            "S2_RENAMED",
             "Distribution E2E v69",
             "model-edit-linear-material-identity",
             "M2_RENAMED",
@@ -854,6 +857,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_linear_material_identity_edit_recovery_sha256",
         "workbench_linear_material_identity_edit_report_ir_sha256",
         "workbench_linear_material_identity_edit_restart_passed",
+        "exercise_frame_section_identity_edit_surface",
+        "model-edit-frame-section-identity",
+        "structural-native:model-edit-frame-section-identity.v1",
+        "workbench_frame_section_identity_edit_surface_passed",
+        "workbench_frame_section_identity_edit_model_sha256",
+        "workbench_frame_section_identity_edit_receipt_sha256",
+        "workbench_frame_section_identity_edit_request_receipt_sha256",
+        "workbench_frame_section_identity_edit_request_sha256",
+        "workbench_frame_section_identity_edit_assembly_receipt_sha256",
+        "workbench_frame_section_identity_edit_checkpoint_sha256",
+        "workbench_frame_section_identity_edit_result_ir_sha256",
+        "workbench_frame_section_identity_edit_recovery_sha256",
+        "workbench_frame_section_identity_edit_report_ir_sha256",
+        "workbench_frame_section_identity_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1056,6 +1073,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v70",
+            "V70_FRAME_SECTION_IDENTITY_EDIT_KEYS",
+            "workbench_frame_section_identity_edit_surface_passed",
+            "workbench_frame_section_identity_edit_receipt_sha256",
+            "workbench_frame_section_identity_edit_request_receipt_sha256",
+            "workbench_frame_section_identity_edit_recovery_sha256",
+            "workbench_frame_section_identity_edit_restart_passed",
             "structural-native-distribution-e2e.v69",
             "V69_LINEAR_MATERIAL_IDENTITY_EDIT_KEYS",
             "workbench_linear_material_identity_edit_surface_passed",
@@ -1622,6 +1646,29 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "structural-native:model-edit-linear-material-identity.v1",
             "linear_material_identity_edit",
             "append-only v69",
+            "[6,7,8,9,10,11]",
+            "[0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    frame_section_identity_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-frame-section-identity-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-frame-section-identity-edit-v1.md"),
+        text=frame_section_identity_edit_doc,
+        tokens=(
+            "model-edit-frame-section-identity",
+            "single C ABI into C++ semantic validation",
+            "structural-native:model-edit-frame-section-identity.v1",
+            "frame_section_identity_edit",
+            "append-only v70",
             "[6,7,8,9,10,11]",
             "[0,-10000,0,0,0,0]",
             "fallback 0",
@@ -2514,6 +2561,45 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in linear_material_identity_edit_claim:
                 blockers.append(
                     "modelir_linear_material_identity_edit_capability_"
+                    f"claim_missing:{token}"
+                )
+    frame_section_identity_edit_capability = (
+        capabilities.get("modelir_frame_section_identity_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(frame_section_identity_edit_capability, dict):
+        blockers.append("modelir_frame_section_identity_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if frame_section_identity_edit_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_frame_section_identity_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        frame_section_identity_edit_claim = str(
+            frame_section_identity_edit_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing unreferenced parameter-set-v1 frame_3d section ID",
+            "distinct unique stable ID",
+            "element section_id references",
+            "unsupported-feature ownership and direct round-trip mappings",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v70 E2E",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "active load [0,-10000,0,0,0,0]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in frame_section_identity_edit_claim:
+                blockers.append(
+                    "modelir_frame_section_identity_edit_capability_"
                     f"claim_missing:{token}"
                 )
     linear_load_combination_deletion_capability = (

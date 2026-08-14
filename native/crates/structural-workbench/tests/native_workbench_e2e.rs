@@ -582,6 +582,24 @@ fn run_frame_section_edit(
     ])
 }
 
+fn run_frame_section_identity_edit(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-frame-section-identity"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--new-section"),
+        text(replacement_section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_truss_section_edit(
     source: &Path,
     destination: &Path,
@@ -7771,6 +7789,254 @@ fn linear_material_identity_edit_is_deterministic_fail_closed_and_cpu_executable
     }
 
     let existing = run_linear_material_identity_edit(&source, &first, "M2", "M2_RENAMED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame_section_identity_edit_is_deterministic_fail_closed_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let section_add = temporary.0.join("frame-section-identity-source");
+    assert_success(&run_frame_section_add(
+        &base,
+        &section_add,
+        "S2",
+        ["0.02", "0.0002", "0.0003", "0.00004", "0.015", "0.016"],
+    ));
+    let source = section_add.join("model-ir.json");
+    let source_bytes = std::fs::read(&source).expect("frame-section identity source bytes");
+    let source_model = validate_model_bytes(&source_bytes)
+        .expect("C++ frame-section identity source validation")
+        .snapshot;
+
+    let first = temporary.0.join("frame-section-identity-first");
+    let second = temporary.0.join("frame-section-identity-second");
+    for destination in [&first, &second] {
+        let output = run_frame_section_identity_edit(&source, destination, "S2", "S2_RENAMED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("frame-section identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first frame-section identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second frame-section identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged frame-section identity source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("identity-edited frame-section ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict identity-edited frame section");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++ frame-section identity validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model.value()[family]);
+    }
+    let source_sections = source_model.value()["sections"]
+        .as_array()
+        .expect("source sections");
+    let edited_sections = edited.value()["sections"]
+        .as_array()
+        .expect("edited sections");
+    assert_eq!(source_sections.len(), edited_sections.len());
+    assert_eq!(edited_sections[0], source_sections[0]);
+    assert_eq!(edited_sections[1]["id"], "S2_RENAMED");
+    for key in [
+        "index",
+        "family_id",
+        "parameter_set_version",
+        "parameters",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(edited_sections[1][key], source_sections[1][key]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-frame-section-identity.v1")
+        .expect("frame-section identity provenance extension");
+    assert_eq!(extension["operation"], "frame_section_identity_edit");
+    assert_eq!(extension["source_section_id"], "S2");
+    assert_eq!(extension["replacement_section_id"], "S2_RENAMED");
+    assert_eq!(extension["section_index"], 1);
+    assert_eq!(extension["family_id"], "frame_3d");
+    assert_eq!(extension["parameter_set_version"], "1");
+    assert_eq!(
+        extension["retained_parameters_si"],
+        source_sections[1]["parameters"]
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("frame-section identity receipt"),
+    )
+    .expect("frame-section identity receipt JSON");
+    assert_eq!(receipt["operation"], "frame_section_identity_edit");
+    assert_eq!(receipt["source_section_id"], "S2");
+    assert_eq!(receipt["replacement_section_id"], "S2_RENAMED");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("frame-section-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "frame-section-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("frame-section identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("frame-section identity direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("frame-section identity direct recovery"),
+    )
+    .expect("frame-section identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("frame-section identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("frame-section identity resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, source_id, replacement_id, code) in [
+        (
+            "frame-section-identity-missing",
+            "S_MISSING",
+            "S_NEW",
+            "workbench_model_edit_frame_section_identity_section_missing",
+        ),
+        (
+            "frame-section-identity-collision",
+            "S2",
+            "S1",
+            "workbench_model_edit_frame_section_identity_replacement_exists",
+        ),
+        (
+            "frame-section-identity-no-op",
+            "S2",
+            "S2",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "frame-section-identity-invalid",
+            "S2",
+            "1_INVALID",
+            "workbench_model_edit_frame_section_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected =
+            run_frame_section_identity_edit(&source, &destination, source_id, replacement_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let write_model = |name: &str, value: &Value| {
+        let path = temporary.0.join(name);
+        std::fs::write(
+            &path,
+            canonicalize_model_ir_v2(value)
+                .expect("canonical frame-section identity rejection source")
+                .as_bytes(),
+        )
+        .expect("write frame-section identity rejection source");
+        path
+    };
+    let mut element_owned = source_model.value().clone();
+    element_owned["elements"][0]["section_id"] = serde_json::json!("S2");
+    let mut feature_owned = source_model.value().clone();
+    feature_owned["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.frame-section-identity-owned",
+        "kind": "unsupported_solver_feature", "source_entity_id": "S2",
+        "disposition": "blocked", "blocking": true,
+        "detail": "Frame-section identity is externally owned.", "extensions": {}
+    }]);
+    let mut roundtrip_owned = source_model.value().clone();
+    roundtrip_owned["roundtrip_map"]
+        .as_array_mut()
+        .expect("round-trip rows")
+        .push(serde_json::json!({
+            "source_entity_id": "source:S2", "entity_kind": "section",
+            "model_ir_entity_id": "S2", "mapping_status": "exact", "extensions": {}
+        }));
+    for (name, value, code) in [
+        (
+            "element-owned-frame-section.json",
+            element_owned,
+            "workbench_model_edit_frame_section_identity_referenced_by_element",
+        ),
+        (
+            "feature-owned-frame-section.json",
+            feature_owned,
+            "workbench_model_edit_frame_section_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned-frame-section.json",
+            roundtrip_owned,
+            "workbench_model_edit_frame_section_identity_roundtrip_owned",
+        ),
+    ] {
+        let owned_source = write_model(name, &value);
+        let destination = temporary.0.join(format!("{name}.output"));
+        let rejected =
+            run_frame_section_identity_edit(&owned_source, &destination, "S2", "S2_RENAMED");
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let existing = run_frame_section_identity_edit(&source, &first, "S2", "S2_RENAMED");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

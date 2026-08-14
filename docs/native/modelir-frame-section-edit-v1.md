@@ -22,6 +22,8 @@ The command strictly parses the source and crosses Rust -> C ABI -> C++ before e
 one stable section identity from the canonical C++ snapshot and requires exactly
 `family_id: frame_3d` and `parameter_set_version: "1"`. It replaces the complete closed parameter
 object; it cannot change family, version, identity, element references, topology, or orientation.
+Stable-identity replacement is the separate bounded
+`docs/native/modelir-frame-section-identity-edit-v1.md` surface.
 
 Direct provenance is rewritten to `structural-native-model-editor`, prior provenance is retained
 under `structural-native:upstream-provenance`, and

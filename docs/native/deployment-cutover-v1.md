@@ -25,6 +25,7 @@ provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-
 `model-reorder-fixed-constraint-dof` order-only restraint movement plus
 `model-edit-fixed-constraint-identity` unreferenced stable-identity replacement, and the closed
 `model-edit-linear-material`, `model-edit-linear-material-identity`, `model-edit-frame-section`,
+`model-edit-frame-section-identity`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting for one existing two-node element.
@@ -122,7 +123,13 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v69 proves repeated material-identity-edited/request/artifact
+assembly preflight. Distribution E2E v70 proves repeated frame-section-identity-edited/request/
+artifact bytes and retains every v69 assertion while replacing unreferenced neutral `S2` with
+`S2_RENAMED` through `model-edit-frame-section-identity`, preserving its index/family/version/six
+SI parameters/source identity/extensions, rejecting malformed, no-op and colliding identities plus
+element, unsupported-feature and round-trip ownership without cascade, and proving unchanged exact
+active DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, byte-identical initialized-
+checkpoint restart and fallback 0. Distribution E2E v69 proves repeated material-identity-edited/request/artifact
 bytes and retains every v68 assertion while replacing unreferenced neutral `M2` with `M2_RENAMED`
 through `model-edit-linear-material-identity`, preserving its index/law/version/SI parameters/
 state schema/source identity/extensions, rejecting malformed, no-op and colliding identities plus
