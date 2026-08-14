@@ -354,8 +354,16 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 63. emits an append-only v49 hash-bound receipt that inherits every v48 identity and additionally
    binds the factor-edited ModelIR, edit receipt, request receipt, analysis request, assembly
    receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit restart
-   parity. The receipt checker continues to accept frozen v1 through v48 receipts
-   (including frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+   parity;
+64. edits exactly one typed root factor in neutral unreferenced `COMBO_NESTED`, preserves root
+   reference identity/kind/order/count and every descendant, binds source and edited bounded
+   expansions, proves exact active load `[25000,-9000,3750,0,0,0]`, typed recovery, fallback 0 and
+   byte-identical initialized checkpoint/restart output;
+65. emits an append-only v50 hash-bound receipt that inherits every v49 identity and additionally
+   binds the nested-factor-edited ModelIR, edit receipt, request receipt, analysis request,
+   assembly receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit
+   restart parity. The receipt checker continues to accept frozen v1 through v49 receipts
+   (including frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
@@ -401,7 +409,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    bounded nested linear-load-combination deletion, v3 root/expanded-term provenance, retained
    child-combination CPU execution, typed recovery and restart authority; and no pre-v49 receipt is
    installed bounded direct linear-load-combination single-factor edit, exact active-load, typed
-   recovery and restart authority.
+   recovery and restart authority; and no pre-v50 receipt is installed bounded nested
+   linear-load-combination typed-root-factor edit, source/edited expansion, exact active-load,
+   typed recovery and restart authority.
 
 The reference command is:
 

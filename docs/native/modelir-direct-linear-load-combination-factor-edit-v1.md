@@ -33,5 +33,6 @@ recovery and ReportIR. Native CPU execution proves exact `active_external_load`
 and Python/Node lookup count 0.
 
 This is not general combination editing. Reference replacement, term insertion/removal/reorder,
-nested or downstream-referenced combination editing, source-format writeback, visual editing,
-arbitrary solver selection, approved HIP C2, engineering acceptance and C6 remain open.
+downstream-referenced editing and nested edits beyond the separate bounded typed-root-factor
+surface, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
+engineering acceptance and C6 remain open.

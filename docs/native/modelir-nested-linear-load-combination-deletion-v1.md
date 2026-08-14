@@ -43,6 +43,7 @@ edit/request/assembly/checkpoint/ResultIR/recovery/ReportIR identities, proves b
 and resumed output, and requires fallback 0 with Python/Node lookup 0.
 
 This slice does not claim deletion of a nested nonterminal or referenced row, cascading or
-reindexing, direct or nested term editing, arbitrary graph rewriting, depth beyond eight, more than
-64 leaf contributions, self-weight, time functions, construction stages, shell/nonlinear
-combination execution, engineering acceptance, approved HIP C2, or C6 decommission.
+reindexing, general direct or nested term/reference editing beyond the separate bounded factor
+editors, arbitrary graph rewriting, depth beyond eight, more than 64 leaf contributions,
+self-weight, time functions, construction stages, shell/nonlinear combination execution,
+engineering acceptance, approved HIP C2, or C6 decommission.

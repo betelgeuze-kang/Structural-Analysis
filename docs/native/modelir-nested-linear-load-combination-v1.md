@@ -55,11 +55,13 @@ Installed CPU static/shared distribution E2E v46 authors `COMBO_BASE`, then
 `[25000,-6000,2500,0,0,0]`, binds edit/request/assembly/checkpoint/ResultIR/recovery/ReportIR hashes,
 proves byte-identical direct and resumed output, and requires fallback 0 with Python/Node lookup 0.
 
-The same bounds now support deletion of one last neutral, extension-free, unreferenced nested root;
-that additive v3 surface and installed distribution E2E v48 are documented in
-`docs/native/modelir-nested-linear-load-combination-deletion-v1.md`.
+The same bounds now support deletion of one last neutral, extension-free, unreferenced nested root
+and editing one typed root factor. Those separate surfaces are documented in
+`docs/native/modelir-nested-linear-load-combination-deletion-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md`.
 
-This slice does not claim nested term editing, nonterminal, referenced, cascading or general graph
-deletion, depth beyond eight, more than 64 leaf contributions, self-weight, time functions,
+This authoring slice does not claim general nested term/reference editing beyond the separate
+bounded root-factor editor, nonterminal or downstream-referenced editing, cascading or general
+graph deletion, depth beyond eight, more than 64 leaf contributions, self-weight, time functions,
 construction stages, shell/nonlinear combination execution, general solver selection, visual
 manipulation, engineering acceptance, approved HIP C2, or C6 decommission.

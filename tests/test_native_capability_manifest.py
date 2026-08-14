@@ -435,6 +435,29 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in nested_combination["claim"]
     assert (
         capabilities.capability_is_enabled(
+            payload, "modelir_nested_linear_load_combination_factor_edit"
+        )
+        is True
+    )
+    nested_combination_factor_edit = payload["capabilities"][
+        "modelir_nested_linear_load_combination_factor_edit"
+    ]
+    assert nested_combination_factor_edit["cutover_gate"] == "C5"
+    assert nested_combination_factor_edit["owner"] == "structural-workbench"
+    assert "changes exactly one existing root factor" in nested_combination_factor_edit["claim"]
+    assert "explicit load_pattern or load_combination" in nested_combination_factor_edit["claim"]
+    assert "root term order/count" in nested_combination_factor_edit["claim"]
+    assert "descendant combinations" in nested_combination_factor_edit["claim"]
+    assert "root-inclusive depth at most eight" in nested_combination_factor_edit["claim"]
+    assert "both complete expansions" in nested_combination_factor_edit["claim"]
+    assert "distribution v50 E2E" in nested_combination_factor_edit["claim"]
+    assert "[25000,-9000,3750,0,0,0]" in nested_combination_factor_edit["claim"]
+    assert "byte-identical direct/restart output" in nested_combination_factor_edit["claim"]
+    assert "fallback 0" in nested_combination_factor_edit["claim"]
+    assert "approved HIP C2" in nested_combination_factor_edit["claim"]
+    assert "C6" in nested_combination_factor_edit["claim"]
+    assert (
+        capabilities.capability_is_enabled(
             payload, "modelir_nested_linear_load_combination_deletion"
         )
         is True
@@ -1061,6 +1084,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v47" in distribution["claim"]
     assert "append-only v48" in distribution["claim"]
     assert "append-only v49" in distribution["claim"]
+    assert "append-only v50" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -1070,7 +1094,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v48 receipts" in distribution["claim"]
+    assert "frozen v1 through v49 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-section deletion" in distribution["claim"]
@@ -1088,6 +1112,8 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "retained child-combination" in distribution["claim"]
     assert "bounded direct linear-load-combination single-factor editing" in distribution["claim"]
     assert "[25000,-13500,5000,0,0,0]" in distribution["claim"]
+    assert "bounded nested linear-load-combination typed-root-factor editing" in distribution["claim"]
+    assert "[25000,-9000,3750,0,0,0]" in distribution["claim"]
     assert "exact-two v1 field preservation" in distribution["claim"]
     assert "v2 deletion provenance beyond two terms" in distribution["claim"]
     assert "exact unchanged active DOFs/load" in distribution["claim"]
@@ -1121,7 +1147,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v49 E2E" in deployment["claim"]
+    assert "distribution v50 E2E" in deployment["claim"]
     assert "standalone neutral-node creation" in deployment["claim"]
     assert "last-neutral orphan-node deletion" in deployment["claim"]
     assert "two-pattern linear-load-combination creation" in deployment["claim"]
@@ -1130,6 +1156,8 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "bounded two-through-64 direct linear-load-combination authoring and CPU execution" in deployment["claim"]
     assert "bounded direct linear-load-combination single-factor editing" in deployment["claim"]
     assert "[25000,-13500,5000,0,0,0]" in deployment["claim"]
+    assert "bounded nested linear-load-combination typed-root-factor editing" in deployment["claim"]
+    assert "[25000,-9000,3750,0,0,0]" in deployment["claim"]
     assert "bounded two-through-64 direct linear-load-combination deletion" in deployment["claim"]
     assert "bounded acyclic nested linear-load-combination authoring and CPU execution" in deployment["claim"]
     assert "bounded acyclic nested linear-load-combination deletion" in deployment["claim"]

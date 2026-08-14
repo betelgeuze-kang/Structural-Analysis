@@ -3920,6 +3920,130 @@ exercise_nested_linear_load_combination_surface() {
 }
 exercise_nested_linear_load_combination_surface
 
+exercise_nested_linear_load_combination_factor_edit_surface() {
+  local source_model="$e2e_root/nested-linear-load-combination-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/nested-linear-load-combination-factor-edit-$label"
+    request_directory="$e2e_root/nested-linear-load-combination-factor-edit-$label-request"
+    direct_directory="$e2e_root/nested-linear-load-combination-factor-edit-$label-direct"
+    partial_directory="$e2e_root/nested-linear-load-combination-factor-edit-$label-partial"
+    resumed_directory="$e2e_root/nested-linear-load-combination-factor-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-nested-linear-load-combination-factor "$source_model" \
+      --load-combination COMBO_NESTED --ref-kind load_combination \
+      --ref-id COMBO_SERVICE --factor 0.75 --output-dir "$edit_directory" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label.stdout.json"
+    grep -Fq '"operation":"nested_linear_load_combination_factor_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"editing_profile":"acyclic_nested_linear_static_depth_8_expanded_terms_64"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"reference_kind":"load_combination"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"reference_id":"COMBO_SERVICE"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"previous_factor":0.5' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_factor":0.75' "$edit_directory/edit-receipt.json"
+    grep -Fq '"term_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"term_count":2' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_combination_depth":2' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_combination_depth":2' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_expanded_term_count":3' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_expanded_term_count":3' "$edit_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-edit-nested-linear-load-combination-factor.v1"' \
+      "$edit_directory/model-ir.json"
+    grep -Fq '"terms":[{"factor":0.75,"ref_id":"COMBO_SERVICE","ref_kind":"load_combination"},{"factor":0.25,"ref_id":"LC_AXIAL","ref_kind":"load_pattern"}]' \
+      "$edit_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case nested-linear-load-combination-factor-edit-c5 \
+      --load-combination COMBO_NESTED \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label-request.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-nested-combination-request-create-receipt.v3"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"combination_depth":2' "$request_directory/request-receipt.json"
+    grep -Fq '"expanded_term_count":3' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_NESTED"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[25000,-9000,3750,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/nested-linear-load-combination-factor-edit-first$suffix" \
+      "$e2e_root/nested-linear-load-combination-factor-edit-second$suffix" \
+      > "$e2e_root/nested-linear-load-combination-factor-edit$suffix-diff.txt"
+  done
+  cmp "$e2e_root/nested-linear-load-combination-factor-edit-first.stdout.json" \
+    "$e2e_root/nested-linear-load-combination-factor-edit-second.stdout.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/nested-linear-load-combination-factor-edit-first-$suffix.stdout.json" \
+      "$e2e_root/nested-linear-load-combination-factor-edit-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed nested load-combination factor edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local no_change_destination="$e2e_root/nested-linear-load-combination-factor-edit-no-change"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nested-linear-load-combination-factor "$source_model" \
+    --load-combination COMBO_NESTED --ref-kind load_combination \
+    --ref-id COMBO_SERVICE --factor 0.5 --output-dir "$no_change_destination" \
+    > "$e2e_root/nested-linear-load-combination-factor-edit-no-change.stdout.json"; then
+    echo "installed nested load-combination factor editor accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/nested-linear-load-combination-factor-edit-no-change.stdout.json"
+  test ! -e "$no_change_destination"
+
+  local typed_mismatch_destination="$e2e_root/nested-linear-load-combination-factor-edit-typed-mismatch"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nested-linear-load-combination-factor "$source_model" \
+    --load-combination COMBO_NESTED --ref-kind load_pattern \
+    --ref-id COMBO_SERVICE --factor 0.75 --output-dir "$typed_mismatch_destination" \
+    > "$e2e_root/nested-linear-load-combination-factor-edit-typed-mismatch.stdout.json"; then
+    echo "installed nested load-combination factor editor accepted a typed mismatch" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_nested_linear_load_combination_term_missing' \
+    "$e2e_root/nested-linear-load-combination-factor-edit-typed-mismatch.stdout.json"
+  test ! -e "$typed_mismatch_destination"
+}
+exercise_nested_linear_load_combination_factor_edit_surface
+
 exercise_nested_linear_load_combination_delete_surface() {
   local source_model="$e2e_root/nested-linear-load-combination-first/model-ir.json"
   local source_before_hash
@@ -4641,6 +4765,15 @@ nested_linear_load_combination_checkpoint_hash="$(sha256sum "$e2e_root/nested-li
 nested_linear_load_combination_result_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/result-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_recovery_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_report_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/report-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_model_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first/model-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first/edit-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_request_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-request/request-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_request_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-request/analysis-request.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_checkpoint_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_result_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-direct/result-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_recovery_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_factor_edit_report_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-factor-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
 nested_linear_load_combination_delete_request_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-request/request-receipt.json" | awk '{print $1}')"
@@ -4842,6 +4975,10 @@ v49_receipt_json="${v48_receipt_json/structural-native-distribution-e2e.v48/stru
 direct_linear_load_combination_factor_edit_receipt_fields="\"workbench_direct_linear_load_combination_factor_edit_surface_passed\":true,\"workbench_direct_linear_load_combination_factor_edit_model_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_model_hash\",\"workbench_direct_linear_load_combination_factor_edit_receipt_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_receipt_hash\",\"workbench_direct_linear_load_combination_factor_edit_request_receipt_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_request_receipt_hash\",\"workbench_direct_linear_load_combination_factor_edit_request_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_request_hash\",\"workbench_direct_linear_load_combination_factor_edit_assembly_receipt_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_assembly_receipt_hash\",\"workbench_direct_linear_load_combination_factor_edit_checkpoint_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_checkpoint_hash\",\"workbench_direct_linear_load_combination_factor_edit_result_ir_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_result_ir_hash\",\"workbench_direct_linear_load_combination_factor_edit_recovery_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_recovery_hash\",\"workbench_direct_linear_load_combination_factor_edit_report_ir_sha256\":\"sha256:$direct_linear_load_combination_factor_edit_report_ir_hash\",\"workbench_direct_linear_load_combination_factor_edit_restart_passed\":true,"
 v49_receipt_json="${v49_receipt_json/\"workbench_result_view_surface_passed\":true,/${direct_linear_load_combination_factor_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v49_receipt_json" > "$temporary_receipt"
+v50_receipt_json="${v49_receipt_json/structural-native-distribution-e2e.v49/structural-native-distribution-e2e.v50}"
+nested_linear_load_combination_factor_edit_receipt_fields="\"workbench_nested_linear_load_combination_factor_edit_surface_passed\":true,\"workbench_nested_linear_load_combination_factor_edit_model_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_model_hash\",\"workbench_nested_linear_load_combination_factor_edit_receipt_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_receipt_hash\",\"workbench_nested_linear_load_combination_factor_edit_request_receipt_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_request_receipt_hash\",\"workbench_nested_linear_load_combination_factor_edit_request_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_request_hash\",\"workbench_nested_linear_load_combination_factor_edit_assembly_receipt_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_assembly_receipt_hash\",\"workbench_nested_linear_load_combination_factor_edit_checkpoint_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_checkpoint_hash\",\"workbench_nested_linear_load_combination_factor_edit_result_ir_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_result_ir_hash\",\"workbench_nested_linear_load_combination_factor_edit_recovery_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_recovery_hash\",\"workbench_nested_linear_load_combination_factor_edit_report_ir_sha256\":\"sha256:$nested_linear_load_combination_factor_edit_report_ir_hash\",\"workbench_nested_linear_load_combination_factor_edit_restart_passed\":true,"
+v50_receipt_json="${v50_receipt_json/\"workbench_result_view_surface_passed\":true,/${nested_linear_load_combination_factor_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v50_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

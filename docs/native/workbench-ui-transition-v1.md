@@ -186,6 +186,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   exact active load, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
   Nested term editing, deeper or larger graphs, self-weight, HIP parity and engineering acceptance
   remain open.
+- `model-edit-nested-linear-load-combination-factor`: deterministic change of exactly one existing
+  root factor selected by explicit `load_pattern` or `load_combination` kind plus identity. Rust
+  preserves root references/order/count and every descendant, rejects no-op/direct/referenced or
+  owned roots, and requires both source and edited expansion to remain within depth eight and 64
+  leaves before C++ revalidation. Installed E2E v50 proves exact active load
+  `[25000,-9000,3750,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+  output. Reference replacement, descendant editing, HIP parity and engineering acceptance remain
+  open.
 - `model-delete-linear-load-combination`: deterministic deletion of only the last contiguous
   neutral, extension-free and unreferenced `linear` combination. Direct rows contain two through 64
   unique existing `linear_static` pattern terms; exact-two deletion retains the v1 field set and

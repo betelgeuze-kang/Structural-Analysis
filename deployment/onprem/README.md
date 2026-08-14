@@ -44,6 +44,10 @@ absent from the runtime image.
   a neutral, extension-free and unreferenced two-through-64-term combination while preserving every
   term reference, order and count; installed v49 E2E proves exact changed load, restart parity and
   fallback 0.
+  `model-edit-nested-linear-load-combination-factor` changes exactly one typed root factor in a
+  neutral, extension-free and unreferenced bounded nested combination while preserving root
+  references/order/count and every descendant; installed v50 E2E binds source/edited expansions,
+  exact changed load, restart parity and fallback 0.
   `model-add-nested-linear-load-combination` adds one bounded acyclic root with explicitly typed
   pattern/combination terms, root-inclusive depth at most eight and at most 64 expanded leaves.
   Rust and C++ independently flatten and validate it before native CPU execution; v3 receipts bind

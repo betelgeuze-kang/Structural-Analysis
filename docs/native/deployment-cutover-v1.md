@@ -89,7 +89,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v49 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v50 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -124,6 +124,10 @@ fallback 0 and byte-identical checkpoint/restart output,
 plus bounded direct linear-load-combination factor editing with preserved term references/order/count,
 exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
 checkpoint/restart output,
+plus bounded nested linear-load-combination typed-root-factor editing with preserved root
+references/order/count and descendants, source/edited depth-eight/64-leaf expansion binding, exact
+active load `[25000,-9000,3750,0,0,0]`, typed recovery, fallback 0 and byte-identical
+checkpoint/restart output through `model-edit-nested-linear-load-combination-factor`,
 plus bounded acyclic nested linear-load-combination authoring and CPU execution with depth eight,
 64 expanded leaves, v3 provenance/request receipts, exact nested active load, typed recovery,
 fallback 0 and byte-identical checkpoint/restart output,
