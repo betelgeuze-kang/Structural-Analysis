@@ -149,6 +149,24 @@ fn run_node_edit(
     ])
 }
 
+fn run_node_identity_edit(
+    source: &Path,
+    destination: &Path,
+    node_id: &str,
+    replacement_node_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-node-identity"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--new-node"),
+        text(replacement_node_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_node_add(
     source: &Path,
     destination: &Path,
@@ -2692,6 +2710,320 @@ fn node_add_is_deterministic_fail_closed_composable_and_cpu_executable() {
         u32::MAX,
     )
     .expect("node-add resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn node_identity_edit_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let added = temporary.0.join("node-identity-added-source");
+    assert_success(&run_node_add(&source, &added, "N3", ["4", "1", "0"]));
+    let added_path = added.join("model-ir.json");
+    let added_bytes = std::fs::read(&added_path).expect("node-added source bytes");
+    let added_validation = validate_model_bytes(&added_bytes).expect("C++-validated added source");
+    let added_model = added_validation.snapshot.value();
+
+    let first = temporary.0.join("node-identity-edit-first");
+    let second = temporary.0.join("node-identity-edit-second");
+    for destination in [&first, &second] {
+        let output = run_node_identity_edit(&added_path, destination, "N3", "N3_RENAMED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published node-identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first node-identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second node-identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&added_path).expect("unchanged node-added source"),
+        added_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("node identity-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict node identity-edited ModelIR");
+    let edited_validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated identity-edited ModelIR");
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    let added_nodes = added_model["nodes"].as_array().expect("added source nodes");
+    let edited_nodes = edited.value()["nodes"].as_array().expect("edited nodes");
+    assert_eq!(edited_nodes.len(), added_nodes.len());
+    assert_eq!(&edited_nodes[..2], &added_nodes[..2]);
+    assert_eq!(edited_nodes[2]["id"], "N3_RENAMED");
+    for key in ["index", "coordinates_m", "source_id", "extensions"] {
+        assert_eq!(edited_nodes[2][key], added_nodes[2][key]);
+    }
+    for family in [
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(edited.value()[family], added_model[family]);
+    }
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-node-identity.v1")
+        .expect("node identity provenance extension");
+    assert_eq!(extension["operation"], "node_identity_edit");
+    assert_eq!(extension["source_node_id"], "N3");
+    assert_eq!(extension["replacement_node_id"], "N3_RENAMED");
+    assert_eq!(extension["node_index"], 2);
+    assert_eq!(
+        extension["retained_coordinates_m"],
+        serde_json::json!([4, 1, 0])
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("node identity receipt"),
+    )
+    .expect("node identity receipt JSON");
+    assert_eq!(receipt["operation"], "node_identity_edit");
+    assert_eq!(receipt["source_node_id"], "N3");
+    assert_eq!(receipt["replacement_node_id"], "N3_RENAMED");
+    assert_eq!(receipt["node_index"], 2);
+    assert_eq!(
+        receipt["retained_coordinates_m"],
+        serde_json::json!([4, 1, 0])
+    );
+    assert_eq!(receipt["retained_source_id"], Value::Null);
+    assert_eq!(receipt["retained_extensions"], serde_json::json!({}));
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, node_id, replacement, expected_code) in [
+        (
+            "missing",
+            "N404",
+            "N4",
+            "workbench_model_edit_node_identity_node_missing",
+        ),
+        (
+            "collision",
+            "N3",
+            "N2",
+            "workbench_model_edit_node_identity_replacement_exists",
+        ),
+        ("no-op", "N3", "N3", "workbench_model_edit_no_change"),
+        (
+            "invalid-replacement",
+            "N3",
+            "1_INVALID",
+            "workbench_model_edit_node_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("node-identity-{name}"));
+        let rejected = run_node_identity_edit(&added_path, &destination, node_id, replacement);
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+    let existing = run_node_identity_edit(&added_path, &first, "N3", "N3_RENAMED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let ownership_cases = [
+        (
+            "element",
+            "workbench_model_edit_node_identity_referenced_by_element",
+        ),
+        (
+            "constraint",
+            "workbench_model_edit_node_identity_referenced_by_constraint",
+        ),
+        (
+            "load",
+            "workbench_model_edit_node_identity_referenced_by_load",
+        ),
+        (
+            "unsupported-feature",
+            "workbench_model_edit_node_identity_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip",
+            "workbench_model_edit_node_identity_roundtrip_owned",
+        ),
+    ];
+    for (name, expected_code) in ownership_cases {
+        let mut owned = added_model.clone();
+        match name {
+            "element" => owned["elements"][0]["node_ids"][1] = serde_json::json!("N3"),
+            "constraint" => {
+                owned["constraints"]
+                    .as_array_mut()
+                    .expect("constraints")
+                    .push(serde_json::json!({
+                        "id": "BC_N3",
+                        "index": 1,
+                        "type": "fixed_dofs",
+                        "node_id": "N3",
+                        "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+                        "prescribed_values_si": {
+                            "UX": 0, "UY": 0, "UZ": 0, "RX": 0, "RY": 0, "RZ": 0
+                        },
+                        "source_id": null,
+                        "extensions": {}
+                    }));
+            }
+            "load" => {
+                owned["load_patterns"][1]["nodal_loads"][0]["node_id"] = serde_json::json!("N3");
+            }
+            "unsupported-feature" => {
+                owned["unsupported_features"] = serde_json::json!([{
+                    "feature_id": "feature.node-identity-owned",
+                    "kind": "unsupported_solver_feature",
+                    "source_entity_id": "N3",
+                    "disposition": "blocked",
+                    "blocking": true,
+                    "detail": "Node identity remains externally owned.",
+                    "extensions": {}
+                }]);
+            }
+            "roundtrip" => {
+                owned["roundtrip_map"] = serde_json::json!([{
+                    "source_entity_id": "source:N3",
+                    "entity_kind": "node",
+                    "model_ir_entity_id": "N3",
+                    "mapping_status": "exact",
+                    "extensions": {}
+                }]);
+            }
+            _ => unreachable!(),
+        }
+        let owned_path = temporary
+            .0
+            .join(format!("node-identity-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned node source")
+                .as_bytes(),
+        )
+        .expect("write owned node source");
+        let destination = temporary.0.join(format!("node-identity-{name}-output"));
+        let rejected = run_node_identity_edit(&owned_path, &destination, "N3", "N3_RENAMED");
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let malformed_path = temporary.0.join("node-identity-malformed-source.json");
+    let mut malformed = added_model.clone();
+    malformed["nodes"][2]["index"] = serde_json::json!(7);
+    std::fs::write(
+        &malformed_path,
+        canonicalize_model_ir_v2(&malformed)
+            .expect("canonical malformed node source")
+            .as_bytes(),
+    )
+    .expect("write malformed node source");
+    let malformed_destination = temporary.0.join("node-identity-malformed-output");
+    let malformed_rejection =
+        run_node_identity_edit(&malformed_path, &malformed_destination, "N3", "N3_RENAMED");
+    assert_eq!(malformed_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&malformed_rejection.stdout)
+        .contains("workbench_model_edit_source_semantics_invalid"));
+    assert!(!malformed_destination.exists());
+
+    let supported = temporary.0.join("node-identity-supported");
+    assert_success(&run_fixed_constraint_add(
+        &first.join("model-ir.json"),
+        &supported,
+        "BC_N3_RENAMED",
+        "N3_RENAMED",
+    ));
+    let supported_bytes =
+        std::fs::read(supported.join("model-ir.json")).expect("constrained renamed-node ModelIR");
+    let request_directory = temporary.0.join("node-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &supported.join("model-ir.json"),
+        &request_directory,
+        "node-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("node identity request");
+    let direct = execute_model_ir_linear_analysis(&supported_bytes, &request_bytes, None, u32::MAX)
+        .expect("node identity direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("node identity direct recovery"),
+    )
+    .expect("node identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&supported_bytes, &request_bytes, None, 0)
+        .expect("node identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &supported_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("node identity resumed execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(

@@ -250,6 +250,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v72",
+            "model-edit-node-identity",
+            "N3_RENAMED",
             "Distribution E2E v71",
             "model-edit-truss-section-identity",
             "T2_RENAMED",
@@ -888,6 +891,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_truss_section_identity_edit_recovery_sha256",
         "workbench_truss_section_identity_edit_report_ir_sha256",
         "workbench_truss_section_identity_edit_restart_passed",
+        "exercise_node_identity_edit_surface",
+        "model-edit-node-identity",
+        "structural-native:model-edit-node-identity.v1",
+        "workbench_node_identity_edit_surface_passed",
+        "workbench_node_identity_edit_model_sha256",
+        "workbench_node_identity_edit_receipt_sha256",
+        "workbench_node_identity_edit_request_receipt_sha256",
+        "workbench_node_identity_edit_request_sha256",
+        "workbench_node_identity_edit_assembly_receipt_sha256",
+        "workbench_node_identity_edit_checkpoint_sha256",
+        "workbench_node_identity_edit_result_ir_sha256",
+        "workbench_node_identity_edit_recovery_sha256",
+        "workbench_node_identity_edit_report_ir_sha256",
+        "workbench_node_identity_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1090,6 +1107,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v72",
+            "V72_NODE_IDENTITY_EDIT_KEYS",
+            "workbench_node_identity_edit_surface_passed",
+            "workbench_node_identity_edit_receipt_sha256",
+            "workbench_node_identity_edit_request_receipt_sha256",
+            "workbench_node_identity_edit_recovery_sha256",
+            "workbench_node_identity_edit_restart_passed",
             "structural-native-distribution-e2e.v71",
             "V71_TRUSS_SECTION_IDENTITY_EDIT_KEYS",
             "workbench_truss_section_identity_edit_surface_passed",
@@ -1718,6 +1742,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "append-only v71",
             "[1,2]",
             "[0,12,15]",
+            "[6,7,8,9,10,11]",
+            "[0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    node_identity_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-node-identity-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-node-identity-edit-v1.md"),
+        text=node_identity_edit_doc,
+        tokens=(
+            "model-edit-node-identity",
+            "single C ABI into C++ semantic validation",
+            "structural-native:model-edit-node-identity.v1",
+            "node_identity_edit",
+            "append-only v72",
+            "[1]",
+            "[0,12]",
             "[6,7,8,9,10,11]",
             "[0,-10000,0,0,0,0]",
             "fallback 0",
@@ -2690,6 +2739,44 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     "modelir_truss_section_identity_edit_capability_"
                     f"claim_missing:{token}"
+                )
+    node_identity_edit_capability = (
+        capabilities.get("modelir_node_identity_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(node_identity_edit_capability, dict):
+        blockers.append("modelir_node_identity_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if node_identity_edit_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_node_identity_edit_capability_" f"field_invalid:{field}"
+                )
+        node_identity_edit_claim = str(node_identity_edit_capability.get("claim", ""))
+        for token in (
+            "replaces exactly one existing unreferenced node ID",
+            "distinct unique stable ID",
+            "element node_ids references",
+            "constraint node_id references",
+            "nested nodal-load node_id references",
+            "unsupported-feature ownership and direct round-trip mappings",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v72 E2E",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "active load [0,-10000,0,0,0,0]",
+            "typed frame recovery [1] with offsets [0,12]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in node_identity_edit_claim:
+                blockers.append(
+                    "modelir_node_identity_edit_capability_" f"claim_missing:{token}"
                 )
     linear_load_combination_deletion_capability = (
         capabilities.get("modelir_linear_load_combination_deletion")

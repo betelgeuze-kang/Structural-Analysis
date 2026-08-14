@@ -14,7 +14,8 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component,
+provenance-bound `model-edit-node` coordinate, `model-edit-node-identity` unreferenced stable-
+identity, `model-edit-nodal-load` existing-load component,
 `model-edit-nodal-load-target` existing-load target-node,
 `model-edit-nodal-load-identity` existing-load stable-identity,
 `model-edit-linear-load-pattern-identity` unreferenced linear-pattern stable-identity,
@@ -123,7 +124,15 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v71 proves repeated truss-section-identity-edited/request/
+assembly preflight. Distribution E2E v72 proves repeated node-identity-edited/request/artifact
+bytes and retains every v71 assertion while replacing neutral unreferenced `N3` with `N3_RENAMED`
+through `model-edit-node-identity`, preserving its index/exact SI coordinates/source identity/
+extensions, rejecting malformed, no-op and colliding identities plus element, constraint,
+nodal-load, unsupported-feature and round-trip ownership without cascade, composing a homogeneous
+six-DOF support on the renamed node, and proving exact typed frame recovery `[1]`, offsets
+`[0,12]`, unchanged active DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, byte-
+identical initialized-checkpoint restart and fallback 0. Distribution E2E v71 proves repeated
+truss-section-identity-edited/request/
 artifact bytes and retains every v70 assertion while replacing unreferenced neutral `T2` with
 `T2_RENAMED` through `model-edit-truss-section-identity`, preserving its index/family/version/SI
 area/source identity/extensions, rejecting malformed, no-op and colliding identities plus element,

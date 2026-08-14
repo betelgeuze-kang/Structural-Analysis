@@ -199,6 +199,12 @@
       "owner": "structural-workbench",
       "claim": "bounded ModelIR node-authoring C5 only: Rust appends one unique finite-coordinate node with the next contiguous index, neutral source ownership and empty extensions while preserving all existing domain rows, blockers and round-trip mappings; source and edited models pass strict Rust parsing and the single C ABI into C++ semantic validation, output is create-new canonical and self-hashed, and installed static/shared E2E composes a homogeneous six-DOF fixed constraint before proving exact unchanged active DOFs/load, typed frame recovery, initialized-active checkpoint/restart parity, native CPU completion and fallback 0; member/load/constraint/property creation in the same operation, arbitrary node placement semantics, visual manipulation, referenced-node/cascade deletion, approved HIP C2 and C6 remain open"
     },
+    "modelir_node_identity_edit": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-workbench",
+      "claim": "bounded ModelIR node stable-identity editing C5 only: Rust replaces exactly one existing unreferenced node ID with a distinct unique stable ID while preserving its contiguous index, exact finite SI coordinates, source identity, extensions and every unrelated row; missing, colliding, no-op or malformed identities, index/coordinate/source/extension drift, element node_ids references, constraint node_id references, nested nodal-load node_id references, unsupported-feature ownership and direct round-trip mappings fail closed without cascade; source and edited models cross strict Rust parsing plus the single C ABI into C++ semantic/reference validation before create-new canonical self-hashed publication; focused plus installed static/shared distribution v72 E2E bind the edited ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR while composing a homogeneous six-DOF support on the renamed node and proving exact active DOFs [6,7,8,9,10,11], active load [0,-10000,0,0,0,0], typed frame recovery [1] with offsets [0,12], byte-identical initialized restart, native CPU FP64, fallback 0 and Python/Node lookup 0; coordinate editing, node creation/deletion, topology/load/constraint retargeting, reference cascade, solver selection, visual manipulation, approved HIP C2, engineering acceptance and C6 remain open"
+    },
     "modelir_orphan_node_delete": {
       "status": "implemented",
       "cutover_gate": "C5",

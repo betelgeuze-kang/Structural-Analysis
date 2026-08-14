@@ -57,3 +57,6 @@ receipts retain their narrower authority and cannot be used as standalone node-a
 
 This is not general topology authoring, connectivity editing, visual placement, referenced-node or
 cascade deletion, automatic support generation, engineering acceptance, approved HIP C2, or C6.
+Stable-identity replacement for an existing unreferenced node is the separate bounded
+`model-edit-node-identity` surface documented in
+`docs/native/modelir-node-identity-edit-v1.md`.

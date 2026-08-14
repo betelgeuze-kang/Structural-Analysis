@@ -162,6 +162,15 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   types `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, active load
   `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Section
   area/family editing, reference cascades and visual dragging remain separate or open.
+- `model-edit-node-identity`: deterministic replacement of one existing unreferenced node identity
+  with a distinct unique ModelIR stable ID. Rust preserves the contiguous index, exact finite SI
+  coordinates, source identity, extensions and unrelated rows; rejects element/constraint/
+  nodal-load/unsupported-feature/round-trip ownership without cascade; and strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v72 replaces neutral `N3` with
+  `N3_RENAMED`, composes a six-DOF support on it, and proves frame recovery type `[1]`, offsets
+  `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, fallback 0 and
+  byte-identical initialized-checkpoint restart. Coordinate editing, creation/deletion, reference
+  cascades and visual dragging remain separate or open.
 - `model-edit-frame-element-orientation`: deterministic replacement of the finite local-axis
   rotation in radians for one existing `frame_3d` element. Rust binds the element identity, fixed
   type, retained formulation, previous/new angle and source hashes, marks only a matching element

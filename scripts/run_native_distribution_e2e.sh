@@ -4939,6 +4939,188 @@ exercise_node_add_surface() {
 }
 exercise_node_add_surface
 
+exercise_node_identity_edit_surface() {
+  local source_model="$e2e_root/node-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory composed_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/node-identity-edit-$label"
+    composed_directory="$e2e_root/node-identity-edit-$label-composed"
+    request_directory="$e2e_root/node-identity-edit-$label-request"
+    direct_directory="$e2e_root/node-identity-edit-$label-direct"
+    partial_directory="$e2e_root/node-identity-edit-$label-partial"
+    resumed_directory="$e2e_root/node-identity-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-node-identity "$source_model" \
+      --node N3 --new-node N3_RENAMED --output-dir "$edit_directory" \
+      > "$e2e_root/node-identity-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"node_identity_edit"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_node_id":"N3"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_node_id":"N3_RENAMED"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"node_index":2' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_coordinates_m":[4,1,0]' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_source_id":null' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_extensions":{}' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"coordinates_m":[4,1,0],"extensions":{},"id":"N3_RENAMED","index":2,"source_id":null' \
+      "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-node-identity.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/node-identity-edit-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":3,"materials":1,"sections":1,"elements":1,"constraints":1' \
+      "$e2e_root/node-identity-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-add-fixed-constraint "$edit_directory/model-ir.json" \
+      --constraint BC_N3_RENAMED --node N3_RENAMED --output-dir "$composed_directory" \
+      > "$e2e_root/node-identity-edit-$label-composed.stdout.json"
+    grep -Fq '"structural-native:model-edit-node-identity.v1"' \
+      "$composed_directory/model-ir.json"
+    grep -Fq '"id":"BC_N3_RENAMED","index":1,"node_id":"N3_RENAMED"' \
+      "$composed_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$composed_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/node-identity-edit-$label-composed-validation.json"
+    grep -Fq '"entity_counts":{"nodes":3,"materials":1,"sections":1,"elements":1,"constraints":2' \
+      "$e2e_root/node-identity-edit-$label-composed-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$composed_directory/model-ir.json" \
+      --case node-identity-edit-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/node-identity-edit-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/node-identity-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 > "$e2e_root/node-identity-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$composed_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/node-identity-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/node-identity-edit-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -composed -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/node-identity-edit-first$suffix" \
+      "$e2e_root/node-identity-edit-second$suffix" \
+      > "$e2e_root/node-identity-edit-$diff_label-diff.txt"
+    cmp "$e2e_root/node-identity-edit-first$suffix.stdout.json" \
+      "$e2e_root/node-identity-edit-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/node-identity-edit-first-validation.json" \
+    "$e2e_root/node-identity-edit-second-validation.json"
+  cmp "$e2e_root/node-identity-edit-first-composed-validation.json" \
+    "$e2e_root/node-identity-edit-second-composed-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed node identity edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/node-identity-edit-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-node-identity "$source_model" \
+    --node N404 --new-node N4 --output-dir "$missing_destination" \
+    > "$e2e_root/node-identity-edit-missing-rejected.stdout.json"; then
+    echo "installed node identity edit accepted a missing node" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_node_identity_node_missing' \
+    "$e2e_root/node-identity-edit-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local collision_destination="$e2e_root/node-identity-edit-collision-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-node-identity "$source_model" \
+    --node N3 --new-node N2 --output-dir "$collision_destination" \
+    > "$e2e_root/node-identity-edit-collision-rejected.stdout.json"; then
+    echo "installed node identity edit accepted a colliding identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_node_identity_replacement_exists' \
+    "$e2e_root/node-identity-edit-collision-rejected.stdout.json"
+  test ! -e "$collision_destination"
+
+  local referenced_destination="$e2e_root/node-identity-edit-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-node-identity "$source_model" \
+    --node N2 --new-node N2_RENAMED --output-dir "$referenced_destination" \
+    > "$e2e_root/node-identity-edit-referenced-rejected.stdout.json"; then
+    echo "installed node identity edit accepted an element-owned node" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_node_identity_referenced_by_element' \
+    "$e2e_root/node-identity-edit-referenced-rejected.stdout.json"
+  test ! -e "$referenced_destination"
+
+  local no_op_destination="$e2e_root/node-identity-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-node-identity "$source_model" \
+    --node N3 --new-node N3 --output-dir "$no_op_destination" \
+    > "$e2e_root/node-identity-edit-no-op-rejected.stdout.json"; then
+    echo "installed node identity edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/node-identity-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/node-identity-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-node-identity "$source_model" \
+    --node N3 --new-node 1_INVALID --output-dir "$invalid_destination" \
+    > "$e2e_root/node-identity-edit-invalid-rejected.stdout.json"; then
+    echo "installed node identity edit accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_node_identity_replacement_invalid' \
+    "$e2e_root/node-identity-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+}
+exercise_node_identity_edit_surface
+
 exercise_orphan_node_delete_surface() {
   local source_model="$e2e_root/node-add-first/model-ir.json"
   local source_before_hash
@@ -7818,6 +8000,15 @@ truss_section_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/truss-sectio
 truss_section_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/truss-section-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
 truss_section_identity_edit_recovery_hash="$(sha256sum "$e2e_root/truss-section-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 truss_section_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/truss-section-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
+node_identity_edit_model_hash="$(sha256sum "$e2e_root/node-identity-edit-first/model-ir.json" | awk '{print $1}')"
+node_identity_edit_receipt_hash="$(sha256sum "$e2e_root/node-identity-edit-first/edit-receipt.json" | awk '{print $1}')"
+node_identity_edit_request_receipt_hash="$(sha256sum "$e2e_root/node-identity-edit-first-request/request-receipt.json" | awk '{print $1}')"
+node_identity_edit_request_hash="$(sha256sum "$e2e_root/node-identity-edit-first-request/analysis-request.json" | awk '{print $1}')"
+node_identity_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/node-identity-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+node_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/node-identity-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+node_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/node-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
+node_identity_edit_recovery_hash="$(sha256sum "$e2e_root/node-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+node_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/node-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -8326,6 +8517,10 @@ v71_receipt_json="${v70_receipt_json/structural-native-distribution-e2e.v70/stru
 truss_section_identity_edit_receipt_fields="\"workbench_truss_section_identity_edit_surface_passed\":true,\"workbench_truss_section_identity_edit_model_sha256\":\"sha256:$truss_section_identity_edit_model_hash\",\"workbench_truss_section_identity_edit_receipt_sha256\":\"sha256:$truss_section_identity_edit_receipt_hash\",\"workbench_truss_section_identity_edit_request_receipt_sha256\":\"sha256:$truss_section_identity_edit_request_receipt_hash\",\"workbench_truss_section_identity_edit_request_sha256\":\"sha256:$truss_section_identity_edit_request_hash\",\"workbench_truss_section_identity_edit_assembly_receipt_sha256\":\"sha256:$truss_section_identity_edit_assembly_receipt_hash\",\"workbench_truss_section_identity_edit_checkpoint_sha256\":\"sha256:$truss_section_identity_edit_checkpoint_hash\",\"workbench_truss_section_identity_edit_result_ir_sha256\":\"sha256:$truss_section_identity_edit_result_ir_hash\",\"workbench_truss_section_identity_edit_recovery_sha256\":\"sha256:$truss_section_identity_edit_recovery_hash\",\"workbench_truss_section_identity_edit_report_ir_sha256\":\"sha256:$truss_section_identity_edit_report_ir_hash\",\"workbench_truss_section_identity_edit_restart_passed\":true,"
 v71_receipt_json="${v71_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss_section_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v71_receipt_json" > "$temporary_receipt"
+v72_receipt_json="${v71_receipt_json/structural-native-distribution-e2e.v71/structural-native-distribution-e2e.v72}"
+node_identity_edit_receipt_fields="\"workbench_node_identity_edit_surface_passed\":true,\"workbench_node_identity_edit_model_sha256\":\"sha256:$node_identity_edit_model_hash\",\"workbench_node_identity_edit_receipt_sha256\":\"sha256:$node_identity_edit_receipt_hash\",\"workbench_node_identity_edit_request_receipt_sha256\":\"sha256:$node_identity_edit_request_receipt_hash\",\"workbench_node_identity_edit_request_sha256\":\"sha256:$node_identity_edit_request_hash\",\"workbench_node_identity_edit_assembly_receipt_sha256\":\"sha256:$node_identity_edit_assembly_receipt_hash\",\"workbench_node_identity_edit_checkpoint_sha256\":\"sha256:$node_identity_edit_checkpoint_hash\",\"workbench_node_identity_edit_result_ir_sha256\":\"sha256:$node_identity_edit_result_ir_hash\",\"workbench_node_identity_edit_recovery_sha256\":\"sha256:$node_identity_edit_recovery_hash\",\"workbench_node_identity_edit_report_ir_sha256\":\"sha256:$node_identity_edit_report_ir_hash\",\"workbench_node_identity_edit_restart_passed\":true,"
+v72_receipt_json="${v72_receipt_json/\"workbench_result_view_surface_passed\":true,/${node_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v72_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

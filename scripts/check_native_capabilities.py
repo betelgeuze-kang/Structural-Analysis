@@ -42,6 +42,7 @@ EXPECTED_OWNERS = {
     "pdf_report": "structural-report",
     "native_workbench": "structural-workbench",
     "modelir_node_add": "structural-workbench",
+    "modelir_node_identity_edit": "structural-workbench",
     "modelir_orphan_node_delete": "structural-workbench",
     "modelir_frame3d_member_add": "structural-workbench",
     "modelir_frame3d_leaf_deletion": "structural-workbench",

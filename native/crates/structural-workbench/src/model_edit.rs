@@ -22,6 +22,7 @@ pub use super::linear_combination::{
 
 const EDIT_SCHEMA_V1: &str = "structural-native-model-edit-receipt.v1";
 const NODE_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node.v1";
+const NODE_IDENTITY_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node-identity.v1";
 const NODE_ADD_EXTENSION_KEY: &str = "structural-native:model-add-node.v1";
 const ORPHAN_NODE_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-orphan-node.v1";
 const NODAL_LOAD_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-nodal-load.v1";
@@ -120,6 +121,7 @@ const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss
 const TRUSS_SECTION_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-truss-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
+const NODE_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_node_identity_replacement_to_distinct_unique_stable_id_with_index_coordinates_source_extensions_and_unrelated_rows_preserved_without_element_constraint_nodal_load_unsupported_feature_or_roundtrip_cascade_not_coordinate_node_creation_deletion_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const NODE_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_contiguous_neutral_node_addition_not_member_load_constraint_property_solver_visual_editing_engineering_acceptance_or_c6";
 const ORPHAN_NODE_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_orphan_node_deletion_with_two_nodes_retained_not_source_owned_extended_element_constraint_load_mapped_unsupported_feature_owned_cascade_reindexing_general_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
@@ -182,6 +184,13 @@ const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 /// Complete deterministic artifact pair produced by one bounded node-coordinate edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodeEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded node identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelNodeIdentityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -613,6 +622,31 @@ pub fn publish_model_node_coordinate_edit(
 ) -> Result<ModelNodeEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_node_coordinates(&source, node_id, coordinates_m)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one unreferenced node identity and atomically publish the edited `ModelIR`.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// malformed node rows, element/constraint/load references, unsupported-feature or round-trip
+/// ownership, no-op edits, or create-new publication failures.
+pub fn publish_model_node_identity_edit(
+    source_path: &Path,
+    node_id: &str,
+    replacement_node_id: &str,
+    output_directory: &Path,
+) -> Result<ModelNodeIdentityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_node_identity(&source, node_id, replacement_node_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2177,6 +2211,101 @@ pub fn edit_model_node_coordinates(
         "claim_boundary": NODE_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodeEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RenamedNodeV1 {
+    node_index: usize,
+    coordinates_m: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Replace one unreferenced node identity in memory.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing or malformed nodes,
+/// no-op edits, element/constraint/nodal-load references, unsupported-feature or round-trip
+/// ownership, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_node_identity(
+    source_bytes: &[u8],
+    node_id: &str,
+    replacement_node_id: &str,
+) -> Result<ModelNodeIdentityEditOutcomeV1, WorkbenchError> {
+    validate_node_identity_edit_request(source_bytes.len(), node_id, replacement_node_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let renamed = replace_node_identity(&mut edited, node_id, replacement_node_id)?;
+    bind_node_identity_edit_provenance(
+        &mut edited,
+        node_id,
+        replacement_node_id,
+        &renamed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the node identity-edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "node_identity_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_node_id": node_id,
+        "replacement_node_id": replacement_node_id,
+        "node_index": renamed.node_index,
+        "retained_coordinates_m": renamed.coordinates_m,
+        "retained_source_id": renamed.retained_source_id,
+        "retained_extensions": renamed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NODE_IDENTITY_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelNodeIdentityEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -7927,6 +8056,36 @@ fn validate_node_add_request(
     Ok(())
 }
 
+fn validate_node_identity_edit_request(
+    source_length: usize,
+    node_id: &str,
+    replacement_node_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, node_id, "node")?;
+    validate_bounded_edit_identity(0, replacement_node_id, "replacement node")?;
+    let replacement_bytes = replacement_node_id.as_bytes();
+    if !replacement_bytes
+        .first()
+        .is_some_and(u8::is_ascii_alphabetic)
+        || !replacement_bytes
+            .iter()
+            .skip(1)
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'.' | b':' | b'-'))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_replacement_invalid",
+            "replacement node identity must satisfy the ModelIR stable-ID grammar",
+        ));
+    }
+    if node_id == replacement_node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement node identity is identical to the source identity",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_orphan_node_delete_request(
     source_length: usize,
     node_id: &str,
@@ -9005,6 +9164,157 @@ fn replace_node_coordinates(
         .ok_or_else(|| snapshot_error("node"))?
         .insert("coordinates_m".to_owned(), json!(coordinates_m));
     Ok(previous_coordinates_m)
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_node_identity(
+    model: &mut Value,
+    node_id: &str,
+    replacement_node_id: &str,
+) -> Result<RenamedNodeV1, WorkbenchError> {
+    if node_id == replacement_node_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement node identity is identical to the source identity",
+        ));
+    }
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    let node_index = nodes
+        .iter()
+        .position(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_node_identity_node_missing",
+                format!("ModelIR has no node with identity {node_id}"),
+            )
+        })?;
+    if nodes
+        .iter()
+        .any(|node| node.get("id").and_then(Value::as_str) == Some(replacement_node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_replacement_exists",
+            format!("ModelIR already has a node with identity {replacement_node_id}"),
+        ));
+    }
+    let node = &nodes[node_index];
+    if node.get("index").and_then(Value::as_u64) != u64::try_from(node_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_index_mismatch",
+            "identity-edited node index must match its contiguous position",
+        ));
+    }
+    let coordinates = node
+        .get("coordinates_m")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| snapshot_error("node coordinates_m"))?;
+    for coordinate in coordinates {
+        finite_number(coordinate, "node identity retained finite coordinate")?;
+    }
+    let coordinates_m = Value::Array(coordinates.clone());
+    let retained_source_id = node
+        .get("source_id")
+        .filter(|value| value.is_null() || value.is_string())
+        .ok_or_else(|| snapshot_error("node source_id"))?
+        .clone();
+    let retained_extensions = node
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("node extensions"))?
+        .clone();
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == node_id || id == replacement_node_id);
+
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements.iter().any(|element| {
+        element
+            .get("node_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| identity_matches(id.as_str())))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_referenced_by_element",
+            "node identity editing refuses source or replacement references from elements",
+        ));
+    }
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    if constraints
+        .iter()
+        .any(|constraint| identity_matches(constraint.get("node_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_referenced_by_constraint",
+            "node identity editing refuses source or replacement references from constraints",
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.iter().any(|pattern| {
+        pattern
+            .get("nodal_loads")
+            .and_then(Value::as_array)
+            .is_some_and(|loads| {
+                loads
+                    .iter()
+                    .any(|load| identity_matches(load.get("node_id").and_then(Value::as_str)))
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_referenced_by_load",
+            "node identity editing refuses source or replacement references from nodal loads",
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_unsupported_feature_owned",
+            "node identity editing refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| identity_matches(row.get("model_ir_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_node_identity_roundtrip_owned",
+            "node identity editing refuses source or replacement ownership by a round-trip mapping",
+        ));
+    }
+
+    model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .and_then(|rows| rows.get_mut(node_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("node"))?
+        .insert("id".to_owned(), json!(replacement_node_id));
+    Ok(RenamedNodeV1 {
+        node_index,
+        coordinates_m,
+        retained_source_id,
+        retained_extensions,
+    })
 }
 
 fn replace_nodal_load_components(
@@ -18433,6 +18743,36 @@ fn bind_node_add_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_node_identity_edit_provenance(
+    model: &mut Value,
+    node_id: &str,
+    replacement_node_id: &str,
+    renamed: &RenamedNodeV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NODE_IDENTITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "node_identity_edit",
+            "source_node_id": node_id,
+            "replacement_node_id": replacement_node_id,
+            "node_index": renamed.node_index,
+            "retained_coordinates_m": renamed.coordinates_m.clone(),
+            "retained_source_id": renamed.retained_source_id.clone(),
+            "retained_extensions": renamed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": NODE_IDENTITY_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_orphan_node_delete_provenance(
     model: &mut Value,
     node_id: &str,
@@ -18847,7 +19187,7 @@ mod tests {
         replace_frame_section_identity, replace_linear_load_pattern_identity,
         replace_linear_material_identity, replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
-        replace_nodal_load_target, replace_truss_section_identity,
+        replace_nodal_load_target, replace_node_identity, replace_truss_section_identity,
         validate_constraint_target_edit_request, validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request,
@@ -18881,15 +19221,16 @@ mod tests {
         validate_nodal_load_add_request, validate_nodal_load_delete_request,
         validate_nodal_load_edit_request, validate_nodal_load_identity_edit_request,
         validate_nodal_load_target_edit_request, validate_node_add_request,
-        validate_orphan_node_delete_request, validate_truss3d_leaf_member_delete_request,
-        validate_truss3d_member_add_request, validate_truss3d_member_properties,
-        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
-        validate_truss_section_add_request, validate_truss_section_delete_request,
-        validate_truss_section_edit_request, validate_truss_section_identity_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1,
-        LinearLoadCombinationDeletionProfileV1, LinearLoadCombinationReferenceKindV1,
-        LinearLoadCombinationTermV1, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+        validate_node_identity_edit_request, validate_orphan_node_delete_request,
+        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
+        validate_truss_element_property_references, validate_truss_section_add_request,
+        validate_truss_section_delete_request, validate_truss_section_edit_request,
+        validate_truss_section_identity_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, LinearLoadCombinationDeletionProfileV1,
+        LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
+        NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -18934,6 +19275,115 @@ mod tests {
                 .code,
             "workbench_model_add_node_coordinate_exists"
         );
+    }
+
+    #[test]
+    fn node_identity_edit_is_unreferenced_and_field_preserving() {
+        validate_node_identity_edit_request(0, "N3", "N3_RENAMED")
+            .expect("valid node identity request");
+        assert_eq!(
+            validate_node_identity_edit_request(0, "N3", "1_INVALID")
+                .expect_err("invalid replacement stable ID")
+                .code,
+            "workbench_model_edit_node_identity_replacement_invalid"
+        );
+        assert_eq!(
+            validate_node_identity_edit_request(0, "N3", "N3")
+                .expect_err("no-op identity")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+
+        let model = node_identity_fixture();
+        let source_node = model["nodes"][2].clone();
+        let mut edited = model.clone();
+        let renamed = replace_node_identity(&mut edited, "N3", "N3_RENAMED")
+            .expect("rename unreferenced node");
+        assert_eq!(renamed.node_index, 2);
+        assert_eq!(renamed.coordinates_m, source_node["coordinates_m"]);
+        assert_eq!(renamed.retained_source_id, source_node["source_id"]);
+        assert_eq!(renamed.retained_extensions, source_node["extensions"]);
+        assert_eq!(edited["nodes"][2]["id"], "N3_RENAMED");
+        for key in ["index", "coordinates_m", "source_id", "extensions"] {
+            assert_eq!(edited["nodes"][2][key], source_node[key]);
+        }
+        assert_eq!(edited["nodes"][0], model["nodes"][0]);
+        assert_eq!(edited["nodes"][1], model["nodes"][1]);
+
+        assert_node_identity_rejections(&model);
+    }
+
+    fn node_identity_fixture() -> Value {
+        json!({
+            "nodes": [
+                {"id": "N1", "index": 0, "coordinates_m": [0, 0, 0], "source_id": "source:N1", "extensions": {}},
+                {"id": "N2", "index": 1, "coordinates_m": [2, 0, 0], "source_id": "source:N2", "extensions": {}},
+                {"id": "N3", "index": 2, "coordinates_m": [4, 1, 0], "source_id": null, "extensions": {"fixture": true}}
+            ],
+            "elements": [{"node_ids": ["N1", "N2"]}],
+            "constraints": [{"node_id": "N1"}],
+            "load_patterns": [{"nodal_loads": [{"node_id": "N2"}]}],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        })
+    }
+
+    fn assert_node_identity_rejections(model: &Value) {
+        for (source, replacement, code) in [
+            (
+                "N404",
+                "N4",
+                "workbench_model_edit_node_identity_node_missing",
+            ),
+            (
+                "N3",
+                "N2",
+                "workbench_model_edit_node_identity_replacement_exists",
+            ),
+        ] {
+            assert_eq!(
+                replace_node_identity(&mut model.clone(), source, replacement)
+                    .expect_err("invalid node identity edit")
+                    .code,
+                code
+            );
+        }
+        for (field, value, code) in [
+            (
+                "elements",
+                json!([{"node_ids": ["N1", "N3"]}]),
+                "workbench_model_edit_node_identity_referenced_by_element",
+            ),
+            (
+                "constraints",
+                json!([{"node_id": "N3"}]),
+                "workbench_model_edit_node_identity_referenced_by_constraint",
+            ),
+            (
+                "load_patterns",
+                json!([{"nodal_loads": [{"node_id": "N3"}]}]),
+                "workbench_model_edit_node_identity_referenced_by_load",
+            ),
+            (
+                "unsupported_features",
+                json!([{"source_entity_id": "N3"}]),
+                "workbench_model_edit_node_identity_unsupported_feature_owned",
+            ),
+            (
+                "roundtrip_map",
+                json!([{"model_ir_entity_id": "N3"}]),
+                "workbench_model_edit_node_identity_roundtrip_owned",
+            ),
+        ] {
+            let mut owned = model.clone();
+            owned[field] = value;
+            assert_eq!(
+                replace_node_identity(&mut owned, "N3", "N3_RENAMED")
+                    .expect_err("owned node identity")
+                    .code,
+                code
+            );
+        }
     }
 
     #[test]

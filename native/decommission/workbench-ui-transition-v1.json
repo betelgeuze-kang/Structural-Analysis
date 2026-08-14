@@ -16,6 +16,7 @@
     "model_flow": [
       "model-view",
       "model-edit-node",
+      "model-edit-node-identity",
       "model-add-node",
       "model-delete-orphan-node",
       "model-edit-nodal-load",
