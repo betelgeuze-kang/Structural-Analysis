@@ -49,6 +49,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-truss3d-editing-v1.md"),
     Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
+    Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
 )
 
 
@@ -194,6 +195,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-truss3d-member",
             "model-delete-frame3d-leaf-member",
             "model-delete-truss3d-leaf-member",
+            "model-delete-fixed-constraint",
             "model-add-nodal-load",
             "model-add-frame-section",
             "model-create-linear-analysis-request",
@@ -320,7 +322,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v33",
+        "structural-native-distribution-e2e.v34",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -362,6 +364,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_fixed_constraint_add_request_sha256",
         "workbench_fixed_constraint_add_result_ir_sha256",
         "workbench_fixed_constraint_add_recovery_sha256",
+        "exercise_fixed_constraint_deletion_surface",
+        "model-delete-fixed-constraint",
+        "workbench_fixed_constraint_delete_surface_passed",
+        "workbench_fixed_constraint_delete_model_sha256",
+        "workbench_fixed_constraint_delete_receipt_sha256",
+        "workbench_fixed_constraint_delete_request_sha256",
+        "workbench_fixed_constraint_delete_result_ir_sha256",
+        "workbench_fixed_constraint_delete_recovery_sha256",
         "exercise_linear_load_pattern_add_surface",
         "model-add-linear-load-pattern",
         "workbench_linear_load_pattern_add_surface_passed",
@@ -500,7 +510,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
-            "structural-native-distribution-e2e.v33",
+            "structural-native-distribution-e2e.v34",
+            "V34_FIXED_CONSTRAINT_DELETE_KEYS",
+            "workbench_fixed_constraint_delete_surface_passed",
+            "workbench_fixed_constraint_delete_recovery_sha256",
             "V33_FRAME3D_LEAF_DELETION_KEYS",
             "workbench_frame3d_leaf_deletion_surface_passed",
             "workbench_frame3d_leaf_deletion_recovery_sha256",
@@ -518,9 +531,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
-            "append-only v33 hash-bound receipt",
-            "frozen v1 through v32 receipts",
-            "no pre-v33 receipt",
+            "append-only v34 hash-bound receipt",
+            "frozen v1 through v33 receipts",
+            "no pre-v34 receipt",
         ),
         blockers=blockers,
     )
@@ -566,6 +579,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-frame3d-leaf-member",
             "Installed static and shared package E2E v33",
             "Frozen v1 through v32",
+            "receipts keep their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    fixed_constraint_deletion_doc = _text(
+        root, Path("docs/native/modelir-fixed-constraint-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
+        text=fixed_constraint_deletion_doc,
+        tokens=(
+            "model-delete-fixed-constraint",
+            "Installed static and shared package E2E v34",
+            "Frozen v1 through v33",
             "receipts keep their narrower authority",
         ),
         blockers=blockers,
@@ -638,6 +666,37 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in truss_editing_claim:
                 blockers.append(
                     f"modelir_truss3d_editing_capability_claim_missing:{token}"
+                )
+    fixed_constraint_deletion_capability = (
+        capabilities.get("modelir_fixed_constraint_deletion")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(fixed_constraint_deletion_capability, dict):
+        blockers.append("modelir_fixed_constraint_deletion_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if fixed_constraint_deletion_capability.get(field) != expected:
+                blockers.append(
+                    f"modelir_fixed_constraint_deletion_capability_field_invalid:{field}"
+                )
+        fixed_constraint_deletion_claim = str(
+            fixed_constraint_deletion_capability.get("claim", "")
+        )
+        for token in (
+            "last contiguous neutral homogeneous six-DOF zero fixed_dofs row",
+            "construction-stage/unsupported-feature/round-trip reference",
+            "installed static/shared E2E",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in fixed_constraint_deletion_claim:
+                blockers.append(
+                    f"modelir_fixed_constraint_deletion_capability_claim_missing:{token}"
                 )
     frame_leaf_deletion_capability = (
         capabilities.get("modelir_frame3d_leaf_deletion")
@@ -720,7 +779,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v33 E2E",
+            "CPU static/shared distribution v34 E2E",
+            "last-neutral fixed-constraint deletion",
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",

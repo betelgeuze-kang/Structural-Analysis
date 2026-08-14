@@ -119,6 +119,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   active linear DOFs from twelve to six, proves changed recovery and fallback 0. Partial/nonzero
   restraint, already constrained nodes, MPC/contact/support sets, retargeting, deletion and visual
   authoring remain open.
+- `model-delete-fixed-constraint`: deterministic deletion of only the last contiguous neutral,
+  homogeneous six-DOF zero `fixed_dofs` row while retaining another constraint. Rust rejects
+  source-owned/nonterminal/partial/nonzero rows and construction-stage, unsupported-feature, or
+  round-trip references before mutation, then strictly reparses and C++-revalidates before
+  create-new publication. Installed E2E proves twelve active DOFs, exact retained loads, typed
+  frame recovery, one-real-iteration byte-identical restart and fallback 0. General constraint or
+  topology deletion, cascade/reindex and visual authoring remain open.
 - `model-add-linear-load-pattern`: atomic deterministic creation of one `linear_static` pattern and
   its first nonzero nodal load on an existing node. Rust assigns contiguous pattern/load indices,
   zero self-weight and neutral source ownership, preserves all existing round-trip rows and
@@ -295,16 +302,17 @@ well. Viewer report PDF verification plus Viewer sample-workflow, performance, a
 process/artifact verification are also Rust-native; npm package installation, Vite/TypeScript
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only the
-documented bounded existing-entity editors, frame/truss member and property creators, and the two
-family-specific last-neutral-frame/truss-leaf deletion operations. It also provides bounded nodal-load,
-fixed-constraint, linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
+documented bounded existing-entity editors, frame/truss member and property creators, the
+last-neutral fixed-constraint deletion, and the two family-specific last-neutral-frame/truss-leaf
+deletion operations. It also provides bounded nodal-load, fixed-constraint,
+linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
 section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 The transition manifest now enumerates the compatible frame-element property editor, both truss
-editors, truss section/member authoring, and both last-neutral frame/truss leaf deleters explicitly
-in its native command and feature inventories. These remain bounded C5 rows and do not promote any
-open general-editing or C6 prerequisite.
+editors, truss section/member authoring, last-neutral fixed-constraint deletion, and both
+last-neutral frame/truss leaf deleters explicitly in its native command and feature inventories.
+These remain bounded C5 rows and do not promote any open general-editing or C6 prerequisite.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
 
@@ -326,7 +334,8 @@ provenance-bound operations. The frame/truss member, nodal-load, fixed-constrain
 linear-static-pattern/first-load, stateless linear-elastic-material and frame/truss-section
 creators close only their documented fixed constructions. The two leaf deleters close only one
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
-endpoint node.
+endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
+homogeneous six-DOF zero row while retaining the base constraint.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
 property/material/section/load-combination/constraint-topology editing remain open, so the

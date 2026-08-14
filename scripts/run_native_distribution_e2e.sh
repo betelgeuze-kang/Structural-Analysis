@@ -1176,6 +1176,132 @@ exercise_fixed_constraint_add_surface() {
 }
 exercise_fixed_constraint_add_surface
 
+exercise_fixed_constraint_deletion_surface() {
+  local source_model="$e2e_root/fixed-constraint-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/fixed-constraint-delete-$label"
+    request_directory="$e2e_root/fixed-constraint-delete-$label-request"
+    direct_directory="$e2e_root/fixed-constraint-delete-$label-direct"
+    partial_directory="$e2e_root/fixed-constraint-delete-$label-partial"
+    resumed_directory="$e2e_root/fixed-constraint-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-fixed-constraint "$source_model" \
+      --constraint BC_N3 --output-dir "$delete_directory" \
+      > "$e2e_root/fixed-constraint-delete-$label.stdout.json"
+    grep -Fq '"operation":"fixed_constraint_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_constraint_id":"BC_N3"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_constraint_index":1' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_constraint_type":"fixed_dofs"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_id":"N3"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_dofs":["UX","UY","UZ","RX","RY","RZ"]' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_prescribed_values_si":{"RX":0,"RY":0,"RZ":0,"UX":0,"UY":0,"UZ":0}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-fixed-constraint.v1"' \
+      "$delete_directory/model-ir.json"
+    if grep -Fq '"id":"BC_N3"' "$delete_directory/model-ir.json"; then
+      echo "installed fixed-constraint deletion retained BC_N3" >&2
+      exit 1
+    fi
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/fixed-constraint-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/fixed-constraint-delete-$label-view.txt"
+    grep -Fq 'constraints=1' "$e2e_root/fixed-constraint-delete-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case fixed-constraint-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/fixed-constraint-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/fixed-constraint-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11,12,13,14,15,16,17]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0,0,-1000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1,1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12,24]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 1 \
+      > "$e2e_root/fixed-constraint-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/fixed-constraint-delete-first$suffix" \
+      "$e2e_root/fixed-constraint-delete-second$suffix" \
+      > "$e2e_root/fixed-constraint-delete-$diff_label-diff.txt"
+  done
+  for suffix in '' -request -direct -partial -resumed; do
+    cmp "$e2e_root/fixed-constraint-delete-first$suffix.stdout.json" \
+      "$e2e_root/fixed-constraint-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/fixed-constraint-delete-first-validation.json" \
+    "$e2e_root/fixed-constraint-delete-second-validation.json"
+  cmp "$e2e_root/fixed-constraint-delete-first-view.txt" \
+    "$e2e_root/fixed-constraint-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed fixed-constraint deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local rejected_destination="$e2e_root/fixed-constraint-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-fixed-constraint "$source_model" --constraint BC1 \
+    --output-dir "$rejected_destination" \
+    > "$e2e_root/fixed-constraint-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed fixed-constraint deletion accepted a nonterminal row" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_fixed_constraint_not_terminal' \
+    "$e2e_root/fixed-constraint-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$rejected_destination"
+}
+exercise_fixed_constraint_deletion_surface
+
 exercise_linear_load_pattern_add_surface() {
   local source_model="$e2e_root/fixed-constraint-add-first/model-ir.json"
   local source_before_hash baseline_recovery baseline_maximum_displacement
@@ -2585,6 +2711,11 @@ fixed_constraint_add_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-add-f
 fixed_constraint_add_request_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 fixed_constraint_add_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 fixed_constraint_add_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+fixed_constraint_delete_model_hash="$(sha256sum "$e2e_root/fixed-constraint-delete-first/model-ir.json" | awk '{print $1}')"
+fixed_constraint_delete_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-delete-first/edit-receipt.json" | awk '{print $1}')"
+fixed_constraint_delete_request_hash="$(sha256sum "$e2e_root/fixed-constraint-delete-first-request/analysis-request.json" | awk '{print $1}')"
+fixed_constraint_delete_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-delete-first-direct/result-ir.json" | awk '{print $1}')"
+fixed_constraint_delete_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 linear_load_pattern_add_model_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first/model-ir.json" | awk '{print $1}')"
 linear_load_pattern_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first/edit-receipt.json" | awk '{print $1}')"
 linear_load_pattern_add_request_hash="$(sha256sum "$e2e_root/linear-load-pattern-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -2730,6 +2861,10 @@ v33_receipt_json="${v32_receipt_json/structural-native-distribution-e2e.v32/stru
 frame3d_leaf_deletion_receipt_fields="\"workbench_frame3d_leaf_deletion_surface_passed\":true,\"workbench_frame3d_leaf_deletion_model_sha256\":\"sha256:$frame3d_leaf_deletion_model_hash\",\"workbench_frame3d_leaf_deletion_receipt_sha256\":\"sha256:$frame3d_leaf_deletion_receipt_hash\",\"workbench_frame3d_leaf_deletion_request_sha256\":\"sha256:$frame3d_leaf_deletion_request_hash\",\"workbench_frame3d_leaf_deletion_result_ir_sha256\":\"sha256:$frame3d_leaf_deletion_result_ir_hash\",\"workbench_frame3d_leaf_deletion_recovery_sha256\":\"sha256:$frame3d_leaf_deletion_recovery_hash\","
 v33_receipt_json="${v33_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame3d_leaf_deletion_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v33_receipt_json" > "$temporary_receipt"
+v34_receipt_json="${v33_receipt_json/structural-native-distribution-e2e.v33/structural-native-distribution-e2e.v34}"
+fixed_constraint_delete_receipt_fields="\"workbench_fixed_constraint_delete_surface_passed\":true,\"workbench_fixed_constraint_delete_model_sha256\":\"sha256:$fixed_constraint_delete_model_hash\",\"workbench_fixed_constraint_delete_receipt_sha256\":\"sha256:$fixed_constraint_delete_receipt_hash\",\"workbench_fixed_constraint_delete_request_sha256\":\"sha256:$fixed_constraint_delete_request_hash\",\"workbench_fixed_constraint_delete_result_ir_sha256\":\"sha256:$fixed_constraint_delete_result_ir_hash\",\"workbench_fixed_constraint_delete_recovery_sha256\":\"sha256:$fixed_constraint_delete_recovery_hash\","
+v34_receipt_json="${v34_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v34_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

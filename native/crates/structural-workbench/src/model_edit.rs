@@ -34,6 +34,8 @@ const TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-truss3d-leaf-member.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
+const FIXED_CONSTRAINT_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-fixed-constraint.v1";
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-pattern.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
@@ -56,6 +58,7 @@ const FRAME3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated
 const TRUSS3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_linear_truss3d_leaf_member_and_orphan_node_deletion_not_cascade_general_entity_or_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
+const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_homogeneous_six_dof_fixed_constraint_deletion_not_source_owned_partial_nonzero_staged_mapped_general_constraint_or_topology_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -200,6 +203,13 @@ pub struct ModelFixedConstraintAddOutcomeV1 {
     pub receipt_json: String,
 }
 
+/// Complete deterministic artifact pair produced by one bounded fixed-constraint deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFixedConstraintDeleteOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
 /// Complete deterministic artifact pair produced by one bounded linear-load-pattern addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearLoadPatternAddOutcomeV1 {
@@ -324,6 +334,30 @@ pub fn publish_model_fixed_constraint_add(
 ) -> Result<ModelFixedConstraintAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_fixed_constraint(&source, constraint_id, node_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral homogeneous fixed constraint and publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, non-terminal, source-owned,
+/// non-homogeneous, staged, unsupported-feature-owned, or round-trip-mapped constraints, and
+/// publication failures.
+pub fn publish_model_fixed_constraint_delete(
+    source_path: &Path,
+    constraint_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFixedConstraintDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_fixed_constraint(&source, constraint_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1147,6 +1181,99 @@ pub fn add_model_fixed_constraint(
         "claim_boundary": FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFixedConstraintAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedFixedConstraintV1 {
+    constraint_index: usize,
+    node_id: String,
+    dofs: Value,
+    prescribed_values_si: Value,
+}
+
+/// Delete one last contiguous neutral homogeneous six-DOF fixed constraint in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal rows, source-owned, partial or
+/// nonzero constraints, construction-stage/unsupported-feature/round-trip references, schema
+/// drift, or edited semantics rejected by the C++ validator.
+pub fn delete_model_fixed_constraint(
+    source_bytes: &[u8],
+    constraint_id: &str,
+) -> Result<ModelFixedConstraintDeleteOutcomeV1, WorkbenchError> {
+    validate_fixed_constraint_delete_request(source_bytes.len(), constraint_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_fixed_constraint(&mut edited, constraint_id)?;
+    bind_fixed_constraint_delete_provenance(
+        &mut edited,
+        constraint_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "fixed_constraint_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_constraint_id": constraint_id,
+        "removed_constraint_index": removed.constraint_index,
+        "removed_constraint_type": "fixed_dofs",
+        "removed_node_id": removed.node_id,
+        "removed_dofs": removed.dofs,
+        "removed_prescribed_values_si": removed.prescribed_values_si,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFixedConstraintDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3089,6 +3216,13 @@ fn validate_fixed_constraint_add_request(
     Ok(())
 }
 
+fn validate_fixed_constraint_delete_request(
+    source_length: usize,
+    constraint_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, constraint_id, "fixed constraint")
+}
+
 fn validate_linear_load_pattern_add_request(
     source_length: usize,
     load_pattern_id: &str,
@@ -3417,6 +3551,166 @@ fn append_fixed_constraint(
             "extensions": {}
         }));
     Ok(constraint_index)
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_fixed_constraint(
+    model: &mut Value,
+    constraint_id: &str,
+) -> Result<RemovedFixedConstraintV1, WorkbenchError> {
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    if constraints.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_minimum_topology",
+            "fixed-constraint deletion must retain at least one constraint",
+        ));
+    }
+    let constraint_index = constraints
+        .iter()
+        .position(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    if constraint_index + 1 != constraints.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_not_terminal",
+            "deleted constraint must be the last contiguous constraint row",
+        ));
+    }
+    let constraint = &constraints[constraint_index];
+    if constraint.get("index").and_then(Value::as_u64) != u64::try_from(constraint_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_index_mismatch",
+            "deleted constraint index must match its last contiguous position",
+        ));
+    }
+    if constraint.get("type").and_then(Value::as_str) != Some("fixed_dofs") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_type_unsupported",
+            "fixed-constraint deletion accepts only a fixed_dofs constraint",
+        ));
+    }
+    if !constraint.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_source_owned",
+            "fixed-constraint deletion accepts only a neutral row with null source_id",
+        ));
+    }
+    let node_id = constraint
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("fixed constraint node_id"))?
+        .to_owned();
+    let dofs = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == DOF_KEYS.len())
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_not_homogeneous",
+                "deleted constraint must contain the closed six-DOF mask",
+            )
+        })?;
+    if dofs
+        .iter()
+        .zip(DOF_KEYS)
+        .any(|(value, expected)| value.as_str() != Some(expected))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_not_homogeneous",
+            "deleted constraint must use the ordered UX/UY/UZ/RX/RY/RZ mask",
+        ));
+    }
+    let prescribed_values = constraint
+        .get("prescribed_values_si")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == DOF_KEYS.len())
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_not_homogeneous",
+                "deleted constraint must contain exactly six prescribed values",
+            )
+        })?;
+    for dof in DOF_KEYS {
+        let value = prescribed_values
+            .get(dof)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_delete_fixed_constraint_not_homogeneous",
+                    format!("deleted constraint has no prescribed value for {dof}"),
+                )
+            })?
+            .as_f64()
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| snapshot_error("fixed constraint prescribed value"))?;
+        if normalized_number_bits(value) != normalized_number_bits(0.0) {
+            return Err(WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_not_homogeneous",
+                "deleted constraint must prescribe zero for every restrained DOF",
+            ));
+        }
+    }
+    let construction_stages = model
+        .get("construction_stages")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("construction_stages"))?;
+    if construction_stages.iter().any(|stage| {
+        stage
+            .get("active_constraint_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| id.as_str() == Some(constraint_id)))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_referenced_by_stage",
+            format!("constraint {constraint_id} is referenced by a construction stage"),
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        feature.get("source_entity_id").and_then(Value::as_str) == Some(constraint_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_unsupported_feature_owned",
+            "fixed-constraint deletion refuses a row referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| row.get("model_ir_entity_id").and_then(Value::as_str) == Some(constraint_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_roundtrip_owned",
+            "fixed-constraint deletion refuses a row with a round-trip mapping",
+        ));
+    }
+
+    let dofs = constraint["dofs"].clone();
+    let prescribed_values_si = constraint["prescribed_values_si"].clone();
+    model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("constraints"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last constraint"))?;
+    Ok(RemovedFixedConstraintV1 {
+        constraint_index,
+        node_id,
+        dofs,
+        prescribed_values_si,
+    })
 }
 
 fn append_linear_load_pattern(
@@ -5068,6 +5362,34 @@ fn bind_fixed_constraint_add_provenance(
     )
 }
 
+fn bind_fixed_constraint_delete_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    removed: &RemovedFixedConstraintV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FIXED_CONSTRAINT_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "fixed_constraint_delete",
+            "removed_constraint_id": constraint_id,
+            "removed_constraint_index": removed.constraint_index,
+            "removed_constraint_type": "fixed_dofs",
+            "removed_node_id": removed.node_id,
+            "removed_dofs": removed.dofs,
+            "removed_prescribed_values_si": removed.prescribed_values_si,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_linear_load_pattern_add_provenance(
     model: &mut Value,
@@ -5848,11 +6170,12 @@ mod tests {
 
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
-        mark_roundtrip_node_approximated, normalized_number_bits, remove_frame3d_leaf_member,
-        remove_truss3d_leaf_member, validate_constraint_value_edit_request, validate_edit_request,
+        mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
+        remove_frame3d_leaf_member, remove_truss3d_leaf_member,
+        validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
-        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
-        validate_frame_element_orientation_edit_request,
+        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
+        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_material_add_request,
@@ -6223,6 +6546,109 @@ mod tests {
                 .expect_err("empty node identity")
                 .code,
             "workbench_model_edit_entity_id_invalid"
+        );
+    }
+
+    #[test]
+    fn fixed_constraint_delete_requires_terminal_neutral_unreferenced_homogeneous_row() {
+        validate_fixed_constraint_delete_request(0, "BC_N3")
+            .expect("valid fixed-constraint deletion request");
+        assert_eq!(
+            validate_fixed_constraint_delete_request(0, "")
+                .expect_err("empty constraint identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        let model = json!({
+            "constraints": [
+                {
+                    "id": "BC1",
+                    "index": 0,
+                    "type": "fixed_dofs",
+                    "node_id": "N1",
+                    "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+                    "prescribed_values_si": {"UX": 0, "UY": 0, "UZ": 0, "RX": 0, "RY": 0, "RZ": 0},
+                    "source_id": "source:BC1"
+                },
+                {
+                    "id": "BC_N3",
+                    "index": 1,
+                    "type": "fixed_dofs",
+                    "node_id": "N3",
+                    "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+                    "prescribed_values_si": {"UX": 0, "UY": 0, "UZ": 0, "RX": 0, "RY": 0, "RZ": 0},
+                    "source_id": null
+                }
+            ],
+            "construction_stages": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed = remove_fixed_constraint(&mut deleted, "BC_N3")
+            .expect("delete terminal neutral fixed constraint");
+        assert_eq!(removed.constraint_index, 1);
+        assert_eq!(removed.node_id, "N3");
+        assert_eq!(
+            deleted["constraints"]
+                .as_array()
+                .expect("constraints")
+                .len(),
+            1
+        );
+
+        let mut staged = model.clone();
+        staged["construction_stages"] = json!([{
+            "active_constraint_ids": ["BC_N3"]
+        }]);
+        assert_eq!(
+            remove_fixed_constraint(&mut staged, "BC_N3")
+                .expect_err("staged constraint")
+                .code,
+            "workbench_model_delete_fixed_constraint_referenced_by_stage"
+        );
+        let mut nonzero = model.clone();
+        nonzero["constraints"][1]["prescribed_values_si"]["UY"] = json!(0.001);
+        assert_eq!(
+            remove_fixed_constraint(&mut nonzero, "BC_N3")
+                .expect_err("nonzero fixed constraint")
+                .code,
+            "workbench_model_delete_fixed_constraint_not_homogeneous"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "BC_N3"}]);
+        assert_eq!(
+            remove_fixed_constraint(&mut mapped, "BC_N3")
+                .expect_err("mapped constraint")
+                .code,
+            "workbench_model_delete_fixed_constraint_roundtrip_owned"
+        );
+        let mut feature_owned = deleted.clone();
+        feature_owned["constraints"]
+            .as_array_mut()
+            .expect("constraints")
+            .push(json!({
+                "id": "BC_N3",
+                "index": 1,
+                "type": "fixed_dofs",
+                "node_id": "N3",
+                "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+                "prescribed_values_si": {"UX": 0, "UY": 0, "UZ": 0, "RX": 0, "RY": 0, "RZ": 0},
+                "source_id": null
+            }));
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "BC_N3"}]);
+        assert_eq!(
+            remove_fixed_constraint(&mut feature_owned, "BC_N3")
+                .expect_err("unsupported-feature-owned constraint")
+                .code,
+            "workbench_model_delete_fixed_constraint_unsupported_feature_owned"
+        );
+        let mut minimum = deleted;
+        assert_eq!(
+            remove_fixed_constraint(&mut minimum, "BC1")
+                .expect_err("minimum retained topology")
+                .code,
+            "workbench_model_delete_fixed_constraint_minimum_topology"
         );
     }
 

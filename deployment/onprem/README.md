@@ -27,7 +27,9 @@ absent from the runtime image.
   frame3d member using existing compatible material/section identities. `model-add-nodal-load`
   adds one nonzero six-component SI load to an existing linear-static pattern and node.
   `model-add-fixed-constraint` adds one homogeneous six-DOF zero constraint to an existing
-  unconstrained node. `model-add-linear-load-pattern` atomically adds one zero-self-weight
+  unconstrained node. `model-delete-fixed-constraint` removes only the last contiguous neutral
+  homogeneous six-DOF zero constraint while retaining another constraint and rejecting references
+  or source-owned/nonterminal rows. `model-add-linear-load-pattern` atomically adds one zero-self-weight
   linear-static pattern and its first nonzero nodal load on an existing node.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
@@ -130,6 +132,8 @@ structural-workbench model-add-nodal-load /workspace/added-member-model/model-ir
   --components 0 -1000 0 0 0 0 --output-dir /workspace/added-load-model
 structural-workbench model-add-fixed-constraint /workspace/added-load-model/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir /workspace/added-constraint-model
+structural-workbench model-delete-fixed-constraint /workspace/added-constraint-model/model-ir.json \
+  --constraint BC_N3 --output-dir /workspace/deleted-constraint-model
 structural-workbench model-add-linear-load-pattern /workspace/added-constraint-model/model-ir.json \
   --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
   --components 2500 0 0 0 0 0 --output-dir /workspace/added-pattern-model
@@ -192,8 +196,10 @@ The nodal-load creator appends one globally unique nonzero load to an existing l
 pattern and existing node with a contiguous index; it cannot create or retarget either identity,
 add other load families, or alter combinations.
 The fixed-constraint creator appends only one homogeneous six-DOF zero restraint to an existing
-unconstrained node; partial/nonzero restraints, overlap, MPC/contact/support sets, retargeting and
-deletion remain outside the command.
+unconstrained node. Its bounded inverse removes only the last contiguous neutral homogeneous zero
+restraint while retaining another constraint and rejecting stage/unsupported-feature/round-trip
+references. Partial/nonzero restraint deletion, overlap, MPC/contact/support sets, retargeting and
+general constraint deletion remain outside the commands.
 The linear-load-pattern creator atomically appends one zero-self-weight `linear_static` pattern and
 one globally unique nonzero nodal load on an existing node; empty patterns, self-weight,
 combinations, time functions, other load families, editing, deletion and retargeting remain

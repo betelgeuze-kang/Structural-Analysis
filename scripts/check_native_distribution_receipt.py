@@ -316,6 +316,15 @@ V33_FRAME3D_LEAF_DELETION_KEYS = {
     "workbench_frame3d_leaf_deletion_recovery_sha256",
 }
 V33_EXPECTED_KEYS = V32_EXPECTED_KEYS | V33_FRAME3D_LEAF_DELETION_KEYS
+V34_FIXED_CONSTRAINT_DELETE_KEYS = {
+    "workbench_fixed_constraint_delete_surface_passed",
+    "workbench_fixed_constraint_delete_model_sha256",
+    "workbench_fixed_constraint_delete_receipt_sha256",
+    "workbench_fixed_constraint_delete_request_sha256",
+    "workbench_fixed_constraint_delete_result_ir_sha256",
+    "workbench_fixed_constraint_delete_recovery_sha256",
+}
+V34_EXPECTED_KEYS = V33_EXPECTED_KEYS | V34_FIXED_CONSTRAINT_DELETE_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -391,6 +400,7 @@ def validate(
         "structural-native-distribution-e2e.v31": V31_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v32": V32_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v33": V33_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v34": V34_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -400,6 +410,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v32",
         "structural-native-distribution-e2e.v33",
+        "structural-native-distribution-e2e.v34",
     }:
         cumulative_receipt_schema_version = "structural-native-distribution-e2e.v31"
     if cumulative_receipt_schema_version in {
@@ -1163,6 +1174,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v32",
         "structural-native-distribution-e2e.v33",
+        "structural-native-distribution-e2e.v34",
     }:
         if payload.get("workbench_truss3d_leaf_deletion_surface_passed") is not True:
             errors.append("workbench_truss3d_leaf_deletion_surface_passed must be true")
@@ -1175,7 +1187,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v33":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v33",
+        "structural-native-distribution-e2e.v34",
+    }:
         if payload.get("workbench_frame3d_leaf_deletion_surface_passed") is not True:
             errors.append("workbench_frame3d_leaf_deletion_surface_passed must be true")
         for name in (
@@ -1184,6 +1199,18 @@ def validate(
             "workbench_frame3d_leaf_deletion_request_sha256",
             "workbench_frame3d_leaf_deletion_result_ir_sha256",
             "workbench_frame3d_leaf_deletion_recovery_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v34":
+        if payload.get("workbench_fixed_constraint_delete_surface_passed") is not True:
+            errors.append("workbench_fixed_constraint_delete_surface_passed must be true")
+        for name in (
+            "workbench_fixed_constraint_delete_model_sha256",
+            "workbench_fixed_constraint_delete_receipt_sha256",
+            "workbench_fixed_constraint_delete_request_sha256",
+            "workbench_fixed_constraint_delete_result_ir_sha256",
+            "workbench_fixed_constraint_delete_recovery_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

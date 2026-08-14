@@ -58,7 +58,11 @@ revalidates through C++. It does not create or retarget patterns/nodes or broade
 The bounded fixed-constraint creator appends one unique contiguous-index homogeneous six-DOF
 `fixed_dofs` row with zero prescribed values to one existing unconstrained node, preserves every
 existing round-trip row and blocker, and revalidates through C++. It does not support partial or
-nonzero restraints, overlapping constraints, MPC/contact/support sets, deletion, or retargeting.
+nonzero restraints, overlapping constraints, MPC/contact/support sets, or retargeting. The bounded
+inverse command deletes only the last contiguous neutral homogeneous six-DOF zero row, retains at
+least one constraint, rejects stage/unsupported-feature/round-trip references before mutation, and
+revalidates through C++. General constraint or topology deletion remains open. See
+`docs/native/modelir-fixed-constraint-deletion-v1.md` for the exact boundary.
 The bounded linear-load-pattern creator atomically appends one contiguous-index `linear_static`
 pattern with zero self-weight and one globally unique, nonzero index-zero nodal load on an existing
 node. It preserves every existing round-trip row and blocker and revalidates through C++; no empty
@@ -192,6 +196,8 @@ structural-workbench model-add-nodal-load ADDED-MEMBER-MODEL/model-ir.json \
   --components 0 -1000 0 0 0 0 --output-dir ADDED-LOAD-MODEL
 structural-workbench model-add-fixed-constraint ADDED-LOAD-MODEL/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir ADDED-CONSTRAINT-MODEL
+structural-workbench model-delete-fixed-constraint ADDED-CONSTRAINT-MODEL/model-ir.json \
+  --constraint BC_N3 --output-dir DELETED-CONSTRAINT-MODEL
 structural-workbench model-add-linear-load-pattern ADDED-CONSTRAINT-MODEL/model-ir.json \
   --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
   --components 2500 0 0 0 0 0 --output-dir ADDED-PATTERN-MODEL
