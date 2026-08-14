@@ -44,8 +44,11 @@ append-only receipt binds the edited ModelIR, edit receipt, request receipt, ana
 assembly receipt, checkpoint, ResultIR, recovery and ReportIR hashes. Frozen v1 through v44
 distribution receipts retain their narrower authority.
 
-One existing direct factor can now be changed only through the separately bounded v49 surface in
-`docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md`. Reference replacement,
-term insertion/removal/reorder, nested combinations, self-weight, time functions, construction
+One existing direct factor can be changed only through the separately bounded v49 surface in
+`docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md`. One existing direct pattern
+reference can be replaced, with its factor/order/count preserved, only through the separately
+bounded v51 surface in
+`docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`. Term
+insertion/removal/reorder, nested reference replacement, self-weight, time functions, construction
 stages, shell/nonlinear combination execution, nested/general deletion, approved-device HIP C2,
 engineering acceptance and C6 remain open.

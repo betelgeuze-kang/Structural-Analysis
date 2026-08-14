@@ -44,6 +44,9 @@ absent from the runtime image.
   a neutral, extension-free and unreferenced two-through-64-term combination while preserving every
   term reference, order and count; installed v49 E2E proves exact changed load, restart parity and
   fallback 0.
+  `model-edit-linear-load-combination-reference` replaces exactly one existing direct-pattern
+  identity in the same bounded ownership profile while preserving every factor, order and count;
+  installed v51 E2E proves exact changed load, restart parity and fallback 0.
   `model-edit-nested-linear-load-combination-factor` changes exactly one typed root factor in a
   neutral, extension-free and unreferenced bounded nested combination while preserving root
   references/order/count and every descendant; installed v50 E2E binds source/edited expansions,

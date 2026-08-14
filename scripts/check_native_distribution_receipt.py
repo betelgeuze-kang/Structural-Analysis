@@ -506,6 +506,22 @@ V50_NESTED_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_KEYS = {
 V50_EXPECTED_KEYS = (
     V49_EXPECTED_KEYS | V50_NESTED_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_KEYS
 )
+V51_DIRECT_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_KEYS = {
+    "workbench_direct_linear_load_combination_reference_edit_surface_passed",
+    "workbench_direct_linear_load_combination_reference_edit_model_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_receipt_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_request_receipt_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_request_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_assembly_receipt_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_checkpoint_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_result_ir_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_recovery_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_report_ir_sha256",
+    "workbench_direct_linear_load_combination_reference_edit_restart_passed",
+}
+V51_EXPECTED_KEYS = (
+    V50_EXPECTED_KEYS | V51_DIRECT_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_KEYS
+)
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -599,11 +615,14 @@ def validate(
         "structural-native-distribution-e2e.v48": V48_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v49": V49_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v50": V50_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v51": V51_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v51":
+        receipt_schema_version = "structural-native-distribution-e2e.v50"
     if receipt_schema_version == "structural-native-distribution-e2e.v50":
         receipt_schema_version = "structural-native-distribution-e2e.v49"
     if receipt_schema_version == "structural-native-distribution-e2e.v49":
@@ -1667,6 +1686,7 @@ def validate(
         "structural-native-distribution-e2e.v48",
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
     }:
         for name in (
             "workbench_direct_linear_load_combination_surface_passed",
@@ -1693,6 +1713,7 @@ def validate(
         "structural-native-distribution-e2e.v48",
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
     }:
         for name in (
             "workbench_nested_linear_load_combination_surface_passed",
@@ -1718,6 +1739,7 @@ def validate(
         "structural-native-distribution-e2e.v48",
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
     }:
         for name in (
             "workbench_direct_linear_load_combination_delete_surface_passed",
@@ -1741,6 +1763,7 @@ def validate(
         "structural-native-distribution-e2e.v48",
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
     }:
         for name in (
             "workbench_nested_linear_load_combination_delete_surface_passed",
@@ -1764,6 +1787,7 @@ def validate(
     if latest_receipt_schema_version in {
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
     }:
         for name in (
             "workbench_direct_linear_load_combination_factor_edit_surface_passed",
@@ -1784,7 +1808,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if latest_receipt_schema_version == "structural-native-distribution-e2e.v50":
+    if latest_receipt_schema_version in {
+        "structural-native-distribution-e2e.v50",
+        "structural-native-distribution-e2e.v51",
+    }:
         for name in (
             "workbench_nested_linear_load_combination_factor_edit_surface_passed",
             "workbench_nested_linear_load_combination_factor_edit_restart_passed",
@@ -1801,6 +1828,26 @@ def validate(
             "workbench_nested_linear_load_combination_factor_edit_result_ir_sha256",
             "workbench_nested_linear_load_combination_factor_edit_recovery_sha256",
             "workbench_nested_linear_load_combination_factor_edit_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if latest_receipt_schema_version == "structural-native-distribution-e2e.v51":
+        for name in (
+            "workbench_direct_linear_load_combination_reference_edit_surface_passed",
+            "workbench_direct_linear_load_combination_reference_edit_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_direct_linear_load_combination_reference_edit_model_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_receipt_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_request_receipt_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_request_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_assembly_receipt_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_checkpoint_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_result_ir_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_recovery_sha256",
+            "workbench_direct_linear_load_combination_reference_edit_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

@@ -391,6 +391,30 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in direct_combination_factor_edit["claim"]
     assert (
         capabilities.capability_is_enabled(
+            payload, "modelir_direct_linear_load_combination_reference_edit"
+        )
+        is True
+    )
+    direct_combination_reference_edit = payload["capabilities"][
+        "modelir_direct_linear_load_combination_reference_edit"
+    ]
+    assert direct_combination_reference_edit["cutover_gate"] == "C5"
+    assert direct_combination_reference_edit["owner"] == "structural-workbench"
+    assert (
+        "replaces exactly one existing load_pattern"
+        in direct_combination_reference_edit["claim"]
+    )
+    assert "every factor" in direct_combination_reference_edit["claim"]
+    assert "term order/count" in direct_combination_reference_edit["claim"]
+    assert "single C ABI into C++" in direct_combination_reference_edit["claim"]
+    assert "distribution v51 E2E" in direct_combination_reference_edit["claim"]
+    assert "[120000,0,5000,0,0,0]" in direct_combination_reference_edit["claim"]
+    assert "byte-identical direct/restart output" in direct_combination_reference_edit["claim"]
+    assert "fallback 0" in direct_combination_reference_edit["claim"]
+    assert "approved HIP C2" in direct_combination_reference_edit["claim"]
+    assert "C6" in direct_combination_reference_edit["claim"]
+    assert (
+        capabilities.capability_is_enabled(
             payload, "modelir_direct_linear_load_combination_deletion"
         )
         is True

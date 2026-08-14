@@ -32,7 +32,9 @@ recovery and ReportIR. Native CPU execution proves exact `active_external_load`
 `[25000,-13500,5000,0,0,0]`, byte-identical direct/restart results, FP64 execution, fallback 0,
 and Python/Node lookup count 0.
 
-This is not general combination editing. Reference replacement, term insertion/removal/reorder,
-downstream-referenced editing and nested edits beyond the separate bounded typed-root-factor
-surface, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
-engineering acceptance and C6 remain open.
+This is not general combination editing. Direct pattern-reference replacement is a separate
+bounded surface documented in
+`docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`. Term
+insertion/removal/reorder, downstream-referenced editing and nested edits beyond the separate
+bounded typed-root-factor surface, source-format writeback, visual editing, arbitrary solver
+selection, approved HIP C2, engineering acceptance and C6 remain open.

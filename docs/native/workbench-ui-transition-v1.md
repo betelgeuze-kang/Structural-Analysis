@@ -178,6 +178,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
   checkpoint/restart output. Reference replacement, term insertion/removal/reorder, nested or
   downstream-referenced editing, HIP parity and engineering acceptance remain open.
+- `model-edit-linear-load-combination-reference`: deterministic replacement of exactly one existing
+  pattern identity in a neutral, extension-free and unreferenced two-through-64-term direct
+  combination. Rust preserves the selected factor, all other factors, term order and count;
+  rejects no-op, missing, nonlinear, duplicate, nested or owned inputs; then strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v51 proves exact active load
+  `[120000,0,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
+  Factor editing remains separate; insertion/removal/reorder, nested reference replacement,
+  downstream-referenced editing, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
   `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at
   most eight, at most 64 expanded leaf contributions and two through 64 resolved nonzero unique
