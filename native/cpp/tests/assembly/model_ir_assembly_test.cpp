@@ -143,6 +143,123 @@ int main() {
             == std::vector<double>({12.0, -24.0, -4.0, 0.0, 0.0, 0.0, 40.0}),
         "three-pattern combination preserves declared signed-factor order");
 
+    structural::tests::ModelIrAssemblyFixture nested_fixture;
+    nested_fixture.enable_nested_linear_combination();
+    const structural::model_ir::Model nested_model(nested_fixture.descriptor);
+    const auto nested = structural::assembly::assemble_model_ir_linear_reference(
+        nested_model, "combo_nested", displacement, direction);
+    expect(nested.load_pattern_id == "combo_nested", "selected nested combination identity");
+    expect(nested.load_pattern_index == 1U, "selected nested combination stable index");
+    expect(
+        nested.external_load
+            == std::vector<double>({10.0, -20.0, -2.0, 0.0, 0.0, 0.0, 34.0}),
+        "nested combination flattens in declaration order and consolidates repeated patterns");
+    const auto nested_repeated = structural::assembly::assemble_model_ir_linear_reference(
+        nested_model, "combo_nested", displacement, direction);
+    expect(
+        nested_repeated.external_load == nested.external_load,
+        "nested combination flattening is deterministic");
+
+    structural::tests::ModelIrAssemblyFixture deep_nested_fixture;
+    constexpr std::array<const char*, 9> deep_ids {
+        "deep0", "deep1", "deep2", "deep3", "deep4",
+        "deep5", "deep6", "deep7", "deep8",
+    };
+    std::array<std::array<sa_load_combination_term_v1, 2>, deep_ids.size()> deep_terms {};
+    std::array<sa_load_combination_descriptor_v1, deep_ids.size()> deep_combinations {};
+    for (std::size_t index = 0U; index < deep_ids.size(); ++index) {
+        deep_terms[index][0] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            structural::tests::text(index + 1U == deep_ids.size() ? "lp" : deep_ids[index + 1U]),
+            index + 1U == deep_ids.size() ? SA_LOAD_REF_PATTERN : SA_LOAD_REF_COMBINATION,
+            0U,
+            1.0,
+        };
+        deep_terms[index][1] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            structural::tests::text("lp2"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            1.0,
+        };
+        deep_combinations[index] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            structural::tests::entity(deep_ids[index], index),
+            deep_terms[index].data(),
+            deep_terms[index].size(),
+        };
+    }
+    deep_nested_fixture.descriptor.load_pattern_count = 2U;
+    deep_nested_fixture.descriptor.load_combinations = deep_combinations.data();
+    deep_nested_fixture.descriptor.load_combination_count = deep_combinations.size();
+    const structural::model_ir::Model deep_nested_model(deep_nested_fixture.descriptor);
+    expect_status(
+        [&deep_nested_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                deep_nested_model, "deep0", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "nested combination deeper than eight must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture expanded_nested_fixture;
+    std::array<sa_load_combination_term_v1, 64> expanded_leaf_terms {};
+    expanded_leaf_terms.fill({
+        SA_ABI_V1_1,
+        static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+        structural::tests::text("lp"),
+        SA_LOAD_REF_PATTERN,
+        0U,
+        1.0,
+    });
+    const std::array<sa_load_combination_term_v1, 2> expanded_root_terms {{
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            structural::tests::text("expanded_leaf"),
+            SA_LOAD_REF_COMBINATION,
+            0U,
+            1.0,
+        },
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            structural::tests::text("lp2"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            1.0,
+        },
+    }};
+    const std::array<sa_load_combination_descriptor_v1, 2> expanded_combinations {{
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            structural::tests::entity("expanded_leaf", 0U),
+            expanded_leaf_terms.data(),
+            expanded_leaf_terms.size(),
+        },
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            structural::tests::entity("expanded_root", 1U),
+            expanded_root_terms.data(),
+            expanded_root_terms.size(),
+        },
+    }};
+    expanded_nested_fixture.descriptor.load_pattern_count = 2U;
+    expanded_nested_fixture.descriptor.load_combinations = expanded_combinations.data();
+    expanded_nested_fixture.descriptor.load_combination_count = expanded_combinations.size();
+    const structural::model_ir::Model expanded_nested_model(expanded_nested_fixture.descriptor);
+    expect_status(
+        [&expanded_nested_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                expanded_nested_model, "expanded_root", displacement, direction));
+        },
+        SA_ERR_ANALYSIS_NOT_READY,
+        "nested combination with more than 64 expanded pattern terms must fail closed");
+
     structural::tests::ModelIrAssemblyFixture short_combination_fixture;
     short_combination_fixture.enable_linear_combination();
     short_combination_fixture.load_combinations[0].term_count = 1U;

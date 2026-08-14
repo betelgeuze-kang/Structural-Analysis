@@ -39,6 +39,7 @@ mod analysis_request;
 mod catalog;
 mod deformed_view;
 mod evidence;
+mod linear_combination;
 mod model_edit;
 mod model_view;
 mod report_view;
@@ -60,8 +61,9 @@ pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
     add_model_fixed_constraint, add_model_frame3d_member, add_model_frame_section,
     add_model_linear_load_combination, add_model_linear_load_pattern, add_model_linear_material,
-    add_model_nodal_load, add_model_node, add_model_truss3d_member, add_model_truss_section,
-    delete_model_fixed_constraint, delete_model_frame3d_leaf_member, delete_model_frame_section,
+    add_model_nested_linear_load_combination, add_model_nodal_load, add_model_node,
+    add_model_truss3d_member, add_model_truss_section, delete_model_fixed_constraint,
+    delete_model_frame3d_leaf_member, delete_model_frame_section,
     delete_model_linear_load_combination, delete_model_linear_load_pattern,
     delete_model_linear_material, delete_model_nodal_load, delete_model_orphan_node,
     delete_model_truss3d_leaf_member, delete_model_truss_section, edit_model_constraint_value,
@@ -78,12 +80,13 @@ pub use model_edit::{
     publish_model_linear_load_combination_delete, publish_model_linear_load_pattern_add,
     publish_model_linear_load_pattern_delete, publish_model_linear_material_add,
     publish_model_linear_material_delete, publish_model_linear_material_edit,
-    publish_model_nodal_load_add, publish_model_nodal_load_components_edit,
-    publish_model_nodal_load_delete, publish_model_node_add, publish_model_node_coordinate_edit,
-    publish_model_orphan_node_delete, publish_model_truss3d_leaf_member_delete,
-    publish_model_truss3d_member_add, publish_model_truss_element_properties_edit,
-    publish_model_truss_section_add, publish_model_truss_section_delete,
-    publish_model_truss_section_edit, FrameSectionParametersV1, LinearElasticMaterialParametersV1,
+    publish_model_nested_linear_load_combination_add, publish_model_nodal_load_add,
+    publish_model_nodal_load_components_edit, publish_model_nodal_load_delete,
+    publish_model_node_add, publish_model_node_coordinate_edit, publish_model_orphan_node_delete,
+    publish_model_truss3d_leaf_member_delete, publish_model_truss3d_member_add,
+    publish_model_truss_element_properties_edit, publish_model_truss_section_add,
+    publish_model_truss_section_delete, publish_model_truss_section_edit, FrameSectionParametersV1,
+    LinearElasticMaterialParametersV1, LinearLoadCombinationReferenceKindV1,
     LinearLoadCombinationTermV1, ModelConstraintValueEditOutcomeV1,
     ModelElementConnectivityEditOutcomeV1, ModelFixedConstraintAddOutcomeV1,
     ModelFixedConstraintDeleteOutcomeV1, ModelFrame3dLeafMemberDeleteOutcomeV1,
@@ -98,7 +101,7 @@ pub use model_edit::{
     ModelOrphanNodeDeleteOutcomeV1, ModelTruss3dLeafMemberDeleteOutcomeV1,
     ModelTruss3dMemberAddOutcomeV1, ModelTrussElementPropertiesEditOutcomeV1,
     ModelTrussSectionAddOutcomeV1, ModelTrussSectionDeleteOutcomeV1,
-    ModelTrussSectionEditOutcomeV1, TrussSectionParametersV1,
+    ModelTrussSectionEditOutcomeV1, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1,
     MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
 };

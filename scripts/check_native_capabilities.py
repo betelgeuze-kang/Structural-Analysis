@@ -54,6 +54,7 @@ EXPECTED_OWNERS = {
     "modelir_linear_load_combination_deletion": "structural-workbench",
     "modelir_linear_load_combination_execution": "structural-workbench",
     "modelir_direct_linear_load_combination_authoring_execution": "structural-workbench",
+    "modelir_nested_linear_load_combination_authoring_execution": "structural-workbench",
     "modelir_linear_load_pattern_deletion": "structural-workbench",
     "modelir_linear_material_add": "structural-workbench",
     "modelir_linear_material_deletion": "structural-workbench",

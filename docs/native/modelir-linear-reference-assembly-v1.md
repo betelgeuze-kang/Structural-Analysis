@@ -18,8 +18,9 @@ pattern it:
   reference response source;
 - removes homogeneous constrained DOFs, then emits the sorted active map and canonical CSR
   structure with structural zero entries retained;
-- projects the selected direct nodal loads, or one bounded two-through-64-pattern signed direct
-  combination, into the
+- projects the selected direct nodal loads, one bounded two-through-64-pattern signed direct
+  combination, or one acyclic nested linear combination with root-inclusive depth at most eight,
+  at most 64 expanded leaf contributions and two through 64 resolved nonzero unique patterns, into the
   same active order and emits both external load and
   `equilibrium_residual = internal_force - external_load`;
 - carries the exact ModelIR content, semantic, and provenance hashes plus selected legacy
@@ -61,9 +62,10 @@ implemented C3 integration candidate, not a promoted sequential C3 gate.
 ## Fail-closed boundary
 
 The projection rejects non-linear material or formulation state, frame2d, shell, rigid offsets,
-end releases, member loads, nonzero prescribed constraints, self-weight, nested combinations,
-combinations outside two through 64 unique direct linear-static patterns with finite nonzero
-factors, time functions, construction stages, and declared unsupported features. It does not solve the assembled
+end releases, member loads, nonzero prescribed constraints, self-weight, direct combinations
+outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
+larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
+time functions, construction stages, and declared unsupported features. It does not solve the assembled
 operator by itself, compute constrained reactions, reorder DOFs, or propagate constitutive epochs.
 The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
 to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,

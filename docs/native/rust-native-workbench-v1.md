@@ -92,14 +92,17 @@ and request receipts retain their frozen v1 bytes; three through 64 terms use ex
 provenance/request receipts. The bounded inverse still deletes only the last contiguous neutral
 unreferenced row with the exact two-pattern shape, then proves direct load-pattern CPU execution and
 checkpoint/restart parity are restored. Nested terms, general term editing and general deletion
-remain outside these commands. The bounded `--load-combination` request surface uses the frozen v1
-selector alias to assemble and execute the direct terms through C++ and CPU PCG, with exact active
+remain outside those direct/deletion commands. The separate bounded nested author accepts explicit
+pattern/combination terms, depth eight and 64 expanded leaves, with v3 provenance/request receipts.
+The bounded `--load-combination` request surface uses the frozen v1
+selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
 solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-linear-load-combination-add-v1.md`,
 `docs/native/modelir-linear-load-combination-execution-v1.md`, and
 `docs/native/modelir-linear-load-combination-deletion-v1.md`, plus the additive
-`docs/native/modelir-direct-linear-load-combination-v1.md` boundary.
+`docs/native/modelir-direct-linear-load-combination-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-v1.md` boundaries.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It

@@ -9,9 +9,8 @@ use structural_contracts::model_linear_product::{
 use structural_contracts::product_ir::{sha256_identity, ModelIrIdentityV1};
 use structural_contracts::sparse_product::SparseLinearConfigV1;
 
-use super::model_edit::{
-    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
-    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
+use super::linear_combination::{
+    require_bounded_linear_load_combination, ExpandedLinearLoadCombinationV1,
 };
 use super::{
     artifact_entry, canonical_self_hashed, input_error, publish_new_directory,
@@ -23,9 +22,12 @@ const COMBINATION_REQUEST_RECEIPT_SCHEMA_V1: &str =
     "structural-native-model-linear-combination-request-create-receipt.v1";
 const DIRECT_COMBINATION_REQUEST_RECEIPT_SCHEMA_V2: &str =
     "structural-native-model-linear-direct-combination-request-create-receipt.v2";
+const NESTED_COMBINATION_REQUEST_RECEIPT_SCHEMA_V3: &str =
+    "structural-native-model-linear-nested-combination-request-create-receipt.v3";
 const CLAIM_BOUNDARY: &str = "bounded_cpp_assembly_preflighted_modelir_linear_cpu_request_creation_not_arbitrary_solver_backend_model_editing_execution_convergence_engineering_acceptance_or_c6";
 const COMBINATION_CLAIM_BOUNDARY: &str = "bounded_exact_two_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
 const DIRECT_COMBINATION_CLAIM_BOUNDARY: &str = "bounded_two_to_64_unique_direct_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
+const NESTED_COMBINATION_CLAIM_BOUNDARY: &str = "bounded_acyclic_nested_linear_static_combination_depth_eight_expanded_64_terms_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_self_weight_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum LoadSelectorKindV1 {
@@ -249,7 +251,7 @@ fn build_model_linear_request_receipt(
     mut receipt: serde_json::Value,
     selector_kind: LoadSelectorKindV1,
     selector_id: &str,
-    combination_terms: Option<&serde_json::Value>,
+    combination: Option<&ExpandedLinearLoadCombinationV1>,
 ) -> Result<String, WorkbenchError> {
     if selector_kind == LoadSelectorKindV1::Pattern {
         receipt["schema_version"] = json!(REQUEST_RECEIPT_SCHEMA_V1);
@@ -259,14 +261,28 @@ fn build_model_linear_request_receipt(
         return canonical_self_hashed(receipt);
     }
 
-    let terms = combination_terms.ok_or_else(|| {
+    let combination = combination.ok_or_else(|| {
         WorkbenchError::new(
             "workbench_model_linear_combination_request_terms_invalid",
             "validated load-combination terms became unavailable",
         )
     })?;
-    let term_count = terms.as_array().map_or(0, Vec::len);
-    if term_count == 2 {
+    let term_count = combination.root_terms.as_array().map_or(0, Vec::len);
+    if combination.nested {
+        receipt["schema_version"] = json!(NESTED_COMBINATION_REQUEST_RECEIPT_SCHEMA_V3);
+        receipt["operation"] = json!("create_model_ir_linear_nested_combination_analysis_request");
+        receipt["request_profile"] =
+            json!("acyclic_nested_linear_static_depth_8_expanded_terms_64");
+        receipt["combination_term_count"] = json!(term_count);
+        receipt["combination_depth"] = json!(combination.max_depth);
+        receipt["expanded_term_count"] = json!(combination.expanded_term_count);
+        receipt["expanded_pattern_count"] = json!(combination
+            .expanded_pattern_terms
+            .as_array()
+            .map_or(0, Vec::len));
+        receipt["expanded_pattern_terms"] = combination.expanded_pattern_terms.clone();
+        receipt["claim_boundary"] = json!(NESTED_COMBINATION_CLAIM_BOUNDARY);
+    } else if term_count == 2 {
         receipt["schema_version"] = json!(COMBINATION_REQUEST_RECEIPT_SCHEMA_V1);
         receipt["operation"] = json!("create_model_ir_linear_combination_analysis_request");
         receipt["claim_boundary"] = json!(COMBINATION_CLAIM_BOUNDARY);
@@ -279,7 +295,7 @@ fn build_model_linear_request_receipt(
     }
     receipt["load_selector_kind"] = json!("load_combination");
     receipt["load_combination_id"] = json!(selector_id);
-    receipt["combination_terms"] = terms.clone();
+    receipt["combination_terms"] = combination.root_terms.clone();
     receipt["frozen_request_selector_field"] = json!("load_pattern_id");
     canonical_self_hashed(receipt)
 }
@@ -288,7 +304,7 @@ fn require_load_selector(
     model: &serde_json::Value,
     selector_id: &str,
     selector_kind: LoadSelectorKindV1,
-) -> Result<Option<serde_json::Value>, WorkbenchError> {
+) -> Result<Option<ExpandedLinearLoadCombinationV1>, WorkbenchError> {
     match selector_kind {
         LoadSelectorKindV1::Pattern => {
             require_linear_load_pattern(model, selector_id)?;
@@ -349,150 +365,6 @@ fn require_linear_load_pattern(
         ));
     }
     Ok(())
-}
-
-fn require_bounded_linear_load_combination(
-    model: &serde_json::Value,
-    load_combination_id: &str,
-) -> Result<serde_json::Value, WorkbenchError> {
-    let patterns = model
-        .get("load_patterns")
-        .and_then(serde_json::Value::as_array)
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_snapshot_invalid",
-                "verified ModelIR snapshot has no load-pattern array",
-            )
-        })?;
-    if patterns.iter().any(|pattern| {
-        pattern.get("id").and_then(serde_json::Value::as_str) == Some(load_combination_id)
-    }) {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_request_selector_ambiguous",
-            format!("identity {load_combination_id} names both a load pattern and combination"),
-        ));
-    }
-    let combinations = model
-        .get("load_combinations")
-        .and_then(serde_json::Value::as_array)
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_snapshot_invalid",
-                "verified ModelIR snapshot has no load-combination array",
-            )
-        })?;
-    let combination = combinations
-        .iter()
-        .find(|combination| {
-            combination.get("id").and_then(serde_json::Value::as_str) == Some(load_combination_id)
-        })
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_missing",
-                format!("ModelIR has no load combination with identity {load_combination_id}"),
-            )
-        })?;
-    if combination
-        .get("combination_type")
-        .and_then(serde_json::Value::as_str)
-        != Some("linear")
-    {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_type_unsupported",
-            format!("load combination {load_combination_id} is not linear"),
-        ));
-    }
-    let terms = combination
-        .get("terms")
-        .and_then(serde_json::Value::as_array)
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_terms_invalid",
-                "selected load combination has no term array",
-            )
-        })?;
-    if !(MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
-        ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
-        .contains(&terms.len())
-    {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_term_count_unsupported",
-            "selected direct load combination must contain between two and 64 terms",
-        ));
-    }
-    let referenced_ids = terms
-        .iter()
-        .map(|term| require_bounded_linear_load_combination_term(term, patterns))
-        .collect::<Result<Vec<_>, _>>()?;
-    if referenced_ids
-        .iter()
-        .enumerate()
-        .any(|(index, id)| referenced_ids[..index].iter().any(|prior| prior == id))
-    {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_duplicate_pattern",
-            "selected direct load combination must reference unique load patterns",
-        ));
-    }
-    Ok(serde_json::Value::Array(terms.clone()))
-}
-
-fn require_bounded_linear_load_combination_term<'a>(
-    term: &'a serde_json::Value,
-    patterns: &[serde_json::Value],
-) -> Result<&'a str, WorkbenchError> {
-    if term.get("ref_kind").and_then(serde_json::Value::as_str) != Some("load_pattern") {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_nested_unsupported",
-            "selected load combination may reference load patterns only",
-        ));
-    }
-    let referenced_id = term
-        .get("ref_id")
-        .and_then(serde_json::Value::as_str)
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_terms_invalid",
-                "selected load-combination term has no reference identity",
-            )
-        })?;
-    let factor = term
-        .get("factor")
-        .and_then(serde_json::Value::as_f64)
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_terms_invalid",
-                "selected load-combination factor is not numeric",
-            )
-        })?;
-    if !factor.is_finite() || factor == 0.0 {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_factor_unsupported",
-            "selected load-combination factors must be finite and nonzero",
-        ));
-    }
-    let referenced_pattern = patterns
-        .iter()
-        .find(|pattern| {
-            pattern.get("id").and_then(serde_json::Value::as_str) == Some(referenced_id)
-        })
-        .ok_or_else(|| {
-            WorkbenchError::new(
-                "workbench_model_linear_combination_request_pattern_missing",
-                format!("ModelIR has no referenced load pattern {referenced_id}"),
-            )
-        })?;
-    if referenced_pattern
-        .get("analysis_type")
-        .and_then(serde_json::Value::as_str)
-        != Some("linear_static")
-    {
-        return Err(WorkbenchError::new(
-            "workbench_model_linear_combination_request_pattern_unsupported",
-            format!("referenced load pattern {referenced_id} is not linear_static"),
-        ));
-    }
-    Ok(referenced_id)
 }
 
 #[cfg(test)]
@@ -617,6 +489,54 @@ mod tests {
     }
 
     #[test]
+    fn nested_combination_uses_the_versioned_bounded_receipt() {
+        let nested = model_with_combinations(json!([
+            combination(
+                "COMBO_BASE",
+                &json!([
+                    {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.0},
+                    {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 1.0}
+                ])
+            ),
+            {
+                "id": "COMBO_NESTED",
+                "index": 1,
+                "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 1.0},
+                    {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1.0}
+                ],
+                "source_id": null,
+                "extensions": {}
+            }
+        ]));
+        let outcome = create_model_linear_combination_analysis_request(
+            &nested,
+            "case",
+            "COMBO_NESTED",
+            config(),
+        )
+        .expect("bounded nested combination request");
+        let receipt: Value =
+            serde_json::from_str(&outcome.receipt_json).expect("nested receipt JSON");
+        assert_eq!(
+            receipt["schema_version"],
+            "structural-native-model-linear-nested-combination-request-create-receipt.v3"
+        );
+        assert_eq!(receipt["combination_depth"], 2);
+        assert_eq!(receipt["expanded_term_count"], 3);
+        assert_eq!(receipt["expanded_pattern_count"], 3);
+        assert_eq!(
+            receipt["expanded_pattern_terms"],
+            json!([
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 1},
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1}
+            ])
+        );
+    }
+
+    #[test]
     fn malformed_or_ambiguous_combination_selectors_fail_closed_before_publication() {
         let one_term = model_with_combinations(json!([combination(
             "COMBO_ONE",
@@ -665,38 +585,6 @@ mod tests {
                 .expect_err("zero-factor combination fails")
                 .code,
             "workbench_model_linear_combination_request_factor_unsupported"
-        );
-
-        let nested = model_with_combinations(json!([
-            combination(
-                "COMBO_BASE",
-                &json!([
-                    {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.0},
-                    {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 1.0}
-                ])
-            ),
-            {
-                "id": "COMBO_NESTED",
-                "index": 1,
-                "combination_type": "linear",
-                "terms": [
-                    {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 1.0},
-                    {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1.0}
-                ],
-                "source_id": null,
-                "extensions": {}
-            }
-        ]));
-        assert_eq!(
-            create_model_linear_combination_analysis_request(
-                &nested,
-                "case",
-                "COMBO_NESTED",
-                config()
-            )
-            .expect_err("nested combination fails")
-            .code,
-            "workbench_model_linear_combination_request_nested_unsupported"
         );
 
         let ambiguous = model_with_combinations(json!([combination(

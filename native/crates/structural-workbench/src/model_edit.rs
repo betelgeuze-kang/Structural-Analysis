@@ -10,6 +10,16 @@ use super::{
     read_bounded_regular_file, WorkbenchError, MAX_MODEL_BYTES,
 };
 
+use super::linear_combination::{
+    require_bounded_linear_load_combination, ExpandedLinearLoadCombinationV1,
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+};
+pub use super::linear_combination::{
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
+};
+
 const EDIT_SCHEMA_V1: &str = "structural-native-model-edit-receipt.v1";
 const NODE_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node.v1";
 const NODE_ADD_EXTENSION_KEY: &str = "structural-native:model-add-node.v1";
@@ -47,6 +57,8 @@ const LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-combination.v1";
 const DIRECT_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-direct-linear-load-combination.v2";
+const NESTED_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
+    "structural-native:model-add-nested-linear-load-combination.v3";
 const LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-combination.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
@@ -81,6 +93,7 @@ const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_mo
 const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_zero_self_weight_linear_static_pattern_with_single_neutral_nonzero_six_component_nodal_load_deletion_not_source_owned_combined_staged_mapped_general_pattern_load_node_or_topology_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_distinct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_solver_execution_or_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_to_64_unique_direct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
+const NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_acyclic_nested_linear_static_load_combination_addition_depth_eight_expanded_64_terms_not_term_edit_nested_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_distinct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
@@ -90,9 +103,6 @@ const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_
 const TRUSS_SECTION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_truss3d_section_deletion_with_one_truss_section_retained_not_source_owned_element_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const DOF_KEYS: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
-
-pub const MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1: usize = 2;
-pub const MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1: usize = 64;
 
 /// Complete deterministic artifact pair produced by one bounded node-coordinate edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -278,6 +288,37 @@ pub struct ModelLinearLoadPatternDeleteOutcomeV1 {
 pub struct LinearLoadCombinationTermV1 {
     pub load_pattern_id: String,
     pub factor: f64,
+}
+
+/// Explicit reference family accepted by the bounded nested linear-combination author.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LinearLoadCombinationReferenceKindV1 {
+    LoadPattern,
+    LoadCombination,
+}
+
+impl LinearLoadCombinationReferenceKindV1 {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::LoadPattern => "load_pattern",
+            Self::LoadCombination => "load_combination",
+        }
+    }
+}
+
+/// One explicitly typed term accepted by the bounded nested linear-combination author.
+#[derive(Clone, Debug, PartialEq)]
+pub struct NestedLinearLoadCombinationTermV1 {
+    pub reference_id: String,
+    pub reference_kind: LinearLoadCombinationReferenceKindV1,
+    pub factor: f64,
+}
+
+#[derive(Clone, Copy)]
+struct SourceModelHashesV1<'a> {
+    content: &'a str,
+    semantic: &'a str,
+    provenance: &'a str,
 }
 
 /// Complete deterministic artifact pair produced by one bounded linear-combination addition.
@@ -584,6 +625,31 @@ pub fn publish_model_linear_load_combination_add(
 ) -> Result<ModelLinearLoadCombinationAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_linear_load_combination(&source, load_combination_id, terms)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Add one bounded acyclic nested linear load combination and atomically publish it.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or factors, missing or incompatible typed
+/// references, cycles, depth/expansion overflow, invalid source or edited semantics, and
+/// publication failures.
+pub fn publish_model_nested_linear_load_combination_add(
+    source_path: &Path,
+    load_combination_id: &str,
+    terms: &[NestedLinearLoadCombinationTermV1],
+    output_directory: &Path,
+) -> Result<ModelLinearLoadCombinationAddOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = add_model_nested_linear_load_combination(&source, load_combination_id, terms)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2075,6 +2141,112 @@ pub fn add_model_linear_load_combination(
             "claim_boundary": DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
         }))?
     };
+    Ok(ModelLinearLoadCombinationAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Add one provenance-bound bounded acyclic nested linear load combination in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identities or factors, invalid source semantics, duplicate or missing typed
+/// references, cycles, depth/expansion overflow, schema drift, or edited semantics rejected by
+/// C++.
+pub fn add_model_nested_linear_load_combination(
+    source_bytes: &[u8],
+    load_combination_id: &str,
+    terms: &[NestedLinearLoadCombinationTermV1],
+) -> Result<ModelLinearLoadCombinationAddOutcomeV1, WorkbenchError> {
+    validate_nested_linear_load_combination_add_request(
+        source_bytes.len(),
+        load_combination_id,
+        terms,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let load_combination_index =
+        append_nested_linear_load_combination(&mut edited, load_combination_id, terms)?;
+    let expansion = require_bounded_linear_load_combination(&edited, load_combination_id)?;
+    bind_nested_linear_load_combination_add_provenance(
+        &mut edited,
+        load_combination_id,
+        load_combination_index,
+        terms,
+        &expansion,
+        SourceModelHashesV1 {
+            content: &source_content_hash,
+            semantic: &source_semantic_hash,
+            provenance: &source_provenance_hash,
+        },
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited nested-combination ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let expanded_pattern_count = expansion
+        .expanded_pattern_terms
+        .as_array()
+        .map_or(0, Vec::len);
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "nested_linear_load_combination_add",
+        "authoring_profile": "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+        "model_id": edited_validation.report.model_id,
+        "load_combination_id": load_combination_id,
+        "load_combination_index": load_combination_index,
+        "combination_type": "linear",
+        "term_count": terms.len(),
+        "terms": nested_linear_load_combination_terms_value(terms),
+        "combination_depth": expansion.max_depth,
+        "expanded_term_count": expansion.expanded_term_count,
+        "expanded_pattern_count": expanded_pattern_count,
+        "expanded_pattern_terms": expansion.expanded_pattern_terms,
+        "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+        "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY,
+    }))?;
     Ok(ModelLinearLoadCombinationAddOutcomeV1 {
         model_ir_json,
         receipt_json,
@@ -4475,6 +4647,62 @@ fn validate_linear_load_combination_add_request(
     Ok(())
 }
 
+fn validate_nested_linear_load_combination_add_request(
+    source_length: usize,
+    load_combination_id: &str,
+    terms: &[NestedLinearLoadCombinationTermV1],
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_combination_id, "new load combination")?;
+    if !(MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
+        ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+        .contains(&terms.len())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nested_linear_load_combination_term_count_invalid",
+            "nested load combinations require between two and 64 root terms",
+        ));
+    }
+    if !terms
+        .iter()
+        .any(|term| term.reference_kind == LinearLoadCombinationReferenceKindV1::LoadCombination)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nested_linear_load_combination_reference_required",
+            "nested load-combination authoring requires at least one load-combination term",
+        ));
+    }
+    for term in terms {
+        validate_bounded_edit_identity(
+            0,
+            &term.reference_id,
+            "nested load-combination term reference",
+        )?;
+        if term.reference_id == load_combination_id {
+            return Err(WorkbenchError::new(
+                "workbench_model_add_nested_linear_load_combination_self_reference",
+                "a new nested load combination cannot reference itself",
+            ));
+        }
+        if !term.factor.is_finite() || term.factor == 0.0 {
+            return Err(WorkbenchError::new(
+                "workbench_model_add_nested_linear_load_combination_factor_invalid",
+                "nested load-combination factors must be finite and non-zero",
+            ));
+        }
+    }
+    if terms.iter().enumerate().any(|(index, term)| {
+        terms[..index].iter().any(|prior| {
+            prior.reference_kind == term.reference_kind && prior.reference_id == term.reference_id
+        })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nested_linear_load_combination_reference_duplicate",
+            "nested load-combination root terms must use unique typed references",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_linear_load_combination_delete_request(
     source_length: usize,
     load_combination_id: &str,
@@ -5292,6 +5520,119 @@ fn linear_load_combination_terms_value(terms: &[LinearLoadCombinationTermV1]) ->
                 json!({
                     "ref_id": term.load_pattern_id,
                     "ref_kind": "load_pattern",
+                    "factor": term.factor
+                })
+            })
+            .collect(),
+    )
+}
+
+fn append_nested_linear_load_combination(
+    model: &mut Value,
+    load_combination_id: &str,
+    terms: &[NestedLinearLoadCombinationTermV1],
+) -> Result<usize, WorkbenchError> {
+    let load_combinations = model
+        .get("load_combinations")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_combinations"))?;
+    if load_combinations.iter().any(|combination| {
+        combination.get("id").and_then(Value::as_str) == Some(load_combination_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nested_linear_load_combination_identity_exists",
+            format!("ModelIR already has a load combination with identity {load_combination_id}"),
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns
+        .iter()
+        .any(|pattern| pattern.get("id").and_then(Value::as_str) == Some(load_combination_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_add_nested_linear_load_combination_identity_ambiguous",
+            format!("identity {load_combination_id} already names a load pattern"),
+        ));
+    }
+    for term in terms {
+        match term.reference_kind {
+            LinearLoadCombinationReferenceKindV1::LoadPattern => {
+                let pattern = load_patterns
+                    .iter()
+                    .find(|pattern| {
+                        pattern.get("id").and_then(Value::as_str)
+                            == Some(term.reference_id.as_str())
+                    })
+                    .ok_or_else(|| {
+                        WorkbenchError::new(
+                            "workbench_model_add_nested_linear_load_combination_pattern_missing",
+                            format!(
+                                "ModelIR has no load pattern with identity {}",
+                                term.reference_id
+                            ),
+                        )
+                    })?;
+                if pattern.get("analysis_type").and_then(Value::as_str) != Some("linear_static") {
+                    return Err(WorkbenchError::new(
+                        "workbench_model_add_nested_linear_load_combination_pattern_unsupported",
+                        format!("load pattern {} is not linear_static", term.reference_id),
+                    ));
+                }
+            }
+            LinearLoadCombinationReferenceKindV1::LoadCombination => {
+                let combination = load_combinations
+                    .iter()
+                    .find(|combination| {
+                        combination.get("id").and_then(Value::as_str)
+                            == Some(term.reference_id.as_str())
+                    })
+                    .ok_or_else(|| {
+                        WorkbenchError::new(
+                            "workbench_model_add_nested_linear_load_combination_combination_missing",
+                            format!(
+                                "ModelIR has no load combination with identity {}",
+                                term.reference_id
+                            ),
+                        )
+                    })?;
+                if combination.get("combination_type").and_then(Value::as_str) != Some("linear") {
+                    return Err(WorkbenchError::new(
+                        "workbench_model_add_nested_linear_load_combination_combination_unsupported",
+                        format!("load combination {} is not linear", term.reference_id),
+                    ));
+                }
+            }
+        }
+    }
+    let load_combination_index = load_combinations.len();
+    model
+        .get_mut("load_combinations")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("load_combinations"))?
+        .push(json!({
+            "id": load_combination_id,
+            "index": load_combination_index,
+            "combination_type": "linear",
+            "terms": nested_linear_load_combination_terms_value(terms),
+            "source_id": null,
+            "extensions": {}
+        }));
+    Ok(load_combination_index)
+}
+
+fn nested_linear_load_combination_terms_value(
+    terms: &[NestedLinearLoadCombinationTermV1],
+) -> Value {
+    Value::Array(
+        terms
+            .iter()
+            .map(|term| {
+                json!({
+                    "ref_id": term.reference_id,
+                    "ref_kind": term.reference_kind.as_str(),
                     "factor": term.factor
                 })
             })
@@ -8067,6 +8408,43 @@ fn bind_linear_load_combination_add_provenance(
     bind_parameter_edit_provenance(model, extension_key, provenance, source_content_hash)
 }
 
+fn bind_nested_linear_load_combination_add_provenance(
+    model: &mut Value,
+    load_combination_id: &str,
+    load_combination_index: usize,
+    terms: &[NestedLinearLoadCombinationTermV1],
+    expansion: &ExpandedLinearLoadCombinationV1,
+    source_hashes: SourceModelHashesV1<'_>,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NESTED_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY,
+        json!({
+            "operation": "nested_linear_load_combination_add",
+            "authoring_profile": "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+            "load_combination_id": load_combination_id,
+            "load_combination_index": load_combination_index,
+            "combination_type": "linear",
+            "term_count": terms.len(),
+            "terms": nested_linear_load_combination_terms_value(terms),
+            "combination_depth": expansion.max_depth,
+            "expanded_term_count": expansion.expanded_term_count,
+            "expanded_pattern_count": expansion
+                .expanded_pattern_terms
+                .as_array()
+                .map_or(0, Vec::len),
+            "expanded_pattern_terms": expansion.expanded_pattern_terms.clone(),
+            "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+            "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+            "source_content_hash": source_hashes.content,
+            "source_semantic_hash": source_hashes.semantic,
+            "source_provenance_hash": source_hashes.provenance,
+            "claim_boundary": NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY
+        }),
+        source_hashes.content,
+    )
+}
+
 fn bind_linear_load_combination_delete_provenance(
     model: &mut Value,
     load_combination_id: &str,
@@ -9006,31 +9384,34 @@ mod tests {
     use serde_json::{json, Value};
 
     use super::{
-        append_linear_load_combination, append_node, constraint_value_unit,
-        linear_load_combination_terms_value, mark_roundtrip_entity_approximated,
-        mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_combination,
-        remove_linear_load_pattern, remove_linear_material, remove_nodal_load, remove_orphan_node,
-        remove_truss3d_leaf_member, remove_truss_section, validate_constraint_value_edit_request,
-        validate_edit_request, validate_element_connectivity_edit_request,
-        validate_fixed_constraint_add_request, validate_fixed_constraint_delete_request,
-        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
-        validate_frame_element_orientation_edit_request,
+        append_linear_load_combination, append_nested_linear_load_combination, append_node,
+        constraint_value_unit, linear_load_combination_terms_value,
+        mark_roundtrip_entity_approximated, mark_roundtrip_node_approximated,
+        nested_linear_load_combination_terms_value, normalized_number_bits,
+        remove_fixed_constraint, remove_frame3d_leaf_member, remove_frame_section,
+        remove_linear_load_combination, remove_linear_load_pattern, remove_linear_material,
+        remove_nodal_load, remove_orphan_node, remove_truss3d_leaf_member, remove_truss_section,
+        validate_constraint_value_edit_request, validate_edit_request,
+        validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
+        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
+        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_delete_request,
         validate_frame_section_edit_request, validate_linear_load_combination_add_request,
         validate_linear_load_combination_delete_request, validate_linear_load_pattern_add_request,
         validate_linear_load_pattern_delete_request, validate_linear_material_add_request,
         validate_linear_material_delete_request, validate_linear_material_edit_request,
-        validate_nodal_load_add_request, validate_nodal_load_delete_request,
-        validate_nodal_load_edit_request, validate_node_add_request,
-        validate_orphan_node_delete_request, validate_truss3d_leaf_member_delete_request,
-        validate_truss3d_member_add_request, validate_truss3d_member_properties,
-        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
-        validate_truss_section_add_request, validate_truss_section_delete_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, LinearLoadCombinationTermV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+        validate_nested_linear_load_combination_add_request, validate_nodal_load_add_request,
+        validate_nodal_load_delete_request, validate_nodal_load_edit_request,
+        validate_node_add_request, validate_orphan_node_delete_request,
+        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
+        validate_truss_element_property_references, validate_truss_section_add_request,
+        validate_truss_section_delete_request, validate_truss_section_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1,
+        LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
+        NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -9946,6 +10327,99 @@ mod tests {
         assert_eq!(
             model["load_combinations"][0]["terms"],
             linear_load_combination_terms_value(&direct_terms)
+        );
+    }
+
+    #[test]
+    fn nested_linear_load_combination_add_requires_typed_existing_references() {
+        let terms = [
+            NestedLinearLoadCombinationTermV1 {
+                reference_id: "COMBO_BASE".to_owned(),
+                reference_kind: LinearLoadCombinationReferenceKindV1::LoadCombination,
+                factor: 0.5,
+            },
+            NestedLinearLoadCombinationTermV1 {
+                reference_id: "LC_AXIAL".to_owned(),
+                reference_kind: LinearLoadCombinationReferenceKindV1::LoadPattern,
+                factor: 0.25,
+            },
+        ];
+        validate_nested_linear_load_combination_add_request(0, "COMBO_NESTED", &terms)
+            .expect("valid nested combination request");
+
+        let model = json!({
+            "load_patterns": [
+                {"id": "LC_AXIAL", "analysis_type": "linear_static"},
+                {"id": "LC_WEAK", "analysis_type": "linear_static"},
+                {"id": "LC_STRONG", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": [{
+                "id": "COMBO_BASE",
+                "index": 0,
+                "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                    {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+                ],
+                "source_id": null,
+                "extensions": {}
+            }]
+        });
+        let mut added = model.clone();
+        assert_eq!(
+            append_nested_linear_load_combination(&mut added, "COMBO_NESTED", &terms)
+                .expect("append nested load combination"),
+            1
+        );
+        assert_eq!(
+            added["load_combinations"][1],
+            json!({
+                "id": "COMBO_NESTED",
+                "index": 1,
+                "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+                    {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+                ],
+                "source_id": null,
+                "extensions": {}
+            })
+        );
+        assert_eq!(
+            added["load_combinations"][1]["terms"],
+            nested_linear_load_combination_terms_value(&terms)
+        );
+
+        let direct_only = [
+            NestedLinearLoadCombinationTermV1 {
+                reference_id: "LC_WEAK".to_owned(),
+                reference_kind: LinearLoadCombinationReferenceKindV1::LoadPattern,
+                factor: 1.0,
+            },
+            NestedLinearLoadCombinationTermV1 {
+                reference_id: "LC_STRONG".to_owned(),
+                reference_kind: LinearLoadCombinationReferenceKindV1::LoadPattern,
+                factor: 1.0,
+            },
+        ];
+        assert_eq!(
+            validate_nested_linear_load_combination_add_request(
+                0,
+                "COMBO_DIRECT_ONLY",
+                &direct_only,
+            )
+            .expect_err("nested author requires a combination reference")
+            .code,
+            "workbench_model_add_nested_linear_load_combination_reference_required"
+        );
+        let mut missing = model;
+        let mut missing_terms = terms;
+        missing_terms[0].reference_id = "COMBO_MISSING".to_owned();
+        assert_eq!(
+            append_nested_linear_load_combination(&mut missing, "COMBO_NESTED", &missing_terms,)
+                .expect_err("missing nested combination")
+                .code,
+            "workbench_model_add_nested_linear_load_combination_combination_missing"
         );
     }
 

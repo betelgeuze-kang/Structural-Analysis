@@ -499,6 +499,18 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-nested-linear-load-combination-v1.md": (
+        "model-add-nested-linear-load-combination",
+        "root-inclusive combination depth is at most eight",
+        "structural-native:model-add-nested-linear-load-combination.v3",
+        "structural-native-model-linear-nested-combination-request-create-receipt.v3",
+        "frozen ABI v1.13",
+        "Installed CPU static/shared distribution E2E v46",
+        "[25000,-6000,2500,0,0,0]",
+        "fallback 0",
+        "approved HIP C2",
+        "C6",
+    ),
     "docs/native/modelir-linear-load-combination-deletion-v1.md": (
         "model-delete-linear-load-combination",
         "Rust -> C ABI -> C++",

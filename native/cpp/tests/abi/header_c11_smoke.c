@@ -16,6 +16,15 @@ _Static_assert(
 _Static_assert(
     SA_MODEL_IR_LINEAR_MAX_RECOVERY_RECORD_COUNT == UINT64_C(1000000),
     "ModelIR linear recovery-record bound changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_DIRECT_COMBINATION_TERMS == UINT64_C(64),
+    "ModelIR direct-combination bound changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_NESTED_COMBINATION_DEPTH == UINT64_C(8),
+    "ModelIR nested-combination depth bound changed");
+_Static_assert(
+    SA_MODEL_IR_LINEAR_MAX_EXPANDED_COMBINATION_TERMS == UINT64_C(64),
+    "ModelIR nested-combination expansion bound changed");
 _Static_assert(sizeof(sa_api_v1) == 200U, "sa_api_v1 layout changed");
 _Static_assert(sizeof(sa_backend_request_v1) == 40U, "backend request layout changed");
 _Static_assert(sizeof(sa_full_residual_operator_v1) == 544U, "full residual operator layout changed");

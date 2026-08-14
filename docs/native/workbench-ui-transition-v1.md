@@ -169,8 +169,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   proves deterministic validation/view output, then creates a dedicated `--load-combination`
   request whose frozen selector alias is explicit. C++ deterministically assembles the two signed
   pattern loads, executes CPU PCG, and publishes typed recovery with exact active load, fallback 0,
-  and byte-identical initialized checkpoint/restart output. Nested/arbitrary terms, editing,
-  general solver selection, HIP parity and engineering acceptance remain open.
+  and byte-identical initialized checkpoint/restart output. This command remains direct-pattern
+  only; term editing, general solver selection, HIP parity and engineering acceptance remain open.
+- `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
+  `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at
+  most eight, at most 64 expanded leaf contributions and two through 64 resolved nonzero unique
+  `linear_static` patterns. Rust and C++ independently enforce the same declaration-order
+  flattening and factor consolidation. Installed E2E binds v3 authoring/request receipts, proves
+  exact active load, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
+  Nested deletion/term editing, deeper or larger graphs, self-weight, HIP parity and engineering
+  acceptance remain open.
 - `model-delete-linear-load-combination`: deterministic deletion of only the last contiguous
   neutral, extension-free and unreferenced `linear` combination containing exactly two distinct
   existing `linear_static` pattern terms with finite nonzero factors. Rust rejects source-owned,
@@ -406,7 +414,9 @@ combination deleter closes only the last contiguous neutral unreferenced two-pat
 restores direct-pattern CPU execution. The additive two-to-64 direct linear-combination surface
 closes ordered unique-pattern authoring, v2 provenance/request receipts beyond two terms, C++ CPU
 assembly, typed recovery and checkpoint/restart parity; the exact-two v1 receipt path remains
-frozen. The two leaf deleters close only one
+frozen. The bounded nested surface closes typed acyclic authoring and deterministic CPU flattening
+only through depth eight and 64 expanded leaves, with v3 provenance/request receipts. The two leaf
+deleters close only one
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
 endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
 homogeneous six-DOF zero row while retaining the base constraint.
@@ -414,8 +424,8 @@ The nodal-load deleter closes only one last contiguous neutral unreferenced nonz
 row while retaining another nonzero load in the same linear-static pattern.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
-property/material/section/nested-load-combination/constraint-topology editing and
-general combination deletion remain open, so the
+property/material/section/nested-load-combination-term/constraint-topology editing, nested
+combination deletion and general combination deletion remain open, so the
 composite visual parity row stays open.
 
 The model-bound CPU linear request creator additionally closes selection of one existing

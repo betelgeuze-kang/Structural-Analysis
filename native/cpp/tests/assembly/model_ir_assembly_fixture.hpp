@@ -68,6 +68,8 @@ struct ModelIrAssemblyFixture final {
     std::array<sa_load_pattern_descriptor_v1, 3> load_patterns {};
     std::array<sa_load_combination_term_v1, 3> load_combination_terms {};
     std::array<sa_load_combination_descriptor_v1, 1> load_combinations {};
+    std::array<sa_load_combination_term_v1, 3> nested_root_terms {};
+    std::array<sa_load_combination_descriptor_v1, 2> nested_combinations {};
     sa_model_ir_descriptor_v1 descriptor {};
 
     ModelIrAssemblyFixture() {
@@ -242,6 +244,44 @@ struct ModelIrAssemblyFixture final {
             load_combination_terms.data(),
             2U,
         };
+        nested_root_terms[0] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            text("combo_base"),
+            SA_LOAD_REF_COMBINATION,
+            0U,
+            0.5,
+        };
+        nested_root_terms[1] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            text("lp"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            0.4,
+        };
+        nested_root_terms[2] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
+            text("lp3"),
+            SA_LOAD_REF_PATTERN,
+            0U,
+            0.25,
+        };
+        nested_combinations[0] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            entity("combo_base", 0U),
+            load_combination_terms.data(),
+            2U,
+        };
+        nested_combinations[1] = {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(sizeof(sa_load_combination_descriptor_v1)),
+            entity("combo_nested", 1U),
+            nested_root_terms.data(),
+            nested_root_terms.size(),
+        };
 
         descriptor.abi_version = SA_ABI_V1_1;
         descriptor.struct_size =
@@ -323,6 +363,12 @@ struct ModelIrAssemblyFixture final {
         load_combinations[0].term_count = load_combination_terms.size();
         descriptor.load_combinations = load_combinations.data();
         descriptor.load_combination_count = load_combinations.size();
+    }
+
+    void enable_nested_linear_combination() {
+        descriptor.load_pattern_count = load_patterns.size();
+        descriptor.load_combinations = nested_combinations.data();
+        descriptor.load_combination_count = nested_combinations.size();
     }
 };
 

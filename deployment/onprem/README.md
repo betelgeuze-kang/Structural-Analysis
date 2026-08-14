@@ -36,10 +36,14 @@ absent from the runtime image.
   `model-delete-linear-load-pattern` removes only the last contiguous neutral zero-self-weight
   linear-static pattern with one neutral nonzero load while rejecting combined, staged, mapped,
   source-owned, multiple-load, minimum-pattern or nonterminal candidates.
-  `model-add-linear-load-combination` adds one neutral contiguous linear combination from exactly
-  two distinct existing linear-static patterns and finite nonzero factors. The installed surface
-  C++-validates the reference graph and intentionally fails solver preflight until combination
-  evaluation is implemented.
+  `model-add-linear-load-combination` adds one neutral contiguous direct linear combination from
+  two through 64 unique existing linear-static patterns and finite nonzero factors. Exact-two
+  authoring keeps the frozen v1 receipts; larger direct combinations use v2 receipts. The installed
+  surface C++-validates, assembles and executes the selected combination through native CPU PCG.
+  `model-add-nested-linear-load-combination` adds one bounded acyclic root with explicitly typed
+  pattern/combination terms, root-inclusive depth at most eight and at most 64 expanded leaves.
+  Rust and C++ independently flatten and validate it before native CPU execution; v3 receipts bind
+  both root and resolved pattern terms.
   `model-delete-linear-load-combination` removes only the last contiguous neutral, extension-free,
   unreferenced two-pattern linear combination. It rejects nested, mapped, source-owned,
   feature-owned, referenced or nonterminal candidates and restores direct load-pattern CPU

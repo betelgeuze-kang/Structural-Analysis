@@ -324,7 +324,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    binds the direct-combination edited ModelIR, edit receipt, request receipt, analysis request,
    assembly receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit
    restart parity.
-   The receipt checker continues to accept frozen v1 through v44 receipts (including frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+56. authors a direct two-pattern `COMBO_BASE`, then authors
+   `0.5*COMBO_BASE + 0.25*LC_AXIAL` as a bounded acyclic nested combination twice, binds v3
+   provenance/request receipts, executes exact active load `[25000,-6000,2500,0,0,0]`, proves
+   typed recovery, fallback 0 and byte-identical initialized checkpoint/restart output;
+57. emits an append-only v46 hash-bound receipt that inherits every v45 identity and additionally
+   binds the nested-combination edited ModelIR, edit receipt, request receipt, analysis request,
+   assembly receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit
+   restart parity.
+   The receipt checker continues to accept frozen v1 through v45 receipts (including frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
@@ -362,7 +370,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    is installed bounded two-pattern linear-load-combination assembly, CPU execution,
    typed recovery and restart authority; and no pre-v45 receipt is installed bounded
    two-through-64 direct linear-load-combination authoring, v2 provenance/request binding, CPU
-   execution, typed recovery and restart authority.
+   execution, typed recovery and restart authority; and no pre-v46 receipt is installed bounded
+   acyclic nested linear-load-combination authoring, v3 provenance/request binding, CPU execution,
+   typed recovery and restart authority.
 
 The reference command is:
 

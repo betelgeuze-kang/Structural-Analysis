@@ -318,6 +318,48 @@ struct OutputStorage final {
     return true;
 }
 
+[[nodiscard]] bool bounded_nested_linear_combination_crosses_the_frozen_abi() {
+    const auto api = load_api(SA_ABI_V1_13);
+    structural::tests::ModelIrAssemblyFixture fixture;
+    fixture.enable_nested_linear_combination();
+    sa_model_ir_handle_v1* handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
+
+    auto sizes = empty_sizes();
+    CHECK(api.model_ir_linear_assembly_sizes(handle, &sizes, nullptr) == SA_OK);
+    const auto displacement = structural::tests::assembly_displacement();
+    const auto direction = structural::tests::assembly_direction();
+    const sa_model_ir_linear_assembly_config_v1 config {
+        SA_ABI_V1_13,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_linear_assembly_config_v1)),
+        structural::tests::text("combo_nested"),
+        input_view(displacement.data(), displacement.size()),
+        input_view(direction.data(), direction.size()),
+        0U,
+        {0U, 0U},
+    };
+    OutputStorage storage(sizes);
+    auto outputs = storage.descriptor();
+    auto result = empty_result();
+    CHECK(api.model_ir_linear_assemble(handle, &config, &outputs, &result, nullptr) == SA_OK);
+    CHECK(result.load_pattern_index == 1U);
+    CHECK(result.execution_backend == SA_EXECUTION_BACKEND_CPU);
+    CHECK(result.fallback_count == 0U);
+    CHECK(storage.external_load
+          == std::vector<double>({10.0, -20.0, -2.0, 0.0, 0.0, 0.0, 34.0}));
+
+    OutputStorage repeated(sizes);
+    auto repeated_outputs = repeated.descriptor();
+    auto repeated_result = empty_result();
+    CHECK(api.model_ir_linear_assemble(
+              handle, &config, &repeated_outputs, &repeated_result, nullptr)
+          == SA_OK);
+    CHECK(repeated == storage);
+    CHECK(std::memcmp(&repeated_result, &result, sizeof(result)) == 0);
+    CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
+    return true;
+}
+
 [[nodiscard]] bool failures_are_atomic_and_aliases_fail_closed() {
     const auto api = load_api(SA_ABI_V1_13);
     structural::tests::ModelIrAssemblyFixture fixture;
@@ -456,6 +498,7 @@ int main() {
         table_is_append_only,
         successful_assembly_is_canonical_and_deterministic,
         bounded_direct_linear_combination_crosses_the_frozen_abi,
+        bounded_nested_linear_combination_crosses_the_frozen_abi,
         failures_are_atomic_and_aliases_fail_closed,
         immutable_calls_are_concurrent,
         unsupported_graph_sizes_fail_atomically,

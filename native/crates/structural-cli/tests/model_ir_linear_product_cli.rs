@@ -102,6 +102,37 @@ fn direct_combination_model_bytes() -> Vec<u8> {
         .into_bytes()
 }
 
+fn nested_combination_model_bytes() -> Vec<u8> {
+    let mut value: Value = serde_json::from_slice(&model_bytes()).expect("ModelIR fixture JSON");
+    value["load_combinations"] = json!([
+        {
+            "id": "COMBO_BASE",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+            ],
+            "source_id": null,
+            "extensions": {}
+        },
+        {
+            "id": "COMBO_NESTED",
+            "index": 1,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+            ],
+            "source_id": null,
+            "extensions": {}
+        }
+    ]);
+    canonicalize_model_ir_v2(&value)
+        .expect("canonical nested-combination ModelIR")
+        .into_bytes()
+}
+
 fn rebound_request_bytes(model: &[u8], selector_id: &str, max_iterations: u32) -> Vec<u8> {
     let document = parse_model_ir_v2(model).expect("strict rebound ModelIR");
     let mut value: Value =
@@ -295,6 +326,52 @@ fn bounded_three_pattern_direct_combination_executes_and_restarts_exactly() {
         u32::MAX,
     )
     .expect("resumed direct-combination execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+    assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
+}
+
+#[test]
+fn bounded_nested_combination_executes_and_restarts_exactly() {
+    let model = nested_combination_model_bytes();
+    let request = rebound_request_bytes(&model, "COMBO_NESTED", 100);
+    let first = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("bounded nested-combination compatibility");
+    let repeated = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("deterministic nested-combination compatibility");
+    assert_eq!(first, repeated);
+
+    let direct = execute_model_ir_linear_analysis(&model, &request, None, u32::MAX)
+        .expect("bounded nested-combination execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nested-combination recovery IR"),
+    )
+    .expect("nested-combination recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_NESTED");
+    assert_eq!(recovery["load_pattern_index"], 1);
+    assert_eq!(
+        recovery["active_external_load"],
+        json!([25000, -6000, 2500, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&model, &request, None, 0)
+        .expect("initial nested-combination checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &model,
+        &request,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed nested-combination execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(

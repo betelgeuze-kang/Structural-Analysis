@@ -34,6 +34,122 @@ struct SelectedLoadCase final {
     std::vector<SelectedLoadPattern> patterns;
 };
 
+[[nodiscard]] const model_ir::LinearReferenceLoadPattern* find_load_pattern(
+    const model_ir::LinearReferenceGraph& graph,
+    const std::string_view id) {
+    const auto found = std::find_if(
+        graph.load_patterns.begin(),
+        graph.load_patterns.end(),
+        [id](const auto& candidate) { return candidate.id == id; });
+    return found == graph.load_patterns.end() ? nullptr : &*found;
+}
+
+[[nodiscard]] const model_ir::LinearReferenceLoadCombination* find_load_combination(
+    const model_ir::LinearReferenceGraph& graph,
+    const std::string_view id) {
+    const auto found = std::find_if(
+        graph.load_combinations.begin(),
+        graph.load_combinations.end(),
+        [id](const auto& candidate) { return candidate.id == id; });
+    return found == graph.load_combinations.end() ? nullptr : &*found;
+}
+
+void require_bounded_combination_terms(
+    const model_ir::LinearReferenceLoadCombination& combination,
+    const char* const profile) {
+    if (combination.terms.size() < 2U
+        || combination.terms.size() > SA_MODEL_IR_LINEAR_MAX_DIRECT_COMBINATION_TERMS) {
+        throw model_ir::Error(SA_ERR_ANALYSIS_NOT_READY, profile);
+    }
+}
+
+void append_nested_combination_patterns(
+    const model_ir::LinearReferenceGraph& graph,
+    const model_ir::LinearReferenceLoadCombination& combination,
+    const double parent_factor,
+    const std::uint64_t depth,
+    std::uint64_t& expanded_term_count,
+    std::vector<const model_ir::LinearReferenceLoadCombination*>& active,
+    std::vector<SelectedLoadPattern>& patterns) {
+    if (depth > SA_MODEL_IR_LINEAR_MAX_NESTED_COMBINATION_DEPTH) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR nested linear combination exceeds the maximum depth of eight");
+    }
+    if (std::find(active.begin(), active.end(), &combination) != active.end()) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR nested linear combination contains a cycle");
+    }
+    require_bounded_combination_terms(
+        combination,
+        "ModelIR nested linear assembly requires between two and 64 terms per combination");
+    active.push_back(&combination);
+    for (const auto& term : combination.terms) {
+        if (!std::isfinite(term.factor) || term.factor == 0.0) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR nested linear assembly requires finite nonzero combination factors");
+        }
+        const auto scaled_factor = parent_factor * term.factor;
+        if (!std::isfinite(scaled_factor) || scaled_factor == 0.0) {
+            throw model_ir::Error(
+                SA_ERR_RESIDUAL_LIMIT,
+                "ModelIR nested combination factor propagation exceeds the finite numerical domain");
+        }
+        if (term.ref_kind == SA_LOAD_REF_COMBINATION) {
+            const auto* const nested = find_load_combination(graph, term.ref_id);
+            if (nested == nullptr) {
+                throw model_ir::Error(
+                    SA_ERR_INTERNAL,
+                    "validated ModelIR nested combination reference became unavailable");
+            }
+            append_nested_combination_patterns(
+                graph,
+                *nested,
+                scaled_factor,
+                depth + 1U,
+                expanded_term_count,
+                active,
+                patterns);
+            continue;
+        }
+        if (term.ref_kind != SA_LOAD_REF_PATTERN) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR nested linear assembly encountered an unsupported reference kind");
+        }
+        ++expanded_term_count;
+        if (expanded_term_count > SA_MODEL_IR_LINEAR_MAX_EXPANDED_COMBINATION_TERMS) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR nested linear combination expands beyond 64 pattern terms");
+        }
+        const auto* const referenced = find_load_pattern(graph, term.ref_id);
+        if (referenced == nullptr) {
+            throw model_ir::Error(
+                SA_ERR_INTERNAL,
+                "validated ModelIR nested combination pattern reference became unavailable");
+        }
+        const auto prior = std::find_if(
+            patterns.begin(),
+            patterns.end(),
+            [referenced](const auto& candidate) { return candidate.pattern == referenced; });
+        if (prior == patterns.end()) {
+            patterns.push_back({referenced, scaled_factor});
+            continue;
+        }
+        const auto accumulated = prior->factor + scaled_factor;
+        if (!std::isfinite(accumulated)) {
+            throw model_ir::Error(
+                SA_ERR_RESIDUAL_LIMIT,
+                "ModelIR nested combination factor accumulation exceeds the finite numerical domain");
+        }
+        prior->factor = accumulated == 0.0 ? 0.0 : accumulated;
+    }
+    active.pop_back();
+}
+
 [[nodiscard]] bool all_finite(const std::span<const double> values) {
     return std::all_of(values.begin(), values.end(), [](const double value) {
         return std::isfinite(value);
@@ -49,35 +165,51 @@ struct SelectedLoadCase final {
 [[nodiscard]] SelectedLoadCase select_load_case(
     const model_ir::LinearReferenceGraph& graph,
     const std::string_view selector_id) {
-    const auto pattern = std::find_if(
-        graph.load_patterns.begin(),
-        graph.load_patterns.end(),
-        [selector_id](const auto& candidate) { return candidate.id == selector_id; });
-    const auto combination = std::find_if(
-        graph.load_combinations.begin(),
-        graph.load_combinations.end(),
-        [selector_id](const auto& candidate) { return candidate.id == selector_id; });
-    if (pattern != graph.load_patterns.end() && combination != graph.load_combinations.end()) {
+    const auto* const pattern = find_load_pattern(graph, selector_id);
+    const auto* const combination = find_load_combination(graph, selector_id);
+    if (pattern != nullptr && combination != nullptr) {
         throw model_ir::Error(
             SA_ERR_INVALID_ARGUMENT,
             "ModelIR load-case selector is ambiguous across patterns and combinations");
     }
-    if (pattern != graph.load_patterns.end()) {
-        return {pattern->id, pattern->stable_index, {{&*pattern, 1.0}}};
+    if (pattern != nullptr) {
+        return {pattern->id, pattern->stable_index, {{pattern, 1.0}}};
     }
-    if (combination == graph.load_combinations.end()) {
+    if (combination == nullptr) {
         throw model_ir::Error(
             SA_ERR_INVALID_ARGUMENT,
             "ModelIR load-case selector does not identify a bounded linear pattern or combination");
     }
-    if (combination->terms.size() < 2U
-        || combination->terms.size() > SA_MODEL_IR_LINEAR_MAX_DIRECT_COMBINATION_TERMS) {
-        throw model_ir::Error(
-            SA_ERR_ANALYSIS_NOT_READY,
-            "ModelIR linear reference assembly requires between two and 64 direct combination terms");
-    }
+    require_bounded_combination_terms(
+        *combination,
+        "ModelIR linear reference assembly requires between two and 64 direct combination terms");
 
     SelectedLoadCase selected {combination->id, combination->stable_index, {}};
+    const auto nested = std::any_of(
+        combination->terms.begin(), combination->terms.end(), [](const auto& term) {
+            return term.ref_kind == SA_LOAD_REF_COMBINATION;
+        });
+    if (nested) {
+        auto expanded_term_count = std::uint64_t {0U};
+        std::vector<const model_ir::LinearReferenceLoadCombination*> active;
+        append_nested_combination_patterns(
+            graph, *combination, 1.0, 1U, expanded_term_count, active, selected.patterns);
+        selected.patterns.erase(
+            std::remove_if(
+                selected.patterns.begin(),
+                selected.patterns.end(),
+                [](const auto& term) { return term.factor == 0.0; }),
+            selected.patterns.end());
+        if (selected.patterns.size() < 2U
+            || selected.patterns.size()
+                > SA_MODEL_IR_LINEAR_MAX_EXPANDED_COMBINATION_TERMS) {
+            throw model_ir::Error(
+                SA_ERR_ANALYSIS_NOT_READY,
+                "ModelIR nested linear combination must resolve to between two and 64 nonzero unique patterns");
+        }
+        return selected;
+    }
+
     selected.patterns.reserve(combination->terms.size());
     for (const auto& term : combination->terms) {
         if (term.ref_kind != SA_LOAD_REF_PATTERN || !std::isfinite(term.factor)
@@ -86,11 +218,8 @@ struct SelectedLoadCase final {
                 SA_ERR_ANALYSIS_NOT_READY,
                 "ModelIR linear reference assembly requires finite nonzero direct-pattern combination terms");
         }
-        const auto referenced = std::find_if(
-            graph.load_patterns.begin(),
-            graph.load_patterns.end(),
-            [&term](const auto& candidate) { return candidate.id == term.ref_id; });
-        if (referenced == graph.load_patterns.end()) {
+        const auto* const referenced = find_load_pattern(graph, term.ref_id);
+        if (referenced == nullptr) {
             throw model_ir::Error(
                 SA_ERR_INTERNAL,
                 "validated ModelIR combination pattern reference became unavailable");
@@ -98,12 +227,12 @@ struct SelectedLoadCase final {
         if (std::any_of(
                 selected.patterns.begin(),
                 selected.patterns.end(),
-                [&referenced](const auto& prior) { return prior.pattern == &*referenced; })) {
+                [referenced](const auto& prior) { return prior.pattern == referenced; })) {
             throw model_ir::Error(
                 SA_ERR_ANALYSIS_NOT_READY,
                 "ModelIR linear reference assembly requires unique direct combination patterns");
         }
-        selected.patterns.push_back({&*referenced, term.factor});
+        selected.patterns.push_back({referenced, term.factor});
     }
     return selected;
 }

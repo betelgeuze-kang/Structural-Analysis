@@ -62,5 +62,14 @@ int main() {
     emit(
         "model_assembly.direct_terms_equilibrium_residual",
         direct_terms.equilibrium_residual);
+    structural::tests::ModelIrAssemblyFixture nested_fixture;
+    nested_fixture.enable_nested_linear_combination();
+    const structural::model_ir::Model nested_model(nested_fixture.descriptor);
+    const auto nested = structural::assembly::assemble_model_ir_linear_reference(
+        nested_model, "combo_nested", displacement, direction);
+    emit("model_assembly.nested_combination_external_load", nested.external_load);
+    emit(
+        "model_assembly.nested_combination_equilibrium_residual",
+        nested.equilibrium_residual);
     return 0;
 }
