@@ -100,6 +100,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-delete-frame3d-leaf-member.v1",
         "structural-native:model-delete-truss3d-leaf-member.v1",
         "structural-native:model-add-nodal-load.v1",
+        "structural-native:model-delete-nodal-load.v1",
         "structural-native:model-add-fixed-constraint.v1",
         "structural-native:model-delete-fixed-constraint.v1",
         "structural-native:model-add-linear-load-pattern.v1",
@@ -142,6 +143,7 @@ REQUIRED_TOKENS = {
         "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_euler_bernoulli_frame3d_leaf_member_and_orphan_node_deletion",
         "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_linear_truss3d_leaf_member_and_orphan_node_deletion",
         "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition",
+        "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_nonzero_six_component_nodal_load_deletion",
         "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition",
         "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_homogeneous_six_dof_fixed_constraint_deletion",
         "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition",
@@ -173,6 +175,7 @@ REQUIRED_TOKENS = {
         'Some("model-delete-frame3d-leaf-member")',
         'Some("model-delete-truss3d-leaf-member")',
         'Some("model-add-nodal-load")',
+        'Some("model-delete-nodal-load")',
         'Some("model-add-fixed-constraint")',
         'Some("model-delete-fixed-constraint")',
         'Some("model-add-linear-load-pattern")',
@@ -229,6 +232,7 @@ REQUIRED_TOKENS = {
         "element_connectivity_edit_is_deterministic_cpp_revalidated_and_preserves_blockers",
         "frame3d_member_add_is_deterministic_cpp_revalidated_and_linear_executable",
         "nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution",
+        "nodal_load_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable",
         "fixed_constraint_add_is_deterministic_cpp_revalidated_and_changes_linear_execution",
         "fixed_constraint_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable",
         "linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executable",
@@ -392,6 +396,16 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-nodal-load-deletion-v1.md": (
+        "model-delete-nodal-load",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-delete-nodal-load.v1",
+        "last contiguous",
+        "another nonzero nodal load",
+        "one-real-iteration",
+        "fallback 0",
+        "C6",
+    ),
     "docs/native/modelir-linear-load-pattern-add-v1.md": (
         "model-add-linear-load-pattern",
         "Rust -> C ABI -> C++",
@@ -471,6 +485,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     blockers: list[str] = []
     member_add_row: dict[str, object] = {}
     load_add_row: dict[str, object] = {}
+    load_deletion_row: dict[str, object] = {}
     constraint_add_row: dict[str, object] = {}
     constraint_deletion_row: dict[str, object] = {}
     load_pattern_add_row: dict[str, object] = {}
@@ -488,6 +503,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         row = payload["capabilities"]["native_workbench"]
         member_add_row = payload["capabilities"]["modelir_frame3d_member_add"]
         load_add_row = payload["capabilities"]["modelir_nodal_load_add"]
+        load_deletion_row = payload["capabilities"]["modelir_nodal_load_deletion"]
         constraint_add_row = payload["capabilities"]["modelir_fixed_constraint_add"]
         constraint_deletion_row = payload["capabilities"][
             "modelir_fixed_constraint_deletion"
@@ -577,6 +593,30 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     ):
         if token not in load_add_claim:
             blockers.append(f"native_workbench_load_add_claim_token_missing:{token}")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if load_deletion_row.get(field) != expected:
+            blockers.append(f"native_workbench_load_deletion_capability_invalid:{field}")
+    load_deletion_claim = str(load_deletion_row.get("claim", ""))
+    for token in (
+        "last contiguous neutral nonzero six-component nodal-load row",
+        "another nonzero load",
+        "unsupported-feature/direct-round-trip ownership",
+        "single C ABI into C++",
+        "exact retained active load",
+        "typed frame recovery",
+        "byte-identical restart",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in load_deletion_claim:
+            blockers.append(
+                f"native_workbench_load_deletion_claim_token_missing:{token}"
+            )
     for field, expected in (
         ("status", "implemented"),
         ("cutover_gate", "C5"),
@@ -797,6 +837,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         "model-bound CPU linear request",
         "fixed-constraint creator",
         "model-delete-fixed-constraint",
+        "model-delete-nodal-load",
         "linear-load-pattern creator",
         "linear-material creator",
         "frame-section creator",

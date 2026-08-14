@@ -738,6 +738,24 @@ fn run_nodal_load_add(
     ])
 }
 
+fn run_nodal_load_delete(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-nodal-load"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--load"),
+        text(nodal_load_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_fixed_constraint_add(
     source: &Path,
     destination: &Path,
@@ -3428,6 +3446,273 @@ fn nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution(
     assert_eq!(
         blocked_edited["roundtrip_map"][1]["mapping_status"],
         "exact"
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nodal_load_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("load-delete-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("load-delete-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let load_path = load_directory.join("model-ir.json");
+    let load_bytes = std::fs::read(&load_path).expect("nodal-load delete source bytes");
+    let load_model = parse_model_ir_v2(&load_bytes).expect("strict nodal-load delete source");
+
+    let first = temporary.0.join("nodal-load-delete-first");
+    let second = temporary.0.join("nodal-load-delete-second");
+    for destination in [&first, &second] {
+        let output = run_nodal_load_delete(&load_path, destination, "LC_WEAK", "L_WEAK_N3");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nodal-load delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nodal-load delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second nodal-load delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&load_path).expect("unchanged nodal-load delete source"),
+        load_bytes
+    );
+
+    let deleted_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("nodal-load-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict nodal-load-deleted ModelIR");
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+    ] {
+        assert_eq!(deleted.value()[family], load_model.value()[family]);
+    }
+    let source_patterns = load_model.value()["load_patterns"]
+        .as_array()
+        .expect("source load patterns");
+    let deleted_patterns = deleted.value()["load_patterns"]
+        .as_array()
+        .expect("deleted load patterns");
+    assert_eq!(source_patterns.len(), deleted_patterns.len());
+    for (source_pattern, deleted_pattern) in source_patterns.iter().zip(deleted_patterns) {
+        if source_pattern["id"] == "LC_WEAK" {
+            assert_eq!(deleted_pattern["analysis_type"], "linear_static");
+            assert_eq!(
+                deleted_pattern["nodal_loads"].as_array().map(Vec::len),
+                Some(1)
+            );
+            assert_eq!(
+                deleted_pattern["nodal_loads"][0],
+                source_pattern["nodal_loads"][0]
+            );
+        } else {
+            assert_eq!(deleted_pattern, source_pattern);
+        }
+    }
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-nodal-load.v1")
+        .expect("nodal-load delete provenance extension");
+    assert_eq!(extension["operation"], "nodal_load_delete");
+    assert_eq!(extension["load_pattern_id"], "LC_WEAK");
+    assert_eq!(extension["load_pattern_index"], 1);
+    assert_eq!(extension["removed_nodal_load_id"], "L_WEAK_N3");
+    assert_eq!(extension["removed_nodal_load_index"], 1);
+    assert_eq!(extension["removed_node_id"], "N3");
+    assert_eq!(
+        extension["removed_components_si"],
+        serde_json::json!({"FX": 0, "FY": -1000, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0})
+    );
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nodal-load delete receipt"),
+    )
+    .expect("nodal-load delete receipt JSON");
+    assert_eq!(receipt["operation"], "nodal_load_delete");
+    assert_eq!(receipt["load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["removed_nodal_load_id"], "L_WEAK_N3");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("nodal-load-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nodal-load-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nodal-load delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("nodal-load delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nodal-load delete direct recovery"),
+    )
+    .expect("nodal-load delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        recovery["recovery_stable_indices"],
+        serde_json::json!([0, 1])
+    );
+    assert_eq!(
+        recovery["recovery_element_types"],
+        serde_json::json!([1, 1])
+    );
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12, 24]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 1)
+        .expect("nodal-load delete partial execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nodal-load delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let nonterminal_destination = temporary.0.join("nodal-load-delete-nonterminal");
+    let nonterminal =
+        run_nodal_load_delete(&load_path, &nonterminal_destination, "LC_WEAK", "L_WEAK_N2");
+    assert_eq!(nonterminal.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&nonterminal.stdout)
+        .contains("workbench_model_delete_nodal_load_not_terminal"));
+    assert!(!nonterminal_destination.exists());
+
+    let mut source_owned = load_model.value().clone();
+    source_owned["load_patterns"][1]["nodal_loads"][1]["source_id"] =
+        serde_json::json!("native:test:L_WEAK_N3");
+    let source_owned_path = temporary.0.join("nodal-load-delete-source-owned.json");
+    std::fs::write(
+        &source_owned_path,
+        canonicalize_model_ir_v2(&source_owned)
+            .expect("canonical source-owned nodal load")
+            .as_bytes(),
+    )
+    .expect("write source-owned nodal load");
+    let source_owned_destination = temporary.0.join("nodal-load-delete-source-owned");
+    let source_owned_rejection = run_nodal_load_delete(
+        &source_owned_path,
+        &source_owned_destination,
+        "LC_WEAK",
+        "L_WEAK_N3",
+    );
+    assert_eq!(source_owned_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&source_owned_rejection.stdout)
+        .contains("workbench_model_delete_nodal_load_source_owned"));
+    assert!(!source_owned_destination.exists());
+
+    let minimum_destination = temporary.0.join("nodal-load-delete-minimum");
+    let minimum = run_nodal_load_delete(
+        &member_directory.join("model-ir.json"),
+        &minimum_destination,
+        "LC_WEAK",
+        "L_WEAK_N2",
+    );
+    assert_eq!(minimum.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&minimum.stdout)
+        .contains("workbench_model_delete_nodal_load_minimum_pattern"));
+    assert!(!minimum_destination.exists());
+
+    let existing = run_nodal_load_delete(&load_path, &first, "LC_WEAK", "L_WEAK_N3");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut blocked = load_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.nodal-load-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Nodal-load deletion must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:LC_WEAK",
+        "entity_kind": "load_pattern",
+        "model_ir_entity_id": "LC_WEAK",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-nodal-load-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked nodal-load delete")
+            .as_bytes(),
+    )
+    .expect("write blocked nodal-load delete source");
+    let blocked_destination = temporary.0.join("blocked-nodal-load-delete-output");
+    assert_success(&run_nodal_load_delete(
+        &blocked_source,
+        &blocked_destination,
+        "LC_WEAK",
+        "L_WEAK_N3",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked nodal-load delete receipt"),
+    )
+    .expect("blocked nodal-load delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.nodal-load-delete-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked nodal-load-deleted ModelIR"),
+    )
+    .expect("blocked nodal-load-deleted JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
     );
 }
 

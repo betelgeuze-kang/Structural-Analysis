@@ -50,6 +50,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
+    Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
 
 
@@ -197,6 +198,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-truss3d-leaf-member",
             "model-delete-fixed-constraint",
             "model-add-nodal-load",
+            "model-delete-nodal-load",
             "model-add-frame-section",
             "model-create-linear-analysis-request",
             "customer-approved image build",
@@ -322,7 +324,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v34",
+        "structural-native-distribution-e2e.v35",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -356,6 +358,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_nodal_load_add_request_sha256",
         "workbench_nodal_load_add_result_ir_sha256",
         "workbench_nodal_load_add_recovery_sha256",
+        "exercise_nodal_load_deletion_surface",
+        "model-delete-nodal-load",
+        "workbench_nodal_load_delete_surface_passed",
+        "workbench_nodal_load_delete_model_sha256",
+        "workbench_nodal_load_delete_receipt_sha256",
+        "workbench_nodal_load_delete_request_sha256",
+        "workbench_nodal_load_delete_result_ir_sha256",
+        "workbench_nodal_load_delete_recovery_sha256",
         "exercise_fixed_constraint_add_surface",
         "model-add-fixed-constraint",
         "workbench_fixed_constraint_add_surface_passed",
@@ -510,7 +520,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
-            "structural-native-distribution-e2e.v34",
+            "structural-native-distribution-e2e.v35",
+            "V35_NODAL_LOAD_DELETE_KEYS",
+            "workbench_nodal_load_delete_surface_passed",
+            "workbench_nodal_load_delete_recovery_sha256",
             "V34_FIXED_CONSTRAINT_DELETE_KEYS",
             "workbench_fixed_constraint_delete_surface_passed",
             "workbench_fixed_constraint_delete_recovery_sha256",
@@ -531,9 +544,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
-            "append-only v34 hash-bound receipt",
-            "frozen v1 through v33 receipts",
-            "no pre-v34 receipt",
+            "append-only v35 hash-bound receipt",
+            "frozen v1 through v34 receipts",
+            "no pre-v35 receipt",
         ),
         blockers=blockers,
     )
@@ -595,6 +608,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Installed static and shared package E2E v34",
             "Frozen v1 through v33",
             "receipts keep their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    nodal_load_deletion_doc = _text(
+        root, Path("docs/native/modelir-nodal-load-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-nodal-load-deletion-v1.md"),
+        text=nodal_load_deletion_doc,
+        tokens=(
+            "model-delete-nodal-load",
+            "Installed static and shared package E2E v35",
+            "Frozen v1 through v34",
+            "receipts retain their narrower authority",
         ),
         blockers=blockers,
     )
@@ -779,8 +807,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v34 E2E",
+            "CPU static/shared distribution v35 E2E",
             "last-neutral fixed-constraint deletion",
+            "last-neutral nodal-load deletion",
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",

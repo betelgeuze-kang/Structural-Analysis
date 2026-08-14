@@ -33,6 +33,7 @@ const FRAME3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
 const TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-truss3d-leaf-member.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
+const NODAL_LOAD_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
 const FIXED_CONSTRAINT_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-fixed-constraint.v1";
@@ -57,6 +58,7 @@ const TRUSS3D_MEMBER_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir
 const FRAME3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_euler_bernoulli_frame3d_leaf_member_and_orphan_node_deletion_not_cascade_general_entity_or_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS3D_LEAF_MEMBER_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_linear_truss3d_leaf_member_and_orphan_node_deletion_not_cascade_general_entity_or_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_nodal_load_addition_to_existing_pattern_and_node_not_pattern_node_combination_member_property_constraint_solver_visual_editing_engineering_acceptance_or_c6";
+const NODAL_LOAD_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_nonzero_six_component_nodal_load_deletion_from_existing_linear_static_pattern_with_another_nonzero_load_retained_not_source_owned_pattern_combination_stage_node_or_general_load_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_homogeneous_six_dof_fixed_constraint_deletion_not_source_owned_partial_nonzero_staged_mapped_general_constraint_or_topology_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -196,6 +198,13 @@ pub struct ModelNodalLoadAddOutcomeV1 {
     pub receipt_json: String,
 }
 
+/// Complete deterministic artifact pair produced by one bounded nodal-load deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelNodalLoadDeleteOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
 /// Complete deterministic artifact pair produced by one bounded fixed-constraint addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFixedConstraintAddOutcomeV1 {
@@ -310,6 +319,31 @@ pub fn publish_model_nodal_load_add(
         node_id,
         components_si,
     )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral nodal load from an existing linear-static pattern.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing or non-terminal loads,
+/// source ownership, invalid components, unsupported-feature or round-trip ownership, a pattern
+/// that would retain no load, and publication failures.
+pub fn publish_model_nodal_load_delete(
+    source_path: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    output_directory: &Path,
+) -> Result<ModelNodalLoadDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_nodal_load(&source, load_pattern_id, nodal_load_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1095,6 +1129,103 @@ pub fn add_model_nodal_load(
         "claim_boundary": NODAL_LOAD_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodalLoadAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedNodalLoadV1 {
+    load_pattern_index: usize,
+    nodal_load_index: usize,
+    node_id: String,
+    components_si: Value,
+}
+
+/// Delete one last contiguous neutral nonzero nodal load in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal rows, unsupported pattern types,
+/// source-owned or malformed loads, unsupported-feature/round-trip ownership, empty retained
+/// patterns, schema drift, or edited semantics rejected by the C++ validator.
+pub fn delete_model_nodal_load(
+    source_bytes: &[u8],
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+) -> Result<ModelNodalLoadDeleteOutcomeV1, WorkbenchError> {
+    validate_nodal_load_delete_request(source_bytes.len(), load_pattern_id, nodal_load_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_nodal_load(&mut edited, load_pattern_id, nodal_load_id)?;
+    bind_nodal_load_delete_provenance(
+        &mut edited,
+        load_pattern_id,
+        nodal_load_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "load_pattern", load_pattern_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "nodal_load_delete",
+        "model_id": edited_validation.report.model_id,
+        "load_pattern_id": load_pattern_id,
+        "load_pattern_index": removed.load_pattern_index,
+        "analysis_type": "linear_static",
+        "removed_nodal_load_id": nodal_load_id,
+        "removed_nodal_load_index": removed.nodal_load_index,
+        "removed_node_id": removed.node_id,
+        "removed_components_si": removed.components_si,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NODAL_LOAD_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelNodalLoadDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3206,6 +3337,15 @@ fn validate_nodal_load_add_request(
     Ok(())
 }
 
+fn validate_nodal_load_delete_request(
+    source_length: usize,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_pattern_id, "load pattern")?;
+    validate_bounded_edit_identity(0, nodal_load_id, "nodal load")
+}
+
 fn validate_fixed_constraint_add_request(
     source_length: usize,
     constraint_id: &str,
@@ -3493,6 +3633,180 @@ fn append_nodal_load(
             "extensions": {}
         }));
     Ok((load_pattern_index, nodal_load_index))
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_nodal_load(
+    model: &mut Value,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+) -> Result<RemovedNodalLoadV1, WorkbenchError> {
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    let load_pattern_index = load_patterns
+        .iter()
+        .position(|pattern| pattern.get("id").and_then(Value::as_str) == Some(load_pattern_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_nodal_load_pattern_missing",
+                format!("ModelIR has no load pattern with identity {load_pattern_id}"),
+            )
+        })?;
+    let load_pattern = &load_patterns[load_pattern_index];
+    if load_pattern.get("index").and_then(Value::as_u64) != u64::try_from(load_pattern_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_pattern_index_mismatch",
+            "target load-pattern index must match its contiguous position",
+        ));
+    }
+    if load_pattern.get("analysis_type").and_then(Value::as_str) != Some("linear_static") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_pattern_unsupported",
+            "nodal-load deletion accepts only an existing linear_static pattern",
+        ));
+    }
+    let nodal_loads = load_pattern
+        .get("nodal_loads")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load pattern nodal_loads"))?;
+    let nodal_load_index = nodal_loads
+        .iter()
+        .position(|load| load.get("id").and_then(Value::as_str) == Some(nodal_load_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_nodal_load_missing",
+                format!(
+                    "load pattern {load_pattern_id} has no nodal load with identity {nodal_load_id}"
+                ),
+            )
+        })?;
+    if nodal_load_index + 1 != nodal_loads.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_not_terminal",
+            "deleted nodal load must be the last contiguous row in its pattern",
+        ));
+    }
+    if nodal_loads.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_minimum_pattern",
+            "nodal-load deletion must retain at least one nonzero nodal load in the pattern",
+        ));
+    }
+    let nodal_load = &nodal_loads[nodal_load_index];
+    if nodal_load.get("index").and_then(Value::as_u64) != u64::try_from(nodal_load_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_index_mismatch",
+            "deleted nodal-load index must match its last contiguous position",
+        ));
+    }
+    if !nodal_load.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_source_owned",
+            "nodal-load deletion accepts only a neutral row with null source_id",
+        ));
+    }
+    let node_id = nodal_load
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("nodal load node_id"))?
+        .to_owned();
+    let components = nodal_load
+        .get("components_si")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == NODAL_LOAD_COMPONENT_KEYS.len())
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_nodal_load_components_invalid",
+                "deleted nodal load must contain exactly six SI components",
+            )
+        })?;
+    let mut removed_is_nonzero = false;
+    for component in NODAL_LOAD_COMPONENT_KEYS {
+        let value = components
+            .get(component)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_delete_nodal_load_components_invalid",
+                    format!("deleted nodal load has no {component} component"),
+                )
+            })?
+            .as_f64()
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| snapshot_error("nodal load component"))?;
+        removed_is_nonzero = removed_is_nonzero || value != 0.0;
+    }
+    if !removed_is_nonzero {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_zero_components",
+            "deleted nodal load must contain at least one nonzero SI component",
+        ));
+    }
+    let mut retained_nonzero = false;
+    for retained in &nodal_loads[..nodal_load_index] {
+        let retained_components = retained
+            .get("components_si")
+            .and_then(Value::as_object)
+            .filter(|values| values.len() == NODAL_LOAD_COMPONENT_KEYS.len())
+            .ok_or_else(|| snapshot_error("retained nodal load components_si"))?;
+        for component in NODAL_LOAD_COMPONENT_KEYS {
+            let value = retained_components
+                .get(component)
+                .and_then(Value::as_f64)
+                .filter(|value| value.is_finite())
+                .ok_or_else(|| snapshot_error("retained nodal load component"))?;
+            retained_nonzero = retained_nonzero || value != 0.0;
+        }
+    }
+    if !retained_nonzero {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_retained_pattern_zero",
+            "nodal-load deletion must retain another nonzero nodal load in the pattern",
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        feature.get("source_entity_id").and_then(Value::as_str) == Some(nodal_load_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_unsupported_feature_owned",
+            "nodal-load deletion refuses a row referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| row.get("model_ir_entity_id").and_then(Value::as_str) == Some(nodal_load_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_nodal_load_roundtrip_owned",
+            "nodal-load deletion refuses a row with a direct round-trip mapping",
+        ));
+    }
+
+    let components_si = nodal_load["components_si"].clone();
+    model
+        .get_mut("load_patterns")
+        .and_then(Value::as_array_mut)
+        .and_then(|patterns| patterns.get_mut(load_pattern_index))
+        .and_then(|pattern| pattern.get_mut("nodal_loads"))
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("load pattern nodal_loads"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last nodal load"))?;
+    Ok(RemovedNodalLoadV1 {
+        load_pattern_index,
+        nodal_load_index,
+        node_id,
+        components_si,
+    })
 }
 
 fn append_fixed_constraint(
@@ -5332,6 +5646,36 @@ fn bind_nodal_load_add_provenance(
     )
 }
 
+fn bind_nodal_load_delete_provenance(
+    model: &mut Value,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    removed: &RemovedNodalLoadV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NODAL_LOAD_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "nodal_load_delete",
+            "load_pattern_id": load_pattern_id,
+            "load_pattern_index": removed.load_pattern_index,
+            "analysis_type": "linear_static",
+            "removed_nodal_load_id": nodal_load_id,
+            "removed_nodal_load_index": removed.nodal_load_index,
+            "removed_node_id": removed.node_id,
+            "removed_components_si": removed.components_si,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": NODAL_LOAD_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_fixed_constraint_add_provenance(
     model: &mut Value,
@@ -6171,7 +6515,7 @@ mod tests {
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_truss3d_leaf_member,
+        remove_frame3d_leaf_member, remove_nodal_load, remove_truss3d_leaf_member,
         validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
@@ -6180,12 +6524,12 @@ mod tests {
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_material_add_request,
         validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
-        validate_truss3d_member_add_request, validate_truss3d_member_properties,
-        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
-        validate_truss_section_add_request, validate_truss_section_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES,
+        validate_nodal_load_delete_request, validate_nodal_load_edit_request,
+        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
+        validate_truss_element_property_references, validate_truss_section_add_request,
+        validate_truss_section_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -6528,6 +6872,114 @@ mod tests {
                 .expect_err("new load must not be all zero")
                 .code,
             "workbench_model_add_nodal_load_zero_components"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn nodal_load_delete_requires_terminal_neutral_nonzero_row_and_nonzero_retained_load() {
+        validate_nodal_load_delete_request(0, "LC_WEAK", "L_WEAK_N3")
+            .expect("valid nodal-load deletion request");
+        assert_eq!(
+            validate_nodal_load_delete_request(0, "LC_WEAK", "")
+                .expect_err("empty nodal-load identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        let model = json!({
+            "load_patterns": [{
+                "id": "LC_WEAK",
+                "index": 0,
+                "analysis_type": "linear_static",
+                "nodal_loads": [
+                    {
+                        "id": "L_WEAK_N2",
+                        "index": 0,
+                        "node_id": "N2",
+                        "components_si": {"FX": 0, "FY": -10000, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0},
+                        "source_id": "source:L_WEAK_N2"
+                    },
+                    {
+                        "id": "L_WEAK_N3",
+                        "index": 1,
+                        "node_id": "N3",
+                        "components_si": {"FX": 0, "FY": -1000, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0},
+                        "source_id": null
+                    }
+                ]
+            }],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed = remove_nodal_load(&mut deleted, "LC_WEAK", "L_WEAK_N3")
+            .expect("delete terminal neutral nodal load");
+        assert_eq!(removed.load_pattern_index, 0);
+        assert_eq!(removed.nodal_load_index, 1);
+        assert_eq!(removed.node_id, "N3");
+        assert_eq!(
+            deleted["load_patterns"][0]["nodal_loads"]
+                .as_array()
+                .expect("nodal loads")
+                .len(),
+            1
+        );
+
+        let mut nonterminal = model.clone();
+        assert_eq!(
+            remove_nodal_load(&mut nonterminal, "LC_WEAK", "L_WEAK_N2")
+                .expect_err("nonterminal nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_not_terminal"
+        );
+        let mut source_owned = model.clone();
+        source_owned["load_patterns"][0]["nodal_loads"][1]["source_id"] = json!("source:L_WEAK_N3");
+        assert_eq!(
+            remove_nodal_load(&mut source_owned, "LC_WEAK", "L_WEAK_N3")
+                .expect_err("source-owned nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_source_owned"
+        );
+        let mut zero = model.clone();
+        zero["load_patterns"][0]["nodal_loads"][1]["components_si"] =
+            json!({"FX": 0, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0});
+        assert_eq!(
+            remove_nodal_load(&mut zero, "LC_WEAK", "L_WEAK_N3")
+                .expect_err("zero nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_zero_components"
+        );
+        let mut retained_zero = model.clone();
+        retained_zero["load_patterns"][0]["nodal_loads"][0]["components_si"] =
+            json!({"FX": 0, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0});
+        assert_eq!(
+            remove_nodal_load(&mut retained_zero, "LC_WEAK", "L_WEAK_N3")
+                .expect_err("zero retained nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_retained_pattern_zero"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "L_WEAK_N3"}]);
+        assert_eq!(
+            remove_nodal_load(&mut feature_owned, "LC_WEAK", "L_WEAK_N3")
+                .expect_err("unsupported-feature-owned nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "L_WEAK_N3"}]);
+        assert_eq!(
+            remove_nodal_load(&mut mapped, "LC_WEAK", "L_WEAK_N3")
+                .expect_err("round-trip-owned nodal load")
+                .code,
+            "workbench_model_delete_nodal_load_roundtrip_owned"
+        );
+        let mut minimum = deleted;
+        assert_eq!(
+            remove_nodal_load(&mut minimum, "LC_WEAK", "L_WEAK_N2")
+                .expect_err("minimum retained pattern")
+                .code,
+            "workbench_model_delete_nodal_load_minimum_pattern"
         );
     }
 

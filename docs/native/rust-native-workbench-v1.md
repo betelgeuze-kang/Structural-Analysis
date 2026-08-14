@@ -54,7 +54,10 @@ C++ revalidation. It does not broaden to arbitrary topology authoring.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and
-revalidates through C++. It does not create or retarget patterns/nodes or broaden to other loads.
+revalidates through C++. Its bounded inverse deletes only the last contiguous neutral nonzero load,
+retains another nonzero load in the same pattern, rejects direct ownership references, and
+revalidates through C++. It does not create, delete, or retarget patterns/nodes or broaden to other
+loads. See `docs/native/modelir-nodal-load-deletion-v1.md` for the exact inverse boundary.
 The bounded fixed-constraint creator appends one unique contiguous-index homogeneous six-DOF
 `fixed_dofs` row with zero prescribed values to one existing unconstrained node, preserves every
 existing round-trip row and blocker, and revalidates through C++. It does not support partial or
@@ -194,6 +197,8 @@ structural-workbench model-add-frame3d-member MODEL.json \
 structural-workbench model-add-nodal-load ADDED-MEMBER-MODEL/model-ir.json \
   --load-pattern LC_WEAK --load L_WEAK_N3 --node N3 \
   --components 0 -1000 0 0 0 0 --output-dir ADDED-LOAD-MODEL
+structural-workbench model-delete-nodal-load ADDED-LOAD-MODEL/model-ir.json \
+  --load-pattern LC_WEAK --load L_WEAK_N3 --output-dir DELETED-LOAD-MODEL
 structural-workbench model-add-fixed-constraint ADDED-LOAD-MODEL/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir ADDED-CONSTRAINT-MODEL
 structural-workbench model-delete-fixed-constraint ADDED-CONSTRAINT-MODEL/model-ir.json \

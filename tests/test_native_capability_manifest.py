@@ -313,6 +313,21 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "HIP C2" in fixed_constraint_deletion["claim"]
     assert "C6" in fixed_constraint_deletion["claim"]
     assert (
+        capabilities.capability_is_enabled(payload, "modelir_nodal_load_deletion")
+        is True
+    )
+    nodal_load_deletion = payload["capabilities"]["modelir_nodal_load_deletion"]
+    assert nodal_load_deletion["cutover_gate"] == "C5"
+    assert nodal_load_deletion["owner"] == "structural-workbench"
+    assert "last contiguous neutral nonzero six-component" in nodal_load_deletion["claim"]
+    assert "another nonzero load" in nodal_load_deletion["claim"]
+    assert "exact retained active load" in nodal_load_deletion["claim"]
+    assert "typed frame recovery" in nodal_load_deletion["claim"]
+    assert "byte-identical restart" in nodal_load_deletion["claim"]
+    assert "fallback 0" in nodal_load_deletion["claim"]
+    assert "HIP C2" in nodal_load_deletion["claim"]
+    assert "C6" in nodal_load_deletion["claim"]
+    assert (
         capabilities.capability_is_enabled(payload, "modelir_truss3d_leaf_deletion")
         is True
     )
@@ -734,6 +749,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v32" in distribution["claim"]
     assert "append-only v33" in distribution["claim"]
     assert "append-only v34" in distribution["claim"]
+    assert "append-only v35" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -743,11 +759,12 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v33 receipts" in distribution["claim"]
+    assert "frozen v1 through v34 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
+    assert "last-neutral-nodal-load deletion" in distribution["claim"]
     assert "distinct baseline/section/property displacement" in distribution["claim"]
     assert "one-real-iteration restart parity" in distribution["claim"]
     assert "structural-catalog" in distribution["claim"]
@@ -773,7 +790,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v34 E2E" in deployment["claim"]
+    assert "distribution v35 E2E" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]
@@ -782,6 +799,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral-frame-leaf deletion" in deployment["claim"]
     assert "removed-frame-field binding" in deployment["claim"]
     assert "last-neutral fixed-constraint deletion" in deployment["claim"]
+    assert "last-neutral nodal-load deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
     assert "v6 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "frozen v1 through v5 rootfs receipts" in deployment["claim"]

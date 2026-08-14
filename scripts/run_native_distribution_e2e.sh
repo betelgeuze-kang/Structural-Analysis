@@ -1071,6 +1071,127 @@ exercise_nodal_load_add_surface() {
 }
 exercise_nodal_load_add_surface
 
+exercise_nodal_load_deletion_surface() {
+  local source_model="$e2e_root/nodal-load-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/nodal-load-delete-$label"
+    request_directory="$e2e_root/nodal-load-delete-$label-request"
+    direct_directory="$e2e_root/nodal-load-delete-$label-direct"
+    partial_directory="$e2e_root/nodal-load-delete-$label-partial"
+    resumed_directory="$e2e_root/nodal-load-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-nodal-load "$source_model" \
+      --load-pattern LC_WEAK --load L_WEAK_N3 --output-dir "$delete_directory" \
+      > "$e2e_root/nodal-load-delete-$label.stdout.json"
+    grep -Fq '"operation":"nodal_load_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_WEAK"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_index":1' "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_type":"linear_static"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_nodal_load_id":"L_WEAK_N3"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_nodal_load_index":1' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_id":"N3"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_components_si":{"FX":0,"FY":-1000,"FZ":0,"MX":0,"MY":0,"MZ":0}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-nodal-load.v1"' \
+      "$delete_directory/model-ir.json"
+    if grep -Fq '"id":"L_WEAK_N3"' "$delete_directory/model-ir.json"; then
+      echo "installed nodal-load deletion retained L_WEAK_N3" >&2
+      exit 1
+    fi
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/nodal-load-delete-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case nodal-load-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/nodal-load-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/nodal-load-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11,12,13,14,15,16,17]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0,0,0,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1,1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12,24]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 1 \
+      > "$e2e_root/nodal-load-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/nodal-load-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/nodal-load-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/nodal-load-delete-first$suffix" \
+      "$e2e_root/nodal-load-delete-second$suffix" \
+      > "$e2e_root/nodal-load-delete-$diff_label-diff.txt"
+  done
+  for suffix in '' -request -direct -partial -resumed; do
+    cmp "$e2e_root/nodal-load-delete-first$suffix.stdout.json" \
+      "$e2e_root/nodal-load-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/nodal-load-delete-first-validation.json" \
+    "$e2e_root/nodal-load-delete-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed nodal-load deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local rejected_destination="$e2e_root/nodal-load-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-nodal-load "$source_model" --load-pattern LC_WEAK --load L_WEAK_N2 \
+    --output-dir "$rejected_destination" \
+    > "$e2e_root/nodal-load-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed nodal-load deletion accepted a nonterminal row" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_nodal_load_not_terminal' \
+    "$e2e_root/nodal-load-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$rejected_destination"
+}
+exercise_nodal_load_deletion_surface
+
 exercise_fixed_constraint_add_surface() {
   local source_model="$e2e_root/nodal-load-add-first/model-ir.json"
   local source_before_hash baseline_recovery baseline_maximum_displacement
@@ -2706,6 +2827,11 @@ nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-re
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 nodal_load_add_result_ir_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 nodal_load_add_recovery_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+nodal_load_delete_model_hash="$(sha256sum "$e2e_root/nodal-load-delete-first/model-ir.json" | awk '{print $1}')"
+nodal_load_delete_receipt_hash="$(sha256sum "$e2e_root/nodal-load-delete-first/edit-receipt.json" | awk '{print $1}')"
+nodal_load_delete_request_hash="$(sha256sum "$e2e_root/nodal-load-delete-first-request/analysis-request.json" | awk '{print $1}')"
+nodal_load_delete_result_ir_hash="$(sha256sum "$e2e_root/nodal-load-delete-first-direct/result-ir.json" | awk '{print $1}')"
+nodal_load_delete_recovery_hash="$(sha256sum "$e2e_root/nodal-load-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 fixed_constraint_add_model_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first/model-ir.json" | awk '{print $1}')"
 fixed_constraint_add_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first/edit-receipt.json" | awk '{print $1}')"
 fixed_constraint_add_request_hash="$(sha256sum "$e2e_root/fixed-constraint-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -2865,6 +2991,10 @@ v34_receipt_json="${v33_receipt_json/structural-native-distribution-e2e.v33/stru
 fixed_constraint_delete_receipt_fields="\"workbench_fixed_constraint_delete_surface_passed\":true,\"workbench_fixed_constraint_delete_model_sha256\":\"sha256:$fixed_constraint_delete_model_hash\",\"workbench_fixed_constraint_delete_receipt_sha256\":\"sha256:$fixed_constraint_delete_receipt_hash\",\"workbench_fixed_constraint_delete_request_sha256\":\"sha256:$fixed_constraint_delete_request_hash\",\"workbench_fixed_constraint_delete_result_ir_sha256\":\"sha256:$fixed_constraint_delete_result_ir_hash\",\"workbench_fixed_constraint_delete_recovery_sha256\":\"sha256:$fixed_constraint_delete_recovery_hash\","
 v34_receipt_json="${v34_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v34_receipt_json" > "$temporary_receipt"
+v35_receipt_json="${v34_receipt_json/structural-native-distribution-e2e.v34/structural-native-distribution-e2e.v35}"
+nodal_load_delete_receipt_fields="\"workbench_nodal_load_delete_surface_passed\":true,\"workbench_nodal_load_delete_model_sha256\":\"sha256:$nodal_load_delete_model_hash\",\"workbench_nodal_load_delete_receipt_sha256\":\"sha256:$nodal_load_delete_receipt_hash\",\"workbench_nodal_load_delete_request_sha256\":\"sha256:$nodal_load_delete_request_hash\",\"workbench_nodal_load_delete_result_ir_sha256\":\"sha256:$nodal_load_delete_result_ir_hash\",\"workbench_nodal_load_delete_recovery_sha256\":\"sha256:$nodal_load_delete_recovery_hash\","
+v35_receipt_json="${v35_receipt_json/\"workbench_result_view_surface_passed\":true,/${nodal_load_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v35_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

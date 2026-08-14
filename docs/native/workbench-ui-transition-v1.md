@@ -109,8 +109,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   round-trip claim is degraded. Rust strictly reparses and C++-revalidates before create-new
   publication. Installed E2E composes the connected-member addition, applies an exact N3-UY load,
   and proves that value in typed recovery plus changed displacement and fallback 0. Pattern/node
-  creation, retargeting, deletion, combinations, other load families and visual authoring remain
-  open.
+  creation, retargeting, arbitrary deletion, combinations, other load families and visual
+  authoring remain open.
+- `model-delete-nodal-load`: deterministic deletion of only the last contiguous neutral, nonzero
+  six-component row from one existing `linear_static` pattern while retaining another nonzero
+  nodal load. Rust rejects source-owned/nonterminal/zero rows, index drift, a zero/empty retained
+  pattern and direct ownership references, conservatively degrades a retained pattern round-trip
+  claim, then strictly reparses and C++-revalidates before create-new publication. Installed E2E
+  proves the exact retained N2 load, zero N3 load, typed frame recovery, one-real-iteration
+  byte-identical restart and fallback 0. Pattern/node deletion, cascade/reindex and visual
+  authoring remain open.
 - `model-add-fixed-constraint`: deterministic creation of one homogeneous six-DOF `fixed_dofs`
   constraint with zero prescribed SI values on one existing unconstrained node. Rust assigns the
   next contiguous constraint index and neutral source ownership, preserves every existing
@@ -303,15 +311,15 @@ process/artifact verification are also Rust-native; npm package installation, Vi
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only the
 documented bounded existing-entity editors, frame/truss member and property creators, the
-last-neutral fixed-constraint deletion, and the two family-specific last-neutral-frame/truss-leaf
-deletion operations. It also provides bounded nodal-load, fixed-constraint,
+last-neutral nodal-load and fixed-constraint deletions, and the two family-specific
+last-neutral-frame/truss-leaf deletion operations. It also provides bounded nodal-load, fixed-constraint,
 linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
 section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 The transition manifest now enumerates the compatible frame-element property editor, both truss
-editors, truss section/member authoring, last-neutral fixed-constraint deletion, and both
-last-neutral frame/truss leaf deleters explicitly in its native command and feature inventories.
+editors, truss section/member authoring, last-neutral nodal-load and fixed-constraint deletion, and
+both last-neutral frame/truss leaf deleters explicitly in its native command and feature inventories.
 These remain bounded C5 rows and do not promote any open general-editing or C6 prerequisite.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
@@ -336,6 +344,8 @@ creators close only their documented fixed constructions. The two leaf deleters 
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
 endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
 homogeneous six-DOF zero row while retaining the base constraint.
+The nodal-load deleter closes only one last contiguous neutral unreferenced nonzero six-component
+row while retaining another nonzero load in the same linear-static pattern.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
 property/material/section/load-combination/constraint-topology editing remain open, so the

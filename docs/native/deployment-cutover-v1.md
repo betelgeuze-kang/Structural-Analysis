@@ -24,6 +24,9 @@ The installed `model-add-frame3d-member` command appends one connected linear fr
 pair using existing compatible material/section identities and strict C++ revalidation.
 The installed `model-add-nodal-load` command appends one nonzero six-component SI load to an
 existing linear-static pattern and existing node with strict C++ revalidation.
+The installed `model-delete-nodal-load` command removes only the last contiguous neutral nonzero
+six-component load, retains another nonzero load in the same pattern, and rejects direct ownership,
+source-owned, zero, minimum-pattern or nonterminal rows before strict C++ revalidation.
 The installed `model-add-fixed-constraint` command appends one homogeneous six-DOF zero constraint
 to an existing unconstrained node with strict C++ revalidation.
 The installed `model-delete-fixed-constraint` command removes only the last contiguous neutral
@@ -45,7 +48,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v34 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v35 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -56,6 +59,8 @@ truss3d authoring/editing with typed frame-plus-truss recovery, and last-neutral
 plus last-neutral-frame-leaf deletion with frame-only recovery, constrained-endpoint rejection and
 one-real-iteration restart parity, plus last-neutral fixed-constraint deletion with exact restored
 active DOFs and loads, typed frame recovery, nonterminal rejection and restart parity,
+plus last-neutral nodal-load deletion with the exact retained active load, typed frame recovery,
+nonterminal rejection and restart parity,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

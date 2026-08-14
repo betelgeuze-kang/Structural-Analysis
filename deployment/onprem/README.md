@@ -26,6 +26,8 @@ absent from the runtime image.
   `model-add-frame3d-member` adds one new node and one connected linear
   frame3d member using existing compatible material/section identities. `model-add-nodal-load`
   adds one nonzero six-component SI load to an existing linear-static pattern and node.
+  `model-delete-nodal-load` removes only the last contiguous neutral nonzero load while retaining
+  another nonzero load in the same pattern and rejecting direct ownership or nonterminal rows.
   `model-add-fixed-constraint` adds one homogeneous six-DOF zero constraint to an existing
   unconstrained node. `model-delete-fixed-constraint` removes only the last contiguous neutral
   homogeneous six-DOF zero constraint while retaining another constraint and rejecting references
@@ -130,6 +132,8 @@ structural-workbench model-add-frame3d-member /workspace/model.json \
 structural-workbench model-add-nodal-load /workspace/added-member-model/model-ir.json \
   --load-pattern LC_WEAK --load L_WEAK_N3 --node N3 \
   --components 0 -1000 0 0 0 0 --output-dir /workspace/added-load-model
+structural-workbench model-delete-nodal-load /workspace/added-load-model/model-ir.json \
+  --load-pattern LC_WEAK --load L_WEAK_N3 --output-dir /workspace/deleted-load-model
 structural-workbench model-add-fixed-constraint /workspace/added-load-model/model-ir.json \
   --constraint BC_N3 --node N3 --output-dir /workspace/added-constraint-model
 structural-workbench model-delete-fixed-constraint /workspace/added-constraint-model/model-ir.json \
@@ -194,7 +198,9 @@ existing v1 linear-elastic material and v1 truss section. Neither changes topolo
 formulation or any unrelated entity.
 The nodal-load creator appends one globally unique nonzero load to an existing linear-static
 pattern and existing node with a contiguous index; it cannot create or retarget either identity,
-add other load families, or alter combinations.
+add other load families, or alter combinations. Its bounded inverse deletes only the last neutral
+nonzero row while retaining another nonzero load in the same pattern; general load/pattern/node
+deletion, cascade/reindex, and retargeting remain outside the commands.
 The fixed-constraint creator appends only one homogeneous six-DOF zero restraint to an existing
 unconstrained node. Its bounded inverse removes only the last contiguous neutral homogeneous zero
 restraint while retaining another constraint and rejecting stage/unsupported-feature/round-trip
