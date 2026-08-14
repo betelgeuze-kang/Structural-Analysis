@@ -282,7 +282,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 45. emits an append-only v40 hash-bound receipt that inherits every v39 identity and additionally
    binds the node-added ModelIR and edit receipt, fixed-support-composed ModelIR, generated request,
    completed ResultIR and typed frame recovery identities.
-   The receipt checker continues to accept frozen v1 through v39 receipts (including frozen v1 through v38 receipts); v1 through v19 are not
+46. removes that last contiguous neutral unreferenced orphan node twice while retaining two nodes,
+   proves byte-identical ModelIR/receipt output and unchanged source bytes, rejects nonterminal,
+   minimum-topology and constraint-referenced targets without publishing output, binds removed
+   identity/index/coordinates/null source/empty extensions, then proves strict C++ validation,
+   exact restored active DOFs/load, typed frame recovery, initialized-active checkpoint/restart
+   parity and fallback 0;
+47. emits an append-only v41 hash-bound receipt that inherits every v40 identity and additionally
+   binds the orphan-node-deleted ModelIR and edit receipt, generated request, completed ResultIR and
+   typed frame recovery identities.
+   The receipt checker continues to accept frozen v1 through v40 receipts (including frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+   v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
@@ -310,7 +320,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    is installed last-neutral truss-section deletion, retained-truss-section/load,
    typed frame-plus-truss recovery and restart authority; and no pre-v40 receipt is installed
    standalone neutral-node addition, fixed-support composition, unchanged active-DOF/load, typed
-   frame recovery and restart authority.
+   frame recovery and restart authority; and no pre-v41 receipt is installed terminal neutral
+   orphan-node deletion, restored two-node topology/active-DOF/load, typed frame recovery and
+   restart authority.
 
 The reference command is:
 

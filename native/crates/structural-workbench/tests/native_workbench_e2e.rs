@@ -169,6 +169,17 @@ fn run_node_add(
     ])
 }
 
+fn run_orphan_node_delete(source: &Path, destination: &Path, node_id: &str) -> Output {
+    run_workbench(&[
+        text("model-delete-orphan-node"),
+        source.as_os_str(),
+        text("--node"),
+        text(node_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn assert_published_node_edit(destination: &Path) {
     let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
     let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
@@ -1956,7 +1967,11 @@ fn node_add_is_deterministic_fail_closed_composable_and_cpu_executable() {
         let destination = temporary.0.join(name);
         let rejected = run_node_add(&source, &destination, node_id, coordinates);
         assert_eq!(rejected.status.code(), Some(1));
-        assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
         assert!(!destination.exists());
     }
     let existing = run_node_add(&source, &first, "N3", ["4", "1", "0"]);
@@ -2085,6 +2100,354 @@ fn node_add_is_deterministic_fail_closed_composable_and_cpu_executable() {
         u32::MAX,
     )
     .expect("node-add resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn orphan_node_deletion_is_deterministic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("source ModelIR bytes");
+    let source_validation = validate_model_bytes(&source_bytes).expect("C++-validated source");
+    let source_model = &source_validation.snapshot;
+    let added = temporary.0.join("orphan-node-added");
+    assert_success(&run_node_add(&source, &added, "N3", ["4", "1", "0"]));
+    let added_path = added.join("model-ir.json");
+    let added_bytes = std::fs::read(&added_path).expect("node-added source bytes");
+    let added_model = parse_model_ir_v2(&added_bytes).expect("strict node-added source");
+
+    let first = temporary.0.join("orphan-node-delete-first");
+    let second = temporary.0.join("orphan-node-delete-second");
+    for destination in [&first, &second] {
+        let output = run_orphan_node_delete(&added_path, destination, "N3");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published orphan-node-delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first deletion artifact"),
+            std::fs::read(second.join(artifact)).expect("second deletion artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&added_path).expect("unchanged node-added source"),
+        added_bytes
+    );
+
+    let deleted_bytes = std::fs::read(first.join("model-ir.json")).expect("node-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict node-deleted ModelIR");
+    assert_eq!(deleted.value()["nodes"], source_model.value()["nodes"]);
+    for family in [
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(deleted.value()[family], added_model.value()[family]);
+    }
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-orphan-node.v1")
+        .expect("orphan-node-delete provenance extension");
+    assert_eq!(extension["operation"], "orphan_node_delete");
+    assert_eq!(extension["removed_node_id"], "N3");
+    assert_eq!(extension["removed_node_index"], 2);
+    assert_eq!(
+        extension["removed_coordinates_m"],
+        serde_json::json!([4, 1, 0])
+    );
+    assert_eq!(extension["removed_source_id"], Value::Null);
+    assert_eq!(extension["removed_extensions"], serde_json::json!({}));
+    assert!(deleted.value()["extensions"]
+        .get("structural-native:model-add-node.v1")
+        .is_some());
+    assert_eq!(
+        deleted.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("orphan-node-delete receipt"),
+    )
+    .expect("orphan-node-delete receipt JSON");
+    assert_eq!(receipt["operation"], "orphan_node_delete");
+    assert_eq!(receipt["removed_node_id"], "N3");
+    assert_eq!(receipt["removed_node_index"], 2);
+    assert_eq!(
+        receipt["removed_coordinates_m"],
+        serde_json::json!([4, 1, 0])
+    );
+    assert_eq!(receipt["removed_source_id"], Value::Null);
+    assert_eq!(receipt["removed_extensions"], serde_json::json!({}));
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, node_id, expected_code) in [
+        (
+            "missing",
+            "N404",
+            "workbench_model_delete_orphan_node_missing",
+        ),
+        (
+            "nonterminal",
+            "N2",
+            "workbench_model_delete_orphan_node_not_terminal",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("orphan-node-{name}-rejected"));
+        let rejected = run_orphan_node_delete(&added_path, &destination, node_id);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(expected_code));
+        assert!(!destination.exists());
+    }
+    let minimum_destination = temporary.0.join("orphan-node-minimum-rejected");
+    let minimum = run_orphan_node_delete(&source, &minimum_destination, "N2");
+    assert_eq!(minimum.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&minimum.stdout)
+        .contains("workbench_model_delete_orphan_node_minimum_topology"));
+    assert!(!minimum_destination.exists());
+    let existing = run_orphan_node_delete(&added_path, &first, "N3");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    for (name, mutate, expected_code) in [
+        (
+            "source-owned",
+            0_u8,
+            "workbench_model_delete_orphan_node_source_owned",
+        ),
+        (
+            "extended",
+            1_u8,
+            "workbench_model_delete_orphan_node_extensions_unsupported",
+        ),
+        (
+            "unsupported-owned",
+            2_u8,
+            "workbench_model_delete_orphan_node_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned",
+            3_u8,
+            "workbench_model_delete_orphan_node_roundtrip_owned",
+        ),
+    ] {
+        let mut guarded = added_model.value().clone();
+        match mutate {
+            0 => guarded["nodes"][2]["source_id"] = serde_json::json!("source:N3"),
+            1 => {
+                guarded["nodes"][2]["extensions"] =
+                    serde_json::json!({"external:owner": "external"});
+            }
+            2 => {
+                guarded["unsupported_features"] = serde_json::json!([{
+                    "feature_id": "feature.orphan-node-owned",
+                    "kind": "unsupported_topology",
+                    "source_entity_id": "N3",
+                    "disposition": "blocked",
+                    "blocking": true,
+                    "detail": "Target node is owned by unsupported source topology.",
+                    "extensions": {}
+                }]);
+            }
+            3 => {
+                guarded["roundtrip_map"] = serde_json::json!([{
+                    "source_entity_id": "source:N3",
+                    "entity_kind": "node",
+                    "model_ir_entity_id": "N3",
+                    "mapping_status": "exact",
+                    "extensions": {}
+                }]);
+            }
+            _ => unreachable!(),
+        }
+        let guarded_path = temporary.0.join(format!("orphan-node-{name}-source.json"));
+        std::fs::write(
+            &guarded_path,
+            canonicalize_model_ir_v2(&guarded)
+                .expect("canonical guarded orphan-node source")
+                .as_bytes(),
+        )
+        .expect("write guarded orphan-node source");
+        let destination = temporary.0.join(format!("orphan-node-{name}-output"));
+        let rejected = run_orphan_node_delete(&guarded_path, &destination, "N3");
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let element_source = temporary.0.join("orphan-node-element-source");
+    assert_success(&run_element_connectivity_edit(
+        &added_path,
+        &element_source,
+        "E1",
+        ["N1", "N3"],
+    ));
+    let element_destination = temporary.0.join("orphan-node-element-rejected");
+    let element_rejected = run_orphan_node_delete(
+        &element_source.join("model-ir.json"),
+        &element_destination,
+        "N3",
+    );
+    assert_eq!(element_rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&element_rejected.stdout)
+        .contains("workbench_model_delete_orphan_node_referenced_by_element"));
+    assert!(!element_destination.exists());
+
+    let constraint_source = temporary.0.join("orphan-node-constraint-source");
+    assert_success(&run_fixed_constraint_add(
+        &added_path,
+        &constraint_source,
+        "BC_N3",
+        "N3",
+    ));
+    let constraint_destination = temporary.0.join("orphan-node-constraint-rejected");
+    let constraint_rejected = run_orphan_node_delete(
+        &constraint_source.join("model-ir.json"),
+        &constraint_destination,
+        "N3",
+    );
+    assert_eq!(constraint_rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&constraint_rejected.stdout)
+        .contains("workbench_model_delete_orphan_node_referenced_by_constraint"));
+    assert!(!constraint_destination.exists());
+
+    let load_source = temporary.0.join("orphan-node-load-source");
+    assert_success(&run_nodal_load_add(
+        &added_path,
+        &load_source,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1", "0", "0", "0", "0"],
+    ));
+    let load_destination = temporary.0.join("orphan-node-load-rejected");
+    let load_rejected =
+        run_orphan_node_delete(&load_source.join("model-ir.json"), &load_destination, "N3");
+    assert_eq!(load_rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&load_rejected.stdout)
+        .contains("workbench_model_delete_orphan_node_referenced_by_load"));
+    assert!(!load_destination.exists());
+
+    let mut blocked = added_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.orphan-node-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Orphan-node deletion must preserve unrelated blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:N2",
+        "entity_kind": "node",
+        "model_ir_entity_id": "N2",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("orphan-node-blocked-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked orphan-node source")
+            .as_bytes(),
+    )
+    .expect("write blocked orphan-node source");
+    let blocked_destination = temporary.0.join("orphan-node-blocked-output");
+    assert_success(&run_orphan_node_delete(
+        &blocked_source,
+        &blocked_destination,
+        "N3",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked orphan-node-delete receipt"),
+    )
+    .expect("blocked orphan-node-delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.orphan-node-delete-visible-not-runnable"])
+    );
+    let blocked_deleted: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked node-deleted ModelIR"),
+    )
+    .expect("blocked node-deleted JSON");
+    assert_eq!(blocked_deleted["roundtrip_map"], blocked["roundtrip_map"]);
+
+    let request_directory = temporary.0.join("orphan-node-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "orphan-node-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("orphan-node-delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("orphan-node-delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("orphan-node-delete recovery"),
+    )
+    .expect("orphan-node-delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 0)
+        .expect("orphan-node-delete initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("orphan-node-delete resumed execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(

@@ -51,6 +51,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss-section-deletion-v1.md"),
     Path("docs/native/modelir-node-add-v1.md"),
+    Path("docs/native/modelir-orphan-node-delete-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
@@ -332,6 +333,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "python_lookup_count",
         "node_lookup_count",
         "structural-native-distribution-e2e.v40",
+        "structural-native-distribution-e2e.v41",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -341,6 +343,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_node_add_request_sha256",
         "workbench_node_add_result_ir_sha256",
         "workbench_node_add_recovery_sha256",
+        "exercise_orphan_node_delete_surface",
+        "model-delete-orphan-node",
+        "workbench_orphan_node_delete_surface_passed",
+        "workbench_orphan_node_delete_model_sha256",
+        "workbench_orphan_node_delete_receipt_sha256",
+        "workbench_orphan_node_delete_request_sha256",
+        "workbench_orphan_node_delete_result_ir_sha256",
+        "workbench_orphan_node_delete_recovery_sha256",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -568,6 +578,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v41",
+            "V41_ORPHAN_NODE_DELETE_KEYS",
+            "workbench_orphan_node_delete_surface_passed",
+            "workbench_orphan_node_delete_recovery_sha256",
             "structural-native-distribution-e2e.v40",
             "V40_NODE_ADD_KEYS",
             "workbench_node_add_surface_passed",
@@ -610,6 +624,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v41 hash-bound receipt",
+            "frozen v1 through v40 receipts",
+            "no pre-v41 receipt",
             "append-only v40 hash-bound receipt",
             "frozen v1 through v39 receipts",
             "no pre-v40 receipt",
@@ -770,6 +787,22 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-node",
             "Installed static and shared package E2E v40",
             "Frozen v1 through v39",
+            "receipts retain their narrower authority",
+            "fallback 0",
+        ),
+        blockers=blockers,
+    )
+
+    orphan_node_delete_doc = _text(
+        root, Path("docs/native/modelir-orphan-node-delete-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-orphan-node-delete-v1.md"),
+        text=orphan_node_delete_doc,
+        tokens=(
+            "model-delete-orphan-node",
+            "Installed static and shared package E2E v41",
+            "Frozen v1 through v40",
             "receipts retain their narrower authority",
             "fallback 0",
         ),
@@ -1090,8 +1123,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v40 E2E",
+            "CPU static/shared distribution v41 E2E",
             "standalone neutral-node creation",
+            "last-neutral orphan-node deletion",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",

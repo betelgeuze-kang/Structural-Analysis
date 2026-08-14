@@ -55,5 +55,5 @@ Installed static and shared package E2E v40 owns the node-added ModelIR, edit re
 fixed-constraint-composed ModelIR, generated request, ResultIR, and recovery hash set. Frozen v1 through v39
 receipts retain their narrower authority and cannot be used as standalone node-addition evidence.
 
-This is not general topology authoring, connectivity editing, visual placement, orphan-node
-deletion, automatic support generation, engineering acceptance, approved HIP C2, or C6.
+This is not general topology authoring, connectivity editing, visual placement, referenced-node or
+cascade deletion, automatic support generation, engineering acceptance, approved HIP C2, or C6.

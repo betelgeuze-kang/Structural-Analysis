@@ -37,6 +37,10 @@ contiguous index while preserving every existing domain row, blocker, and round-
 creates no member, load, constraint, or source mapping; installed E2E composes a fixed constraint
 before analysis so the otherwise orphan node adds no active equation. See
 `docs/native/modelir-node-add-v1.md` for the exact boundary.
+The inverse bounded orphan-node deletion removes only the last contiguous `source_id: null` node
+with empty entity extensions while retaining two nodes. It rejects every element, constraint,
+nodal-load, unsupported-feature, or round-trip reference and performs no cascade or reindexing. See
+`docs/native/modelir-orphan-node-delete-v1.md` for the exact boundary.
 The sibling nodal-load edit replaces the six finite SI components of one existing load inside one
 named pattern under the same source-validation, provenance, create-new, and C++ revalidation rules.
 It cannot create, delete, retarget, or combine loads.
@@ -211,6 +215,8 @@ structural-workbench model-edit-element-connectivity MODEL.json \
   --output-dir EDITED-CONNECTIVITY-MODEL
 structural-workbench model-add-node MODEL.json \
   --node N3 --coordinates 4 1 0 --output-dir ADDED-NODE-MODEL
+structural-workbench model-delete-orphan-node ADDED-NODE-MODEL/model-ir.json \
+  --node N3 --output-dir DELETED-NODE-MODEL
 structural-workbench model-add-frame3d-member MODEL.json \
   --node N3 --coordinates 4 0 0 --element E2 --from-node N2 \
   --material M1 --section S1 --output-dir ADDED-MEMBER-MODEL

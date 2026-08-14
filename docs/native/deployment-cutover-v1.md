@@ -49,6 +49,9 @@ revalidation.
 The installed `model-add-node` command appends one unique finite-coordinate neutral node with the
 next contiguous index while preserving all existing rows, blockers, and round-trip mappings. Its
 installed execution proof explicitly composes a homogeneous six-DOF fixed support before solving.
+The installed `model-delete-orphan-node` command removes only the last contiguous neutral node with
+empty entity extensions while retaining two nodes, and rejects source ownership or any element,
+constraint, load, unsupported-feature, or round-trip reference before C++ revalidation.
 The installed `model-add-frame-section` command appends one v1 frame3d section with six positive
 finite SI parameters, then strictly revalidates it through C++ without changing existing
 references.
@@ -66,7 +69,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v40 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v41 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -89,6 +92,8 @@ plus last-neutral truss-section deletion with an exact retained truss section an
 load, typed frame-plus-truss recovery, referenced/nonterminal rejection and restart parity,
 plus standalone neutral-node creation with duplicate identity/coordinate rejection, a composed
 six-DOF fixed support, exact unchanged active DOFs/load, typed frame recovery and restart parity,
+plus last-neutral orphan-node deletion with source/extension/reference guards, exact restored
+two-node topology and active DOFs/load, typed frame recovery and restart parity,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

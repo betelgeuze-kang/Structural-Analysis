@@ -3275,6 +3275,148 @@ exercise_node_add_surface() {
 }
 exercise_node_add_surface
 
+exercise_orphan_node_delete_surface() {
+  local source_model="$e2e_root/node-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/orphan-node-delete-$label"
+    request_directory="$e2e_root/orphan-node-delete-$label-request"
+    direct_directory="$e2e_root/orphan-node-delete-$label-direct"
+    partial_directory="$e2e_root/orphan-node-delete-$label-partial"
+    resumed_directory="$e2e_root/orphan-node-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-orphan-node "$source_model" --node N3 \
+      --output-dir "$delete_directory" \
+      > "$e2e_root/orphan-node-delete-$label.stdout.json"
+    grep -Fq '"operation":"orphan_node_delete"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_id":"N3"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_index":2' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_coordinates_m":[4,1,0]' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_source_id":null' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_extensions":{}' "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-orphan-node.v1"' \
+      "$delete_directory/model-ir.json"
+    if grep -Fq '"id":"N3","index":2' "$delete_directory/model-ir.json"; then
+      echo "installed orphan-node deletion retained the deleted node" >&2
+      exit 1
+    fi
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/orphan-node-delete-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":2,"materials":1,"sections":1,"elements":1,"constraints":1' \
+      "$e2e_root/orphan-node-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/orphan-node-delete-$label-view.txt"
+    grep -Fq 'Inventory: nodes=2 elements=1 constraints=1 load_patterns=4' \
+      "$e2e_root/orphan-node-delete-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case orphan-node-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/orphan-node-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/orphan-node-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 > "$e2e_root/orphan-node-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/orphan-node-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/orphan-node-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/orphan-node-delete-first$suffix" \
+      "$e2e_root/orphan-node-delete-second$suffix" \
+      > "$e2e_root/orphan-node-delete-$diff_label-diff.txt"
+    cmp "$e2e_root/orphan-node-delete-first$suffix.stdout.json" \
+      "$e2e_root/orphan-node-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/orphan-node-delete-first-validation.json" \
+    "$e2e_root/orphan-node-delete-second-validation.json"
+  cmp "$e2e_root/orphan-node-delete-first-view.txt" \
+    "$e2e_root/orphan-node-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed orphan-node deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local nonterminal_destination="$e2e_root/orphan-node-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-orphan-node "$source_model" --node N2 \
+    --output-dir "$nonterminal_destination" \
+    > "$e2e_root/orphan-node-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed orphan-node deletion accepted a nonterminal node" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_orphan_node_not_terminal' \
+    "$e2e_root/orphan-node-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$nonterminal_destination"
+
+  local minimum_destination="$e2e_root/orphan-node-delete-minimum-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-orphan-node "$linear_model" --node N2 \
+    --output-dir "$minimum_destination" \
+    > "$e2e_root/orphan-node-delete-minimum-rejected.stdout.json"; then
+    echo "installed orphan-node deletion accepted minimum topology" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_orphan_node_minimum_topology' \
+    "$e2e_root/orphan-node-delete-minimum-rejected.stdout.json"
+  test ! -e "$minimum_destination"
+
+  local referenced_destination="$e2e_root/orphan-node-delete-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-orphan-node "$e2e_root/node-add-first-composed/model-ir.json" --node N3 \
+    --output-dir "$referenced_destination" \
+    > "$e2e_root/orphan-node-delete-referenced-rejected.stdout.json"; then
+    echo "installed orphan-node deletion accepted a constraint-referenced node" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_orphan_node_referenced_by_constraint' \
+    "$e2e_root/orphan-node-delete-referenced-rejected.stdout.json"
+  test ! -e "$referenced_destination"
+}
+exercise_orphan_node_delete_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -3635,6 +3777,11 @@ node_add_composed_model_hash="$(sha256sum "$e2e_root/node-add-first-composed/mod
 node_add_request_hash="$(sha256sum "$e2e_root/node-add-first-request/analysis-request.json" | awk '{print $1}')"
 node_add_result_ir_hash="$(sha256sum "$e2e_root/node-add-first-direct/result-ir.json" | awk '{print $1}')"
 node_add_recovery_hash="$(sha256sum "$e2e_root/node-add-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+orphan_node_delete_model_hash="$(sha256sum "$e2e_root/orphan-node-delete-first/model-ir.json" | awk '{print $1}')"
+orphan_node_delete_receipt_hash="$(sha256sum "$e2e_root/orphan-node-delete-first/edit-receipt.json" | awk '{print $1}')"
+orphan_node_delete_request_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-request/analysis-request.json" | awk '{print $1}')"
+orphan_node_delete_result_ir_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-direct/result-ir.json" | awk '{print $1}')"
+orphan_node_delete_recovery_hash="$(sha256sum "$e2e_root/orphan-node-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
 truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
 truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
@@ -3778,6 +3925,10 @@ v40_receipt_json="${v39_receipt_json/structural-native-distribution-e2e.v39/stru
 node_add_receipt_fields="\"workbench_node_add_surface_passed\":true,\"workbench_node_add_model_sha256\":\"sha256:$node_add_model_hash\",\"workbench_node_add_receipt_sha256\":\"sha256:$node_add_receipt_hash\",\"workbench_node_add_composed_model_sha256\":\"sha256:$node_add_composed_model_hash\",\"workbench_node_add_request_sha256\":\"sha256:$node_add_request_hash\",\"workbench_node_add_result_ir_sha256\":\"sha256:$node_add_result_ir_hash\",\"workbench_node_add_recovery_sha256\":\"sha256:$node_add_recovery_hash\","
 v40_receipt_json="${v40_receipt_json/\"workbench_result_view_surface_passed\":true,/${node_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v40_receipt_json" > "$temporary_receipt"
+v41_receipt_json="${v40_receipt_json/structural-native-distribution-e2e.v40/structural-native-distribution-e2e.v41}"
+orphan_node_delete_receipt_fields="\"workbench_orphan_node_delete_surface_passed\":true,\"workbench_orphan_node_delete_model_sha256\":\"sha256:$orphan_node_delete_model_hash\",\"workbench_orphan_node_delete_receipt_sha256\":\"sha256:$orphan_node_delete_receipt_hash\",\"workbench_orphan_node_delete_request_sha256\":\"sha256:$orphan_node_delete_request_hash\",\"workbench_orphan_node_delete_result_ir_sha256\":\"sha256:$orphan_node_delete_result_ir_hash\",\"workbench_orphan_node_delete_recovery_sha256\":\"sha256:$orphan_node_delete_recovery_hash\","
+v41_receipt_json="${v41_receipt_json/\"workbench_result_view_surface_passed\":true,/${orphan_node_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v41_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

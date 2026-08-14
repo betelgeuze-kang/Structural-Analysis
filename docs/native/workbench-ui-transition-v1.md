@@ -31,7 +31,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   strictly reparses and C++-revalidates, and publishes only a new canonical model plus self-hashed
   receipt. Installed E2E composes a six-DOF fixed constraint before CPU execution and proves exact
   unchanged active DOFs/load, typed frame recovery, restart parity, and fallback 0. Member/load/
-  constraint creation in the same operation, visual placement, and orphan deletion remain open.
+  constraint creation in the same operation, visual placement, and referenced-node/cascade
+  deletion remain open.
+- `model-delete-orphan-node`: deterministic removal of only the last contiguous neutral
+  unreferenced node while retaining two nodes. Rust rejects source/extension ownership and every
+  element, constraint, nodal-load, unsupported-feature, or round-trip reference, then strictly
+  reparses and C++-revalidates a create-new model plus receipt. Installed CPU execution proves exact
+  active DOFs/load, typed frame recovery, restart parity, and fallback 0. Cascade, reindexing,
+  referenced-node removal, and general topology deletion remain open.
 - `model-edit-nodal-load`: deterministic replacement of the six finite SI components of one
   existing nodal load inside one named load pattern. Rust edits only the canonical C++ snapshot,
   binds both identities plus previous/new components and source hashes, conservatively marks a

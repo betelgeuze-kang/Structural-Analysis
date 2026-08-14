@@ -13,6 +13,7 @@ use super::{
 const EDIT_SCHEMA_V1: &str = "structural-native-model-edit-receipt.v1";
 const NODE_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-node.v1";
 const NODE_ADD_EXTENSION_KEY: &str = "structural-native:model-add-node.v1";
+const ORPHAN_NODE_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-orphan-node.v1";
 const NODAL_LOAD_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-nodal-load.v1";
 const CONSTRAINT_VALUE_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-constraint-value.v1";
@@ -52,6 +53,7 @@ const TRUSS_SECTION_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
 const NODE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_node_coordinate_edit_not_visual_dragging_property_constraint_load_or_solver_editing_engineering_acceptance_or_c6";
 const NODE_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_contiguous_neutral_node_addition_not_member_load_constraint_property_solver_visual_editing_engineering_acceptance_or_c6";
+const ORPHAN_NODE_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_orphan_node_deletion_with_two_nodes_retained_not_source_owned_extended_element_constraint_load_mapped_unsupported_feature_owned_cascade_reindexing_general_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
@@ -90,6 +92,13 @@ pub struct ModelNodeEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded node addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodeAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded orphan-node deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelOrphanNodeDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -332,6 +341,29 @@ pub fn publish_model_node_add(
 ) -> Result<ModelNodeAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_node(&source, node_id, coordinates_m)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one terminal neutral unreferenced orphan node and publish the result.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing, non-terminal, source-owned,
+/// extended or referenced nodes, minimum topology, index drift, or create-new publication failure.
+pub fn publish_model_orphan_node_delete(
+    source_path: &Path,
+    node_id: &str,
+    output_directory: &Path,
+) -> Result<ModelOrphanNodeDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_orphan_node(&source, node_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1169,6 +1201,97 @@ pub fn add_model_node(
         "claim_boundary": NODE_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodeAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedOrphanNodeV1 {
+    node_index: usize,
+    coordinates_m: [f64; 3],
+    extensions: Value,
+}
+
+/// Delete one provenance-bound terminal neutral unreferenced orphan node in memory.
+///
+/// # Errors
+///
+/// Rejects an invalid source model, missing or non-terminal nodes, source ownership, entity
+/// extensions, any element/constraint/load/unsupported-feature/round-trip reference, minimum
+/// topology, index drift, schema drift, or edited semantics rejected by C++.
+pub fn delete_model_orphan_node(
+    source_bytes: &[u8],
+    node_id: &str,
+) -> Result<ModelOrphanNodeDeleteOutcomeV1, WorkbenchError> {
+    validate_orphan_node_delete_request(source_bytes.len(), node_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_orphan_node(&mut edited, node_id)?;
+    bind_orphan_node_delete_provenance(
+        &mut edited,
+        node_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "orphan_node_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_node_id": node_id,
+        "removed_node_index": removed.node_index,
+        "removed_coordinates_m": removed.coordinates_m,
+        "removed_source_id": null,
+        "removed_extensions": removed.extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": ORPHAN_NODE_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelOrphanNodeDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3671,6 +3794,13 @@ fn validate_node_add_request(
     Ok(())
 }
 
+fn validate_orphan_node_delete_request(
+    source_length: usize,
+    node_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, node_id, "orphan node")
+}
+
 fn validate_nodal_load_edit_request(
     source_length: usize,
     load_pattern_id: &str,
@@ -6138,6 +6268,158 @@ fn append_node(
     Ok(node_index)
 }
 
+#[allow(clippy::too_many_lines)]
+fn remove_orphan_node(
+    model: &mut Value,
+    node_id: &str,
+) -> Result<RemovedOrphanNodeV1, WorkbenchError> {
+    let nodes = model
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("nodes"))?;
+    if nodes.len() <= 2 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_minimum_topology",
+            "orphan-node deletion must retain at least two nodes",
+        ));
+    }
+    let node_index = nodes
+        .iter()
+        .position(|node| node.get("id").and_then(Value::as_str) == Some(node_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_orphan_node_missing",
+                format!("ModelIR has no node with identity {node_id}"),
+            )
+        })?;
+    if node_index + 1 != nodes.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_not_terminal",
+            "deleted orphan node must be the last contiguous node row",
+        ));
+    }
+    let node = &nodes[node_index];
+    if node.get("index").and_then(Value::as_u64) != u64::try_from(node_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_index_mismatch",
+            "deleted orphan-node index must match its last contiguous position",
+        ));
+    }
+    if !node.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_source_owned",
+            "orphan-node deletion accepts only a neutral row with null source_id",
+        ));
+    }
+    let extensions = node
+        .get("extensions")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("orphan node extensions"))?;
+    if !extensions.is_empty() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_extensions_unsupported",
+            "orphan-node deletion accepts only a row with empty entity extensions",
+        ));
+    }
+    let removed_extensions = Value::Object(extensions.clone());
+    let coordinates = node
+        .get("coordinates_m")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| snapshot_error("orphan node coordinates_m"))?;
+    let coordinates_m = [
+        finite_number(&coordinates[0], "orphan node coordinate")?,
+        finite_number(&coordinates[1], "orphan node coordinate")?,
+        finite_number(&coordinates[2], "orphan node coordinate")?,
+    ];
+
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements.iter().any(|element| {
+        element
+            .get("node_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| id.as_str() == Some(node_id)))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_referenced_by_element",
+            format!("node {node_id} is referenced by an element"),
+        ));
+    }
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    if constraints
+        .iter()
+        .any(|constraint| constraint.get("node_id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_referenced_by_constraint",
+            format!("node {node_id} is referenced by a constraint"),
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.iter().any(|pattern| {
+        pattern
+            .get("nodal_loads")
+            .and_then(Value::as_array)
+            .is_some_and(|loads| {
+                loads
+                    .iter()
+                    .any(|load| load.get("node_id").and_then(Value::as_str) == Some(node_id))
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_referenced_by_load",
+            format!("node {node_id} is referenced by a nodal load"),
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| feature.get("source_entity_id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_unsupported_feature_owned",
+            "orphan-node deletion refuses a row referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| row.get("model_ir_entity_id").and_then(Value::as_str) == Some(node_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_orphan_node_roundtrip_owned",
+            "orphan-node deletion refuses a row with a direct round-trip mapping",
+        ));
+    }
+
+    model
+        .get_mut("nodes")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("nodes"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last node"))?;
+    Ok(RemovedOrphanNodeV1 {
+        node_index,
+        coordinates_m,
+        extensions: removed_extensions,
+    })
+}
+
 #[allow(clippy::too_many_arguments)]
 fn append_frame3d_member(
     model: &mut Value,
@@ -7675,6 +7957,33 @@ fn bind_node_add_provenance(
     )
 }
 
+fn bind_orphan_node_delete_provenance(
+    model: &mut Value,
+    node_id: &str,
+    removed: &RemovedOrphanNodeV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        ORPHAN_NODE_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "orphan_node_delete",
+            "removed_node_id": node_id,
+            "removed_node_index": removed.node_index,
+            "removed_coordinates_m": removed.coordinates_m,
+            "removed_source_id": null,
+            "removed_extensions": removed.extensions,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": ORPHAN_NODE_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_frame3d_member_add_provenance(
     model: &mut Value,
@@ -8047,7 +8356,7 @@ mod tests {
         append_node, constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
         remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_pattern,
-        remove_linear_material, remove_nodal_load, remove_truss3d_leaf_member,
+        remove_linear_material, remove_nodal_load, remove_orphan_node, remove_truss3d_leaf_member,
         remove_truss_section, validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
@@ -8059,12 +8368,12 @@ mod tests {
         validate_linear_material_delete_request, validate_linear_material_edit_request,
         validate_nodal_load_add_request, validate_nodal_load_delete_request,
         validate_nodal_load_edit_request, validate_node_add_request,
-        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
-        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
-        validate_truss_element_property_references, validate_truss_section_add_request,
-        validate_truss_section_delete_request, validate_truss_section_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES,
+        validate_orphan_node_delete_request, validate_truss3d_leaf_member_delete_request,
+        validate_truss3d_member_add_request, validate_truss3d_member_properties,
+        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
+        validate_truss_section_add_request, validate_truss_section_delete_request,
+        validate_truss_section_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -8108,6 +8417,109 @@ mod tests {
                 .expect_err("duplicate canonical coordinates")
                 .code,
             "workbench_model_add_node_coordinate_exists"
+        );
+    }
+
+    #[test]
+    fn orphan_node_delete_requires_terminal_neutral_unreferenced_empty_row() {
+        validate_orphan_node_delete_request(0, "N3").expect("valid orphan-node deletion");
+        assert!(validate_orphan_node_delete_request(0, "").is_err());
+
+        let model = json!({
+            "nodes": [
+                {"id": "N1", "index": 0, "coordinates_m": [0, 0, 0], "source_id": "source:N1", "extensions": {}},
+                {"id": "N2", "index": 1, "coordinates_m": [1, 0, 0], "source_id": "source:N2", "extensions": {}},
+                {"id": "N3", "index": 2, "coordinates_m": [2, 0, 0], "source_id": null, "extensions": {}}
+            ],
+            "elements": [],
+            "constraints": [],
+            "load_patterns": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed = remove_orphan_node(&mut deleted, "N3").expect("delete orphan node");
+        assert_eq!(removed.node_index, 2);
+        assert_eq!(
+            removed.coordinates_m.map(f64::to_bits),
+            [2.0_f64, 0.0, 0.0].map(f64::to_bits)
+        );
+        assert_eq!(removed.extensions, json!({}));
+        assert_eq!(
+            deleted["nodes"].as_array().expect("retained nodes").len(),
+            2
+        );
+
+        let mut nonterminal = model.clone();
+        assert_eq!(
+            remove_orphan_node(&mut nonterminal, "N2")
+                .expect_err("nonterminal node")
+                .code,
+            "workbench_model_delete_orphan_node_not_terminal"
+        );
+        let mut source_owned = model.clone();
+        source_owned["nodes"][2]["source_id"] = json!("source:N3");
+        assert_eq!(
+            remove_orphan_node(&mut source_owned, "N3")
+                .expect_err("source-owned node")
+                .code,
+            "workbench_model_delete_orphan_node_source_owned"
+        );
+        let mut extended = model.clone();
+        extended["nodes"][2]["extensions"] = json!({"external:owner": "external"});
+        assert_eq!(
+            remove_orphan_node(&mut extended, "N3")
+                .expect_err("extended node")
+                .code,
+            "workbench_model_delete_orphan_node_extensions_unsupported"
+        );
+        let mut element = model.clone();
+        element["elements"] = json!([{"node_ids": ["N1", "N3"]}]);
+        assert_eq!(
+            remove_orphan_node(&mut element, "N3")
+                .expect_err("element reference")
+                .code,
+            "workbench_model_delete_orphan_node_referenced_by_element"
+        );
+        let mut constraint = model.clone();
+        constraint["constraints"] = json!([{"node_id": "N3"}]);
+        assert_eq!(
+            remove_orphan_node(&mut constraint, "N3")
+                .expect_err("constraint reference")
+                .code,
+            "workbench_model_delete_orphan_node_referenced_by_constraint"
+        );
+        let mut load = model.clone();
+        load["load_patterns"] = json!([{"nodal_loads": [{"node_id": "N3"}]}]);
+        assert_eq!(
+            remove_orphan_node(&mut load, "N3")
+                .expect_err("load reference")
+                .code,
+            "workbench_model_delete_orphan_node_referenced_by_load"
+        );
+        let mut unsupported = model.clone();
+        unsupported["unsupported_features"] = json!([{"source_entity_id": "N3"}]);
+        assert_eq!(
+            remove_orphan_node(&mut unsupported, "N3")
+                .expect_err("unsupported-feature reference")
+                .code,
+            "workbench_model_delete_orphan_node_unsupported_feature_owned"
+        );
+        let mut mapped = model.clone();
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "N3"}]);
+        assert_eq!(
+            remove_orphan_node(&mut mapped, "N3")
+                .expect_err("round-trip reference")
+                .code,
+            "workbench_model_delete_orphan_node_roundtrip_owned"
+        );
+        let mut minimum = model;
+        minimum["nodes"].as_array_mut().expect("nodes").pop();
+        assert_eq!(
+            remove_orphan_node(&mut minimum, "N2")
+                .expect_err("minimum topology")
+                .code,
+            "workbench_model_delete_orphan_node_minimum_topology"
         );
     }
 

@@ -44,6 +44,9 @@ absent from the runtime image.
   `model-add-node` appends one unique finite-coordinate neutral node with the next contiguous
   index while preserving every existing row, blocker, and round-trip mapping. It creates no
   member, load, or constraint; operators compose those explicitly.
+  `model-delete-orphan-node` removes only the last contiguous neutral unreferenced node while
+  retaining two nodes and rejecting source/extension ownership plus element, constraint, load,
+  unsupported-feature, or round-trip references.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
   parameters without changing existing references. `model-delete-frame-section` removes only the
   last contiguous neutral unreferenced parameter-set-v1 frame3d section while retaining another
@@ -166,6 +169,8 @@ structural-workbench model-delete-linear-material /workspace/added-material-mode
   --material M2 --output-dir /workspace/deleted-material-model
 structural-workbench model-add-node /workspace/model.json \
   --node N3 --coordinates 4 1 0 --output-dir /workspace/added-node-model
+structural-workbench model-delete-orphan-node /workspace/added-node-model/model-ir.json \
+  --node N3 --output-dir /workspace/deleted-node-model
 structural-workbench model-add-frame-section /workspace/model.json \
   --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
   --torsional-constant-m4 0.000005 \
