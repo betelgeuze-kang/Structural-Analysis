@@ -857,6 +857,24 @@ fn run_fixed_constraint_delete(source: &Path, destination: &Path, constraint_id:
     ])
 }
 
+fn run_fixed_constraint_dof_delete(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    dof: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-fixed-constraint-dof"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--dof"),
+        text(dof),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_add(
     source: &Path,
     destination: &Path,
@@ -5600,6 +5618,297 @@ fn constraint_target_edit_is_deterministic_cpp_revalidated_restartable_and_execu
     );
 
     let existing = run_constraint_target_edit(&fixed_path, &first, "BC_N3", "N2");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_constraint_dof_deletion_is_deterministic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("constraint-dof-delete-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("constraint-dof-delete-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let fixed_directory = temporary.0.join("constraint-dof-delete-fixed-source");
+    assert_success(&run_fixed_constraint_add(
+        &load_directory.join("model-ir.json"),
+        &fixed_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let target_directory = temporary.0.join("constraint-dof-delete-target-source");
+    assert_success(&run_constraint_target_edit(
+        &fixed_directory.join("model-ir.json"),
+        &target_directory,
+        "BC_N3",
+        "N2",
+    ));
+    let target_path = target_directory.join("model-ir.json");
+    let target_bytes = std::fs::read(&target_path).expect("constraint-DOF delete source bytes");
+    let target_model = parse_model_ir_v2(&target_bytes).expect("strict DOF-delete source");
+
+    let first = temporary.0.join("constraint-dof-delete-first");
+    let second = temporary.0.join("constraint-dof-delete-second");
+    for destination in [&first, &second] {
+        let output = run_fixed_constraint_dof_delete(&target_path, destination, "BC_N3", "RZ");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("constraint-DOF delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint-DOF delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint-DOF delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&target_path).expect("unchanged constraint-DOF delete source"),
+        target_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("constraint-DOF-deleted ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict DOF-deleted ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++ DOF-deleted validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], target_model.value()[family]);
+    }
+    let source_constraints = target_model.value()["constraints"]
+        .as_array()
+        .expect("source constraints");
+    let edited_constraints = edited.value()["constraints"]
+        .as_array()
+        .expect("edited constraints");
+    assert_eq!(edited_constraints[0], source_constraints[0]);
+    for key in ["id", "index", "type", "node_id", "source_id", "extensions"] {
+        assert_eq!(edited_constraints[1][key], source_constraints[1][key]);
+    }
+    assert_eq!(
+        source_constraints[1]["dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY", "RZ"])
+    );
+    assert_eq!(
+        edited_constraints[1]["dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY"])
+    );
+    assert_eq!(source_constraints[1]["prescribed_values_si"]["RZ"], 0);
+    assert!(edited_constraints[1]["prescribed_values_si"]
+        .get("RZ")
+        .is_none());
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-delete-fixed-constraint-dof.v1")
+        .expect("constraint-DOF delete provenance extension");
+    assert_eq!(extension["operation"], "fixed_constraint_dof_delete");
+    assert_eq!(extension["constraint_id"], "BC_N3");
+    assert_eq!(extension["constraint_index"], 1);
+    assert_eq!(extension["constraint_type"], "fixed_dofs");
+    assert_eq!(extension["node_id"], "N2");
+    assert_eq!(extension["removed_dof"], "RZ");
+    assert_eq!(extension["removed_prescribed_value_explicit"], true);
+    assert_eq!(extension["removed_prescribed_value_si"], 0);
+    assert_eq!(
+        extension["retained_dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY"])
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("constraint-DOF delete receipt"),
+    )
+    .expect("constraint-DOF delete receipt JSON");
+    assert_eq!(receipt["operation"], "fixed_constraint_dof_delete");
+    assert_eq!(receipt["constraint_id"], "BC_N3");
+    assert_eq!(receipt["removed_dof"], "RZ");
+    assert_eq!(receipt["removed_prescribed_value_explicit"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("constraint-dof-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "constraint-dof-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("constraint-DOF delete request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("constraint-DOF delete direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("constraint-DOF delete direct recovery"),
+    )
+    .expect("constraint-DOF delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([11, 12, 13, 14, 15, 16, 17])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, 0, -1000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("constraint-DOF delete initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("constraint-DOF delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, constraint, dof, code) in [
+        (
+            "constraint-dof-delete-missing-constraint",
+            "MISSING",
+            "RZ",
+            "workbench_model_delete_fixed_constraint_dof_constraint_missing",
+        ),
+        (
+            "constraint-dof-delete-not-restrained",
+            "BC_N3",
+            "RZ",
+            "workbench_model_delete_fixed_constraint_dof_not_restrained",
+        ),
+    ] {
+        let source_path = if name.ends_with("not-restrained") {
+            first.join("model-ir.json")
+        } else {
+            target_path.clone()
+        };
+        let destination = temporary.0.join(name);
+        let rejected = run_fixed_constraint_dof_delete(&source_path, &destination, constraint, dof);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut minimum = target_model.value().clone();
+    minimum["constraints"][1]["dofs"] = serde_json::json!(["RZ"]);
+    minimum["constraints"][1]["prescribed_values_si"] = serde_json::json!({"RZ": 0});
+    let minimum_source = temporary
+        .0
+        .join("constraint-dof-delete-minimum-source.json");
+    std::fs::write(
+        &minimum_source,
+        canonicalize_model_ir_v2(&minimum)
+            .expect("canonical minimum-mask source")
+            .as_bytes(),
+    )
+    .expect("write minimum-mask source");
+    let minimum_destination = temporary.0.join("constraint-dof-delete-minimum-rejected");
+    let minimum_rejected =
+        run_fixed_constraint_dof_delete(&minimum_source, &minimum_destination, "BC_N3", "RZ");
+    assert_eq!(minimum_rejected.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&minimum_rejected.stdout)
+        .contains("workbench_model_delete_fixed_constraint_dof_minimum_mask"));
+    assert!(!minimum_destination.exists());
+
+    let mut blocked = target_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.constraint-dof-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Constraint DOF deletion must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:BC_N3",
+        "entity_kind": "constraint",
+        "model_ir_entity_id": "BC_N3",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary
+        .0
+        .join("blocked-constraint-dof-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked constraint-DOF delete source")
+            .as_bytes(),
+    )
+    .expect("write blocked constraint-DOF delete source");
+    let blocked_destination = temporary.0.join("blocked-constraint-dof-delete-output");
+    assert_success(&run_fixed_constraint_dof_delete(
+        &blocked_source,
+        &blocked_destination,
+        "BC_N3",
+        "RZ",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked constraint-DOF delete receipt"),
+    )
+    .expect("blocked constraint-DOF delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.constraint-dof-delete-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked constraint-DOF-deleted ModelIR"),
+    )
+    .expect("blocked constraint-DOF-deleted JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+
+    let existing = run_fixed_constraint_dof_delete(&target_path, &first, "BC_N3", "RZ");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

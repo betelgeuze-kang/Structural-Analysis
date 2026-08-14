@@ -34,6 +34,7 @@
       "model-delete-nodal-load",
       "model-add-fixed-constraint",
       "model-delete-fixed-constraint",
+      "model-delete-fixed-constraint-dof",
       "model-add-linear-load-pattern",
       "model-add-linear-load-combination",
       "model-add-linear-load-combination-term",
@@ -308,6 +309,12 @@
     },
     {
       "feature": "bounded_cpp_revalidated_existing_modelir_fixed_constraint_target_edit",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_cpp_revalidated_existing_modelir_fixed_constraint_single_dof_delete",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false

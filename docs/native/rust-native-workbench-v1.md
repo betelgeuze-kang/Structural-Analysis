@@ -52,7 +52,10 @@ restrained by the named existing constraint. The separate `model-edit-constraint
 changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves
 its index, mask, prescribed values, source identity and extensions, and rejects target-node DOF
 overlap before C++ revalidation. See `docs/native/modelir-constraint-target-edit-v1.md`. Neither
-surface adds/removes restrained DOFs or creates multi-point constraints.
+surface adds/removes restrained DOFs or creates multi-point constraints. The separate
+`model-delete-fixed-constraint-dof` command removes one named restraint and its matching explicit
+prescribed value while retaining at least one DOF and every other row field. See
+`docs/native/modelir-fixed-constraint-dof-deletion-v1.md`; DOF addition remains open.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`

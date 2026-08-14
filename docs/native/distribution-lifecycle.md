@@ -433,7 +433,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    fallback 0 and byte-identical initialized checkpoint/restart output, then emits an append-only v62
    receipt binding the edited ModelIR, edit/request/assembly receipts, analysis request, checkpoint,
    ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v61 receipts, including frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
+78. removes `RZ` and its explicit zero prescribed value from the target-edited `BC_N3`, retains
+   the other five DOFs in order plus every non-mask row field, rejects missing/unrestrained/invalid
+   identities and final-DOF removal, proves exact active DOFs `[11,12,13,14,15,16,17]`, active load
+   `[0,0,-1000,0,0,0,0]`, typed recovery, fallback 0 and byte-identical initialized
+   checkpoint/restart output, then emits an append-only v63 receipt binding the edited ModelIR,
+   edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
+   The receipt checker continues to accept frozen v1 through v62 receipts, including frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -508,7 +514,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    authority; and no pre-v61 receipt is installed bounded existing nodal-load target-node editing,
    retained-field binding, exact relocated active-load, typed recovery and restart authority; and no
    pre-v62 receipt is installed bounded existing fixed-constraint target-node editing, retained-field
-   binding, exact active-DOF/load, typed recovery and restart authority.
+   binding, exact active-DOF/load, typed recovery and restart authority; and no pre-v63 receipt is
+   installed bounded existing fixed-constraint single-DOF deletion, retained-mask/value binding,
+   exact active-DOF/load, typed recovery and restart authority.
 
 The reference command is:
 

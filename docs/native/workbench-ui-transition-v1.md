@@ -62,6 +62,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-
   checkpoint restart. Constraint-value/mask/identity editing, MPC/contact/support sets and visual
   dragging remain separate or open.
+- `model-delete-fixed-constraint-dof`: deterministic removal of one named restrained DOF and its
+  matching explicit prescribed value, when present, from one existing `fixed_dofs` constraint.
+  Rust retains at least one DOF plus identity/index/type/target/source/extensions, degrades only a
+  matching constraint round-trip claim, and strictly reparses and C++-revalidates before create-new
+  publication. Installed E2E v63 proves active DOFs `[11,12,13,14,15,16,17]`, active load
+  `[0,0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. DOF addition
+  or reordering, constraint identity editing and MPC/contact/support sets remain open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint

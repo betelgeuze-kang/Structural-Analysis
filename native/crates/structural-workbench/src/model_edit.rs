@@ -48,6 +48,8 @@ const NODAL_LOAD_TARGET_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-nodal-load-target.v1";
 const CONSTRAINT_TARGET_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-constraint-target.v1";
+const FIXED_CONSTRAINT_DOF_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-fixed-constraint-dof.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const NODAL_LOAD_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
@@ -107,6 +109,7 @@ const ORPHAN_NODE_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_co
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_target_replacement_to_distinct_existing_node_with_identity_index_components_source_and_extensions_preserved_not_load_component_identity_pattern_creation_deletion_combination_constraint_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_target_replacement_to_distinct_existing_node_without_overlapping_restrained_dofs_with_identity_index_type_dofs_prescribed_values_source_and_extensions_preserved_not_constraint_value_mask_identity_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
+const FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_and_matching_explicit_prescribed_value_deletion_with_at_least_one_dof_retained_and_identity_index_type_node_source_extensions_preserved_not_dof_addition_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -190,6 +193,13 @@ pub struct ModelNodalLoadTargetEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded constraint-target edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelConstraintTargetEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded fixed-constraint DOF deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFixedConstraintDofDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -645,6 +655,30 @@ pub fn publish_model_constraint_target_edit(
 ) -> Result<ModelConstraintTargetEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_constraint_target(&source, constraint_id, node_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one restrained DOF from an existing fixed constraint and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or DOFs, invalid source or edited semantics, missing
+/// constraints or restraints, deletion of the last restrained DOF, or publication failure.
+pub fn publish_model_fixed_constraint_dof_delete(
+    source_path: &Path,
+    constraint_id: &str,
+    dof: &str,
+    output_directory: &Path,
+) -> Result<ModelFixedConstraintDofDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_fixed_constraint_dof(&source, constraint_id, dof)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2342,6 +2376,112 @@ pub fn edit_model_constraint_target(
         "claim_boundary": CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelConstraintTargetEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedConstraintDofV1 {
+    constraint_index: usize,
+    constraint_type: String,
+    node_id: String,
+    removed_prescribed_value_explicit: bool,
+    removed_prescribed_value_si: f64,
+    retained_dofs: Value,
+    retained_prescribed_values_si: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Delete one restrained DOF from an existing fixed constraint in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identities or DOFs, invalid source semantics, missing constraints or
+/// restraints, removal of the last DOF, malformed retained fields, schema drift, or edited
+/// semantics rejected by C++.
+pub fn delete_model_fixed_constraint_dof(
+    source_bytes: &[u8],
+    constraint_id: &str,
+    dof: &str,
+) -> Result<ModelFixedConstraintDofDeleteOutcomeV1, WorkbenchError> {
+    validate_fixed_constraint_dof_delete_request(source_bytes.len(), constraint_id, dof)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_fixed_constraint_dof(&mut edited, constraint_id, dof)?;
+    bind_fixed_constraint_dof_delete_provenance(
+        &mut edited,
+        constraint_id,
+        dof,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "constraint", constraint_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the fixed-constraint DOF-deleted ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "fixed_constraint_dof_delete",
+        "model_id": edited_validation.report.model_id,
+        "constraint_id": constraint_id,
+        "constraint_index": removed.constraint_index,
+        "constraint_type": removed.constraint_type,
+        "node_id": removed.node_id,
+        "removed_dof": dof,
+        "removed_prescribed_value_explicit": removed.removed_prescribed_value_explicit,
+        "removed_prescribed_value_si": removed.removed_prescribed_value_si,
+        "retained_dofs": removed.retained_dofs,
+        "retained_prescribed_values_si": removed.retained_prescribed_values_si,
+        "retained_source_id": removed.retained_source_id,
+        "retained_extensions": removed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFixedConstraintDofDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -6684,6 +6824,21 @@ fn validate_constraint_target_edit_request(
     validate_bounded_edit_identity(0, node_id, "replacement constraint target node")
 }
 
+fn validate_fixed_constraint_dof_delete_request(
+    source_length: usize,
+    constraint_id: &str,
+    dof: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, constraint_id, "constraint")?;
+    if !DOF_KEYS.contains(&dof) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_dof_invalid",
+            "deleted constraint DOF must be UX, UY, UZ, RX, RY, or RZ",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -7722,6 +7877,121 @@ fn replace_constraint_target(
         previous_node_id,
         dofs: retained_dofs,
         prescribed_values_si: retained_prescribed_values_si,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_fixed_constraint_dof(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+) -> Result<RemovedConstraintDofV1, WorkbenchError> {
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    let constraint_index = constraints
+        .iter()
+        .position(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_dof_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    let constraint = &constraints[constraint_index];
+    if constraint.get("index").and_then(Value::as_u64) != u64::try_from(constraint_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_dof_index_mismatch",
+            "edited constraint index must match its contiguous position",
+        ));
+    }
+    let constraint_type = constraint
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint type"))?
+        .to_owned();
+    if constraint_type != "fixed_dofs" {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_dof_type_unsupported",
+            "constraint DOF deletion accepts only a fixed_dofs constraint",
+        ));
+    }
+    let node_id = constraint
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint node_id"))?
+        .to_owned();
+    let dofs = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraint dofs"))?;
+    if dofs.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_fixed_constraint_dof_minimum_mask",
+            "constraint DOF deletion must retain at least one restrained DOF",
+        ));
+    }
+    let dof_index = dofs
+        .iter()
+        .position(|candidate| candidate.as_str() == Some(dof))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_fixed_constraint_dof_not_restrained",
+                format!("constraint {constraint_id} does not restrain DOF {dof}"),
+            )
+        })?;
+    if dofs.iter().any(|candidate| candidate.as_str().is_none()) {
+        return Err(snapshot_error("constraint dofs"));
+    }
+    let prescribed = constraint
+        .get("prescribed_values_si")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?;
+    for value in prescribed.values() {
+        finite_number(value, "constraint prescribed value")?;
+    }
+    let removed_prescribed_value_explicit = prescribed.contains_key(dof);
+    let removed_prescribed_value_si = prescribed
+        .get(dof)
+        .map(|value| finite_number(value, "constraint prescribed value"))
+        .transpose()?
+        .unwrap_or(0.0);
+    let retained_source_id = constraint
+        .get("source_id")
+        .ok_or_else(|| snapshot_error("constraint source_id"))?
+        .clone();
+    let retained_extensions = constraint
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("constraint extensions"))?
+        .clone();
+
+    let constraint = model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .and_then(|constraints| constraints.get_mut(constraint_index))
+        .ok_or_else(|| snapshot_error("constraint"))?;
+    constraint
+        .get_mut("dofs")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("constraint dofs"))?
+        .remove(dof_index);
+    constraint
+        .get_mut("prescribed_values_si")
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?
+        .remove(dof);
+    Ok(RemovedConstraintDofV1 {
+        constraint_index,
+        constraint_type,
+        node_id,
+        removed_prescribed_value_explicit,
+        removed_prescribed_value_si,
+        retained_dofs: constraint["dofs"].clone(),
+        retained_prescribed_values_si: constraint["prescribed_values_si"].clone(),
         retained_source_id,
         retained_extensions,
     })
@@ -13874,6 +14144,41 @@ fn bind_constraint_target_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_fixed_constraint_dof_delete_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+    removed: &RemovedConstraintDofV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FIXED_CONSTRAINT_DOF_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "fixed_constraint_dof_delete",
+            "constraint_id": constraint_id,
+            "constraint_index": removed.constraint_index,
+            "constraint_type": removed.constraint_type.clone(),
+            "node_id": removed.node_id.clone(),
+            "removed_dof": dof,
+            "removed_prescribed_value_explicit": removed.removed_prescribed_value_explicit,
+            "removed_prescribed_value_si": removed.removed_prescribed_value_si,
+            "retained_dofs": removed.retained_dofs.clone(),
+            "retained_prescribed_values_si": removed.retained_prescribed_values_si.clone(),
+            "retained_source_id": removed.retained_source_id.clone(),
+            "retained_extensions": removed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -15658,8 +15963,8 @@ mod tests {
         move_direct_linear_load_combination_term, move_nested_linear_load_combination_term,
         nested_linear_load_combination_terms_value, normalized_number_bits,
         remove_direct_linear_load_combination_term, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_frame_section, remove_linear_load_combination,
-        remove_linear_load_pattern, remove_linear_material,
+        remove_fixed_constraint_dof, remove_frame3d_leaf_member, remove_frame_section,
+        remove_linear_load_combination, remove_linear_load_pattern, remove_linear_material,
         remove_nested_linear_load_combination_term, remove_nodal_load, remove_orphan_node,
         remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
         replace_direct_linear_load_combination_factor,
@@ -15674,8 +15979,9 @@ mod tests {
         validate_direct_linear_load_combination_term_insert_request,
         validate_direct_linear_load_combination_term_reorder_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
-        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
-        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
+        validate_fixed_constraint_delete_request, validate_fixed_constraint_dof_delete_request,
+        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
+        validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_delete_request,
         validate_frame_section_edit_request, validate_linear_load_combination_add_request,
@@ -16074,6 +16380,75 @@ mod tests {
                 .expect_err("overlapping target DOFs")
                 .code,
             "workbench_model_edit_constraint_target_dof_overlap"
+        );
+    }
+
+    #[test]
+    fn fixed_constraint_dof_delete_preserves_row_and_retains_one_dof() {
+        validate_fixed_constraint_dof_delete_request(0, "BC2", "UX")
+            .expect("valid fixed-constraint DOF delete request");
+        assert!(validate_fixed_constraint_dof_delete_request(0, "", "UX").is_err());
+        assert_eq!(
+            validate_fixed_constraint_dof_delete_request(0, "BC2", "QX")
+                .expect_err("invalid DOF")
+                .code,
+            "workbench_model_delete_fixed_constraint_dof_invalid"
+        );
+
+        let model = json!({
+            "constraints": [{
+                "id": "BC2", "index": 0, "type": "fixed_dofs", "node_id": "N2",
+                "dofs": ["UX", "UY"], "prescribed_values_si": {"UX": 0.125},
+                "source_id": "generated:BC2", "extensions": {"fixture": true}
+            }]
+        });
+        let mut edited = model.clone();
+        let removed = remove_fixed_constraint_dof(&mut edited, "BC2", "UX")
+            .expect("delete explicit prescribed DOF");
+        assert_eq!(removed.constraint_index, 0);
+        assert_eq!(removed.constraint_type, "fixed_dofs");
+        assert_eq!(removed.node_id, "N2");
+        assert!(removed.removed_prescribed_value_explicit);
+        assert_eq!(
+            removed.removed_prescribed_value_si.to_bits(),
+            0.125_f64.to_bits()
+        );
+        assert_eq!(removed.retained_dofs, json!(["UY"]));
+        assert_eq!(removed.retained_prescribed_values_si, json!({}));
+        assert_eq!(removed.retained_source_id, "generated:BC2");
+        assert_eq!(removed.retained_extensions, json!({"fixture": true}));
+        assert_eq!(edited["constraints"][0]["id"], "BC2");
+        assert_eq!(edited["constraints"][0]["node_id"], "N2");
+
+        let implicit = remove_fixed_constraint_dof(&mut model.clone(), "BC2", "UY")
+            .expect("delete implicit-zero prescribed DOF");
+        assert!(!implicit.removed_prescribed_value_explicit);
+        assert_eq!(
+            implicit.removed_prescribed_value_si.to_bits(),
+            0.0_f64.to_bits()
+        );
+        assert_eq!(implicit.retained_dofs, json!(["UX"]));
+        assert_eq!(implicit.retained_prescribed_values_si, json!({"UX": 0.125}));
+
+        assert_eq!(
+            remove_fixed_constraint_dof(&mut model.clone(), "MISSING", "UX")
+                .expect_err("missing constraint")
+                .code,
+            "workbench_model_delete_fixed_constraint_dof_constraint_missing"
+        );
+        assert_eq!(
+            remove_fixed_constraint_dof(&mut model.clone(), "BC2", "UZ")
+                .expect_err("unrestrained DOF")
+                .code,
+            "workbench_model_delete_fixed_constraint_dof_not_restrained"
+        );
+        let mut minimum = model;
+        minimum["constraints"][0]["dofs"] = json!(["UX"]);
+        assert_eq!(
+            remove_fixed_constraint_dof(&mut minimum, "BC2", "UX")
+                .expect_err("last DOF")
+                .code,
+            "workbench_model_delete_fixed_constraint_dof_minimum_mask"
         );
     }
 
