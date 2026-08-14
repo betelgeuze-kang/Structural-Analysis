@@ -228,6 +228,7 @@ def _oracle() -> dict[str, np.ndarray]:
         pattern[np.ix_(dofs, dofs)] = True
 
     active = np.asarray([6, 7, 8, 9, 10, 11, 13])
+    constrained = np.asarray([0, 1, 2, 3, 4, 5, 12, 14, 15, 16, 17])
     reduced_pattern = pattern[np.ix_(active, active)]
     reduced_tangent = tangent[np.ix_(active, active)]
     reduced_mass = mass[np.ix_(active, active)]
@@ -249,6 +250,14 @@ def _oracle() -> dict[str, np.ndarray]:
     nested_combination_external = (
         0.5 * combination_external + 0.4 * external + 0.25 * tertiary
     )
+    full_external = np.zeros(18, dtype=np.float64)
+    full_external[active] = external
+    full_combination_external = np.zeros(18, dtype=np.float64)
+    full_combination_external[active] = combination_external
+    full_direct_terms_external = np.zeros(18, dtype=np.float64)
+    full_direct_terms_external[active] = direct_terms_external
+    full_nested_combination_external = np.zeros(18, dtype=np.float64)
+    full_nested_combination_external[active] = nested_combination_external
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -259,17 +268,27 @@ def _oracle() -> dict[str, np.ndarray]:
         "model_assembly.external_load": external,
         "model_assembly.equilibrium_residual": internal[active] - external,
         "model_assembly.jvp": jvp[active],
+        "model_assembly.constrained_dofs": constrained,
+        "model_assembly.constrained_internal_force": internal[constrained],
+        "model_assembly.constrained_external_load": full_external[constrained],
+        "model_assembly.reactions": internal[constrained] - full_external[constrained],
         "model_assembly.frame_recovery": frame[4],
         "model_assembly.truss_recovery": truss[4],
         "model_assembly.combination_external_load": combination_external,
         "model_assembly.combination_equilibrium_residual": internal[active]
         - combination_external,
+        "model_assembly.combination_reactions": internal[constrained]
+        - full_combination_external[constrained],
         "model_assembly.direct_terms_external_load": direct_terms_external,
         "model_assembly.direct_terms_equilibrium_residual": internal[active]
         - direct_terms_external,
+        "model_assembly.direct_terms_reactions": internal[constrained]
+        - full_direct_terms_external[constrained],
         "model_assembly.nested_combination_external_load": nested_combination_external,
         "model_assembly.nested_combination_equilibrium_residual": internal[active]
         - nested_combination_external,
+        "model_assembly.nested_combination_reactions": internal[constrained]
+        - full_nested_combination_external[constrained],
     }
 
 

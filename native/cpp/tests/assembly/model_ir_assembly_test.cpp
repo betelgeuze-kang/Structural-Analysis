@@ -90,6 +90,22 @@ int main() {
                 == result.operator_result.residual[index] - result.external_load[index],
             "equilibrium residual uses internal minus external convention");
     }
+    expect(
+        result.constrained_dof_indices
+            == std::vector<std::uint32_t>({0U, 1U, 2U, 3U, 4U, 5U, 12U, 14U, 15U, 16U, 17U}),
+        "canonical constrained node/DOF mapping");
+    expect(
+        result.constrained_internal_force.size() == result.constrained_dof_indices.size()
+            && result.constrained_external_load.size() == result.constrained_dof_indices.size()
+            && result.reactions.size() == result.constrained_dof_indices.size(),
+        "constrained reaction vector shapes");
+    for (std::size_t index = 0U; index < result.constrained_dof_indices.size(); ++index) {
+        expect(
+            result.reactions[index]
+                == result.constrained_internal_force[index]
+                    - result.constrained_external_load[index],
+            "reaction uses internal minus external convention");
+    }
     expect(result.element_recovery.size() == 2U, "one recovery row per element");
     expect(
         result.element_recovery[0].stable_index == 0U
@@ -112,6 +128,26 @@ int main() {
     expect(repeated.operator_result.jvp == result.operator_result.jvp, "repeat JVP");
     expect(repeated.external_load == result.external_load, "repeat external load");
     expect(repeated.equilibrium_residual == result.equilibrium_residual, "repeat equilibrium");
+    expect(
+        repeated.constrained_dof_indices == result.constrained_dof_indices,
+        "repeat constrained mapping");
+    expect(repeated.reactions == result.reactions, "repeat reactions");
+
+    structural::tests::ModelIrAssemblyFixture support_load_fixture;
+    support_load_fixture.nodal_loads[1].node_id = structural::tests::text("n0");
+    support_load_fixture.nodal_loads[1].components_si[0] = 7.0;
+    support_load_fixture.nodal_loads[1].components_si[1] = 0.0;
+    const structural::model_ir::Model support_load_model(support_load_fixture.descriptor);
+    const auto support_load = structural::assembly::assemble_model_ir_linear_reference(
+        support_load_model, "lp", displacement, direction);
+    expect(
+        support_load.constrained_dof_indices.front() == 0U
+            && support_load.constrained_external_load.front() == 7.0,
+        "constrained loads remain visible in global canonical order");
+    expect(
+        support_load.reactions.front()
+            == support_load.constrained_internal_force.front() - 7.0,
+        "support load participates in the reaction sign convention");
 
     structural::tests::ModelIrAssemblyFixture combination_fixture;
     combination_fixture.enable_linear_combination();

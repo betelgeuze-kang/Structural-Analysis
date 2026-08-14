@@ -33,6 +33,8 @@ struct ModelIrLinearAssemblySizes final {
 ///
 /// `operator_result.residual` is the assembled internal force. `external_load` and
 /// `equilibrium_residual = internal - external` use the same reduced active-DOF order.
+/// The constrained vectors use sorted global DOF order and preserve the same sign convention,
+/// so `reaction = constrained_internal_force - constrained_external_load`.
 struct ModelIrLinearAssemblyResult final {
     std::string model_content_hash;
     std::string model_semantic_hash;
@@ -42,6 +44,10 @@ struct ModelIrLinearAssemblyResult final {
     CanonicalCsrAssemblyResult operator_result {};
     std::vector<double> external_load;
     std::vector<double> equilibrium_residual;
+    std::vector<std::uint32_t> constrained_dof_indices;
+    std::vector<double> constrained_internal_force;
+    std::vector<double> constrained_external_load;
+    std::vector<double> reactions;
     std::vector<ModelIrElementRecovery> element_recovery;
 };
 

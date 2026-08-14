@@ -134,9 +134,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   frame3d/truss3d graph, maps six canonical DOFs per node, selects one direct nodal-load pattern or
   one bounded two-through-64-pattern signed direct linear combination or one depth-eight/64-leaf
   acyclic nested linear combination, and emits reduced tangent, mass,
-  internal/external/equilibrium residual, JVP and per-element recovery. Its three-node mixed graph
+  internal/external/equilibrium residual, JVP and per-element recovery. The same stable-order
+  element accumulation now preserves sorted constrained global DOFs and computes constrained
+  internal load, external load and reactions with the `internal - external` convention. Its
+  three-node mixed graph
   and the direct, exact-two, explicit three-pattern and consolidated nested external-load vectors independently match NumPy for all 43
-  structural entries. This is not general ModelIR assembly: nonzero constraints, offsets/releases,
+  structural entries, including the constrained map/load/reaction vectors. This is not general
+  ModelIR assembly: nonzero constraints, offsets/releases,
   self-weight, nested graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust now provide a

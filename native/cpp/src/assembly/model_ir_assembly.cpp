@@ -457,6 +457,10 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
 
     std::vector<DenseElementContribution> contributions;
     contributions.reserve(owned.size());
+    std::sort(owned.begin(), owned.end(), [](const auto& left, const auto& right) {
+        return left.stable_index < right.stable_index;
+    });
+    std::vector<double> full_internal_force(graph.global_dof_count, 0.0);
     for (const auto& element : owned) {
         contributions.push_back({
             element.stable_index,
@@ -466,6 +470,17 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
             element.response.residual,
             element.response.jvp,
         });
+        for (std::size_t local_dof = 0U; local_dof < element.dof_indices.size(); ++local_dof) {
+            const auto global_dof_index = element.dof_indices[local_dof];
+            const auto accumulated = full_internal_force[global_dof_index]
+                + element.response.residual[local_dof];
+            if (!std::isfinite(accumulated)) {
+                throw model_ir::Error(
+                    SA_ERR_RESIDUAL_LIMIT,
+                    "ModelIR full internal-force accumulation exceeds the finite numerical domain");
+            }
+            full_internal_force[global_dof_index] = accumulated == 0.0 ? 0.0 : accumulated;
+        }
     }
     CanonicalCsrAssemblyResult operator_result {};
     try {
@@ -521,6 +536,25 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                 "ModelIR equilibrium residual exceeds the finite numerical domain");
         }
         output.equilibrium_residual.push_back(equilibrium == 0.0 ? 0.0 : equilibrium);
+    }
+    output.constrained_dof_indices.assign(
+        graph.constrained_dof_indices.begin(), graph.constrained_dof_indices.end());
+    std::sort(output.constrained_dof_indices.begin(), output.constrained_dof_indices.end());
+    output.constrained_internal_force.reserve(output.constrained_dof_indices.size());
+    output.constrained_external_load.reserve(output.constrained_dof_indices.size());
+    output.reactions.reserve(output.constrained_dof_indices.size());
+    for (const auto constrained_dof : output.constrained_dof_indices) {
+        const auto internal = full_internal_force[constrained_dof];
+        const auto external = full_external_load[constrained_dof];
+        const auto reaction = internal - external;
+        if (!std::isfinite(reaction)) {
+            throw model_ir::Error(
+                SA_ERR_RESIDUAL_LIMIT,
+                "ModelIR constrained reaction exceeds the finite numerical domain");
+        }
+        output.constrained_internal_force.push_back(internal == 0.0 ? 0.0 : internal);
+        output.constrained_external_load.push_back(external == 0.0 ? 0.0 : external);
+        output.reactions.push_back(reaction == 0.0 ? 0.0 : reaction);
     }
     output.element_recovery.reserve(owned.size());
     for (auto& element : owned) {

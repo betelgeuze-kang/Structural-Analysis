@@ -23,6 +23,9 @@ pattern it:
   at most 64 expanded leaf contributions and two through 64 resolved nonzero unique patterns, into the
   same active order and emits both external load and
   `equilibrium_residual = internal_force - external_load`;
+- preserves constrained DOFs in sorted global order and emits constrained internal force,
+  constrained external load, and `reaction = internal_force - external_load` from the same
+  stable-order element accumulation;
 - carries the exact ModelIR content, semantic, and provenance hashes plus selected legacy
   load-case identity into the pointer-free result.
 
@@ -40,7 +43,7 @@ not link Python or Rust.
   independent NumPy implementation evaluates a rolled frame and orthogonal truss, scatters their
   18-DOF graph, reduces it to seven active DOFs and 43 structural entries, and compares the exact
   active map, CSR rows/columns, tangent, mass, internal force, direct and combined external load,
-  equilibrium residual, JVP, and both recovery records.
+  equilibrium residual, JVP, constrained map/load/reaction vectors, and both recovery records.
 - C3 integration candidate: ABI v1.13 preserves the complete 184-byte v1.12 prefix and appends an
   immutable exact-sizes query plus a failure-atomic execute slot. Execute requires 16 disjoint
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
@@ -65,13 +68,15 @@ The projection rejects non-linear material or formulation state, frame2d, shell,
 end releases, member loads, nonzero prescribed constraints, self-weight, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
-time functions, construction stages, and declared unsupported features. It does not solve the assembled
-operator by itself, compute constrained reactions, reorder DOFs, or propagate constitutive epochs.
+time functions, construction stages, and declared unsupported features. It does not solve the
+assembled operator by itself, expose constrained reactions through ABI v1.13, reorder DOFs, or
+propagate constitutive epochs.
 The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
 to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,
 and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
 does not promote this numerical family past C1.
 
 Still open: those excluded formulations and general load semantics, shell graph support, stateful
-trial/commit/rollback aggregation, constrained reactions, authoritative sequential C2/C3
-promotion, durable job/service integration for this profile, and C6 decommission.
+trial/commit/rollback aggregation, ABI/Rust/product publication of the C++ reaction vectors,
+authoritative sequential C2/C3 promotion, durable job/service integration for this profile, and C6
+decommission.

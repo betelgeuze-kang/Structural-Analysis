@@ -45,6 +45,13 @@ int main() {
     emit("model_assembly.external_load", result.external_load);
     emit("model_assembly.equilibrium_residual", result.equilibrium_residual);
     emit("model_assembly.jvp", result.operator_result.jvp);
+    emit_integer(
+        "model_assembly.constrained_dofs", std::span {result.constrained_dof_indices});
+    emit(
+        "model_assembly.constrained_internal_force", result.constrained_internal_force);
+    emit(
+        "model_assembly.constrained_external_load", result.constrained_external_load);
+    emit("model_assembly.reactions", result.reactions);
     emit("model_assembly.frame_recovery", result.element_recovery[0].values);
     emit("model_assembly.truss_recovery", result.element_recovery[1].values);
     const auto combination = structural::assembly::assemble_model_ir_linear_reference(
@@ -53,6 +60,7 @@ int main() {
     emit(
         "model_assembly.combination_equilibrium_residual",
         combination.equilibrium_residual);
+    emit("model_assembly.combination_reactions", combination.reactions);
     structural::tests::ModelIrAssemblyFixture direct_terms_fixture;
     direct_terms_fixture.enable_three_pattern_linear_combination();
     const structural::model_ir::Model direct_terms_model(direct_terms_fixture.descriptor);
@@ -62,6 +70,7 @@ int main() {
     emit(
         "model_assembly.direct_terms_equilibrium_residual",
         direct_terms.equilibrium_residual);
+    emit("model_assembly.direct_terms_reactions", direct_terms.reactions);
     structural::tests::ModelIrAssemblyFixture nested_fixture;
     nested_fixture.enable_nested_linear_combination();
     const structural::model_ir::Model nested_model(nested_fixture.descriptor);
@@ -71,5 +80,6 @@ int main() {
     emit(
         "model_assembly.nested_combination_equilibrium_residual",
         nested.equilibrium_residual);
+    emit("model_assembly.nested_combination_reactions", nested.reactions);
     return 0;
 }

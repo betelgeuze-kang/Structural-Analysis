@@ -90,15 +90,18 @@ canonical CSR assembly remains a separate C++ reference target. The CSR projecti
 sorted active-DOF map, canonical structure and the same four numerical channels. A separate
 `structural_model_assembly` target now resolves a bounded typed ModelIR linear frame3d/truss3d
 graph, selected direct nodal loads or one bounded two-pattern signed linear combination, and
-element recovery through those exact sources; its mixed three-node/18-DOF graph matches an
-independent NumPy oracle after reduction to seven active DOFs and 43 structural entries. ABI v1.13
+element recovery through those exact sources. The C++ composition also preserves the sorted
+constrained global-DOF map and computes constrained internal load, external load and reaction with
+the same `internal - external` convention; its mixed three-node/18-DOF graph matches an independent
+NumPy oracle after reduction to seven active DOFs and 43 structural entries. ABI v1.13
 exposes an immutable exact-size query and failure-atomic
 assembly operation, and the safe Rust wrapper independently revalidates the canonical CSR,
 recovery layout, selected legacy load-case index and all three ModelIR identities. That boundary is a
 C3 integration candidate,
 not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
-does not cover nonzero constraints, offsets/releases, self-weight, nested or arbitrary-term
-combinations, stages, shell/nonlinear graphs or constrained reactions. A separate Rust composition
+does not expose those constrained reaction vectors yet and does not cover nonzero constraints,
+offsets/releases, self-weight, nested or arbitrary-term combinations, stages, or shell/nonlinear
+graphs. A separate Rust composition
 path binds this exact
 assembly to the ABI v1.10 resumable PCG operation, `SAMLPC01` ModelIR provenance envelope,
 self-hashed ResultIR/ReportIR/Markdown, and terminal active-DOF plus element recovery. Public
