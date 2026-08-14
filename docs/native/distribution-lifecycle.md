@@ -596,7 +596,7 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    and byte-identical initialized checkpoint/restart, then emits an append-only v81 receipt binding
    the edited ModelIR, edit/request/assembly receipts, analysis request, checkpoint, ResultIR,
    recovery and ReportIR.
-96. consumes the normalized MGT cantilever ModelIR, replaces mapped element `E1` with `E1_LINKED`,
+96. consumes the normalized MGT cantilever ModelIR, replaces mapped element `E_1` with `E1_LINKED`,
    atomically rewrites its direct element round-trip ownership, degrades the canonicalized mapping
    to approximated, and rejects malformed/no-op/colliding/unreferenced identities plus unsupported-
    feature ownership. Focused E2E separately proves construction-stage reference cascade and C++

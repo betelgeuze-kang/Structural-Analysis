@@ -4786,6 +4786,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v82" in e2e
     assert "exercise_element_identity_cascade_edit_surface" in e2e
     assert "model-edit-element-identity-cascade" in e2e
+    assert "--element E_1 --new-element E1_LINKED" in e2e
     assert "structural-native:model-edit-element-identity-cascade.v2" in e2e
     assert "workbench_element_identity_cascade_edit_surface_passed" in e2e
     assert "workbench_element_identity_cascade_edit_model_sha256" in e2e

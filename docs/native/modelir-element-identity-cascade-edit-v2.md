@@ -45,7 +45,7 @@ readiness, blockers, and model artifact hash.
 
 Focused E2E separately proves a construction-stage reference is rewritten and C++-revalidated.
 Installed CPU static/shared distribution E2E consumes the normalized MGT cantilever ModelIR, whose
-direct element mapping is source-owned, and cascades `E1` to `E1_LINKED`. The append-only v82
+direct element mapping is source-owned, and cascades `E_1` to `E1_LINKED`. The append-only v82
 receipt binds model, edit/request/assembly receipts, request, checkpoint, ResultIR, recovery, and
 ReportIR. Typed recovery proves frame element type `[1]`, offsets `[0,12]`, active DOFs
 `[6,7,8,9,10,11]`, exact active load `[200000,0,0,0,0,0]`, byte-identical initialized restart, and

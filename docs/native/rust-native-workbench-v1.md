@@ -151,7 +151,7 @@ ID and atomically rewrites typed construction-stage plus direct element round-tr
 preserves the element index and exact typed row, degrades exact or canonicalized direct mappings
 to approximated, requires at least one such reference, rejects unsupported-feature ownership, and
 C++-revalidates the edited snapshot. Installed distribution v82 uses the normalized MGT mapping to
-replace `E1` with `E1_LINKED`; stage-reference execution remains outside the current linear
+replace `E_1` with `E1_LINKED`; stage-reference execution remains outside the current linear
 projection. See `docs/native/modelir-element-identity-cascade-edit-v2.md`.
 The separate `model-edit-linear-load-combination-identity` command changes only one unreferenced
 bounded direct or acyclic nested linear load combination's stable ID, preserves its index, exact

@@ -237,7 +237,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   construction-stage reference plus direct element round-trip ownership, degrades exact or
   canonicalized direct mappings to approximated, preserves the complete typed element row, and
   requires at least one such reference before strict Rust and C++ revalidation. Installed E2E v82
-  consumes the normalized MGT mapping, replaces `E1` with `E1_LINKED`, and proves frame recovery
+  consumes the normalized MGT mapping, replaces `E_1` with `E1_LINKED`, and proves frame recovery
   type `[1]`, offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active load
   `[200000,0,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Focused E2E
   proves the construction-stage cascade, but stage-bearing linear execution, untyped extension

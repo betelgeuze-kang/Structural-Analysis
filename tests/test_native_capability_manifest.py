@@ -418,7 +418,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "direct element round-trip" in element_identity_cascade["claim"]
     assert "normalized MGT round-trip mapping" in element_identity_cascade["claim"]
     assert "distribution v82 E2E" in element_identity_cascade["claim"]
-    assert "E1_LINKED" in element_identity_cascade["claim"]
+    assert "E_1 with E1_LINKED" in element_identity_cascade["claim"]
     assert "byte-identical initialized restart" in element_identity_cascade["claim"]
     assert "fallback 0" in element_identity_cascade["claim"]
     assert "approved HIP C2" in element_identity_cascade["claim"]

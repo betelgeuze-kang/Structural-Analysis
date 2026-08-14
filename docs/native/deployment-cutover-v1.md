@@ -140,7 +140,7 @@ The installed frame leaf deletion uses the same reference preflight and addition
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
 assembly preflight. Distribution E2E v82 proves repeated element-identity-cascade-edited/request/
-artifact bytes from the normalized MGT cantilever source while replacing mapped `E1` with
+artifact bytes from the normalized MGT cantilever source while replacing mapped `E_1` with
 `E1_LINKED` through `model-edit-element-identity-cascade`. It atomically rewrites the direct
 element round-trip identity, degrades its canonicalized disposition to approximated, rejects
 malformed, no-op, colliding and unreferenced identities plus unsupported-feature ownership, and

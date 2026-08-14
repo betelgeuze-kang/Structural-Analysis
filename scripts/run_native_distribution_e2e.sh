@@ -5295,13 +5295,13 @@ exercise_element_identity_cascade_edit_surface() {
 
     env -i PATH="$empty_path" "$active/bin/structural-workbench" \
       model-edit-element-identity-cascade "$source_model" \
-      --element E1 --new-element E1_LINKED --output-dir "$edit_directory" \
+      --element E_1 --new-element E1_LINKED --output-dir "$edit_directory" \
       > "$e2e_root/element-identity-cascade-edit-$label.stdout.json"
     grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
       "$edit_directory/edit-receipt.json"
     grep -Fq '"operation":"element_identity_cascade_edit"' \
       "$edit_directory/edit-receipt.json"
-    grep -Fq '"source_element_id":"E1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_element_id":"E_1"' "$edit_directory/edit-receipt.json"
     grep -Fq '"replacement_element_id":"E1_LINKED"' \
       "$edit_directory/edit-receipt.json"
     grep -Fq '"element_index":0' "$edit_directory/edit-receipt.json"
@@ -5426,7 +5426,7 @@ exercise_element_identity_cascade_edit_surface() {
   local no_op_destination="$e2e_root/element-identity-cascade-edit-no-op-rejected"
   if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
     model-edit-element-identity-cascade "$source_model" \
-    --element E1 --new-element E1 --output-dir "$no_op_destination" \
+    --element E_1 --new-element E_1 --output-dir "$no_op_destination" \
     > "$e2e_root/element-identity-cascade-edit-no-op-rejected.stdout.json"; then
     echo "installed element identity cascade accepted a no-op" >&2
     exit 1
@@ -5438,7 +5438,7 @@ exercise_element_identity_cascade_edit_surface() {
   local invalid_destination="$e2e_root/element-identity-cascade-edit-invalid-rejected"
   if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
     model-edit-element-identity-cascade "$source_model" \
-    --element E1 --new-element 1_INVALID --output-dir "$invalid_destination" \
+    --element E_1 --new-element 1_INVALID --output-dir "$invalid_destination" \
     > "$e2e_root/element-identity-cascade-edit-invalid-rejected.stdout.json"; then
     echo "installed element identity cascade accepted an invalid stable identity" >&2
     exit 1
@@ -5451,7 +5451,7 @@ exercise_element_identity_cascade_edit_surface() {
   mkdir "$existing_destination"
   if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
     model-edit-element-identity-cascade "$source_model" \
-    --element E1 --new-element E1_LINKED --output-dir "$existing_destination" \
+    --element E_1 --new-element E1_LINKED --output-dir "$existing_destination" \
     > "$e2e_root/element-identity-cascade-edit-existing-rejected.stdout.json"; then
     echo "installed element identity cascade overwrote an existing destination" >&2
     exit 1
