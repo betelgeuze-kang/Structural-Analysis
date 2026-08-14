@@ -116,6 +116,10 @@ bounded direct or acyclic nested linear load combination's stable ID, preserves 
 ordered typed terms and bounded expansion, rejects downstream-combination, unsupported-feature and
 round-trip ownership without cascade, and C++-revalidates the edited snapshot. See
 `docs/native/modelir-linear-load-combination-identity-edit-v1.md`.
+The separate `model-edit-model-identity` command requires the exact current root `model_id`, changes
+it to one distinct stable ID, proves the complete verified document without that field is unchanged
+before binding provenance, rejects unsupported-feature ownership without cascade, and
+C++-revalidates the edited snapshot. See `docs/native/modelir-model-identity-edit-v1.md`.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and

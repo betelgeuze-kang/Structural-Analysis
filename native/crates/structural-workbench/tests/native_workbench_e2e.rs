@@ -751,6 +751,24 @@ fn run_element_identity_edit(
     ])
 }
 
+fn run_model_identity_edit(
+    source: &Path,
+    destination: &Path,
+    model_id: &str,
+    replacement_model_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-model-identity"),
+        source.as_os_str(),
+        text("--model-id"),
+        text(model_id),
+        text("--new-model-id"),
+        text(replacement_model_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 #[allow(clippy::too_many_arguments)]
 fn run_frame3d_member_add(
     source: &Path,
@@ -10010,6 +10028,260 @@ fn direct_three_pattern_linear_load_combination_executes_and_restarts_without_fa
         serde_json::json!([0, -10000, 0, 0, 0, 0])
     );
     assert_eq!(deleted_recovery["fallback_count"], 0);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn model_identity_edit_is_deterministic_fail_closed_and_restartable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("model identity source bytes");
+    parse_model_ir_v2(&source_bytes).expect("strict model identity source");
+    let source_model = validate_model_bytes(&source_bytes)
+        .expect("C++-validated model identity source")
+        .snapshot
+        .value()
+        .clone();
+    assert_eq!(source_model["model_id"], "engine-v2-frame-cantilever");
+
+    let first = temporary.0.join("model-identity-first");
+    let second = temporary.0.join("model-identity-second");
+    for destination in [&first, &second] {
+        let output = run_model_identity_edit(
+            &source,
+            destination,
+            "engine-v2-frame-cantilever",
+            "engine-v2-frame-cantilever-renamed",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published model identity receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first model identity artifact"),
+            std::fs::read(second.join(artifact)).expect("second model identity artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged model identity source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("model identity-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict model identity-edited ModelIR");
+    let edited_validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated model identity-edited ModelIR");
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(
+        edited_validation.report.model_id,
+        "engine-v2-frame-cantilever-renamed"
+    );
+    assert_eq!(
+        edited.value()["model_id"],
+        "engine-v2-frame-cantilever-renamed"
+    );
+    for (key, value) in source_model.as_object().expect("source root object") {
+        if !matches!(key.as_str(), "model_id" | "provenance" | "extensions") {
+            assert_eq!(&edited.value()[key], value, "retained root field {key}");
+        }
+    }
+    for (key, value) in source_model["extensions"]
+        .as_object()
+        .expect("source root extensions")
+    {
+        assert_eq!(&edited.value()["extensions"][key], value);
+    }
+
+    let mut source_without_model_id = source_model.clone();
+    source_without_model_id
+        .as_object_mut()
+        .expect("source root object")
+        .remove("model_id");
+    let retained_hash = sha256_identity(
+        canonicalize_model_ir_v2(&source_without_model_id)
+            .expect("canonical source without model identity")
+            .as_bytes(),
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-model-identity.v1")
+        .expect("model identity provenance extension");
+    assert_eq!(extension["operation"], "model_identity_edit");
+    assert_eq!(extension["source_model_id"], "engine-v2-frame-cantilever");
+    assert_eq!(
+        extension["replacement_model_id"],
+        "engine-v2-frame-cantilever-renamed"
+    );
+    assert_eq!(
+        extension["retained_schema_version"],
+        "structural-analysis-model-ir.v2"
+    );
+    assert_eq!(
+        extension["retained_capability_profile"],
+        "engine_v2_phase0_linear_3d"
+    );
+    assert_eq!(
+        extension["source_document_without_model_id_sha256"],
+        retained_hash
+    );
+    assert_eq!(
+        extension["identity_only_edit_verified_before_provenance"],
+        true
+    );
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("model identity receipt"),
+    )
+    .expect("model identity receipt JSON");
+    assert_eq!(receipt["operation"], "model_identity_edit");
+    assert_eq!(receipt["source_model_id"], "engine-v2-frame-cantilever");
+    assert_eq!(
+        receipt["replacement_model_id"],
+        "engine-v2-frame-cantilever-renamed"
+    );
+    assert_eq!(receipt["model_id"], "engine-v2-frame-cantilever-renamed");
+    assert_eq!(
+        receipt["source_document_without_model_id_sha256"],
+        retained_hash
+    );
+    assert_eq!(receipt["retained_family_counts"]["nodes"], 2);
+    assert_eq!(receipt["retained_family_counts"]["elements"], 1);
+    assert_eq!(receipt["retained_family_counts"]["load_patterns"], 4);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, source_id, replacement_id, expected_code) in [
+        (
+            "source-mismatch",
+            "engine-v2-other",
+            "engine-v2-frame-cantilever-renamed",
+            "workbench_model_edit_model_identity_source_mismatch",
+        ),
+        (
+            "no-op",
+            "engine-v2-frame-cantilever",
+            "engine-v2-frame-cantilever",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "invalid",
+            "engine-v2-frame-cantilever",
+            "1-invalid",
+            "workbench_model_edit_model_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("model-identity-{name}"));
+        let rejected = run_model_identity_edit(&source, &destination, source_id, replacement_id);
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    for (name, owned_id) in [
+        ("source-owned", "engine-v2-frame-cantilever"),
+        ("replacement-owned", "engine-v2-frame-cantilever-renamed"),
+    ] {
+        let mut owned = source_model.clone();
+        owned["unsupported_features"] = serde_json::json!([{
+            "feature_id": format!("feature.model-identity-{name}"),
+            "kind": "unsupported_solver_feature",
+            "source_entity_id": owned_id,
+            "disposition": "blocked",
+            "blocking": true,
+            "detail": "Model identity remains externally owned.",
+            "extensions": {}
+        }]);
+        let owned_path = temporary
+            .0
+            .join(format!("model-identity-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned model identity source")
+                .as_bytes(),
+        )
+        .expect("write owned model identity source");
+        let destination = temporary.0.join(format!("model-identity-{name}-output"));
+        let rejected = run_model_identity_edit(
+            &owned_path,
+            &destination,
+            "engine-v2-frame-cantilever",
+            "engine-v2-frame-cantilever-renamed",
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(String::from_utf8_lossy(&rejected.stdout)
+            .contains("workbench_model_edit_model_identity_unsupported_feature_owned"));
+        assert!(!destination.exists());
+    }
+    let existing = run_model_identity_edit(
+        &source,
+        &first,
+        "engine-v2-frame-cantilever",
+        "engine-v2-frame-cantilever-renamed",
+    );
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("model-identity-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "model-identity-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("model identity request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("model identity direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("model identity direct recovery"),
+    )
+    .expect("model identity recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("model identity initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("model identity resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
 }
 
 #[test]

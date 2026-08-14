@@ -32,7 +32,9 @@ existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting and `model-edit-element-identity`
 unreferenced stable-identity replacement for one existing element, plus
 `model-edit-linear-load-combination-identity` bounded direct-or-nested unreferenced
-load-combination stable-identity replacement without reference cascade.
+load-combination stable-identity replacement without reference cascade, plus
+`model-edit-model-identity` expected-source-bound root model-identity replacement with complete
+pre-provenance retained-document hash equality.
 The installed `model-add-frame3d-member` command appends one connected linear frame3d node/member
 pair using existing compatible material/section identities and strict C++ revalidation.
 The installed `model-add-nodal-load` command appends one nonzero six-component SI load to an
@@ -127,7 +129,14 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v74 proves repeated load-combination-identity-edited/request/
+assembly preflight. Distribution E2E v75 proves repeated model-identity-edited/request/artifact
+bytes and retains every v74 assertion while replacing root `engine-v2-frame-cantilever` with
+`engine-v2-frame-cantilever-renamed` through `model-edit-model-identity`, binding the exact expected
+source identity and complete source-document-without-identity hash, rejecting malformed, no-op and
+mismatched identities plus unsupported-feature ownership without cascade, retaining
+`COMBO_RENAMED`, and proving exact typed frame recovery `[1]`, offsets `[0,12]`, active DOFs
+`[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, byte-identical initialized-
+checkpoint restart and fallback 0. Distribution E2E v74 proves repeated load-combination-identity-edited/request/
 artifact bytes and retains every v73 assertion while replacing unreferenced `COMBO_DIRECT` with
 `COMBO_RENAMED` through `model-edit-linear-load-combination-identity`, preserving its index, exact
 ordered typed terms and bounded expansion, rejecting malformed, no-op, colliding and load-pattern-

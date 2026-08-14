@@ -236,7 +236,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "English/Korean UTF-8 linear report view" in workbench["claim"]
     assert "general ModelIR terminal topology view" in workbench["claim"]
     assert "closed `en-US`/`ko-KR` paths" in workbench["claim"]
-    assert "provenance-bound existing-entity editors" in workbench["claim"]
+    assert "provenance-bound editors cover the root model identity" in workbench["claim"]
     assert "v1 frame and truss sections" in workbench["claim"]
     assert "compatible frame and truss element property references" in workbench["claim"]
     assert "model-edit-truss-section" in workbench["claim"]
@@ -264,6 +264,17 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "React/TypeScript removal" in workbench["claim"]
     assert "HIP C2" in workbench["claim"]
     assert "C6" in workbench["claim"]
+    assert capabilities.capability_is_enabled(payload, "modelir_model_identity_edit") is True
+    model_identity_edit = payload["capabilities"]["modelir_model_identity_edit"]
+    assert model_identity_edit["cutover_gate"] == "C5"
+    assert model_identity_edit["owner"] == "structural-workbench"
+    assert "exact expected source model_id" in model_identity_edit["claim"]
+    assert "C++-canonical source document with model_id removed" in model_identity_edit["claim"]
+    assert "distribution v75 E2E" in model_identity_edit["claim"]
+    assert "byte-identical initialized restart" in model_identity_edit["claim"]
+    assert "fallback 0" in model_identity_edit["claim"]
+    assert "HIP C2" in model_identity_edit["claim"]
+    assert "C6" in model_identity_edit["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_node_add") is True
     node_add = payload["capabilities"]["modelir_node_add"]
     assert node_add["cutover_gate"] == "C5"

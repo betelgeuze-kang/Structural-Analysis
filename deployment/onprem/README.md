@@ -13,7 +13,8 @@ absent from the runtime image.
 - The image owns the bounded Import -> Validate -> Run -> Resume -> Compare -> Report flow plus
   deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
-  and provenance-bound `model-edit-node` coordinate plus `model-edit-nodal-load` existing-load
+  and expected-source-bound `model-edit-model-identity` root identity replacement, plus
+  provenance-bound `model-edit-node` coordinate and `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
@@ -174,6 +175,10 @@ structural-workbench review --workspace /workspace/session --decision review \
 structural-workbench review-show --workspace /workspace/session
 structural-workbench export --workspace /workspace/session
 structural-workbench model-view /workspace/model.json --projection isometric
+structural-workbench model-edit-model-identity /workspace/model.json \
+  --model-id engine-v2-frame-cantilever \
+  --new-model-id engine-v2-frame-cantilever-renamed \
+  --output-dir /workspace/renamed-model
 structural-workbench model-edit-node /workspace/model.json --node N2 \
   --coordinates 2 1 1 --output-dir /workspace/edited-model
 structural-workbench model-edit-nodal-load /workspace/model.json \

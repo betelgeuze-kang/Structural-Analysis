@@ -189,6 +189,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   DOFs `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, fallback 0 and
   byte-identical initialized-checkpoint restart. Term editing, creation/deletion, reference
   cascades and visual manipulation remain separate or open.
+- `model-edit-model-identity`: expected-source-bound replacement of the root ModelIR `model_id`.
+  Rust hashes and compares the complete verified document with `model_id` removed before binding
+  explicit edit provenance, rejects malformed/no-op/mismatched identities and unsupported-feature
+  ownership without cascade, then strictly reparses and C++-revalidates. Installed E2E v75 retains
+  `COMBO_RENAMED` and proves frame recovery type `[1]`, offsets `[0,12]`, active DOFs
+  `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, fallback 0 and byte-identical
+  initialized-checkpoint restart. Entity editing and general visual manipulation remain separate.
 - `model-edit-frame-element-orientation`: deterministic replacement of the finite local-axis
   rotation in radians for one existing `frame_3d` element. Rust binds the element identity, fixed
   type, retained formulation, previous/new angle and source hashes, marks only a matching element

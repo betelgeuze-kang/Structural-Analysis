@@ -5931,6 +5931,179 @@ exercise_linear_load_combination_identity_edit_surface() {
 }
 exercise_linear_load_combination_identity_edit_surface
 
+exercise_model_identity_edit_surface() {
+  local source_model="$e2e_root/linear-load-combination-identity-edit-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/model-identity-edit-$label"
+    request_directory="$e2e_root/model-identity-edit-$label-request"
+    direct_directory="$e2e_root/model-identity-edit-$label-direct"
+    partial_directory="$e2e_root/model-identity-edit-$label-partial"
+    resumed_directory="$e2e_root/model-identity-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-model-identity "$source_model" \
+      --model-id engine-v2-frame-cantilever \
+      --new-model-id engine-v2-frame-cantilever-renamed \
+      --output-dir "$edit_directory" \
+      > "$e2e_root/model-identity-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"model_identity_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_model_id":"engine-v2-frame-cantilever"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_model_id":"engine-v2-frame-cantilever-renamed"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_schema_version":"structural-analysis-model-ir.v2"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_capability_profile":"engine_v2_phase0_linear_3d"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Eq '"source_document_without_model_id_sha256":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"identity_only_edit_verified_before_provenance":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"model_id":"engine-v2-frame-cantilever-renamed"' \
+      "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-model-identity.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/model-identity-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case model-identity-edit-c5 --load-combination COMBO_RENAMED \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/model-identity-edit-$label-request.stdout.json"
+    grep -Fq '"model_id":"engine-v2-frame-cantilever-renamed"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"load_combination_id":"COMBO_RENAMED"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/model-identity-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"model_id":"engine-v2-frame-cantilever-renamed"' \
+      "$direct_directory/assembly-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_RENAMED"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[25000,-12000,5000,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/model-identity-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/model-identity-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/model-identity-edit-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/model-identity-edit-first$suffix" \
+      "$e2e_root/model-identity-edit-second$suffix" \
+      > "$e2e_root/model-identity-edit-$diff_label-diff.txt"
+    cmp "$e2e_root/model-identity-edit-first$suffix.stdout.json" \
+      "$e2e_root/model-identity-edit-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/model-identity-edit-first-validation.json" \
+    "$e2e_root/model-identity-edit-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed model identity edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local mismatch_destination="$e2e_root/model-identity-edit-mismatch-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-model-identity "$source_model" \
+    --model-id engine-v2-other --new-model-id engine-v2-renamed \
+    --output-dir "$mismatch_destination" \
+    > "$e2e_root/model-identity-edit-mismatch-rejected.stdout.json"; then
+    echo "installed model identity edit accepted a mismatched source identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_model_identity_source_mismatch' \
+    "$e2e_root/model-identity-edit-mismatch-rejected.stdout.json"
+  test ! -e "$mismatch_destination"
+
+  local no_op_destination="$e2e_root/model-identity-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-model-identity "$source_model" \
+    --model-id engine-v2-frame-cantilever \
+    --new-model-id engine-v2-frame-cantilever \
+    --output-dir "$no_op_destination" \
+    > "$e2e_root/model-identity-edit-no-op-rejected.stdout.json"; then
+    echo "installed model identity edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/model-identity-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/model-identity-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-model-identity "$source_model" \
+    --model-id engine-v2-frame-cantilever --new-model-id 1-invalid \
+    --output-dir "$invalid_destination" \
+    > "$e2e_root/model-identity-edit-invalid-rejected.stdout.json"; then
+    echo "installed model identity edit accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_model_identity_replacement_invalid' \
+    "$e2e_root/model-identity-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-model-identity "$source_model" \
+    --model-id engine-v2-frame-cantilever \
+    --new-model-id engine-v2-frame-cantilever-renamed \
+    --output-dir "$e2e_root/model-identity-edit-first" \
+    > "$e2e_root/model-identity-edit-existing-rejected.stdout.json"; then
+    echo "installed model identity edit replaced an existing destination" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_stage_destination_exists' \
+    "$e2e_root/model-identity-edit-existing-rejected.stdout.json"
+}
+exercise_model_identity_edit_surface
+
 exercise_direct_linear_load_combination_factor_edit_surface() {
   local source_model="$e2e_root/direct-linear-load-combination-first/model-ir.json"
   local source_before_hash
@@ -8392,6 +8565,15 @@ linear_load_combination_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/li
 linear_load_combination_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
 linear_load_combination_identity_edit_recovery_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 linear_load_combination_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
+model_identity_edit_model_hash="$(sha256sum "$e2e_root/model-identity-edit-first/model-ir.json" | awk '{print $1}')"
+model_identity_edit_receipt_hash="$(sha256sum "$e2e_root/model-identity-edit-first/edit-receipt.json" | awk '{print $1}')"
+model_identity_edit_request_receipt_hash="$(sha256sum "$e2e_root/model-identity-edit-first-request/request-receipt.json" | awk '{print $1}')"
+model_identity_edit_request_hash="$(sha256sum "$e2e_root/model-identity-edit-first-request/analysis-request.json" | awk '{print $1}')"
+model_identity_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/model-identity-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+model_identity_edit_checkpoint_hash="$(sha256sum "$e2e_root/model-identity-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+model_identity_edit_result_ir_hash="$(sha256sum "$e2e_root/model-identity-edit-first-direct/result-ir.json" | awk '{print $1}')"
+model_identity_edit_recovery_hash="$(sha256sum "$e2e_root/model-identity-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+model_identity_edit_report_ir_hash="$(sha256sum "$e2e_root/model-identity-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -8912,6 +9094,10 @@ v74_receipt_json="${v73_receipt_json/structural-native-distribution-e2e.v73/stru
 linear_load_combination_identity_edit_receipt_fields="\"workbench_linear_load_combination_identity_edit_surface_passed\":true,\"workbench_linear_load_combination_identity_edit_model_sha256\":\"sha256:$linear_load_combination_identity_edit_model_hash\",\"workbench_linear_load_combination_identity_edit_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_receipt_hash\",\"workbench_linear_load_combination_identity_edit_request_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_request_receipt_hash\",\"workbench_linear_load_combination_identity_edit_request_sha256\":\"sha256:$linear_load_combination_identity_edit_request_hash\",\"workbench_linear_load_combination_identity_edit_assembly_receipt_sha256\":\"sha256:$linear_load_combination_identity_edit_assembly_receipt_hash\",\"workbench_linear_load_combination_identity_edit_checkpoint_sha256\":\"sha256:$linear_load_combination_identity_edit_checkpoint_hash\",\"workbench_linear_load_combination_identity_edit_result_ir_sha256\":\"sha256:$linear_load_combination_identity_edit_result_ir_hash\",\"workbench_linear_load_combination_identity_edit_recovery_sha256\":\"sha256:$linear_load_combination_identity_edit_recovery_hash\",\"workbench_linear_load_combination_identity_edit_report_ir_sha256\":\"sha256:$linear_load_combination_identity_edit_report_ir_hash\",\"workbench_linear_load_combination_identity_edit_restart_passed\":true,"
 v74_receipt_json="${v74_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v74_receipt_json" > "$temporary_receipt"
+v75_receipt_json="${v74_receipt_json/structural-native-distribution-e2e.v74/structural-native-distribution-e2e.v75}"
+model_identity_edit_receipt_fields="\"workbench_model_identity_edit_surface_passed\":true,\"workbench_model_identity_edit_model_sha256\":\"sha256:$model_identity_edit_model_hash\",\"workbench_model_identity_edit_receipt_sha256\":\"sha256:$model_identity_edit_receipt_hash\",\"workbench_model_identity_edit_request_receipt_sha256\":\"sha256:$model_identity_edit_request_receipt_hash\",\"workbench_model_identity_edit_request_sha256\":\"sha256:$model_identity_edit_request_hash\",\"workbench_model_identity_edit_assembly_receipt_sha256\":\"sha256:$model_identity_edit_assembly_receipt_hash\",\"workbench_model_identity_edit_checkpoint_sha256\":\"sha256:$model_identity_edit_checkpoint_hash\",\"workbench_model_identity_edit_result_ir_sha256\":\"sha256:$model_identity_edit_result_ir_hash\",\"workbench_model_identity_edit_recovery_sha256\":\"sha256:$model_identity_edit_recovery_hash\",\"workbench_model_identity_edit_report_ir_sha256\":\"sha256:$model_identity_edit_report_ir_hash\",\"workbench_model_identity_edit_restart_passed\":true,"
+v75_receipt_json="${v75_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_identity_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v75_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
