@@ -55,6 +55,12 @@ The separate `model-edit-linear-load-pattern-identity` command changes only one 
 `linear_static` pattern's stable ID. It preserves the full pattern contents and refuses
 load-combination, construction-stage, unsupported-feature, or round-trip ownership without
 cascade; see `docs/native/modelir-linear-load-pattern-identity-edit-v1.md`.
+The separate `model-edit-linear-load-pattern-identity-cascade` command changes one referenced
+`linear_static` pattern's stable ID and atomically rewrites typed load-combination, construction-
+stage and direct load-pattern round-trip references. It preserves the complete pattern contents,
+degrades exact direct mappings to approximated, rejects unsupported-feature ownership and
+unreferenced patterns, then C++-revalidates the edited snapshot. See
+`docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. The separate `model-edit-constraint-target` command
 changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves

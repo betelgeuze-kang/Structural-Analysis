@@ -1154,6 +1154,24 @@ fn run_linear_load_pattern_identity_edit(
     ])
 }
 
+fn run_linear_load_pattern_identity_cascade_edit(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    replacement_load_pattern_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-load-pattern-identity-cascade"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--new-load-pattern"),
+        text(replacement_load_pattern_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_add(
     source: &Path,
     destination: &Path,
@@ -8613,6 +8631,379 @@ fn linear_load_pattern_identity_edit_is_deterministic_fail_closed_and_cpu_execut
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_pattern_identity_cascade_edit_is_atomic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base_bytes = std::fs::read(&base).expect("load-pattern cascade base bytes");
+    let mut source_model = validate_model_bytes(&base_bytes)
+        .expect("C++-validated load-pattern cascade base")
+        .snapshot
+        .value()
+        .clone();
+    source_model["load_combinations"] = serde_json::json!([{
+        "id": "COMBO_PATTERN_REF",
+        "index": 0,
+        "combination_type": "linear",
+        "terms": [
+            {"ref_kind": "load_pattern", "ref_id": "LC_WEAK", "factor": 1.0},
+            {"ref_kind": "load_pattern", "ref_id": "LC_AXIAL", "factor": 0.25}
+        ],
+        "source_id": null,
+        "extensions": {"structural-native:fixture": "load-pattern-cascade-combination"}
+    }]);
+    source_model["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:LC_WEAK",
+        "entity_kind": "load_pattern",
+        "model_ir_entity_id": "LC_WEAK",
+        "mapping_status": "canonicalized",
+        "extensions": {"structural-native:fixture": "load-pattern-cascade-map"}
+    }]);
+    let source_bytes = canonicalize_model_ir_v2(&source_model)
+        .expect("canonical load-pattern cascade source")
+        .into_bytes();
+    let source_validation = validate_model_bytes(&source_bytes)
+        .expect("C++-validated referenced load-pattern cascade source");
+    assert!(source_validation.report.contract_valid);
+    assert!(source_validation.report.semantics_valid);
+    assert!(source_validation.report.analysis_ready);
+    let source = temporary.0.join("load-pattern-cascade-source.json");
+    std::fs::write(&source, &source_bytes).expect("write load-pattern cascade source");
+
+    let first = temporary.0.join("load-pattern-cascade-first");
+    let second = temporary.0.join("load-pattern-cascade-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_pattern_identity_cascade_edit(
+            &source,
+            destination,
+            "LC_WEAK",
+            "LC_WEAK_LINKED",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published load-pattern cascade receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first load-pattern cascade artifact"),
+            std::fs::read(second.join(artifact)).expect("second load-pattern cascade artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged load-pattern cascade source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("load-pattern identity-cascaded ModelIR");
+    let edited =
+        parse_model_ir_v2(&edited_bytes).expect("strict load-pattern identity-cascaded ModelIR");
+    let validation = validate_model_bytes(&edited_bytes)
+        .expect("C++-validated load-pattern identity-cascaded ModelIR");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(edited.value()["load_patterns"][1]["id"], "LC_WEAK_LINKED");
+    for key in [
+        "index",
+        "analysis_type",
+        "self_weight",
+        "nodal_loads",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(
+            edited.value()["load_patterns"][1][key],
+            source_model["load_patterns"][1][key]
+        );
+    }
+    assert_eq!(
+        edited.value()["load_combinations"][0]["terms"][0]["ref_id"],
+        "LC_WEAK_LINKED"
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0]["terms"][1],
+        source_model["load_combinations"][0]["terms"][1]
+    );
+    assert_eq!(
+        edited.value()["construction_stages"],
+        source_model["construction_stages"]
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["model_ir_entity_id"],
+        "LC_WEAK_LINKED"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["extensions"],
+        source_model["roundtrip_map"][0]["extensions"]
+    );
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "time_functions",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-load-pattern-identity-cascade.v2")
+        .expect("load-pattern cascade provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "linear_load_pattern_identity_cascade_edit"
+    );
+    assert_eq!(extension["source_load_pattern_id"], "LC_WEAK");
+    assert_eq!(extension["replacement_load_pattern_id"], "LC_WEAK_LINKED");
+    assert_eq!(extension["load_pattern_index"], 1);
+    assert_eq!(extension["analysis_type"], "linear_static");
+    assert_eq!(extension["load_combination_reference_count"], 1);
+    assert_eq!(extension["construction_stage_reference_count"], 0);
+    assert_eq!(extension["roundtrip_reference_count"], 1);
+    assert_eq!(extension["typed_reference_cascade_verified"], true);
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("load-pattern cascade receipt"),
+    )
+    .expect("load-pattern cascade receipt JSON");
+    assert_eq!(
+        receipt["operation"],
+        "linear_load_pattern_identity_cascade_edit"
+    );
+    assert_eq!(receipt["source_load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["replacement_load_pattern_id"], "LC_WEAK_LINKED");
+    assert_eq!(receipt["load_pattern_index"], 1);
+    assert_eq!(receipt["load_combination_reference_count"], 1);
+    assert_eq!(receipt["construction_stage_reference_count"], 0);
+    assert_eq!(receipt["roundtrip_reference_count"], 1);
+    assert_eq!(receipt["typed_reference_cascade_verified"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let mut staged_model = source_model.clone();
+    staged_model["load_combinations"] = serde_json::json!([]);
+    staged_model["construction_stages"] = serde_json::json!([{
+        "id": "STAGE_PATTERN_REF",
+        "index": 0,
+        "active_element_ids": ["E1"],
+        "active_constraint_ids": ["BC1"],
+        "load_pattern_ids": ["LC_WEAK"],
+        "extensions": {"structural-native:fixture": "load-pattern-cascade-stage"}
+    }]);
+    let staged_source = temporary.0.join("load-pattern-cascade-stage-source.json");
+    std::fs::write(
+        &staged_source,
+        canonicalize_model_ir_v2(&staged_model)
+            .expect("canonical staged load-pattern source")
+            .as_bytes(),
+    )
+    .expect("write staged load-pattern cascade source");
+    let staged_output = temporary.0.join("load-pattern-cascade-stage-output");
+    assert_success(&run_linear_load_pattern_identity_cascade_edit(
+        &staged_source,
+        &staged_output,
+        "LC_WEAK",
+        "LC_WEAK_LINKED",
+    ));
+    let staged_edited_bytes = std::fs::read(staged_output.join("model-ir.json"))
+        .expect("staged load-pattern cascade model");
+    let staged_edited = parse_model_ir_v2(&staged_edited_bytes)
+        .expect("strict staged load-pattern identity-cascaded ModelIR");
+    let staged_validation = validate_model_bytes(&staged_edited_bytes)
+        .expect("C++-validated staged load-pattern identity-cascaded ModelIR");
+    assert!(staged_validation.report.contract_valid);
+    assert!(staged_validation.report.semantics_valid);
+    assert_eq!(
+        staged_edited.value()["construction_stages"][0]["load_pattern_ids"],
+        serde_json::json!(["LC_WEAK_LINKED"])
+    );
+    let staged_receipt: Value = serde_json::from_slice(
+        &std::fs::read(staged_output.join("edit-receipt.json"))
+            .expect("staged load-pattern cascade receipt"),
+    )
+    .expect("staged load-pattern cascade receipt JSON");
+    assert_eq!(staged_receipt["load_combination_reference_count"], 0);
+    assert_eq!(staged_receipt["construction_stage_reference_count"], 1);
+    assert_eq!(staged_receipt["roundtrip_reference_count"], 1);
+
+    for (name, source_id, replacement_id, code) in [
+        (
+            "missing",
+            "LC404",
+            "LC_NEW",
+            "workbench_model_edit_linear_load_pattern_identity_pattern_missing",
+        ),
+        (
+            "collision",
+            "LC_WEAK",
+            "LC_AXIAL",
+            "workbench_model_edit_linear_load_pattern_identity_replacement_exists",
+        ),
+        (
+            "no-op",
+            "LC_WEAK",
+            "LC_WEAK",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "invalid",
+            "LC_WEAK",
+            "1_INVALID",
+            "workbench_model_edit_linear_load_pattern_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("load-pattern-cascade-{name}"));
+        let rejected = run_linear_load_pattern_identity_cascade_edit(
+            &source,
+            &destination,
+            source_id,
+            replacement_id,
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let mut orphan = source_model.clone();
+    orphan["load_combinations"] = serde_json::json!([]);
+    orphan["construction_stages"] = serde_json::json!([]);
+    let orphan_source = temporary.0.join("load-pattern-cascade-orphan-source.json");
+    std::fs::write(
+        &orphan_source,
+        canonicalize_model_ir_v2(&orphan)
+            .expect("canonical orphan load-pattern source")
+            .as_bytes(),
+    )
+    .expect("write orphan load-pattern cascade source");
+    let orphan_destination = temporary.0.join("load-pattern-cascade-orphan-output");
+    let orphan_rejection = run_linear_load_pattern_identity_cascade_edit(
+        &orphan_source,
+        &orphan_destination,
+        "LC_WEAK",
+        "LC_WEAK_LINKED",
+    );
+    assert_eq!(orphan_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&orphan_rejection.stdout)
+        .contains("workbench_model_edit_linear_load_pattern_identity_cascade_unreferenced"));
+    assert!(!orphan_destination.exists());
+
+    for (name, owned_id) in [
+        ("source-owned", "LC_WEAK"),
+        ("replacement-owned", "LC_WEAK_LINKED"),
+    ] {
+        let mut owned = source_model.clone();
+        owned["unsupported_features"] = serde_json::json!([{
+            "feature_id": format!("feature.load-pattern-cascade-{name}"),
+            "kind": "unsupported_solver_feature",
+            "source_entity_id": owned_id,
+            "disposition": "blocked",
+            "blocking": true,
+            "detail": "Load-pattern identity remains externally owned.",
+            "extensions": {}
+        }]);
+        let owned_path = temporary
+            .0
+            .join(format!("load-pattern-cascade-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned load-pattern cascade source")
+                .as_bytes(),
+        )
+        .expect("write owned load-pattern cascade source");
+        let destination = temporary
+            .0
+            .join(format!("load-pattern-cascade-{name}-output"));
+        let rejected = run_linear_load_pattern_identity_cascade_edit(
+            &owned_path,
+            &destination,
+            "LC_WEAK",
+            "LC_WEAK_LINKED",
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(
+            "workbench_model_edit_linear_load_pattern_identity_cascade_unsupported_feature_owned"
+        ));
+        assert!(!destination.exists());
+    }
+
+    let existing =
+        run_linear_load_pattern_identity_cascade_edit(&source, &first, "LC_WEAK", "LC_WEAK_LINKED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("load-pattern-cascade-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "load-pattern-cascade-c5",
+        "COMBO_PATTERN_REF",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("load-pattern cascade request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("load-pattern cascade direct CPU execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("load-pattern cascade direct recovery"),
+    )
+    .expect("load-pattern cascade recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("load-pattern cascade initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("load-pattern cascade resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
     );
 }
 

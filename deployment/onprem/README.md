@@ -18,6 +18,7 @@ absent from the runtime image.
   cascade, `model-edit-frame-section-identity-cascade` typed section-reference cascade,
   `model-edit-linear-material-identity-cascade` typed material-reference cascade,
   `model-edit-truss-section-identity-cascade` typed truss-section-reference cascade and
+  `model-edit-linear-load-pattern-identity-cascade` typed pattern-reference cascade, plus
   `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
@@ -194,6 +195,9 @@ structural-workbench model-edit-nodal-load /workspace/model.json \
 structural-workbench model-edit-nodal-load-target /workspace/model.json \
   --load-pattern LC_WEAK --load L_WEAK_N2 --node N3 \
   --output-dir /workspace/retargeted-load-model
+structural-workbench model-edit-linear-load-pattern-identity-cascade /workspace/model.json \
+  --load-pattern LC_WEAK --new-load-pattern LC_WEAK_LINKED \
+  --output-dir /workspace/renamed-referenced-load-pattern-model
 structural-workbench model-edit-constraint-value /workspace/model.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir /workspace/edited-constraint-model

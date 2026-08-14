@@ -207,6 +207,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-edit-frame-element-properties",
             "model-edit-truss-section",
             "model-edit-truss-section-identity-cascade",
+            "model-edit-linear-load-pattern-identity-cascade",
             "model-edit-truss-element-properties",
             "model-edit-element-connectivity",
             "model-add-frame3d-member",
@@ -256,6 +257,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v80",
+            "model-edit-linear-load-pattern-identity-cascade",
+            "LC_WEAK_LINKED",
             "Distribution E2E v79",
             "model-edit-truss-section-identity-cascade",
             "T1_LINKED",
@@ -1030,6 +1034,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_truss_section_identity_cascade_edit_recovery_sha256",
         "workbench_truss_section_identity_cascade_edit_report_ir_sha256",
         "workbench_truss_section_identity_cascade_edit_restart_passed",
+        "exercise_linear_load_pattern_identity_cascade_edit_surface",
+        "model-edit-linear-load-pattern-identity-cascade",
+        "structural-native:model-edit-linear-load-pattern-identity-cascade.v2",
+        "workbench_linear_load_pattern_identity_cascade_edit_surface_passed",
+        "workbench_linear_load_pattern_identity_cascade_edit_model_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_receipt_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_request_receipt_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_request_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_assembly_receipt_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_checkpoint_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_result_ir_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_recovery_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_report_ir_sha256",
+        "workbench_linear_load_pattern_identity_cascade_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1232,6 +1250,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v80",
+            "V80_LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_KEYS",
+            "workbench_linear_load_pattern_identity_cascade_edit_surface_passed",
+            "workbench_linear_load_pattern_identity_cascade_edit_receipt_sha256",
+            "workbench_linear_load_pattern_identity_cascade_edit_request_receipt_sha256",
+            "workbench_linear_load_pattern_identity_cascade_edit_recovery_sha256",
+            "workbench_linear_load_pattern_identity_cascade_edit_restart_passed",
             "structural-native-distribution-e2e.v79",
             "V79_TRUSS_SECTION_IDENTITY_CASCADE_EDIT_KEYS",
             "workbench_truss_section_identity_cascade_edit_surface_passed",
@@ -2085,6 +2110,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "structural-native:model-edit-truss-section-identity-cascade.v2",
             "truss_section_identity_cascade_edit",
             "append-only v79",
+            "[1,2]",
+            "[0,12,15]",
+            "[6,7,8,9,10,11]",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    load_pattern_identity_cascade_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md"),
+        text=load_pattern_identity_cascade_doc,
+        tokens=(
+            "model-edit-linear-load-pattern-identity-cascade",
+            "single C ABI into C++ semantic",
+            "structural-native:model-edit-linear-load-pattern-identity-cascade.v2",
+            "linear_load_pattern_identity_cascade_edit",
+            "append-only v80",
             "[1,2]",
             "[0,12,15]",
             "[6,7,8,9,10,11]",
@@ -3367,6 +3417,52 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in truss_section_identity_cascade_claim:
                 blockers.append(
                     "modelir_truss_section_identity_cascade_edit_capability_"
+                    f"claim_missing:{token}"
+                )
+
+    load_pattern_identity_cascade_capability = (
+        capabilities.get("modelir_linear_load_pattern_identity_cascade_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(load_pattern_identity_cascade_capability, dict):
+        blockers.append(
+            "modelir_linear_load_pattern_identity_cascade_edit_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if load_pattern_identity_cascade_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_linear_load_pattern_identity_cascade_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        load_pattern_identity_cascade_claim = str(
+            load_pattern_identity_cascade_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing referenced linear_static pattern ID",
+            "atomically updates every typed load-combination",
+            "construction-stage load_pattern_ids",
+            "direct load_pattern round-trip model_ir_entity_id",
+            "exact or canonicalized direct mappings degrade to approximated",
+            "unsupported-feature ownership of either identity",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v80 E2E",
+            "LC_WEAK_LINKED",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "combined active load [25000,-12000,5000,0,0,0]",
+            "typed frame-plus-truss recovery [1,2] with offsets [0,12,15]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in load_pattern_identity_cascade_claim:
+                blockers.append(
+                    "modelir_linear_load_pattern_identity_cascade_edit_capability_"
                     f"claim_missing:{token}"
                 )
 

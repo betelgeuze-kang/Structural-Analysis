@@ -20,6 +20,8 @@ round-trip reference cascade, `model-edit-nodal-load` existing-load component,
 `model-edit-nodal-load-target` existing-load target-node,
 `model-edit-nodal-load-identity` existing-load stable-identity,
 `model-edit-linear-load-pattern-identity` unreferenced linear-pattern stable-identity,
+`model-edit-linear-load-pattern-identity-cascade` typed combination/stage/pattern-round-trip
+reference cascade,
 `model-edit-constraint-target` existing-fixed-constraint target-node and
 `model-edit-constraint-value` existing-restrained-DOF commands, plus
 `model-delete-fixed-constraint-dof` single-restraint deletion and the closed
@@ -132,7 +134,13 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v79 proves repeated truss-section-identity-cascade-edited/
+assembly preflight. Distribution E2E v80 proves repeated load-pattern-identity-cascade-edited/
+request/artifact bytes and retains every v79 assertion while replacing referenced `LC_WEAK` with
+`LC_WEAK_LINKED` through `model-edit-linear-load-pattern-identity-cascade`. It atomically updates
+the typed term inside retained `COMBO_RENAMED`, rejects malformed, no-op, colliding and unreferenced
+identities, and proves exact frame-plus-truss recovery `[1,2]`, offsets `[0,12,15]`, active DOFs
+`[6,7,8,9,10,11]`, unchanged combined active load `[25000,-12000,5000,0,0,0]`, byte-identical
+initialized-checkpoint restart and fallback 0. Distribution E2E v79 proves repeated truss-section-identity-cascade-edited/
 request/artifact bytes and retains every v78 assertion while authoring one referenced `T1` truss
 section/member/fixed leaf and replacing it with `T1_LINKED` through
 `model-edit-truss-section-identity-cascade`. It atomically updates one typed element reference,

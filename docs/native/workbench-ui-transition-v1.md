@@ -76,6 +76,18 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical
   initialized-checkpoint restart. Pattern content editing, nonlinear patterns, reference cascades
   and visual dragging remain open.
+- `model-edit-linear-load-pattern-identity-cascade`: deterministic replacement of one referenced
+  `linear_static` pattern identity with a distinct unique ModelIR stable ID. Rust atomically
+  rewrites every typed load-combination term, construction-stage pattern entry and direct pattern
+  round-trip ownership, degrades exact or canonicalized direct mappings to approximated, and
+  preserves the pattern index, analysis type, self-weight, ordered nodal loads, source identity,
+  extensions and unrelated rows. Installed E2E v80 replaces `LC_WEAK` with `LC_WEAK_LINKED`
+  inside `COMBO_RENAMED` and proves frame-plus-truss recovery types `[1,2]`,
+  offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+  `[25000,-12000,5000,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. A
+  separate focused fixture C++-revalidates construction-stage cascade because the linear reference
+  runtime intentionally refuses stage-bearing execution. Untyped extension and unsupported-
+  feature cascades, nonlinear patterns and visual manipulation remain open.
 - `model-edit-constraint-target`: deterministic replacement of one existing `fixed_dofs`
   constraint's target with a distinct existing node. Rust preserves identity, index, type, DOFs,
   prescribed values, source identity, extensions and unrelated rows; rejects any target-node DOF
