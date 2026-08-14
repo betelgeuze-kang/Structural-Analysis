@@ -60,6 +60,11 @@ absent from the runtime image.
   nonzero factor to a neutral, extension-free, unreferenced two-through-63-term nested root while
   preserving every existing root term and descendant; installed v55 E2E proves bounded repeated-
   pattern consolidation, exact active load, restart parity and fallback 0.
+  `model-insert-nested-linear-load-combination-term` inserts one compatible typed reference and
+  finite nonzero factor at an explicit final index in the same bounded nested-root ownership
+  profile while preserving every existing root term's relative order and every descendant;
+  installed v60 E2E proves exact root order, consolidated active load, restart parity and fallback
+  0.
   `model-delete-nested-linear-load-combination-term` removes one existing typed root term from any
   position in a neutral, extension-free, unreferenced three-through-64-term nested root while
   preserving retained order and descendants and refusing direct degradation; the installed

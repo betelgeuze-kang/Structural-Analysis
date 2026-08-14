@@ -39,9 +39,7 @@ same flow by replacing `LC_WEAK` with `LC_AXIAL` in `COMBO_SERVICE`, proves exac
 append-only v51 distribution receipt.
 
 This is not general combination editing. Factor editing, bounded append-only direct term addition,
-single-term removal, direct term reorder and nested typed-reference replacement remain separate
-surfaces. Bulk permutation,
-explicit-position insertion is a separate bounded surface; nested insertion, descendant or
-downstream-referenced mutation,
-source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
-engineering acceptance and C6 remain open.
+explicit-position direct insertion, single-term removal, direct term reorder, nested typed-reference
+replacement and nested typed-root insertion remain separate surfaces. Bulk insertion or
+permutation, descendant or downstream-referenced mutation, source-format writeback, visual
+editing, arbitrary solver selection, approved HIP C2, engineering acceptance and C6 remain open.

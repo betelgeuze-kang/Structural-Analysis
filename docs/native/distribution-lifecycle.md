@@ -411,6 +411,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    `[25000,-12000,0,0,0,0]`, typed recovery, fallback 0 and byte-identical initialized
    checkpoint/restart output, then emits an append-only v58 receipt binding the edited ModelIR,
    edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
+74. inserts direct term `0.25 LC_AXIAL` at final index one between two retained terms, preserves all
+   existing factors and relative order, rejects duplicate, out-of-range and missing-pattern
+   requests, proves exact ordered terms and active load `[25000,-12000,5000,0,0,0]`, then emits an
+   append-only v59 receipt binding the edited ModelIR through ReportIR and restart authority.
+75. inserts typed nested-root term `0.1 LC_STRONG` at final index one, preserves every existing root
+   term and descendant, binds both complete expansions, rejects duplicate, out-of-range, missing,
+   cyclic and owned requests, proves exact ordered root terms
+   `[COMBO_SERVICE,LC_STRONG,LC_AXIAL]` and active load `[25000,-6000,1500,0,0,0]`, then emits an
+   append-only v60 receipt binding the edited ModelIR through ReportIR and restart authority.
    The receipt checker continues to accept frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
@@ -480,7 +489,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    linear-load-combination term reorder, source/target-index and order-only term binding, exact
    retained active-load, typed recovery and restart authority; and no pre-v59 receipt is installed
    bounded direct linear-load-combination explicit-index single-term insertion, requested-index and
-   source/edited order binding, exact active-load, typed recovery and restart authority.
+   source/edited order binding, exact active-load, typed recovery and restart authority; and no
+   pre-v60 receipt is installed bounded nested linear-load-combination explicit-index typed-root
+   insertion, source/edited expansion binding, exact active-load, typed recovery and restart
+   authority.
 
 The reference command is:
 

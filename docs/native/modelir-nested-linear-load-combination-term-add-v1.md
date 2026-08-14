@@ -49,6 +49,7 @@ the edited ModelIR, edit receipt, request receipt, analysis request, assembly re
 ResultIR, recovery and ReportIR.
 
 This is not general nested combination editing. Root factor and reference replacement, bounded
-root-term removal and root-term reorder are separate surfaces. Arbitrary-position insertion, bulk permutation, descendant or
-downstream-referenced mutation, source-format writeback, visual editing, arbitrary solver
-selection, approved HIP C2, engineering acceptance and C6 remain open.
+explicit-position root-term insertion, root-term removal and root-term reorder are separate
+surfaces. Bulk insertion or permutation, descendant or downstream-referenced mutation,
+source-format writeback, visual editing, arbitrary solver selection, approved HIP C2, engineering
+acceptance and C6 remain open.

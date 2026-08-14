@@ -114,7 +114,12 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v59 proves repeated edited/request/artifact bytes and retains
+assembly preflight. Distribution E2E v60 proves repeated edited/request/artifact bytes and retains
+all Distribution E2E v59 assertions, including explicit-index insertion of `0.1 LC_STRONG` between
+the existing nested-root terms, exact ordered root terms `[COMBO_SERVICE,LC_STRONG,LC_AXIAL]` and
+exact active load `[25000,-6000,1500,0,0,0]` through
+`model-insert-nested-linear-load-combination-term`. Distribution E2E v59 proves repeated
+edited/request/artifact bytes and retains
 all Distribution E2E v58 assertions, including explicit-index insertion of `0.25 LC_AXIAL` between
 the existing direct-combination terms, exact ordered terms `[LC_WEAK,LC_AXIAL,LC_STRONG]` and exact
 active load `[25000,-12000,5000,0,0,0]` through

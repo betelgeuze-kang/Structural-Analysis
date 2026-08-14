@@ -177,9 +177,9 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   order, rejects nested/owned/duplicate/64-term inputs, then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v53 proves exact active load
   `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Direct term reorder and explicit-position insertion are separate bounded surfaces;
-  nested insertion, downstream-referenced editing, HIP
-  parity and engineering acceptance remain open.
+  output. Direct term reorder, explicit-position direct insertion and nested typed-root insertion
+  are separate bounded surfaces; bulk insertion, downstream-referenced editing, HIP parity and
+  engineering acceptance remain open.
 - `model-insert-linear-load-combination-term`: deterministic insertion of one unique existing
   `linear_static` pattern and finite nonzero factor at an explicit final index in a neutral,
   extension-free, unreferenced two-through-63-term direct combination. Rust preserves every
@@ -210,8 +210,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   source and edited graphs must remain acyclic, root-inclusive depth-eight/64-leaf bounded and
   C++ valid. Installed E2E v55 proves repeated-pattern consolidation, exact active load
   `[25000,-6000,1500,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Root-term removal is a separate bounded surface; reorder, arbitrary-position insertion, descendant or downstream-root
-  mutation, HIP parity and engineering acceptance remain open.
+  output. Explicit-position insertion, root-term removal and reorder are separate bounded surfaces;
+  descendant or downstream-root mutation, HIP parity and engineering acceptance remain open.
+- `model-insert-nested-linear-load-combination-term`: deterministic insertion of one existing
+  compatible typed reference and finite nonzero factor at an explicit final index in a neutral,
+  extension-free, unreferenced two-through-63-term nested root. Rust preserves existing relative
+  order and every descendant; source and edited graphs remain acyclic, root-inclusive
+  depth-eight/64-leaf bounded and C++ valid. Installed E2E v60 proves exact ordered root terms
+  `[COMBO_SERVICE,LC_STRONG,LC_AXIAL]`, active load `[25000,-6000,1500,0,0,0]`, typed recovery,
+  fallback 0 and byte-identical checkpoint/restart output. Bulk insertion or permutation,
+  descendant or downstream-root mutation, HIP parity and engineering acceptance remain open.
 - `model-delete-nested-linear-load-combination-term`: deterministic removal of one existing typed
   root term from any position in a neutral, extension-free, unreferenced three-through-64-term
   nested root. Rust preserves every retained root term and descendant, requires at least one
@@ -244,7 +252,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   C++-revalidates before create-new publication. Installed E2E v51 proves exact active load
   `[120000,0,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
   Factor editing, bounded append-only term addition and nested reference replacement remain
-  separate; removal/reorder, arbitrary-position insertion, downstream-referenced editing, HIP
+  separate; removal/reorder and explicit-position insertion are separate bounded surfaces, while
+  downstream-referenced editing, HIP
   parity and engineering acceptance remain open.
 - `model-edit-nested-linear-load-combination-reference`: deterministic replacement of one typed
   root reference in a neutral, extension-free, unreferenced acyclic nested combination. Rust
@@ -252,8 +261,8 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   missing/incompatible/duplicate, cyclic and direct-degrading replacements; then strictly reparses
   and C++-revalidates before create-new publication. Installed E2E v52 proves exact active load
   `[0,-8000,2000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
-  Factor editing and bounded append-only root-term addition remain separate; root removal/reorder,
-  arbitrary-position insertion, descendant or downstream-root
+  Factor editing, bounded append-only root-term addition and explicit-position insertion remain
+  separate; root removal/reorder, descendant or downstream-root
   mutation, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
   `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at

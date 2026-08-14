@@ -38,6 +38,7 @@
       "model-insert-linear-load-combination-term",
       "model-delete-linear-load-combination-term",
       "model-add-nested-linear-load-combination-term",
+      "model-insert-nested-linear-load-combination-term",
       "model-edit-linear-load-combination-factor",
       "model-edit-linear-load-combination-reference",
       "model-edit-nested-linear-load-combination-factor",
@@ -437,6 +438,12 @@
     },
     {
       "feature": "bounded_cpp_revalidated_nested_linear_load_combination_term_add",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_cpp_revalidated_nested_linear_load_combination_term_insert",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false

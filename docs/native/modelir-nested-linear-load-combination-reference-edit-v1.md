@@ -45,7 +45,8 @@ checkpoint resume. The installed static and shared CPU package E2E creates `COMB
 preserving factor `0.25`, proves exact active load `[0,-8000,2000,0,0,0]` with an empty executable
 lookup path, and binds all artifacts in the append-only v52 distribution receipt.
 
-This is not general combination editing. Factor editing, append-only root-term addition, root-term
-removal and root-term reorder remain separate bounded surfaces. Arbitrary-position insertion, bulk permutation, descendant mutation, downstream-
-referenced root mutation, source-format writeback, visual editing, arbitrary solver selection,
-approved HIP C2, engineering acceptance and C6 remain open.
+This is not general combination editing. Factor editing, append-only root-term addition,
+explicit-position root-term insertion, root-term removal and root-term reorder remain separate
+bounded surfaces. Bulk insertion or permutation, descendant mutation, downstream-referenced root
+mutation, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
+engineering acceptance and C6 remain open.

@@ -1022,6 +1022,33 @@ fn run_nested_linear_load_combination_term_add(
     ])
 }
 
+fn run_nested_linear_load_combination_term_insert(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    reference_kind: &str,
+    reference_id: &str,
+    factor: &str,
+    target_index: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-insert-nested-linear-load-combination-term"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--ref-kind"),
+        text(reference_kind),
+        text("--ref-id"),
+        text(reference_id),
+        text("--factor"),
+        text(factor),
+        text("--at-index"),
+        text(target_index),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_nested_linear_load_combination_term_delete(
     source: &Path,
     destination: &Path,
@@ -7504,6 +7531,259 @@ fn nested_linear_load_combination_term_add_executes_and_restarts_without_fallbac
     assert!(!rejected.status.success());
     assert!(String::from_utf8_lossy(&rejected.stdout)
         .contains("workbench_model_add_nested_linear_load_combination_term_direct_unsupported"));
+    assert!(!direct_destination.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nested_linear_load_combination_term_insert_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base = temporary.0.join("nested-term-insert-base");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &base,
+        "COMBO_BASE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let nested = temporary.0.join("nested-term-insert-authored");
+    assert_success(&run_nested_linear_load_combination_add(
+        &base.join("model-ir.json"),
+        &nested,
+        "COMBO_NESTED",
+        &[
+            ["--combination-term", "COMBO_BASE", "0.5"],
+            ["--pattern-term", "LC_AXIAL", "0.25"],
+        ],
+    ));
+    let nested_path = nested.join("model-ir.json");
+    let nested_bytes = std::fs::read(&nested_path).expect("nested term-insert source");
+    let source_document =
+        parse_model_ir_v2(&nested_bytes).expect("strict nested term-insert source");
+    let first = temporary.0.join("nested-term-insert-first");
+    let second = temporary.0.join("nested-term-insert-second");
+    for destination in [&first, &second] {
+        let output = run_nested_linear_load_combination_term_insert(
+            &nested_path,
+            destination,
+            "COMBO_NESTED",
+            "load_pattern",
+            "LC_STRONG",
+            "0.1",
+            "1",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nested term-insert receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nested term-insert artifact"),
+            std::fs::read(second.join(artifact)).expect("second nested term-insert artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&nested_path).expect("unchanged nested term-insert source"),
+        nested_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("nested term-inserted ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict nested term-inserted ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated nested term insertion");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][1]["terms"],
+        serde_json::json!([
+            {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 0.1},
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0],
+        source_document.value()["load_combinations"][0]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-insert-nested-linear-load-combination-term.v1")
+        .expect("nested term-insert provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "nested_linear_load_combination_term_insert"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    );
+    assert_eq!(extension["load_combination_index"], 1);
+    assert_eq!(extension["reference_kind"], "load_pattern");
+    assert_eq!(extension["reference_id"], "LC_STRONG");
+    assert_eq!(extension["term_index"], 1);
+    assert_eq!(extension["source_term_count"], 2);
+    assert_eq!(extension["term_count"], 3);
+    assert_eq!(extension["factor"], 0.1);
+    assert_eq!(extension["source_combination_depth"], 2);
+    assert_eq!(extension["edited_combination_depth"], 2);
+    assert_eq!(extension["source_expanded_term_count"], 3);
+    assert_eq!(extension["edited_expanded_term_count"], 4);
+    assert_eq!(extension["source_expanded_pattern_count"], 3);
+    assert_eq!(extension["edited_expanded_pattern_count"], 3);
+    assert_eq!(
+        extension["source_terms"],
+        serde_json::json!([
+            {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+        ])
+    );
+    assert_eq!(
+        extension["edited_expanded_pattern_terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.15},
+            {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+        ])
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nested term-insert receipt"),
+    )
+    .expect("nested term-insert receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "nested_linear_load_combination_term_insert"
+    );
+    assert_eq!(edit_receipt["reference_kind"], "load_pattern");
+    assert_eq!(edit_receipt["reference_id"], "LC_STRONG");
+    assert_eq!(edit_receipt["term_index"], 1);
+    assert_eq!(edit_receipt["source_term_count"], 2);
+    assert_eq!(edit_receipt["term_count"], 3);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("nested-term-insert-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nested-term-insert-c5",
+        "COMBO_NESTED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nested term-insert request");
+    let request_receipt: Value = serde_json::from_slice(
+        &std::fs::read(request_directory.join("request-receipt.json"))
+            .expect("nested term-insert request receipt"),
+    )
+    .expect("nested term-insert request receipt JSON");
+    assert_eq!(
+        request_receipt["schema_version"],
+        "structural-native-model-linear-nested-combination-request-create-receipt.v3"
+    );
+    assert_eq!(request_receipt["combination_depth"], 2);
+    assert_eq!(request_receipt["expanded_term_count"], 4);
+    assert_eq!(request_receipt["expanded_pattern_count"], 3);
+
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("nested term-inserted direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nested term-insert recovery"),
+    )
+    .expect("nested term-insert recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_NESTED");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([25000, -6000, 1500, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("nested term-insert initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nested term-insert resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let rejected_cases = [
+        (
+            "duplicate",
+            "load_pattern",
+            "LC_AXIAL",
+            "1",
+            "workbench_model_insert_nested_linear_load_combination_term_reference_duplicate",
+        ),
+        (
+            "missing",
+            "load_pattern",
+            "LC_MISSING",
+            "1",
+            "workbench_model_insert_nested_linear_load_combination_term_pattern_missing",
+        ),
+        (
+            "range",
+            "load_pattern",
+            "LC_STRONG",
+            "3",
+            "workbench_model_insert_nested_linear_load_combination_term_target_index_invalid",
+        ),
+        (
+            "cycle",
+            "load_combination",
+            "COMBO_NESTED",
+            "1",
+            "workbench_model_linear_nested_combination_cycle",
+        ),
+    ];
+    for (label, reference_kind, reference_id, target_index, expected_code) in rejected_cases {
+        let destination = temporary
+            .0
+            .join(format!("nested-term-insert-{label}-rejected"));
+        let rejected = run_nested_linear_load_combination_term_insert(
+            &nested_path,
+            &destination,
+            "COMBO_NESTED",
+            reference_kind,
+            reference_id,
+            "0.1",
+            target_index,
+        );
+        assert!(!rejected.status.success(), "accepted {label} nested term");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "unexpected {label} error: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let direct_destination = temporary.0.join("nested-term-insert-direct-rejected");
+    let rejected = run_nested_linear_load_combination_term_insert(
+        &nested_path,
+        &direct_destination,
+        "COMBO_BASE",
+        "load_pattern",
+        "LC_AXIAL",
+        "0.1",
+        "1",
+    );
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_insert_nested_linear_load_combination_term_direct_unsupported"));
     assert!(!direct_destination.exists());
 }
 

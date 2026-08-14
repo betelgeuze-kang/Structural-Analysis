@@ -35,8 +35,8 @@ and Python/Node lookup count 0.
 This is not general combination editing. Direct pattern-reference replacement is a separate
 bounded surface documented in
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`. Append-only direct term
-addition, single-term removal and direct term reorder are other bounded surfaces; bulk permutation,
-explicit-position insertion and nested insertion are separate or open boundaries;
-downstream-referenced editing and nested edits beyond the separate bounded typed-root-factor
-surface, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
-engineering acceptance and C6 remain open.
+addition, explicit-position direct insertion, single-term removal, direct term reorder and bounded
+nested typed-root insertion are other separate surfaces. Bulk insertion or permutation,
+downstream-referenced editing and nested edits beyond those bounded typed-root surfaces,
+source-format writeback, visual editing, arbitrary solver selection, approved HIP C2, engineering
+acceptance and C6 remain open.

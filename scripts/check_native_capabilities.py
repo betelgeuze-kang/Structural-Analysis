@@ -63,6 +63,7 @@ EXPECTED_OWNERS = {
     "modelir_direct_linear_load_combination_deletion": "structural-workbench",
     "modelir_nested_linear_load_combination_authoring_execution": "structural-workbench",
     "modelir_nested_linear_load_combination_term_add": "structural-workbench",
+    "modelir_nested_linear_load_combination_term_insert": "structural-workbench",
     "modelir_nested_linear_load_combination_term_delete": "structural-workbench",
     "modelir_nested_linear_load_combination_term_reorder": "structural-workbench",
     "modelir_nested_linear_load_combination_factor_edit": "structural-workbench",

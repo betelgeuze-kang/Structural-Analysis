@@ -192,6 +192,17 @@ struct ModelAddNestedLinearLoadCombinationTermCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelInsertNestedLinearLoadCombinationTermCommand {
+    model: PathBuf,
+    load_combination_id: String,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: String,
+    factor: f64,
+    target_index: usize,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ModelDeleteNestedLinearLoadCombinationTermCommand {
     model: PathBuf,
@@ -525,6 +536,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("model-add-nested-linear-load-combination-term") => {
             parse_model_add_nested_linear_load_combination_term(arguments)
                 .and_then(|command| run_model_add_nested_linear_load_combination_term(&command))
+        }
+        Some("model-insert-nested-linear-load-combination-term") => {
+            parse_model_insert_nested_linear_load_combination_term(arguments)
+                .and_then(|command| run_model_insert_nested_linear_load_combination_term(&command))
         }
         Some("model-delete-nested-linear-load-combination-term") => {
             parse_model_delete_nested_linear_load_combination_term(arguments)
@@ -1061,6 +1076,22 @@ fn run_model_add_nested_linear_load_combination_term(
         command.reference_kind,
         &command.reference_id,
         command.factor,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_insert_nested_linear_load_combination_term(
+    command: &ModelInsertNestedLinearLoadCombinationTermCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_nested_linear_load_combination_term_insert(
+        &command.model,
+        &command.load_combination_id,
+        command.reference_kind,
+        &command.reference_id,
+        command.factor,
+        command.target_index,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -2275,6 +2306,65 @@ fn parse_model_add_nested_linear_load_combination_term(
         )?,
         factor,
         output_directory: PathBuf::from(&arguments[11]),
+    })
+}
+
+fn parse_model_insert_nested_linear_load_combination_term(
+    arguments: &[OsString],
+) -> Result<ModelInsertNestedLinearLoadCombinationTermCommand, WorkbenchError> {
+    if arguments.len() != 14
+        || arguments[2] != "--load-combination"
+        || arguments[4] != "--ref-kind"
+        || arguments[6] != "--ref-id"
+        || arguments[8] != "--factor"
+        || arguments[10] != "--at-index"
+        || arguments[12] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-insert-nested-linear-load-combination-term requires MODEL.json --load-combination ID --ref-kind load_pattern|load_combination --ref-id NEW-ID --factor NONZERO-F64 --at-index 0..63 --output-dir DIR",
+        ));
+    }
+    let reference_kind = if arguments[5] == "load_pattern" {
+        LinearLoadCombinationReferenceKindV1::LoadPattern
+    } else if arguments[5] == "load_combination" {
+        LinearLoadCombinationReferenceKindV1::LoadCombination
+    } else {
+        return Err(usage_error(
+            "model-insert-nested-linear-load-combination-term --ref-kind must be load_pattern or load_combination",
+        ));
+    };
+    let factor = parse_finite_edit_number(
+        &arguments[9],
+        "model-insert-nested-linear-load-combination-term factor",
+    )?;
+    if factor == 0.0 {
+        return Err(usage_error(
+            "model-insert-nested-linear-load-combination-term requires a non-zero factor",
+        ));
+    }
+    let target_index = arguments[11]
+        .to_str()
+        .and_then(|value| value.parse::<usize>().ok())
+        .filter(|value| *value < MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+        .ok_or_else(|| {
+            usage_error(
+                "model-insert-nested-linear-load-combination-term --at-index must be an integer between zero and 63",
+            )
+        })?;
+    Ok(ModelInsertNestedLinearLoadCombinationTermCommand {
+        model: PathBuf::from(&arguments[1]),
+        load_combination_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-insert-nested-linear-load-combination-term load-combination ID",
+        )?,
+        reference_kind,
+        reference_id: parse_bounded_edit_id(
+            &arguments[7],
+            "model-insert-nested-linear-load-combination-term new typed reference ID",
+        )?,
+        factor,
+        target_index,
+        output_directory: PathBuf::from(&arguments[13]),
     })
 }
 
@@ -3691,6 +3781,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
+        "\n  structural-workbench model-insert-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
@@ -3727,6 +3818,7 @@ mod tests {
         parse_model_edit_nested_linear_load_combination_reference, parse_model_edit_nodal_load,
         parse_model_edit_node, parse_model_edit_truss_element_properties,
         parse_model_edit_truss_section, parse_model_insert_direct_linear_load_combination_term,
+        parse_model_insert_nested_linear_load_combination_term,
         parse_model_reorder_direct_linear_load_combination_term,
         parse_model_reorder_nested_linear_load_combination_term, parse_model_view,
         parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
@@ -4383,6 +4475,65 @@ mod tests {
         let mut missing_reference = arguments;
         missing_reference[7] = OsString::new();
         assert!(parse_model_add_nested_linear_load_combination_term(&missing_reference).is_err());
+    }
+
+    #[test]
+    fn model_insert_nested_linear_load_combination_term_parser_is_typed_and_strict() {
+        let arguments = [
+            OsString::from("model-insert-nested-linear-load-combination-term"),
+            OsString::from("model.json"),
+            OsString::from("--load-combination"),
+            OsString::from("COMBO_NESTED"),
+            OsString::from("--ref-kind"),
+            OsString::from("load_pattern"),
+            OsString::from("--ref-id"),
+            OsString::from("LC_STRONG"),
+            OsString::from("--factor"),
+            OsString::from("0.1"),
+            OsString::from("--at-index"),
+            OsString::from("1"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_insert_nested_linear_load_combination_term(&arguments)
+            .expect("valid nested term-insert command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.load_combination_id, "COMBO_NESTED");
+        assert_eq!(
+            parsed.reference_kind,
+            LinearLoadCombinationReferenceKindV1::LoadPattern
+        );
+        assert_eq!(parsed.reference_id, "LC_STRONG");
+        assert_eq!(parsed.factor.to_bits(), 0.1_f64.to_bits());
+        assert_eq!(parsed.target_index, 1);
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut combination = arguments.clone();
+        combination[5] = OsString::from("load_combination");
+        combination[7] = OsString::from("COMBO_ALTERNATE");
+        combination[11] = OsString::from("63");
+        let parsed = parse_model_insert_nested_linear_load_combination_term(&combination)
+            .expect("valid nested combination term-insert command");
+        assert_eq!(
+            parsed.reference_kind,
+            LinearLoadCombinationReferenceKindV1::LoadCombination
+        );
+        assert_eq!(parsed.target_index, 63);
+        let mut invalid_kind = arguments.clone();
+        invalid_kind[5] = OsString::from("pattern");
+        assert!(parse_model_insert_nested_linear_load_combination_term(&invalid_kind).is_err());
+        let mut zero = arguments.clone();
+        zero[9] = OsString::from("-0");
+        assert!(parse_model_insert_nested_linear_load_combination_term(&zero).is_err());
+        let mut out_of_bounds = arguments.clone();
+        out_of_bounds[11] = OsString::from("64");
+        assert!(parse_model_insert_nested_linear_load_combination_term(&out_of_bounds).is_err());
+        let mut negative = arguments.clone();
+        negative[11] = OsString::from("-1");
+        assert!(parse_model_insert_nested_linear_load_combination_term(&negative).is_err());
+        let mut wrong_flag = arguments;
+        wrong_flag[10] = OsString::from("--index");
+        assert!(parse_model_insert_nested_linear_load_combination_term(&wrong_flag).is_err());
     }
 
     #[test]

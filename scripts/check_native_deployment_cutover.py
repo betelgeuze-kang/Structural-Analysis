@@ -247,6 +247,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v60",
+            "model-insert-nested-linear-load-combination-term",
+            "[COMBO_SERVICE,LC_STRONG,LC_AXIAL]",
             "Distribution E2E v59",
             "model-insert-linear-load-combination-term",
             "[LC_WEAK,LC_AXIAL,LC_STRONG]",
@@ -581,6 +584,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_nested_linear_load_combination_term_add_recovery_sha256",
         "workbench_nested_linear_load_combination_term_add_report_ir_sha256",
         "workbench_nested_linear_load_combination_term_add_restart_passed",
+        "exercise_nested_linear_load_combination_term_insert_surface",
+        "model-insert-nested-linear-load-combination-term",
+        "structural-native:model-insert-nested-linear-load-combination-term.v1",
+        "workbench_nested_linear_load_combination_term_insert_surface_passed",
+        "workbench_nested_linear_load_combination_term_insert_model_sha256",
+        "workbench_nested_linear_load_combination_term_insert_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_insert_request_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_insert_request_sha256",
+        "workbench_nested_linear_load_combination_term_insert_assembly_receipt_sha256",
+        "workbench_nested_linear_load_combination_term_insert_checkpoint_sha256",
+        "workbench_nested_linear_load_combination_term_insert_result_ir_sha256",
+        "workbench_nested_linear_load_combination_term_insert_recovery_sha256",
+        "workbench_nested_linear_load_combination_term_insert_report_ir_sha256",
+        "workbench_nested_linear_load_combination_term_insert_restart_passed",
         "exercise_nested_linear_load_combination_term_delete_surface",
         "model-delete-nested-linear-load-combination-term",
         "structural-native:model-delete-nested-linear-load-combination-term.v1",
@@ -883,6 +900,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v60",
+            "V60_NESTED_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS",
+            "workbench_nested_linear_load_combination_term_insert_surface_passed",
+            "workbench_nested_linear_load_combination_term_insert_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_insert_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_term_insert_recovery_sha256",
+            "workbench_nested_linear_load_combination_term_insert_restart_passed",
             "structural-native-distribution-e2e.v59",
             "V59_DIRECT_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS",
             "workbench_direct_linear_load_combination_term_insert_surface_passed",
@@ -1619,6 +1643,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    nested_linear_load_combination_term_insert_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-term-insert-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-term-insert-v1.md"
+        ),
+        text=nested_linear_load_combination_term_insert_doc,
+        tokens=(
+            "model-insert-nested-linear-load-combination-term",
+            "two through 63",
+            "root-inclusive depth at most eight",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-insert-nested-linear-load-combination-term.v1",
+            "nested_linear_load_combination_term_insert",
+            "append-only v60",
+            "[25000,-6000,1500,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
     nested_linear_load_combination_term_delete_doc = _text(
         root,
         Path("docs/native/modelir-nested-linear-load-combination-term-delete-v1.md"),
@@ -2092,6 +2141,48 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in nested_linear_load_combination_term_add_claim:
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_add_capability_"
+                    f"claim_missing:{token}"
+                )
+    nested_linear_load_combination_term_insert_capability = (
+        capabilities.get("modelir_nested_linear_load_combination_term_insert")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(nested_linear_load_combination_term_insert_capability, dict):
+        blockers.append(
+            "modelir_nested_linear_load_combination_term_insert_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if nested_linear_load_combination_term_insert_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_insert_capability_"
+                    f"field_invalid:{field}"
+                )
+        nested_linear_load_combination_term_insert_claim = str(
+            nested_linear_load_combination_term_insert_capability.get("claim", "")
+        )
+        for token in (
+            "inserts exactly one new explicitly typed load_pattern or load_combination term",
+            "two through 63 ordered unique typed terms",
+            "explicit final zero-based index from zero through the source root-term count",
+            "yielding three through 64 root terms",
+            "root-inclusive depth at most eight",
+            "at most 64 expanded leaf contributions",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v60 E2E",
+            "exact active load [25000,-6000,1500,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nested_linear_load_combination_term_insert_claim:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_term_insert_capability_"
                     f"claim_missing:{token}"
                 )
     nested_linear_load_combination_term_delete_capability = (
