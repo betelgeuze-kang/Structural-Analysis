@@ -15,7 +15,8 @@ browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
 provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component,
-`model-edit-nodal-load-target` existing-load target-node, `model-edit-constraint-target`
+`model-edit-nodal-load-target` existing-load target-node,
+`model-edit-nodal-load-identity` existing-load stable-identity, `model-edit-constraint-target`
 existing-fixed-constraint target-node and `model-edit-constraint-value` existing-restrained-DOF
 commands, plus `model-delete-fixed-constraint-dof` single-restraint deletion and the closed
 `model-add-fixed-constraint-dof` single-restraint addition plus
@@ -119,7 +120,13 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v66 proves repeated constraint-identity-edited/request/artifact
+assembly preflight. Distribution E2E v67 proves repeated nodal-load-identity-edited/request/artifact
+bytes and retains every v66 assertion while replacing `L_WEAK_N3` with `L_WEAK_N3_RENAMED` through
+`model-edit-nodal-load-identity`, preserving the containing pattern identity/index/analysis type and
+the load index/node/components/source identity/extensions, rejecting malformed, no-op and globally
+colliding identities without cascade, and proving unchanged exact active DOFs
+`[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, byte-identical initialized-checkpoint
+restart and fallback 0. Distribution E2E v66 proves repeated constraint-identity-edited/request/artifact
 bytes and retains every v65 assertion while replacing unreferenced `BC_N3` with
 `BC_N3_RENAMED` through `model-edit-fixed-constraint-identity`, preserving every non-identity
 constraint field and unrelated row, rejecting identity collisions and owned references without

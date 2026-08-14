@@ -47,6 +47,7 @@ EXPECTED_OWNERS = {
     "modelir_frame3d_leaf_deletion": "structural-workbench",
     "modelir_nodal_load_add": "structural-workbench",
     "modelir_nodal_load_target_edit": "structural-workbench",
+    "modelir_nodal_load_identity_edit": "structural-workbench",
     "modelir_fixed_constraint_target_edit": "structural-workbench",
     "modelir_fixed_constraint_dof_deletion": "structural-workbench",
     "modelir_fixed_constraint_dof_addition": "structural-workbench",

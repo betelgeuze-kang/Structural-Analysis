@@ -46,6 +46,8 @@ const TRUSS3D_LEAF_MEMBER_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-truss3d-leaf-member.v1";
 const NODAL_LOAD_TARGET_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-nodal-load-target.v1";
+const NODAL_LOAD_IDENTITY_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-nodal-load-identity.v1";
 const CONSTRAINT_TARGET_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-constraint-target.v1";
 const FIXED_CONSTRAINT_DOF_DELETE_EXTENSION_KEY: &str =
@@ -114,6 +116,7 @@ const NODE_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_contiguou
 const ORPHAN_NODE_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_orphan_node_deletion_with_two_nodes_retained_not_source_owned_extended_element_constraint_load_mapped_unsupported_feature_owned_cascade_reindexing_general_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_component_edit_not_load_creation_deletion_combination_property_constraint_solver_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_target_replacement_to_distinct_existing_node_with_identity_index_components_source_and_extensions_preserved_not_load_component_identity_pattern_creation_deletion_combination_constraint_topology_solver_visual_editing_engineering_acceptance_or_c6";
+const NODAL_LOAD_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_nodal_load_identity_replacement_to_distinct_globally_unique_stable_id_with_pattern_and_load_indices_analysis_type_node_components_source_extensions_and_unrelated_rows_preserved_without_unsupported_feature_cascade_and_with_pattern_roundtrip_degradation_not_target_component_pattern_creation_deletion_combination_constraint_topology_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_target_replacement_to_distinct_existing_node_without_overlapping_restrained_dofs_with_identity_index_type_dofs_prescribed_values_source_and_extensions_preserved_not_constraint_value_mask_identity_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_and_matching_explicit_prescribed_value_deletion_with_at_least_one_dof_retained_and_identity_index_type_node_source_extensions_preserved_not_dof_addition_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_unrestrained_dof_append_with_explicit_finite_prescribed_value_and_identity_index_type_node_existing_dof_order_values_source_extensions_preserved_without_same_node_overlap_not_dof_deletion_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
@@ -195,6 +198,13 @@ pub struct ModelNodalLoadEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded nodal-load target edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelNodalLoadTargetEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded nodal-load identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelNodalLoadIdentityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -661,6 +671,37 @@ pub fn publish_model_nodal_load_target_edit(
 ) -> Result<ModelNodalLoadTargetEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_nodal_load_target(&source, load_pattern_id, nodal_load_id, node_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one existing nodal-load identity and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// missing patterns or loads, no-op edits, unsupported-feature ownership, malformed retained
+/// fields, or publication failure.
+pub fn publish_model_nodal_load_identity_edit(
+    source_path: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    replacement_nodal_load_id: &str,
+    output_directory: &Path,
+) -> Result<ModelNodalLoadIdentityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_nodal_load_identity(
+        &source,
+        load_pattern_id,
+        nodal_load_id,
+        replacement_nodal_load_id,
+    )?;
     publish_new_directory(
         output_directory,
         &[
@@ -2381,6 +2422,121 @@ pub fn edit_model_nodal_load_target(
         "claim_boundary": NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelNodalLoadTargetEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RenamedNodalLoadV1 {
+    load_pattern_index: usize,
+    nodal_load_index: usize,
+    analysis_type: String,
+    node_id: String,
+    components_si: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Replace one existing nodal-load identity in memory.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing patterns or loads,
+/// no-op edits, unsupported-feature ownership, malformed retained fields, schema drift, or edited
+/// semantics rejected by C++.
+pub fn edit_model_nodal_load_identity(
+    source_bytes: &[u8],
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    replacement_nodal_load_id: &str,
+) -> Result<ModelNodalLoadIdentityEditOutcomeV1, WorkbenchError> {
+    validate_nodal_load_identity_edit_request(
+        source_bytes.len(),
+        load_pattern_id,
+        nodal_load_id,
+        replacement_nodal_load_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let renamed = replace_nodal_load_identity(
+        &mut edited,
+        load_pattern_id,
+        nodal_load_id,
+        replacement_nodal_load_id,
+    )?;
+    bind_nodal_load_identity_edit_provenance(
+        &mut edited,
+        load_pattern_id,
+        nodal_load_id,
+        replacement_nodal_load_id,
+        &renamed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "load_pattern", load_pattern_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the nodal-load identity-edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "nodal_load_identity_edit",
+        "model_id": edited_validation.report.model_id,
+        "load_pattern_id": load_pattern_id,
+        "load_pattern_index": renamed.load_pattern_index,
+        "analysis_type": renamed.analysis_type,
+        "source_nodal_load_id": nodal_load_id,
+        "replacement_nodal_load_id": replacement_nodal_load_id,
+        "nodal_load_index": renamed.nodal_load_index,
+        "node_id": renamed.node_id,
+        "retained_components_si": renamed.components_si,
+        "retained_source_id": renamed.retained_source_id,
+        "retained_extensions": renamed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NODAL_LOAD_IDENTITY_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelNodalLoadIdentityEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -7257,6 +7413,38 @@ fn validate_nodal_load_target_edit_request(
     validate_bounded_edit_identity(0, node_id, "replacement load target node")
 }
 
+fn validate_nodal_load_identity_edit_request(
+    source_length: usize,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    replacement_nodal_load_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_pattern_id, "load pattern")?;
+    validate_bounded_edit_identity(0, nodal_load_id, "nodal load")?;
+    validate_bounded_edit_identity(0, replacement_nodal_load_id, "replacement nodal load")?;
+    let replacement_bytes = replacement_nodal_load_id.as_bytes();
+    if !replacement_bytes
+        .first()
+        .is_some_and(u8::is_ascii_alphabetic)
+        || !replacement_bytes
+            .iter()
+            .skip(1)
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'.' | b':' | b'-'))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nodal_load_identity_replacement_invalid",
+            "replacement nodal-load identity must satisfy the ModelIR stable-ID grammar",
+        ));
+    }
+    if nodal_load_id == replacement_nodal_load_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement nodal-load identity is identical to the source identity",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_target_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -8275,6 +8463,126 @@ fn replace_nodal_load_target(
         nodal_load_index,
         analysis_type,
         previous_node_id,
+        components_si,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_nodal_load_identity(
+    model: &mut Value,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    replacement_nodal_load_id: &str,
+) -> Result<RenamedNodalLoadV1, WorkbenchError> {
+    if nodal_load_id == replacement_nodal_load_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement nodal-load identity is identical to the source identity",
+        ));
+    }
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.iter().any(|pattern| {
+        pattern
+            .get("nodal_loads")
+            .and_then(Value::as_array)
+            .is_some_and(|loads| {
+                loads.iter().any(|load| {
+                    load.get("id").and_then(Value::as_str) == Some(replacement_nodal_load_id)
+                })
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nodal_load_identity_replacement_exists",
+            format!("ModelIR already has a nodal load with identity {replacement_nodal_load_id}"),
+        ));
+    }
+    let load_pattern_index = load_patterns
+        .iter()
+        .position(|pattern| pattern.get("id").and_then(Value::as_str) == Some(load_pattern_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_nodal_load_identity_pattern_missing",
+                format!("ModelIR has no load pattern with identity {load_pattern_id}"),
+            )
+        })?;
+    let load_pattern = &load_patterns[load_pattern_index];
+    if load_pattern.get("index").and_then(Value::as_u64) != u64::try_from(load_pattern_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nodal_load_identity_pattern_index_mismatch",
+            "identity-edited nodal-load pattern index must match its contiguous position",
+        ));
+    }
+    let analysis_type = load_pattern
+        .get("analysis_type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("load pattern analysis_type"))?
+        .to_owned();
+    let nodal_loads = load_pattern
+        .get("nodal_loads")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load pattern nodal_loads"))?;
+    let nodal_load_index = nodal_loads
+        .iter()
+        .position(|load| load.get("id").and_then(Value::as_str) == Some(nodal_load_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_nodal_load_identity_load_missing",
+                format!(
+                    "load pattern {load_pattern_id} has no nodal load with identity {nodal_load_id}"
+                ),
+            )
+        })?;
+    let nodal_load = &nodal_loads[nodal_load_index];
+    if nodal_load.get("index").and_then(Value::as_u64) != u64::try_from(nodal_load_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nodal_load_identity_load_index_mismatch",
+            "identity-edited nodal-load index must match its contiguous pattern-local position",
+        ));
+    }
+    let node_id = nodal_load
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("nodal load node_id"))?
+        .to_owned();
+    let (components_si, retained_source_id, retained_extensions) =
+        retained_nodal_load_fields(nodal_load)?;
+
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        matches!(
+            feature.get("source_entity_id").and_then(Value::as_str),
+            Some(id) if id == nodal_load_id || id == replacement_nodal_load_id
+        )
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nodal_load_identity_unsupported_feature_owned",
+            "nodal-load identity editing refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+
+    model
+        .get_mut("load_patterns")
+        .and_then(Value::as_array_mut)
+        .and_then(|patterns| patterns.get_mut(load_pattern_index))
+        .and_then(|pattern| pattern.get_mut("nodal_loads"))
+        .and_then(Value::as_array_mut)
+        .and_then(|loads| loads.get_mut(nodal_load_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("nodal load"))?
+        .insert("id".to_owned(), json!(replacement_nodal_load_id));
+    Ok(RenamedNodalLoadV1 {
+        load_pattern_index,
+        nodal_load_index,
+        analysis_type,
+        node_id,
         components_si,
         retained_source_id,
         retained_extensions,
@@ -15041,6 +15349,41 @@ fn bind_nodal_load_target_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_nodal_load_identity_edit_provenance(
+    model: &mut Value,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    replacement_nodal_load_id: &str,
+    renamed: &RenamedNodalLoadV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NODAL_LOAD_IDENTITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "nodal_load_identity_edit",
+            "load_pattern_id": load_pattern_id,
+            "load_pattern_index": renamed.load_pattern_index,
+            "analysis_type": renamed.analysis_type.clone(),
+            "source_nodal_load_id": nodal_load_id,
+            "replacement_nodal_load_id": replacement_nodal_load_id,
+            "nodal_load_index": renamed.nodal_load_index,
+            "node_id": renamed.node_id.clone(),
+            "retained_components_si": renamed.components_si.clone(),
+            "retained_source_id": renamed.retained_source_id.clone(),
+            "retained_extensions": renamed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": NODAL_LOAD_IDENTITY_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_constraint_target_edit_provenance(
     model: &mut Value,
     constraint_id: &str,
@@ -17011,8 +17354,9 @@ mod tests {
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference, replace_fixed_constraint_identity,
         replace_nested_linear_load_combination_factor,
-        replace_nested_linear_load_combination_reference, replace_nodal_load_target,
-        validate_constraint_target_edit_request, validate_constraint_value_edit_request,
+        replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
+        replace_nodal_load_target, validate_constraint_target_edit_request,
+        validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request,
         validate_direct_linear_load_combination_term_add_request,
@@ -17040,16 +17384,17 @@ mod tests {
         validate_nested_linear_load_combination_term_insert_request,
         validate_nested_linear_load_combination_term_reorder_request,
         validate_nodal_load_add_request, validate_nodal_load_delete_request,
-        validate_nodal_load_edit_request, validate_nodal_load_target_edit_request,
-        validate_node_add_request, validate_orphan_node_delete_request,
-        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
-        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
-        validate_truss_element_property_references, validate_truss_section_add_request,
-        validate_truss_section_delete_request, validate_truss_section_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1,
-        LinearLoadCombinationDeletionProfileV1, LinearLoadCombinationReferenceKindV1,
-        LinearLoadCombinationTermV1, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+        validate_nodal_load_edit_request, validate_nodal_load_identity_edit_request,
+        validate_nodal_load_target_edit_request, validate_node_add_request,
+        validate_orphan_node_delete_request, validate_truss3d_leaf_member_delete_request,
+        validate_truss3d_member_add_request, validate_truss3d_member_properties,
+        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
+        validate_truss_section_add_request, validate_truss_section_delete_request,
+        validate_truss_section_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, LinearLoadCombinationDeletionProfileV1,
+        LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
+        NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -17352,6 +17697,107 @@ mod tests {
                 .expect_err("missing load")
                 .code,
             "workbench_model_edit_nodal_load_target_load_missing"
+        );
+    }
+
+    #[test]
+    fn nodal_load_identity_edit_is_globally_unique_and_field_preserving() {
+        validate_nodal_load_identity_edit_request(0, "LC1", "L1", "L1_RENAMED")
+            .expect("valid nodal-load identity request");
+        assert_eq!(
+            validate_nodal_load_identity_edit_request(0, "LC1", "L1", "1_INVALID")
+                .expect_err("invalid replacement stable ID")
+                .code,
+            "workbench_model_edit_nodal_load_identity_replacement_invalid"
+        );
+        assert_eq!(
+            validate_nodal_load_identity_edit_request(0, "LC1", "L1", "L1")
+                .expect_err("no-op identity")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+
+        let model = json!({
+            "load_patterns": [
+                {
+                    "id": "LC1", "index": 0, "analysis_type": "linear_static",
+                    "nodal_loads": [{
+                        "id": "L1", "index": 0, "node_id": "N2",
+                        "components_si": {
+                            "FX": 0.0, "FY": -10000.0, "FZ": 0.0,
+                            "MX": 0.0, "MY": 0.0, "MZ": 0.0
+                        },
+                        "source_id": "generated:L1", "extensions": {"fixture": true}
+                    }]
+                },
+                {
+                    "id": "LC2", "index": 1, "analysis_type": "linear_static",
+                    "nodal_loads": [{
+                        "id": "L2", "index": 0, "node_id": "N3",
+                        "components_si": {
+                            "FX": 1.0, "FY": 0.0, "FZ": 0.0,
+                            "MX": 0.0, "MY": 0.0, "MZ": 0.0
+                        },
+                        "source_id": null, "extensions": {}
+                    }]
+                }
+            ],
+            "unsupported_features": []
+        });
+        let source_load = model["load_patterns"][0]["nodal_loads"][0].clone();
+        let mut edited = model.clone();
+        let renamed = replace_nodal_load_identity(&mut edited, "LC1", "L1", "L1_RENAMED")
+            .expect("rename existing nodal load");
+        assert_eq!(renamed.load_pattern_index, 0);
+        assert_eq!(renamed.nodal_load_index, 0);
+        assert_eq!(renamed.analysis_type, "linear_static");
+        assert_eq!(renamed.node_id, "N2");
+        assert_eq!(renamed.components_si, source_load["components_si"]);
+        assert_eq!(renamed.retained_source_id, source_load["source_id"]);
+        assert_eq!(renamed.retained_extensions, source_load["extensions"]);
+        assert_eq!(
+            edited["load_patterns"][0]["nodal_loads"][0]["id"],
+            "L1_RENAMED"
+        );
+        for key in [
+            "index",
+            "node_id",
+            "components_si",
+            "source_id",
+            "extensions",
+        ] {
+            assert_eq!(
+                edited["load_patterns"][0]["nodal_loads"][0][key],
+                source_load[key]
+            );
+        }
+        assert_eq!(edited["load_patterns"][1], model["load_patterns"][1]);
+
+        assert_eq!(
+            replace_nodal_load_identity(&mut model.clone(), "LC1", "L1", "L2")
+                .expect_err("global collision")
+                .code,
+            "workbench_model_edit_nodal_load_identity_replacement_exists"
+        );
+        assert_eq!(
+            replace_nodal_load_identity(&mut model.clone(), "MISSING", "L1", "L3")
+                .expect_err("missing pattern")
+                .code,
+            "workbench_model_edit_nodal_load_identity_pattern_missing"
+        );
+        assert_eq!(
+            replace_nodal_load_identity(&mut model.clone(), "LC1", "MISSING", "L3")
+                .expect_err("missing load")
+                .code,
+            "workbench_model_edit_nodal_load_identity_load_missing"
+        );
+        let mut feature_owned = model;
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "L1"}]);
+        assert_eq!(
+            replace_nodal_load_identity(&mut feature_owned, "LC1", "L1", "L3")
+                .expect_err("unsupported-feature-owned load")
+                .code,
+            "workbench_model_edit_nodal_load_identity_unsupported_feature_owned"
         );
     }
 

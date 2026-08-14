@@ -52,8 +52,19 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   and retained fields; degrades only a matching load-pattern round-trip claim; and strictly
   reparses and C++-revalidates before create-new publication. Installed E2E v61 proves exact N3-UY
   active load `[0,0,0,0,0,0,0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-
-  checkpoint restart. Component/identity/pattern editing, general topology and visual dragging
-  remain separate or open.
+  checkpoint restart. Component editing and the v67 bounded identity surface are separate;
+  pattern editing, general topology and visual dragging remain open.
+- `model-edit-nodal-load-identity`: deterministic replacement of one existing nested nodal-load
+  identity with a distinct ModelIR stable ID that is unique across every load pattern. Rust
+  preserves the containing pattern identity/index and analysis type plus the load index, node, six
+  SI components, source identity, extensions and unrelated structural rows; rejects global
+  collisions, malformed/no-op IDs and unsupported-feature ownership without cascade; degrades a
+  valid containing-pattern round-trip claim; and strictly reparses and C++-revalidates before
+  create-new publication. Installed E2E v67 replaces `L_WEAK_N3` with `L_WEAK_N3_RENAMED` while
+  proving unchanged active DOFs `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, fallback 0
+  and byte-identical initialized-checkpoint restart. Load target/components and creation/deletion are
+  separate bounded surfaces; pattern identity editing, unsupported-feature cascades and visual
+  dragging remain open.
 - `model-edit-constraint-target`: deterministic replacement of one existing `fixed_dofs`
   constraint's target with a distinct existing node. Rust preserves identity, index, type, DOFs,
   prescribed values, source identity, extensions and unrelated rows; rejects any target-node DOF

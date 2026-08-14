@@ -44,6 +44,6 @@ fallback 0 with Python and Node lookup counts both zero.
 
 This closes only identity replacement for one unreferenced existing `fixed_dofs` constraint. It
 does not cascade construction-stage, unsupported-feature, or round-trip references; edit other
-entity identities; change target/value/mask/topology; create or delete constraints; author
+top-level entity identities; change target/value/mask/topology; create or delete constraints; author
 MPC/contact/support sets; select a solver; provide general visual editing or engineering
 acceptance; remove React/TypeScript; prove approved HIP C2; or authorize C6.

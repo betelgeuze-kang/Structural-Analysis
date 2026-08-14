@@ -46,7 +46,11 @@ named pattern under the same source-validation, provenance, create-new, and C++ 
 It cannot create, delete, retarget, or combine loads. A separate bounded
 `model-edit-nodal-load-target` command changes only that existing load's `node_id` to a distinct
 existing node while preserving both indices, analysis type, components, source identity and
-extensions. See `docs/native/modelir-nodal-load-target-edit-v1.md`.
+extensions. The separate `model-edit-nodal-load-identity` command changes only the nested load's
+stable ID, enforces uniqueness across every pattern, preserves every non-identity field, degrades a
+valid containing-pattern round-trip claim and refuses unsupported-feature ownership without
+cascade. See `docs/native/modelir-nodal-load-target-edit-v1.md` and
+`docs/native/modelir-nodal-load-identity-edit-v1.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. The separate `model-edit-constraint-target` command
 changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves

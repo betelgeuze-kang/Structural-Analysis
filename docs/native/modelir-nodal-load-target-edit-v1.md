@@ -39,6 +39,7 @@ with Python and Node lookup counts both zero.
 
 ## Claim boundary
 
-This closes only target-node replacement for one existing nodal load. Component, identity and
-pattern edits, creation and deletion are separate bounded C5 surfaces. General topology, solver or
-visual editing, engineering acceptance, React/TypeScript removal, approved HIP C2, and C6 remain open.
+This closes only target-node replacement for one existing nodal load. Component and identity edits,
+creation and deletion are separate bounded C5 surfaces; pattern editing remains open. General
+topology, solver or visual editing, engineering acceptance, React/TypeScript removal, approved HIP C2,
+and C6 remain open.

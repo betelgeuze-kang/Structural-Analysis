@@ -513,6 +513,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-delete-orphan-node",
         "model-edit-nodal-load",
         "model-edit-nodal-load-target",
+        "model-edit-nodal-load-identity",
         "model-edit-constraint-target",
         "model-edit-constraint-value",
         "model-edit-linear-material",
@@ -1127,6 +1128,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-nodal-load.v1",
             "structural-native:model-edit-nodal-load-target.v1",
             "nodal_load_target",
+            "structural-native:model-edit-nodal-load-identity.v1",
+            "nodal_load_identity_edit",
             "structural-native:model-edit-constraint-target.v1",
             "constraint_target",
             "structural-native:model-delete-fixed-constraint-dof.v1",
@@ -2640,6 +2643,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    nodal_load_identity_edit_doc = _text(
+        root, Path("docs/native/modelir-nodal-load-identity-edit-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-nodal-load-identity-edit-v1.md"),
+        nodal_load_identity_edit_doc,
+        (
+            "model-edit-nodal-load-identity",
+            "single C ABI into C++",
+            "structural-native:model-edit-nodal-load-identity.v1",
+            "nodal_load_identity_edit",
+            "append-only v67",
+            "[12,13,14,15,16,17]",
+            "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2655,6 +2678,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "localized NDTHA result views are C5-implemented",
             "model-edit-nodal-load",
             "model-edit-nodal-load-target",
+            "model-edit-nodal-load-identity",
             "model-edit-constraint-target",
             "model-delete-fixed-constraint-dof",
             "model-add-fixed-constraint-dof",
