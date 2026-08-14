@@ -15,7 +15,8 @@ absent from the runtime image.
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
   and expected-source-bound `model-edit-model-identity` root identity replacement, plus
   provenance-bound `model-edit-node` coordinate, `model-edit-node-identity-cascade` typed-reference
-  cascade and `model-edit-nodal-load` existing-load
+  cascade, `model-edit-frame-section-identity-cascade` typed element-reference cascade and
+  `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
@@ -203,6 +204,9 @@ structural-workbench model-edit-frame-section /workspace/model.json \
   --torsional-constant-m4 0.000012 \
   --shear-area-y-m2 0.02 --shear-area-z-m2 0.02 \
   --output-dir /workspace/edited-section-model
+structural-workbench model-edit-frame-section-identity-cascade /workspace/model.json \
+  --section S1 --new-section S1_LINKED \
+  --output-dir /workspace/renamed-referenced-section-model
 structural-workbench model-edit-frame-element-orientation /workspace/model.json \
   --element E1 --rotation-rad 0.25 \
   --output-dir /workspace/edited-element-model

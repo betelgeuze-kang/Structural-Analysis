@@ -31,6 +31,7 @@
       "model-edit-linear-material-identity",
       "model-edit-frame-section",
       "model-edit-frame-section-identity",
+      "model-edit-frame-section-identity-cascade",
       "model-edit-truss-section-identity",
       "model-edit-frame-element-orientation",
       "model-edit-frame-element-properties",

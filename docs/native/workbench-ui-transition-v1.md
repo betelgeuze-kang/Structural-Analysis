@@ -153,6 +153,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   replaces neutral `S2` with `S2_RENAMED` while proving active DOFs `[6,7,8,9,10,11]`, active load
   `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Section
   parameter/family editing, reference cascades and visual dragging remain separate or open.
+- `model-edit-frame-section-identity-cascade`: deterministic replacement of one referenced v1
+  `frame_3d` section identity with a distinct unique ModelIR stable ID. Rust atomically rewrites
+  every typed element `section_id` plus direct section round-trip ownership, degrades exact or
+  canonicalized direct mappings to approximated, and preserves the section index, family/version,
+  exact six positive SI parameters, source identity, extensions and unrelated rows. Installed E2E
+  v77 replaces `S1` with `S1_LINKED` and proves one element reference, frame recovery type `[1]`,
+  offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+  `[25000,-12000,5000,0,0,0]` through retained `COMBO_RENAMED`, fallback 0 and byte-identical
+  initialized-checkpoint restart. Untyped extension and unsupported-feature cascades, non-frame
+  families and visual manipulation remain open.
 - `model-edit-truss-section-identity`: deterministic replacement of one existing unreferenced v1
   `truss_3d` section identity with a distinct unique ModelIR stable ID. Rust preserves the
   contiguous index, family/version, exact positive SI area, source identity, extensions and

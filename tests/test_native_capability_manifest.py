@@ -306,6 +306,25 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in node_identity_cascade["claim"]
     assert "approved HIP C2" in node_identity_cascade["claim"]
     assert "C6" in node_identity_cascade["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_frame_section_identity_cascade_edit"
+        )
+        is True
+    )
+    frame_section_identity_cascade = payload["capabilities"][
+        "modelir_frame_section_identity_cascade_edit"
+    ]
+    assert frame_section_identity_cascade["cutover_gate"] == "C5"
+    assert frame_section_identity_cascade["owner"] == "structural-workbench"
+    assert "atomically updates every typed" in frame_section_identity_cascade["claim"]
+    assert "direct section round-trip" in frame_section_identity_cascade["claim"]
+    assert "distribution v77 E2E" in frame_section_identity_cascade["claim"]
+    assert "S1_LINKED" in frame_section_identity_cascade["claim"]
+    assert "byte-identical initialized restart" in frame_section_identity_cascade["claim"]
+    assert "fallback 0" in frame_section_identity_cascade["claim"]
+    assert "approved HIP C2" in frame_section_identity_cascade["claim"]
+    assert "C6" in frame_section_identity_cascade["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_orphan_node_delete") is True
     orphan_node_delete = payload["capabilities"]["modelir_orphan_node_delete"]
     assert orphan_node_delete["cutover_gate"] == "C5"

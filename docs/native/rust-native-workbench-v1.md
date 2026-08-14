@@ -99,6 +99,12 @@ The separate `model-edit-frame-section-identity` command changes only one unrefe
 extensions, rejects element, unsupported-feature and round-trip ownership without cascade, and
 C++-revalidates the edited snapshot. See
 `docs/native/modelir-frame-section-identity-edit-v1.md`.
+The separate `model-edit-frame-section-identity-cascade` command changes one referenced v1
+`frame_3d` section's stable ID and atomically rewrites typed element plus direct section round-trip
+references. It preserves the section index/family/version/six SI parameters/source/extensions,
+degrades exact direct mappings to approximated, rejects unsupported-feature ownership and
+unreferenced sections, then C++-revalidates the edited snapshot. See
+`docs/native/modelir-frame-section-identity-cascade-edit-v2.md`.
 The separate `model-edit-truss-section-identity` command changes only one unreferenced v1
 `truss_3d` section's stable ID, preserves its index/family/version/SI area/source/extensions,
 rejects element, unsupported-feature and round-trip ownership without cascade, and C++-revalidates

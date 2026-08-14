@@ -37,6 +37,8 @@ const LINEAR_MATERIAL_IDENTITY_EDIT_EXTENSION_KEY: &str =
 const FRAME_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-frame-section.v1";
 const FRAME_SECTION_IDENTITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-section-identity.v1";
+const FRAME_SECTION_IDENTITY_CASCADE_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-frame-section-identity-cascade.v2";
 const TRUSS_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-truss-section.v1";
 const TRUSS_SECTION_IDENTITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-truss-section-identity.v1";
@@ -146,6 +148,7 @@ const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_m
 const LINEAR_MATERIAL_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_linear_elastic_isotropic_material_identity_replacement_to_distinct_unique_stable_id_with_index_law_version_parameters_state_schema_source_extensions_and_unrelated_rows_preserved_without_element_section_unsupported_feature_or_roundtrip_cascade_not_parameter_law_state_material_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_frame3d_section_identity_replacement_to_distinct_unique_stable_id_with_index_family_version_parameters_source_extensions_and_unrelated_rows_preserved_without_element_unsupported_feature_or_roundtrip_cascade_not_parameter_family_section_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
+const FRAME_SECTION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_modelir_v1_frame3d_section_identity_replacement_to_distinct_unique_stable_id_with_index_family_version_parameters_source_extensions_and_unrelated_rows_preserved_and_typed_element_plus_direct_section_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_parameter_family_section_creation_deletion_general_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_truss3d_section_area_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_truss3d_section_identity_replacement_to_distinct_unique_stable_id_with_index_family_version_area_source_extensions_and_unrelated_rows_preserved_without_element_unsupported_feature_or_roundtrip_cascade_not_parameter_family_section_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -347,6 +350,14 @@ pub struct ModelFrameSectionEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded frame-section identity edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFrameSectionIdentityEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one typed-reference-cascading frame-section
+/// identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFrameSectionIdentityCascadeEditOutcomeV2 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -1956,6 +1967,33 @@ pub fn publish_model_frame_section_identity_edit(
 ) -> Result<ModelFrameSectionIdentityEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_frame_section_identity(&source, section_id, replacement_section_id)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one referenced v1 frame-section identity, cascade every typed reference, and
+/// atomically publish the edited `ModelIR`.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, an unreferenced source section,
+/// invalid source or edited semantics, unsupported-feature ownership, malformed typed references,
+/// no-op edits, or create-new publication failures.
+pub fn publish_model_frame_section_identity_cascade_edit(
+    source_path: &Path,
+    section_id: &str,
+    replacement_section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelFrameSectionIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome =
+        edit_model_frame_section_identity_cascade(&source, section_id, replacement_section_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -4316,6 +4354,18 @@ struct RenamedFrameSectionV1 {
     retained_extensions: Value,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct CascadedFrameSectionIdentityV2 {
+    section_index: usize,
+    family_id: String,
+    parameter_set_version: String,
+    parameters: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+    element_reference_count: usize,
+    roundtrip_reference_count: usize,
+}
+
 /// Replace one unreferenced v1 frame-section identity in memory.
 ///
 /// # Errors
@@ -4404,6 +4454,104 @@ pub fn edit_model_frame_section_identity(
         "claim_boundary": FRAME_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFrameSectionIdentityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Replace one referenced v1 frame-section identity and atomically cascade every typed `ModelIR`
+/// reference.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, a section with no element
+/// reference, malformed typed references, unsupported-feature ownership, schema drift, or edited
+/// semantics rejected by C++.
+pub fn edit_model_frame_section_identity_cascade(
+    source_bytes: &[u8],
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Result<ModelFrameSectionIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    validate_frame_section_identity_edit_request(
+        source_bytes.len(),
+        section_id,
+        replacement_section_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let cascaded =
+        replace_frame_section_identity_cascade(&mut edited, section_id, replacement_section_id)?;
+    bind_frame_section_identity_cascade_edit_provenance(
+        &mut edited,
+        section_id,
+        replacement_section_id,
+        &cascaded,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the frame-section identity-cascaded ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "frame_section_identity_cascade_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_section_id": section_id,
+        "replacement_section_id": replacement_section_id,
+        "section_index": cascaded.section_index,
+        "family_id": cascaded.family_id,
+        "parameter_set_version": cascaded.parameter_set_version,
+        "retained_parameters_si": cascaded.parameters,
+        "retained_source_id": cascaded.retained_source_id,
+        "retained_extensions": cascaded.retained_extensions,
+        "element_reference_count": cascaded.element_reference_count,
+        "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+        "typed_reference_cascade_verified": true,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FRAME_SECTION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFrameSectionIdentityCascadeEditOutcomeV2 {
         model_ir_json,
         receipt_json,
     })
@@ -11125,6 +11273,221 @@ fn replace_frame_section_identity(
         parameters,
         retained_source_id,
         retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_frame_section_identity_cascade(
+    model: &mut Value,
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Result<CascadedFrameSectionIdentityV2, WorkbenchError> {
+    if section_id == replacement_section_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement frame-section identity is identical to the source identity",
+        ));
+    }
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    let section_index = sections
+        .iter()
+        .position(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_frame_section_identity_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if sections
+        .iter()
+        .any(|section| section.get("id").and_then(Value::as_str) == Some(replacement_section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_replacement_exists",
+            format!("ModelIR already has a section with identity {replacement_section_id}"),
+        ));
+    }
+    let section = &sections[section_index];
+    if section.get("index").and_then(Value::as_u64) != u64::try_from(section_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_index_mismatch",
+            "identity-cascaded frame-section index must match its contiguous position",
+        ));
+    }
+    let family_id = section
+        .get("family_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("section family_id"))?
+        .to_owned();
+    if family_id != "frame_3d" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_family_unsupported",
+            "frame-section identity cascade accepts only a frame_3d section",
+        ));
+    }
+    let parameter_set_version = section
+        .get("parameter_set_version")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("section parameter_set_version"))?
+        .to_owned();
+    if parameter_set_version != "1" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_version_unsupported",
+            "frame-section identity cascade accepts only parameter_set_version 1",
+        ));
+    }
+    let parameter_values = section
+        .get("parameters")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 6)
+        .ok_or_else(|| snapshot_error("section parameters"))?;
+    for key in [
+        "area_m2",
+        "iy_m4",
+        "iz_m4",
+        "torsional_constant_m4",
+        "shear_area_y_m2",
+        "shear_area_z_m2",
+    ] {
+        if !parameter_values
+            .get(key)
+            .and_then(Value::as_f64)
+            .is_some_and(|value| value.is_finite() && value > 0.0)
+        {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_frame_section_identity_parameters_invalid",
+                format!("retained frame-section parameters have no finite positive {key}"),
+            ));
+        }
+    }
+    let parameters = Value::Object(parameter_values.clone());
+    let retained_source_id = section
+        .get("source_id")
+        .filter(|value| value.is_null() || value.is_string())
+        .ok_or_else(|| snapshot_error("section source_id"))?
+        .clone();
+    let retained_extensions = section
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("section extensions"))?
+        .clone();
+
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == section_id || id == replacement_section_id);
+    if model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_cascade_unsupported_feature_owned",
+            "frame-section identity cascade refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+
+    let element_reference_count = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?
+        .iter()
+        .filter(|element| element.get("section_id").and_then(Value::as_str) == Some(section_id))
+        .count();
+    if element_reference_count == 0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_frame_section_identity_cascade_unreferenced",
+            "frame-section identity cascade requires at least one typed element reference; use the non-cascading identity editor for an orphan",
+        ));
+    }
+
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    let mut roundtrip_reference_count = 0usize;
+    for row in roundtrip_rows {
+        let mapped = row
+            .get("model_ir_entity_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| snapshot_error("roundtrip model_ir_entity_id"))?;
+        if mapped == replacement_section_id {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_frame_section_identity_cascade_replacement_roundtrip_owned",
+                "replacement frame-section identity is already owned by a round-trip mapping",
+            ));
+        }
+        if mapped != section_id {
+            continue;
+        }
+        if row.get("entity_kind").and_then(Value::as_str) != Some("section") {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_frame_section_identity_cascade_roundtrip_kind_mismatch",
+                "direct round-trip ownership of the source frame section must have entity_kind section",
+            ));
+        }
+        if !matches!(
+            row.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized" | "approximated" | "unsupported")
+        ) {
+            return Err(snapshot_error("roundtrip mapping_status"));
+        }
+        roundtrip_reference_count += 1;
+    }
+
+    for element in model
+        .get_mut("elements")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("elements"))?
+    {
+        if element.get("section_id").and_then(Value::as_str) == Some(section_id) {
+            element
+                .as_object_mut()
+                .ok_or_else(|| snapshot_error("element"))?
+                .insert("section_id".to_owned(), json!(replacement_section_id));
+        }
+    }
+    for row in model
+        .get_mut("roundtrip_map")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?
+    {
+        if row.get("model_ir_entity_id").and_then(Value::as_str) != Some(section_id) {
+            continue;
+        }
+        let object = row
+            .as_object_mut()
+            .ok_or_else(|| snapshot_error("roundtrip row"))?;
+        object.insert(
+            "model_ir_entity_id".to_owned(),
+            json!(replacement_section_id),
+        );
+        if matches!(
+            object.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized")
+        ) {
+            object.insert("mapping_status".to_owned(), json!("approximated"));
+        }
+    }
+    model
+        .get_mut("sections")
+        .and_then(Value::as_array_mut)
+        .and_then(|rows| rows.get_mut(section_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("section"))?
+        .insert("id".to_owned(), json!(replacement_section_id));
+
+    Ok(CascadedFrameSectionIdentityV2 {
+        section_index,
+        family_id,
+        parameter_set_version,
+        parameters,
+        retained_source_id,
+        retained_extensions,
+        element_reference_count,
+        roundtrip_reference_count,
     })
 }
 
@@ -18616,6 +18979,41 @@ fn bind_frame_section_identity_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_frame_section_identity_cascade_edit_provenance(
+    model: &mut Value,
+    section_id: &str,
+    replacement_section_id: &str,
+    cascaded: &CascadedFrameSectionIdentityV2,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FRAME_SECTION_IDENTITY_CASCADE_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "frame_section_identity_cascade_edit",
+            "source_section_id": section_id,
+            "replacement_section_id": replacement_section_id,
+            "section_index": cascaded.section_index,
+            "family_id": cascaded.family_id,
+            "parameter_set_version": cascaded.parameter_set_version,
+            "retained_parameters_si": cascaded.parameters.clone(),
+            "retained_source_id": cascaded.retained_source_id.clone(),
+            "retained_extensions": cascaded.retained_extensions.clone(),
+            "element_reference_count": cascaded.element_reference_count,
+            "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+            "typed_reference_cascade_verified": true,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FRAME_SECTION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_truss_section_identity_edit_provenance(
     model: &mut Value,
     section_id: &str,
@@ -20607,9 +21005,9 @@ mod tests {
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference, replace_element_identity,
         replace_fixed_constraint_identity, replace_frame_section_identity,
-        replace_linear_load_combination_identity, replace_linear_load_pattern_identity,
-        replace_linear_material_identity, replace_model_identity,
-        replace_nested_linear_load_combination_factor,
+        replace_frame_section_identity_cascade, replace_linear_load_combination_identity,
+        replace_linear_load_pattern_identity, replace_linear_material_identity,
+        replace_model_identity, replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
         replace_nodal_load_target, replace_node_identity, replace_node_identity_cascade,
         replace_truss_section_identity, validate_constraint_target_edit_request,
@@ -21823,6 +22221,99 @@ mod tests {
                 .expect_err("round-trip-owned section")
                 .code,
             "workbench_model_edit_frame_section_identity_roundtrip_owned"
+        );
+    }
+
+    #[test]
+    fn frame_section_identity_cascade_updates_elements_and_direct_mapping() {
+        let mut model = frame_section_identity_fixture();
+        model["elements"] = json!([
+            {"id": "E1", "section_id": "S1"},
+            {"id": "E2", "section_id": "S1"},
+            {"id": "E3", "section_id": "S2"}
+        ]);
+        model["roundtrip_map"] = json!([
+            {
+                "source_entity_id": "source:S1",
+                "entity_kind": "section",
+                "model_ir_entity_id": "S1",
+                "mapping_status": "exact"
+            },
+            {
+                "source_entity_id": "source:E1",
+                "entity_kind": "element",
+                "model_ir_entity_id": "E1",
+                "mapping_status": "approximated"
+            }
+        ]);
+        let source_section = model["sections"][0].clone();
+        let unrelated_section = model["sections"][1].clone();
+        let unrelated_element = model["elements"][2].clone();
+        let unrelated_mapping = model["roundtrip_map"][1].clone();
+
+        let mut edited = model.clone();
+        let cascaded = replace_frame_section_identity_cascade(&mut edited, "S1", "S1_LINKED")
+            .expect("cascade referenced frame section");
+        assert_eq!(cascaded.section_index, 0);
+        assert_eq!(cascaded.family_id, "frame_3d");
+        assert_eq!(cascaded.parameter_set_version, "1");
+        assert_eq!(cascaded.parameters, source_section["parameters"]);
+        assert_eq!(cascaded.retained_source_id, source_section["source_id"]);
+        assert_eq!(cascaded.retained_extensions, source_section["extensions"]);
+        assert_eq!(cascaded.element_reference_count, 2);
+        assert_eq!(cascaded.roundtrip_reference_count, 1);
+        assert_eq!(edited["sections"][0]["id"], "S1_LINKED");
+        for key in [
+            "index",
+            "family_id",
+            "parameter_set_version",
+            "parameters",
+            "source_id",
+            "extensions",
+        ] {
+            assert_eq!(edited["sections"][0][key], source_section[key]);
+        }
+        assert_eq!(edited["sections"][1], unrelated_section);
+        assert_eq!(edited["elements"][0]["section_id"], "S1_LINKED");
+        assert_eq!(edited["elements"][1]["section_id"], "S1_LINKED");
+        assert_eq!(edited["elements"][2], unrelated_element);
+        assert_eq!(
+            edited["roundtrip_map"][0]["model_ir_entity_id"],
+            "S1_LINKED"
+        );
+        assert_eq!(edited["roundtrip_map"][0]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][1], unrelated_mapping);
+
+        let mut unreferenced = frame_section_identity_fixture();
+        assert_eq!(
+            replace_frame_section_identity_cascade(&mut unreferenced, "S2", "S2_LINKED")
+                .expect_err("orphan section uses non-cascading editor")
+                .code,
+            "workbench_model_edit_frame_section_identity_cascade_unreferenced"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "S1"}]);
+        assert_eq!(
+            replace_frame_section_identity_cascade(&mut feature_owned, "S1", "S1_LINKED")
+                .expect_err("unsupported feature owns section")
+                .code,
+            "workbench_model_edit_frame_section_identity_cascade_unsupported_feature_owned"
+        );
+        let mut kind_mismatch = model.clone();
+        kind_mismatch["roundtrip_map"][0]["entity_kind"] = json!("material");
+        assert_eq!(
+            replace_frame_section_identity_cascade(&mut kind_mismatch, "S1", "S1_LINKED")
+                .expect_err("direct mapping kind must be section")
+                .code,
+            "workbench_model_edit_frame_section_identity_cascade_roundtrip_kind_mismatch"
+        );
+        let mut replacement_owned = model;
+        replacement_owned["roundtrip_map"][1]["model_ir_entity_id"] = json!("S1_LINKED");
+        assert_eq!(
+            replace_frame_section_identity_cascade(&mut replacement_owned, "S1", "S1_LINKED")
+                .expect_err("replacement mapping ownership")
+                .code,
+            "workbench_model_edit_frame_section_identity_cascade_replacement_roundtrip_owned"
         );
     }
 
