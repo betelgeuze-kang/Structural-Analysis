@@ -139,6 +139,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `M2_RENAMED` while proving active DOFs `[6,7,8,9,10,11]`, active load
   `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Material
   parameter/law/state editing, reference cascades and visual dragging remain separate or open.
+- `model-edit-linear-material-identity-cascade`: deterministic replacement of one referenced v1
+  linear-elastic material identity with a distinct unique ModelIR stable ID. Rust atomically
+  rewrites every typed element `material_id` plus direct material round-trip ownership, degrades
+  exact or canonicalized direct mappings to approximated, and preserves the material index,
+  law/version, exact SI parameters, stateless trial/commit/rollback schema, source identity,
+  extensions and unrelated rows. Installed E2E v78 replaces `M1` with `M1_LINKED` and proves one
+  element reference, frame recovery type `[1]`, offsets `[0,12]`, active DOFs
+  `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]` through retained
+  `COMBO_RENAMED`, fallback 0 and byte-identical initialized-checkpoint restart. Nonlinear-section,
+  untyped-extension and unsupported-feature cascades plus visual manipulation remain open.
 - `model-edit-frame-section`: deterministic replacement of area, two second moments, torsional
   constant, and two shear areas for one existing v1 `frame_3d` section. Every SI value is positive;
   Rust binds the fixed family/version and previous/new parameter objects, marks only a matching

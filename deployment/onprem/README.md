@@ -15,7 +15,8 @@ absent from the runtime image.
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
   and expected-source-bound `model-edit-model-identity` root identity replacement, plus
   provenance-bound `model-edit-node` coordinate, `model-edit-node-identity-cascade` typed-reference
-  cascade, `model-edit-frame-section-identity-cascade` typed element-reference cascade and
+  cascade, `model-edit-frame-section-identity-cascade` typed section-reference cascade,
+  `model-edit-linear-material-identity-cascade` typed material-reference cascade and
   `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
@@ -199,6 +200,9 @@ structural-workbench model-edit-linear-material /workspace/model.json \
   --material M1 --elastic-modulus-pa 210000000000 \
   --poisson-ratio 0.29 --density-kg-m3 7850 \
   --output-dir /workspace/edited-material-model
+structural-workbench model-edit-linear-material-identity-cascade /workspace/model.json \
+  --material M1 --new-material M1_LINKED \
+  --output-dir /workspace/renamed-referenced-material-model
 structural-workbench model-edit-frame-section /workspace/model.json \
   --section S1 --area-m2 0.025 --iy-m4 0.00009 --iz-m4 0.00006 \
   --torsional-constant-m4 0.000012 \

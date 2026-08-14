@@ -29,6 +29,7 @@
       "model-edit-constraint-value",
       "model-edit-linear-material",
       "model-edit-linear-material-identity",
+      "model-edit-linear-material-identity-cascade",
       "model-edit-frame-section",
       "model-edit-frame-section-identity",
       "model-edit-frame-section-identity-cascade",

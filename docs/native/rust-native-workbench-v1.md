@@ -94,6 +94,12 @@ linear-elastic material's stable ID, preserves its index/law/version/parameters/
 extensions, rejects element, composite-section, unsupported-feature and round-trip ownership
 without cascade, and C++-revalidates the edited snapshot. See
 `docs/native/modelir-linear-material-identity-edit-v1.md`.
+The separate `model-edit-linear-material-identity-cascade` command changes one referenced v1
+linear-elastic material's stable ID and atomically rewrites typed element plus direct material
+round-trip references. It preserves the material index/law/version/parameters/state/source/
+extensions, degrades exact direct mappings to approximated, rejects nonlinear-section and
+unsupported-feature ownership plus unreferenced materials, then C++-revalidates the edited
+snapshot. See `docs/native/modelir-linear-material-identity-cascade-edit-v2.md`.
 The separate `model-edit-frame-section-identity` command changes only one unreferenced v1
 `frame_3d` section's stable ID, preserves its index/family/version/six SI parameters/source/
 extensions, rejects element, unsupported-feature and round-trip ownership without cascade, and

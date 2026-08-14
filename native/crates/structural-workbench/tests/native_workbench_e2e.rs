@@ -590,6 +590,24 @@ fn run_linear_material_identity_edit(
     ])
 }
 
+fn run_linear_material_identity_cascade_edit(
+    source: &Path,
+    destination: &Path,
+    material_id: &str,
+    replacement_material_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-linear-material-identity-cascade"),
+        source.as_os_str(),
+        text("--material"),
+        text(material_id),
+        text("--new-material"),
+        text(replacement_material_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_frame_section_edit(
     source: &Path,
     destination: &Path,
@@ -9076,6 +9094,330 @@ fn frame_section_identity_edit_is_deterministic_fail_closed_and_cpu_executable()
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_material_identity_cascade_edit_is_atomic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let fixture =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let fixture_bytes = std::fs::read(&fixture).expect("material cascade fixture bytes");
+    let mut source_model = validate_model_bytes(&fixture_bytes)
+        .expect("C++-validated material cascade fixture")
+        .snapshot
+        .value()
+        .clone();
+    source_model["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:M1",
+        "entity_kind": "material",
+        "model_ir_entity_id": "M1",
+        "mapping_status": "exact",
+        "extensions": {"structural-native:fixture": "material-cascade"}
+    }]);
+    let source_bytes = canonicalize_model_ir_v2(&source_model)
+        .expect("canonical material cascade source")
+        .into_bytes();
+    validate_model_bytes(&source_bytes).expect("C++-validated mapped material cascade source");
+    let source = temporary.0.join("material-cascade-source.json");
+    std::fs::write(&source, &source_bytes).expect("write material cascade source");
+
+    let first = temporary.0.join("material-cascade-first");
+    let second = temporary.0.join("material-cascade-second");
+    for destination in [&first, &second] {
+        let output =
+            run_linear_material_identity_cascade_edit(&source, destination, "M1", "M1_LINKED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published material cascade receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first material cascade artifact"),
+            std::fs::read(second.join(artifact)).expect("second material cascade artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged material cascade source"),
+        source_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("material identity-cascaded ModelIR");
+    let edited =
+        parse_model_ir_v2(&edited_bytes).expect("strict material identity-cascaded ModelIR");
+    let validation = validate_model_bytes(&edited_bytes)
+        .expect("C++-validated material identity-cascaded ModelIR");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(edited.value()["materials"][0]["id"], "M1_LINKED");
+    for key in [
+        "index",
+        "law_id",
+        "parameter_set_version",
+        "parameters",
+        "state_schema",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(
+            edited.value()["materials"][0][key],
+            source_model["materials"][0][key]
+        );
+    }
+    assert_eq!(edited.value()["elements"][0]["material_id"], "M1_LINKED");
+    for key in [
+        "id",
+        "index",
+        "element_type",
+        "formulation_id",
+        "node_ids",
+        "section_id",
+        "local_axis_rotation_rad",
+        "end_offsets_m",
+        "releases",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(
+            edited.value()["elements"][0][key],
+            source_model["elements"][0][key]
+        );
+    }
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["source_entity_id"],
+        "source:M1"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["entity_kind"],
+        "material"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["model_ir_entity_id"],
+        "M1_LINKED"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["extensions"],
+        source_model["roundtrip_map"][0]["extensions"]
+    );
+    for family in [
+        "nodes",
+        "sections",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-linear-material-identity-cascade.v2")
+        .expect("material cascade provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "linear_material_identity_cascade_edit"
+    );
+    assert_eq!(extension["source_material_id"], "M1");
+    assert_eq!(extension["replacement_material_id"], "M1_LINKED");
+    assert_eq!(extension["material_index"], 0);
+    assert_eq!(extension["law_id"], "linear_elastic_isotropic");
+    assert_eq!(extension["parameter_set_version"], "1");
+    assert_eq!(extension["element_reference_count"], 1);
+    assert_eq!(extension["roundtrip_reference_count"], 1);
+    assert_eq!(extension["typed_reference_cascade_verified"], true);
+    assert_eq!(
+        edited.value()["provenance"]["normalizer_id"],
+        "structural-native-model-editor"
+    );
+    assert!(edited.value()["provenance"]["extensions"]
+        .get("structural-native:upstream-provenance")
+        .is_some());
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("material cascade receipt"),
+    )
+    .expect("material cascade receipt JSON");
+    assert_eq!(
+        receipt["operation"],
+        "linear_material_identity_cascade_edit"
+    );
+    assert_eq!(receipt["source_material_id"], "M1");
+    assert_eq!(receipt["replacement_material_id"], "M1_LINKED");
+    assert_eq!(receipt["material_index"], 0);
+    assert_eq!(receipt["element_reference_count"], 1);
+    assert_eq!(receipt["roundtrip_reference_count"], 1);
+    assert_eq!(receipt["typed_reference_cascade_verified"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_ne!(
+        receipt["source_provenance_hash"],
+        receipt["edited_provenance_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, material_id, replacement, code) in [
+        (
+            "missing",
+            "M404",
+            "M_NEW",
+            "workbench_model_edit_linear_material_identity_material_missing",
+        ),
+        ("no-op", "M1", "M1", "workbench_model_edit_no_change"),
+        (
+            "invalid",
+            "M1",
+            "1_INVALID",
+            "workbench_model_edit_linear_material_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("material-cascade-{name}"));
+        let rejected = run_linear_material_identity_cascade_edit(
+            &source,
+            &destination,
+            material_id,
+            replacement,
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let orphan_source = temporary.0.join("material-cascade-orphan-source");
+    assert_success(&run_linear_material_add(
+        &fixture,
+        &orphan_source,
+        "M2",
+        ["70000000000", "0.33", "2700"],
+    ));
+    let orphan_destination = temporary.0.join("material-cascade-orphan-output");
+    let orphan_rejection = run_linear_material_identity_cascade_edit(
+        &orphan_source.join("model-ir.json"),
+        &orphan_destination,
+        "M2",
+        "M2_LINKED",
+    );
+    assert_eq!(orphan_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&orphan_rejection.stdout)
+        .contains("workbench_model_edit_linear_material_identity_cascade_unreferenced"));
+    assert!(!orphan_destination.exists());
+    let collision_destination = temporary.0.join("material-cascade-collision-output");
+    let collision = run_linear_material_identity_cascade_edit(
+        &orphan_source.join("model-ir.json"),
+        &collision_destination,
+        "M1",
+        "M2",
+    );
+    assert_eq!(collision.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&collision.stdout)
+        .contains("workbench_model_edit_linear_material_identity_replacement_exists"));
+    assert!(!collision_destination.exists());
+
+    for (name, owned_id) in [("source-owned", "M1"), ("replacement-owned", "M1_LINKED")] {
+        let mut owned = source_model.clone();
+        owned["unsupported_features"] = serde_json::json!([{
+            "feature_id": format!("feature.material-cascade-{name}"),
+            "kind": "unsupported_solver_feature",
+            "source_entity_id": owned_id,
+            "disposition": "blocked",
+            "blocking": true,
+            "detail": "Material identity remains externally owned.",
+            "extensions": {}
+        }]);
+        let owned_path = temporary
+            .0
+            .join(format!("material-cascade-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned material cascade source")
+                .as_bytes(),
+        )
+        .expect("write owned material cascade source");
+        let destination = temporary.0.join(format!("material-cascade-{name}-output"));
+        let rejected =
+            run_linear_material_identity_cascade_edit(&owned_path, &destination, "M1", "M1_LINKED");
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(
+            "workbench_model_edit_linear_material_identity_cascade_unsupported_feature_owned"
+        ));
+        assert!(!destination.exists());
+    }
+    let existing = run_linear_material_identity_cascade_edit(&source, &first, "M1", "M1_LINKED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("material-cascade-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "material-cascade-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("material cascade request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("material cascade direct CPU execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("material cascade direct recovery"),
+    )
+    .expect("material cascade recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_stable_indices"], serde_json::json!([0]));
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("material cascade initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("material cascade resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
     );
 }
 

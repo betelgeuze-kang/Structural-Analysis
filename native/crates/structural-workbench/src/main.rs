@@ -755,6 +755,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             parse_model_edit_linear_material_identity(arguments)
                 .and_then(|command| run_model_edit_linear_material_identity(&command))
         }
+        Some("model-edit-linear-material-identity-cascade") => {
+            parse_model_edit_linear_material_identity_cascade(arguments)
+                .and_then(|command| run_model_edit_linear_material_identity_cascade(&command))
+        }
         Some("model-edit-frame-section") => parse_model_edit_frame_section(arguments)
             .and_then(|command| run_model_edit_frame_section(&command)),
         Some("model-edit-frame-section-identity") => {
@@ -1656,6 +1660,19 @@ fn run_model_edit_linear_material_identity(
     command: &ModelEditLinearMaterialIdentityCommand,
 ) -> Result<(), WorkbenchError> {
     let outcome = structural_workbench::publish_model_linear_material_identity_edit(
+        &command.model,
+        &command.material_id,
+        &command.replacement_material_id,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_linear_material_identity_cascade(
+    command: &ModelEditLinearMaterialIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_linear_material_identity_cascade_edit(
         &command.model,
         &command.material_id,
         &command.replacement_material_id,
@@ -3690,6 +3707,32 @@ fn parse_model_edit_linear_material_identity(
     })
 }
 
+fn parse_model_edit_linear_material_identity_cascade(
+    arguments: &[OsString],
+) -> Result<ModelEditLinearMaterialIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--material"
+        || arguments[4] != "--new-material"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-linear-material-identity-cascade requires MODEL.json --material SOURCE-ID --new-material NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditLinearMaterialIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        material_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-linear-material-identity-cascade source material ID",
+        )?,
+        replacement_material_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-linear-material-identity-cascade replacement material ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
 fn parse_model_edit_frame_section(
     arguments: &[OsString],
 ) -> Result<ModelEditFrameSectionCommand, WorkbenchError> {
@@ -4654,6 +4697,7 @@ fn usage() -> &'static str {
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-model-identity <MODEL.json> --model-id <SOURCE-ID> --new-model-id <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-node-identity <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node-identity-cascade <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-node <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-delete-orphan-node <MODEL.json> --node <ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-target <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-identity <MODEL.json> --load-pattern <PATTERN-ID> --load <SOURCE-ID> --new-load <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-constraint-target <MODEL.json> --constraint <CONSTRAINT-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-delete-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-linear-material-identity <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
+        "\n  structural-workbench model-edit-linear-material-identity-cascade <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-element-identity <MODEL.json> --element <SOURCE-ID> --new-element <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
@@ -4696,7 +4740,8 @@ mod tests {
         parse_model_edit_frame_section_identity, parse_model_edit_frame_section_identity_cascade,
         parse_model_edit_linear_load_combination_identity,
         parse_model_edit_linear_load_pattern_identity, parse_model_edit_linear_material,
-        parse_model_edit_linear_material_identity, parse_model_edit_model_identity,
+        parse_model_edit_linear_material_identity,
+        parse_model_edit_linear_material_identity_cascade, parse_model_edit_model_identity,
         parse_model_edit_nested_linear_load_combination_factor,
         parse_model_edit_nested_linear_load_combination_reference, parse_model_edit_nodal_load,
         parse_model_edit_nodal_load_identity, parse_model_edit_nodal_load_target,
@@ -6349,6 +6394,36 @@ mod tests {
         let mut oversized = arguments;
         oversized[5] = OsString::from("M".repeat(129));
         assert!(parse_model_edit_linear_material_identity(&oversized).is_err());
+    }
+
+    #[test]
+    fn model_edit_linear_material_identity_cascade_parser_is_distinct_and_bounded() {
+        let arguments = [
+            OsString::from("model-edit-linear-material-identity-cascade"),
+            OsString::from("model.json"),
+            OsString::from("--material"),
+            OsString::from("M1"),
+            OsString::from("--new-material"),
+            OsString::from("M1_LINKED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_linear_material_identity_cascade(&arguments)
+            .expect("valid linear-material identity cascade command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.material_id, "M1");
+        assert_eq!(parsed.replacement_material_id, "M1_LINKED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut wrong_flag = arguments.clone();
+        wrong_flag[4] = OsString::from("--replacement");
+        assert!(parse_model_edit_linear_material_identity_cascade(&wrong_flag).is_err());
+        let mut empty_source = arguments.clone();
+        empty_source[3] = OsString::from("");
+        assert!(parse_model_edit_linear_material_identity_cascade(&empty_source).is_err());
+        let mut oversized = arguments;
+        oversized[5] = OsString::from("M".repeat(129));
+        assert!(parse_model_edit_linear_material_identity_cascade(&oversized).is_err());
     }
 
     #[test]
