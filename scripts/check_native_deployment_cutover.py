@@ -974,6 +974,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_element_identity_cascade_edit_recovery_sha256",
         "workbench_element_identity_cascade_edit_report_ir_sha256",
         "workbench_element_identity_cascade_edit_restart_passed",
+        "exercise_fixed_constraint_identity_cascade_edit_surface",
+        "model-edit-fixed-constraint-identity-cascade",
+        "--constraint C_1 --new-constraint C1_LINKED",
+        "structural-native:model-edit-fixed-constraint-identity-cascade.v2",
+        "workbench_fixed_constraint_identity_cascade_edit_surface_passed",
+        "workbench_fixed_constraint_identity_cascade_edit_model_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_receipt_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_request_receipt_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_request_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_assembly_receipt_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_checkpoint_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_result_ir_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_recovery_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_report_ir_sha256",
+        "workbench_fixed_constraint_identity_cascade_edit_restart_passed",
         "exercise_linear_load_combination_identity_edit_surface",
         "model-edit-linear-load-combination-identity",
         "structural-native:model-edit-linear-load-combination-identity.v1",
@@ -1288,6 +1303,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v83",
+            "V83_FIXED_CONSTRAINT_IDENTITY_CASCADE_EDIT_KEYS",
+            "workbench_fixed_constraint_identity_cascade_edit_surface_passed",
+            "workbench_fixed_constraint_identity_cascade_edit_receipt_sha256",
+            "workbench_fixed_constraint_identity_cascade_edit_request_receipt_sha256",
+            "workbench_fixed_constraint_identity_cascade_edit_recovery_sha256",
+            "workbench_fixed_constraint_identity_cascade_edit_restart_passed",
             "structural-native-distribution-e2e.v82",
             "V82_ELEMENT_IDENTITY_CASCADE_EDIT_KEYS",
             "workbench_element_identity_cascade_edit_surface_passed",
@@ -1880,6 +1902,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "append-only v66",
             "[12,13,14,15,16,17]",
             "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    fixed_constraint_identity_cascade_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"),
+        text=fixed_constraint_identity_cascade_edit_doc,
+        tokens=(
+            "model-edit-fixed-constraint-identity-cascade",
+            "single C ABI into C++ semantic",
+            "structural-native:model-edit-fixed-constraint-identity-cascade.v2",
+            "fixed_constraint_identity_cascade_edit",
+            "append-only v83",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[200000,0,0,0,0,0]",
             "fallback 0",
             "approved HIP C2",
             "authorize C6",
@@ -3041,6 +3088,50 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in fixed_constraint_identity_edit_claim:
                 blockers.append(
                     "modelir_fixed_constraint_identity_edit_capability_"
+                    f"claim_missing:{token}"
+                )
+    fixed_constraint_identity_cascade_edit_capability = (
+        capabilities.get("modelir_fixed_constraint_identity_cascade_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(fixed_constraint_identity_cascade_edit_capability, dict):
+        blockers.append("modelir_fixed_constraint_identity_cascade_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if fixed_constraint_identity_cascade_edit_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_fixed_constraint_identity_cascade_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        fixed_constraint_identity_cascade_edit_claim = str(
+            fixed_constraint_identity_cascade_edit_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing referenced fixed_dofs constraint ID",
+            "atomically updates every construction_stages[].active_constraint_ids reference",
+            "direct constraint round-trip model_ir_entity_id",
+            "exact or canonicalized direct mappings degrade to approximated",
+            "at least one typed construction-stage or direct round-trip reference is required",
+            "unsupported-feature source_entity_id ownership of either source or replacement",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v83 E2E",
+            "C_1 with C1_LINKED",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "active load [200000,0,0,0,0,0]",
+            "typed frame recovery [1] with offsets [0,12]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "construction stages remain outside the current linear execution projection",
+            "C6 remain open",
+        ):
+            if token not in fixed_constraint_identity_cascade_edit_claim:
+                blockers.append(
+                    "modelir_fixed_constraint_identity_cascade_edit_capability_"
                     f"claim_missing:{token}"
                 )
     nodal_load_identity_edit_capability = (

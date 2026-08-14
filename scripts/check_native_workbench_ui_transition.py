@@ -553,6 +553,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-fixed-constraint-dof",
         "model-reorder-fixed-constraint-dof",
         "model-edit-fixed-constraint-identity",
+        "model-edit-fixed-constraint-identity-cascade",
         "model-add-linear-load-pattern",
         "model-add-linear-load-combination",
         "model-add-linear-load-combination-term",
@@ -1191,6 +1192,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "fixed_constraint_dof_reorder",
             "structural-native:model-edit-fixed-constraint-identity.v1",
             "fixed_constraint_identity_edit",
+            "structural-native:model-edit-fixed-constraint-identity-cascade.v2",
+            "fixed_constraint_identity_cascade_edit",
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
             "structural-native:model-add-linear-load-combination.v1",
@@ -2708,6 +2711,30 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    fixed_constraint_identity_cascade_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"),
+        fixed_constraint_identity_cascade_edit_doc,
+        (
+            "model-edit-fixed-constraint-identity-cascade",
+            "single C ABI into C++",
+            "structural-native:model-edit-fixed-constraint-identity-cascade.v2",
+            "fixed_constraint_identity_cascade_edit",
+            "append-only v83",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[200000,0,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers,
+    )
     nodal_load_identity_edit_doc = _text(
         root, Path("docs/native/modelir-nodal-load-identity-edit-v1.md"), blockers
     )
@@ -3104,6 +3131,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-add-fixed-constraint-dof",
             "model-reorder-fixed-constraint-dof",
             "model-edit-fixed-constraint-identity",
+            "model-edit-fixed-constraint-identity-cascade",
             "model-edit-constraint-value",
             "model-edit-linear-material",
             "model-edit-linear-material-identity",

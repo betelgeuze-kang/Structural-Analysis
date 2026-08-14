@@ -5461,6 +5461,189 @@ exercise_element_identity_cascade_edit_surface() {
 }
 exercise_element_identity_cascade_edit_surface
 
+exercise_fixed_constraint_identity_cascade_edit_surface() {
+  local source_model="$mgt_linear_direct/01-import/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/fixed-constraint-identity-cascade-edit-$label"
+    request_directory="$e2e_root/fixed-constraint-identity-cascade-edit-$label-request"
+    direct_directory="$e2e_root/fixed-constraint-identity-cascade-edit-$label-direct"
+    partial_directory="$e2e_root/fixed-constraint-identity-cascade-edit-$label-partial"
+    resumed_directory="$e2e_root/fixed-constraint-identity-cascade-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-fixed-constraint-identity-cascade "$source_model" \
+      --constraint C_1 --new-constraint C1_LINKED --output-dir "$edit_directory" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"fixed_constraint_identity_cascade_edit"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_constraint_id":"C_1"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"replacement_constraint_id":"C1_LINKED"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_type":"fixed_dofs"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"construction_stage_reference_count":0' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"roundtrip_reference_count":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"typed_reference_cascade_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"id":"C1_LINKED","index":0' "$edit_directory/model-ir.json"
+    grep -Fq '"model_ir_entity_id":"C1_LINKED"' "$edit_directory/model-ir.json"
+    grep -Fq '"mapping_status":"approximated"' "$edit_directory/model-ir.json"
+    grep -Fq '"structural-native:model-edit-fixed-constraint-identity-cascade.v2"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case fixed-constraint-identity-cascade-edit-c5 --load-pattern LP_PUSH \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[200000,0,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/fixed-constraint-identity-cascade-edit-first$suffix" \
+      "$e2e_root/fixed-constraint-identity-cascade-edit-second$suffix" \
+      > "$e2e_root/fixed-constraint-identity-cascade-edit-$diff_label-diff.txt"
+    cmp "$e2e_root/fixed-constraint-identity-cascade-edit-first$suffix.stdout.json" \
+      "$e2e_root/fixed-constraint-identity-cascade-edit-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/fixed-constraint-identity-cascade-edit-first-validation.json" \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed fixed-constraint identity cascade mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/fixed-constraint-identity-cascade-edit-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade "$source_model" \
+    --constraint C_404 --new-constraint C3 --output-dir "$missing_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-missing-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade accepted a missing constraint" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_constraint_missing' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local orphan_destination="$e2e_root/fixed-constraint-identity-cascade-edit-orphan-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade "$linear_model" \
+    --constraint BC1 --new-constraint BC1_LINKED --output-dir "$orphan_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-orphan-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade accepted an unreferenced constraint" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_cascade_unreferenced' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-orphan-rejected.stdout.json"
+  test ! -e "$orphan_destination"
+
+  local collision_destination="$e2e_root/fixed-constraint-identity-cascade-edit-collision-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade \
+    "$e2e_root/fixed-constraint-add-first/model-ir.json" \
+    --constraint BC1 --new-constraint BC_N3 --output-dir "$collision_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-collision-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade accepted a colliding identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_replacement_exists' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-collision-rejected.stdout.json"
+  test ! -e "$collision_destination"
+
+  local no_op_destination="$e2e_root/fixed-constraint-identity-cascade-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade "$source_model" \
+    --constraint C_1 --new-constraint C_1 --output-dir "$no_op_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-no-op-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local invalid_destination="$e2e_root/fixed-constraint-identity-cascade-edit-invalid-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade "$source_model" \
+    --constraint C_1 --new-constraint 1_INVALID --output-dir "$invalid_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-invalid-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade accepted an invalid stable identity" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_fixed_constraint_identity_replacement_invalid' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-invalid-rejected.stdout.json"
+  test ! -e "$invalid_destination"
+
+  local existing_destination="$e2e_root/fixed-constraint-identity-cascade-edit-existing-rejected"
+  mkdir "$existing_destination"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-fixed-constraint-identity-cascade "$source_model" \
+    --constraint C_1 --new-constraint C1_LINKED --output-dir "$existing_destination" \
+    > "$e2e_root/fixed-constraint-identity-cascade-edit-existing-rejected.stdout.json"; then
+    echo "installed fixed-constraint identity cascade overwrote an existing destination" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_stage_destination_exists' \
+    "$e2e_root/fixed-constraint-identity-cascade-edit-existing-rejected.stdout.json"
+}
+exercise_fixed_constraint_identity_cascade_edit_surface
+
 exercise_orphan_node_delete_surface() {
   local source_model="$e2e_root/node-add-first/model-ir.json"
   local source_before_hash
@@ -9921,6 +10104,15 @@ element_identity_cascade_edit_checkpoint_hash="$(sha256sum "$e2e_root/element-id
 element_identity_cascade_edit_result_ir_hash="$(sha256sum "$e2e_root/element-identity-cascade-edit-first-direct/result-ir.json" | awk '{print $1}')"
 element_identity_cascade_edit_recovery_hash="$(sha256sum "$e2e_root/element-identity-cascade-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 element_identity_cascade_edit_report_ir_hash="$(sha256sum "$e2e_root/element-identity-cascade-edit-first-direct/report-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_model_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first/model-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first/edit-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_request_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-request/request-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_request_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-request/analysis-request.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_checkpoint_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-direct/result-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+fixed_constraint_identity_cascade_edit_report_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-identity-cascade-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -10473,6 +10665,10 @@ v82_receipt_json="${v81_receipt_json/structural-native-distribution-e2e.v81/stru
 element_identity_cascade_edit_receipt_fields="\"workbench_element_identity_cascade_edit_surface_passed\":true,\"workbench_element_identity_cascade_edit_model_sha256\":\"sha256:$element_identity_cascade_edit_model_hash\",\"workbench_element_identity_cascade_edit_receipt_sha256\":\"sha256:$element_identity_cascade_edit_receipt_hash\",\"workbench_element_identity_cascade_edit_request_receipt_sha256\":\"sha256:$element_identity_cascade_edit_request_receipt_hash\",\"workbench_element_identity_cascade_edit_request_sha256\":\"sha256:$element_identity_cascade_edit_request_hash\",\"workbench_element_identity_cascade_edit_assembly_receipt_sha256\":\"sha256:$element_identity_cascade_edit_assembly_receipt_hash\",\"workbench_element_identity_cascade_edit_checkpoint_sha256\":\"sha256:$element_identity_cascade_edit_checkpoint_hash\",\"workbench_element_identity_cascade_edit_result_ir_sha256\":\"sha256:$element_identity_cascade_edit_result_ir_hash\",\"workbench_element_identity_cascade_edit_recovery_sha256\":\"sha256:$element_identity_cascade_edit_recovery_hash\",\"workbench_element_identity_cascade_edit_report_ir_sha256\":\"sha256:$element_identity_cascade_edit_report_ir_hash\",\"workbench_element_identity_cascade_edit_restart_passed\":true,"
 v82_receipt_json="${v82_receipt_json/\"workbench_result_view_surface_passed\":true,/${element_identity_cascade_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v82_receipt_json" > "$temporary_receipt"
+v83_receipt_json="${v82_receipt_json/structural-native-distribution-e2e.v82/structural-native-distribution-e2e.v83}"
+fixed_constraint_identity_cascade_edit_receipt_fields="\"workbench_fixed_constraint_identity_cascade_edit_surface_passed\":true,\"workbench_fixed_constraint_identity_cascade_edit_model_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_model_hash\",\"workbench_fixed_constraint_identity_cascade_edit_receipt_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_receipt_hash\",\"workbench_fixed_constraint_identity_cascade_edit_request_receipt_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_request_receipt_hash\",\"workbench_fixed_constraint_identity_cascade_edit_request_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_request_hash\",\"workbench_fixed_constraint_identity_cascade_edit_assembly_receipt_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_assembly_receipt_hash\",\"workbench_fixed_constraint_identity_cascade_edit_checkpoint_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_checkpoint_hash\",\"workbench_fixed_constraint_identity_cascade_edit_result_ir_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_result_ir_hash\",\"workbench_fixed_constraint_identity_cascade_edit_recovery_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_recovery_hash\",\"workbench_fixed_constraint_identity_cascade_edit_report_ir_sha256\":\"sha256:$fixed_constraint_identity_cascade_edit_report_ir_hash\",\"workbench_fixed_constraint_identity_cascade_edit_restart_passed\":true,"
+v83_receipt_json="${v83_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_identity_cascade_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v83_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

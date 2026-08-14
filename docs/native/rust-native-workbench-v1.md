@@ -85,8 +85,16 @@ preserving complete mask membership and prescribed values; see
 constraint identity with a distinct unique stable ID, preserves every non-identity field, rejects
 stage/unsupported-feature/round-trip ownership without cascade, and C++-revalidates the edited
 snapshot. See `docs/native/modelir-fixed-constraint-identity-edit-v1.md`. Other entity identity
-editing remains split into separate bounded surfaces; node, section, element and combination
-identity replacement plus every reference cascade remain open.
+editing remains split into separate bounded surfaces. The separate
+`model-edit-fixed-constraint-identity-cascade` command changes one referenced `fixed_dofs` stable
+ID and atomically rewrites typed construction-stage plus direct constraint round-trip references.
+It preserves index, target node, complete ordered DOF mask, prescribed values, source identity and
+extensions, degrades exact or canonicalized direct mappings to approximated, requires at least one
+such reference, rejects unsupported-feature ownership, and C++-revalidates the edited snapshot.
+Installed distribution v83 uses the normalized MGT mapping to replace `C_1` with `C1_LINKED`;
+stage-reference execution remains outside the current linear projection. See
+`docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md`. Broader constraint families and
+untyped reference cascades remain open.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
 parameter set only for one existing v1 `linear_elastic_isotropic` material. The frame-section
 editor similarly replaces the six positive SI parameters only for one existing v1 `frame_3d`

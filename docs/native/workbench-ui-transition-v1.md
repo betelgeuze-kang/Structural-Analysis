@@ -130,6 +130,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   load `[0,-1000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Other
   bounded identity surfaces are separate; reference cascades and MPC/contact/support sets remain
   open.
+- `model-edit-fixed-constraint-identity-cascade`: deterministic replacement of one referenced
+  `fixed_dofs` identity with a distinct unique ModelIR stable ID. Rust atomically rewrites every
+  typed construction-stage reference plus direct constraint round-trip ownership, degrades exact
+  or canonicalized direct mappings to approximated, preserves the complete constraint row, and
+  requires at least one such reference before strict Rust and C++ revalidation. Installed E2E v83
+  consumes the normalized MGT mapping, replaces `C_1` with `C1_LINKED`, and proves frame recovery
+  type `[1]`, offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active load
+  `[200000,0,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Focused E2E
+  proves the construction-stage constraint cascade, but stage-bearing linear execution, untyped
+  extension and unsupported-feature cascades, MPC/contact/support sets and visual manipulation
+  remain open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint

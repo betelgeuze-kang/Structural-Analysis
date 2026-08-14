@@ -27,7 +27,9 @@ reference cascade,
 `model-delete-fixed-constraint-dof` single-restraint deletion and the closed
 `model-add-fixed-constraint-dof` single-restraint addition plus
 `model-reorder-fixed-constraint-dof` order-only restraint movement plus
-`model-edit-fixed-constraint-identity` unreferenced stable-identity replacement, and the closed
+`model-edit-fixed-constraint-identity` unreferenced stable-identity replacement plus
+`model-edit-fixed-constraint-identity-cascade` referenced stable-identity replacement with typed
+construction-stage and direct constraint round-trip reference cascade, and the closed
 `model-edit-linear-material`, `model-edit-linear-material-identity`,
 `model-edit-linear-material-identity-cascade`, `model-edit-frame-section`,
 `model-edit-frame-section-identity`, `model-edit-frame-section-identity-cascade`,
@@ -139,7 +141,18 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v82 proves repeated element-identity-cascade-edited/request/
+assembly preflight. Distribution E2E v83 retains every v82 assertion and adds repeated
+fixed-constraint-identity-cascade-edited/request/artifact bytes from the same normalized MGT
+cantilever source while
+replacing mapped `C_1` with `C1_LINKED` through
+`model-edit-fixed-constraint-identity-cascade`. It atomically rewrites the direct constraint
+round-trip identity, degrades its canonicalized disposition to approximated, rejects malformed,
+no-op, colliding and unreferenced identities plus unsupported-feature ownership, and proves exact
+typed frame recovery `[1]`, offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active load
+`[200000,0,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback 0. Focused E2E
+separately proves construction-stage constraint-reference cascade and C++ validation; stage-bearing
+linear execution remains outside the current projection. Distribution E2E v82 proves repeated
+element-identity-cascade-edited/request/
 artifact bytes from the normalized MGT cantilever source while replacing mapped `E_1` with
 `E1_LINKED` through `model-edit-element-identity-cascade`. It atomically rewrites the direct
 element round-trip identity, degrades its canonicalized disposition to approximated, rejects

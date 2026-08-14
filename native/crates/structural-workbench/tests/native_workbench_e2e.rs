@@ -1133,6 +1133,24 @@ fn run_fixed_constraint_identity_edit(
     ])
 }
 
+fn run_fixed_constraint_identity_cascade_edit(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    replacement_constraint_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-fixed-constraint-identity-cascade"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--new-constraint"),
+        text(replacement_constraint_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_nodal_load_identity_edit(
     source: &Path,
     destination: &Path,
@@ -8461,6 +8479,380 @@ fn fixed_constraint_identity_edit_is_deterministic_reference_closed_and_cpu_exec
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_constraint_identity_cascade_is_atomic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base_bytes = std::fs::read(&base).expect("base constraint-cascade ModelIR bytes");
+    let base_validation = validate_model_bytes(&base_bytes).expect("C++-validated base ModelIR");
+    let base_model = base_validation.snapshot.value().clone();
+    let mut source_model = base_model.clone();
+    source_model["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "CONSTRAINT:1",
+            "entity_kind": "constraint",
+            "model_ir_entity_id": "BC1",
+            "mapping_status": "canonicalized",
+            "extensions": {"structural-native:source-section": "CONSTRAINT"}
+        },
+        {
+            "source_entity_id": "NODE:1",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N1",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let source = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-source.json");
+    std::fs::write(
+        &source,
+        canonicalize_model_ir_v2(&source_model)
+            .expect("canonical constraint-cascade source")
+            .as_bytes(),
+    )
+    .expect("write constraint-cascade source");
+    let source_bytes = std::fs::read(&source).expect("constraint-cascade source bytes");
+    let source_validation =
+        validate_model_bytes(&source_bytes).expect("C++-validated constraint-cascade source");
+    assert!(source_validation.report.analysis_ready);
+
+    let first = temporary.0.join("fixed-constraint-identity-cascade-first");
+    let second = temporary.0.join("fixed-constraint-identity-cascade-second");
+    for destination in [&first, &second] {
+        let output =
+            run_fixed_constraint_identity_cascade_edit(&source, destination, "BC1", "BC1_LINKED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published constraint-cascade receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint-cascade artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint-cascade artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged constraint-cascade source"),
+        source_bytes
+    );
+
+    let edited_bytes = std::fs::read(first.join("model-ir.json"))
+        .expect("fixed-constraint identity-cascaded ModelIR");
+    let edited =
+        parse_model_ir_v2(&edited_bytes).expect("strict constraint identity-cascaded ModelIR");
+    let edited_validation = validate_model_bytes(&edited_bytes)
+        .expect("C++-validated constraint identity-cascaded ModelIR");
+    assert!(edited_validation.report.analysis_ready);
+    assert_eq!(
+        edited_validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(edited.value()["constraints"][0]["id"], "BC1_LINKED");
+    for (key, value) in source_model["constraints"][0]
+        .as_object()
+        .expect("source constraint object")
+    {
+        if key != "id" {
+            assert_eq!(&edited.value()["constraints"][0][key], value);
+        }
+    }
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["model_ir_entity_id"],
+        "BC1_LINKED"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["extensions"],
+        source_model["roundtrip_map"][0]["extensions"]
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][1],
+        source_model["roundtrip_map"][1]
+    );
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-fixed-constraint-identity-cascade.v2")
+        .expect("constraint identity cascade provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "fixed_constraint_identity_cascade_edit"
+    );
+    assert_eq!(extension["source_constraint_id"], "BC1");
+    assert_eq!(extension["replacement_constraint_id"], "BC1_LINKED");
+    assert_eq!(extension["constraint_index"], 0);
+    assert_eq!(extension["constraint_type"], "fixed_dofs");
+    assert_eq!(extension["node_id"], "N1");
+    assert_eq!(
+        extension["retained_dofs"],
+        source_model["constraints"][0]["dofs"]
+    );
+    assert_eq!(
+        extension["retained_prescribed_values_si"],
+        source_model["constraints"][0]["prescribed_values_si"]
+    );
+    assert_eq!(extension["construction_stage_reference_count"], 0);
+    assert_eq!(extension["roundtrip_reference_count"], 1);
+    assert_eq!(extension["typed_reference_cascade_verified"], true);
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json"))
+            .expect("constraint identity cascade receipt"),
+    )
+    .expect("constraint identity cascade receipt JSON");
+    assert_eq!(
+        receipt["operation"],
+        "fixed_constraint_identity_cascade_edit"
+    );
+    assert_eq!(receipt["source_constraint_id"], "BC1");
+    assert_eq!(receipt["replacement_constraint_id"], "BC1_LINKED");
+    assert_eq!(receipt["constraint_index"], 0);
+    assert_eq!(receipt["construction_stage_reference_count"], 0);
+    assert_eq!(receipt["roundtrip_reference_count"], 1);
+    assert_eq!(receipt["typed_reference_cascade_verified"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let mut staged_model = base_model.clone();
+    staged_model["construction_stages"] = serde_json::json!([{
+        "id": "STAGE_BC1",
+        "index": 0,
+        "active_element_ids": ["E1"],
+        "active_constraint_ids": ["BC1"],
+        "load_pattern_ids": ["LC_WEAK"],
+        "extensions": {"structural-native:fixture": true}
+    }]);
+    let staged_source = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-staged-source.json");
+    std::fs::write(
+        &staged_source,
+        canonicalize_model_ir_v2(&staged_model)
+            .expect("canonical staged constraint-cascade source")
+            .as_bytes(),
+    )
+    .expect("write staged constraint-cascade source");
+    let staged_destination = temporary.0.join("fixed-constraint-identity-cascade-staged");
+    assert_success(&run_fixed_constraint_identity_cascade_edit(
+        &staged_source,
+        &staged_destination,
+        "BC1",
+        "BC1_STAGED",
+    ));
+    let staged_edited_bytes = std::fs::read(staged_destination.join("model-ir.json"))
+        .expect("staged constraint identity-cascaded ModelIR");
+    let staged_edited = parse_model_ir_v2(&staged_edited_bytes)
+        .expect("strict staged constraint identity-cascaded ModelIR");
+    let staged_validation = validate_model_bytes(&staged_edited_bytes)
+        .expect("C++-validated staged constraint identity-cascaded ModelIR");
+    assert!(staged_validation.report.analysis_ready);
+    assert_eq!(staged_edited.value()["constraints"][0]["id"], "BC1_STAGED");
+    assert_eq!(
+        staged_edited.value()["construction_stages"][0]["active_constraint_ids"],
+        serde_json::json!(["BC1_STAGED"])
+    );
+    assert_eq!(
+        staged_edited.value()["construction_stages"][0]["extensions"],
+        staged_model["construction_stages"][0]["extensions"]
+    );
+    let staged_receipt: Value = serde_json::from_slice(
+        &std::fs::read(staged_destination.join("edit-receipt.json"))
+            .expect("staged constraint cascade receipt"),
+    )
+    .expect("staged constraint cascade receipt JSON");
+    assert_eq!(staged_receipt["construction_stage_reference_count"], 1);
+    assert_eq!(staged_receipt["roundtrip_reference_count"], 0);
+
+    for (name, constraint_id, replacement, expected_code) in [
+        (
+            "missing",
+            "BC404",
+            "BC_NEW",
+            "workbench_model_edit_fixed_constraint_identity_constraint_missing",
+        ),
+        ("no-op", "BC1", "BC1", "workbench_model_edit_no_change"),
+        (
+            "invalid-replacement",
+            "BC1",
+            "1_INVALID",
+            "workbench_model_edit_fixed_constraint_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary
+            .0
+            .join(format!("fixed-constraint-identity-cascade-{name}"));
+        let rejected = run_fixed_constraint_identity_cascade_edit(
+            &source,
+            &destination,
+            constraint_id,
+            replacement,
+        );
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+    let orphan_destination = temporary.0.join("fixed-constraint-identity-cascade-orphan");
+    let orphan_rejection =
+        run_fixed_constraint_identity_cascade_edit(&base, &orphan_destination, "BC1", "BC1_LINKED");
+    assert_eq!(orphan_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&orphan_rejection.stdout)
+        .contains("workbench_model_edit_fixed_constraint_identity_cascade_unreferenced"));
+    assert!(!orphan_destination.exists());
+
+    let mut collision_model = source_model.clone();
+    let mut collision_constraint = collision_model["constraints"][0].clone();
+    collision_constraint["id"] = serde_json::json!("BC2");
+    collision_constraint["index"] = serde_json::json!(1);
+    collision_constraint["node_id"] = serde_json::json!("N2");
+    collision_constraint["source_id"] = Value::Null;
+    collision_constraint["extensions"] = serde_json::json!({});
+    collision_model["constraints"]
+        .as_array_mut()
+        .expect("collision constraints")
+        .push(collision_constraint);
+    let collision_source = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-collision-source.json");
+    std::fs::write(
+        &collision_source,
+        canonicalize_model_ir_v2(&collision_model)
+            .expect("canonical collision source")
+            .as_bytes(),
+    )
+    .expect("write collision source");
+    let collision_destination = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-collision-output");
+    let collision = run_fixed_constraint_identity_cascade_edit(
+        &collision_source,
+        &collision_destination,
+        "BC1",
+        "BC2",
+    );
+    assert_eq!(collision.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&collision.stdout)
+        .contains("workbench_model_edit_fixed_constraint_identity_replacement_exists"));
+    assert!(!collision_destination.exists());
+
+    let mut feature_owned = source_model.clone();
+    feature_owned["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.constraint-cascade-owned",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": "BC1",
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Constraint identity remains externally owned.",
+        "extensions": {}
+    }]);
+    let feature_owned_path = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-feature-owned-source.json");
+    std::fs::write(
+        &feature_owned_path,
+        canonicalize_model_ir_v2(&feature_owned)
+            .expect("canonical feature-owned constraint source")
+            .as_bytes(),
+    )
+    .expect("write feature-owned constraint source");
+    let feature_destination = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-feature-owned");
+    let feature_rejection = run_fixed_constraint_identity_cascade_edit(
+        &feature_owned_path,
+        &feature_destination,
+        "BC1",
+        "BC1_LINKED",
+    );
+    assert_eq!(feature_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&feature_rejection.stdout).contains(
+        "workbench_model_edit_fixed_constraint_identity_cascade_unsupported_feature_owned"
+    ));
+    assert!(!feature_destination.exists());
+
+    let existing = run_fixed_constraint_identity_cascade_edit(&source, &first, "BC1", "BC1_LINKED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary
+        .0
+        .join("fixed-constraint-identity-cascade-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "fixed-constraint-identity-cascade-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("constraint identity cascade request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("constraint identity cascade direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("constraint identity cascade direct recovery"),
+    )
+    .expect("constraint identity cascade recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("constraint identity cascade initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("constraint identity cascade resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
     );
 }
 

@@ -21,7 +21,8 @@ absent from the runtime image.
   `model-edit-linear-load-pattern-identity-cascade` typed pattern-reference cascade, plus
   `model-edit-linear-load-combination-identity-cascade` typed downstream-combination-reference
   cascade and `model-edit-element-identity-cascade` typed construction-stage/direct-element-
-  round-trip reference cascade, plus
+  round-trip reference cascade, plus `model-edit-fixed-constraint-identity-cascade` typed
+  construction-stage/direct-constraint-round-trip reference cascade, plus
   `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
@@ -207,6 +208,9 @@ structural-workbench model-edit-linear-load-combination-identity-cascade /worksp
 structural-workbench model-edit-element-identity-cascade /workspace/model.json \
   --element E1 --new-element E1_LINKED \
   --output-dir /workspace/renamed-referenced-element-model
+structural-workbench model-edit-fixed-constraint-identity-cascade /workspace/model.json \
+  --constraint BC1 --new-constraint BC1_LINKED \
+  --output-dir /workspace/renamed-referenced-constraint-model
 structural-workbench model-edit-constraint-value /workspace/model.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir /workspace/edited-constraint-model

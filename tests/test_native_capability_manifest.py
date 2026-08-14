@@ -423,6 +423,29 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in element_identity_cascade["claim"]
     assert "approved HIP C2" in element_identity_cascade["claim"]
     assert "C6" in element_identity_cascade["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_fixed_constraint_identity_cascade_edit"
+        )
+        is True
+    )
+    fixed_constraint_identity_cascade = payload["capabilities"][
+        "modelir_fixed_constraint_identity_cascade_edit"
+    ]
+    assert fixed_constraint_identity_cascade["cutover_gate"] == "C5"
+    assert fixed_constraint_identity_cascade["owner"] == "structural-workbench"
+    assert (
+        "atomically updates every construction_stages"
+        in fixed_constraint_identity_cascade["claim"]
+    )
+    assert "direct constraint round-trip" in fixed_constraint_identity_cascade["claim"]
+    assert "normalized MGT round-trip mapping" in fixed_constraint_identity_cascade["claim"]
+    assert "distribution v83 E2E" in fixed_constraint_identity_cascade["claim"]
+    assert "C_1 with C1_LINKED" in fixed_constraint_identity_cascade["claim"]
+    assert "byte-identical initialized restart" in fixed_constraint_identity_cascade["claim"]
+    assert "fallback 0" in fixed_constraint_identity_cascade["claim"]
+    assert "approved HIP C2" in fixed_constraint_identity_cascade["claim"]
+    assert "C6" in fixed_constraint_identity_cascade["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_orphan_node_delete") is True
     orphan_node_delete = payload["capabilities"]["modelir_orphan_node_delete"]
     assert orphan_node_delete["cutover_gate"] == "C5"
