@@ -253,6 +253,8 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "model-delete-orphan-node" in workbench["claim"]
     assert "model-add-linear-load-combination" in workbench["claim"]
     assert "model-delete-linear-load-combination" in workbench["claim"]
+    assert "two through 64 unique pattern terms" in workbench["claim"]
+    assert "v2 deletion provenance beyond two terms" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
@@ -362,6 +364,27 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "nested combinations" in direct_combination["claim"]
     assert "HIP C2" in direct_combination["claim"]
     assert "C6" in direct_combination["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_direct_linear_load_combination_deletion"
+        )
+        is True
+    )
+    direct_combination_delete = payload["capabilities"][
+        "modelir_direct_linear_load_combination_deletion"
+    ]
+    assert direct_combination_delete["cutover_gate"] == "C5"
+    assert direct_combination_delete["owner"] == "structural-workbench"
+    assert "two through 64 ordered terms" in direct_combination_delete["claim"]
+    assert "exact-two v1 provenance/receipt field set" in direct_combination_delete["claim"]
+    assert "v2 deletion provenance" in direct_combination_delete["claim"]
+    assert "distribution v47 E2E" in direct_combination_delete["claim"]
+    assert "exact restored direct-pattern active load" in direct_combination_delete["claim"]
+    assert "byte-identical direct/restart output" in direct_combination_delete["claim"]
+    assert "nested deletion" in direct_combination_delete["claim"]
+    assert "fallback 0" in direct_combination_delete["claim"]
+    assert "HIP C2" in direct_combination_delete["claim"]
+    assert "C6" in direct_combination_delete["claim"]
     assert (
         capabilities.capability_is_enabled(
             payload, "modelir_nested_linear_load_combination_authoring_execution"
@@ -986,6 +1009,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v44" in distribution["claim"]
     assert "append-only v45" in distribution["claim"]
     assert "append-only v46" in distribution["claim"]
+    assert "append-only v47" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -995,7 +1019,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v45 receipts" in distribution["claim"]
+    assert "frozen v1 through v46 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-section deletion" in distribution["claim"]
@@ -1008,6 +1032,9 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "bounded two-through-64 direct linear-load-combination authoring" in distribution["claim"]
     assert "bounded acyclic nested linear-load-combination authoring" in distribution["claim"]
     assert "depth-eight/64-leaf flattening" in distribution["claim"]
+    assert "two-through-64 direct linear-load-combination deletion" in distribution["claim"]
+    assert "exact-two v1 field preservation" in distribution["claim"]
+    assert "v2 deletion provenance beyond two terms" in distribution["claim"]
     assert "exact unchanged active DOFs/load" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
@@ -1039,13 +1066,14 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v46 E2E" in deployment["claim"]
+    assert "distribution v47 E2E" in deployment["claim"]
     assert "standalone neutral-node creation" in deployment["claim"]
     assert "last-neutral orphan-node deletion" in deployment["claim"]
     assert "two-pattern linear-load-combination creation" in deployment["claim"]
-    assert "last-neutral linear-load-combination deletion" in deployment["claim"]
+    assert "last-neutral exact-two linear-load-combination deletion" in deployment["claim"]
     assert "bounded two-pattern linear-load-combination CPU execution" in deployment["claim"]
     assert "bounded two-through-64 direct linear-load-combination authoring and CPU execution" in deployment["claim"]
+    assert "bounded two-through-64 direct linear-load-combination deletion" in deployment["claim"]
     assert "bounded acyclic nested linear-load-combination authoring and CPU execution" in deployment["claim"]
     assert "depth-eight/64-leaf flattening" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]

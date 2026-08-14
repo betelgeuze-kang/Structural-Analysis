@@ -45,5 +45,5 @@ assembly receipt, checkpoint, ResultIR, recovery and ReportIR hashes. Frozen v1 
 distribution receipts retain their narrower authority.
 
 Nested combinations, self-weight, time functions, construction stages, shell/nonlinear
-combination execution, general term editing/deletion, approved-device HIP C2, engineering
+combination execution, direct term editing, nested/general deletion, approved-device HIP C2, engineering
 acceptance and C6 remain open.

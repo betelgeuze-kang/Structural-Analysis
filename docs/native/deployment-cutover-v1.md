@@ -46,7 +46,8 @@ with explicitly typed pattern/combination terms, root-inclusive depth at most ei
 expanded leaves. Rust and C++ independently flatten and validate it; v3 receipts bind both root and
 resolved pattern terms before native CPU execution.
 The installed `model-delete-linear-load-combination` command removes only the last contiguous
-neutral, extension-free and unreferenced row with that exact two-pattern shape. It rejects nested,
+neutral, extension-free and unreferenced direct row with two through 64 unique pattern terms.
+Exact-two deletion retains the v1 field set; larger rows use v2 deletion provenance. It rejects nested,
 mapped, source-owned, feature-owned, referenced or nonterminal candidates, C++-revalidates the
 edited graph, and restores direct load-pattern CPU execution.
 The installed `model-delete-linear-load-pattern` command removes only the last contiguous neutral
@@ -83,7 +84,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v46 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v47 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -118,8 +119,9 @@ fallback 0 and byte-identical checkpoint/restart output,
 plus bounded acyclic nested linear-load-combination authoring and CPU execution with depth eight,
 64 expanded leaves, v3 provenance/request receipts, exact nested active load, typed recovery,
 fallback 0 and byte-identical checkpoint/restart output,
-plus last-neutral linear-load-combination deletion with exact removed term bindings, restored
-direct load-pattern CPU execution, typed frame recovery, checkpoint/restart parity and fallback 0,
+plus last-neutral two-through-64 direct linear-load-combination deletion with exact-two v1 field
+preservation, v2 provenance beyond two terms, exact removed term bindings, restored direct
+load-pattern CPU execution, typed frame recovery, checkpoint/restart parity and fallback 0,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The

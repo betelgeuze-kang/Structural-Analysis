@@ -5643,6 +5643,82 @@ fn direct_three_pattern_linear_load_combination_executes_and_restarts_without_fa
         resumed.result_recovery_ir_json(),
         direct.result_recovery_ir_json()
     );
+
+    let delete_first = temporary.0.join("direct-combination-delete-first");
+    let delete_second = temporary.0.join("direct-combination-delete-second");
+    for destination in [&delete_first, &delete_second] {
+        assert_success(&run_linear_load_combination_delete(
+            &first.join("model-ir.json"),
+            destination,
+            "COMBO_DIRECT",
+        ));
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(delete_first.join(artifact)).expect("first direct-deletion artifact"),
+            std::fs::read(delete_second.join(artifact)).expect("second direct-deletion artifact")
+        );
+    }
+    let deleted_bytes =
+        std::fs::read(delete_first.join("model-ir.json")).expect("direct-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict direct-deleted ModelIR");
+    assert_eq!(deleted.value()["load_combinations"], serde_json::json!([]));
+    let delete_extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-direct-linear-load-combination.v2")
+        .expect("direct-combination delete provenance extension");
+    assert_eq!(
+        delete_extension["operation"],
+        "direct_linear_load_combination_delete"
+    );
+    assert_eq!(
+        delete_extension["deletion_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_eq!(delete_extension["term_count"], 3);
+    assert_eq!(
+        delete_extension["removed_terms"],
+        edited.value()["load_combinations"][0]["terms"]
+    );
+    let mut delete_receipt: Value = serde_json::from_slice(
+        &std::fs::read(delete_first.join("edit-receipt.json"))
+            .expect("direct-combination delete receipt"),
+    )
+    .expect("direct-combination delete receipt JSON");
+    assert_eq!(
+        delete_receipt["operation"],
+        "direct_linear_load_combination_delete"
+    );
+    assert_eq!(delete_receipt["term_count"], 3);
+    assert_eq!(
+        delete_receipt["deletion_profile"],
+        "unique_direct_linear_static_patterns_2_to_64"
+    );
+    assert_self_hashed_edit_receipt(&mut delete_receipt);
+
+    let deleted_request_directory = temporary.0.join("direct-combination-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &delete_first.join("model-ir.json"),
+        &deleted_request_directory,
+        "direct-combination-delete-c5",
+        "LC_WEAK",
+    ));
+    let deleted_request = std::fs::read(deleted_request_directory.join("analysis-request.json"))
+        .expect("direct-combination delete request");
+    let deleted_direct =
+        execute_model_ir_linear_analysis(&deleted_bytes, &deleted_request, None, u32::MAX)
+            .expect("direct-combination deletion CPU execution");
+    assert!(deleted_direct.is_complete());
+    let deleted_recovery: Value = serde_json::from_str(
+        deleted_direct
+            .result_recovery_ir_json()
+            .expect("direct-combination deletion recovery"),
+    )
+    .expect("direct-combination deletion recovery JSON");
+    assert_eq!(
+        deleted_recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(deleted_recovery["fallback_count"], 0);
 }
 
 #[test]
@@ -5853,6 +5929,8 @@ fn linear_load_combination_deletion_is_deterministic_fail_closed_and_restores_cp
         .get("structural-native:model-delete-linear-load-combination.v1")
         .expect("linear-load-combination delete provenance extension");
     assert_eq!(extension["operation"], "linear_load_combination_delete");
+    assert!(extension.get("deletion_profile").is_none());
+    assert!(extension.get("term_count").is_none());
     assert_eq!(extension["removed_load_combination_id"], "COMBO_SERVICE");
     assert_eq!(extension["removed_load_combination_index"], 0);
     assert_eq!(extension["removed_combination_type"], "linear");
@@ -5869,6 +5947,8 @@ fn linear_load_combination_deletion_is_deterministic_fail_closed_and_restores_cp
     )
     .expect("linear-load-combination delete receipt JSON");
     assert_eq!(receipt["operation"], "linear_load_combination_delete");
+    assert!(receipt.get("deletion_profile").is_none());
+    assert!(receipt.get("term_count").is_none());
     assert_eq!(receipt["removed_load_combination_id"], "COMBO_SERVICE");
     assert_eq!(receipt["removed_load_combination_index"], 0);
     assert_eq!(receipt["removed_combination_type"], "linear");

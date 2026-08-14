@@ -89,9 +89,10 @@ The bounded linear-load-combination creator appends one contiguous-index neutral
 two through 64 unique existing `linear_static` patterns and finite nonzero factors. It preserves all
 other rows and blockers and revalidates through the C++ reference/cycle checks. Exact-two authoring
 and request receipts retain their frozen v1 bytes; three through 64 terms use explicit v2
-provenance/request receipts. The bounded inverse still deletes only the last contiguous neutral
-unreferenced row with the exact two-pattern shape, then proves direct load-pattern CPU execution and
-checkpoint/restart parity are restored. Nested terms, general term editing and general deletion
+provenance/request receipts. The bounded inverse deletes only the last contiguous neutral
+unreferenced direct row with two through 64 unique pattern terms, preserves the exact-two v1 path,
+uses v2 deletion provenance beyond two terms, then proves direct load-pattern CPU execution and
+checkpoint/restart parity are restored. Nested deletion, general term editing and general deletion
 remain outside those direct/deletion commands. The separate bounded nested author accepts explicit
 pattern/combination terms, depth eight and 64 expanded leaves, with v3 provenance/request receipts.
 The bounded `--load-combination` request surface uses the frozen v1
@@ -102,6 +103,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-linear-load-combination-execution-v1.md`, and
 `docs/native/modelir-linear-load-combination-deletion-v1.md`, plus the additive
 `docs/native/modelir-direct-linear-load-combination-v1.md` and
+`docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` boundaries.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral

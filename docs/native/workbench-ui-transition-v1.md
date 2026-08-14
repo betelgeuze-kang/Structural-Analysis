@@ -163,7 +163,7 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   Empty patterns, self-weight, time functions, other load families, editing,
   deletion, retargeting and visual authoring remain open.
 - `model-add-linear-load-combination`: deterministic creation of one contiguous neutral `linear`
-  combination from exactly two distinct existing `linear_static` patterns and finite nonzero
+  combination from two through 64 unique existing `linear_static` patterns and finite nonzero
   factors. Rust preserves every unrelated row, blocker and round-trip mapping, then strictly
   reparses and C++-revalidates the reference graph before create-new publication. Installed E2E
   proves deterministic validation/view output, then creates a dedicated `--load-combination`
@@ -180,12 +180,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   Nested deletion/term editing, deeper or larger graphs, self-weight, HIP parity and engineering
   acceptance remain open.
 - `model-delete-linear-load-combination`: deterministic deletion of only the last contiguous
-  neutral, extension-free and unreferenced `linear` combination containing exactly two distinct
-  existing `linear_static` pattern terms with finite nonzero factors. Rust rejects source-owned,
+  neutral, extension-free and unreferenced direct `linear` combination containing two through 64
+  unique existing `linear_static` pattern terms with finite nonzero factors. Exact-two deletion
+  retains the v1 field set; three through 64 terms use explicit v2 deletion provenance. Rust rejects source-owned,
   nonterminal, malformed, nested, referenced, unsupported-feature-owned and round-trip-owned rows,
   then strictly reparses and C++-revalidates before create-new publication. Installed E2E proves
   direct load-pattern CPU execution is restored with exact active DOFs/load, typed frame recovery,
-  checkpoint/restart parity and fallback 0. General combination deletion, term editing,
+  checkpoint/restart parity and fallback 0. Nested/general combination deletion, term editing,
   cascade/reindexing, arbitrary combination evaluation and visual authoring remain open.
 - `model-add-linear-material`: deterministic creation of one v1 `linear_elastic_isotropic`
   material with a unique contiguous index, complete finite physical SI parameters, neutral source

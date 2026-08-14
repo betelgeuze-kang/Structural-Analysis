@@ -61,6 +61,8 @@ const NESTED_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-nested-linear-load-combination.v3";
 const LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-combination.v1";
+const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-direct-linear-load-combination.v2";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
 const LINEAR_MATERIAL_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-material.v1";
@@ -95,6 +97,7 @@ const LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidate
 const DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_to_64_unique_direct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_acyclic_nested_linear_static_load_combination_addition_depth_eight_expanded_64_terms_not_term_edit_nested_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_distinct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
+const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_to_64_unique_direct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -660,7 +663,8 @@ pub fn publish_model_nested_linear_load_combination_add(
     Ok(outcome)
 }
 
-/// Delete one last contiguous neutral unreferenced two-pattern linear combination atomically.
+/// Delete one last contiguous neutral unreferenced two-through-64-pattern direct linear
+/// combination atomically.
 ///
 /// # Errors
 ///
@@ -2253,13 +2257,21 @@ pub fn add_model_nested_linear_load_combination(
     })
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum LinearLoadCombinationDeletionProfileV1 {
+    ExactTwoV1,
+    DirectV2,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 struct RemovedLinearLoadCombinationV1 {
     load_combination_index: usize,
     terms: Value,
+    profile: LinearLoadCombinationDeletionProfileV1,
 }
 
-/// Delete one provenance-bound terminal neutral two-pattern linear combination in memory.
+/// Delete one provenance-bound terminal neutral two-through-64-pattern direct linear combination
+/// in memory.
 ///
 /// # Errors
 ///
@@ -2315,7 +2327,7 @@ pub fn delete_model_linear_load_combination(
         "application/json",
         model_ir_json.as_bytes(),
     )?;
-    let receipt_json = canonical_self_hashed(json!({
+    let mut receipt = json!({
         "schema_version": EDIT_SCHEMA_V1,
         "operation": "linear_load_combination_delete",
         "model_id": edited_validation.report.model_id,
@@ -2337,7 +2349,14 @@ pub fn delete_model_linear_load_combination(
         "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
         "artifacts": [model_artifact],
         "claim_boundary": LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY,
-    }))?;
+    });
+    if removed.profile == LinearLoadCombinationDeletionProfileV1::DirectV2 {
+        receipt["operation"] = json!("direct_linear_load_combination_delete");
+        receipt["deletion_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
+        receipt["term_count"] = json!(removed.terms.as_array().map_or(0, Vec::len));
+        receipt["claim_boundary"] = json!(DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY);
+    }
+    let receipt_json = canonical_self_hashed(receipt)?;
     Ok(ModelLinearLoadCombinationDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
@@ -5707,18 +5726,22 @@ fn remove_linear_load_combination(
     let terms = load_combination
         .get("terms")
         .and_then(Value::as_array)
-        .filter(|terms| terms.len() == 2)
+        .filter(|terms| {
+            (MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
+                ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+                .contains(&terms.len())
+        })
         .ok_or_else(|| {
             WorkbenchError::new(
                 "workbench_model_delete_linear_load_combination_terms_unsupported",
-                "deleted linear load combination must contain exactly two terms",
+                "deleted direct linear load combination must contain between two and 64 terms",
             )
         })?;
     let load_patterns = model
         .get("load_patterns")
         .and_then(Value::as_array)
         .ok_or_else(|| snapshot_error("load_patterns"))?;
-    let mut term_ids = Vec::with_capacity(2);
+    let mut term_ids = Vec::with_capacity(terms.len());
     for term in terms {
         if term.get("ref_kind").and_then(Value::as_str) != Some("load_pattern") {
             return Err(WorkbenchError::new(
@@ -5753,10 +5776,14 @@ fn remove_linear_load_combination(
         }
         term_ids.push(ref_id);
     }
-    if term_ids[0] == term_ids[1] {
+    if term_ids
+        .iter()
+        .enumerate()
+        .any(|(index, id)| term_ids[..index].iter().any(|prior| prior == id))
+    {
         return Err(WorkbenchError::new(
             "workbench_model_delete_linear_load_combination_pattern_duplicate",
-            "deleted linear load combination must reference two distinct patterns",
+            "deleted direct linear load combination must reference unique patterns",
         ));
     }
     if load_combinations
@@ -5807,6 +5834,11 @@ fn remove_linear_load_combination(
     }
 
     let removed_terms = Value::Array(terms.clone());
+    let profile = if terms.len() == 2 {
+        LinearLoadCombinationDeletionProfileV1::ExactTwoV1
+    } else {
+        LinearLoadCombinationDeletionProfileV1::DirectV2
+    };
     model
         .get_mut("load_combinations")
         .and_then(Value::as_array_mut)
@@ -5816,6 +5848,7 @@ fn remove_linear_load_combination(
     Ok(RemovedLinearLoadCombinationV1 {
         load_combination_index,
         terms: removed_terms,
+        profile,
     })
 }
 
@@ -8453,24 +8486,36 @@ fn bind_linear_load_combination_delete_provenance(
     source_semantic_hash: &str,
     source_provenance_hash: &str,
 ) -> Result<(), WorkbenchError> {
-    bind_parameter_edit_provenance(
-        model,
-        LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY,
-        json!({
-            "operation": "linear_load_combination_delete",
-            "removed_load_combination_id": load_combination_id,
-            "removed_load_combination_index": removed.load_combination_index,
-            "removed_combination_type": "linear",
-            "removed_terms": removed.terms,
-            "removed_source_id": null,
-            "removed_extensions": {},
-            "source_content_hash": source_content_hash,
-            "source_semantic_hash": source_semantic_hash,
-            "source_provenance_hash": source_provenance_hash,
-            "claim_boundary": LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY
-        }),
-        source_content_hash,
-    )
+    let (extension_key, operation, claim_boundary) = match removed.profile {
+        LinearLoadCombinationDeletionProfileV1::ExactTwoV1 => (
+            LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY,
+            "linear_load_combination_delete",
+            LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY,
+        ),
+        LinearLoadCombinationDeletionProfileV1::DirectV2 => (
+            DIRECT_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY,
+            "direct_linear_load_combination_delete",
+            DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY,
+        ),
+    };
+    let mut provenance = json!({
+        "operation": operation,
+        "removed_load_combination_id": load_combination_id,
+        "removed_load_combination_index": removed.load_combination_index,
+        "removed_combination_type": "linear",
+        "removed_terms": removed.terms,
+        "removed_source_id": null,
+        "removed_extensions": {},
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "claim_boundary": claim_boundary
+    });
+    if removed.profile == LinearLoadCombinationDeletionProfileV1::DirectV2 {
+        provenance["deletion_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
+        provenance["term_count"] = json!(removed.terms.as_array().map_or(0, Vec::len));
+    }
+    bind_parameter_edit_provenance(model, extension_key, provenance, source_content_hash)
 }
 
 fn bind_linear_load_pattern_delete_provenance(
@@ -9409,9 +9454,9 @@ mod tests {
         validate_truss_element_property_references, validate_truss_section_add_request,
         validate_truss_section_delete_request, validate_truss_section_edit_request,
         FrameSectionParametersV1, LinearElasticMaterialParametersV1,
-        LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
-        NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
-        MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+        LinearLoadCombinationDeletionProfileV1, LinearLoadCombinationReferenceKindV1,
+        LinearLoadCombinationTermV1, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -10424,7 +10469,7 @@ mod tests {
     }
 
     #[test]
-    fn linear_load_combination_delete_requires_terminal_neutral_unreferenced_two_pattern_row() {
+    fn linear_load_combination_delete_requires_terminal_neutral_unreferenced_direct_row() {
         validate_linear_load_combination_delete_request(0, "COMBO_B")
             .expect("valid linear-load-combination deletion request");
         assert!(validate_linear_load_combination_delete_request(0, "").is_err());
@@ -10456,6 +10501,10 @@ mod tests {
             .expect("delete terminal neutral linear combination");
         assert_eq!(removed.load_combination_index, 1);
         assert_eq!(removed.terms, model["load_combinations"][1]["terms"]);
+        assert_eq!(
+            removed.profile,
+            LinearLoadCombinationDeletionProfileV1::ExactTwoV1
+        );
         assert_eq!(
             deleted["load_combinations"],
             json!([combination("COMBO_A", 0)])
@@ -10517,6 +10566,39 @@ mod tests {
                 .code,
             "workbench_model_delete_linear_load_combination_roundtrip_owned"
         );
+    }
+
+    #[test]
+    fn linear_load_combination_delete_accepts_three_pattern_direct_row() {
+        let mut model = json!({
+            "load_patterns": [
+                {"id": "LC_AXIAL", "analysis_type": "linear_static"},
+                {"id": "LC_WEAK", "analysis_type": "linear_static"},
+                {"id": "LC_STRONG", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": [{
+                "id": "COMBO_DIRECT",
+                "index": 0,
+                "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25},
+                    {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                    {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+                ],
+                "source_id": null,
+                "extensions": {}
+            }],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let removed = remove_linear_load_combination(&mut model, "COMBO_DIRECT")
+            .expect("delete terminal three-pattern direct combination");
+        assert_eq!(
+            removed.profile,
+            LinearLoadCombinationDeletionProfileV1::DirectV2
+        );
+        assert_eq!(removed.terms.as_array().map(Vec::len), Some(3));
+        assert_eq!(model["load_combinations"], json!([]));
     }
 
     #[test]
