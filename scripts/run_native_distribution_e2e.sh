@@ -1856,6 +1856,163 @@ exercise_fixed_constraint_dof_add_surface() {
 }
 exercise_fixed_constraint_dof_add_surface
 
+exercise_fixed_constraint_dof_reorder_surface() {
+  local source_model="$e2e_root/fixed-constraint-dof-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/fixed-constraint-dof-reorder-$label"
+    request_directory="$e2e_root/fixed-constraint-dof-reorder-$label-request"
+    direct_directory="$e2e_root/fixed-constraint-dof-reorder-$label-direct"
+    partial_directory="$e2e_root/fixed-constraint-dof-reorder-$label-partial"
+    resumed_directory="$e2e_root/fixed-constraint-dof-reorder-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-reorder-fixed-constraint-dof "$source_model" \
+      --constraint BC_N3 --dof RZ --to-index 0 --output-dir "$edit_directory" \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"fixed_constraint_dof_reorder"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_id":"BC_N3"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_index":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"constraint_type":"fixed_dofs"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"node_id":"N2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"moved_dof":"RZ"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_dof_index":5' "$edit_directory/edit-receipt.json"
+    grep -Fq '"target_dof_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"prescribed_value_explicit":true' "$edit_directory/edit-receipt.json"
+    grep -Fq '"prescribed_value_si":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"unit":"rad"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"source_dofs":["UX","UY","UZ","RX","RY","RZ"]' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_dofs":["RZ","UX","UY","UZ","RX","RY"]' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_prescribed_values_si":{"RX":0,"RY":0,"RZ":0,"UX":0,"UY":0,"UZ":0}' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_source_id":null' "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_extensions":{}' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-reorder-fixed-constraint-dof.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case fixed-constraint-dof-reorder-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[12,13,14,15,16,17]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-1000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/fixed-constraint-dof-reorder-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/fixed-constraint-dof-reorder-first$suffix" \
+      "$e2e_root/fixed-constraint-dof-reorder-second$suffix" \
+      > "$e2e_root/fixed-constraint-dof-reorder$suffix-diff.txt"
+  done
+  cmp "$e2e_root/fixed-constraint-dof-reorder-first.stdout.json" \
+    "$e2e_root/fixed-constraint-dof-reorder-second.stdout.json"
+  cmp "$e2e_root/fixed-constraint-dof-reorder-first-validation.json" \
+    "$e2e_root/fixed-constraint-dof-reorder-second-validation.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/fixed-constraint-dof-reorder-first-$suffix.stdout.json" \
+      "$e2e_root/fixed-constraint-dof-reorder-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed fixed-constraint DOF reorder mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local missing_destination="$e2e_root/fixed-constraint-dof-reorder-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-fixed-constraint-dof "$source_model" \
+    --constraint BC_MISSING --dof RZ --to-index 0 --output-dir "$missing_destination" \
+    > "$e2e_root/fixed-constraint-dof-reorder-missing-rejected.stdout.json"; then
+    echo "installed fixed-constraint DOF reorder accepted a missing constraint" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_reorder_fixed_constraint_dof_constraint_missing' \
+    "$e2e_root/fixed-constraint-dof-reorder-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  local unrestrained_destination="$e2e_root/fixed-constraint-dof-reorder-unrestrained-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-fixed-constraint-dof \
+    "$e2e_root/fixed-constraint-dof-delete-first/model-ir.json" \
+    --constraint BC_N3 --dof RZ --to-index 0 --output-dir "$unrestrained_destination" \
+    > "$e2e_root/fixed-constraint-dof-reorder-unrestrained-rejected.stdout.json"; then
+    echo "installed fixed-constraint DOF reorder accepted an unrestrained DOF" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_reorder_fixed_constraint_dof_not_restrained' \
+    "$e2e_root/fixed-constraint-dof-reorder-unrestrained-rejected.stdout.json"
+  test ! -e "$unrestrained_destination"
+
+  local no_op_destination="$e2e_root/fixed-constraint-dof-reorder-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-fixed-constraint-dof "$source_model" \
+    --constraint BC_N3 --dof RZ --to-index 5 --output-dir "$no_op_destination" \
+    > "$e2e_root/fixed-constraint-dof-reorder-no-op-rejected.stdout.json"; then
+    echo "installed fixed-constraint DOF reorder accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_no_change' \
+    "$e2e_root/fixed-constraint-dof-reorder-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local index_destination="$e2e_root/fixed-constraint-dof-reorder-index-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-reorder-fixed-constraint-dof "$source_model" \
+    --constraint BC_N3 --dof RZ --to-index 6 --output-dir "$index_destination" \
+    > "$e2e_root/fixed-constraint-dof-reorder-index-rejected.stdout.json"; then
+    echo "installed fixed-constraint DOF reorder accepted target index six" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_usage_error' \
+    "$e2e_root/fixed-constraint-dof-reorder-index-rejected.stdout.json"
+  test ! -e "$index_destination"
+}
+exercise_fixed_constraint_dof_reorder_surface
+
 exercise_fixed_constraint_deletion_surface() {
   local source_model="$e2e_root/fixed-constraint-add-first/model-ir.json"
   local source_before_hash
@@ -6650,6 +6807,15 @@ fixed_constraint_dof_add_checkpoint_hash="$(sha256sum "$e2e_root/fixed-constrain
 fixed_constraint_dof_add_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-add-first-direct/result-ir.json" | awk '{print $1}')"
 fixed_constraint_dof_add_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-add-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 fixed_constraint_dof_add_report_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-add-first-direct/report-ir.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_model_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first/model-ir.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first/edit-receipt.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_request_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-request/request-receipt.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_request_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-request/analysis-request.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_assembly_receipt_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/assembly-receipt.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_checkpoint_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+fixed_constraint_dof_reorder_result_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/result-ir.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_recovery_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+fixed_constraint_dof_reorder_report_ir_hash="$(sha256sum "$e2e_root/fixed-constraint-dof-reorder-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -7130,6 +7296,10 @@ v64_receipt_json="${v63_receipt_json/structural-native-distribution-e2e.v63/stru
 fixed_constraint_dof_add_receipt_fields="\"workbench_fixed_constraint_dof_add_surface_passed\":true,\"workbench_fixed_constraint_dof_add_model_sha256\":\"sha256:$fixed_constraint_dof_add_model_hash\",\"workbench_fixed_constraint_dof_add_receipt_sha256\":\"sha256:$fixed_constraint_dof_add_receipt_hash\",\"workbench_fixed_constraint_dof_add_request_receipt_sha256\":\"sha256:$fixed_constraint_dof_add_request_receipt_hash\",\"workbench_fixed_constraint_dof_add_request_sha256\":\"sha256:$fixed_constraint_dof_add_request_hash\",\"workbench_fixed_constraint_dof_add_assembly_receipt_sha256\":\"sha256:$fixed_constraint_dof_add_assembly_receipt_hash\",\"workbench_fixed_constraint_dof_add_checkpoint_sha256\":\"sha256:$fixed_constraint_dof_add_checkpoint_hash\",\"workbench_fixed_constraint_dof_add_result_ir_sha256\":\"sha256:$fixed_constraint_dof_add_result_ir_hash\",\"workbench_fixed_constraint_dof_add_recovery_sha256\":\"sha256:$fixed_constraint_dof_add_recovery_hash\",\"workbench_fixed_constraint_dof_add_report_ir_sha256\":\"sha256:$fixed_constraint_dof_add_report_ir_hash\",\"workbench_fixed_constraint_dof_add_restart_passed\":true,"
 v64_receipt_json="${v64_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_dof_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v64_receipt_json" > "$temporary_receipt"
+v65_receipt_json="${v64_receipt_json/structural-native-distribution-e2e.v64/structural-native-distribution-e2e.v65}"
+fixed_constraint_dof_reorder_receipt_fields="\"workbench_fixed_constraint_dof_reorder_surface_passed\":true,\"workbench_fixed_constraint_dof_reorder_model_sha256\":\"sha256:$fixed_constraint_dof_reorder_model_hash\",\"workbench_fixed_constraint_dof_reorder_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_request_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_request_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_request_sha256\":\"sha256:$fixed_constraint_dof_reorder_request_hash\",\"workbench_fixed_constraint_dof_reorder_assembly_receipt_sha256\":\"sha256:$fixed_constraint_dof_reorder_assembly_receipt_hash\",\"workbench_fixed_constraint_dof_reorder_checkpoint_sha256\":\"sha256:$fixed_constraint_dof_reorder_checkpoint_hash\",\"workbench_fixed_constraint_dof_reorder_result_ir_sha256\":\"sha256:$fixed_constraint_dof_reorder_result_ir_hash\",\"workbench_fixed_constraint_dof_reorder_recovery_sha256\":\"sha256:$fixed_constraint_dof_reorder_recovery_hash\",\"workbench_fixed_constraint_dof_reorder_report_ir_sha256\":\"sha256:$fixed_constraint_dof_reorder_report_ir_hash\",\"workbench_fixed_constraint_dof_reorder_restart_passed\":true,"
+v65_receipt_json="${v65_receipt_json/\"workbench_result_view_surface_passed\":true,/${fixed_constraint_dof_reorder_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v65_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

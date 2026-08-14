@@ -896,6 +896,27 @@ fn run_fixed_constraint_dof_add(
     ])
 }
 
+fn run_fixed_constraint_dof_reorder(
+    source: &Path,
+    destination: &Path,
+    constraint_id: &str,
+    dof: &str,
+    target_index: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-reorder-fixed-constraint-dof"),
+        source.as_os_str(),
+        text("--constraint"),
+        text(constraint_id),
+        text("--dof"),
+        text(dof),
+        text("--to-index"),
+        text(target_index),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_add(
     source: &Path,
     destination: &Path,
@@ -6233,6 +6254,342 @@ fn fixed_constraint_dof_addition_is_deterministic_restartable_and_cpu_executable
     );
 
     let existing = run_fixed_constraint_dof_add(&delete_path, &first, "BC_N3", "RZ", "0");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn fixed_constraint_dof_reorder_is_deterministic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("constraint-dof-reorder-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("constraint-dof-reorder-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let fixed_directory = temporary.0.join("constraint-dof-reorder-fixed-source");
+    assert_success(&run_fixed_constraint_add(
+        &load_directory.join("model-ir.json"),
+        &fixed_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let target_directory = temporary.0.join("constraint-dof-reorder-target-source");
+    assert_success(&run_constraint_target_edit(
+        &fixed_directory.join("model-ir.json"),
+        &target_directory,
+        "BC_N3",
+        "N2",
+    ));
+    let delete_directory = temporary.0.join("constraint-dof-reorder-delete-source");
+    assert_success(&run_fixed_constraint_dof_delete(
+        &target_directory.join("model-ir.json"),
+        &delete_directory,
+        "BC_N3",
+        "RZ",
+    ));
+    let add_directory = temporary.0.join("constraint-dof-reorder-add-source");
+    assert_success(&run_fixed_constraint_dof_add(
+        &delete_directory.join("model-ir.json"),
+        &add_directory,
+        "BC_N3",
+        "RZ",
+        "0",
+    ));
+    let add_path = add_directory.join("model-ir.json");
+    let add_bytes = std::fs::read(&add_path).expect("constraint-DOF reorder source bytes");
+    let add_model = parse_model_ir_v2(&add_bytes).expect("strict DOF-reorder source");
+
+    let first = temporary.0.join("constraint-dof-reorder-first");
+    let second = temporary.0.join("constraint-dof-reorder-second");
+    for destination in [&first, &second] {
+        let output = run_fixed_constraint_dof_reorder(&add_path, destination, "BC_N3", "RZ", "0");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("constraint-DOF reorder receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first constraint-DOF reorder artifact"),
+            std::fs::read(second.join(artifact)).expect("second constraint-DOF reorder artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&add_path).expect("unchanged constraint-DOF reorder source"),
+        add_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("constraint-DOF-reordered ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict DOF-reordered ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++ DOF-reordered validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], add_model.value()[family]);
+    }
+    let source_constraints = add_model.value()["constraints"]
+        .as_array()
+        .expect("source constraints");
+    let edited_constraints = edited.value()["constraints"]
+        .as_array()
+        .expect("edited constraints");
+    assert_eq!(edited_constraints[0], source_constraints[0]);
+    for key in [
+        "id",
+        "index",
+        "type",
+        "node_id",
+        "prescribed_values_si",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(edited_constraints[1][key], source_constraints[1][key]);
+    }
+    assert_eq!(
+        source_constraints[1]["dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY", "RZ"])
+    );
+    assert_eq!(
+        edited_constraints[1]["dofs"],
+        serde_json::json!(["RZ", "UX", "UY", "UZ", "RX", "RY"])
+    );
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-reorder-fixed-constraint-dof.v1")
+        .expect("constraint-DOF reorder provenance extension");
+    assert_eq!(extension["operation"], "fixed_constraint_dof_reorder");
+    assert_eq!(extension["constraint_id"], "BC_N3");
+    assert_eq!(extension["constraint_index"], 1);
+    assert_eq!(extension["constraint_type"], "fixed_dofs");
+    assert_eq!(extension["node_id"], "N2");
+    assert_eq!(extension["moved_dof"], "RZ");
+    assert_eq!(extension["source_dof_index"], 5);
+    assert_eq!(extension["target_dof_index"], 0);
+    assert_eq!(extension["prescribed_value_explicit"], true);
+    assert_eq!(extension["prescribed_value_si"], 0);
+    assert_eq!(extension["unit"], "rad");
+    assert_eq!(
+        extension["source_dofs"],
+        serde_json::json!(["UX", "UY", "UZ", "RX", "RY", "RZ"])
+    );
+    assert_eq!(
+        extension["edited_dofs"],
+        serde_json::json!(["RZ", "UX", "UY", "UZ", "RX", "RY"])
+    );
+    assert_eq!(
+        extension["retained_prescribed_values_si"],
+        source_constraints[1]["prescribed_values_si"]
+    );
+    assert_eq!(extension["retained_source_id"], Value::Null);
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("constraint-DOF reorder receipt"),
+    )
+    .expect("constraint-DOF reorder receipt JSON");
+    assert_eq!(receipt["operation"], "fixed_constraint_dof_reorder");
+    assert_eq!(receipt["constraint_id"], "BC_N3");
+    assert_eq!(receipt["moved_dof"], "RZ");
+    assert_eq!(receipt["source_dof_index"], 5);
+    assert_eq!(receipt["target_dof_index"], 0);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("constraint-dof-reorder-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "constraint-dof-reorder-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("constraint-DOF reorder request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("constraint-DOF reorder direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("constraint-DOF reorder direct recovery"),
+    )
+    .expect("constraint-DOF reorder recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([12, 13, 14, 15, 16, 17])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -1000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("constraint-DOF reorder initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("constraint-DOF reorder resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, source_path, constraint, dof, target_index, status, code) in [
+        (
+            "constraint-dof-reorder-missing-constraint",
+            add_path.clone(),
+            "MISSING",
+            "RZ",
+            "0",
+            1,
+            "workbench_model_reorder_fixed_constraint_dof_constraint_missing",
+        ),
+        (
+            "constraint-dof-reorder-not-restrained",
+            delete_directory.join("model-ir.json"),
+            "BC_N3",
+            "RZ",
+            "0",
+            1,
+            "workbench_model_reorder_fixed_constraint_dof_not_restrained",
+        ),
+        (
+            "constraint-dof-reorder-no-change",
+            add_path.clone(),
+            "BC_N3",
+            "RZ",
+            "5",
+            1,
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "constraint-dof-reorder-source-mask-index",
+            delete_directory.join("model-ir.json"),
+            "BC_N3",
+            "RY",
+            "5",
+            1,
+            "workbench_model_reorder_fixed_constraint_dof_target_index_invalid",
+        ),
+        (
+            "constraint-dof-reorder-parser-index",
+            add_path.clone(),
+            "BC_N3",
+            "RZ",
+            "6",
+            2,
+            "workbench_usage_error",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_fixed_constraint_dof_reorder(
+            &source_path,
+            &destination,
+            constraint,
+            dof,
+            target_index,
+        );
+        assert_eq!(rejected.status.code(), Some(status));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked = add_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.constraint-dof-reorder-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Constraint DOF reordering must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:BC_N3",
+        "entity_kind": "constraint",
+        "model_ir_entity_id": "BC_N3",
+        "mapping_status": "exact",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary
+        .0
+        .join("blocked-constraint-dof-reorder-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked constraint-DOF reorder source")
+            .as_bytes(),
+    )
+    .expect("write blocked constraint-DOF reorder source");
+    let blocked_destination = temporary.0.join("blocked-constraint-dof-reorder-output");
+    assert_success(&run_fixed_constraint_dof_reorder(
+        &blocked_source,
+        &blocked_destination,
+        "BC_N3",
+        "RZ",
+        "0",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked constraint-DOF reorder receipt"),
+    )
+    .expect("blocked constraint-DOF reorder receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.constraint-dof-reorder-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked constraint-DOF-reordered ModelIR"),
+    )
+    .expect("blocked constraint-DOF-reordered JSON");
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+
+    let existing = run_fixed_constraint_dof_reorder(&add_path, &first, "BC_N3", "RZ", "0");
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")

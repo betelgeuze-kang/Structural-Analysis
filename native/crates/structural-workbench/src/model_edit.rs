@@ -52,6 +52,8 @@ const FIXED_CONSTRAINT_DOF_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-fixed-constraint-dof.v1";
 const FIXED_CONSTRAINT_DOF_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-fixed-constraint-dof.v1";
+const FIXED_CONSTRAINT_DOF_REORDER_EXTENSION_KEY: &str =
+    "structural-native:model-reorder-fixed-constraint-dof.v1";
 const NODAL_LOAD_ADD_EXTENSION_KEY: &str = "structural-native:model-add-nodal-load.v1";
 const NODAL_LOAD_DELETE_EXTENSION_KEY: &str = "structural-native:model-delete-nodal-load.v1";
 const FIXED_CONSTRAINT_ADD_EXTENSION_KEY: &str = "structural-native:model-add-fixed-constraint.v1";
@@ -113,6 +115,7 @@ const NODAL_LOAD_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_exi
 const CONSTRAINT_TARGET_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_target_replacement_to_distinct_existing_node_without_overlapping_restrained_dofs_with_identity_index_type_dofs_prescribed_values_source_and_extensions_preserved_not_constraint_value_mask_identity_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_and_matching_explicit_prescribed_value_deletion_with_at_least_one_dof_retained_and_identity_index_type_node_source_extensions_preserved_not_dof_addition_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DOF_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_unrestrained_dof_append_with_explicit_finite_prescribed_value_and_identity_index_type_node_existing_dof_order_values_source_extensions_preserved_without_same_node_overlap_not_dof_deletion_reorder_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
+const FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_fixed_dofs_constraint_single_restrained_dof_order_only_move_to_distinct_bounded_index_with_identity_index_type_node_complete_dof_membership_prescribed_values_source_extensions_and_unrelated_rows_preserved_not_dof_addition_deletion_value_only_identity_constraint_creation_deletion_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const CONSTRAINT_VALUE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_restrained_dof_prescribed_value_edit_not_restraint_node_or_topology_creation_deletion_solver_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_linear_elastic_isotropic_material_parameter_edit_not_material_creation_deletion_law_version_state_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
@@ -210,6 +213,13 @@ pub struct ModelFixedConstraintDofDeleteOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded fixed-constraint DOF addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelFixedConstraintDofAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded fixed-constraint DOF reorder.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelFixedConstraintDofReorderOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -714,6 +724,32 @@ pub fn publish_model_fixed_constraint_dof_add(
 ) -> Result<ModelFixedConstraintDofAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_fixed_constraint_dof(&source, constraint_id, dof, value_si)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Move one restrained DOF within an existing fixed constraint and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities, DOFs or target indices, invalid source or edited
+/// semantics, missing or unrestrained DOFs, no-op moves, malformed retained fields, or publication
+/// failure.
+pub fn publish_model_fixed_constraint_dof_reorder(
+    source_path: &Path,
+    constraint_id: &str,
+    dof: &str,
+    target_index: usize,
+    output_directory: &Path,
+) -> Result<ModelFixedConstraintDofReorderOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = reorder_model_fixed_constraint_dof(&source, constraint_id, dof, target_index)?;
     publish_new_directory(
         output_directory,
         &[
@@ -2627,6 +2663,125 @@ pub fn add_model_fixed_constraint_dof(
         "claim_boundary": FIXED_CONSTRAINT_DOF_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFixedConstraintDofAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct ReorderedConstraintDofV1 {
+    constraint_index: usize,
+    constraint_type: String,
+    node_id: String,
+    source_dof_index: usize,
+    target_dof_index: usize,
+    prescribed_value_explicit: bool,
+    prescribed_value_si: f64,
+    source_dofs: Value,
+    edited_dofs: Value,
+    retained_prescribed_values_si: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Move one restrained DOF to a distinct final index in an existing fixed constraint in memory.
+///
+/// # Errors
+///
+/// Rejects invalid identities, DOFs or target indices, invalid source semantics, missing
+/// constraints or restraints, no-op moves, malformed retained fields, schema drift, or edited
+/// semantics rejected by C++.
+pub fn reorder_model_fixed_constraint_dof(
+    source_bytes: &[u8],
+    constraint_id: &str,
+    dof: &str,
+    target_index: usize,
+) -> Result<ModelFixedConstraintDofReorderOutcomeV1, WorkbenchError> {
+    validate_fixed_constraint_dof_reorder_request(
+        source_bytes.len(),
+        constraint_id,
+        dof,
+        target_index,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let reordered = move_fixed_constraint_dof(&mut edited, constraint_id, dof, target_index)?;
+    bind_fixed_constraint_dof_reorder_provenance(
+        &mut edited,
+        constraint_id,
+        dof,
+        &reordered,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+    mark_roundtrip_entity_approximated(&mut edited, "constraint", constraint_id)?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the fixed-constraint DOF-reordered ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "fixed_constraint_dof_reorder",
+        "model_id": edited_validation.report.model_id,
+        "constraint_id": constraint_id,
+        "constraint_index": reordered.constraint_index,
+        "constraint_type": reordered.constraint_type,
+        "node_id": reordered.node_id,
+        "moved_dof": dof,
+        "source_dof_index": reordered.source_dof_index,
+        "target_dof_index": reordered.target_dof_index,
+        "prescribed_value_explicit": reordered.prescribed_value_explicit,
+        "prescribed_value_si": reordered.prescribed_value_si,
+        "unit": constraint_value_unit(dof),
+        "source_dofs": reordered.source_dofs,
+        "edited_dofs": reordered.edited_dofs,
+        "retained_prescribed_values_si": reordered.retained_prescribed_values_si,
+        "retained_source_id": reordered.retained_source_id,
+        "retained_extensions": reordered.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelFixedConstraintDofReorderOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -7006,6 +7161,28 @@ fn validate_fixed_constraint_dof_add_request(
     Ok(())
 }
 
+fn validate_fixed_constraint_dof_reorder_request(
+    source_length: usize,
+    constraint_id: &str,
+    dof: &str,
+    target_index: usize,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, constraint_id, "constraint")?;
+    if !DOF_KEYS.contains(&dof) {
+        return Err(WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_invalid",
+            "reordered constraint DOF must be UX, UY, UZ, RX, RY, or RZ",
+        ));
+    }
+    if target_index >= DOF_KEYS.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_target_index_invalid",
+            "fixed-constraint DOF target index must be between zero and five",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -8279,6 +8456,140 @@ fn append_fixed_constraint_dof(
         source_prescribed_values_si,
         edited_dofs: constraint["dofs"].clone(),
         edited_prescribed_values_si: constraint["prescribed_values_si"].clone(),
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn move_fixed_constraint_dof(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+    target_index: usize,
+) -> Result<ReorderedConstraintDofV1, WorkbenchError> {
+    let constraints = model
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("constraints"))?;
+    let constraint_index = constraints
+        .iter()
+        .position(|constraint| constraint.get("id").and_then(Value::as_str) == Some(constraint_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_reorder_fixed_constraint_dof_constraint_missing",
+                format!("ModelIR has no constraint with identity {constraint_id}"),
+            )
+        })?;
+    let constraint = &constraints[constraint_index];
+    if constraint.get("index").and_then(Value::as_u64) != u64::try_from(constraint_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_index_mismatch",
+            "reordered constraint index must match its contiguous position",
+        ));
+    }
+    let constraint_type = constraint
+        .get("type")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint type"))?
+        .to_owned();
+    if constraint_type != "fixed_dofs" {
+        return Err(WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_type_unsupported",
+            "constraint DOF reordering accepts only a fixed_dofs constraint",
+        ));
+    }
+    let node_id = constraint
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("constraint node_id"))?
+        .to_owned();
+    let dofs = constraint
+        .get("dofs")
+        .and_then(Value::as_array)
+        .filter(|values| !values.is_empty() && values.len() <= DOF_KEYS.len())
+        .ok_or_else(|| snapshot_error("constraint dofs"))?;
+    if target_index >= dofs.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_target_index_invalid",
+            format!(
+                "target index {target_index} is outside the {} restrained DOFs",
+                dofs.len()
+            ),
+        ));
+    }
+    let mut seen_dofs = Vec::with_capacity(dofs.len());
+    let mut source_dof_index = None;
+    for (index, candidate) in dofs.iter().enumerate() {
+        let candidate = candidate
+            .as_str()
+            .filter(|candidate| DOF_KEYS.contains(candidate))
+            .ok_or_else(|| snapshot_error("constraint dofs"))?;
+        if seen_dofs.contains(&candidate) {
+            return Err(snapshot_error("constraint dofs"));
+        }
+        if candidate == dof {
+            source_dof_index = Some(index);
+        }
+        seen_dofs.push(candidate);
+    }
+    let source_dof_index = source_dof_index.ok_or_else(|| {
+        WorkbenchError::new(
+            "workbench_model_reorder_fixed_constraint_dof_not_restrained",
+            format!("constraint {constraint_id} does not restrain DOF {dof}"),
+        )
+    })?;
+    if source_dof_index == target_index {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "fixed-constraint DOF already occupies the requested target index",
+        ));
+    }
+    let prescribed = constraint
+        .get("prescribed_values_si")
+        .and_then(Value::as_object)
+        .ok_or_else(|| snapshot_error("constraint prescribed_values_si"))?;
+    for value in prescribed.values() {
+        finite_number(value, "constraint prescribed value")?;
+    }
+    let prescribed_value_explicit = prescribed.contains_key(dof);
+    let prescribed_value_si = prescribed
+        .get(dof)
+        .map(|value| finite_number(value, "constraint prescribed value"))
+        .transpose()?
+        .unwrap_or(0.0);
+    let source_dofs = Value::Array(dofs.clone());
+    let retained_prescribed_values_si = Value::Object(prescribed.clone());
+    let retained_source_id = constraint
+        .get("source_id")
+        .ok_or_else(|| snapshot_error("constraint source_id"))?
+        .clone();
+    let retained_extensions = constraint
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("constraint extensions"))?
+        .clone();
+
+    let dofs = model
+        .get_mut("constraints")
+        .and_then(Value::as_array_mut)
+        .and_then(|constraints| constraints.get_mut(constraint_index))
+        .and_then(|constraint| constraint.get_mut("dofs"))
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("constraint dofs"))?;
+    let moved = dofs.remove(source_dof_index);
+    dofs.insert(target_index, moved);
+    Ok(ReorderedConstraintDofV1 {
+        constraint_index,
+        constraint_type,
+        node_id,
+        source_dof_index,
+        target_dof_index: target_index,
+        prescribed_value_explicit,
+        prescribed_value_si,
+        source_dofs,
+        edited_dofs: Value::Array(dofs.clone()),
+        retained_prescribed_values_si,
         retained_source_id,
         retained_extensions,
     })
@@ -14504,6 +14815,45 @@ fn bind_fixed_constraint_dof_add_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_fixed_constraint_dof_reorder_provenance(
+    model: &mut Value,
+    constraint_id: &str,
+    dof: &str,
+    reordered: &ReorderedConstraintDofV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        FIXED_CONSTRAINT_DOF_REORDER_EXTENSION_KEY,
+        json!({
+            "operation": "fixed_constraint_dof_reorder",
+            "constraint_id": constraint_id,
+            "constraint_index": reordered.constraint_index,
+            "constraint_type": reordered.constraint_type.clone(),
+            "node_id": reordered.node_id.clone(),
+            "moved_dof": dof,
+            "source_dof_index": reordered.source_dof_index,
+            "target_dof_index": reordered.target_dof_index,
+            "prescribed_value_explicit": reordered.prescribed_value_explicit,
+            "prescribed_value_si": reordered.prescribed_value_si,
+            "unit": constraint_value_unit(dof),
+            "source_dofs": reordered.source_dofs.clone(),
+            "edited_dofs": reordered.edited_dofs.clone(),
+            "retained_prescribed_values_si": reordered.retained_prescribed_values_si.clone(),
+            "retained_source_id": reordered.retained_source_id.clone(),
+            "retained_extensions": reordered.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": FIXED_CONSTRAINT_DOF_REORDER_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -16286,13 +16636,14 @@ mod tests {
         insert_direct_linear_load_combination_term, insert_nested_linear_load_combination_term,
         linear_load_combination_terms_value, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, move_direct_linear_load_combination_term,
-        move_nested_linear_load_combination_term, nested_linear_load_combination_terms_value,
-        normalized_number_bits, remove_direct_linear_load_combination_term,
-        remove_fixed_constraint, remove_fixed_constraint_dof, remove_frame3d_leaf_member,
-        remove_frame_section, remove_linear_load_combination, remove_linear_load_pattern,
-        remove_linear_material, remove_nested_linear_load_combination_term, remove_nodal_load,
-        remove_orphan_node, remove_truss3d_leaf_member, remove_truss_section,
-        replace_constraint_target, replace_direct_linear_load_combination_factor,
+        move_fixed_constraint_dof, move_nested_linear_load_combination_term,
+        nested_linear_load_combination_terms_value, normalized_number_bits,
+        remove_direct_linear_load_combination_term, remove_fixed_constraint,
+        remove_fixed_constraint_dof, remove_frame3d_leaf_member, remove_frame_section,
+        remove_linear_load_combination, remove_linear_load_pattern, remove_linear_material,
+        remove_nested_linear_load_combination_term, remove_nodal_load, remove_orphan_node,
+        remove_truss3d_leaf_member, remove_truss_section, replace_constraint_target,
+        replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference,
         replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_target,
@@ -16305,7 +16656,8 @@ mod tests {
         validate_direct_linear_load_combination_term_reorder_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_fixed_constraint_delete_request, validate_fixed_constraint_dof_add_request,
-        validate_fixed_constraint_dof_delete_request, validate_frame3d_leaf_member_delete_request,
+        validate_fixed_constraint_dof_delete_request,
+        validate_fixed_constraint_dof_reorder_request, validate_frame3d_leaf_member_delete_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_delete_request,
@@ -16843,6 +17195,88 @@ mod tests {
                 .expect_err("missing constraint")
                 .code,
             "workbench_model_add_fixed_constraint_dof_constraint_missing"
+        );
+    }
+
+    #[test]
+    fn fixed_constraint_dof_reorder_is_order_only_and_bounded() {
+        validate_fixed_constraint_dof_reorder_request(0, "BC2", "RZ", 0)
+            .expect("valid fixed-constraint DOF reorder request");
+        assert!(validate_fixed_constraint_dof_reorder_request(0, "", "RZ", 0).is_err());
+        assert_eq!(
+            validate_fixed_constraint_dof_reorder_request(0, "BC2", "QX", 0)
+                .expect_err("invalid DOF")
+                .code,
+            "workbench_model_reorder_fixed_constraint_dof_invalid"
+        );
+        assert_eq!(
+            validate_fixed_constraint_dof_reorder_request(0, "BC2", "RZ", 6)
+                .expect_err("unbounded target index")
+                .code,
+            "workbench_model_reorder_fixed_constraint_dof_target_index_invalid"
+        );
+
+        let model = json!({
+            "constraints": [
+                {
+                    "id": "BC2", "index": 0, "type": "fixed_dofs", "node_id": "N2",
+                    "dofs": ["UX", "UY", "UZ", "RZ"],
+                    "prescribed_values_si": {"UX": 0.125, "RZ": -0.25},
+                    "source_id": "generated:BC2", "extensions": {"fixture": true}
+                },
+                {
+                    "id": "BC3", "index": 1, "type": "fixed_dofs", "node_id": "N3",
+                    "dofs": ["RX"], "prescribed_values_si": {},
+                    "source_id": null, "extensions": {}
+                }
+            ]
+        });
+        let mut edited = model.clone();
+        let reordered = move_fixed_constraint_dof(&mut edited, "BC2", "RZ", 0)
+            .expect("move restrained DOF to the front");
+        assert_eq!(reordered.constraint_index, 0);
+        assert_eq!(reordered.constraint_type, "fixed_dofs");
+        assert_eq!(reordered.node_id, "N2");
+        assert_eq!(reordered.source_dof_index, 3);
+        assert_eq!(reordered.target_dof_index, 0);
+        assert!(reordered.prescribed_value_explicit);
+        assert_eq!(
+            reordered.prescribed_value_si.to_bits(),
+            (-0.25_f64).to_bits()
+        );
+        assert_eq!(reordered.source_dofs, json!(["UX", "UY", "UZ", "RZ"]));
+        assert_eq!(reordered.edited_dofs, json!(["RZ", "UX", "UY", "UZ"]));
+        assert_eq!(
+            reordered.retained_prescribed_values_si,
+            json!({"UX": 0.125, "RZ": -0.25})
+        );
+        assert_eq!(reordered.retained_source_id, "generated:BC2");
+        assert_eq!(reordered.retained_extensions, json!({"fixture": true}));
+        assert_eq!(edited["constraints"][1], model["constraints"][1]);
+
+        assert_eq!(
+            move_fixed_constraint_dof(&mut model.clone(), "BC2", "UX", 0)
+                .expect_err("no-op move")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+        assert_eq!(
+            move_fixed_constraint_dof(&mut model.clone(), "BC2", "RY", 0)
+                .expect_err("unrestrained DOF")
+                .code,
+            "workbench_model_reorder_fixed_constraint_dof_not_restrained"
+        );
+        assert_eq!(
+            move_fixed_constraint_dof(&mut model.clone(), "BC2", "RZ", 4)
+                .expect_err("target outside source mask")
+                .code,
+            "workbench_model_reorder_fixed_constraint_dof_target_index_invalid"
+        );
+        assert_eq!(
+            move_fixed_constraint_dof(&mut model.clone(), "MISSING", "RZ", 0)
+                .expect_err("missing constraint")
+                .code,
+            "workbench_model_reorder_fixed_constraint_dof_constraint_missing"
         );
     }
 

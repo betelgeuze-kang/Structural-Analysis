@@ -250,6 +250,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v65",
+            "model-reorder-fixed-constraint-dof",
             "Distribution E2E v64",
             "model-add-fixed-constraint-dof",
             "Distribution E2E v63",
@@ -770,6 +772,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_fixed_constraint_dof_add_recovery_sha256",
         "workbench_fixed_constraint_dof_add_report_ir_sha256",
         "workbench_fixed_constraint_dof_add_restart_passed",
+        "exercise_fixed_constraint_dof_reorder_surface",
+        "model-reorder-fixed-constraint-dof",
+        "structural-native:model-reorder-fixed-constraint-dof.v1",
+        "workbench_fixed_constraint_dof_reorder_surface_passed",
+        "workbench_fixed_constraint_dof_reorder_model_sha256",
+        "workbench_fixed_constraint_dof_reorder_receipt_sha256",
+        "workbench_fixed_constraint_dof_reorder_request_receipt_sha256",
+        "workbench_fixed_constraint_dof_reorder_request_sha256",
+        "workbench_fixed_constraint_dof_reorder_assembly_receipt_sha256",
+        "workbench_fixed_constraint_dof_reorder_checkpoint_sha256",
+        "workbench_fixed_constraint_dof_reorder_result_ir_sha256",
+        "workbench_fixed_constraint_dof_reorder_recovery_sha256",
+        "workbench_fixed_constraint_dof_reorder_report_ir_sha256",
+        "workbench_fixed_constraint_dof_reorder_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -972,6 +988,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v65",
+            "V65_FIXED_CONSTRAINT_DOF_REORDER_KEYS",
+            "workbench_fixed_constraint_dof_reorder_surface_passed",
+            "workbench_fixed_constraint_dof_reorder_receipt_sha256",
+            "workbench_fixed_constraint_dof_reorder_request_receipt_sha256",
+            "workbench_fixed_constraint_dof_reorder_recovery_sha256",
+            "workbench_fixed_constraint_dof_reorder_restart_passed",
             "structural-native-distribution-e2e.v64",
             "V64_FIXED_CONSTRAINT_DOF_ADD_KEYS",
             "workbench_fixed_constraint_dof_add_surface_passed",
@@ -1394,6 +1417,27 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "structural-native:model-add-fixed-constraint-dof.v1",
             "fixed_constraint_dof_add",
             "append-only v64",
+            "[12,13,14,15,16,17]",
+            "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6 remain open",
+        ),
+        blockers=blockers,
+    )
+
+    fixed_constraint_dof_reorder_doc = _text(
+        root, Path("docs/native/modelir-fixed-constraint-dof-reorder-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-fixed-constraint-dof-reorder-v1.md"),
+        text=fixed_constraint_dof_reorder_doc,
+        tokens=(
+            "model-reorder-fixed-constraint-dof",
+            "single C ABI into C++ semantic validation",
+            "structural-native:model-reorder-fixed-constraint-dof.v1",
+            "fixed_constraint_dof_reorder",
+            "append-only v65",
             "[12,13,14,15,16,17]",
             "[0,-1000,0,0,0,0]",
             "fallback 0",
@@ -2093,6 +2137,44 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in fixed_constraint_dof_add_claim:
                 blockers.append(
                     "modelir_fixed_constraint_dof_addition_capability_"
+                    f"claim_missing:{token}"
+                )
+    fixed_constraint_dof_reorder_capability = (
+        capabilities.get("modelir_fixed_constraint_dof_reorder")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(fixed_constraint_dof_reorder_capability, dict):
+        blockers.append("modelir_fixed_constraint_dof_reorder_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if fixed_constraint_dof_reorder_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_fixed_constraint_dof_reorder_capability_"
+                    f"field_invalid:{field}"
+                )
+        fixed_constraint_dof_reorder_claim = str(
+            fixed_constraint_dof_reorder_capability.get("claim", "")
+        )
+        for token in (
+            "moves exactly one named restrained DOF",
+            "distinct bounded final index",
+            "all prescribed SI values",
+            "single C ABI into C++ semantic validation",
+            "distribution v65 E2E",
+            "exact active DOFs [12,13,14,15,16,17]",
+            "active load [0,-1000,0,0,0,0]",
+            "byte-identical initialized-checkpoint restart",
+            "fallback 0",
+            "C6 remain separate or open",
+        ):
+            if token not in fixed_constraint_dof_reorder_claim:
+                blockers.append(
+                    "modelir_fixed_constraint_dof_reorder_capability_"
                     f"claim_missing:{token}"
                 )
     linear_load_combination_deletion_capability = (

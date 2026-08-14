@@ -199,6 +199,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_existing_modelir_fixed_constraint_single_dof_reorder": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_existing_modelir_constraint_prescribed_value_edit": (
         "c5_implemented",
         False,
@@ -524,6 +528,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-fixed-constraint",
         "model-delete-fixed-constraint",
         "model-delete-fixed-constraint-dof",
+        "model-add-fixed-constraint-dof",
+        "model-reorder-fixed-constraint-dof",
         "model-add-linear-load-pattern",
         "model-add-linear-load-combination",
         "model-add-linear-load-combination-term",
@@ -1126,6 +1132,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "fixed_constraint_dof_delete",
             "structural-native:model-add-fixed-constraint-dof.v1",
             "fixed_constraint_dof_add",
+            "structural-native:model-reorder-fixed-constraint-dof.v1",
+            "fixed_constraint_dof_reorder",
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
             "structural-native:model-add-linear-load-combination.v1",
@@ -2589,6 +2597,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    fixed_constraint_dof_reorder_doc = _text(
+        root, Path("docs/native/modelir-fixed-constraint-dof-reorder-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-fixed-constraint-dof-reorder-v1.md"),
+        fixed_constraint_dof_reorder_doc,
+        (
+            "model-reorder-fixed-constraint-dof",
+            "single C ABI into C++",
+            "structural-native:model-reorder-fixed-constraint-dof.v1",
+            "fixed_constraint_dof_reorder",
+            "append-only v65",
+            "[12,13,14,15,16,17]",
+            "[0,-1000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6 remain open",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -2607,6 +2635,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-edit-constraint-target",
             "model-delete-fixed-constraint-dof",
             "model-add-fixed-constraint-dof",
+            "model-reorder-fixed-constraint-dof",
             "model-edit-constraint-value",
             "model-edit-linear-material",
             "model-edit-frame-section",

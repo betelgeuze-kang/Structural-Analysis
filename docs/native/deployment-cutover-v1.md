@@ -18,6 +18,8 @@ provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-
 `model-edit-nodal-load-target` existing-load target-node, `model-edit-constraint-target`
 existing-fixed-constraint target-node and `model-edit-constraint-value` existing-restrained-DOF
 commands, plus `model-delete-fixed-constraint-dof` single-restraint deletion and the closed
+`model-add-fixed-constraint-dof` single-restraint addition plus
+`model-reorder-fixed-constraint-dof` order-only restraint movement, and the closed
 `model-edit-linear-material`, `model-edit-frame-section`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
@@ -116,7 +118,12 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v64 proves repeated constraint-DOF-added/request/artifact
+assembly preflight. Distribution E2E v65 proves repeated constraint-DOF-reordered/request/artifact
+bytes and retains every v64 assertion while moving `BC_N3/RZ` from index 5 to index 0 through
+`model-reorder-fixed-constraint-dof`, preserving complete DOF membership, every prescribed value
+and every non-order constraint field, and proving unchanged exact active DOFs
+`[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`, byte-identical initialized-checkpoint
+restart and fallback 0. Distribution E2E v64 proves repeated constraint-DOF-added/request/artifact
 bytes and retains every v63 assertion while restoring `BC_N3/RZ=0` through
 `model-add-fixed-constraint-dof`, preserving every source mask entry and non-mask constraint field,
 and proving exact active DOFs `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`,

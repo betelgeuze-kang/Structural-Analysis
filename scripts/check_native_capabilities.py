@@ -50,6 +50,7 @@ EXPECTED_OWNERS = {
     "modelir_fixed_constraint_target_edit": "structural-workbench",
     "modelir_fixed_constraint_dof_deletion": "structural-workbench",
     "modelir_fixed_constraint_dof_addition": "structural-workbench",
+    "modelir_fixed_constraint_dof_reorder": "structural-workbench",
     "modelir_nodal_load_deletion": "structural-workbench",
     "modelir_fixed_constraint_add": "structural-workbench",
     "modelir_fixed_constraint_deletion": "structural-workbench",
