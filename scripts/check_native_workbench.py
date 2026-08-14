@@ -104,6 +104,7 @@ REQUIRED_TOKENS = {
         "structural-native:model-add-fixed-constraint.v1",
         "structural-native:model-delete-fixed-constraint.v1",
         "structural-native:model-add-linear-load-pattern.v1",
+        "structural-native:model-delete-linear-load-pattern.v1",
         "structural-native:model-add-linear-material.v1",
         "structural-native:model-add-frame-section.v1",
         "structural-native:model-add-truss-section.v1",
@@ -179,6 +180,7 @@ REQUIRED_TOKENS = {
         'Some("model-add-fixed-constraint")',
         'Some("model-delete-fixed-constraint")',
         'Some("model-add-linear-load-pattern")',
+        'Some("model-delete-linear-load-pattern")',
         'Some("model-add-linear-material")',
         'Some("model-add-frame-section")',
         'Some("model-add-truss-section")',
@@ -415,6 +417,16 @@ REQUIRED_TOKENS = {
         "fallback 0",
         "C6",
     ),
+    "docs/native/modelir-linear-load-pattern-deletion-v1.md": (
+        "model-delete-linear-load-pattern",
+        "Rust -> C ABI -> C++",
+        "structural-native:model-delete-linear-load-pattern.v1",
+        "last contiguous",
+        "load-combination",
+        "construction-stage",
+        "fallback 0",
+        "C6",
+    ),
     "docs/native/modelir-linear-material-add-v1.md": (
         "model-add-linear-material",
         "Rust -> C ABI -> C++",
@@ -489,6 +501,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     constraint_add_row: dict[str, object] = {}
     constraint_deletion_row: dict[str, object] = {}
     load_pattern_add_row: dict[str, object] = {}
+    load_pattern_deletion_row: dict[str, object] = {}
     material_add_row: dict[str, object] = {}
     section_add_row: dict[str, object] = {}
     truss_authoring_row: dict[str, object] = {}
@@ -509,6 +522,9 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
             "modelir_fixed_constraint_deletion"
         ]
         load_pattern_add_row = payload["capabilities"]["modelir_linear_load_pattern_add"]
+        load_pattern_deletion_row = payload["capabilities"][
+            "modelir_linear_load_pattern_deletion"
+        ]
         material_add_row = payload["capabilities"]["modelir_linear_material_add"]
         section_add_row = payload["capabilities"]["modelir_frame_section_add"]
         truss_authoring_row = payload["capabilities"]["modelir_truss3d_authoring"]
@@ -684,6 +700,33 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         if token not in load_pattern_add_claim:
             blockers.append(
                 f"native_workbench_load_pattern_add_claim_token_missing:{token}"
+            )
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if load_pattern_deletion_row.get(field) != expected:
+            blockers.append(
+                f"native_workbench_load_pattern_deletion_capability_invalid:{field}"
+            )
+    load_pattern_deletion_claim = str(load_pattern_deletion_row.get("claim", ""))
+    for token in (
+        "last contiguous neutral zero-self-weight linear_static pattern",
+        "load-combination and construction-stage references",
+        "unsupported-feature ownership",
+        "direct round-trip mappings",
+        "single C ABI into C++",
+        "exact retained active load",
+        "typed frame recovery",
+        "byte-identical restart",
+        "fallback 0",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in load_pattern_deletion_claim:
+            blockers.append(
+                f"native_workbench_load_pattern_deletion_claim_token_missing:{token}"
             )
     for field, expected in (
         ("status", "implemented"),

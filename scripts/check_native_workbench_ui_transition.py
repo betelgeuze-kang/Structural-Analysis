@@ -220,6 +220,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_last_neutral_linear_static_load_pattern_delete": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_linear_elastic_isotropic_material_add": (
         "c5_implemented",
         False,
@@ -393,6 +397,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-fixed-constraint",
         "model-delete-fixed-constraint",
         "model-add-linear-load-pattern",
+        "model-delete-linear-load-pattern",
         "model-add-linear-material",
         "model-add-frame-section",
         "model-add-truss-section",
@@ -971,6 +976,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-nodal-load.v1",
             "structural-native:model-add-fixed-constraint.v1",
             "structural-native:model-add-linear-load-pattern.v1",
+            "structural-native:model-delete-linear-load-pattern.v1",
             "structural-native:model-add-linear-material.v1",
             "structural-native:model-add-frame-section.v1",
             "pub fn edit_model_linear_material",
@@ -982,6 +988,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn add_model_nodal_load",
             "pub fn add_model_fixed_constraint",
             "pub fn add_model_linear_load_pattern",
+            "pub fn delete_model_linear_load_pattern",
             "pub fn add_model_linear_material",
             "pub fn add_model_frame_section",
             'mark_roundtrip_entity_approximated(&mut edited, "material", material_id)',
@@ -1583,6 +1590,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-delete-nodal-load")',
             'Some("model-add-fixed-constraint")',
             'Some("model-add-linear-load-pattern")',
+            'Some("model-delete-linear-load-pattern")',
             'Some("model-add-linear-material")',
             'Some("model-add-frame-section")',
             'Some("model-create-linear-analysis-request")',
@@ -1726,6 +1734,24 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    linear_load_pattern_deletion_doc = _text(
+        root, Path("docs/native/modelir-linear-load-pattern-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-linear-load-pattern-deletion-v1.md"),
+        linear_load_pattern_deletion_doc,
+        (
+            "model-delete-linear-load-pattern",
+            "Rust -> C ABI -> C++",
+            "structural-native:model-delete-linear-load-pattern.v1",
+            "last contiguous",
+            "load-combination",
+            "construction-stage",
+            "fallback 0",
+            "C6",
+        ),
+        blockers,
+    )
     linear_material_add_doc = _text(
         root, Path("docs/native/modelir-linear-material-add-v1.md"), blockers
     )
@@ -1800,6 +1826,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-add-nodal-load",
             "model-add-fixed-constraint",
             "model-add-linear-load-pattern",
+            "model-delete-linear-load-pattern",
             "model-add-linear-material",
             "model-add-frame-section",
             "model-create-linear-analysis-request",
@@ -1876,7 +1903,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     extension_claim = manifest.get("native_surface_extension_claim")
     expected_extension_claim = (
         "compatible frame3d element and truss3d material/section edits, truss3d "
-        "section/member authoring, last-neutral nodal-load and fixed-constraint deletion, and "
+        "section/member authoring, last-neutral nodal-load, linear-load-pattern and "
+        "fixed-constraint deletion, and "
         "family-specific last-neutral-frame3d/truss3d-leaf deletion"
     )
     if extension_claim != expected_extension_claim:
@@ -1885,7 +1913,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
         "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
-        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

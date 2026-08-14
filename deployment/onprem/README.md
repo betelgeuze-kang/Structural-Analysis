@@ -33,6 +33,9 @@ absent from the runtime image.
   homogeneous six-DOF zero constraint while retaining another constraint and rejecting references
   or source-owned/nonterminal rows. `model-add-linear-load-pattern` atomically adds one zero-self-weight
   linear-static pattern and its first nonzero nodal load on an existing node.
+  `model-delete-linear-load-pattern` removes only the last contiguous neutral zero-self-weight
+  linear-static pattern with one neutral nonzero load while rejecting combined, staged, mapped,
+  source-owned, multiple-load, minimum-pattern or nonterminal candidates.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
@@ -141,6 +144,8 @@ structural-workbench model-delete-fixed-constraint /workspace/added-constraint-m
 structural-workbench model-add-linear-load-pattern /workspace/added-constraint-model/model-ir.json \
   --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
   --components 2500 0 0 0 0 0 --output-dir /workspace/added-pattern-model
+structural-workbench model-delete-linear-load-pattern /workspace/added-pattern-model/model-ir.json \
+  --load-pattern LC_CUSTOM --output-dir /workspace/deleted-pattern-model
 structural-workbench model-add-linear-material /workspace/model.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \

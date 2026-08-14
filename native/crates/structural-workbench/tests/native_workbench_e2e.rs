@@ -814,6 +814,21 @@ fn run_linear_load_pattern_add(
     ])
 }
 
+fn run_linear_load_pattern_delete(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-linear-load-pattern"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_material_add(
     source: &Path,
     destination: &Path,
@@ -4396,6 +4411,344 @@ fn linear_load_pattern_add_is_atomic_deterministic_cpp_revalidated_and_executabl
     )
     .expect("blocked pattern-added JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_pattern_deletion_is_atomic_fail_closed_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("pattern-delete-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let load_directory = temporary.0.join("pattern-delete-load-source");
+    assert_success(&run_nodal_load_add(
+        &member_directory.join("model-ir.json"),
+        &load_directory,
+        "LC_WEAK",
+        "L_WEAK_N3",
+        "N3",
+        ["0", "-1000", "0", "0", "0", "0"],
+    ));
+    let constraint_directory = temporary.0.join("pattern-delete-constraint-source");
+    assert_success(&run_fixed_constraint_add(
+        &load_directory.join("model-ir.json"),
+        &constraint_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let pattern_directory = temporary.0.join("pattern-delete-source");
+    assert_success(&run_linear_load_pattern_add(
+        &constraint_directory.join("model-ir.json"),
+        &pattern_directory,
+        "LC_CUSTOM",
+        "L_CUSTOM_N2",
+        "N2",
+        ["2500", "0", "0", "0", "0", "0"],
+    ));
+    let pattern_path = pattern_directory.join("model-ir.json");
+    let pattern_bytes = std::fs::read(&pattern_path).expect("load-pattern delete source bytes");
+    let pattern_model = parse_model_ir_v2(&pattern_bytes).expect("strict pattern-delete source");
+
+    let first = temporary.0.join("linear-load-pattern-delete-first");
+    let second = temporary.0.join("linear-load-pattern-delete-second");
+    for destination in [&first, &second] {
+        let output = run_linear_load_pattern_delete(&pattern_path, destination, "LC_CUSTOM");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-load-pattern delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first pattern-delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second pattern-delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&pattern_path).expect("unchanged pattern-delete source"),
+        pattern_bytes
+    );
+
+    let deleted_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("load-pattern-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict load-pattern-deleted ModelIR");
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "roundtrip_map",
+        "unsupported_features",
+    ] {
+        assert_eq!(deleted.value()[family], pattern_model.value()[family]);
+    }
+    let source_patterns = pattern_model.value()["load_patterns"]
+        .as_array()
+        .expect("source load patterns");
+    let deleted_patterns = deleted.value()["load_patterns"]
+        .as_array()
+        .expect("deleted load patterns");
+    assert_eq!(source_patterns.len(), deleted_patterns.len() + 1);
+    assert_eq!(deleted_patterns, &source_patterns[..deleted_patterns.len()]);
+    assert_eq!(
+        source_patterns.last().expect("terminal pattern")["id"],
+        "LC_CUSTOM"
+    );
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-linear-load-pattern.v1")
+        .expect("linear-load-pattern delete provenance extension");
+    assert_eq!(extension["operation"], "linear_load_pattern_delete");
+    assert_eq!(extension["removed_load_pattern_id"], "LC_CUSTOM");
+    assert_eq!(extension["removed_load_pattern_index"], 4);
+    assert_eq!(extension["removed_analysis_type"], "linear_static");
+    assert_eq!(
+        extension["removed_self_weight"],
+        serde_json::json!([0, 0, 0])
+    );
+    assert_eq!(extension["removed_nodal_load_id"], "L_CUSTOM_N2");
+    assert_eq!(extension["removed_nodal_load_index"], 0);
+    assert_eq!(extension["removed_node_id"], "N2");
+    assert_eq!(
+        extension["removed_components_si"],
+        serde_json::json!({"FX": 2500, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0})
+    );
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json"))
+            .expect("linear-load-pattern delete receipt"),
+    )
+    .expect("linear-load-pattern delete receipt JSON");
+    assert_eq!(receipt["operation"], "linear_load_pattern_delete");
+    assert_eq!(receipt["removed_load_pattern_id"], "LC_CUSTOM");
+    assert_eq!(receipt["removed_nodal_load_id"], "L_CUSTOM_N2");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("linear-load-pattern-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "linear-load-pattern-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("load-pattern delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("load-pattern delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("load-pattern delete direct recovery"),
+    )
+    .expect("load-pattern delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        recovery["recovery_stable_indices"],
+        serde_json::json!([0, 1])
+    );
+    assert_eq!(
+        recovery["recovery_element_types"],
+        serde_json::json!([1, 1])
+    );
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12, 24]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 0)
+        .expect("load-pattern delete partial execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("load-pattern delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let nonterminal_destination = temporary.0.join("pattern-delete-nonterminal");
+    let nonterminal =
+        run_linear_load_pattern_delete(&pattern_path, &nonterminal_destination, "LC_WEAK");
+    assert_eq!(nonterminal.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&nonterminal.stdout)
+        .contains("workbench_model_delete_linear_load_pattern_not_terminal"));
+    assert!(!nonterminal_destination.exists());
+
+    let mut source_owned = pattern_model.value().clone();
+    source_owned["load_patterns"][4]["source_id"] = serde_json::json!("source:LC_CUSTOM");
+    let source_owned_path = temporary.0.join("pattern-delete-source-owned.json");
+    std::fs::write(
+        &source_owned_path,
+        canonicalize_model_ir_v2(&source_owned)
+            .expect("canonical source-owned pattern")
+            .as_bytes(),
+    )
+    .expect("write source-owned pattern");
+    let source_owned_destination = temporary.0.join("pattern-delete-source-owned");
+    let source_owned_rejection =
+        run_linear_load_pattern_delete(&source_owned_path, &source_owned_destination, "LC_CUSTOM");
+    assert_eq!(source_owned_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&source_owned_rejection.stdout)
+        .contains("workbench_model_delete_linear_load_pattern_source_owned"));
+    assert!(!source_owned_destination.exists());
+
+    let extra_load_directory = temporary.0.join("pattern-delete-multiple-load-source");
+    assert_success(&run_nodal_load_add(
+        &pattern_path,
+        &extra_load_directory,
+        "LC_CUSTOM",
+        "L_CUSTOM_N3",
+        "N3",
+        ["0", "-100", "0", "0", "0", "0"],
+    ));
+    let multiple_destination = temporary.0.join("pattern-delete-multiple-load");
+    let multiple = run_linear_load_pattern_delete(
+        &extra_load_directory.join("model-ir.json"),
+        &multiple_destination,
+        "LC_CUSTOM",
+    );
+    assert_eq!(multiple.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&multiple.stdout)
+        .contains("workbench_model_delete_linear_load_pattern_single_load_required"));
+    assert!(!multiple_destination.exists());
+
+    for (name, field, value, code) in [
+        (
+            "combined",
+            "load_combinations",
+            serde_json::json!([{
+                "id": "COMB_DELETE_GUARD",
+                "index": 0,
+                "combination_type": "linear",
+                "terms": [{"ref_id": "LC_CUSTOM", "ref_kind": "load_pattern", "factor": 1}],
+                "source_id": null,
+                "extensions": {}
+            }]),
+            "workbench_model_delete_linear_load_pattern_referenced_by_combination",
+        ),
+        (
+            "staged",
+            "construction_stages",
+            serde_json::json!([{
+                "id": "STAGE_DELETE_GUARD",
+                "index": 0,
+                "active_element_ids": [],
+                "active_constraint_ids": [],
+                "load_pattern_ids": ["LC_CUSTOM"],
+                "extensions": {}
+            }]),
+            "workbench_model_delete_linear_load_pattern_referenced_by_stage",
+        ),
+        (
+            "feature-owned",
+            "unsupported_features",
+            serde_json::json!([{
+                "feature_id": "feature.pattern-delete-owned",
+                "kind": "source_owned_load_pattern",
+                "source_entity_id": "LC_CUSTOM",
+                "disposition": "preserved_only",
+                "blocking": false,
+                "detail": "The source feature directly owns the candidate load pattern.",
+                "extensions": {}
+            }]),
+            "workbench_model_delete_linear_load_pattern_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned",
+            "roundtrip_map",
+            serde_json::json!([{
+                "source_entity_id": "source:LC_CUSTOM",
+                "entity_kind": "load_pattern",
+                "model_ir_entity_id": "LC_CUSTOM",
+                "mapping_status": "exact",
+                "extensions": {}
+            }]),
+            "workbench_model_delete_linear_load_pattern_roundtrip_owned",
+        ),
+    ] {
+        let mut guarded = pattern_model.value().clone();
+        guarded[field] = value;
+        let guarded_path = temporary.0.join(format!("pattern-delete-{name}.json"));
+        std::fs::write(
+            &guarded_path,
+            canonicalize_model_ir_v2(&guarded)
+                .expect("canonical guarded pattern-delete source")
+                .as_bytes(),
+        )
+        .expect("write guarded pattern-delete source");
+        let destination = temporary.0.join(format!("pattern-delete-{name}"));
+        let rejection = run_linear_load_pattern_delete(&guarded_path, &destination, "LC_CUSTOM");
+        assert_eq!(rejection.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejection.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let existing = run_linear_load_pattern_delete(&pattern_path, &first, "LC_CUSTOM");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut blocked = pattern_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.pattern-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Load-pattern deletion must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    let blocked_source = temporary.0.join("blocked-pattern-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked pattern-delete source")
+            .as_bytes(),
+    )
+    .expect("write blocked pattern-delete source");
+    let blocked_destination = temporary.0.join("blocked-pattern-delete-output");
+    assert_success(&run_linear_load_pattern_delete(
+        &blocked_source,
+        &blocked_destination,
+        "LC_CUSTOM",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked pattern-delete receipt"),
+    )
+    .expect("blocked pattern-delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.pattern-delete-visible-not-runnable"])
+    );
 }
 
 #[test]

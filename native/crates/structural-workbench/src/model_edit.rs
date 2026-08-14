@@ -39,6 +39,8 @@ const FIXED_CONSTRAINT_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-fixed-constraint.v1";
 const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-pattern.v1";
+const LINEAR_LOAD_PATTERN_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-linear-load-pattern.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
 const FRAME_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame-section.v1";
 const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss-section.v1";
@@ -62,6 +64,7 @@ const NODAL_LOAD_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_con
 const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_homogeneous_six_dof_fixed_constraint_addition_to_existing_unconstrained_node_not_partial_nonzero_mpc_contact_support_set_solver_visual_editing_engineering_acceptance_or_c6";
 const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_homogeneous_six_dof_fixed_constraint_deletion_not_source_owned_partial_nonzero_staged_mapped_general_constraint_or_topology_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_zero_self_weight_linear_static_pattern_with_single_neutral_nonzero_six_component_nodal_load_deletion_not_source_owned_combined_staged_mapped_general_pattern_load_node_or_topology_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_truss3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -222,6 +225,13 @@ pub struct ModelFixedConstraintDeleteOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded linear-load-pattern addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearLoadPatternAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded linear-load-pattern deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelLinearLoadPatternDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -424,6 +434,30 @@ pub fn publish_model_linear_load_pattern_add(
         node_id,
         components_si,
     )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral linear-static pattern and its sole nodal load atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing or non-terminal patterns,
+/// source-owned or malformed rows, load-combination/construction-stage references,
+/// unsupported-feature or round-trip ownership, and publication failures.
+pub fn publish_model_linear_load_pattern_delete(
+    source_path: &Path,
+    load_pattern_id: &str,
+    output_directory: &Path,
+) -> Result<ModelLinearLoadPatternDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_linear_load_pattern(&source, load_pattern_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1509,6 +1543,101 @@ pub fn add_model_linear_load_pattern(
         "claim_boundary": LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearLoadPatternAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedLinearLoadPatternV1 {
+    load_pattern_index: usize,
+    nodal_load_id: String,
+    node_id: String,
+    components_si: Value,
+}
+
+/// Delete one provenance-bound terminal neutral linear-static pattern in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal patterns, source-owned or malformed
+/// pattern/load rows, nonzero self weight, combination or stage references, unsupported-feature
+/// or round-trip ownership, schema drift, or edited semantics rejected by the C++ validator.
+pub fn delete_model_linear_load_pattern(
+    source_bytes: &[u8],
+    load_pattern_id: &str,
+) -> Result<ModelLinearLoadPatternDeleteOutcomeV1, WorkbenchError> {
+    validate_linear_load_pattern_delete_request(source_bytes.len(), load_pattern_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_linear_load_pattern(&mut edited, load_pattern_id)?;
+    bind_linear_load_pattern_delete_provenance(
+        &mut edited,
+        load_pattern_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "linear_load_pattern_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_load_pattern_id": load_pattern_id,
+        "removed_load_pattern_index": removed.load_pattern_index,
+        "removed_analysis_type": "linear_static",
+        "removed_self_weight": [0, 0, 0],
+        "removed_nodal_load_id": removed.nodal_load_id,
+        "removed_nodal_load_index": 0,
+        "removed_node_id": removed.node_id,
+        "removed_components_si": removed.components_si,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearLoadPatternDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3388,6 +3517,13 @@ fn validate_linear_load_pattern_add_request(
     Ok(())
 }
 
+fn validate_linear_load_pattern_delete_request(
+    source_length: usize,
+    load_pattern_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_pattern_id, "load pattern")
+}
+
 fn validate_linear_material_add_request(
     source_length: usize,
     material_id: &str,
@@ -4097,6 +4233,228 @@ fn append_linear_load_pattern(
             "extensions": {}
         }));
     Ok(load_pattern_index)
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_linear_load_pattern(
+    model: &mut Value,
+    load_pattern_id: &str,
+) -> Result<RemovedLinearLoadPatternV1, WorkbenchError> {
+    let load_patterns = model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?;
+    if load_patterns.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_minimum_model",
+            "linear-load-pattern deletion must retain at least one load pattern",
+        ));
+    }
+    let load_pattern_index = load_patterns
+        .iter()
+        .position(|pattern| pattern.get("id").and_then(Value::as_str) == Some(load_pattern_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_load_pattern_missing",
+                format!("ModelIR has no load pattern with identity {load_pattern_id}"),
+            )
+        })?;
+    if load_pattern_index + 1 != load_patterns.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_not_terminal",
+            "deleted load pattern must be the last contiguous load-pattern row",
+        ));
+    }
+    let load_pattern = &load_patterns[load_pattern_index];
+    if load_pattern.get("index").and_then(Value::as_u64) != u64::try_from(load_pattern_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_index_mismatch",
+            "deleted load-pattern index must match its last contiguous position",
+        ));
+    }
+    if load_pattern.get("analysis_type").and_then(Value::as_str) != Some("linear_static") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_type_unsupported",
+            "linear-load-pattern deletion accepts only a linear_static pattern",
+        ));
+    }
+    if !load_pattern.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_source_owned",
+            "linear-load-pattern deletion accepts only a neutral pattern with null source_id",
+        ));
+    }
+    let self_weight = load_pattern
+        .get("self_weight")
+        .and_then(Value::as_array)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_load_pattern_self_weight_unsupported",
+                "deleted load pattern must contain exactly three self-weight components",
+            )
+        })?;
+    for value in self_weight {
+        let value = value
+            .as_f64()
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_delete_linear_load_pattern_self_weight_unsupported",
+                    "deleted load-pattern self weight must contain finite SI values",
+                )
+            })?;
+        if value != 0.0 {
+            return Err(WorkbenchError::new(
+                "workbench_model_delete_linear_load_pattern_self_weight_unsupported",
+                "deleted load pattern must have zero self weight",
+            ));
+        }
+    }
+    let nodal_loads = load_pattern
+        .get("nodal_loads")
+        .and_then(Value::as_array)
+        .filter(|loads| loads.len() == 1)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_load_pattern_single_load_required",
+                "deleted load pattern must contain exactly one nodal load",
+            )
+        })?;
+    let nodal_load = &nodal_loads[0];
+    let nodal_load_id = nodal_load
+        .get("id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("nodal load id"))?
+        .to_owned();
+    if nodal_load.get("index").and_then(Value::as_u64) != Some(0) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_load_index_mismatch",
+            "deleted pattern's sole nodal-load index must be zero",
+        ));
+    }
+    if !nodal_load.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_load_source_owned",
+            "linear-load-pattern deletion accepts only a neutral nested load with null source_id",
+        ));
+    }
+    let node_id = nodal_load
+        .get("node_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("nodal load node_id"))?
+        .to_owned();
+    let components = nodal_load
+        .get("components_si")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == NODAL_LOAD_COMPONENT_KEYS.len())
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_load_pattern_components_invalid",
+                "deleted pattern's nodal load must contain exactly six SI components",
+            )
+        })?;
+    let mut nonzero = false;
+    for component in NODAL_LOAD_COMPONENT_KEYS {
+        let value = components
+            .get(component)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_delete_linear_load_pattern_components_invalid",
+                    format!("deleted pattern's nodal load has no {component} component"),
+                )
+            })?
+            .as_f64()
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| snapshot_error("nodal load component"))?;
+        nonzero = nonzero || value != 0.0;
+    }
+    if !nonzero {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_zero_components",
+            "deleted pattern's nodal load must contain at least one nonzero SI component",
+        ));
+    }
+
+    let load_combinations = model
+        .get("load_combinations")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_combinations"))?;
+    if load_combinations.iter().any(|combination| {
+        combination
+            .get("terms")
+            .and_then(Value::as_array)
+            .is_some_and(|terms| {
+                terms.iter().any(|term| {
+                    term.get("ref_kind").and_then(Value::as_str) == Some("load_pattern")
+                        && term.get("ref_id").and_then(Value::as_str) == Some(load_pattern_id)
+                })
+            })
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_referenced_by_combination",
+            format!("load pattern {load_pattern_id} is referenced by a load combination"),
+        ));
+    }
+    let construction_stages = model
+        .get("construction_stages")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("construction_stages"))?;
+    if construction_stages.iter().any(|stage| {
+        stage
+            .get("load_pattern_ids")
+            .and_then(Value::as_array)
+            .is_some_and(|ids| ids.iter().any(|id| id.as_str() == Some(load_pattern_id)))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_referenced_by_stage",
+            format!("load pattern {load_pattern_id} is referenced by a construction stage"),
+        ));
+    }
+    let removed_ids = [load_pattern_id, nodal_load_id.as_str()];
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features.iter().any(|feature| {
+        feature
+            .get("source_entity_id")
+            .and_then(Value::as_str)
+            .is_some_and(|id| removed_ids.contains(&id))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_unsupported_feature_owned",
+            "linear-load-pattern deletion refuses a pattern or nested load owned by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows.iter().any(|row| {
+        row.get("model_ir_entity_id")
+            .and_then(Value::as_str)
+            .is_some_and(|id| removed_ids.contains(&id))
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_roundtrip_owned",
+            "linear-load-pattern deletion refuses a pattern or nested load with a direct round-trip mapping",
+        ));
+    }
+
+    let components_si = nodal_load["components_si"].clone();
+    model
+        .get_mut("load_patterns")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("load_patterns"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last load pattern"))?;
+    Ok(RemovedLinearLoadPatternV1 {
+        load_pattern_index,
+        nodal_load_id,
+        node_id,
+        components_si,
+    })
 }
 
 fn append_linear_material(
@@ -5768,6 +6126,36 @@ fn bind_linear_load_pattern_add_provenance(
     )
 }
 
+fn bind_linear_load_pattern_delete_provenance(
+    model: &mut Value,
+    load_pattern_id: &str,
+    removed: &RemovedLinearLoadPatternV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        LINEAR_LOAD_PATTERN_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "linear_load_pattern_delete",
+            "removed_load_pattern_id": load_pattern_id,
+            "removed_load_pattern_index": removed.load_pattern_index,
+            "removed_analysis_type": "linear_static",
+            "removed_self_weight": [0, 0, 0],
+            "removed_nodal_load_id": removed.nodal_load_id,
+            "removed_nodal_load_index": 0,
+            "removed_node_id": removed.node_id,
+            "removed_components_si": removed.components_si,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_linear_material_add_provenance(
     model: &mut Value,
@@ -6515,21 +6903,22 @@ mod tests {
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_nodal_load, remove_truss3d_leaf_member,
-        validate_constraint_value_edit_request, validate_edit_request,
+        remove_frame3d_leaf_member, remove_linear_load_pattern, remove_nodal_load,
+        remove_truss3d_leaf_member, validate_constraint_value_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
         validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
         validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_edit_request,
-        validate_linear_load_pattern_add_request, validate_linear_material_add_request,
-        validate_linear_material_edit_request, validate_nodal_load_add_request,
-        validate_nodal_load_delete_request, validate_nodal_load_edit_request,
-        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
-        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
-        validate_truss_element_property_references, validate_truss_section_add_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
+        validate_linear_load_pattern_add_request, validate_linear_load_pattern_delete_request,
+        validate_linear_material_add_request, validate_linear_material_edit_request,
+        validate_nodal_load_add_request, validate_nodal_load_delete_request,
+        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
+        validate_truss3d_member_add_request, validate_truss3d_member_properties,
+        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
+        validate_truss_section_add_request, validate_truss_section_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -7143,6 +7532,168 @@ mod tests {
             .expect_err("new pattern must not contain an all-zero first load")
             .code,
             "workbench_model_add_linear_load_pattern_zero_components"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn linear_load_pattern_delete_requires_terminal_neutral_unreferenced_single_load_pattern() {
+        validate_linear_load_pattern_delete_request(0, "LC_CUSTOM")
+            .expect("valid linear-load-pattern deletion request");
+        assert_eq!(
+            validate_linear_load_pattern_delete_request(0, "")
+                .expect_err("empty pattern identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        let model = json!({
+            "load_patterns": [
+                {
+                    "id": "LC_WEAK",
+                    "index": 0,
+                    "analysis_type": "linear_static",
+                    "self_weight": [0, 0, 0],
+                    "nodal_loads": [{
+                        "id": "L_WEAK_N2",
+                        "index": 0,
+                        "node_id": "N2",
+                        "components_si": {"FX": 0, "FY": -10000, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0},
+                        "source_id": "source:L_WEAK_N2"
+                    }],
+                    "source_id": "source:LC_WEAK"
+                },
+                {
+                    "id": "LC_CUSTOM",
+                    "index": 1,
+                    "analysis_type": "linear_static",
+                    "self_weight": [0, 0, 0],
+                    "nodal_loads": [{
+                        "id": "L_CUSTOM_N2",
+                        "index": 0,
+                        "node_id": "N2",
+                        "components_si": {"FX": 2500, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0},
+                        "source_id": null
+                    }],
+                    "source_id": null
+                }
+            ],
+            "load_combinations": [],
+            "construction_stages": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed = remove_linear_load_pattern(&mut deleted, "LC_CUSTOM")
+            .expect("delete terminal neutral load pattern");
+        assert_eq!(removed.load_pattern_index, 1);
+        assert_eq!(removed.nodal_load_id, "L_CUSTOM_N2");
+        assert_eq!(removed.node_id, "N2");
+        assert_eq!(
+            deleted["load_patterns"]
+                .as_array()
+                .expect("load patterns")
+                .len(),
+            1
+        );
+
+        let mut nonterminal = model.clone();
+        assert_eq!(
+            remove_linear_load_pattern(&mut nonterminal, "LC_WEAK")
+                .expect_err("nonterminal pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_not_terminal"
+        );
+        let mut source_owned = model.clone();
+        source_owned["load_patterns"][1]["source_id"] = json!("source:LC_CUSTOM");
+        assert_eq!(
+            remove_linear_load_pattern(&mut source_owned, "LC_CUSTOM")
+                .expect_err("source-owned pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_source_owned"
+        );
+        let mut self_weight = model.clone();
+        self_weight["load_patterns"][1]["self_weight"] = json!([0, -9.81, 0]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut self_weight, "LC_CUSTOM")
+                .expect_err("self-weight pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_self_weight_unsupported"
+        );
+        let mut multiple = model.clone();
+        multiple["load_patterns"][1]["nodal_loads"]
+            .as_array_mut()
+            .expect("nodal loads")
+            .push(json!({
+                "id": "L_CUSTOM_N3",
+                "index": 1,
+                "node_id": "N3",
+                "components_si": {"FX": 1, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0},
+                "source_id": null
+            }));
+        assert_eq!(
+            remove_linear_load_pattern(&mut multiple, "LC_CUSTOM")
+                .expect_err("multiple nested loads")
+                .code,
+            "workbench_model_delete_linear_load_pattern_single_load_required"
+        );
+        let mut load_source_owned = model.clone();
+        load_source_owned["load_patterns"][1]["nodal_loads"][0]["source_id"] =
+            json!("source:L_CUSTOM_N2");
+        assert_eq!(
+            remove_linear_load_pattern(&mut load_source_owned, "LC_CUSTOM")
+                .expect_err("source-owned nested load")
+                .code,
+            "workbench_model_delete_linear_load_pattern_load_source_owned"
+        );
+        let mut zero = model.clone();
+        zero["load_patterns"][1]["nodal_loads"][0]["components_si"] =
+            json!({"FX": 0, "FY": 0, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0});
+        assert_eq!(
+            remove_linear_load_pattern(&mut zero, "LC_CUSTOM")
+                .expect_err("zero nested load")
+                .code,
+            "workbench_model_delete_linear_load_pattern_zero_components"
+        );
+        let mut combined = model.clone();
+        combined["load_combinations"] = json!([{
+            "terms": [{"ref_id": "LC_CUSTOM", "ref_kind": "load_pattern", "factor": 1}]
+        }]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut combined, "LC_CUSTOM")
+                .expect_err("combined pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_referenced_by_combination"
+        );
+        let mut staged = model.clone();
+        staged["construction_stages"] = json!([{"load_pattern_ids": ["LC_CUSTOM"]}]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut staged, "LC_CUSTOM")
+                .expect_err("staged pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_referenced_by_stage"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "L_CUSTOM_N2"}]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut feature_owned, "LC_CUSTOM")
+                .expect_err("unsupported-feature-owned nested load")
+                .code,
+            "workbench_model_delete_linear_load_pattern_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "LC_CUSTOM"}]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut mapped, "LC_CUSTOM")
+                .expect_err("round-trip-owned pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_roundtrip_owned"
+        );
+        let mut minimum = deleted;
+        assert_eq!(
+            remove_linear_load_pattern(&mut minimum, "LC_WEAK")
+                .expect_err("minimum retained model")
+                .code,
+            "workbench_model_delete_linear_load_pattern_minimum_model"
         );
     }
 

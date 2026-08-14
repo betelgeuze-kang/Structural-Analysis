@@ -199,6 +199,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-fixed-constraint",
             "model-add-nodal-load",
             "model-delete-nodal-load",
+            "model-delete-linear-load-pattern",
             "model-add-frame-section",
             "model-create-linear-analysis-request",
             "customer-approved image build",
@@ -324,7 +325,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v35",
+        "structural-native-distribution-e2e.v36",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -366,6 +367,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_nodal_load_delete_request_sha256",
         "workbench_nodal_load_delete_result_ir_sha256",
         "workbench_nodal_load_delete_recovery_sha256",
+        "exercise_linear_load_pattern_deletion_surface",
+        "model-delete-linear-load-pattern",
+        "workbench_linear_load_pattern_delete_surface_passed",
+        "workbench_linear_load_pattern_delete_model_sha256",
+        "workbench_linear_load_pattern_delete_receipt_sha256",
+        "workbench_linear_load_pattern_delete_request_sha256",
+        "workbench_linear_load_pattern_delete_result_ir_sha256",
+        "workbench_linear_load_pattern_delete_recovery_sha256",
         "exercise_fixed_constraint_add_surface",
         "model-add-fixed-constraint",
         "workbench_fixed_constraint_add_surface_passed",
@@ -520,7 +529,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
-            "structural-native-distribution-e2e.v35",
+            "structural-native-distribution-e2e.v36",
+            "V36_LINEAR_LOAD_PATTERN_DELETE_KEYS",
+            "workbench_linear_load_pattern_delete_surface_passed",
+            "workbench_linear_load_pattern_delete_recovery_sha256",
             "V35_NODAL_LOAD_DELETE_KEYS",
             "workbench_nodal_load_delete_surface_passed",
             "workbench_nodal_load_delete_recovery_sha256",
@@ -544,9 +556,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
-            "append-only v35 hash-bound receipt",
-            "frozen v1 through v34 receipts",
-            "no pre-v35 receipt",
+            "append-only v36 hash-bound receipt",
+            "frozen v1 through v35 receipts",
+            "no pre-v36 receipt",
         ),
         blockers=blockers,
     )
@@ -622,6 +634,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-delete-nodal-load",
             "Installed static and shared package E2E v35",
             "Frozen v1 through v34",
+            "receipts retain their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    linear_load_pattern_deletion_doc = _text(
+        root, Path("docs/native/modelir-linear-load-pattern-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-linear-load-pattern-deletion-v1.md"),
+        text=linear_load_pattern_deletion_doc,
+        tokens=(
+            "model-delete-linear-load-pattern",
+            "Installed static and shared package E2E v36",
+            "Frozen v1 through v35",
             "receipts retain their narrower authority",
         ),
         blockers=blockers,
@@ -726,6 +753,39 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     f"modelir_fixed_constraint_deletion_capability_claim_missing:{token}"
                 )
+    linear_load_pattern_deletion_capability = (
+        capabilities.get("modelir_linear_load_pattern_deletion")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(linear_load_pattern_deletion_capability, dict):
+        blockers.append("modelir_linear_load_pattern_deletion_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if linear_load_pattern_deletion_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_linear_load_pattern_deletion_capability_"
+                    f"field_invalid:{field}"
+                )
+        linear_load_pattern_deletion_claim = str(
+            linear_load_pattern_deletion_capability.get("claim", "")
+        )
+        for token in (
+            "last contiguous neutral zero-self-weight linear_static pattern",
+            "load-combination and construction-stage references",
+            "installed static/shared E2E",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in linear_load_pattern_deletion_claim:
+                blockers.append(
+                    "modelir_linear_load_pattern_deletion_capability_"
+                    f"claim_missing:{token}"
+                )
     frame_leaf_deletion_capability = (
         capabilities.get("modelir_frame3d_leaf_deletion")
         if isinstance(capabilities, dict)
@@ -807,9 +867,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v35 E2E",
+            "CPU static/shared distribution v36 E2E",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
+            "last-neutral linear-load-pattern deletion",
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",

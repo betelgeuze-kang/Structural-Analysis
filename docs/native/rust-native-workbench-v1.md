@@ -70,9 +70,12 @@ The bounded linear-load-pattern creator atomically appends one contiguous-index 
 pattern with zero self-weight and one globally unique, nonzero index-zero nodal load on an existing
 node. It preserves every existing round-trip row and blocker and revalidates through C++; no empty
 pattern is published. Self-weight, combinations, time functions, other load families, pattern
-editing/deletion, and retargeting remain outside the command.
+editing, and retargeting remain outside the command. Its bounded inverse removes only the last
+contiguous neutral zero-self-weight pattern with one neutral nonzero nodal load after rejecting
+combination, stage, unsupported-feature and direct round-trip references; it does not cascade,
+reindex, or delete the target node.
 See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact and installed E2E
-boundary.
+boundary and `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
@@ -206,6 +209,8 @@ structural-workbench model-delete-fixed-constraint ADDED-CONSTRAINT-MODEL/model-
 structural-workbench model-add-linear-load-pattern ADDED-CONSTRAINT-MODEL/model-ir.json \
   --load-pattern LC_CUSTOM --load L_CUSTOM_N2 --node N2 \
   --components 2500 0 0 0 0 0 --output-dir ADDED-PATTERN-MODEL
+structural-workbench model-delete-linear-load-pattern ADDED-PATTERN-MODEL/model-ir.json \
+  --load-pattern LC_CUSTOM --output-dir DELETED-PATTERN-MODEL
 structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \

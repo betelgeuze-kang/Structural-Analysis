@@ -119,6 +119,13 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   proves the exact retained N2 load, zero N3 load, typed frame recovery, one-real-iteration
   byte-identical restart and fallback 0. Pattern/node deletion, cascade/reindex and visual
   authoring remain open.
+- `model-delete-linear-load-pattern`: deterministic deletion of only the last contiguous neutral,
+  zero-self-weight `linear_static` pattern with one neutral nonzero six-component nodal load. Rust
+  rejects source-owned/nonterminal/index-drift/multiple-load candidates and every combination,
+  stage, unsupported-feature, or direct round-trip reference before mutation, then strictly
+  reparses and C++-revalidates before create-new publication. Installed E2E proves the exact
+  retained N2-FY load, typed frame recovery, initialized-active byte-identical restart and fallback
+  0. General pattern/load/node deletion, cascade/reindex and visual authoring remain open.
 - `model-add-fixed-constraint`: deterministic creation of one homogeneous six-DOF `fixed_dofs`
   constraint with zero prescribed SI values on one existing unconstrained node. Rust assigns the
   next contiguous constraint index and neutral source ownership, preserves every existing
@@ -311,14 +318,14 @@ process/artifact verification are also Rust-native; npm package installation, Vi
 execution, the Node PDF exporter and measurement probes, Playwright/Chromium execution, browser
 checks, prototype JavaScript, and viewer runtime remain Node/browser-owned. It provides only the
 documented bounded existing-entity editors, frame/truss member and property creators, the
-last-neutral nodal-load and fixed-constraint deletions, and the two family-specific
+last-neutral nodal-load, linear-load-pattern and fixed-constraint deletions, and the two family-specific
 last-neutral-frame/truss-leaf deletion operations. It also provides bounded nodal-load, fixed-constraint,
 linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
 section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
 The transition manifest now enumerates the compatible frame-element property editor, both truss
-editors, truss section/member authoring, last-neutral nodal-load and fixed-constraint deletion, and
+editors, truss section/member authoring, last-neutral nodal-load, linear-load-pattern and fixed-constraint deletion, and
 both last-neutral frame/truss leaf deleters explicitly in its native command and feature inventories.
 These remain bounded C5 rows and do not promote any open general-editing or C6 prerequisite.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
