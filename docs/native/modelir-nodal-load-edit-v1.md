@@ -50,8 +50,8 @@ receipts retain their narrower authority.
 
 ## Claim boundary
 
-This closes only six-component replacement for one existing nodal load. It does not create or
-delete patterns or loads, move the load to another node, edit self-weight or load combinations,
-select a solver, provide undo history or visual manipulation, or make an engineering acceptance
-decision. General property/material/section/constraint editing, broad visual editing,
+This closes only six-component replacement for one existing nodal load. Target-node replacement is
+a separate bounded C5 surface. It does not create or delete patterns or loads, edit self-weight or
+load combinations, select a solver, provide undo history or visual manipulation, or make an
+engineering acceptance decision. General property/material/section/constraint editing, broad visual editing,
 React/TypeScript removal, approved HIP C2, and C6 remain open.

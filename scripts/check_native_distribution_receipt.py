@@ -650,6 +650,20 @@ V60_NESTED_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS = {
     "workbench_nested_linear_load_combination_term_insert_restart_passed",
 }
 V60_EXPECTED_KEYS = V59_EXPECTED_KEYS | V60_NESTED_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS
+V61_NODAL_LOAD_TARGET_EDIT_KEYS = {
+    "workbench_nodal_load_target_edit_surface_passed",
+    "workbench_nodal_load_target_edit_model_sha256",
+    "workbench_nodal_load_target_edit_receipt_sha256",
+    "workbench_nodal_load_target_edit_request_receipt_sha256",
+    "workbench_nodal_load_target_edit_request_sha256",
+    "workbench_nodal_load_target_edit_assembly_receipt_sha256",
+    "workbench_nodal_load_target_edit_checkpoint_sha256",
+    "workbench_nodal_load_target_edit_result_ir_sha256",
+    "workbench_nodal_load_target_edit_recovery_sha256",
+    "workbench_nodal_load_target_edit_report_ir_sha256",
+    "workbench_nodal_load_target_edit_restart_passed",
+}
+V61_EXPECTED_KEYS = V60_EXPECTED_KEYS | V61_NODAL_LOAD_TARGET_EDIT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -696,17 +710,24 @@ def validate(
         "structural-native-distribution-e2e.v58",
         "structural-native-distribution-e2e.v59",
         "structural-native-distribution-e2e.v60",
+        "structural-native-distribution-e2e.v61",
     }
     is_v58_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v58",
         "structural-native-distribution-e2e.v59",
         "structural-native-distribution-e2e.v60",
+        "structural-native-distribution-e2e.v61",
     }
     is_v59_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v59",
         "structural-native-distribution-e2e.v60",
+        "structural-native-distribution-e2e.v61",
     }
-    is_v60_receipt = receipt_schema_version == "structural-native-distribution-e2e.v60"
+    is_v60_receipt = receipt_schema_version in {
+        "structural-native-distribution-e2e.v60",
+        "structural-native-distribution-e2e.v61",
+    }
+    is_v61_receipt = receipt_schema_version == "structural-native-distribution-e2e.v61"
     latest_receipt_schema_version = (
         "structural-native-distribution-e2e.v56"
         if receipt_schema_version
@@ -715,6 +736,7 @@ def validate(
             "structural-native-distribution-e2e.v58",
             "structural-native-distribution-e2e.v59",
             "structural-native-distribution-e2e.v60",
+            "structural-native-distribution-e2e.v61",
         }
         else receipt_schema_version
     )
@@ -779,11 +801,14 @@ def validate(
         "structural-native-distribution-e2e.v58": V58_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v59": V59_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v60": V60_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v61": V61_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v61":
+        receipt_schema_version = "structural-native-distribution-e2e.v60"
     if receipt_schema_version == "structural-native-distribution-e2e.v60":
         receipt_schema_version = "structural-native-distribution-e2e.v59"
     if receipt_schema_version == "structural-native-distribution-e2e.v59":
@@ -2264,6 +2289,26 @@ def validate(
             "workbench_nested_linear_load_combination_term_insert_result_ir_sha256",
             "workbench_nested_linear_load_combination_term_insert_recovery_sha256",
             "workbench_nested_linear_load_combination_term_insert_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v61_receipt:
+        for name in (
+            "workbench_nodal_load_target_edit_surface_passed",
+            "workbench_nodal_load_target_edit_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_nodal_load_target_edit_model_sha256",
+            "workbench_nodal_load_target_edit_receipt_sha256",
+            "workbench_nodal_load_target_edit_request_receipt_sha256",
+            "workbench_nodal_load_target_edit_request_sha256",
+            "workbench_nodal_load_target_edit_assembly_receipt_sha256",
+            "workbench_nodal_load_target_edit_checkpoint_sha256",
+            "workbench_nodal_load_target_edit_result_ir_sha256",
+            "workbench_nodal_load_target_edit_recovery_sha256",
+            "workbench_nodal_load_target_edit_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

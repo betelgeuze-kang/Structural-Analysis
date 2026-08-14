@@ -14,8 +14,9 @@ Import -> Validate -> Run -> Resume -> Compare -> Report flow therefore has no P
 browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
-provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component and
-`model-edit-constraint-value` existing-restrained-DOF commands, plus the closed
+provenance-bound `model-edit-node` coordinate, `model-edit-nodal-load` existing-load component,
+`model-edit-nodal-load-target` existing-load target-node and `model-edit-constraint-value`
+existing-restrained-DOF commands, plus the closed
 `model-edit-linear-material`, `model-edit-frame-section`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
@@ -114,7 +115,11 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v60 proves repeated edited/request/artifact bytes and retains
+assembly preflight. Distribution E2E v61 proves repeated target-edited/request/artifact bytes and
+retains every v60 assertion while moving `LC_WEAK/L_WEAK_N2` from N2 to the existing N3 through
+`model-edit-nodal-load-target`, preserving all load fields except `node_id`, and proving exact active
+load `[0,0,0,0,0,0,0,-10000,0,0,0,0]`, byte-identical initialized-checkpoint restart and fallback
+0. Distribution E2E v60 proves repeated edited/request/artifact bytes and retains
 all Distribution E2E v59 assertions, including explicit-index insertion of `0.1 LC_STRONG` between
 the existing nested-root terms, exact ordered root terms `[COMBO_SERVICE,LC_STRONG,LC_AXIAL]` and
 exact active load `[25000,-6000,1500,0,0,0]` through

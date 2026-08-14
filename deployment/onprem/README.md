@@ -14,7 +14,8 @@ absent from the runtime image.
   deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
   and provenance-bound `model-edit-node` coordinate plus `model-edit-nodal-load` existing-load
-  component plus `model-edit-constraint-value` existing-restrained-DOF commands for current
+  component, `model-edit-nodal-load-target` existing-load target-node and
+  `model-edit-constraint-value` existing-restrained-DOF commands for current
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
   `model-edit-frame-section` parameter replacement for an existing v1 linear-elastic material or
   `frame_3d` section, plus `model-edit-frame-element-orientation` rotation replacement for one
@@ -178,6 +179,9 @@ structural-workbench model-edit-node /workspace/model.json --node N2 \
 structural-workbench model-edit-nodal-load /workspace/model.json \
   --load-pattern LC_WEAK --load L_WEAK_N2 \
   --components 0 -20000 0 0 0 0 --output-dir /workspace/edited-load-model
+structural-workbench model-edit-nodal-load-target /workspace/model.json \
+  --load-pattern LC_WEAK --load L_WEAK_N2 --node N3 \
+  --output-dir /workspace/retargeted-load-model
 structural-workbench model-edit-constraint-value /workspace/model.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir /workspace/edited-constraint-model
@@ -288,10 +292,12 @@ The truss-property editor reassigns only one existing fixed-formulation `truss_3
 existing v1 linear-elastic material and v1 truss section. Neither changes topology, identity,
 formulation or any unrelated entity.
 The nodal-load creator appends one globally unique nonzero load to an existing linear-static
-pattern and existing node with a contiguous index; it cannot create or retarget either identity,
-add other load families, or alter combinations. Its bounded inverse deletes only the last neutral
+pattern and existing node with a contiguous index; it cannot create either identity, add other load
+families, or alter combinations. The bounded target editor changes only one existing load's
+`node_id` to a distinct existing node and preserves every other load/pattern field. The bounded
+inverse deletes only the last neutral
 nonzero row while retaining another nonzero load in the same pattern; general load/pattern/node
-deletion, cascade/reindex, and retargeting remain outside the commands.
+deletion, cascade/reindex, and general retargeting remain outside the commands.
 The fixed-constraint creator appends only one homogeneous six-DOF zero restraint to an existing
 unconstrained node. Its bounded inverse removes only the last contiguous neutral homogeneous zero
 restraint while retaining another constraint and rejecting stage/unsupported-feature/round-trip

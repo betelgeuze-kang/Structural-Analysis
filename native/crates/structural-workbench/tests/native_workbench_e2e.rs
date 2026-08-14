@@ -293,6 +293,27 @@ fn run_nodal_load_edit(
     ])
 }
 
+fn run_nodal_load_target_edit(
+    source: &Path,
+    destination: &Path,
+    load_pattern_id: &str,
+    nodal_load_id: &str,
+    node_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-nodal-load-target"),
+        source.as_os_str(),
+        text("--load-pattern"),
+        text(load_pattern_id),
+        text("--load"),
+        text(nodal_load_id),
+        text("--node"),
+        text(node_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn assert_published_nodal_load_edit(destination: &Path) {
     let edited_bytes = std::fs::read(destination.join("model-ir.json")).expect("edited ModelIR");
     let edited = parse_model_ir_v2(&edited_bytes).expect("strict edited ModelIR");
@@ -4513,6 +4534,292 @@ fn nodal_load_add_is_deterministic_cpp_revalidated_and_changes_linear_execution(
     assert_eq!(
         blocked_edited["roundtrip_map"][1]["mapping_status"],
         "exact"
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nodal_load_target_edit_is_deterministic_cpp_revalidated_restartable_and_executable() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let member_directory = temporary.0.join("nodal-load-target-member-source");
+    assert_success(&run_frame3d_member_add(
+        &source,
+        &member_directory,
+        "N3",
+        ["4", "0", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "S1",
+    ));
+    let member_path = member_directory.join("model-ir.json");
+    let member_bytes = std::fs::read(&member_path).expect("nodal-load target source bytes");
+    let member_model = parse_model_ir_v2(&member_bytes).expect("strict nodal-load target source");
+
+    let first = temporary.0.join("nodal-load-target-first");
+    let second = temporary.0.join("nodal-load-target-second");
+    for destination in [&first, &second] {
+        let output =
+            run_nodal_load_target_edit(&member_path, destination, "LC_WEAK", "L_WEAK_N2", "N3");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nodal-load target receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nodal-load target artifact"),
+            std::fs::read(second.join(artifact)).expect("second nodal-load target artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&member_path).expect("unchanged nodal-load target source"),
+        member_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("retargeted nodal-load ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict retargeted nodal-load ModelIR");
+    let validation = validate_model_bytes(&edited_bytes).expect("C++ retargeted-model validation");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], member_model.value()[family]);
+    }
+    let source_patterns = member_model.value()["load_patterns"]
+        .as_array()
+        .expect("source load patterns");
+    let edited_patterns = edited.value()["load_patterns"]
+        .as_array()
+        .expect("edited load patterns");
+    assert_eq!(source_patterns.len(), edited_patterns.len());
+    for (source_pattern, edited_pattern) in source_patterns.iter().zip(edited_patterns) {
+        if source_pattern["id"] == "LC_WEAK" {
+            for key in [
+                "id",
+                "index",
+                "analysis_type",
+                "self_weight",
+                "source_id",
+                "extensions",
+            ] {
+                assert_eq!(edited_pattern[key], source_pattern[key]);
+            }
+            let source_load = &source_pattern["nodal_loads"][0];
+            let edited_load = &edited_pattern["nodal_loads"][0];
+            for key in ["id", "index", "components_si", "source_id", "extensions"] {
+                assert_eq!(edited_load[key], source_load[key]);
+            }
+            assert_eq!(source_load["node_id"], "N2");
+            assert_eq!(edited_load["node_id"], "N3");
+        } else {
+            assert_eq!(edited_pattern, source_pattern);
+        }
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-nodal-load-target.v1")
+        .expect("nodal-load target provenance extension");
+    assert_eq!(extension["operation"], "nodal_load_target");
+    assert_eq!(extension["load_pattern_id"], "LC_WEAK");
+    assert_eq!(extension["load_pattern_index"], 1);
+    assert_eq!(extension["analysis_type"], "linear_static");
+    assert_eq!(extension["nodal_load_id"], "L_WEAK_N2");
+    assert_eq!(extension["nodal_load_index"], 0);
+    assert_eq!(extension["previous_node_id"], "N2");
+    assert_eq!(extension["edited_node_id"], "N3");
+    assert_eq!(
+        extension["components_si"],
+        serde_json::json!({"FX": 0, "FY": -10000, "FZ": 0, "MX": 0, "MY": 0, "MZ": 0})
+    );
+    assert_eq!(extension["retained_source_id"], "generated:L_WEAK_N2");
+    assert_eq!(extension["retained_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nodal-load target receipt"),
+    )
+    .expect("nodal-load target receipt JSON");
+    assert_eq!(receipt["operation"], "nodal_load_target");
+    assert_eq!(receipt["load_pattern_id"], "LC_WEAK");
+    assert_eq!(receipt["load_pattern_index"], 1);
+    assert_eq!(receipt["nodal_load_id"], "L_WEAK_N2");
+    assert_eq!(receipt["nodal_load_index"], 0);
+    assert_eq!(receipt["previous_node_id"], "N2");
+    assert_eq!(receipt["edited_node_id"], "N3");
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let request_directory = temporary.0.join("nodal-load-target-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nodal-load-target-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nodal-load target request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("nodal-load target direct execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nodal-load target direct recovery"),
+    )
+    .expect("nodal-load target recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, 0, 0, 0, 0, 0, 0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("nodal-load target initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nodal-load target resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    for (name, pattern, load, node, code) in [
+        (
+            "nodal-load-target-no-op",
+            "LC_WEAK",
+            "L_WEAK_N2",
+            "N2",
+            "workbench_model_edit_nodal_load_target_no_change",
+        ),
+        (
+            "nodal-load-target-missing-node",
+            "LC_WEAK",
+            "L_WEAK_N2",
+            "MISSING",
+            "workbench_model_edit_nodal_load_target_node_missing",
+        ),
+        (
+            "nodal-load-target-missing-load",
+            "LC_WEAK",
+            "MISSING",
+            "N3",
+            "workbench_model_edit_nodal_load_target_load_missing",
+        ),
+        (
+            "nodal-load-target-missing-pattern",
+            "MISSING",
+            "L_WEAK_N2",
+            "N3",
+            "workbench_model_edit_nodal_load_target_pattern_missing",
+        ),
+    ] {
+        let destination = temporary.0.join(name);
+        let rejected = run_nodal_load_target_edit(&member_path, &destination, pattern, load, node);
+        assert_eq!(rejected.status.code(), Some(1));
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(code));
+        assert!(!destination.exists());
+    }
+
+    let mut blocked = member_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.nodal-load-target-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Target editing must preserve unsupported solver blockers.",
+        "extensions": {}
+    }]);
+    blocked["roundtrip_map"] = serde_json::json!([
+        {
+            "source_entity_id": "source:LC_WEAK",
+            "entity_kind": "load_pattern",
+            "model_ir_entity_id": "LC_WEAK",
+            "mapping_status": "exact",
+            "extensions": {}
+        },
+        {
+            "source_entity_id": "source:N3",
+            "entity_kind": "node",
+            "model_ir_entity_id": "N3",
+            "mapping_status": "exact",
+            "extensions": {}
+        }
+    ]);
+    let blocked_source = temporary.0.join("blocked-nodal-load-target-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked nodal-load target source")
+            .as_bytes(),
+    )
+    .expect("write blocked nodal-load target source");
+    let blocked_destination = temporary.0.join("blocked-nodal-load-target-output");
+    assert_success(&run_nodal_load_target_edit(
+        &blocked_source,
+        &blocked_destination,
+        "LC_WEAK",
+        "L_WEAK_N2",
+        "N3",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked nodal-load target receipt"),
+    )
+    .expect("blocked nodal-load target receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.nodal-load-target-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked retargeted ModelIR"),
+    )
+    .expect("blocked retargeted JSON");
+    assert_eq!(
+        blocked_edited["load_patterns"][1]["nodal_loads"][0]["node_id"],
+        "N3"
+    );
+    assert_eq!(
+        blocked_edited["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        blocked_edited["roundtrip_map"][1]["mapping_status"],
+        "exact"
+    );
+
+    let existing = run_nodal_load_target_edit(&member_path, &first, "LC_WEAK", "L_WEAK_N2", "N3");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
     );
 }
 

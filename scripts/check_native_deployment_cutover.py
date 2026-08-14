@@ -59,6 +59,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
+    Path("docs/native/modelir-nodal-load-target-edit-v1.md"),
 )
 
 
@@ -247,6 +248,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v61",
+            "model-edit-nodal-load-target",
+            "[0,0,0,0,0,0,0,-10000,0,0,0,0]",
             "Distribution E2E v60",
             "model-insert-nested-linear-load-combination-term",
             "[COMBO_SERVICE,LC_STRONG,LC_AXIAL]",
@@ -698,6 +702,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_frame3d_member_add_receipt_sha256",
         "workbench_frame3d_member_add_request_sha256",
         "workbench_frame3d_member_add_result_ir_sha256",
+        "exercise_nodal_load_target_edit_surface",
+        "model-edit-nodal-load-target",
+        "structural-native:model-edit-nodal-load-target.v1",
+        "workbench_nodal_load_target_edit_surface_passed",
+        "workbench_nodal_load_target_edit_model_sha256",
+        "workbench_nodal_load_target_edit_receipt_sha256",
+        "workbench_nodal_load_target_edit_request_receipt_sha256",
+        "workbench_nodal_load_target_edit_request_sha256",
+        "workbench_nodal_load_target_edit_assembly_receipt_sha256",
+        "workbench_nodal_load_target_edit_checkpoint_sha256",
+        "workbench_nodal_load_target_edit_result_ir_sha256",
+        "workbench_nodal_load_target_edit_recovery_sha256",
+        "workbench_nodal_load_target_edit_report_ir_sha256",
+        "workbench_nodal_load_target_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -900,6 +918,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v61",
+            "V61_NODAL_LOAD_TARGET_EDIT_KEYS",
+            "workbench_nodal_load_target_edit_surface_passed",
+            "workbench_nodal_load_target_edit_receipt_sha256",
+            "workbench_nodal_load_target_edit_request_receipt_sha256",
+            "workbench_nodal_load_target_edit_recovery_sha256",
+            "workbench_nodal_load_target_edit_restart_passed",
             "structural-native-distribution-e2e.v60",
             "V60_NESTED_LINEAR_LOAD_COMBINATION_TERM_INSERT_KEYS",
             "workbench_nested_linear_load_combination_term_insert_surface_passed",
@@ -1216,6 +1241,26 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Installed static and shared package E2E v35",
             "Frozen v1 through v34",
             "receipts retain their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    nodal_load_target_edit_doc = _text(
+        root, Path("docs/native/modelir-nodal-load-target-edit-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-nodal-load-target-edit-v1.md"),
+        text=nodal_load_target_edit_doc,
+        tokens=(
+            "model-edit-nodal-load-target",
+            "single C ABI into C++ semantic validation",
+            "structural-native:model-edit-nodal-load-target.v1",
+            "nodal_load_target",
+            "append-only v61",
+            "[0,0,0,0,0,0,0,-10000,0,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6 remain open",
         ),
         blockers=blockers,
     )
@@ -1760,6 +1805,43 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         root, Path("native/capabilities.json"), blockers
     )
     capabilities = capabilities_payload.get("capabilities")
+    nodal_load_target_edit_capability = (
+        capabilities.get("modelir_nodal_load_target_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(nodal_load_target_edit_capability, dict):
+        blockers.append("modelir_nodal_load_target_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if nodal_load_target_edit_capability.get(field) != expected:
+                blockers.append(
+                    f"modelir_nodal_load_target_edit_capability_field_invalid:{field}"
+                )
+        nodal_load_target_edit_claim = str(
+            nodal_load_target_edit_capability.get("claim", "")
+        )
+        for token in (
+            "changes exactly one existing nodal-load node_id",
+            "distinct existing node",
+            "preserving load and pattern identity and contiguous indices",
+            "all six finite SI components",
+            "single C ABI into C++ semantic validation",
+            "distribution v61 E2E",
+            "exact active load [0,0,0,0,0,0,0,-10000,0,0,0,0]",
+            "byte-identical initialized-checkpoint restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nodal_load_target_edit_claim:
+                blockers.append(
+                    "modelir_nodal_load_target_edit_capability_"
+                    f"claim_missing:{token}"
+                )
     linear_load_combination_deletion_capability = (
         capabilities.get("modelir_linear_load_combination_deletion")
         if isinstance(capabilities, dict)

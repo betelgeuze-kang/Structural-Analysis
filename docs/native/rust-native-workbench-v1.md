@@ -43,7 +43,10 @@ nodal-load, unsupported-feature, or round-trip reference and performs no cascade
 `docs/native/modelir-orphan-node-delete-v1.md` for the exact boundary.
 The sibling nodal-load edit replaces the six finite SI components of one existing load inside one
 named pattern under the same source-validation, provenance, create-new, and C++ revalidation rules.
-It cannot create, delete, retarget, or combine loads.
+It cannot create, delete, retarget, or combine loads. A separate bounded
+`model-edit-nodal-load-target` command changes only that existing load's `node_id` to a distinct
+existing node while preserving both indices, analysis type, components, source identity and
+extensions. See `docs/native/modelir-nodal-load-target-edit-v1.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. It cannot add/remove restraints or retarget a node.
 The linear-material editor replaces the closed elastic-modulus, Poisson-ratio, and density
@@ -282,6 +285,9 @@ structural-workbench model-edit-node MODEL.json --node N2 \
 structural-workbench model-edit-nodal-load MODEL.json \
   --load-pattern LC_WEAK --load L_WEAK_N2 \
   --components 0 -20000 0 0 0 0 --output-dir EDITED-LOAD-MODEL
+structural-workbench model-edit-nodal-load-target MODEL.json \
+  --load-pattern LC_WEAK --load L_WEAK_N2 --node N3 \
+  --output-dir RETARGETED-LOAD-MODEL
 structural-workbench model-edit-constraint-value MODEL.json \
   --constraint BC2 --dof UY --value -0.0002 \
   --output-dir EDITED-CONSTRAINT-MODEL
@@ -488,7 +494,7 @@ inside one named pattern under the same provenance and C++ revalidation policy; 
 load-pattern round-trip row is conservatively marked approximated. The constraint-value editor
 changes one existing restrained DOF's finite prescribed metre/radian value and similarly degrades a
 matching constraint row. None of these existing-entity editors provides visual dragging,
-load/constraint retargeting, existing-combination term editing, restraint-mask changes, or general
+general load/constraint retargeting, existing-combination term editing, restraint-mask changes, or general
 topology or solver editing. Two further closed property commands replace all parameters of one existing v1
 `linear_elastic_isotropic` material or one existing v1 `frame_3d` section. They require physical SI
 ranges, fixed law/family and version, degrade only matching material/section round-trip rows, and

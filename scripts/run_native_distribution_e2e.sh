@@ -971,6 +971,156 @@ exercise_frame3d_member_add_surface() {
 }
 exercise_frame3d_member_add_surface
 
+exercise_nodal_load_target_edit_surface() {
+  local source_model="$e2e_root/frame3d-member-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+  local label edit_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    edit_directory="$e2e_root/nodal-load-target-edit-$label"
+    request_directory="$e2e_root/nodal-load-target-edit-$label-request"
+    direct_directory="$e2e_root/nodal-load-target-edit-$label-direct"
+    partial_directory="$e2e_root/nodal-load-target-edit-$label-partial"
+    resumed_directory="$e2e_root/nodal-load-target-edit-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-edit-nodal-load-target "$source_model" \
+      --load-pattern LC_WEAK --load L_WEAK_N2 --node N3 \
+      --output-dir "$edit_directory" \
+      > "$e2e_root/nodal-load-target-edit-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-edit-receipt.v1"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"operation":"nodal_load_target"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_id":"LC_WEAK"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"load_pattern_index":1' "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_type":"linear_static"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_id":"L_WEAK_N2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"nodal_load_index":0' "$edit_directory/edit-receipt.json"
+    grep -Fq '"previous_node_id":"N2"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"edited_node_id":"N3"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"components_si":{"FX":0,"FY":-10000,"FZ":0,"MX":0,"MY":0,"MZ":0}' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_source_id":"generated:L_WEAK_N2"' \
+      "$edit_directory/edit-receipt.json"
+    grep -Fq '"retained_extensions":{}' "$edit_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' "$edit_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$edit_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' "$edit_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-edit-nodal-load-target.v1"' \
+      "$edit_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$edit_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/nodal-load-target-edit-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$edit_directory/model-ir.json" \
+      --case nodal-load-target-edit-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/nodal-load-target-edit-$label-request.stdout.json"
+    grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/nodal-load-target-edit-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11,12,13,14,15,16,17]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,0,0,0,0,0,0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/nodal-load-target-edit-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$edit_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/nodal-load-target-edit-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/nodal-load-target-edit-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/nodal-load-target-edit-first$suffix" \
+      "$e2e_root/nodal-load-target-edit-second$suffix" \
+      > "$e2e_root/nodal-load-target-edit$suffix-diff.txt"
+  done
+  cmp "$e2e_root/nodal-load-target-edit-first.stdout.json" \
+    "$e2e_root/nodal-load-target-edit-second.stdout.json"
+  cmp "$e2e_root/nodal-load-target-edit-first-validation.json" \
+    "$e2e_root/nodal-load-target-edit-second-validation.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/nodal-load-target-edit-first-$suffix.stdout.json" \
+      "$e2e_root/nodal-load-target-edit-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed nodal-load target edit mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local no_op_destination="$e2e_root/nodal-load-target-edit-no-op-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nodal-load-target "$source_model" --load-pattern LC_WEAK \
+    --load L_WEAK_N2 --node N2 --output-dir "$no_op_destination" \
+    > "$e2e_root/nodal-load-target-edit-no-op-rejected.stdout.json"; then
+    echo "installed nodal-load target edit accepted a no-op" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_nodal_load_target_no_change' \
+    "$e2e_root/nodal-load-target-edit-no-op-rejected.stdout.json"
+  test ! -e "$no_op_destination"
+
+  local missing_node_destination="$e2e_root/nodal-load-target-edit-node-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nodal-load-target "$source_model" --load-pattern LC_WEAK \
+    --load L_WEAK_N2 --node N_MISSING --output-dir "$missing_node_destination" \
+    > "$e2e_root/nodal-load-target-edit-node-missing-rejected.stdout.json"; then
+    echo "installed nodal-load target edit accepted a missing node" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_nodal_load_target_node_missing' \
+    "$e2e_root/nodal-load-target-edit-node-missing-rejected.stdout.json"
+  test ! -e "$missing_node_destination"
+
+  local missing_load_destination="$e2e_root/nodal-load-target-edit-load-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nodal-load-target "$source_model" --load-pattern LC_WEAK \
+    --load L_MISSING --node N3 --output-dir "$missing_load_destination" \
+    > "$e2e_root/nodal-load-target-edit-load-missing-rejected.stdout.json"; then
+    echo "installed nodal-load target edit accepted a missing load" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_nodal_load_target_load_missing' \
+    "$e2e_root/nodal-load-target-edit-load-missing-rejected.stdout.json"
+  test ! -e "$missing_load_destination"
+
+  local missing_pattern_destination="$e2e_root/nodal-load-target-edit-pattern-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-nodal-load-target "$source_model" --load-pattern LC_MISSING \
+    --load L_WEAK_N2 --node N3 --output-dir "$missing_pattern_destination" \
+    > "$e2e_root/nodal-load-target-edit-pattern-missing-rejected.stdout.json"; then
+    echo "installed nodal-load target edit accepted a missing pattern" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_edit_nodal_load_target_pattern_missing' \
+    "$e2e_root/nodal-load-target-edit-pattern-missing-rejected.stdout.json"
+  test ! -e "$missing_pattern_destination"
+}
+exercise_nodal_load_target_edit_surface
+
 exercise_nodal_load_add_surface() {
   local source_model="$e2e_root/frame3d-member-add-first/model-ir.json"
   local source_before_hash baseline_recovery baseline_maximum_displacement
@@ -6055,6 +6205,15 @@ frame3d_member_add_model_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/m
 frame3d_member_add_receipt_hash="$(sha256sum "$e2e_root/frame3d-member-add-first/edit-receipt.json" | awk '{print $1}')"
 frame3d_member_add_request_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 frame3d_member_add_result_ir_hash="$(sha256sum "$e2e_root/frame3d-member-add-first-linear-run/result-ir.json" | awk '{print $1}')"
+nodal_load_target_edit_model_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first/model-ir.json" | awk '{print $1}')"
+nodal_load_target_edit_receipt_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first/edit-receipt.json" | awk '{print $1}')"
+nodal_load_target_edit_request_receipt_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-request/request-receipt.json" | awk '{print $1}')"
+nodal_load_target_edit_request_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-request/analysis-request.json" | awk '{print $1}')"
+nodal_load_target_edit_assembly_receipt_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-direct/assembly-receipt.json" | awk '{print $1}')"
+nodal_load_target_edit_checkpoint_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+nodal_load_target_edit_result_ir_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-direct/result-ir.json" | awk '{print $1}')"
+nodal_load_target_edit_recovery_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+nodal_load_target_edit_report_ir_hash="$(sha256sum "$e2e_root/nodal-load-target-edit-first-direct/report-ir.json" | awk '{print $1}')"
 nodal_load_add_model_hash="$(sha256sum "$e2e_root/nodal-load-add-first/model-ir.json" | awk '{print $1}')"
 nodal_load_add_receipt_hash="$(sha256sum "$e2e_root/nodal-load-add-first/edit-receipt.json" | awk '{print $1}')"
 nodal_load_add_request_hash="$(sha256sum "$e2e_root/nodal-load-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
@@ -6519,6 +6678,10 @@ v60_receipt_json="${v59_receipt_json/structural-native-distribution-e2e.v59/stru
 nested_linear_load_combination_term_insert_receipt_fields="\"workbench_nested_linear_load_combination_term_insert_surface_passed\":true,\"workbench_nested_linear_load_combination_term_insert_model_sha256\":\"sha256:$nested_linear_load_combination_term_insert_model_hash\",\"workbench_nested_linear_load_combination_term_insert_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_insert_receipt_hash\",\"workbench_nested_linear_load_combination_term_insert_request_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_insert_request_receipt_hash\",\"workbench_nested_linear_load_combination_term_insert_request_sha256\":\"sha256:$nested_linear_load_combination_term_insert_request_hash\",\"workbench_nested_linear_load_combination_term_insert_assembly_receipt_sha256\":\"sha256:$nested_linear_load_combination_term_insert_assembly_receipt_hash\",\"workbench_nested_linear_load_combination_term_insert_checkpoint_sha256\":\"sha256:$nested_linear_load_combination_term_insert_checkpoint_hash\",\"workbench_nested_linear_load_combination_term_insert_result_ir_sha256\":\"sha256:$nested_linear_load_combination_term_insert_result_ir_hash\",\"workbench_nested_linear_load_combination_term_insert_recovery_sha256\":\"sha256:$nested_linear_load_combination_term_insert_recovery_hash\",\"workbench_nested_linear_load_combination_term_insert_report_ir_sha256\":\"sha256:$nested_linear_load_combination_term_insert_report_ir_hash\",\"workbench_nested_linear_load_combination_term_insert_restart_passed\":true,"
 v60_receipt_json="${v60_receipt_json/\"workbench_result_view_surface_passed\":true,/${nested_linear_load_combination_term_insert_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v60_receipt_json" > "$temporary_receipt"
+v61_receipt_json="${v60_receipt_json/structural-native-distribution-e2e.v60/structural-native-distribution-e2e.v61}"
+nodal_load_target_edit_receipt_fields="\"workbench_nodal_load_target_edit_surface_passed\":true,\"workbench_nodal_load_target_edit_model_sha256\":\"sha256:$nodal_load_target_edit_model_hash\",\"workbench_nodal_load_target_edit_receipt_sha256\":\"sha256:$nodal_load_target_edit_receipt_hash\",\"workbench_nodal_load_target_edit_request_receipt_sha256\":\"sha256:$nodal_load_target_edit_request_receipt_hash\",\"workbench_nodal_load_target_edit_request_sha256\":\"sha256:$nodal_load_target_edit_request_hash\",\"workbench_nodal_load_target_edit_assembly_receipt_sha256\":\"sha256:$nodal_load_target_edit_assembly_receipt_hash\",\"workbench_nodal_load_target_edit_checkpoint_sha256\":\"sha256:$nodal_load_target_edit_checkpoint_hash\",\"workbench_nodal_load_target_edit_result_ir_sha256\":\"sha256:$nodal_load_target_edit_result_ir_hash\",\"workbench_nodal_load_target_edit_recovery_sha256\":\"sha256:$nodal_load_target_edit_recovery_hash\",\"workbench_nodal_load_target_edit_report_ir_sha256\":\"sha256:$nodal_load_target_edit_report_ir_hash\",\"workbench_nodal_load_target_edit_restart_passed\":true,"
+v61_receipt_json="${v61_receipt_json/\"workbench_result_view_surface_passed\":true,/${nodal_load_target_edit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v61_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

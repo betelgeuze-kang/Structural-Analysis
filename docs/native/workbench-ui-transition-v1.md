@@ -43,8 +43,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   existing nodal load inside one named load pattern. Rust edits only the canonical C++ snapshot,
   binds both identities plus previous/new components and source hashes, conservatively marks a
   matching load-pattern round-trip row approximated, then strictly reparses and C++-revalidates the
-  result before create-new publication. Pattern/load creation, deletion, retargeting, combinations,
-  self-weight, visual manipulation, and broader model editing remain open.
+  result before create-new publication. Target editing is a separate bounded C5 surface;
+  pattern/load creation, deletion, combinations, self-weight, visual manipulation, and broader
+  model editing remain open.
+- `model-edit-nodal-load-target`: deterministic replacement of one existing nodal load's target
+  with a distinct existing node. Rust preserves the pattern/load identities and indices, analysis
+  type, all six components, source identity, extensions and unrelated rows; binds the old/new node
+  and retained fields; degrades only a matching load-pattern round-trip claim; and strictly
+  reparses and C++-revalidates before create-new publication. Installed E2E v61 proves exact N3-UY
+  active load `[0,0,0,0,0,0,0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-
+  checkpoint restart. Component/identity/pattern editing, general topology and visual dragging
+  remain separate or open.
 - `model-edit-constraint-value`: deterministic replacement of one finite metre/radian prescribed
   value for a DOF already restrained by one existing named constraint. Rust binds the constraint,
   DOF, unit, previous/new values and source hashes, conservatively marks a matching constraint
@@ -121,9 +130,9 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   contiguous pattern-local index and neutral source ownership; only a matching direct load-pattern
   round-trip claim is degraded. Rust strictly reparses and C++-revalidates before create-new
   publication. Installed E2E composes the connected-member addition, applies an exact N3-UY load,
-  and proves that value in typed recovery plus changed displacement and fallback 0. Pattern/node
-  creation, retargeting, arbitrary deletion, combinations, other load families and visual
-  authoring remain open.
+  and proves that value in typed recovery plus changed displacement and fallback 0. Target editing
+  is a separate bounded C5 surface; pattern/node creation, arbitrary deletion, combinations, other
+  load families and visual authoring remain open.
 - `model-delete-nodal-load`: deterministic deletion of only the last contiguous neutral, nonzero
   six-component row from one existing `linear_static` pattern while retaining another nonzero
   nodal load. Rust rejects source-owned/nonterminal/zero rows, index drift, a zero/empty retained

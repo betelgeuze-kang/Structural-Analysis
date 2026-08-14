@@ -44,8 +44,8 @@ Earlier distribution receipts retain their narrower authority.
 
 ## Claim boundary
 
-This closes one linear-static nodal-load addition to existing identities. It does not create load
-patterns, nodes, members, properties, constraints, combinations or stages; it does not delete,
-retarget or merge existing loads, select arbitrary analysis types/backends/solvers, provide visual
+This closes one linear-static nodal-load addition to existing identities. Target-node replacement
+is a separate bounded C5 surface. It does not create load patterns, nodes, members, properties,
+constraints, combinations or stages; it does not delete or merge existing loads, select arbitrary analysis types/backends/solvers, provide visual
 manipulation, infer engineering acceptance, prove protected HIP C2, replace React/TypeScript, or
 authorize C6.
