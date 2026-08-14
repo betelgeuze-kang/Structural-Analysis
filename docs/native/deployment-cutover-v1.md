@@ -116,7 +116,11 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v63 proves repeated constraint-DOF-deleted/request/artifact
+assembly preflight. Distribution E2E v64 proves repeated constraint-DOF-added/request/artifact
+bytes and retains every v63 assertion while restoring `BC_N3/RZ=0` through
+`model-add-fixed-constraint-dof`, preserving every source mask entry and non-mask constraint field,
+and proving exact active DOFs `[12,13,14,15,16,17]`, active load `[0,-1000,0,0,0,0]`,
+byte-identical initialized-checkpoint restart and fallback 0. Distribution E2E v63 proves repeated constraint-DOF-deleted/request/artifact
 bytes and retains every v62 assertion while removing `BC_N3/RZ` through
 `model-delete-fixed-constraint-dof`, preserving every other constraint field, and proving exact
 active DOFs `[11,12,13,14,15,16,17]`, active load `[0,0,-1000,0,0,0,0]`, byte-identical

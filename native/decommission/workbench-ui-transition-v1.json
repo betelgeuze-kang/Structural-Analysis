@@ -320,6 +320,12 @@
       "removal_blocker": false
     },
     {
+      "feature": "bounded_cpp_revalidated_existing_modelir_fixed_constraint_single_dof_add",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
       "feature": "bounded_cpp_revalidated_existing_modelir_constraint_prescribed_value_edit",
       "native_status": "c5_implemented",
       "legacy_status": "partial",

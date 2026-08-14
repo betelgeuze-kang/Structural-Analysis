@@ -146,6 +146,15 @@ struct ModelDeleteFixedConstraintDofCommand {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+struct ModelAddFixedConstraintDofCommand {
+    model: PathBuf,
+    constraint_id: String,
+    dof: String,
+    value_si: f64,
+    output_directory: PathBuf,
+}
+
+#[derive(Clone, Debug, PartialEq)]
 struct ModelAddLinearLoadPatternCommand {
     model: PathBuf,
     load_pattern_id: String,
@@ -540,6 +549,8 @@ fn run(arguments: &[OsString]) -> ExitCode {
             parse_model_delete_fixed_constraint_dof(arguments)
                 .and_then(|command| run_model_delete_fixed_constraint_dof(&command))
         }
+        Some("model-add-fixed-constraint-dof") => parse_model_add_fixed_constraint_dof(arguments)
+            .and_then(|command| run_model_add_fixed_constraint_dof(&command)),
         Some("model-add-linear-load-pattern") => parse_model_add_linear_load_pattern(arguments)
             .and_then(|command| run_model_add_linear_load_pattern(&command)),
         Some("model-add-linear-load-combination") => {
@@ -1037,6 +1048,20 @@ fn run_model_delete_fixed_constraint_dof(
         &command.model,
         &command.constraint_id,
         &command.dof,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_add_fixed_constraint_dof(
+    command: &ModelAddFixedConstraintDofCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_fixed_constraint_dof_add(
+        &command.model,
+        &command.constraint_id,
+        &command.dof,
+        command.value_si,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -2079,6 +2104,41 @@ fn parse_model_delete_fixed_constraint_dof(
         )?,
         dof,
         output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
+fn parse_model_add_fixed_constraint_dof(
+    arguments: &[OsString],
+) -> Result<ModelAddFixedConstraintDofCommand, WorkbenchError> {
+    if arguments.len() != 10
+        || arguments[2] != "--constraint"
+        || arguments[4] != "--dof"
+        || arguments[6] != "--value"
+        || arguments[8] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-add-fixed-constraint-dof requires MODEL.json --constraint ID --dof UX|UY|UZ|RX|RY|RZ --value SI-VALUE --output-dir DIR",
+        ));
+    }
+    let dof = arguments[5]
+        .to_str()
+        .filter(|value| matches!(*value, "UX" | "UY" | "UZ" | "RX" | "RY" | "RZ"))
+        .ok_or_else(|| {
+            usage_error("model-add-fixed-constraint-dof DOF must be UX, UY, UZ, RX, RY, or RZ")
+        })?
+        .to_owned();
+    Ok(ModelAddFixedConstraintDofCommand {
+        model: PathBuf::from(&arguments[1]),
+        constraint_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-add-fixed-constraint-dof constraint ID",
+        )?,
+        dof,
+        value_si: parse_finite_edit_number(
+            &arguments[7],
+            "model-add-fixed-constraint-dof prescribed value",
+        )?,
+        output_directory: PathBuf::from(&arguments[9]),
     })
 }
 
@@ -3939,7 +3999,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
-        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
+        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
 }
 
@@ -3951,9 +4011,10 @@ mod tests {
     use super::{
         parse_catalog, parse_catalog_show, parse_deformed_view, parse_evidence, parse_import,
         parse_model_add_direct_linear_load_combination_term, parse_model_add_fixed_constraint,
-        parse_model_add_frame3d_member, parse_model_add_frame_section,
-        parse_model_add_linear_load_combination, parse_model_add_linear_load_pattern,
-        parse_model_add_linear_material, parse_model_add_nested_linear_load_combination,
+        parse_model_add_fixed_constraint_dof, parse_model_add_frame3d_member,
+        parse_model_add_frame_section, parse_model_add_linear_load_combination,
+        parse_model_add_linear_load_pattern, parse_model_add_linear_material,
+        parse_model_add_nested_linear_load_combination,
         parse_model_add_nested_linear_load_combination_term, parse_model_add_nodal_load,
         parse_model_add_node, parse_model_add_truss3d_member, parse_model_add_truss_section,
         parse_model_create_linear_analysis_request,
@@ -4376,6 +4437,39 @@ mod tests {
         let mut empty_constraint = arguments;
         empty_constraint[3] = OsString::new();
         assert!(parse_model_delete_fixed_constraint_dof(&empty_constraint).is_err());
+    }
+
+    #[test]
+    fn model_add_fixed_constraint_dof_parser_is_closed_finite_and_bounded() {
+        let arguments = [
+            OsString::from("model-add-fixed-constraint-dof"),
+            OsString::from("model.json"),
+            OsString::from("--constraint"),
+            OsString::from("BC_N3"),
+            OsString::from("--dof"),
+            OsString::from("RZ"),
+            OsString::from("--value"),
+            OsString::from("0.125"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_add_fixed_constraint_dof(&arguments)
+            .expect("valid fixed-constraint DOF add command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.constraint_id, "BC_N3");
+        assert_eq!(parsed.dof, "RZ");
+        assert_eq!(parsed.value_si.to_bits(), 0.125_f64.to_bits());
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut invalid_dof = arguments.clone();
+        invalid_dof[5] = OsString::from("QX");
+        assert!(parse_model_add_fixed_constraint_dof(&invalid_dof).is_err());
+        let mut nonfinite = arguments.clone();
+        nonfinite[7] = OsString::from("NaN");
+        assert!(parse_model_add_fixed_constraint_dof(&nonfinite).is_err());
+        let mut empty_constraint = arguments;
+        empty_constraint[3] = OsString::new();
+        assert!(parse_model_add_fixed_constraint_dof(&empty_constraint).is_err());
     }
 
     #[test]

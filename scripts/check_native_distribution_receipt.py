@@ -692,6 +692,20 @@ V63_FIXED_CONSTRAINT_DOF_DELETE_KEYS = {
     "workbench_fixed_constraint_dof_delete_restart_passed",
 }
 V63_EXPECTED_KEYS = V62_EXPECTED_KEYS | V63_FIXED_CONSTRAINT_DOF_DELETE_KEYS
+V64_FIXED_CONSTRAINT_DOF_ADD_KEYS = {
+    "workbench_fixed_constraint_dof_add_surface_passed",
+    "workbench_fixed_constraint_dof_add_model_sha256",
+    "workbench_fixed_constraint_dof_add_receipt_sha256",
+    "workbench_fixed_constraint_dof_add_request_receipt_sha256",
+    "workbench_fixed_constraint_dof_add_request_sha256",
+    "workbench_fixed_constraint_dof_add_assembly_receipt_sha256",
+    "workbench_fixed_constraint_dof_add_checkpoint_sha256",
+    "workbench_fixed_constraint_dof_add_result_ir_sha256",
+    "workbench_fixed_constraint_dof_add_recovery_sha256",
+    "workbench_fixed_constraint_dof_add_report_ir_sha256",
+    "workbench_fixed_constraint_dof_add_restart_passed",
+}
+V64_EXPECTED_KEYS = V63_EXPECTED_KEYS | V64_FIXED_CONSTRAINT_DOF_ADD_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -741,6 +755,7 @@ def validate(
         "structural-native-distribution-e2e.v61",
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
     is_v58_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v58",
@@ -749,6 +764,7 @@ def validate(
         "structural-native-distribution-e2e.v61",
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
     is_v59_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v59",
@@ -756,23 +772,31 @@ def validate(
         "structural-native-distribution-e2e.v61",
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
     is_v60_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v60",
         "structural-native-distribution-e2e.v61",
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
     is_v61_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v61",
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
     is_v62_receipt = receipt_schema_version in {
         "structural-native-distribution-e2e.v62",
         "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
     }
-    is_v63_receipt = receipt_schema_version == "structural-native-distribution-e2e.v63"
+    is_v63_receipt = receipt_schema_version in {
+        "structural-native-distribution-e2e.v63",
+        "structural-native-distribution-e2e.v64",
+    }
+    is_v64_receipt = receipt_schema_version == "structural-native-distribution-e2e.v64"
     latest_receipt_schema_version = (
         "structural-native-distribution-e2e.v56"
         if receipt_schema_version
@@ -784,6 +808,7 @@ def validate(
             "structural-native-distribution-e2e.v61",
             "structural-native-distribution-e2e.v62",
             "structural-native-distribution-e2e.v63",
+            "structural-native-distribution-e2e.v64",
         }
         else receipt_schema_version
     )
@@ -851,11 +876,14 @@ def validate(
         "structural-native-distribution-e2e.v61": V61_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v62": V62_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v63": V63_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v64": V64_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
+    if receipt_schema_version == "structural-native-distribution-e2e.v64":
+        receipt_schema_version = "structural-native-distribution-e2e.v63"
     if receipt_schema_version == "structural-native-distribution-e2e.v63":
         receipt_schema_version = "structural-native-distribution-e2e.v62"
     if receipt_schema_version == "structural-native-distribution-e2e.v62":
@@ -2402,6 +2430,26 @@ def validate(
             "workbench_fixed_constraint_dof_delete_result_ir_sha256",
             "workbench_fixed_constraint_dof_delete_recovery_sha256",
             "workbench_fixed_constraint_dof_delete_report_ir_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v64_receipt:
+        for name in (
+            "workbench_fixed_constraint_dof_add_surface_passed",
+            "workbench_fixed_constraint_dof_add_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_fixed_constraint_dof_add_model_sha256",
+            "workbench_fixed_constraint_dof_add_receipt_sha256",
+            "workbench_fixed_constraint_dof_add_request_receipt_sha256",
+            "workbench_fixed_constraint_dof_add_request_sha256",
+            "workbench_fixed_constraint_dof_add_assembly_receipt_sha256",
+            "workbench_fixed_constraint_dof_add_checkpoint_sha256",
+            "workbench_fixed_constraint_dof_add_result_ir_sha256",
+            "workbench_fixed_constraint_dof_add_recovery_sha256",
+            "workbench_fixed_constraint_dof_add_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
