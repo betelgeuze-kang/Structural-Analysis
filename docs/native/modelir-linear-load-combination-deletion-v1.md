@@ -50,9 +50,12 @@ deleting the sole supported combination restores direct load-pattern CPU executi
 two-pattern combination evaluation is separately covered by installed distribution E2E v44.
 
 General or nonterminal combination deletion, term editing, cascade or reindexing,
-nested or nonlinear combination deletion/evaluation, general solver selection,
+nonlinear combination deletion/evaluation, general solver selection,
 visual editing, engineering acceptance, approved HIP C2, React/TypeScript removal, and C6
 decommission remain open.
 
 The exact-two v1 bytes remain frozen. Bounded three-through-64 direct deletion is an additive v2
-profile documented in `docs/native/modelir-direct-linear-load-combination-deletion-v1.md`.
+profile documented in `docs/native/modelir-direct-linear-load-combination-deletion-v1.md`. Bounded
+last-neutral acyclic nested-root deletion is an additive v3 profile documented in
+`docs/native/modelir-nested-linear-load-combination-deletion-v1.md`; neither extension changes the
+frozen exact-two v1 receipt bytes.

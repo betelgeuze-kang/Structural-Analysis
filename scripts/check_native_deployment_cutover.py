@@ -55,6 +55,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-linear-load-combination-add-v1.md"),
     Path("docs/native/modelir-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-direct-linear-load-combination-deletion-v1.md"),
+    Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
@@ -210,6 +211,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-linear-load-combination",
             "model-add-nested-linear-load-combination",
             "model-delete-linear-load-combination",
+            "depth-eight/64-leaf nested root",
             "model-delete-linear-material",
             "model-add-frame-section",
             "model-delete-frame-section",
@@ -227,9 +229,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
-            "Distribution E2E v47",
+            "Distribution E2E v48",
             "model-add-nested-linear-load-combination",
             "last-neutral two-through-64 direct linear-load-combination deletion",
+            "last-neutral bounded acyclic nested linear-load-combination deletion",
             "can no longer receive Pages write authority",
             "release-authorized build",
             "legacy release publication and branch-writing workflows are archived",
@@ -349,6 +352,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v45",
         "structural-native-distribution-e2e.v46",
         "structural-native-distribution-e2e.v47",
+        "structural-native-distribution-e2e.v48",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -424,6 +428,19 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_direct_linear_load_combination_delete_recovery_sha256",
         "workbench_direct_linear_load_combination_delete_report_ir_sha256",
         "workbench_direct_linear_load_combination_delete_restart_passed",
+        "exercise_nested_linear_load_combination_delete_surface",
+        "structural-native:model-delete-nested-linear-load-combination.v3",
+        "workbench_nested_linear_load_combination_delete_surface_passed",
+        "workbench_nested_linear_load_combination_delete_model_sha256",
+        "workbench_nested_linear_load_combination_delete_receipt_sha256",
+        "workbench_nested_linear_load_combination_delete_request_receipt_sha256",
+        "workbench_nested_linear_load_combination_delete_request_sha256",
+        "workbench_nested_linear_load_combination_delete_assembly_receipt_sha256",
+        "workbench_nested_linear_load_combination_delete_checkpoint_sha256",
+        "workbench_nested_linear_load_combination_delete_result_ir_sha256",
+        "workbench_nested_linear_load_combination_delete_recovery_sha256",
+        "workbench_nested_linear_load_combination_delete_report_ir_sha256",
+        "workbench_nested_linear_load_combination_delete_restart_passed",
         "exercise_linear_load_combination_delete_surface",
         "model-delete-linear-load-combination",
         "workbench_linear_load_combination_delete_surface_passed",
@@ -659,6 +676,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v48",
+            "V48_NESTED_LINEAR_LOAD_COMBINATION_DELETE_KEYS",
+            "workbench_nested_linear_load_combination_delete_surface_passed",
+            "workbench_nested_linear_load_combination_delete_receipt_sha256",
+            "workbench_nested_linear_load_combination_delete_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_delete_recovery_sha256",
+            "workbench_nested_linear_load_combination_delete_restart_passed",
             "structural-native-distribution-e2e.v47",
             "V47_DIRECT_LINEAR_LOAD_COMBINATION_DELETE_KEYS",
             "workbench_direct_linear_load_combination_delete_surface_passed",
@@ -737,6 +761,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v48 hash-bound receipt",
+            "frozen v1 through v47 receipts",
+            "no pre-v48 receipt",
             "append-only v47 hash-bound receipt",
             "frozen v1 through v46 receipts",
             "no pre-v47 receipt",
@@ -1060,6 +1087,29 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers=blockers,
     )
 
+    nested_linear_load_combination_deletion_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+        text=nested_linear_load_combination_deletion_doc,
+        tokens=(
+            "model-delete-linear-load-combination",
+            "root-inclusive combination depth is at most eight",
+            "structural-native:model-delete-nested-linear-load-combination.v3",
+            "nested_linear_load_combination_delete",
+            "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+            "Installed CPU static/shared distribution E2E v48",
+            "[0,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
+
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
         "schema_version": "native-production-deployment-cutover.v1",
@@ -1285,6 +1335,48 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in nested_linear_load_combination_claim:
                 blockers.append(
                     "modelir_nested_linear_load_combination_authoring_execution_capability_"
+                    f"claim_missing:{token}"
+                )
+    nested_linear_load_combination_deletion_capability = (
+        capabilities.get("modelir_nested_linear_load_combination_deletion")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(nested_linear_load_combination_deletion_capability, dict):
+        blockers.append(
+            "modelir_nested_linear_load_combination_deletion_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if nested_linear_load_combination_deletion_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_deletion_capability_"
+                    f"field_invalid:{field}"
+                )
+        nested_linear_load_combination_deletion_claim = str(
+            nested_linear_load_combination_deletion_capability.get("claim", "")
+        )
+        for token in (
+            "two through 64 uniquely typed pattern/combination terms",
+            "root-inclusive depth at most eight",
+            "at most 64 expanded leaf contributions",
+            "single C ABI into C++ reference/cycle validation",
+            "direct exact-two v1",
+            "explicit v3 root/expanded-term provenance",
+            "distribution v48 E2E",
+            "retaining and executing the child combination",
+            "exact active load [0,-12000,5000,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nested_linear_load_combination_deletion_claim:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_deletion_capability_"
                     f"claim_missing:{token}"
                 )
     truss_editing_capability = capabilities.get("modelir_truss3d_editing") if isinstance(
@@ -1560,7 +1652,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v47 E2E",
+            "CPU static/shared distribution v48 E2E",
             "standalone neutral-node creation",
             "last-neutral orphan-node deletion",
             "two-pattern linear-load-combination creation",
@@ -1569,6 +1661,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "bounded two-through-64 direct linear-load-combination authoring and CPU execution",
             "bounded two-through-64 direct linear-load-combination deletion",
             "bounded acyclic nested linear-load-combination authoring and CPU execution",
+            "bounded acyclic nested linear-load-combination deletion",
+            "retained child-combination execution",
             "last-neutral fixed-constraint deletion",
             "last-neutral nodal-load deletion",
             "last-neutral linear-load-pattern deletion",

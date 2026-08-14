@@ -99,6 +99,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-linear-load-combination-execution-v1.md"),
     Path("docs/native/modelir-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-direct-linear-load-combination-deletion-v1.md"),
+    Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-linear-material-add-v1.md"),
     Path("docs/native/modelir-frame-section-add-v1.md"),
     Path("docs/native/modelir-truss3d-authoring-v1.md"),
@@ -253,6 +254,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_last_neutral_two_to_64_direct_linear_load_combination_delete": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_last_neutral_acyclic_nested_linear_load_combination_delete": (
         "c5_implemented",
         False,
     ),
@@ -1036,6 +1041,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-add-linear-load-combination.v1",
             "structural-native:model-delete-linear-load-combination.v1",
             "structural-native:model-delete-direct-linear-load-combination.v2",
+            "structural-native:model-delete-nested-linear-load-combination.v3",
+            "nested_linear_load_combination_delete",
             "structural-native:model-delete-linear-load-pattern.v1",
             "structural-native:model-add-linear-material.v1",
             "structural-native:model-delete-linear-material.v1",
@@ -1908,6 +1915,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    nested_linear_load_combination_deletion_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+        nested_linear_load_combination_deletion_doc,
+        (
+            "model-delete-linear-load-combination",
+            "root-inclusive combination depth is at most eight",
+            "structural-native:model-delete-nested-linear-load-combination.v3",
+            "nested_linear_load_combination_delete",
+            "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+            "Installed CPU static/shared distribution E2E v48",
+            "[0,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
     linear_load_combination_deletion_doc = _text(
         root,
         Path("docs/native/modelir-linear-load-combination-deletion-v1.md"),
@@ -2188,7 +2217,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     expected_extension_claim = (
         "standalone neutral-node authoring and orphan-node deletion, two-pattern "
         "linear-load-combination authoring and bounded CPU execution, last-neutral two-to-64 "
-        "direct linear-load-combination deletion, "
+        "direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, "
         "two-to-64 direct plus depth-eight/64-leaf acyclic nested "
         "linear-load-combination authoring and CPU execution, "
         "compatible frame3d element and truss3d "
@@ -2203,8 +2232,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
         "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one standalone neutral node addition, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one two-pattern linear-load-combination addition plus bounded CPU execution with a frozen selector alias, exact active load, typed recovery and checkpoint/restart parity, and its last-neutral deletion restoring direct-pattern native linear execution, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
-        "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity",
-        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, last-neutral two-to-64 direct linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+        "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity, plus one last-neutral depth-eight/64-leaf acyclic nested linear-load-combination deletion with v3 root/expanded-term provenance, retained child-combination CPU execution, exact active load [0,-12000,5000,0,0,0], typed recovery and checkpoint/restart parity",
+        "standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

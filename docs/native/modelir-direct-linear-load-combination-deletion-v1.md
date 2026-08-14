@@ -12,8 +12,9 @@ structural-workbench model-delete-linear-load-combination MODEL.json \
 The candidate must be the last contiguous load-combination row, have null `source_id`, empty entity
 extensions and `combination_type: linear`. It must contain two through 64 ordered terms referencing
 unique existing `linear_static` patterns with finite nonzero factors. Missing, nonterminal,
-source-owned, extended, referenced, unsupported-feature-owned, round-trip-owned, malformed,
-duplicate-pattern and nested candidates fail before mutation. No row is reindexed or cascaded.
+source-owned, extended, referenced, unsupported-feature-owned, round-trip-owned, malformed and
+duplicate-pattern candidates fail before mutation. A nested candidate is outside this direct
+profile and must satisfy the separate bounded v3 profile. No row is reindexed or cascaded.
 
 ## Compatibility and provenance
 
@@ -37,6 +38,8 @@ the deleted ModelIR, edit receipt, request, assembly receipt, checkpoint, Result
 ReportIR identities; verifies exact active load `[0,-10000,0,0,0,0]`; proves byte-identical direct
 and resumed output; and requires fallback 0 with Python/Node lookup 0.
 
-Nested deletion, direct or nested term editing, nonterminal/general deletion, self-weight, time
-functions, stages, shell/nonlinear execution, visual manipulation, engineering acceptance,
-approved HIP C2 and C6 remain open.
+Bounded last-neutral nested-root deletion is the separate additive v3 profile documented in
+`docs/native/modelir-nested-linear-load-combination-deletion-v1.md`. Direct or nested term editing,
+nonterminal/referenced/general graph deletion, self-weight, time functions, stages,
+shell/nonlinear execution, visual manipulation, engineering acceptance, approved HIP C2 and C6
+remain open.

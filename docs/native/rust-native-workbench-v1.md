@@ -90,11 +90,13 @@ two through 64 unique existing `linear_static` patterns and finite nonzero facto
 other rows and blockers and revalidates through the C++ reference/cycle checks. Exact-two authoring
 and request receipts retain their frozen v1 bytes; three through 64 terms use explicit v2
 provenance/request receipts. The bounded inverse deletes only the last contiguous neutral
-unreferenced direct row with two through 64 unique pattern terms, preserves the exact-two v1 path,
-uses v2 deletion provenance beyond two terms, then proves direct load-pattern CPU execution and
-checkpoint/restart parity are restored. Nested deletion, general term editing and general deletion
-remain outside those direct/deletion commands. The separate bounded nested author accepts explicit
-pattern/combination terms, depth eight and 64 expanded leaves, with v3 provenance/request receipts.
+unreferenced row. Direct rows with two through 64 unique pattern terms preserve the exact-two v1
+path and use v2 deletion provenance beyond two terms. A bounded acyclic nested root uses additive
+v3 deletion provenance and the same depth-eight/64-leaf expansion checks before retaining its child
+combination for CPU execution and checkpoint/restart parity. General term editing, nonterminal,
+referenced, cascading and general graph deletion remain outside the command. The separate bounded
+nested author accepts explicit pattern/combination terms, depth eight and 64 expanded leaves, with
+v3 provenance/request receipts.
 The bounded `--load-combination` request surface uses the frozen v1
 selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
@@ -104,7 +106,8 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-linear-load-combination-deletion-v1.md`, plus the additive
 `docs/native/modelir-direct-linear-load-combination-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
-`docs/native/modelir-nested-linear-load-combination-v1.md` boundaries.
+`docs/native/modelir-nested-linear-load-combination-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-deletion-v1.md` boundaries.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
@@ -265,6 +268,14 @@ structural-workbench model-add-linear-load-combination MODEL.json \
 structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE \
   --output-dir DELETED-COMBINATION-MODEL
+structural-workbench model-add-nested-linear-load-combination MODEL.json \
+  --load-combination COMBO_NESTED \
+  --combination-term COMBO_SERVICE 0.5 --pattern-term LC_AXIAL 0.25 \
+  --output-dir ADDED-NESTED-COMBINATION-MODEL
+structural-workbench model-delete-linear-load-combination \
+  ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_NESTED \
+  --output-dir DELETED-NESTED-COMBINATION-MODEL
 structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \

@@ -3815,6 +3815,94 @@ exercise_nested_linear_load_combination_surface() {
 }
 exercise_nested_linear_load_combination_surface
 
+exercise_nested_linear_load_combination_delete_surface() {
+  local source_model="$e2e_root/nested-linear-load-combination-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/nested-linear-load-combination-delete-$label"
+    request_directory="$e2e_root/nested-linear-load-combination-delete-$label-request"
+    direct_directory="$e2e_root/nested-linear-load-combination-delete-$label-direct"
+    partial_directory="$e2e_root/nested-linear-load-combination-delete-$label-partial"
+    resumed_directory="$e2e_root/nested-linear-load-combination-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-linear-load-combination "$source_model" \
+      --load-combination COMBO_NESTED --output-dir "$delete_directory" \
+      > "$e2e_root/nested-linear-load-combination-delete-$label.stdout.json"
+    grep -Fq '"operation":"nested_linear_load_combination_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"deletion_profile":"acyclic_nested_linear_static_depth_8_expanded_terms_64"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"term_count":2' "$delete_directory/edit-receipt.json"
+    grep -Fq '"combination_depth":2' "$delete_directory/edit-receipt.json"
+    grep -Fq '"expanded_term_count":3' "$delete_directory/edit-receipt.json"
+    grep -Fq '"expanded_pattern_count":3' "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-nested-linear-load-combination.v3"' \
+      "$delete_directory/model-ir.json"
+    grep -Fq '"load_combinations":[{"combination_type":"linear","extensions":{},"id":"COMBO_SERVICE"' \
+      "$delete_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case nested-linear-load-combination-delete-c5 --load-combination COMBO_SERVICE \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/nested-linear-load-combination-delete-$label-request.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-combination-request-create-receipt.v1"' \
+      "$request_directory/request-receipt.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/nested-linear-load-combination-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"load_pattern_id":"COMBO_SERVICE"' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-12000,5000,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/nested-linear-load-combination-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/nested-linear-load-combination-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/nested-linear-load-combination-delete-$label-restart-diff.txt"
+  done
+
+  local suffix
+  for suffix in '' -request -direct -partial -resumed; do
+    diff -r "$e2e_root/nested-linear-load-combination-delete-first$suffix" \
+      "$e2e_root/nested-linear-load-combination-delete-second$suffix" \
+      > "$e2e_root/nested-linear-load-combination-delete$suffix-diff.txt"
+  done
+  cmp "$e2e_root/nested-linear-load-combination-delete-first.stdout.json" \
+    "$e2e_root/nested-linear-load-combination-delete-second.stdout.json"
+  for suffix in request direct partial resumed; do
+    cmp "$e2e_root/nested-linear-load-combination-delete-first-$suffix.stdout.json" \
+      "$e2e_root/nested-linear-load-combination-delete-second-$suffix.stdout.json"
+  done
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed nested linear load-combination deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+}
+exercise_nested_linear_load_combination_delete_surface
+
 exercise_direct_linear_load_combination_delete_surface() {
   local source_model="$e2e_root/direct-linear-load-combination-first/model-ir.json"
   local source_before_hash
@@ -4439,6 +4527,15 @@ nested_linear_load_combination_checkpoint_hash="$(sha256sum "$e2e_root/nested-li
 nested_linear_load_combination_result_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/result-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_recovery_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 nested_linear_load_combination_report_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-first-direct/report-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_request_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-request/request-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_request_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-request/analysis-request.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_assembly_receipt_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-direct/assembly-receipt.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_checkpoint_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-direct/checkpoint.mlpcp" | awk '{print $1}')"
+nested_linear_load_combination_delete_result_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-direct/result-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_recovery_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+nested_linear_load_combination_delete_report_ir_hash="$(sha256sum "$e2e_root/nested-linear-load-combination-delete-first-direct/report-ir.json" | awk '{print $1}')"
 direct_linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
 direct_linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
 direct_linear_load_combination_delete_request_hash="$(sha256sum "$e2e_root/direct-linear-load-combination-delete-first-request/analysis-request.json" | awk '{print $1}')"
@@ -4623,6 +4720,10 @@ v47_receipt_json="${v46_receipt_json/structural-native-distribution-e2e.v46/stru
 direct_linear_load_combination_delete_receipt_fields="\"workbench_direct_linear_load_combination_delete_surface_passed\":true,\"workbench_direct_linear_load_combination_delete_model_sha256\":\"sha256:$direct_linear_load_combination_delete_model_hash\",\"workbench_direct_linear_load_combination_delete_receipt_sha256\":\"sha256:$direct_linear_load_combination_delete_receipt_hash\",\"workbench_direct_linear_load_combination_delete_request_sha256\":\"sha256:$direct_linear_load_combination_delete_request_hash\",\"workbench_direct_linear_load_combination_delete_assembly_receipt_sha256\":\"sha256:$direct_linear_load_combination_delete_assembly_receipt_hash\",\"workbench_direct_linear_load_combination_delete_checkpoint_sha256\":\"sha256:$direct_linear_load_combination_delete_checkpoint_hash\",\"workbench_direct_linear_load_combination_delete_result_ir_sha256\":\"sha256:$direct_linear_load_combination_delete_result_ir_hash\",\"workbench_direct_linear_load_combination_delete_recovery_sha256\":\"sha256:$direct_linear_load_combination_delete_recovery_hash\",\"workbench_direct_linear_load_combination_delete_report_ir_sha256\":\"sha256:$direct_linear_load_combination_delete_report_ir_hash\",\"workbench_direct_linear_load_combination_delete_restart_passed\":true,"
 v47_receipt_json="${v47_receipt_json/\"workbench_result_view_surface_passed\":true,/${direct_linear_load_combination_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v47_receipt_json" > "$temporary_receipt"
+v48_receipt_json="${v47_receipt_json/structural-native-distribution-e2e.v47/structural-native-distribution-e2e.v48}"
+nested_linear_load_combination_delete_receipt_fields="\"workbench_nested_linear_load_combination_delete_surface_passed\":true,\"workbench_nested_linear_load_combination_delete_model_sha256\":\"sha256:$nested_linear_load_combination_delete_model_hash\",\"workbench_nested_linear_load_combination_delete_receipt_sha256\":\"sha256:$nested_linear_load_combination_delete_receipt_hash\",\"workbench_nested_linear_load_combination_delete_request_receipt_sha256\":\"sha256:$nested_linear_load_combination_delete_request_receipt_hash\",\"workbench_nested_linear_load_combination_delete_request_sha256\":\"sha256:$nested_linear_load_combination_delete_request_hash\",\"workbench_nested_linear_load_combination_delete_assembly_receipt_sha256\":\"sha256:$nested_linear_load_combination_delete_assembly_receipt_hash\",\"workbench_nested_linear_load_combination_delete_checkpoint_sha256\":\"sha256:$nested_linear_load_combination_delete_checkpoint_hash\",\"workbench_nested_linear_load_combination_delete_result_ir_sha256\":\"sha256:$nested_linear_load_combination_delete_result_ir_hash\",\"workbench_nested_linear_load_combination_delete_recovery_sha256\":\"sha256:$nested_linear_load_combination_delete_recovery_hash\",\"workbench_nested_linear_load_combination_delete_report_ir_sha256\":\"sha256:$nested_linear_load_combination_delete_report_ir_hash\",\"workbench_nested_linear_load_combination_delete_restart_passed\":true,"
+v48_receipt_json="${v48_receipt_json/\"workbench_result_view_surface_passed\":true,/${nested_linear_load_combination_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v48_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

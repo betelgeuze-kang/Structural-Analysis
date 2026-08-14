@@ -5854,6 +5854,116 @@ fn nested_linear_load_combination_is_authored_executed_and_restarted_without_fal
         resumed.result_recovery_ir_json(),
         direct.result_recovery_ir_json()
     );
+
+    let delete_first = temporary.0.join("nested-combination-delete-first");
+    let delete_second = temporary.0.join("nested-combination-delete-second");
+    for destination in [&delete_first, &delete_second] {
+        assert_success(&run_linear_load_combination_delete(
+            &first.join("model-ir.json"),
+            destination,
+            "COMBO_NESTED",
+        ));
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(delete_first.join(artifact)).expect("first nested-deletion artifact"),
+            std::fs::read(delete_second.join(artifact)).expect("second nested-deletion artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(first.join("model-ir.json")).expect("unchanged nested source"),
+        edited_bytes
+    );
+    let deleted_bytes =
+        std::fs::read(delete_first.join("model-ir.json")).expect("nested-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict nested-deleted ModelIR");
+    assert_eq!(
+        deleted.value()["load_combinations"]
+            .as_array()
+            .map(Vec::len),
+        Some(1)
+    );
+    assert_eq!(deleted.value()["load_combinations"][0]["id"], "COMBO_BASE");
+    let delete_extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-nested-linear-load-combination.v3")
+        .expect("nested-combination delete provenance extension");
+    assert_eq!(
+        delete_extension["operation"],
+        "nested_linear_load_combination_delete"
+    );
+    assert_eq!(
+        delete_extension["deletion_profile"],
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    );
+    assert_eq!(delete_extension["term_count"], 2);
+    assert_eq!(delete_extension["combination_depth"], 2);
+    assert_eq!(delete_extension["expanded_term_count"], 3);
+    assert_eq!(delete_extension["expanded_pattern_count"], 3);
+    assert_eq!(
+        delete_extension["removed_terms"],
+        edited.value()["load_combinations"][1]["terms"]
+    );
+    assert_eq!(
+        delete_extension["expanded_pattern_terms"],
+        extension["expanded_pattern_terms"]
+    );
+    let mut delete_receipt: Value = serde_json::from_slice(
+        &std::fs::read(delete_first.join("edit-receipt.json"))
+            .expect("nested-combination delete receipt"),
+    )
+    .expect("nested-combination delete receipt JSON");
+    assert_eq!(
+        delete_receipt["operation"],
+        "nested_linear_load_combination_delete"
+    );
+    assert_eq!(delete_receipt["combination_depth"], 2);
+    assert_eq!(delete_receipt["expanded_term_count"], 3);
+    assert_self_hashed_edit_receipt(&mut delete_receipt);
+
+    let deleted_request_directory = temporary.0.join("nested-combination-delete-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &delete_first.join("model-ir.json"),
+        &deleted_request_directory,
+        "nested-combination-delete-c5",
+        "COMBO_BASE",
+    ));
+    let deleted_request = std::fs::read(deleted_request_directory.join("analysis-request.json"))
+        .expect("nested-combination delete request");
+    let deleted_direct =
+        execute_model_ir_linear_analysis(&deleted_bytes, &deleted_request, None, u32::MAX)
+            .expect("surviving child-combination CPU execution");
+    assert!(deleted_direct.is_complete());
+    let deleted_recovery: Value = serde_json::from_str(
+        deleted_direct
+            .result_recovery_ir_json()
+            .expect("nested-combination deletion recovery"),
+    )
+    .expect("nested-combination deletion recovery JSON");
+    assert_eq!(deleted_recovery["load_pattern_id"], "COMBO_BASE");
+    assert_eq!(
+        deleted_recovery["active_external_load"],
+        serde_json::json!([0, -12000, 5000, 0, 0, 0])
+    );
+    assert_eq!(deleted_recovery["fallback_count"], 0);
+    let deleted_partial =
+        execute_model_ir_linear_analysis(&deleted_bytes, &deleted_request, None, 0)
+            .expect("surviving child-combination checkpoint");
+    assert!(!deleted_partial.is_complete());
+    let deleted_resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &deleted_request,
+        Some(deleted_partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("surviving child-combination resumed execution");
+    assert_eq!(
+        deleted_resumed.result_ir_json(),
+        deleted_direct.result_ir_json()
+    );
+    assert_eq!(
+        deleted_resumed.result_recovery_ir_json(),
+        deleted_direct.result_recovery_ir_json()
+    );
 }
 
 #[test]

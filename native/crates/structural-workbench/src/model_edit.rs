@@ -63,6 +63,8 @@ const LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-combination.v1";
 const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-direct-linear-load-combination.v2";
+const NESTED_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-nested-linear-load-combination.v3";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
 const LINEAR_MATERIAL_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-material.v1";
@@ -98,6 +100,7 @@ const DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_rev
 const NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_acyclic_nested_linear_static_load_combination_addition_depth_eight_expanded_64_terms_not_term_edit_nested_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_distinct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_to_64_unique_direct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
+const NESTED_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_acyclic_nested_linear_static_load_combination_deletion_depth_eight_expanded_64_terms_not_source_owned_direct_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -663,13 +666,13 @@ pub fn publish_model_nested_linear_load_combination_add(
     Ok(outcome)
 }
 
-/// Delete one last contiguous neutral unreferenced two-through-64-pattern direct linear
-/// combination atomically.
+/// Delete one last contiguous neutral unreferenced bounded direct or nested linear combination
+/// atomically.
 ///
 /// # Errors
 ///
 /// Rejects unsafe paths, invalid source or edited semantics, missing or non-terminal
-/// combinations, source-owned or malformed rows, nested-combination references,
+/// combinations, source-owned or malformed rows, out-of-profile nested graphs,
 /// unsupported-feature or round-trip ownership, and publication failures.
 pub fn publish_model_linear_load_combination_delete(
     source_path: &Path,
@@ -2261,6 +2264,7 @@ pub fn add_model_nested_linear_load_combination(
 enum LinearLoadCombinationDeletionProfileV1 {
     ExactTwoV1,
     DirectV2,
+    NestedV3,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -2268,15 +2272,16 @@ struct RemovedLinearLoadCombinationV1 {
     load_combination_index: usize,
     terms: Value,
     profile: LinearLoadCombinationDeletionProfileV1,
+    expansion: Option<ExpandedLinearLoadCombinationV1>,
 }
 
-/// Delete one provenance-bound terminal neutral two-through-64-pattern direct linear combination
-/// in memory.
+/// Delete one provenance-bound terminal neutral bounded direct or nested linear combination in
+/// memory.
 ///
 /// # Errors
 ///
 /// Rejects invalid source semantics, missing or non-terminal combinations, source-owned or
-/// malformed rows, nested-combination references, unsupported-feature or round-trip ownership,
+/// malformed rows, out-of-profile nested graphs, unsupported-feature or round-trip ownership,
 /// schema drift, or edited semantics rejected by the C++ validator.
 pub fn delete_model_linear_load_combination(
     source_bytes: &[u8],
@@ -2355,6 +2360,10 @@ pub fn delete_model_linear_load_combination(
         receipt["deletion_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
         receipt["term_count"] = json!(removed.terms.as_array().map_or(0, Vec::len));
         receipt["claim_boundary"] = json!(DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY);
+    } else if removed.profile == LinearLoadCombinationDeletionProfileV1::NestedV3 {
+        receipt["operation"] = json!("nested_linear_load_combination_delete");
+        bind_nested_linear_load_combination_delete_fields(&mut receipt, &removed)?;
+        receipt["claim_boundary"] = json!(NESTED_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY);
     }
     let receipt_json = canonical_self_hashed(receipt)?;
     Ok(ModelLinearLoadCombinationDeleteOutcomeV1 {
@@ -5737,55 +5746,108 @@ fn remove_linear_load_combination(
                 "deleted direct linear load combination must contain between two and 64 terms",
             )
         })?;
-    let load_patterns = model
-        .get("load_patterns")
-        .and_then(Value::as_array)
-        .ok_or_else(|| snapshot_error("load_patterns"))?;
-    let mut term_ids = Vec::with_capacity(terms.len());
-    for term in terms {
-        if term.get("ref_kind").and_then(Value::as_str) != Some("load_pattern") {
-            return Err(WorkbenchError::new(
-                "workbench_model_delete_linear_load_combination_nested_unsupported",
-                "deleted linear load combination must reference load patterns directly",
-            ));
+    let nested = terms
+        .iter()
+        .any(|term| term.get("ref_kind").and_then(Value::as_str) == Some("load_combination"));
+    let expansion = if nested {
+        let mut typed_references = Vec::with_capacity(terms.len());
+        for term in terms {
+            let reference_kind = term
+                .get("ref_kind")
+                .and_then(Value::as_str)
+                .filter(|kind| matches!(*kind, "load_pattern" | "load_combination"))
+                .ok_or_else(|| {
+                    WorkbenchError::new(
+                        "workbench_model_delete_nested_linear_load_combination_reference_kind_unsupported",
+                        "deleted nested load-combination terms must use explicit load_pattern or load_combination references",
+                    )
+                })?;
+            let reference_id = term
+                .get("ref_id")
+                .and_then(Value::as_str)
+                .ok_or_else(|| snapshot_error("nested load-combination term ref_id"))?;
+            if !term
+                .get("factor")
+                .and_then(Value::as_f64)
+                .is_some_and(|factor| factor.is_finite() && factor != 0.0)
+            {
+                return Err(WorkbenchError::new(
+                    "workbench_model_delete_nested_linear_load_combination_factor_unsupported",
+                    "deleted nested load-combination terms must have finite nonzero factors",
+                ));
+            }
+            if typed_references.contains(&(reference_kind, reference_id)) {
+                return Err(WorkbenchError::new(
+                    "workbench_model_delete_nested_linear_load_combination_reference_duplicate",
+                    "deleted nested load-combination root terms must use unique typed references",
+                ));
+            }
+            typed_references.push((reference_kind, reference_id));
         }
-        let ref_id = term
-            .get("ref_id")
-            .and_then(Value::as_str)
-            .ok_or_else(|| snapshot_error("load-combination term ref_id"))?;
-        if !term
-            .get("factor")
-            .and_then(Value::as_f64)
-            .is_some_and(|factor| factor.is_finite() && factor != 0.0)
+        let bounded = require_bounded_linear_load_combination(model, load_combination_id).map_err(
+            |error| {
+                WorkbenchError::new(
+                    "workbench_model_delete_nested_linear_load_combination_profile_unsupported",
+                    error.to_string(),
+                )
+            },
+        )?;
+        if !bounded.nested {
+            return Err(snapshot_error("nested load-combination deletion profile"));
+        }
+        Some(bounded)
+    } else {
+        let load_patterns = model
+            .get("load_patterns")
+            .and_then(Value::as_array)
+            .ok_or_else(|| snapshot_error("load_patterns"))?;
+        let mut term_ids = Vec::with_capacity(terms.len());
+        for term in terms {
+            if term.get("ref_kind").and_then(Value::as_str) != Some("load_pattern") {
+                return Err(WorkbenchError::new(
+                    "workbench_model_delete_linear_load_combination_nested_unsupported",
+                    "deleted direct linear load combination must reference load patterns only",
+                ));
+            }
+            let ref_id = term
+                .get("ref_id")
+                .and_then(Value::as_str)
+                .ok_or_else(|| snapshot_error("load-combination term ref_id"))?;
+            if !term
+                .get("factor")
+                .and_then(Value::as_f64)
+                .is_some_and(|factor| factor.is_finite() && factor != 0.0)
+            {
+                return Err(WorkbenchError::new(
+                    "workbench_model_delete_linear_load_combination_factor_unsupported",
+                    "deleted linear load-combination terms must have finite nonzero factors",
+                ));
+            }
+            if !load_patterns.iter().any(|pattern| {
+                pattern.get("id").and_then(Value::as_str) == Some(ref_id)
+                    && pattern.get("analysis_type").and_then(Value::as_str) == Some("linear_static")
+            }) {
+                return Err(WorkbenchError::new(
+                    "workbench_model_delete_linear_load_combination_pattern_unsupported",
+                    format!(
+                        "deleted combination term {ref_id} is not an existing linear_static pattern"
+                    ),
+                ));
+            }
+            term_ids.push(ref_id);
+        }
+        if term_ids
+            .iter()
+            .enumerate()
+            .any(|(index, id)| term_ids[..index].iter().any(|prior| prior == id))
         {
             return Err(WorkbenchError::new(
-                "workbench_model_delete_linear_load_combination_factor_unsupported",
-                "deleted linear load-combination terms must have finite nonzero factors",
+                "workbench_model_delete_linear_load_combination_pattern_duplicate",
+                "deleted direct linear load combination must reference unique patterns",
             ));
         }
-        if !load_patterns.iter().any(|pattern| {
-            pattern.get("id").and_then(Value::as_str) == Some(ref_id)
-                && pattern.get("analysis_type").and_then(Value::as_str) == Some("linear_static")
-        }) {
-            return Err(WorkbenchError::new(
-                "workbench_model_delete_linear_load_combination_pattern_unsupported",
-                format!(
-                    "deleted combination term {ref_id} is not an existing linear_static pattern"
-                ),
-            ));
-        }
-        term_ids.push(ref_id);
-    }
-    if term_ids
-        .iter()
-        .enumerate()
-        .any(|(index, id)| term_ids[..index].iter().any(|prior| prior == id))
-    {
-        return Err(WorkbenchError::new(
-            "workbench_model_delete_linear_load_combination_pattern_duplicate",
-            "deleted direct linear load combination must reference unique patterns",
-        ));
-    }
+        None
+    };
     if load_combinations
         .iter()
         .enumerate()
@@ -5834,7 +5896,9 @@ fn remove_linear_load_combination(
     }
 
     let removed_terms = Value::Array(terms.clone());
-    let profile = if terms.len() == 2 {
+    let profile = if nested {
+        LinearLoadCombinationDeletionProfileV1::NestedV3
+    } else if terms.len() == 2 {
         LinearLoadCombinationDeletionProfileV1::ExactTwoV1
     } else {
         LinearLoadCombinationDeletionProfileV1::DirectV2
@@ -5849,6 +5913,7 @@ fn remove_linear_load_combination(
         load_combination_index,
         terms: removed_terms,
         profile,
+        expansion,
     })
 }
 
@@ -8497,6 +8562,11 @@ fn bind_linear_load_combination_delete_provenance(
             "direct_linear_load_combination_delete",
             DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY,
         ),
+        LinearLoadCombinationDeletionProfileV1::NestedV3 => (
+            NESTED_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY,
+            "nested_linear_load_combination_delete",
+            NESTED_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY,
+        ),
     };
     let mut provenance = json!({
         "operation": operation,
@@ -8514,8 +8584,33 @@ fn bind_linear_load_combination_delete_provenance(
     if removed.profile == LinearLoadCombinationDeletionProfileV1::DirectV2 {
         provenance["deletion_profile"] = json!("unique_direct_linear_static_patterns_2_to_64");
         provenance["term_count"] = json!(removed.terms.as_array().map_or(0, Vec::len));
+    } else if removed.profile == LinearLoadCombinationDeletionProfileV1::NestedV3 {
+        bind_nested_linear_load_combination_delete_fields(&mut provenance, removed)?;
     }
     bind_parameter_edit_provenance(model, extension_key, provenance, source_content_hash)
+}
+
+fn bind_nested_linear_load_combination_delete_fields(
+    document: &mut Value,
+    removed: &RemovedLinearLoadCombinationV1,
+) -> Result<(), WorkbenchError> {
+    let expansion = removed
+        .expansion
+        .as_ref()
+        .ok_or_else(|| snapshot_error("nested load-combination deletion expansion"))?;
+    document["deletion_profile"] = json!("acyclic_nested_linear_static_depth_8_expanded_terms_64");
+    document["term_count"] = json!(removed.terms.as_array().map_or(0, Vec::len));
+    document["combination_depth"] = json!(expansion.max_depth);
+    document["expanded_term_count"] = json!(expansion.expanded_term_count);
+    document["expanded_pattern_count"] = json!(expansion
+        .expanded_pattern_terms
+        .as_array()
+        .map_or(0, Vec::len));
+    document["expanded_pattern_terms"] = expansion.expanded_pattern_terms.clone();
+    document["maximum_combination_depth"] =
+        json!(MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1);
+    document["maximum_expanded_terms"] = json!(MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1);
+    Ok(())
 }
 
 fn bind_linear_load_pattern_delete_provenance(
@@ -10532,12 +10627,11 @@ mod tests {
                 .code,
             "workbench_model_delete_linear_load_combination_extensions_unsupported"
         );
-        let mut nested = model.clone();
-        nested["load_combinations"][1]["terms"][1]["ref_kind"] = json!("load_combination");
-        nested["load_combinations"][1]["terms"][1]["ref_id"] = json!("COMBO_A");
+        let mut unsupported_reference = model.clone();
+        unsupported_reference["load_combinations"][1]["terms"][1]["ref_kind"] = json!("load_case");
         assert_eq!(
-            remove_linear_load_combination(&mut nested, "COMBO_B")
-                .expect_err("nested combination")
+            remove_linear_load_combination(&mut unsupported_reference, "COMBO_B")
+                .expect_err("unsupported direct reference kind")
                 .code,
             "workbench_model_delete_linear_load_combination_nested_unsupported"
         );
@@ -10599,6 +10693,62 @@ mod tests {
         );
         assert_eq!(removed.terms.as_array().map(Vec::len), Some(3));
         assert_eq!(model["load_combinations"], json!([]));
+    }
+
+    #[test]
+    fn linear_load_combination_delete_accepts_bounded_nested_root() {
+        let mut model = json!({
+            "load_patterns": [
+                {"id": "LC_AXIAL", "analysis_type": "linear_static"},
+                {"id": "LC_WEAK", "analysis_type": "linear_static"},
+                {"id": "LC_STRONG", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": [
+                {
+                    "id": "COMBO_BASE",
+                    "index": 0,
+                    "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                        {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+                    ],
+                    "source_id": null,
+                    "extensions": {}
+                },
+                {
+                    "id": "COMBO_NESTED",
+                    "index": 1,
+                    "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+                        {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+                    ],
+                    "source_id": null,
+                    "extensions": {}
+                }
+            ],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let removed = remove_linear_load_combination(&mut model, "COMBO_NESTED")
+            .expect("delete terminal bounded nested combination");
+        assert_eq!(
+            removed.profile,
+            LinearLoadCombinationDeletionProfileV1::NestedV3
+        );
+        let expansion = removed.expansion.expect("nested deletion expansion");
+        assert_eq!(expansion.max_depth, 2);
+        assert_eq!(expansion.expanded_term_count, 3);
+        assert_eq!(
+            expansion.expanded_pattern_terms,
+            json!([
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.25},
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+            ])
+        );
+        assert_eq!(model["load_combinations"].as_array().map(Vec::len), Some(1));
+        assert_eq!(model["load_combinations"][0]["id"], "COMBO_BASE");
     }
 
     #[test]

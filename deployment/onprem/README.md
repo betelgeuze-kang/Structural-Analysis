@@ -45,10 +45,11 @@ absent from the runtime image.
   Rust and C++ independently flatten and validate it before native CPU execution; v3 receipts bind
   both root and resolved pattern terms.
   `model-delete-linear-load-combination` removes only the last contiguous neutral, extension-free,
-  unreferenced two-through-64-pattern direct linear combination. Exact-two deletion retains v1
-  provenance fields; larger direct rows use v2 deletion provenance. It rejects nested, mapped, source-owned,
-  feature-owned, referenced or nonterminal candidates and restores direct load-pattern CPU
-  execution with checkpoint/restart parity and fallback 0.
+  unreferenced direct or bounded acyclic nested linear combination. Exact-two direct deletion
+  retains v1 provenance fields; larger direct rows use v2 and a depth-eight/64-leaf nested root uses
+  additive v3 deletion provenance. It rejects mapped, source-owned, feature-owned, referenced or
+  nonterminal candidates; installed v48 E2E retains and executes the child combination with exact
+  active load, checkpoint/restart parity and fallback 0.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
   `model-delete-linear-material` removes only the last contiguous neutral unreferenced v1 linear

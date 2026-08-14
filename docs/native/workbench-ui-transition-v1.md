@@ -177,17 +177,20 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `linear_static` patterns. Rust and C++ independently enforce the same declaration-order
   flattening and factor consolidation. Installed E2E binds v3 authoring/request receipts, proves
   exact active load, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
-  Nested deletion/term editing, deeper or larger graphs, self-weight, HIP parity and engineering
-  acceptance remain open.
+  Nested term editing, deeper or larger graphs, self-weight, HIP parity and engineering acceptance
+  remain open.
 - `model-delete-linear-load-combination`: deterministic deletion of only the last contiguous
-  neutral, extension-free and unreferenced direct `linear` combination containing two through 64
-  unique existing `linear_static` pattern terms with finite nonzero factors. Exact-two deletion
-  retains the v1 field set; three through 64 terms use explicit v2 deletion provenance. Rust rejects source-owned,
-  nonterminal, malformed, nested, referenced, unsupported-feature-owned and round-trip-owned rows,
-  then strictly reparses and C++-revalidates before create-new publication. Installed E2E proves
-  direct load-pattern CPU execution is restored with exact active DOFs/load, typed frame recovery,
-  checkpoint/restart parity and fallback 0. Nested/general combination deletion, term editing,
-  cascade/reindexing, arbitrary combination evaluation and visual authoring remain open.
+  neutral, extension-free and unreferenced `linear` combination. Direct rows contain two through 64
+  unique existing `linear_static` pattern terms; exact-two deletion retains the v1 field set and
+  three through 64 terms use v2 deletion provenance. A nested root contains at least one typed
+  combination term and must satisfy the same acyclic depth-eight/64-leaf expansion bound before
+  additive v3 deletion provenance is published. Rust rejects source-owned, nonterminal, malformed,
+  referenced, unsupported-feature-owned and round-trip-owned rows, then strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v47 restores direct-pattern CPU
+  execution; v48 retains and executes the child combination with exact active load, typed frame
+  recovery, checkpoint/restart parity and fallback 0. General/nonterminal/referenced graph
+  deletion, term editing, cascade/reindexing, arbitrary combination evaluation and visual
+  authoring remain open.
 - `model-add-linear-material`: deterministic creation of one v1 `linear_elastic_isotropic`
   material with a unique contiguous index, complete finite physical SI parameters, neutral source
   ownership, empty extensions and the fixed stateless trial/commit/rollback schema. Rust preserves
@@ -411,12 +414,14 @@ references, and existing-two-node-element connectivity commands close only their
 provenance-bound operations. The frame/truss member, nodal-load, fixed-constraint, atomic
 linear-static-pattern/first-load, two-pattern linear-combination, stateless linear-elastic-material
 and frame/truss-section creators close only their documented fixed constructions. The bounded
-combination deleter closes only the last contiguous neutral unreferenced two-pattern linear row and
-restores direct-pattern CPU execution. The additive two-to-64 direct linear-combination surface
+combination deleter closes only a last contiguous neutral unreferenced direct or bounded acyclic
+nested linear row. The direct path restores direct-pattern CPU execution; the nested v3 path
+retains and executes the referenced child combination. The additive two-to-64 direct linear-combination surface
 closes ordered unique-pattern authoring, v2 provenance/request receipts beyond two terms, C++ CPU
 assembly, typed recovery and checkpoint/restart parity; the exact-two v1 receipt path remains
 frozen. The bounded nested surface closes typed acyclic authoring and deterministic CPU flattening
-only through depth eight and 64 expanded leaves, with v3 provenance/request receipts. The two leaf
+only through depth eight and 64 expanded leaves, with v3 provenance/request receipts; deletion uses
+the same bounds and separate v3 deletion provenance. The two leaf
 deleters close only one
 last contiguous neutral unreferenced member of their exact frame/truss family and its last orphan
 endpoint node. The fixed-constraint deleter closes only one last contiguous neutral unreferenced
@@ -425,8 +430,8 @@ The nodal-load deleter closes only one last contiguous neutral unreferenced nonz
 row while retaining another nonzero load in the same linear-static pattern.
 Visual dragging, general entity creation/deletion, cascade/reindex deletion, broad retargeting,
 formulation/type/version changes, restraint-mask changes, and general
-property/material/section/nested-load-combination-term/constraint-topology editing, nested
-combination deletion and general combination deletion remain open, so the
+property/material/section/nested-load-combination-term/constraint-topology editing and general,
+nonterminal, referenced or cascading combination deletion remain open, so the
 composite visual parity row stays open.
 
 The model-bound CPU linear request creator additionally closes selection of one existing

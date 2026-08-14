@@ -339,7 +339,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 59. emits an append-only v47 hash-bound receipt that inherits every v46 identity and additionally
    binds the direct-combination-deleted ModelIR, edit receipt, analysis request, assembly receipt,
    final checkpoint, ResultIR, recovery and ReportIR identities plus explicit restart parity.
-   The receipt checker continues to accept frozen v1 through v46 receipts (including frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
+60. deletes the terminal bounded nested `COMBO_NESTED` twice with the same depth-eight/64-leaf
+   expansion contract, preserves its child `COMBO_SERVICE`, emits v3 deletion provenance, executes
+   the retained child with exact active load `[0,-12000,5000,0,0,0]`, typed recovery, fallback 0 and
+   byte-identical initialized checkpoint/restart output;
+61. emits an append-only v48 hash-bound receipt that inherits every v47 identity and additionally
+   binds the nested-combination-deleted ModelIR, edit receipt, request receipt, analysis request,
+   assembly receipt, final checkpoint, ResultIR, recovery and ReportIR identities plus explicit
+   restart parity. The receipt checker continues to accept frozen v1 through v47 receipts
+   (including frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
@@ -381,7 +389,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    acyclic nested linear-load-combination authoring, v3 provenance/request binding, CPU execution,
    typed recovery and restart authority; and no pre-v47 receipt is installed bounded
    two-through-64 direct linear-load-combination deletion, v2 deletion provenance, restored direct
-   pattern CPU execution, typed recovery and restart authority.
+   pattern CPU execution, typed recovery and restart authority; and no pre-v48 receipt is installed
+   bounded nested linear-load-combination deletion, v3 root/expanded-term provenance, retained
+   child-combination CPU execution, typed recovery and restart authority.
 
 The reference command is:
 
