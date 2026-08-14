@@ -107,6 +107,11 @@ direct-pattern identity in the same neutral, extension-free and unreferenced pro
 the selected factor, every factor, term order and count; rejects no-op, missing, nonlinear or
 duplicate replacements; and publishes only after strict Rust plus C++ revalidation. See
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md`.
+The bounded `model-add-linear-load-combination-term` surface appends exactly one unique existing
+`linear_static` pattern and finite nonzero factor to the final index of a neutral, extension-free,
+unreferenced two-through-63-term direct combination. It preserves every existing term and order,
+rejects nested, owned, duplicate and 64-term sources, and publishes only after strict Rust plus C++
+revalidation. See `docs/native/modelir-direct-linear-load-combination-term-add-v1.md`.
 The separate bounded `model-edit-nested-linear-load-combination-factor` surface selects one root
 term by explicit reference kind and identity. It preserves root references/order/count and every
 descendant, requires the source and edited graphs to remain within depth eight and 64 expanded
@@ -127,6 +132,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-direct-linear-load-combination-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-reference-edit-v1.md` and
+`docs/native/modelir-direct-linear-load-combination-term-add-v1.md` and
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md` and
@@ -298,6 +304,10 @@ structural-workbench model-edit-linear-load-combination-reference \
   --load-combination COMBO_SERVICE --load-pattern LC_WEAK \
   --replacement-load-pattern LC_AXIAL \
   --output-dir REFERENCE-EDITED-DIRECT-COMBINATION-MODEL
+structural-workbench model-add-linear-load-combination-term \
+  ADDED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_SERVICE --load-pattern LC_AXIAL --factor 0.25 \
+  --output-dir TERM-EXTENDED-DIRECT-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE \
   --output-dir DELETED-COMBINATION-MODEL

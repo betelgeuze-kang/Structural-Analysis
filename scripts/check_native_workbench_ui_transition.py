@@ -260,6 +260,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_direct_linear_load_combination_term_add": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_nested_linear_load_combination_factor_edit": (
         "c5_implemented",
         False,
@@ -472,6 +476,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-delete-fixed-constraint",
         "model-add-linear-load-pattern",
         "model-add-linear-load-combination",
+        "model-add-linear-load-combination-term",
         "model-edit-linear-load-combination-factor",
         "model-edit-linear-load-combination-reference",
         "model-edit-nested-linear-load-combination-factor",
@@ -1066,6 +1071,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "direct_linear_load_combination_factor_edit",
             "structural-native:model-edit-direct-linear-load-combination-reference.v1",
             "direct_linear_load_combination_reference_edit",
+            "structural-native:model-add-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_add",
             "structural-native:model-edit-nested-linear-load-combination-factor.v1",
             "nested_linear_load_combination_factor_edit",
             "structural-native:model-edit-nested-linear-load-combination-reference.v1",
@@ -1706,6 +1713,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-add-fixed-constraint")',
             'Some("model-add-linear-load-pattern")',
             'Some("model-add-linear-load-combination")',
+            'Some("model-add-linear-load-combination-term")',
             'Some("model-edit-linear-load-combination-factor")',
             'Some("model-edit-linear-load-combination-reference")',
             'Some("model-edit-nested-linear-load-combination-factor")',
@@ -2012,6 +2020,28 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         Path("docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"),
         blockers,
     )
+    direct_linear_load_combination_term_add_doc = _text(
+        root,
+        Path("docs/native/modelir-direct-linear-load-combination-term-add-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-direct-linear-load-combination-term-add-v1.md"),
+        direct_linear_load_combination_term_add_doc,
+        (
+            "model-add-linear-load-combination-term",
+            "two through 63",
+            "single C ABI into C++",
+            "structural-native:model-add-direct-linear-load-combination-term.v1",
+            "direct_linear_load_combination_term_add",
+            "append-only v53",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
     _require_tokens(
         Path("docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"),
         nested_linear_load_combination_reference_edit_doc,
@@ -2261,6 +2291,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-add-fixed-constraint",
             "model-add-linear-load-pattern",
             "model-add-linear-load-combination",
+            "model-add-linear-load-combination-term",
             "model-edit-linear-load-combination-factor",
             "model-edit-nested-linear-load-combination-factor",
             "model-edit-nested-linear-load-combination-reference",

@@ -34,6 +34,7 @@
       "model-delete-fixed-constraint",
       "model-add-linear-load-pattern",
       "model-add-linear-load-combination",
+      "model-add-linear-load-combination-term",
       "model-edit-linear-load-combination-factor",
       "model-edit-linear-load-combination-reference",
       "model-edit-nested-linear-load-combination-factor",
@@ -403,6 +404,12 @@
     },
     {
       "feature": "bounded_cpp_revalidated_direct_linear_load_combination_reference_edit",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_cpp_revalidated_direct_linear_load_combination_term_add",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false

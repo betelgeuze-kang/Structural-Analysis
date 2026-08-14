@@ -171,21 +171,31 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   pattern loads, executes CPU PCG, and publishes typed recovery with exact active load, fallback 0,
   and byte-identical initialized checkpoint/restart output. This command remains direct-pattern
   only; general solver selection, HIP parity and engineering acceptance remain open.
+- `model-add-linear-load-combination-term`: deterministic append of one unique existing
+  `linear_static` pattern and finite nonzero factor to a neutral, extension-free, unreferenced
+  two-through-63-term direct combination. Rust preserves every existing reference, factor and
+  order, rejects nested/owned/duplicate/64-term inputs, then strictly reparses and
+  C++-revalidates before create-new publication. Installed E2E v53 proves exact active load
+  `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+  output. Term removal/reorder, arbitrary-position or nested insertion, downstream-referenced
+  editing, HIP parity and engineering acceptance remain open.
 - `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
   in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
   preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then
   strictly reparses and C++-revalidates before create-new publication. Installed E2E v49 proves
   exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
-  checkpoint/restart output. Reference replacement, term insertion/removal/reorder, nested or
-  downstream-referenced editing, HIP parity and engineering acceptance remain open.
+  checkpoint/restart output. Reference replacement and bounded append-only term addition are
+  separate; term removal/reorder, nested or downstream-referenced editing, HIP parity and
+  engineering acceptance remain open.
 - `model-edit-linear-load-combination-reference`: deterministic replacement of exactly one existing
   pattern identity in a neutral, extension-free and unreferenced two-through-64-term direct
   combination. Rust preserves the selected factor, all other factors, term order and count;
   rejects no-op, missing, nonlinear, duplicate, nested or owned inputs; then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v51 proves exact active load
   `[120000,0,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
-  Factor editing and bounded nested reference replacement remain separate; insertion/removal/
-  reorder, downstream-referenced editing, HIP parity and engineering acceptance remain open.
+  Factor editing, bounded append-only term addition and nested reference replacement remain
+  separate; removal/reorder, arbitrary-position insertion, downstream-referenced editing, HIP
+  parity and engineering acceptance remain open.
 - `model-edit-nested-linear-load-combination-reference`: deterministic replacement of one typed
   root reference in a neutral, extension-free, unreferenced acyclic nested combination. Rust
   preserves the selected factor, root order/count and every descendant row; rejects no-op,

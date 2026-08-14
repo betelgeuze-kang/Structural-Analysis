@@ -40,6 +40,10 @@ absent from the runtime image.
   two through 64 unique existing linear-static patterns and finite nonzero factors. Exact-two
   authoring keeps the frozen v1 receipts; larger direct combinations use v2 receipts. The installed
   surface C++-validates, assembles and executes the selected combination through native CPU PCG.
+  `model-add-linear-load-combination-term` appends one unique existing linear-static pattern and
+  finite nonzero factor to the end of a neutral, extension-free, unreferenced two-through-63-term
+  direct combination while preserving every existing term and order; installed v53 E2E proves
+  exact active load, restart parity and fallback 0.
   `model-edit-linear-load-combination-factor` changes exactly one existing direct-pattern factor in
   a neutral, extension-free and unreferenced two-through-64-term combination while preserving every
   term reference, order and count; installed v49 E2E proves exact changed load, restart parity and
