@@ -206,6 +206,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-edit-frame-element-orientation",
             "model-edit-frame-element-properties",
             "model-edit-truss-section",
+            "model-edit-truss-section-identity-cascade",
             "model-edit-truss-element-properties",
             "model-edit-element-connectivity",
             "model-add-frame3d-member",
@@ -255,6 +256,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v79",
+            "model-edit-truss-section-identity-cascade",
+            "T1_LINKED",
             "Distribution E2E v78",
             "model-edit-linear-material-identity-cascade",
             "M1_LINKED",
@@ -1012,6 +1016,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_linear_material_identity_cascade_edit_recovery_sha256",
         "workbench_linear_material_identity_cascade_edit_report_ir_sha256",
         "workbench_linear_material_identity_cascade_edit_restart_passed",
+        "exercise_truss_section_identity_cascade_edit_surface",
+        "model-edit-truss-section-identity-cascade",
+        "structural-native:model-edit-truss-section-identity-cascade.v2",
+        "workbench_truss_section_identity_cascade_edit_surface_passed",
+        "workbench_truss_section_identity_cascade_edit_model_sha256",
+        "workbench_truss_section_identity_cascade_edit_receipt_sha256",
+        "workbench_truss_section_identity_cascade_edit_request_receipt_sha256",
+        "workbench_truss_section_identity_cascade_edit_request_sha256",
+        "workbench_truss_section_identity_cascade_edit_assembly_receipt_sha256",
+        "workbench_truss_section_identity_cascade_edit_checkpoint_sha256",
+        "workbench_truss_section_identity_cascade_edit_result_ir_sha256",
+        "workbench_truss_section_identity_cascade_edit_recovery_sha256",
+        "workbench_truss_section_identity_cascade_edit_report_ir_sha256",
+        "workbench_truss_section_identity_cascade_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1214,6 +1232,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v79",
+            "V79_TRUSS_SECTION_IDENTITY_CASCADE_EDIT_KEYS",
+            "workbench_truss_section_identity_cascade_edit_surface_passed",
+            "workbench_truss_section_identity_cascade_edit_receipt_sha256",
+            "workbench_truss_section_identity_cascade_edit_request_receipt_sha256",
+            "workbench_truss_section_identity_cascade_edit_recovery_sha256",
+            "workbench_truss_section_identity_cascade_edit_restart_passed",
             "structural-native-distribution-e2e.v78",
             "V78_LINEAR_MATERIAL_IDENTITY_CASCADE_EDIT_KEYS",
             "workbench_linear_material_identity_cascade_edit_surface_passed",
@@ -2037,6 +2062,31 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "append-only v78",
             "[1]",
             "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    truss_section_identity_cascade_doc = _text(
+        root,
+        Path("docs/native/modelir-truss-section-identity-cascade-edit-v2.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-truss-section-identity-cascade-edit-v2.md"),
+        text=truss_section_identity_cascade_doc,
+        tokens=(
+            "model-edit-truss-section-identity-cascade",
+            "single C ABI into C++ semantic",
+            "structural-native:model-edit-truss-section-identity-cascade.v2",
+            "truss_section_identity_cascade_edit",
+            "append-only v79",
+            "[1,2]",
+            "[0,12,15]",
             "[6,7,8,9,10,11]",
             "[25000,-12000,5000,0,0,0]",
             "fallback 0",
@@ -3274,6 +3324,49 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in linear_material_identity_cascade_claim:
                 blockers.append(
                     "modelir_linear_material_identity_cascade_edit_capability_"
+                    f"claim_missing:{token}"
+                )
+
+    truss_section_identity_cascade_capability = (
+        capabilities.get("modelir_truss_section_identity_cascade_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(truss_section_identity_cascade_capability, dict):
+        blockers.append("modelir_truss_section_identity_cascade_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if truss_section_identity_cascade_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_truss_section_identity_cascade_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        truss_section_identity_cascade_claim = str(
+            truss_section_identity_cascade_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing referenced parameter-set-v1 truss_3d section ID",
+            "atomically updates every typed elements[].section_id",
+            "direct section round-trip model_ir_entity_id",
+            "exact or canonicalized direct mappings degrade to approximated",
+            "unsupported-feature source_entity_id ownership of either source or replacement",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v79 E2E",
+            "T1_LINKED",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "combined active load [25000,-12000,5000,0,0,0]",
+            "typed frame-plus-truss recovery [1,2] with offsets [0,12,15]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in truss_section_identity_cascade_claim:
+                blockers.append(
+                    "modelir_truss_section_identity_cascade_edit_capability_"
                     f"claim_missing:{token}"
                 )
 

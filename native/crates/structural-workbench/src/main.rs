@@ -775,6 +775,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             parse_model_edit_truss_section_identity(arguments)
                 .and_then(|command| run_model_edit_truss_section_identity(&command))
         }
+        Some("model-edit-truss-section-identity-cascade") => {
+            parse_model_edit_truss_section_identity_cascade(arguments)
+                .and_then(|command| run_model_edit_truss_section_identity_cascade(&command))
+        }
         Some("model-edit-frame-element-orientation") => {
             parse_model_edit_frame_element_orientation(arguments)
                 .and_then(|command| run_model_edit_frame_element_orientation(&command))
@@ -1738,6 +1742,19 @@ fn run_model_edit_truss_section_identity(
     command: &ModelEditTrussSectionIdentityCommand,
 ) -> Result<(), WorkbenchError> {
     let outcome = structural_workbench::publish_model_truss_section_identity_edit(
+        &command.model,
+        &command.section_id,
+        &command.replacement_section_id,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_truss_section_identity_cascade(
+    command: &ModelEditTrussSectionIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_truss_section_identity_cascade_edit(
         &command.model,
         &command.section_id,
         &command.replacement_section_id,
@@ -3882,6 +3899,32 @@ fn parse_model_edit_truss_section_identity(
     })
 }
 
+fn parse_model_edit_truss_section_identity_cascade(
+    arguments: &[OsString],
+) -> Result<ModelEditTrussSectionIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--section"
+        || arguments[4] != "--new-section"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-truss-section-identity-cascade requires MODEL.json --section SOURCE-ID --new-section NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditTrussSectionIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        section_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-truss-section-identity-cascade source section ID",
+        )?,
+        replacement_section_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-truss-section-identity-cascade replacement section ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
 fn parse_model_edit_frame_element_orientation(
     arguments: &[OsString],
 ) -> Result<ModelEditFrameElementOrientationCommand, WorkbenchError> {
@@ -4699,6 +4742,7 @@ fn usage() -> &'static str {
         ,
         "\n  structural-workbench model-edit-linear-material-identity-cascade <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
+        "\n  structural-workbench model-edit-truss-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-element-identity <MODEL.json> --element <SOURCE-ID> --new-element <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
         "\n  structural-workbench model-insert-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>",
@@ -4748,6 +4792,7 @@ mod tests {
         parse_model_edit_node, parse_model_edit_node_identity,
         parse_model_edit_node_identity_cascade, parse_model_edit_truss_element_properties,
         parse_model_edit_truss_section, parse_model_edit_truss_section_identity,
+        parse_model_edit_truss_section_identity_cascade,
         parse_model_insert_direct_linear_load_combination_term,
         parse_model_insert_nested_linear_load_combination_term,
         parse_model_reorder_direct_linear_load_combination_term,
@@ -6580,6 +6625,36 @@ mod tests {
         let mut oversized = arguments;
         oversized[5] = OsString::from("T".repeat(129));
         assert!(parse_model_edit_truss_section_identity(&oversized).is_err());
+    }
+
+    #[test]
+    fn model_edit_truss_section_identity_cascade_parser_is_distinct_and_bounded() {
+        let arguments = [
+            OsString::from("model-edit-truss-section-identity-cascade"),
+            OsString::from("model.json"),
+            OsString::from("--section"),
+            OsString::from("T1"),
+            OsString::from("--new-section"),
+            OsString::from("T1_LINKED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_truss_section_identity_cascade(&arguments)
+            .expect("valid truss-section identity cascade command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.section_id, "T1");
+        assert_eq!(parsed.replacement_section_id, "T1_LINKED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut wrong_flag = arguments.clone();
+        wrong_flag[4] = OsString::from("--replacement");
+        assert!(parse_model_edit_truss_section_identity_cascade(&wrong_flag).is_err());
+        let mut empty_source = arguments.clone();
+        empty_source[3] = OsString::from("");
+        assert!(parse_model_edit_truss_section_identity_cascade(&empty_source).is_err());
+        let mut oversized = arguments;
+        oversized[5] = OsString::from("T".repeat(129));
+        assert!(parse_model_edit_truss_section_identity_cascade(&oversized).is_err());
     }
 
     #[test]

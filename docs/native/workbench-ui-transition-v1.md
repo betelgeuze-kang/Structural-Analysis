@@ -182,6 +182,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   types `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, active load
   `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Section
   area/family editing, reference cascades and visual dragging remain separate or open.
+- `model-edit-truss-section-identity-cascade`: deterministic replacement of one referenced v1
+  `truss_3d` section identity with a distinct unique ModelIR stable ID. Rust atomically rewrites
+  every typed element `section_id` plus direct section round-trip ownership, degrades exact or
+  canonicalized direct mappings to approximated, and preserves the section index, family/version,
+  exact positive SI area, source identity, extensions and unrelated rows. Installed E2E v79
+  replaces `T1` with `T1_LINKED` and proves one element reference, frame-plus-truss recovery types
+  `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+  `[25000,-12000,5000,0,0,0]` through retained `COMBO_RENAMED`, fallback 0 and byte-identical
+  initialized-checkpoint restart. Untyped extension and unsupported-feature cascades, non-truss
+  families and visual manipulation remain open.
 - `model-edit-node-identity`: deterministic replacement of one existing unreferenced node identity
   with a distinct unique ModelIR stable ID. Rust preserves the contiguous index, exact finite SI
   coordinates, source identity, extensions and unrelated rows; rejects element/constraint/

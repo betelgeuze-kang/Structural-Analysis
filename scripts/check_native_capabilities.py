@@ -58,6 +58,7 @@ EXPECTED_OWNERS = {
     "modelir_frame_section_identity_edit": "structural-workbench",
     "modelir_frame_section_identity_cascade_edit": "structural-workbench",
     "modelir_truss_section_identity_edit": "structural-workbench",
+    "modelir_truss_section_identity_cascade_edit": "structural-workbench",
     "modelir_fixed_constraint_target_edit": "structural-workbench",
     "modelir_fixed_constraint_dof_deletion": "structural-workbench",
     "modelir_fixed_constraint_dof_addition": "structural-workbench",

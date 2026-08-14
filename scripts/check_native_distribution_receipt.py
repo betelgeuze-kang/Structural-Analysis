@@ -902,6 +902,20 @@ V78_LINEAR_MATERIAL_IDENTITY_CASCADE_EDIT_KEYS = {
     "workbench_linear_material_identity_cascade_edit_restart_passed",
 }
 V78_EXPECTED_KEYS = V77_EXPECTED_KEYS | V78_LINEAR_MATERIAL_IDENTITY_CASCADE_EDIT_KEYS
+V79_TRUSS_SECTION_IDENTITY_CASCADE_EDIT_KEYS = {
+    "workbench_truss_section_identity_cascade_edit_surface_passed",
+    "workbench_truss_section_identity_cascade_edit_model_sha256",
+    "workbench_truss_section_identity_cascade_edit_receipt_sha256",
+    "workbench_truss_section_identity_cascade_edit_request_receipt_sha256",
+    "workbench_truss_section_identity_cascade_edit_request_sha256",
+    "workbench_truss_section_identity_cascade_edit_assembly_receipt_sha256",
+    "workbench_truss_section_identity_cascade_edit_checkpoint_sha256",
+    "workbench_truss_section_identity_cascade_edit_result_ir_sha256",
+    "workbench_truss_section_identity_cascade_edit_recovery_sha256",
+    "workbench_truss_section_identity_cascade_edit_report_ir_sha256",
+    "workbench_truss_section_identity_cascade_edit_restart_passed",
+}
+V79_EXPECTED_KEYS = V78_EXPECTED_KEYS | V79_TRUSS_SECTION_IDENTITY_CASCADE_EDIT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -943,6 +957,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v79_receipt = receipt_schema_version == "structural-native-distribution-e2e.v79"
+    if is_v79_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v78"
     is_v78_receipt = receipt_schema_version == "structural-native-distribution-e2e.v78"
     if is_v78_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v77"
@@ -1229,6 +1246,7 @@ def validate(
         "structural-native-distribution-e2e.v76": V76_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v77": V77_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v78": V78_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v79": V79_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1366,6 +1384,26 @@ def validate(
             "mgt_import_health_sha256",
             "mgt_result_ir_sha256",
             "mgt_report_pdf_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v79_receipt:
+        for name in (
+            "workbench_truss_section_identity_cascade_edit_surface_passed",
+            "workbench_truss_section_identity_cascade_edit_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_truss_section_identity_cascade_edit_model_sha256",
+            "workbench_truss_section_identity_cascade_edit_receipt_sha256",
+            "workbench_truss_section_identity_cascade_edit_request_receipt_sha256",
+            "workbench_truss_section_identity_cascade_edit_request_sha256",
+            "workbench_truss_section_identity_cascade_edit_assembly_receipt_sha256",
+            "workbench_truss_section_identity_cascade_edit_checkpoint_sha256",
+            "workbench_truss_section_identity_cascade_edit_result_ir_sha256",
+            "workbench_truss_section_identity_cascade_edit_recovery_sha256",
+            "workbench_truss_section_identity_cascade_edit_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

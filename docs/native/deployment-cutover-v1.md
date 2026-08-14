@@ -29,7 +29,7 @@ round-trip reference cascade, `model-edit-nodal-load` existing-load component,
 `model-edit-linear-material`, `model-edit-linear-material-identity`,
 `model-edit-linear-material-identity-cascade`, `model-edit-frame-section`,
 `model-edit-frame-section-identity`, `model-edit-frame-section-identity-cascade`,
-`model-edit-truss-section-identity`,
+`model-edit-truss-section-identity`, `model-edit-truss-section-identity-cascade`,
 `model-edit-frame-element-orientation`, and `model-edit-frame-element-properties`
 existing-property commands, plus
 `model-edit-element-connectivity` endpoint retargeting and `model-edit-element-identity`
@@ -132,7 +132,14 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v78 proves repeated linear-material-identity-cascade-edited/
+assembly preflight. Distribution E2E v79 proves repeated truss-section-identity-cascade-edited/
+request/artifact bytes and retains every v78 assertion while authoring one referenced `T1` truss
+section/member/fixed leaf and replacing it with `T1_LINKED` through
+`model-edit-truss-section-identity-cascade`. It atomically updates one typed element reference,
+rejects malformed, no-op, colliding and unreferenced identities, and proves exact frame-plus-truss
+recovery `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+`[25000,-12000,5000,0,0,0]` through retained `COMBO_RENAMED`, byte-identical initialized-
+checkpoint restart and fallback 0. Distribution E2E v78 proves repeated linear-material-identity-cascade-edited/
 request/artifact bytes and retains every v77 assertion while replacing referenced `M1` with
 `M1_LINKED` through `model-edit-linear-material-identity-cascade`, atomically updating one typed
 element reference, rejecting malformed, no-op, colliding and unreferenced identities, and proving

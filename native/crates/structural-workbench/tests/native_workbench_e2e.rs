@@ -708,6 +708,24 @@ fn run_truss_section_identity_edit(
     ])
 }
 
+fn run_truss_section_identity_cascade_edit(
+    source: &Path,
+    destination: &Path,
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-truss-section-identity-cascade"),
+        source.as_os_str(),
+        text("--section"),
+        text(section_id),
+        text("--new-section"),
+        text(replacement_section_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_frame_element_orientation_edit(
     source: &Path,
     destination: &Path,
@@ -10000,6 +10018,337 @@ fn truss_section_identity_edit_is_deterministic_fail_closed_and_cpu_executable()
     assert_eq!(existing.status.code(), Some(1));
     assert!(
         String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn truss_section_identity_cascade_edit_is_atomic_restartable_and_cpu_executable() {
+    let temporary = TestDirectory::create();
+    let base = repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let section_directory = temporary.0.join("truss-section-cascade-t1");
+    assert_success(&run_truss_section_add(
+        &base,
+        &section_directory,
+        "T1",
+        "0.005",
+    ));
+    let member_directory = temporary.0.join("truss-section-cascade-member");
+    assert_success(&run_truss3d_member_add(
+        &section_directory.join("model-ir.json"),
+        &member_directory,
+        "N3",
+        ["2", "1", "0"],
+        "E2",
+        "N2",
+        "M1",
+        "T1",
+    ));
+    let fixed_directory = temporary.0.join("truss-section-cascade-fixed");
+    assert_success(&run_fixed_constraint_add(
+        &member_directory.join("model-ir.json"),
+        &fixed_directory,
+        "BC_N3",
+        "N3",
+    ));
+    let authored_bytes = std::fs::read(fixed_directory.join("model-ir.json"))
+        .expect("authored truss-section cascade source");
+    let mut source_model = validate_model_bytes(&authored_bytes)
+        .expect("C++-validated truss-section cascade source")
+        .snapshot
+        .value()
+        .clone();
+    source_model["roundtrip_map"] = serde_json::json!([{
+        "source_entity_id": "source:T1",
+        "entity_kind": "section",
+        "model_ir_entity_id": "T1",
+        "mapping_status": "canonicalized",
+        "extensions": {"structural-native:fixture": "truss-section-cascade"}
+    }]);
+    let source_bytes = canonicalize_model_ir_v2(&source_model)
+        .expect("canonical truss-section cascade source")
+        .into_bytes();
+    validate_model_bytes(&source_bytes).expect("C++-validated mapped truss-section cascade source");
+    let source = temporary.0.join("truss-section-cascade-source.json");
+    std::fs::write(&source, &source_bytes).expect("write truss-section cascade source");
+
+    let first = temporary.0.join("truss-section-cascade-first");
+    let second = temporary.0.join("truss-section-cascade-second");
+    for destination in [&first, &second] {
+        let output =
+            run_truss_section_identity_cascade_edit(&source, destination, "T1", "T1_LINKED");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("published truss-section cascade receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first truss-section cascade artifact"),
+            std::fs::read(second.join(artifact)).expect("second truss-section cascade artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&source).expect("unchanged truss-section cascade source"),
+        source_bytes
+    );
+
+    let edited_bytes = std::fs::read(first.join("model-ir.json"))
+        .expect("truss-section identity-cascaded ModelIR");
+    let edited =
+        parse_model_ir_v2(&edited_bytes).expect("strict truss-section identity-cascaded ModelIR");
+    let validation = validate_model_bytes(&edited_bytes)
+        .expect("C++-validated truss-section identity-cascaded ModelIR");
+    assert!(validation.report.contract_valid);
+    assert!(validation.report.semantics_valid);
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        validation.snapshot.canonical_json().as_bytes(),
+        edited_bytes
+    );
+    assert_eq!(edited.value()["sections"][1]["id"], "T1_LINKED");
+    for key in [
+        "index",
+        "family_id",
+        "parameter_set_version",
+        "parameters",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(
+            edited.value()["sections"][1][key],
+            source_model["sections"][1][key]
+        );
+    }
+    assert_eq!(edited.value()["sections"][0], source_model["sections"][0]);
+    assert_eq!(edited.value()["elements"][1]["section_id"], "T1_LINKED");
+    for key in [
+        "id",
+        "index",
+        "element_type",
+        "formulation_id",
+        "node_ids",
+        "material_id",
+        "local_axis_rotation_rad",
+        "end_offsets_m",
+        "releases",
+        "source_id",
+        "extensions",
+    ] {
+        assert_eq!(
+            edited.value()["elements"][1][key],
+            source_model["elements"][1][key]
+        );
+    }
+    assert_eq!(edited.value()["elements"][0], source_model["elements"][0]);
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["model_ir_entity_id"],
+        "T1_LINKED"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["mapping_status"],
+        "approximated"
+    );
+    assert_eq!(
+        edited.value()["roundtrip_map"][0]["extensions"],
+        source_model["roundtrip_map"][0]["extensions"]
+    );
+    for family in [
+        "nodes",
+        "materials",
+        "constraints",
+        "load_patterns",
+        "load_combinations",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+    ] {
+        assert_eq!(edited.value()[family], source_model[family]);
+    }
+
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-truss-section-identity-cascade.v2")
+        .expect("truss-section cascade provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "truss_section_identity_cascade_edit"
+    );
+    assert_eq!(extension["source_section_id"], "T1");
+    assert_eq!(extension["replacement_section_id"], "T1_LINKED");
+    assert_eq!(extension["section_index"], 1);
+    assert_eq!(extension["family_id"], "truss_3d");
+    assert_eq!(extension["parameter_set_version"], "1");
+    assert_eq!(
+        extension["retained_parameters_si"],
+        serde_json::json!({"area_m2": 0.005})
+    );
+    assert_eq!(extension["element_reference_count"], 1);
+    assert_eq!(extension["roundtrip_reference_count"], 1);
+    assert_eq!(extension["typed_reference_cascade_verified"], true);
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("truss-section cascade receipt"),
+    )
+    .expect("truss-section cascade receipt JSON");
+    assert_eq!(receipt["operation"], "truss_section_identity_cascade_edit");
+    assert_eq!(receipt["source_section_id"], "T1");
+    assert_eq!(receipt["replacement_section_id"], "T1_LINKED");
+    assert_eq!(receipt["section_index"], 1);
+    assert_eq!(receipt["element_reference_count"], 1);
+    assert_eq!(receipt["roundtrip_reference_count"], 1);
+    assert_eq!(receipt["typed_reference_cascade_verified"], true);
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], edited.content_hash());
+    assert_ne!(
+        receipt["source_semantic_hash"],
+        receipt["edited_semantic_hash"]
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    for (name, section_id, replacement, code) in [
+        (
+            "missing",
+            "T404",
+            "T_NEW",
+            "workbench_model_edit_truss_section_identity_section_missing",
+        ),
+        (
+            "collision",
+            "T1",
+            "S1",
+            "workbench_model_edit_truss_section_identity_replacement_exists",
+        ),
+        ("no-op", "T1", "T1", "workbench_model_edit_no_change"),
+        (
+            "invalid",
+            "T1",
+            "1_INVALID",
+            "workbench_model_edit_truss_section_identity_replacement_invalid",
+        ),
+    ] {
+        let destination = temporary.0.join(format!("truss-section-cascade-{name}"));
+        let rejected =
+            run_truss_section_identity_cascade_edit(&source, &destination, section_id, replacement);
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(code),
+            "{name} rejection: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let orphan_source = temporary.0.join("truss-section-cascade-orphan-source");
+    assert_success(&run_truss_section_add(
+        &source,
+        &orphan_source,
+        "T2",
+        "0.0025",
+    ));
+    let orphan_destination = temporary.0.join("truss-section-cascade-orphan-output");
+    let orphan_rejection = run_truss_section_identity_cascade_edit(
+        &orphan_source.join("model-ir.json"),
+        &orphan_destination,
+        "T2",
+        "T2_LINKED",
+    );
+    assert_eq!(orphan_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&orphan_rejection.stdout)
+        .contains("workbench_model_edit_truss_section_identity_cascade_unreferenced"));
+    assert!(!orphan_destination.exists());
+
+    for (name, owned_id) in [("source-owned", "T1"), ("replacement-owned", "T1_LINKED")] {
+        let mut owned = source_model.clone();
+        owned["unsupported_features"] = serde_json::json!([{
+            "feature_id": format!("feature.truss-section-cascade-{name}"),
+            "kind": "unsupported_solver_feature",
+            "source_entity_id": owned_id,
+            "disposition": "blocked",
+            "blocking": true,
+            "detail": "Truss-section identity remains externally owned.",
+            "extensions": {}
+        }]);
+        let owned_path = temporary
+            .0
+            .join(format!("truss-section-cascade-{name}-source.json"));
+        std::fs::write(
+            &owned_path,
+            canonicalize_model_ir_v2(&owned)
+                .expect("canonical owned truss-section cascade source")
+                .as_bytes(),
+        )
+        .expect("write owned truss-section cascade source");
+        let destination = temporary
+            .0
+            .join(format!("truss-section-cascade-{name}-output"));
+        let rejected =
+            run_truss_section_identity_cascade_edit(&owned_path, &destination, "T1", "T1_LINKED");
+        assert_eq!(rejected.status.code(), Some(1), "{name} status");
+        assert!(String::from_utf8_lossy(&rejected.stdout).contains(
+            "workbench_model_edit_truss_section_identity_cascade_unsupported_feature_owned"
+        ));
+        assert!(!destination.exists());
+    }
+    let existing = run_truss_section_identity_cascade_edit(&source, &first, "T1", "T1_LINKED");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let request_directory = temporary.0.join("truss-section-cascade-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "truss-section-cascade-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("truss-section cascade request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("truss-section cascade direct CPU execution");
+    assert!(direct.is_complete());
+    assert!(!direct.is_terminal_failure());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("truss-section cascade direct recovery"),
+    )
+    .expect("truss-section cascade recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(
+        recovery["recovery_stable_indices"],
+        serde_json::json!([0, 1])
+    );
+    assert_eq!(
+        recovery["recovery_element_types"],
+        serde_json::json!([1, 2])
+    );
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12, 15]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("truss-section cascade initialized checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("truss-section cascade resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
     );
 }
 

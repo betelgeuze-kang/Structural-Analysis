@@ -16,7 +16,8 @@ absent from the runtime image.
   and expected-source-bound `model-edit-model-identity` root identity replacement, plus
   provenance-bound `model-edit-node` coordinate, `model-edit-node-identity-cascade` typed-reference
   cascade, `model-edit-frame-section-identity-cascade` typed section-reference cascade,
-  `model-edit-linear-material-identity-cascade` typed material-reference cascade and
+  `model-edit-linear-material-identity-cascade` typed material-reference cascade,
+  `model-edit-truss-section-identity-cascade` typed truss-section-reference cascade and
   `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
@@ -220,6 +221,9 @@ structural-workbench model-edit-frame-element-properties /workspace/model.json \
 structural-workbench model-edit-truss-section /workspace/model.json \
   --section T1 --area-m2 0.01 \
   --output-dir /workspace/edited-truss-section-model
+structural-workbench model-edit-truss-section-identity-cascade /workspace/model.json \
+  --section T1 --new-section T1_LINKED \
+  --output-dir /workspace/renamed-referenced-truss-section-model
 structural-workbench model-edit-truss-element-properties /workspace/model.json \
   --element E2 --material M2 --section T2 \
   --output-dir /workspace/edited-truss-properties-model
