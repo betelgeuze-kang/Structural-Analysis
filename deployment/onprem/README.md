@@ -44,6 +44,10 @@ absent from the runtime image.
   finite nonzero factor to the end of a neutral, extension-free, unreferenced two-through-63-term
   direct combination while preserving every existing term and order; installed v53 E2E proves
   exact active load, restart parity and fallback 0.
+  `model-delete-linear-load-combination-term` removes one existing pattern term from any position
+  in a neutral, extension-free, unreferenced three-through-64-term direct combination while
+  preserving every retained factor and relative order; installed v54 E2E proves exact active
+  load, restart parity and fallback 0.
   `model-edit-linear-load-combination-factor` changes exactly one existing direct-pattern factor in
   a neutral, extension-free and unreferenced two-through-64-term combination while preserving every
   term reference, order and count; installed v49 E2E proves exact changed load, restart parity and

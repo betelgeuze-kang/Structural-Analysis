@@ -379,7 +379,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    active load `[25000,-12000,5000,0,0,0]`, typed recovery, duplicate/missing-pattern rejection,
    fallback 0 and byte-identical initialized checkpoint/restart output, then emits an append-only v53 receipt binding the source ModelIR, edited ModelIR, edit/request/assembly receipts, analysis
    request, checkpoint, ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v52 receipts
+69. removes middle term `-0.5 LC_STRONG` from that neutral unreferenced direct combination,
+   preserves retained factors and relative order, proves exact active load
+   `[25000,-12000,0,0,0,0]`, typed recovery, missing/minimum-term rejection, fallback 0 and
+   byte-identical initialized checkpoint/restart output, then emits an append-only v54 receipt
+   binding the source ModelIR, edited ModelIR, edit/request/assembly receipts, analysis request,
+   checkpoint, ResultIR, recovery and ReportIR.
+   The receipt checker continues to accept frozen v1 through v53 receipts, including frozen v1 through v52 receipts
    (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -434,7 +440,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    nested linear-load-combination typed-root-reference edit, source/edited expansion binding,
    cycle/direct-degradation rejection, exact active-load, typed recovery and restart authority;
    and no pre-v53 receipt is installed bounded direct linear-load-combination append-only
-   term-addition, exact active-load, typed recovery and restart authority.
+   term-addition, exact active-load, typed recovery and restart authority; and no pre-v54 receipt
+   is installed bounded direct linear-load-combination single-term deletion with retained
+   factor/order, exact active-load, typed recovery and restart authority.
 
 The reference command is:
 

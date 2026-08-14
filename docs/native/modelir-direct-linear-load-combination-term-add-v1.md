@@ -40,7 +40,7 @@ lookup path, and binds the edited ModelIR, edit receipt, request receipt, analys
 assembly receipt, checkpoint, ResultIR, recovery and ReportIR in the append-only v53 distribution
 receipt.
 
-This is not general combination editing. Existing factor and reference editing remain separate
-surfaces. Term removal or reorder, insertion at arbitrary positions, nested term insertion,
+This is not general combination editing. Existing factor, reference and single-term removal remain
+separate surfaces. Reorder, insertion at arbitrary positions, nested term insertion,
 descendant or downstream-referenced mutation, source-format writeback, visual editing, arbitrary
 solver selection, approved HIP C2, engineering acceptance and C6 remain open.

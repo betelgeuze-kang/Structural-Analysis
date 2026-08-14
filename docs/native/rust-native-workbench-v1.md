@@ -112,6 +112,11 @@ The bounded `model-add-linear-load-combination-term` surface appends exactly one
 unreferenced two-through-63-term direct combination. It preserves every existing term and order,
 rejects nested, owned, duplicate and 64-term sources, and publishes only after strict Rust plus C++
 revalidation. See `docs/native/modelir-direct-linear-load-combination-term-add-v1.md`.
+The bounded `model-delete-linear-load-combination-term` surface removes exactly one existing
+pattern term from any position in a neutral, extension-free, unreferenced three-through-64-term
+direct combination. It preserves every retained factor and relative order, rejects nested, owned,
+missing and two-term sources, and publishes only after strict Rust plus C++ revalidation. See
+`docs/native/modelir-direct-linear-load-combination-term-delete-v1.md`.
 The separate bounded `model-edit-nested-linear-load-combination-factor` surface selects one root
 term by explicit reference kind and identity. It preserves root references/order/count and every
 descendant, requires the source and edited graphs to remain within depth eight and 64 expanded
@@ -308,6 +313,10 @@ structural-workbench model-add-linear-load-combination-term \
   ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE --load-pattern LC_AXIAL --factor 0.25 \
   --output-dir TERM-EXTENDED-DIRECT-COMBINATION-MODEL
+structural-workbench model-delete-linear-load-combination-term \
+  TERM-EXTENDED-DIRECT-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_SERVICE --load-pattern LC_STRONG \
+  --output-dir TERM-REDUCED-DIRECT-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_SERVICE \
   --output-dir DELETED-COMBINATION-MODEL

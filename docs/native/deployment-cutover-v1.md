@@ -49,6 +49,11 @@ The installed `model-edit-linear-load-combination-reference` command replaces ex
 direct-pattern term identity in the same bounded ownership profile. It preserves all factors, term
 order and count, fails closed on no-op/missing/nonlinear/duplicate/nested/owned inputs, and
 C++-revalidates the edited graph before create-new publication.
+The installed `model-delete-linear-load-combination-term` command removes one existing pattern
+term from any position in a neutral, extension-free and unreferenced three-through-64-term direct
+combination. It preserves every retained factor and relative order, fails closed on
+missing/two-term/nested/owned inputs, and C++-revalidates the edited graph before create-new
+publication.
 The installed `model-add-linear-load-combination-term` command appends one unique existing
 linear-static pattern with a finite nonzero factor to the final index of a neutral, extension-free,
 unreferenced two-through-63-term direct combination. It preserves every existing reference,
@@ -104,7 +109,8 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v53 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v54 proves repeated edited/request/artifact bytes and retains
+all Distribution E2E v53 assertions, including exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -114,6 +120,8 @@ compatible M2/S2 assignment to E1 with the same active load and changed recovere
 kind-changing nested root reference replacement with exact active load `[0,-8000,2000,0,0,0]`,
 append-only direct term addition with preserved existing factors/order/count and exact active load
 `[25000,-12000,5000,0,0,0]` through `model-add-linear-load-combination-term`,
+middle-position direct term removal with preserved remaining factors/order and exact active load
+`[25000,-12000,0,0,0,0]` through `model-delete-linear-load-combination-term`,
 truss3d authoring/editing with typed frame-plus-truss recovery, and last-neutral-truss-leaf deletion
 plus last-neutral-frame-leaf deletion with frame-only recovery, constrained-endpoint rejection and
 one-real-iteration restart parity, plus last-neutral fixed-constraint deletion with exact restored

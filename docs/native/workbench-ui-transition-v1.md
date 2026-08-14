@@ -177,16 +177,23 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   order, rejects nested/owned/duplicate/64-term inputs, then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v53 proves exact active load
   `[25000,-12000,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
-  output. Term removal/reorder, arbitrary-position or nested insertion, downstream-referenced
-  editing, HIP parity and engineering acceptance remain open.
+  output. Arbitrary-position or nested insertion, reorder, downstream-referenced editing, HIP
+  parity and engineering acceptance remain open.
+- `model-delete-linear-load-combination-term`: deterministic removal of one existing pattern term
+  from any position in a neutral, extension-free, unreferenced three-through-64-term direct
+  combination. Rust preserves each retained factor and relative order, rejects nested/owned,
+  missing and two-term inputs, then strictly reparses and C++-revalidates before create-new
+  publication. Installed E2E v54 proves exact active load `[25000,-12000,0,0,0,0]`, typed
+  recovery, fallback 0 and byte-identical checkpoint/restart output. Reorder, nested term removal,
+  downstream-referenced editing, HIP parity and engineering acceptance remain open.
 - `model-edit-linear-load-combination-factor`: deterministic change of exactly one existing factor
   in a neutral, extension-free and unreferenced two-through-64-term direct combination. Rust
   preserves term reference kind/identity, order and count, rejects no-op/nested/owned inputs, then
   strictly reparses and C++-revalidates before create-new publication. Installed E2E v49 proves
   exact active load `[25000,-13500,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical
   checkpoint/restart output. Reference replacement and bounded append-only term addition are
-  separate; term removal/reorder, nested or downstream-referenced editing, HIP parity and
-  engineering acceptance remain open.
+  separate; reorder, nested or downstream-referenced editing, HIP parity and engineering
+  acceptance remain open.
 - `model-edit-linear-load-combination-reference`: deterministic replacement of exactly one existing
   pattern identity in a neutral, extension-free and unreferenced two-through-64-term direct
   combination. Rust preserves the selected factor, all other factors, term order and count;
