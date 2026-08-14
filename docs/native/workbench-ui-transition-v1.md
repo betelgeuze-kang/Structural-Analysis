@@ -153,6 +153,15 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   replaces neutral `S2` with `S2_RENAMED` while proving active DOFs `[6,7,8,9,10,11]`, active load
   `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Section
   parameter/family editing, reference cascades and visual dragging remain separate or open.
+- `model-edit-truss-section-identity`: deterministic replacement of one existing unreferenced v1
+  `truss_3d` section identity with a distinct unique ModelIR stable ID. Rust preserves the
+  contiguous index, family/version, exact positive SI area, source identity, extensions and
+  unrelated rows; rejects element/unsupported-feature/round-trip ownership without cascade; and
+  strictly reparses and C++-revalidates before create-new publication. Installed E2E v71 replaces
+  neutral `T2` with `T2_RENAMED` alongside the referenced `T1`, proving frame-plus-truss recovery
+  types `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, active load
+  `[0,-10000,0,0,0,0]`, fallback 0 and byte-identical initialized-checkpoint restart. Section
+  area/family editing, reference cascades and visual dragging remain separate or open.
 - `model-edit-frame-element-orientation`: deterministic replacement of the finite local-axis
   rotation in radians for one existing `frame_3d` element. Rust binds the element identity, fixed
   type, retained formulation, previous/new angle and source hashes, marks only a matching element

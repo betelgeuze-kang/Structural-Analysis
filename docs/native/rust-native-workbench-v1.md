@@ -99,6 +99,10 @@ The separate `model-edit-frame-section-identity` command changes only one unrefe
 extensions, rejects element, unsupported-feature and round-trip ownership without cascade, and
 C++-revalidates the edited snapshot. See
 `docs/native/modelir-frame-section-identity-edit-v1.md`.
+The separate `model-edit-truss-section-identity` command changes only one unreferenced v1
+`truss_3d` section's stable ID, preserves its index/family/version/SI area/source/extensions,
+rejects element, unsupported-feature and round-trip ownership without cascade, and C++-revalidates
+the edited snapshot. See `docs/native/modelir-truss-section-identity-edit-v1.md`.
 The bounded nodal-load creator appends one globally unique, nonzero finite six-component SI load to
 one existing `linear_static` pattern and existing node, assigns a contiguous pattern-local index
 and neutral source ownership, degrades only a matching direct load-pattern round-trip claim, and

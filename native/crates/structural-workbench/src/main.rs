@@ -437,6 +437,14 @@ struct ModelEditTrussSectionCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelEditTrussSectionIdentityCommand {
+    model: PathBuf,
+    section_id: String,
+    replacement_section_id: String,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 struct ModelEditFrameElementOrientationCommand {
     model: PathBuf,
@@ -711,6 +719,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
         Some("model-edit-truss-section") => parse_model_edit_truss_section(arguments)
             .and_then(|command| run_model_edit_truss_section(&command)),
+        Some("model-edit-truss-section-identity") => {
+            parse_model_edit_truss_section_identity(arguments)
+                .and_then(|command| run_model_edit_truss_section_identity(&command))
+        }
         Some("model-edit-frame-element-orientation") => {
             parse_model_edit_frame_element_orientation(arguments)
                 .and_then(|command| run_model_edit_frame_element_orientation(&command))
@@ -1584,6 +1596,19 @@ fn run_model_edit_truss_section(
         &command.model,
         &command.section_id,
         command.parameters,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_truss_section_identity(
+    command: &ModelEditTrussSectionIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_truss_section_identity_edit(
+        &command.model,
+        &command.section_id,
+        &command.replacement_section_id,
         &command.output_directory,
     )?;
     println!("{}", outcome.receipt_json);
@@ -3533,6 +3558,32 @@ fn parse_model_edit_truss_section(
     })
 }
 
+fn parse_model_edit_truss_section_identity(
+    arguments: &[OsString],
+) -> Result<ModelEditTrussSectionIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--section"
+        || arguments[4] != "--new-section"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-truss-section-identity requires MODEL.json --section SOURCE-ID --new-section NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditTrussSectionIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        section_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-truss-section-identity source section ID",
+        )?,
+        replacement_section_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-truss-section-identity replacement section ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
 fn parse_model_edit_frame_element_orientation(
     arguments: &[OsString],
 ) -> Result<ModelEditFrameElementOrientationCommand, WorkbenchError> {
@@ -4327,7 +4378,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
-        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
+        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
 }
 
@@ -4365,7 +4416,8 @@ mod tests {
         parse_model_edit_nested_linear_load_combination_reference, parse_model_edit_nodal_load,
         parse_model_edit_nodal_load_identity, parse_model_edit_nodal_load_target,
         parse_model_edit_node, parse_model_edit_truss_element_properties,
-        parse_model_edit_truss_section, parse_model_insert_direct_linear_load_combination_term,
+        parse_model_edit_truss_section, parse_model_edit_truss_section_identity,
+        parse_model_insert_direct_linear_load_combination_term,
         parse_model_insert_nested_linear_load_combination_term,
         parse_model_reorder_direct_linear_load_combination_term,
         parse_model_reorder_fixed_constraint_dof,
@@ -5992,6 +6044,36 @@ mod tests {
             invalid[5] = OsString::from(value);
             assert!(parse_model_edit_truss_section(&invalid).is_err());
         }
+    }
+
+    #[test]
+    fn model_edit_truss_section_identity_parser_is_closed_and_bounded() {
+        let arguments = [
+            OsString::from("model-edit-truss-section-identity"),
+            OsString::from("model.json"),
+            OsString::from("--section"),
+            OsString::from("T2"),
+            OsString::from("--new-section"),
+            OsString::from("T2_RENAMED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_truss_section_identity(&arguments)
+            .expect("valid truss-section identity edit command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.section_id, "T2");
+        assert_eq!(parsed.replacement_section_id, "T2_RENAMED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut wrong_flag = arguments.clone();
+        wrong_flag[4] = OsString::from("--replacement");
+        assert!(parse_model_edit_truss_section_identity(&wrong_flag).is_err());
+        let mut empty_source = arguments.clone();
+        empty_source[3] = OsString::from("");
+        assert!(parse_model_edit_truss_section_identity(&empty_source).is_err());
+        let mut oversized = arguments;
+        oversized[5] = OsString::from("T".repeat(129));
+        assert!(parse_model_edit_truss_section_identity(&oversized).is_err());
     }
 
     #[test]

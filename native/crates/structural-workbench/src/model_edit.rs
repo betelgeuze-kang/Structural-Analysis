@@ -34,6 +34,8 @@ const FRAME_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-fra
 const FRAME_SECTION_IDENTITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-section-identity.v1";
 const TRUSS_SECTION_EDIT_EXTENSION_KEY: &str = "structural-native:model-edit-truss-section.v1";
+const TRUSS_SECTION_IDENTITY_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-truss-section-identity.v1";
 const FRAME_ELEMENT_ORIENTATION_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-frame-element-orientation.v1";
 const FRAME_ELEMENT_PROPERTIES_EDIT_EXTENSION_KEY: &str =
@@ -134,6 +136,7 @@ const LINEAR_MATERIAL_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalida
 const FRAME_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_section_parameter_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_frame3d_section_identity_replacement_to_distinct_unique_stable_id_with_index_family_version_parameters_source_extensions_and_unrelated_rows_preserved_without_element_unsupported_feature_or_roundtrip_cascade_not_parameter_family_section_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_truss3d_section_area_edit_not_section_creation_deletion_family_version_topology_or_solver_editing_engineering_acceptance_or_c6";
+const TRUSS_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_modelir_v1_truss3d_section_identity_replacement_to_distinct_unique_stable_id_with_index_family_version_area_source_extensions_and_unrelated_rows_preserved_without_element_unsupported_feature_or_roundtrip_cascade_not_parameter_family_section_creation_deletion_property_retargeting_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_ORIENTATION_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_local_axis_rotation_edit_not_element_creation_deletion_connectivity_formulation_offset_release_topology_or_solver_editing_engineering_acceptance_or_c6";
 const FRAME_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_frame3d_element_material_and_section_reference_edit_not_identity_type_formulation_connectivity_orientation_offset_release_property_creation_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_ELEMENT_PROPERTIES_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_modelir_truss3d_element_material_and_section_reference_edit_not_identity_type_formulation_connectivity_offset_property_creation_deletion_solver_visual_editing_engineering_acceptance_or_c6";
@@ -316,6 +319,13 @@ pub struct ModelFrameSectionIdentityEditOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded truss-section edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelTrussSectionEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded truss-section identity edit.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelTrussSectionIdentityEditOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -1817,6 +1827,31 @@ pub fn publish_model_truss_section_edit(
 ) -> Result<ModelTrussSectionEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_truss_section(&source, section_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one unreferenced v1 truss-section identity and atomically publish it.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// unsupported section rows, element references, unsupported-feature or round-trip ownership,
+/// no-op edits, or create-new publication failures.
+pub fn publish_model_truss_section_identity_edit(
+    source_path: &Path,
+    section_id: &str,
+    replacement_section_id: &str,
+    output_directory: &Path,
+) -> Result<ModelTrussSectionIdentityEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_truss_section_identity(&source, section_id, replacement_section_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -3889,6 +3924,109 @@ pub fn edit_model_frame_section_identity(
         "claim_boundary": FRAME_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelFrameSectionIdentityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RenamedTrussSectionV1 {
+    section_index: usize,
+    family_id: String,
+    parameter_set_version: String,
+    parameters: Value,
+    retained_source_id: Value,
+    retained_extensions: Value,
+}
+
+/// Replace one unreferenced v1 truss-section identity in memory.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing or unsupported
+/// sections, no-op edits, element references, unsupported-feature or round-trip ownership,
+/// malformed retained fields, schema drift, or edited semantics rejected by C++.
+pub fn edit_model_truss_section_identity(
+    source_bytes: &[u8],
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Result<ModelTrussSectionIdentityEditOutcomeV1, WorkbenchError> {
+    validate_truss_section_identity_edit_request(
+        source_bytes.len(),
+        section_id,
+        replacement_section_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let renamed = replace_truss_section_identity(&mut edited, section_id, replacement_section_id)?;
+    bind_truss_section_identity_edit_provenance(
+        &mut edited,
+        section_id,
+        replacement_section_id,
+        &renamed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the truss-section identity-edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "truss_section_identity_edit",
+        "model_id": edited_validation.report.model_id,
+        "source_section_id": section_id,
+        "replacement_section_id": replacement_section_id,
+        "section_index": renamed.section_index,
+        "family_id": renamed.family_id,
+        "parameter_set_version": renamed.parameter_set_version,
+        "retained_parameters_si": renamed.parameters,
+        "retained_source_id": renamed.retained_source_id,
+        "retained_extensions": renamed.retained_extensions,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": TRUSS_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelTrussSectionIdentityEditOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -8064,6 +8202,36 @@ fn validate_frame_section_identity_edit_request(
     Ok(())
 }
 
+fn validate_truss_section_identity_edit_request(
+    source_length: usize,
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, section_id, "section")?;
+    validate_bounded_edit_identity(0, replacement_section_id, "replacement section")?;
+    let replacement_bytes = replacement_section_id.as_bytes();
+    if !replacement_bytes
+        .first()
+        .is_some_and(u8::is_ascii_alphabetic)
+        || !replacement_bytes
+            .iter()
+            .skip(1)
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(*byte, b'_' | b'.' | b':' | b'-'))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_replacement_invalid",
+            "replacement truss-section identity must satisfy the ModelIR stable-ID grammar",
+        ));
+    }
+    if section_id == replacement_section_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement truss-section identity is identical to the source identity",
+        ));
+    }
+    Ok(())
+}
+
 fn validate_constraint_value_edit_request(
     source_length: usize,
     constraint_id: &str,
@@ -9626,6 +9794,154 @@ fn replace_frame_section_identity(
         .ok_or_else(|| snapshot_error("section"))?
         .insert("id".to_owned(), json!(replacement_section_id));
     Ok(RenamedFrameSectionV1 {
+        section_index,
+        family_id,
+        parameter_set_version,
+        parameters,
+        retained_source_id,
+        retained_extensions,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_truss_section_identity(
+    model: &mut Value,
+    section_id: &str,
+    replacement_section_id: &str,
+) -> Result<RenamedTrussSectionV1, WorkbenchError> {
+    if section_id == replacement_section_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement truss-section identity is identical to the source identity",
+        ));
+    }
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    let section_index = sections
+        .iter()
+        .position(|section| section.get("id").and_then(Value::as_str) == Some(section_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_truss_section_identity_section_missing",
+                format!("ModelIR has no section with identity {section_id}"),
+            )
+        })?;
+    if sections
+        .iter()
+        .any(|section| section.get("id").and_then(Value::as_str) == Some(replacement_section_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_replacement_exists",
+            format!("ModelIR already has a section with identity {replacement_section_id}"),
+        ));
+    }
+    let section = &sections[section_index];
+    if section.get("index").and_then(Value::as_u64) != u64::try_from(section_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_index_mismatch",
+            "identity-edited truss-section index must match its contiguous position",
+        ));
+    }
+    let family_id = section
+        .get("family_id")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("section family_id"))?
+        .to_owned();
+    if family_id != "truss_3d" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_family_unsupported",
+            "truss-section identity editing accepts only a truss_3d section",
+        ));
+    }
+    let parameter_set_version = section
+        .get("parameter_set_version")
+        .and_then(Value::as_str)
+        .ok_or_else(|| snapshot_error("section parameter_set_version"))?
+        .to_owned();
+    if parameter_set_version != "1" {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_version_unsupported",
+            "truss-section identity editing accepts only parameter_set_version 1",
+        ));
+    }
+    let parameter_values = section
+        .get("parameters")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 1)
+        .ok_or_else(|| snapshot_error("section parameters"))?;
+    if !parameter_values
+        .get("area_m2")
+        .and_then(Value::as_f64)
+        .is_some_and(|value| value.is_finite() && value > 0.0)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_parameters_invalid",
+            "retained truss-section parameters have no finite positive area_m2",
+        ));
+    }
+    let parameters = Value::Object(parameter_values.clone());
+    let retained_source_id = section
+        .get("source_id")
+        .filter(|value| value.is_null() || value.is_string())
+        .ok_or_else(|| snapshot_error("section source_id"))?
+        .clone();
+    let retained_extensions = section
+        .get("extensions")
+        .filter(|value| value.is_object())
+        .ok_or_else(|| snapshot_error("section extensions"))?
+        .clone();
+
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == section_id || id == replacement_section_id);
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| identity_matches(element.get("section_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_referenced_by_element",
+            "truss-section identity editing refuses source or replacement references from elements",
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_unsupported_feature_owned",
+            "truss-section identity editing refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| identity_matches(row.get("model_ir_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_truss_section_identity_roundtrip_owned",
+            "truss-section identity editing refuses source or replacement ownership by a round-trip mapping",
+        ));
+    }
+
+    model
+        .get_mut("sections")
+        .and_then(Value::as_array_mut)
+        .and_then(|rows| rows.get_mut(section_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("section"))?
+        .insert("id".to_owned(), json!(replacement_section_id));
+    Ok(RenamedTrussSectionV1 {
         section_index,
         family_id,
         parameter_set_version,
@@ -16705,6 +17021,38 @@ fn bind_frame_section_identity_edit_provenance(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn bind_truss_section_identity_edit_provenance(
+    model: &mut Value,
+    section_id: &str,
+    replacement_section_id: &str,
+    renamed: &RenamedTrussSectionV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        TRUSS_SECTION_IDENTITY_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "truss_section_identity_edit",
+            "source_section_id": section_id,
+            "replacement_section_id": replacement_section_id,
+            "section_index": renamed.section_index,
+            "family_id": renamed.family_id.clone(),
+            "parameter_set_version": renamed.parameter_set_version.clone(),
+            "retained_parameters_si": renamed.parameters.clone(),
+            "retained_source_id": renamed.retained_source_id.clone(),
+            "retained_extensions": renamed.retained_extensions.clone(),
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": TRUSS_SECTION_IDENTITY_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
 fn bind_nodal_load_add_provenance(
     model: &mut Value,
     load_pattern_id: &str,
@@ -18499,8 +18847,8 @@ mod tests {
         replace_frame_section_identity, replace_linear_load_pattern_identity,
         replace_linear_material_identity, replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
-        replace_nodal_load_target, validate_constraint_target_edit_request,
-        validate_constraint_value_edit_request,
+        replace_nodal_load_target, replace_truss_section_identity,
+        validate_constraint_target_edit_request, validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request,
         validate_direct_linear_load_combination_term_add_request,
@@ -18537,11 +18885,11 @@ mod tests {
         validate_truss3d_member_add_request, validate_truss3d_member_properties,
         validate_truss_element_properties_edit_request, validate_truss_element_property_references,
         validate_truss_section_add_request, validate_truss_section_delete_request,
-        validate_truss_section_edit_request, FrameSectionParametersV1,
-        LinearElasticMaterialParametersV1, LinearLoadCombinationDeletionProfileV1,
-        LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
-        NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
-        MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+        validate_truss_section_edit_request, validate_truss_section_identity_edit_request,
+        FrameSectionParametersV1, LinearElasticMaterialParametersV1,
+        LinearLoadCombinationDeletionProfileV1, LinearLoadCombinationReferenceKindV1,
+        LinearLoadCombinationTermV1, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1,
+        MAX_MODEL_BYTES, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     };
 
     #[test]
@@ -19296,6 +19644,122 @@ mod tests {
                 .expect_err("round-trip-owned section")
                 .code,
             "workbench_model_edit_frame_section_identity_roundtrip_owned"
+        );
+    }
+
+    #[test]
+    fn truss_section_identity_edit_is_unreferenced_and_field_preserving() {
+        validate_truss_section_identity_edit_request(0, "T2", "T2_RENAMED")
+            .expect("valid truss-section identity request");
+        assert_eq!(
+            validate_truss_section_identity_edit_request(0, "T2", "1_INVALID")
+                .expect_err("invalid replacement stable ID")
+                .code,
+            "workbench_model_edit_truss_section_identity_replacement_invalid"
+        );
+        assert_eq!(
+            validate_truss_section_identity_edit_request(0, "T2", "T2")
+                .expect_err("no-op identity")
+                .code,
+            "workbench_model_edit_no_change"
+        );
+
+        let model = truss_section_identity_fixture();
+        let source_section = model["sections"][2].clone();
+        let mut edited = model.clone();
+        let renamed = replace_truss_section_identity(&mut edited, "T2", "T2_RENAMED")
+            .expect("rename unreferenced truss section");
+        assert_eq!(renamed.section_index, 2);
+        assert_eq!(renamed.family_id, "truss_3d");
+        assert_eq!(renamed.parameter_set_version, "1");
+        assert_eq!(renamed.parameters, source_section["parameters"]);
+        assert_eq!(renamed.retained_source_id, source_section["source_id"]);
+        assert_eq!(renamed.retained_extensions, source_section["extensions"]);
+        assert_eq!(edited["sections"][2]["id"], "T2_RENAMED");
+        for key in [
+            "index",
+            "family_id",
+            "parameter_set_version",
+            "parameters",
+            "source_id",
+            "extensions",
+        ] {
+            assert_eq!(edited["sections"][2][key], source_section[key]);
+        }
+        assert_eq!(edited["sections"][0], model["sections"][0]);
+        assert_eq!(edited["sections"][1], model["sections"][1]);
+
+        assert_truss_section_identity_rejections(model);
+    }
+
+    fn truss_section_identity_fixture() -> Value {
+        json!({
+            "sections": [
+                {
+                    "id": "S1", "index": 0, "family_id": "frame_3d",
+                    "parameter_set_version": "1",
+                    "parameters": {"area_m2": 0.01, "iy_m4": 0.0001, "iz_m4": 0.0002, "torsional_constant_m4": 0.00005, "shear_area_y_m2": 0.008, "shear_area_z_m2": 0.009},
+                    "source_id": "source:S1", "extensions": {}
+                },
+                {
+                    "id": "T1", "index": 1, "family_id": "truss_3d",
+                    "parameter_set_version": "1", "parameters": {"area_m2": 0.005},
+                    "source_id": "generated:T1", "extensions": {}
+                },
+                {
+                    "id": "T2", "index": 2, "family_id": "truss_3d",
+                    "parameter_set_version": "1", "parameters": {"area_m2": 0.0025},
+                    "source_id": "generated:T2", "extensions": {"fixture": true}
+                }
+            ],
+            "elements": [{"section_id": "T1"}],
+            "unsupported_features": [], "roundtrip_map": []
+        })
+    }
+
+    fn assert_truss_section_identity_rejections(model: Value) {
+        for (source, replacement, code) in [
+            (
+                "T404",
+                "T3",
+                "workbench_model_edit_truss_section_identity_section_missing",
+            ),
+            (
+                "T2",
+                "T1",
+                "workbench_model_edit_truss_section_identity_replacement_exists",
+            ),
+        ] {
+            assert_eq!(
+                replace_truss_section_identity(&mut model.clone(), source, replacement)
+                    .expect_err("invalid identity edit")
+                    .code,
+                code
+            );
+        }
+        let mut element_owned = model.clone();
+        element_owned["elements"] = json!([{"section_id": "T2"}]);
+        assert_eq!(
+            replace_truss_section_identity(&mut element_owned, "T2", "T3")
+                .expect_err("element-owned section")
+                .code,
+            "workbench_model_edit_truss_section_identity_referenced_by_element"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "T2"}]);
+        assert_eq!(
+            replace_truss_section_identity(&mut feature_owned, "T2", "T3")
+                .expect_err("unsupported-feature-owned section")
+                .code,
+            "workbench_model_edit_truss_section_identity_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "T2"}]);
+        assert_eq!(
+            replace_truss_section_identity(&mut mapped, "T2", "T3")
+                .expect_err("round-trip-owned section")
+                .code,
+            "workbench_model_edit_truss_section_identity_roundtrip_owned"
         );
     }
 

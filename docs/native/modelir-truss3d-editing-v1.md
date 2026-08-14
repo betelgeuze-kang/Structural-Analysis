@@ -34,6 +34,9 @@ and revalidated by C++. Publication atomically creates exactly `model-ir.json` a
 self-hashed `edit-receipt.json`; an existing destination or any late validation failure publishes
 nothing. A valid blocked model stays blocked and cannot create an analysis request.
 
+Stable-identity-only replacement for an unreferenced v1 truss section is a separate bounded
+surface; see `docs/native/modelir-truss-section-identity-edit-v1.md`.
+
 ## CPU product and restart evidence
 
 Focused E2E composes the v30 fixed vertical truss and adds alternate v1 properties `M2` and `T2`.
