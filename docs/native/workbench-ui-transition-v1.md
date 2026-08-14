@@ -295,6 +295,10 @@ fixed-constraint, linear-static-pattern/first-load, stateless linear-elastic-mat
 section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
 bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
 general visual model editor or arbitrary-nodal-field 3D result explorer.
+The transition manifest now enumerates the compatible frame-element property editor, both truss
+editors, truss section/member authoring, and the last-neutral-truss-leaf deleter explicitly in its
+native command and feature inventories. These remain bounded C5 rows and do not promote any open
+general-editing or C6 prerequisite.
 Broader fixture/oracle migration is still needed before language-neutral golden ownership is
 complete.
 

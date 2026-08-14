@@ -88,3 +88,31 @@ def test_workbench_ui_transition_detects_new_node_authority(tmp_path: Path) -> N
 
     assert report["contract_pass"] is False
     assert "workbench_ui_active_node_workflow_inventory_drift" in report["blockers"]
+
+
+def test_workbench_ui_transition_rejects_missing_truss_surface_inventory(
+    tmp_path: Path,
+) -> None:
+    _copy_transition_inventory(tmp_path)
+    manifest_path = tmp_path / checker.MANIFEST
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["native_surface"]["model_flow"].remove(
+        "model-delete-truss3d-leaf-member"
+    )
+    manifest["feature_matrix"] = [
+        row
+        for row in manifest["feature_matrix"]
+        if row["feature"]
+        != "bounded_cpp_revalidated_last_neutral_truss3d_leaf_member_delete"
+    ]
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    report = checker.check_native_workbench_ui_transition(tmp_path)
+
+    assert report["contract_pass"] is False
+    assert "workbench_ui_native_model_flow_invalid" in report["blockers"]
+    assert (
+        "workbench_ui_feature_matrix_invalid:"
+        "bounded_cpp_revalidated_last_neutral_truss3d_leaf_member_delete"
+        in report["blockers"]
+    )
