@@ -6313,7 +6313,7 @@ exercise_frame_section_identity_cascade_edit_surface() {
     grep -Fq '"id":"S1_LINKED","index":0' "$edit_directory/model-ir.json"
     grep -Fq '"section_id":"S1_LINKED"' "$edit_directory/model-ir.json"
     grep -Fq '"id":"N2_LINKED","index":1' "$edit_directory/model-ir.json"
-    grep -Fq '"id":"COMBO_RENAMED","index":2' "$edit_directory/model-ir.json"
+    grep -Fq '"id":"COMBO_RENAMED","index":0' "$edit_directory/model-ir.json"
     grep -Fq '"structural-native:model-edit-frame-section-identity-cascade.v2"' \
       "$edit_directory/model-ir.json"
     env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
