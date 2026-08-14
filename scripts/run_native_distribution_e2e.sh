@@ -3563,6 +3563,154 @@ exercise_linear_load_combination_add_surface() {
 }
 exercise_linear_load_combination_add_surface
 
+exercise_linear_load_combination_delete_surface() {
+  local source_model="$e2e_root/linear-load-combination-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory partial_directory
+  local resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/linear-load-combination-delete-$label"
+    request_directory="$e2e_root/linear-load-combination-delete-$label-request"
+    direct_directory="$e2e_root/linear-load-combination-delete-$label-direct"
+    partial_directory="$e2e_root/linear-load-combination-delete-$label-partial"
+    resumed_directory="$e2e_root/linear-load-combination-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-linear-load-combination "$source_model" \
+      --load-combination COMBO_SERVICE --output-dir "$delete_directory" \
+      > "$e2e_root/linear-load-combination-delete-$label.stdout.json"
+    grep -Fq '"operation":"linear_load_combination_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_load_combination_id":"COMBO_SERVICE"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_load_combination_index":0' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_combination_type":"linear"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_terms":[{"factor":1.2,"ref_id":"LC_WEAK","ref_kind":"load_pattern"},{"factor":-0.5,"ref_id":"LC_STRONG","ref_kind":"load_pattern"}]' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-add-linear-load-combination.v1"' \
+      "$delete_directory/model-ir.json"
+    grep -Fq '"structural-native:model-delete-linear-load-combination.v1"' \
+      "$delete_directory/model-ir.json"
+    grep -Fq '"load_combinations":[]' "$delete_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-load-combination-delete-$label-validation.json"
+    grep -Fq '"load_patterns":4,"load_combinations":0' \
+      "$e2e_root/linear-load-combination-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/linear-load-combination-delete-$label-view.txt"
+    grep -Fq 'C++ semantic snapshot: verified' \
+      "$e2e_root/linear-load-combination-delete-$label-view.txt"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case linear-load-combination-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-load-combination-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/linear-load-combination-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/linear-load-combination-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/linear-load-combination-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/linear-load-combination-delete-first$suffix" \
+      "$e2e_root/linear-load-combination-delete-second$suffix" \
+      > "$e2e_root/linear-load-combination-delete-$diff_label-diff.txt"
+    cmp "$e2e_root/linear-load-combination-delete-first$suffix.stdout.json" \
+      "$e2e_root/linear-load-combination-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/linear-load-combination-delete-first-validation.json" \
+    "$e2e_root/linear-load-combination-delete-second-validation.json"
+  cmp "$e2e_root/linear-load-combination-delete-first-view.txt" \
+    "$e2e_root/linear-load-combination-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear load-combination deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local nonterminal_destination="$e2e_root/linear-load-combination-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-linear-load-combination \
+    "$e2e_root/linear-load-combination-add-next-index/model-ir.json" \
+    --load-combination COMBO_SERVICE --output-dir "$nonterminal_destination" \
+    > "$e2e_root/linear-load-combination-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed linear load-combination deletion accepted a nonterminal row" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_linear_load_combination_not_terminal' \
+    "$e2e_root/linear-load-combination-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$nonterminal_destination"
+
+  local missing_destination="$e2e_root/linear-load-combination-delete-missing-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-linear-load-combination "$linear_model" \
+    --load-combination COMBO_SERVICE --output-dir "$missing_destination" \
+    > "$e2e_root/linear-load-combination-delete-missing-rejected.stdout.json"; then
+    echo "installed linear load-combination deletion accepted a missing row" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_linear_load_combination_missing' \
+    "$e2e_root/linear-load-combination-delete-missing-rejected.stdout.json"
+  test ! -e "$missing_destination"
+
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-linear-load-combination "$source_model" \
+    --load-combination COMBO_SERVICE \
+    --output-dir "$e2e_root/linear-load-combination-delete-first" \
+    > "$e2e_root/linear-load-combination-delete-existing-rejected.stdout.json"; then
+    echo "installed linear load-combination deletion overwrote an existing destination" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_stage_destination_exists' \
+    "$e2e_root/linear-load-combination-delete-existing-rejected.stdout.json"
+}
+exercise_linear_load_combination_delete_surface
+
 exercise_result_view_surface() {
   local workspace="$1"
   local workspace_before="$e2e_root/workbench-before-result-view"
@@ -3933,6 +4081,11 @@ linear_load_combination_add_receipt_hash="$(sha256sum "$e2e_root/linear-load-com
 linear_load_combination_add_validation_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-validation.json" | awk '{print $1}')"
 linear_load_combination_add_view_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-view.txt" | awk '{print $1}')"
 linear_load_combination_add_solver_rejection_hash="$(sha256sum "$e2e_root/linear-load-combination-add-first-solver-rejection.json" | awk '{print $1}')"
+linear_load_combination_delete_model_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/model-ir.json" | awk '{print $1}')"
+linear_load_combination_delete_receipt_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first/edit-receipt.json" | awk '{print $1}')"
+linear_load_combination_delete_request_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first-request/analysis-request.json" | awk '{print $1}')"
+linear_load_combination_delete_result_ir_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first-direct/result-ir.json" | awk '{print $1}')"
+linear_load_combination_delete_recovery_hash="$(sha256sum "$e2e_root/linear-load-combination-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
 truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
 truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
@@ -4084,6 +4237,10 @@ v42_receipt_json="${v41_receipt_json/structural-native-distribution-e2e.v41/stru
 linear_load_combination_add_receipt_fields="\"workbench_linear_load_combination_add_surface_passed\":true,\"workbench_linear_load_combination_add_model_sha256\":\"sha256:$linear_load_combination_add_model_hash\",\"workbench_linear_load_combination_add_receipt_sha256\":\"sha256:$linear_load_combination_add_receipt_hash\",\"workbench_linear_load_combination_add_validation_sha256\":\"sha256:$linear_load_combination_add_validation_hash\",\"workbench_linear_load_combination_add_view_sha256\":\"sha256:$linear_load_combination_add_view_hash\",\"workbench_linear_load_combination_add_solver_rejection_sha256\":\"sha256:$linear_load_combination_add_solver_rejection_hash\","
 v42_receipt_json="${v42_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_add_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v42_receipt_json" > "$temporary_receipt"
+v43_receipt_json="${v42_receipt_json/structural-native-distribution-e2e.v42/structural-native-distribution-e2e.v43}"
+linear_load_combination_delete_receipt_fields="\"workbench_linear_load_combination_delete_surface_passed\":true,\"workbench_linear_load_combination_delete_model_sha256\":\"sha256:$linear_load_combination_delete_model_hash\",\"workbench_linear_load_combination_delete_receipt_sha256\":\"sha256:$linear_load_combination_delete_receipt_hash\",\"workbench_linear_load_combination_delete_request_sha256\":\"sha256:$linear_load_combination_delete_request_hash\",\"workbench_linear_load_combination_delete_result_ir_sha256\":\"sha256:$linear_load_combination_delete_result_ir_hash\",\"workbench_linear_load_combination_delete_recovery_sha256\":\"sha256:$linear_load_combination_delete_recovery_hash\","
+v43_receipt_json="${v43_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_combination_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v43_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

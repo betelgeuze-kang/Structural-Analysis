@@ -398,6 +398,15 @@ V42_LINEAR_LOAD_COMBINATION_ADD_KEYS = {
     "workbench_linear_load_combination_add_solver_rejection_sha256",
 }
 V42_EXPECTED_KEYS = V41_EXPECTED_KEYS | V42_LINEAR_LOAD_COMBINATION_ADD_KEYS
+V43_LINEAR_LOAD_COMBINATION_DELETE_KEYS = {
+    "workbench_linear_load_combination_delete_surface_passed",
+    "workbench_linear_load_combination_delete_model_sha256",
+    "workbench_linear_load_combination_delete_receipt_sha256",
+    "workbench_linear_load_combination_delete_request_sha256",
+    "workbench_linear_load_combination_delete_result_ir_sha256",
+    "workbench_linear_load_combination_delete_recovery_sha256",
+}
+V43_EXPECTED_KEYS = V42_EXPECTED_KEYS | V43_LINEAR_LOAD_COMBINATION_DELETE_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -482,6 +491,7 @@ def validate(
         "structural-native-distribution-e2e.v40": V40_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v41": V41_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v42": V42_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v43": V43_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -500,6 +510,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         cumulative_receipt_schema_version = "structural-native-distribution-e2e.v31"
     if cumulative_receipt_schema_version in {
@@ -1272,6 +1283,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_truss3d_leaf_deletion_surface_passed") is not True:
             errors.append("workbench_truss3d_leaf_deletion_surface_passed must be true")
@@ -1295,6 +1307,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_frame3d_leaf_deletion_surface_passed") is not True:
             errors.append("workbench_frame3d_leaf_deletion_surface_passed must be true")
@@ -1317,6 +1330,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_fixed_constraint_delete_surface_passed") is not True:
             errors.append("workbench_fixed_constraint_delete_surface_passed must be true")
@@ -1338,6 +1352,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_nodal_load_delete_surface_passed") is not True:
             errors.append("workbench_nodal_load_delete_surface_passed must be true")
@@ -1358,6 +1373,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_linear_load_pattern_delete_surface_passed") is not True:
             errors.append("workbench_linear_load_pattern_delete_surface_passed must be true")
@@ -1377,6 +1393,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_linear_material_delete_surface_passed") is not True:
             errors.append("workbench_linear_material_delete_surface_passed must be true")
@@ -1395,6 +1412,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_frame_section_delete_surface_passed") is not True:
             errors.append("workbench_frame_section_delete_surface_passed must be true")
@@ -1412,6 +1430,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_truss_section_delete_surface_passed") is not True:
             errors.append("workbench_truss_section_delete_surface_passed must be true")
@@ -1428,6 +1447,7 @@ def validate(
         "structural-native-distribution-e2e.v40",
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_node_add_surface_passed") is not True:
             errors.append("workbench_node_add_surface_passed must be true")
@@ -1444,6 +1464,7 @@ def validate(
     if receipt_schema_version in {
         "structural-native-distribution-e2e.v41",
         "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
     }:
         if payload.get("workbench_orphan_node_delete_surface_passed") is not True:
             errors.append("workbench_orphan_node_delete_surface_passed must be true")
@@ -1456,7 +1477,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v42":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v42",
+        "structural-native-distribution-e2e.v43",
+    }:
         if payload.get("workbench_linear_load_combination_add_surface_passed") is not True:
             errors.append(
                 "workbench_linear_load_combination_add_surface_passed must be true"
@@ -1467,6 +1491,20 @@ def validate(
             "workbench_linear_load_combination_add_validation_sha256",
             "workbench_linear_load_combination_add_view_sha256",
             "workbench_linear_load_combination_add_solver_rejection_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v43":
+        if payload.get("workbench_linear_load_combination_delete_surface_passed") is not True:
+            errors.append(
+                "workbench_linear_load_combination_delete_surface_passed must be true"
+            )
+        for name in (
+            "workbench_linear_load_combination_delete_model_sha256",
+            "workbench_linear_load_combination_delete_receipt_sha256",
+            "workbench_linear_load_combination_delete_request_sha256",
+            "workbench_linear_load_combination_delete_result_ir_sha256",
+            "workbench_linear_load_combination_delete_recovery_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

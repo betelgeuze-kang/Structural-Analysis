@@ -870,6 +870,21 @@ fn run_linear_load_combination_add(
     ])
 }
 
+fn run_linear_load_combination_delete(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-delete-linear-load-combination"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_pattern_delete(
     source: &Path,
     destination: &Path,
@@ -5364,6 +5379,339 @@ fn linear_load_combination_add_is_deterministic_cpp_revalidated_and_solver_fail_
             .expect("blocked combination-added model"),
     )
     .expect("blocked combination-added JSON");
+    assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn linear_load_combination_deletion_is_deterministic_fail_closed_and_restores_cpu_execution() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let source_bytes = std::fs::read(&source).expect("load-combination delete base bytes");
+    let source_validation =
+        validate_model_bytes(&source_bytes).expect("C++-validated combination-delete base");
+    let combination_source = temporary.0.join("combination-delete-source");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &combination_source,
+        "COMBO_SERVICE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let combination_path = combination_source.join("model-ir.json");
+    let combination_bytes =
+        std::fs::read(&combination_path).expect("load-combination delete source bytes");
+    let combination_model =
+        parse_model_ir_v2(&combination_bytes).expect("strict combination-delete source");
+
+    let first = temporary.0.join("linear-load-combination-delete-first");
+    let second = temporary.0.join("linear-load-combination-delete-second");
+    for destination in [&first, &second] {
+        let output =
+            run_linear_load_combination_delete(&combination_path, destination, "COMBO_SERVICE");
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("linear-load-combination delete receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first combination-delete artifact"),
+            std::fs::read(second.join(artifact)).expect("second combination-delete artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&combination_path).expect("unchanged combination-delete source"),
+        combination_bytes
+    );
+
+    let deleted_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("combination-deleted ModelIR");
+    let deleted = parse_model_ir_v2(&deleted_bytes).expect("strict combination-deleted ModelIR");
+    let deleted_validation =
+        validate_model_bytes(&deleted_bytes).expect("C++-validated combination-deleted ModelIR");
+    assert!(deleted_validation.report.analysis_ready);
+    assert_eq!(deleted_validation.report.entity_counts.load_combinations, 0);
+    assert_eq!(deleted.value()["load_combinations"], serde_json::json!([]));
+    for family in [
+        "nodes",
+        "materials",
+        "sections",
+        "elements",
+        "constraints",
+        "load_patterns",
+        "time_functions",
+        "construction_stages",
+        "unsupported_features",
+        "roundtrip_map",
+    ] {
+        assert_eq!(deleted.value()[family], combination_model.value()[family]);
+    }
+    assert!(deleted.value()["extensions"]
+        .get("structural-native:model-add-linear-load-combination.v1")
+        .is_some());
+    let extension = deleted.value()["extensions"]
+        .get("structural-native:model-delete-linear-load-combination.v1")
+        .expect("linear-load-combination delete provenance extension");
+    assert_eq!(extension["operation"], "linear_load_combination_delete");
+    assert_eq!(extension["removed_load_combination_id"], "COMBO_SERVICE");
+    assert_eq!(extension["removed_load_combination_index"], 0);
+    assert_eq!(extension["removed_combination_type"], "linear");
+    assert_eq!(
+        extension["removed_terms"],
+        combination_model.value()["load_combinations"][0]["terms"]
+    );
+    assert_eq!(extension["removed_source_id"], Value::Null);
+    assert_eq!(extension["removed_extensions"], serde_json::json!({}));
+
+    let mut receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json"))
+            .expect("linear-load-combination delete receipt"),
+    )
+    .expect("linear-load-combination delete receipt JSON");
+    assert_eq!(receipt["operation"], "linear_load_combination_delete");
+    assert_eq!(receipt["removed_load_combination_id"], "COMBO_SERVICE");
+    assert_eq!(receipt["removed_load_combination_index"], 0);
+    assert_eq!(receipt["removed_combination_type"], "linear");
+    assert_eq!(
+        receipt["removed_terms"],
+        combination_model.value()["load_combinations"][0]["terms"]
+    );
+    assert_eq!(receipt["cpp_semantic_snapshot_verified"], true);
+    assert_eq!(receipt["analysis_ready"], true);
+    assert_eq!(receipt["blocking_feature_ids"], serde_json::json!([]));
+    assert_eq!(receipt["edited_content_hash"], deleted.content_hash());
+    assert_eq!(
+        receipt["edited_semantic_hash"],
+        source_validation.report.semantic_hash
+    );
+    assert_self_hashed_edit_receipt(&mut receipt);
+
+    let view = run_workbench(&[text("model-view"), first.join("model-ir.json").as_os_str()]);
+    assert_success(&view);
+    assert!(String::from_utf8_lossy(&view.stdout).contains("C++ semantic snapshot: verified"));
+
+    let request_directory = temporary.0.join("linear-load-combination-delete-request");
+    assert_success(&run_model_linear_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "linear-load-combination-delete-c5",
+        "LC_WEAK",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("combination-delete request");
+    let direct = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, u32::MAX)
+        .expect("combination-delete direct execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("combination-delete direct recovery"),
+    )
+    .expect("combination-delete recovery JSON");
+    assert_eq!(
+        recovery["active_dof_indices"],
+        serde_json::json!([6, 7, 8, 9, 10, 11])
+    );
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -10000, 0, 0, 0, 0])
+    );
+    assert_eq!(recovery["recovery_element_types"], serde_json::json!([1]));
+    assert_eq!(recovery["recovery_offsets"], serde_json::json!([0, 12]));
+    assert_eq!(recovery["fallback_count"], 0);
+    let partial = execute_model_ir_linear_analysis(&deleted_bytes, &request_bytes, None, 0)
+        .expect("combination-delete partial execution");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &deleted_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("combination-delete resumed execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let two_combinations = temporary.0.join("combination-delete-two-source");
+    assert_success(&run_linear_load_combination_add(
+        &combination_path,
+        &two_combinations,
+        "COMBO_STRENGTH",
+        ["LC_AXIAL", "1.4"],
+        ["LC_TORSION", "0.7"],
+    ));
+    let nonterminal_destination = temporary.0.join("combination-delete-nonterminal");
+    let nonterminal = run_linear_load_combination_delete(
+        &two_combinations.join("model-ir.json"),
+        &nonterminal_destination,
+        "COMBO_SERVICE",
+    );
+    assert_eq!(nonterminal.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&nonterminal.stdout)
+        .contains("workbench_model_delete_linear_load_combination_not_terminal"));
+    assert!(!nonterminal_destination.exists());
+
+    for (name, guarded, expected_code) in [
+        (
+            "source-owned",
+            {
+                let mut value = combination_model.value().clone();
+                value["load_combinations"][0]["source_id"] = serde_json::json!("mgt:COMBO_SERVICE");
+                value
+            },
+            "workbench_model_delete_linear_load_combination_source_owned",
+        ),
+        (
+            "extended",
+            {
+                let mut value = combination_model.value().clone();
+                value["load_combinations"][0]["extensions"] =
+                    serde_json::json!({"external:owner": "external"});
+                value
+            },
+            "workbench_model_delete_linear_load_combination_extensions_unsupported",
+        ),
+        (
+            "feature-owned",
+            {
+                let mut value = combination_model.value().clone();
+                value["unsupported_features"] = serde_json::json!([{
+                    "feature_id": "feature.combination-delete-owned",
+                    "kind": "source_owned_load_combination",
+                    "source_entity_id": "COMBO_SERVICE",
+                    "disposition": "preserved_only",
+                    "blocking": false,
+                    "detail": "The source feature directly owns the candidate combination.",
+                    "extensions": {}
+                }]);
+                value
+            },
+            "workbench_model_delete_linear_load_combination_unsupported_feature_owned",
+        ),
+        (
+            "roundtrip-owned",
+            {
+                let mut value = combination_model.value().clone();
+                value["roundtrip_map"] = serde_json::json!([{
+                    "source_entity_id": "source:COMBO_SERVICE",
+                    "entity_kind": "load_combination",
+                    "model_ir_entity_id": "COMBO_SERVICE",
+                    "mapping_status": "exact",
+                    "extensions": {}
+                }]);
+                value
+            },
+            "workbench_model_delete_linear_load_combination_roundtrip_owned",
+        ),
+    ] {
+        let guarded_path = temporary.0.join(format!("combination-delete-{name}.json"));
+        std::fs::write(
+            &guarded_path,
+            canonicalize_model_ir_v2(&guarded)
+                .expect("canonical guarded combination-delete source")
+                .as_bytes(),
+        )
+        .expect("write guarded combination-delete source");
+        let destination = temporary.0.join(format!("combination-delete-{name}"));
+        let rejected =
+            run_linear_load_combination_delete(&guarded_path, &destination, "COMBO_SERVICE");
+        assert_eq!(rejected.status.code(), Some(1), "{name}");
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "{name}: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let mut referenced = combination_model.value().clone();
+    let candidate = referenced["load_combinations"][0].clone();
+    referenced["load_combinations"] = serde_json::json!([
+        {
+            "id": "COMBO_PARENT",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "COMBO_SERVICE", "ref_kind": "load_combination", "factor": 1},
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1}
+            ],
+            "source_id": null,
+            "extensions": {}
+        },
+        candidate
+    ]);
+    referenced["load_combinations"][1]["index"] = serde_json::json!(1);
+    let referenced_path = temporary.0.join("combination-delete-referenced.json");
+    std::fs::write(
+        &referenced_path,
+        canonicalize_model_ir_v2(&referenced)
+            .expect("canonical referenced combination-delete source")
+            .as_bytes(),
+    )
+    .expect("write referenced combination-delete source");
+    let referenced_destination = temporary.0.join("combination-delete-referenced");
+    let referenced_rejection = run_linear_load_combination_delete(
+        &referenced_path,
+        &referenced_destination,
+        "COMBO_SERVICE",
+    );
+    assert_eq!(referenced_rejection.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&referenced_rejection.stdout)
+        .contains("workbench_model_delete_linear_load_combination_referenced_by_combination"));
+    assert!(!referenced_destination.exists());
+
+    let existing = run_linear_load_combination_delete(&combination_path, &first, "COMBO_SERVICE");
+    assert_eq!(existing.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&existing.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let mut blocked = combination_model.value().clone();
+    blocked["unsupported_features"] = serde_json::json!([{
+        "feature_id": "feature.combination-delete-visible-not-runnable",
+        "kind": "unsupported_solver_feature",
+        "source_entity_id": null,
+        "disposition": "blocked",
+        "blocking": true,
+        "detail": "Combination deletion must preserve unrelated solver blockers.",
+        "extensions": {}
+    }]);
+    let original_roundtrip_map = blocked["roundtrip_map"].clone();
+    let blocked_source = temporary.0.join("blocked-combination-delete-source.json");
+    std::fs::write(
+        &blocked_source,
+        canonicalize_model_ir_v2(&blocked)
+            .expect("canonical blocked combination-delete source")
+            .as_bytes(),
+    )
+    .expect("write blocked combination-delete source");
+    let blocked_destination = temporary.0.join("blocked-combination-delete");
+    assert_success(&run_linear_load_combination_delete(
+        &blocked_source,
+        &blocked_destination,
+        "COMBO_SERVICE",
+    ));
+    let blocked_receipt: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("edit-receipt.json"))
+            .expect("blocked combination-delete receipt"),
+    )
+    .expect("blocked combination-delete receipt JSON");
+    assert_eq!(blocked_receipt["analysis_ready"], false);
+    assert_eq!(
+        blocked_receipt["blocking_feature_ids"],
+        serde_json::json!(["feature.combination-delete-visible-not-runnable"])
+    );
+    let blocked_edited: Value = serde_json::from_slice(
+        &std::fs::read(blocked_destination.join("model-ir.json"))
+            .expect("blocked combination-deleted model"),
+    )
+    .expect("blocked combination-deleted JSON");
     assert_eq!(blocked_edited["roundtrip_map"], original_roundtrip_map);
 }
 

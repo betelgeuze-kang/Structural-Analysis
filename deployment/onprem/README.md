@@ -40,6 +40,10 @@ absent from the runtime image.
   two distinct existing linear-static patterns and finite nonzero factors. The installed surface
   C++-validates the reference graph and intentionally fails solver preflight until combination
   evaluation is implemented.
+  `model-delete-linear-load-combination` removes only the last contiguous neutral, extension-free,
+  unreferenced two-pattern linear combination. It rejects nested, mapped, source-owned,
+  feature-owned, referenced or nonterminal candidates and restores direct load-pattern CPU
+  execution with checkpoint/restart parity and fallback 0.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
   `model-delete-linear-material` removes only the last contiguous neutral unreferenced v1 linear

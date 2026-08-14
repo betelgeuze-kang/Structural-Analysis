@@ -87,9 +87,12 @@ See `docs/native/modelir-linear-load-pattern-add-v1.md` for the exact artifact a
 boundary and `docs/native/modelir-linear-load-pattern-deletion-v1.md` for the inverse boundary.
 The bounded linear-load-combination creator appends one contiguous-index neutral `linear` row from
 exactly two distinct existing `linear_static` patterns and two finite nonzero factors. It preserves
-all other rows and blockers and revalidates through the C++ reference/cycle checks. Nested terms,
-arbitrary term counts, term editing/deletion, combination evaluation, and solver selection remain
-outside the command. See `docs/native/modelir-linear-load-combination-add-v1.md`.
+all other rows and blockers and revalidates through the C++ reference/cycle checks. Its bounded
+inverse deletes only the last contiguous neutral unreferenced row with that exact two-pattern shape,
+then proves direct load-pattern CPU execution and checkpoint/restart parity are restored. Nested
+terms, arbitrary term counts, term editing, general deletion, combination evaluation, and solver
+selection remain outside these commands. See `docs/native/modelir-linear-load-combination-add-v1.md`
+and `docs/native/modelir-linear-load-combination-deletion-v1.md`.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
 source ownership, empty extensions, and the fixed stateless trial/commit/rollback schema. It
@@ -243,6 +246,9 @@ structural-workbench model-add-linear-load-combination MODEL.json \
   --load-combination COMBO_SERVICE \
   --term LC_WEAK 1.2 --term LC_STRONG -0.5 \
   --output-dir ADDED-COMBINATION-MODEL
+structural-workbench model-delete-linear-load-combination ADDED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_SERVICE \
+  --output-dir DELETED-COMBINATION-MODEL
 structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
