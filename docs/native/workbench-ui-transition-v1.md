@@ -157,6 +157,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   and a fixed support, proves the exact unchanged active load, changed recovered displacement and
   fallback 0 against an otherwise identical original-material baseline. Other laws, nonlinear
   material state, section creation, reference editing, deletion and visual authoring remain open.
+- `model-delete-linear-material`: deterministic deletion of only the last contiguous neutral,
+  unreferenced v1 `linear_elastic_isotropic` material while retaining another material. Rust
+  rejects source-owned/nonterminal/index/law/version/state/parameter drift plus every element,
+  section, unsupported-feature, or direct round-trip reference before mutation, then strictly
+  reparses and C++-revalidates before create-new publication. Installed E2E proves the exact
+  retained material and active load, typed frame recovery, byte-identical restart and fallback 0.
+  General material/property deletion, cascade/reindex, reference retargeting, nonlinear state and
+  visual authoring remain open.
 - `model-add-frame-section`: deterministic creation of one v1 `frame_3d` section with a unique
   contiguous index, six positive finite SI parameters, neutral source ownership and empty
   extensions. Rust preserves all existing round-trip rows and blockers, then strictly reparses and

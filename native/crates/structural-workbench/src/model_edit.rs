@@ -42,6 +42,8 @@ const LINEAR_LOAD_PATTERN_ADD_EXTENSION_KEY: &str =
 const LINEAR_LOAD_PATTERN_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-pattern.v1";
 const LINEAR_MATERIAL_ADD_EXTENSION_KEY: &str = "structural-native:model-add-linear-material.v1";
+const LINEAR_MATERIAL_DELETE_EXTENSION_KEY: &str =
+    "structural-native:model-delete-linear-material.v1";
 const FRAME_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-frame-section.v1";
 const TRUSS_SECTION_ADD_EXTENSION_KEY: &str = "structural-native:model-add-truss-section.v1";
 const UPSTREAM_PROVENANCE_KEY: &str = "structural-native:upstream-provenance";
@@ -66,6 +68,7 @@ const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_la
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_zero_self_weight_linear_static_pattern_with_single_neutral_nonzero_six_component_nodal_load_deletion_not_source_owned_combined_staged_mapped_general_pattern_load_node_or_topology_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_elastic_isotropic_material_addition_not_nonlinear_material_section_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_v1_linear_elastic_isotropic_material_deletion_with_one_material_retained_not_source_owned_element_or_section_retargeting_cascade_general_property_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
 const FRAME_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_frame3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const TRUSS_SECTION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_truss3d_section_addition_not_other_section_family_member_assignment_property_reference_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const NODAL_LOAD_COMPONENT_KEYS: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
@@ -239,6 +242,13 @@ pub struct ModelLinearLoadPatternDeleteOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded linear-material addition.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearMaterialAddOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one bounded linear-material deletion.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelLinearMaterialDeleteOutcomeV1 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -482,6 +492,30 @@ pub fn publish_model_linear_material_add(
 ) -> Result<ModelLinearMaterialAddOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = add_model_linear_material(&source, material_id, parameters)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Delete one last contiguous neutral unreferenced v1 linear material atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid source or edited semantics, missing or non-terminal materials,
+/// source-owned or malformed rows, element/section references, unsupported-feature or round-trip
+/// ownership, and publication failures.
+pub fn publish_model_linear_material_delete(
+    source_path: &Path,
+    material_id: &str,
+    output_directory: &Path,
+) -> Result<ModelLinearMaterialDeleteOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = delete_model_linear_material(&source, material_id)?;
     publish_new_directory(
         output_directory,
         &[
@@ -1724,6 +1758,98 @@ pub fn add_model_linear_material(
         "claim_boundary": LINEAR_MATERIAL_ADD_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearMaterialAddOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct RemovedLinearMaterialV1 {
+    material_index: usize,
+    parameters_si: Value,
+    state_schema: Value,
+}
+
+/// Delete one provenance-bound terminal neutral v1 linear material in memory.
+///
+/// # Errors
+///
+/// Rejects invalid source semantics, missing or non-terminal materials, source-owned or malformed
+/// rows, element or section references, unsupported-feature or round-trip ownership, schema drift,
+/// or edited semantics rejected by the C++ validator.
+pub fn delete_model_linear_material(
+    source_bytes: &[u8],
+    material_id: &str,
+) -> Result<ModelLinearMaterialDeleteOutcomeV1, WorkbenchError> {
+    validate_linear_material_delete_request(source_bytes.len(), material_id)?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let removed = remove_linear_material(&mut edited, material_id)?;
+    bind_linear_material_delete_provenance(
+        &mut edited,
+        material_id,
+        &removed,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the edited ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "linear_material_delete",
+        "model_id": edited_validation.report.model_id,
+        "removed_material_id": material_id,
+        "removed_material_index": removed.material_index,
+        "removed_law_id": "linear_elastic_isotropic",
+        "removed_parameter_set_version": "1",
+        "removed_parameters_si": removed.parameters_si,
+        "removed_state_schema": removed.state_schema,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearMaterialDeleteOutcomeV1 {
         model_ir_json,
         receipt_json,
     })
@@ -3554,6 +3680,13 @@ fn validate_linear_material_add_request(
     Ok(())
 }
 
+fn validate_linear_material_delete_request(
+    source_length: usize,
+    material_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, material_id, "material")
+}
+
 fn validate_frame_section_add_request(
     source_length: usize,
     section_id: &str,
@@ -4491,6 +4624,194 @@ fn append_linear_material(
             "extensions": {}
         }));
     Ok(material_index)
+}
+
+#[allow(clippy::too_many_lines)]
+fn remove_linear_material(
+    model: &mut Value,
+    material_id: &str,
+) -> Result<RemovedLinearMaterialV1, WorkbenchError> {
+    let materials = model
+        .get("materials")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("materials"))?;
+    if materials.len() <= 1 {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_minimum_model",
+            "linear-material deletion must retain at least one material",
+        ));
+    }
+    let material_index = materials
+        .iter()
+        .position(|material| material.get("id").and_then(Value::as_str) == Some(material_id))
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_material_missing",
+                format!("ModelIR has no material with identity {material_id}"),
+            )
+        })?;
+    if material_index + 1 != materials.len() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_not_terminal",
+            "deleted material must be the last contiguous material row",
+        ));
+    }
+    let material = &materials[material_index];
+    if material.get("index").and_then(Value::as_u64) != u64::try_from(material_index).ok() {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_index_mismatch",
+            "deleted material index must match its last contiguous position",
+        ));
+    }
+    if material.get("law_id").and_then(Value::as_str) != Some("linear_elastic_isotropic") {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_law_unsupported",
+            "linear-material deletion accepts only a linear_elastic_isotropic material",
+        ));
+    }
+    if material
+        .get("parameter_set_version")
+        .and_then(Value::as_str)
+        != Some("1")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_version_unsupported",
+            "linear-material deletion accepts only parameter_set_version 1",
+        ));
+    }
+    if !material.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_source_owned",
+            "linear-material deletion accepts only a neutral row with null source_id",
+        ));
+    }
+    let parameters = material
+        .get("parameters")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_material_parameters_invalid",
+                "deleted linear material must contain exactly three SI parameters",
+            )
+        })?;
+    let read_parameter = |key: &'static str| {
+        parameters
+            .get(key)
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite())
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_delete_linear_material_parameters_invalid",
+                    format!("deleted linear material has no finite {key}"),
+                )
+            })
+    };
+    let elastic_modulus_pa = read_parameter("elastic_modulus_pa")?;
+    let poisson_ratio = read_parameter("poisson_ratio")?;
+    let density_kg_m3 = read_parameter("density_kg_m3")?;
+    if elastic_modulus_pa <= 0.0
+        || poisson_ratio <= -1.0
+        || poisson_ratio >= 0.5
+        || density_kg_m3 < 0.0
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_parameters_invalid",
+            "deleted linear material parameters are outside the closed v1 physical ranges",
+        ));
+    }
+    let state_schema = material
+        .get("state_schema")
+        .and_then(Value::as_object)
+        .filter(|values| values.len() == 3)
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_delete_linear_material_state_schema_unsupported",
+                "deleted linear material must contain the exact stateless v1 state schema",
+            )
+        })?;
+    if state_schema.get("stateful").and_then(Value::as_bool) != Some(false)
+        || state_schema
+            .get("state_update_epoch")
+            .and_then(Value::as_str)
+            != Some("none")
+        || state_schema
+            .get("supports_trial_commit_rollback")
+            .and_then(Value::as_bool)
+            != Some(true)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_state_schema_unsupported",
+            "deleted linear material must use the exact stateless v1 state schema",
+        ));
+    }
+
+    let elements = model
+        .get("elements")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("elements"))?;
+    if elements
+        .iter()
+        .any(|element| element.get("material_id").and_then(Value::as_str) == Some(material_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_referenced_by_element",
+            format!("material {material_id} is referenced by an element"),
+        ));
+    }
+    let sections = model
+        .get("sections")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("sections"))?;
+    if sections.iter().any(|section| {
+        section.get("steel_material_id").and_then(Value::as_str) == Some(material_id)
+            || section.get("concrete_material_id").and_then(Value::as_str) == Some(material_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_referenced_by_section",
+            format!("material {material_id} is referenced by a section"),
+        ));
+    }
+    let unsupported_features = model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?;
+    if unsupported_features
+        .iter()
+        .any(|feature| feature.get("source_entity_id").and_then(Value::as_str) == Some(material_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_unsupported_feature_owned",
+            "linear-material deletion refuses a row referenced by an unsupported feature",
+        ));
+    }
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    if roundtrip_rows
+        .iter()
+        .any(|row| row.get("model_ir_entity_id").and_then(Value::as_str) == Some(material_id))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_material_roundtrip_owned",
+            "linear-material deletion refuses a row with a direct round-trip mapping",
+        ));
+    }
+
+    let parameters_si = material["parameters"].clone();
+    let state_schema = material["state_schema"].clone();
+    model
+        .get_mut("materials")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("materials"))?
+        .pop()
+        .ok_or_else(|| snapshot_error("last material"))?;
+    Ok(RemovedLinearMaterialV1 {
+        material_index,
+        parameters_si,
+        state_schema,
+    })
 }
 
 fn append_frame_section(
@@ -6186,6 +6507,34 @@ fn bind_linear_material_add_provenance(
     )
 }
 
+fn bind_linear_material_delete_provenance(
+    model: &mut Value,
+    material_id: &str,
+    removed: &RemovedLinearMaterialV1,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        LINEAR_MATERIAL_DELETE_EXTENSION_KEY,
+        json!({
+            "operation": "linear_material_delete",
+            "removed_material_id": material_id,
+            "removed_material_index": removed.material_index,
+            "removed_law_id": "linear_elastic_isotropic",
+            "removed_parameter_set_version": "1",
+            "removed_parameters_si": removed.parameters_si,
+            "removed_state_schema": removed.state_schema,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": LINEAR_MATERIAL_DELETE_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 #[allow(clippy::too_many_arguments)]
 fn bind_frame_section_add_provenance(
     model: &mut Value,
@@ -6903,22 +7252,23 @@ mod tests {
     use super::{
         constraint_value_unit, mark_roundtrip_entity_approximated,
         mark_roundtrip_node_approximated, normalized_number_bits, remove_fixed_constraint,
-        remove_frame3d_leaf_member, remove_linear_load_pattern, remove_nodal_load,
-        remove_truss3d_leaf_member, validate_constraint_value_edit_request, validate_edit_request,
-        validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
-        validate_fixed_constraint_delete_request, validate_frame3d_leaf_member_delete_request,
-        validate_frame3d_member_add_request, validate_frame_element_orientation_edit_request,
+        remove_frame3d_leaf_member, remove_linear_load_pattern, remove_linear_material,
+        remove_nodal_load, remove_truss3d_leaf_member, validate_constraint_value_edit_request,
+        validate_edit_request, validate_element_connectivity_edit_request,
+        validate_fixed_constraint_add_request, validate_fixed_constraint_delete_request,
+        validate_frame3d_leaf_member_delete_request, validate_frame3d_member_add_request,
+        validate_frame_element_orientation_edit_request,
         validate_frame_element_properties_edit_request, validate_frame_element_property_references,
         validate_frame_section_add_request, validate_frame_section_edit_request,
         validate_linear_load_pattern_add_request, validate_linear_load_pattern_delete_request,
-        validate_linear_material_add_request, validate_linear_material_edit_request,
-        validate_nodal_load_add_request, validate_nodal_load_delete_request,
-        validate_nodal_load_edit_request, validate_truss3d_leaf_member_delete_request,
-        validate_truss3d_member_add_request, validate_truss3d_member_properties,
-        validate_truss_element_properties_edit_request, validate_truss_element_property_references,
-        validate_truss_section_add_request, validate_truss_section_edit_request,
-        FrameSectionParametersV1, LinearElasticMaterialParametersV1, TrussSectionParametersV1,
-        MAX_MODEL_BYTES,
+        validate_linear_material_add_request, validate_linear_material_delete_request,
+        validate_linear_material_edit_request, validate_nodal_load_add_request,
+        validate_nodal_load_delete_request, validate_nodal_load_edit_request,
+        validate_truss3d_leaf_member_delete_request, validate_truss3d_member_add_request,
+        validate_truss3d_member_properties, validate_truss_element_properties_edit_request,
+        validate_truss_element_property_references, validate_truss_section_add_request,
+        validate_truss_section_edit_request, FrameSectionParametersV1,
+        LinearElasticMaterialParametersV1, TrussSectionParametersV1, MAX_MODEL_BYTES,
     };
 
     #[test]
@@ -7694,6 +8044,192 @@ mod tests {
                 .expect_err("minimum retained model")
                 .code,
             "workbench_model_delete_linear_load_pattern_minimum_model"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn linear_material_delete_requires_terminal_neutral_unreferenced_v1_material() {
+        validate_linear_material_delete_request(0, "M2")
+            .expect("valid linear-material deletion request");
+        assert_eq!(
+            validate_linear_material_delete_request(0, "")
+                .expect_err("empty material identity")
+                .code,
+            "workbench_model_edit_entity_id_invalid"
+        );
+        let model = json!({
+            "materials": [
+                {
+                    "id": "M1",
+                    "index": 0,
+                    "law_id": "linear_elastic_isotropic",
+                    "parameter_set_version": "1",
+                    "parameters": {
+                        "elastic_modulus_pa": 200_000_000_000.0,
+                        "poisson_ratio": 0.3,
+                        "density_kg_m3": 7850.0
+                    },
+                    "state_schema": {
+                        "stateful": false,
+                        "state_update_epoch": "none",
+                        "supports_trial_commit_rollback": true
+                    },
+                    "source_id": "source:M1"
+                },
+                {
+                    "id": "M2",
+                    "index": 1,
+                    "law_id": "linear_elastic_isotropic",
+                    "parameter_set_version": "1",
+                    "parameters": {
+                        "elastic_modulus_pa": 70_000_000_000.0,
+                        "poisson_ratio": 0.33,
+                        "density_kg_m3": 2700.0
+                    },
+                    "state_schema": {
+                        "stateful": false,
+                        "state_update_epoch": "none",
+                        "supports_trial_commit_rollback": true
+                    },
+                    "source_id": null
+                }
+            ],
+            "sections": [],
+            "elements": [],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut deleted = model.clone();
+        let removed = remove_linear_material(&mut deleted, "M2")
+            .expect("delete terminal neutral linear material");
+        assert_eq!(removed.material_index, 1);
+        assert_eq!(
+            removed.parameters_si["elastic_modulus_pa"],
+            70_000_000_000.0
+        );
+        assert_eq!(removed.state_schema["state_update_epoch"], "none");
+        assert_eq!(deleted["materials"].as_array().expect("materials").len(), 1);
+
+        let mut missing = model.clone();
+        assert_eq!(
+            remove_linear_material(&mut missing, "M404")
+                .expect_err("missing material")
+                .code,
+            "workbench_model_delete_linear_material_missing"
+        );
+        let mut nonterminal = model.clone();
+        nonterminal["materials"]
+            .as_array_mut()
+            .expect("materials")
+            .push(json!({
+                "id": "M3",
+                "index": 2,
+                "law_id": "linear_elastic_isotropic",
+                "parameter_set_version": "1",
+                "parameters": {"elastic_modulus_pa": 1, "poisson_ratio": 0, "density_kg_m3": 0},
+                "state_schema": {"stateful": false, "state_update_epoch": "none", "supports_trial_commit_rollback": true},
+                "source_id": null
+            }));
+        assert_eq!(
+            remove_linear_material(&mut nonterminal, "M2")
+                .expect_err("nonterminal material")
+                .code,
+            "workbench_model_delete_linear_material_not_terminal"
+        );
+        let mut source_owned = model.clone();
+        source_owned["materials"][1]["source_id"] = json!("source:M2");
+        assert_eq!(
+            remove_linear_material(&mut source_owned, "M2")
+                .expect_err("source-owned material")
+                .code,
+            "workbench_model_delete_linear_material_source_owned"
+        );
+        let mut index_drift = model.clone();
+        index_drift["materials"][1]["index"] = json!(0);
+        assert_eq!(
+            remove_linear_material(&mut index_drift, "M2")
+                .expect_err("material index drift")
+                .code,
+            "workbench_model_delete_linear_material_index_mismatch"
+        );
+        let mut law_drift = model.clone();
+        law_drift["materials"][1]["law_id"] = json!("bilinear_uniaxial");
+        assert_eq!(
+            remove_linear_material(&mut law_drift, "M2")
+                .expect_err("material law drift")
+                .code,
+            "workbench_model_delete_linear_material_law_unsupported"
+        );
+        let mut version_drift = model.clone();
+        version_drift["materials"][1]["parameter_set_version"] = json!("2");
+        assert_eq!(
+            remove_linear_material(&mut version_drift, "M2")
+                .expect_err("material parameter-set drift")
+                .code,
+            "workbench_model_delete_linear_material_version_unsupported"
+        );
+        let mut parameter_drift = model.clone();
+        parameter_drift["materials"][1]["parameters"]["poisson_ratio"] = json!(0.5);
+        assert_eq!(
+            remove_linear_material(&mut parameter_drift, "M2")
+                .expect_err("material physical-parameter drift")
+                .code,
+            "workbench_model_delete_linear_material_parameters_invalid"
+        );
+        let mut malformed_state = model.clone();
+        malformed_state["materials"][1]["state_schema"]["stateful"] = json!(true);
+        assert_eq!(
+            remove_linear_material(&mut malformed_state, "M2")
+                .expect_err("stateful material")
+                .code,
+            "workbench_model_delete_linear_material_state_schema_unsupported"
+        );
+        let mut element_referenced = model.clone();
+        element_referenced["elements"] = json!([{"material_id": "M2"}]);
+        assert_eq!(
+            remove_linear_material(&mut element_referenced, "M2")
+                .expect_err("element-referenced material")
+                .code,
+            "workbench_model_delete_linear_material_referenced_by_element"
+        );
+        let mut section_referenced = model.clone();
+        section_referenced["sections"] = json!([{"steel_material_id": "M2"}]);
+        assert_eq!(
+            remove_linear_material(&mut section_referenced, "M2")
+                .expect_err("section-referenced material")
+                .code,
+            "workbench_model_delete_linear_material_referenced_by_section"
+        );
+        let mut concrete_section_referenced = model.clone();
+        concrete_section_referenced["sections"] = json!([{"concrete_material_id": "M2"}]);
+        assert_eq!(
+            remove_linear_material(&mut concrete_section_referenced, "M2")
+                .expect_err("concrete-section-referenced material")
+                .code,
+            "workbench_model_delete_linear_material_referenced_by_section"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "M2"}]);
+        assert_eq!(
+            remove_linear_material(&mut feature_owned, "M2")
+                .expect_err("unsupported-feature-owned material")
+                .code,
+            "workbench_model_delete_linear_material_unsupported_feature_owned"
+        );
+        let mut mapped = model;
+        mapped["roundtrip_map"] = json!([{"model_ir_entity_id": "M2"}]);
+        assert_eq!(
+            remove_linear_material(&mut mapped, "M2")
+                .expect_err("round-trip-owned material")
+                .code,
+            "workbench_model_delete_linear_material_roundtrip_owned"
+        );
+        assert_eq!(
+            remove_linear_material(&mut deleted, "M1")
+                .expect_err("minimum retained model")
+                .code,
+            "workbench_model_delete_linear_material_minimum_model"
         );
     }
 

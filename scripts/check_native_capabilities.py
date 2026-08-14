@@ -50,6 +50,7 @@ EXPECTED_OWNERS = {
     "modelir_linear_load_pattern_add": "structural-workbench",
     "modelir_linear_load_pattern_deletion": "structural-workbench",
     "modelir_linear_material_add": "structural-workbench",
+    "modelir_linear_material_deletion": "structural-workbench",
     "modelir_frame_section_add": "structural-workbench",
     "modelir_truss3d_authoring": "structural-workbench",
     "modelir_truss3d_editing": "structural-workbench",

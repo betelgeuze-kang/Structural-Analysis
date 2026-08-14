@@ -1829,6 +1829,158 @@ exercise_linear_material_add_surface() {
 }
 exercise_linear_material_add_surface
 
+exercise_linear_material_deletion_surface() {
+  local source_model="$e2e_root/linear-material-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/linear-material-delete-$label"
+    request_directory="$e2e_root/linear-material-delete-$label-request"
+    direct_directory="$e2e_root/linear-material-delete-$label-direct"
+    partial_directory="$e2e_root/linear-material-delete-$label-partial"
+    resumed_directory="$e2e_root/linear-material-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-linear-material "$source_model" \
+      --material M2 --output-dir "$delete_directory" \
+      > "$e2e_root/linear-material-delete-$label.stdout.json"
+    grep -Fq '"operation":"linear_material_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_material_id":"M2"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_material_index":1' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_law_id":"linear_elastic_isotropic"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameter_set_version":"1"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameters_si":{"density_kg_m3":2700,"elastic_modulus_pa":100000000000,"poisson_ratio":0.3}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_state_schema":{"state_update_epoch":"none","stateful":false,"supports_trial_commit_rollback":true}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-linear-material.v1"' \
+      "$delete_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/linear-material-delete-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":2,"materials":1' \
+      "$e2e_root/linear-material-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/linear-material-delete-$label-view.txt"
+    grep -Fq 'Inventory: nodes=2 elements=1 constraints=1 load_patterns=4' \
+      "$e2e_root/linear-material-delete-$label-view.txt"
+    grep -Fq '"id":"M1","index":0,"law_id":"linear_elastic_isotropic"' \
+      "$delete_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case linear-material-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/linear-material-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/linear-material-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/linear-material-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/linear-material-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/linear-material-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/linear-material-delete-first$suffix" \
+      "$e2e_root/linear-material-delete-second$suffix" \
+      > "$e2e_root/linear-material-delete-$diff_label-diff.txt"
+  done
+  for suffix in '' -request -direct -partial -resumed; do
+    cmp "$e2e_root/linear-material-delete-first$suffix.stdout.json" \
+      "$e2e_root/linear-material-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/linear-material-delete-first-validation.json" \
+    "$e2e_root/linear-material-delete-second-validation.json"
+  cmp "$e2e_root/linear-material-delete-first-view.txt" \
+    "$e2e_root/linear-material-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed linear-material deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local referenced_source="$e2e_root/linear-material-delete-referenced-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-frame3d-member "$source_model" --node N3 \
+    --coordinates 4 0 0 --element E2 --from-node N2 \
+    --material M2 --section S1 --output-dir "$referenced_source" \
+    > "$e2e_root/linear-material-delete-referenced-source.stdout.json"
+  local referenced_destination="$e2e_root/linear-material-delete-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-linear-material "$referenced_source/model-ir.json" --material M2 \
+    --output-dir "$referenced_destination" \
+    > "$e2e_root/linear-material-delete-referenced-rejected.stdout.json"; then
+    echo "installed linear-material deletion accepted an element-referenced material" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_linear_material_referenced_by_element' \
+    "$e2e_root/linear-material-delete-referenced-rejected.stdout.json"
+  test ! -e "$referenced_destination"
+
+  local later_source="$e2e_root/linear-material-delete-later-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-linear-material "$source_model" --material M3 \
+    --elastic-modulus-pa 70000000000 --poisson-ratio 0.33 --density-kg-m3 2700 \
+    --output-dir "$later_source" \
+    > "$e2e_root/linear-material-delete-later-source.stdout.json"
+  local nonterminal_destination="$e2e_root/linear-material-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-linear-material "$later_source/model-ir.json" --material M2 \
+    --output-dir "$nonterminal_destination" \
+    > "$e2e_root/linear-material-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed linear-material deletion accepted a nonterminal material" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_linear_material_not_terminal' \
+    "$e2e_root/linear-material-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$nonterminal_destination"
+}
+exercise_linear_material_deletion_surface
+
 exercise_frame_section_add_surface() {
   local source_model="$linear_model"
   local source_before_hash
@@ -2989,6 +3141,11 @@ linear_material_add_composed_model_hash="$(sha256sum "$e2e_root/linear-material-
 linear_material_add_request_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-request/analysis-request.json" | awk '{print $1}')"
 linear_material_add_result_ir_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-ir.json" | awk '{print $1}')"
 linear_material_add_recovery_hash="$(sha256sum "$e2e_root/linear-material-add-first-linear-run/result-recovery-ir.json" | awk '{print $1}')"
+linear_material_delete_model_hash="$(sha256sum "$e2e_root/linear-material-delete-first/model-ir.json" | awk '{print $1}')"
+linear_material_delete_receipt_hash="$(sha256sum "$e2e_root/linear-material-delete-first/edit-receipt.json" | awk '{print $1}')"
+linear_material_delete_request_hash="$(sha256sum "$e2e_root/linear-material-delete-first-request/analysis-request.json" | awk '{print $1}')"
+linear_material_delete_result_ir_hash="$(sha256sum "$e2e_root/linear-material-delete-first-direct/result-ir.json" | awk '{print $1}')"
+linear_material_delete_recovery_hash="$(sha256sum "$e2e_root/linear-material-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 frame_section_add_model_hash="$(sha256sum "$e2e_root/frame-section-add-first/model-ir.json" | awk '{print $1}')"
 frame_section_add_receipt_hash="$(sha256sum "$e2e_root/frame-section-add-first/edit-receipt.json" | awk '{print $1}')"
 frame_section_add_composed_model_hash="$(sha256sum "$e2e_root/frame-section-add-first-supported/model-ir.json" | awk '{print $1}')"
@@ -3135,6 +3292,10 @@ v36_receipt_json="${v35_receipt_json/structural-native-distribution-e2e.v35/stru
 linear_load_pattern_delete_receipt_fields="\"workbench_linear_load_pattern_delete_surface_passed\":true,\"workbench_linear_load_pattern_delete_model_sha256\":\"sha256:$linear_load_pattern_delete_model_hash\",\"workbench_linear_load_pattern_delete_receipt_sha256\":\"sha256:$linear_load_pattern_delete_receipt_hash\",\"workbench_linear_load_pattern_delete_request_sha256\":\"sha256:$linear_load_pattern_delete_request_hash\",\"workbench_linear_load_pattern_delete_result_ir_sha256\":\"sha256:$linear_load_pattern_delete_result_ir_hash\",\"workbench_linear_load_pattern_delete_recovery_sha256\":\"sha256:$linear_load_pattern_delete_recovery_hash\","
 v36_receipt_json="${v36_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_load_pattern_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v36_receipt_json" > "$temporary_receipt"
+v37_receipt_json="${v36_receipt_json/structural-native-distribution-e2e.v36/structural-native-distribution-e2e.v37}"
+linear_material_delete_receipt_fields="\"workbench_linear_material_delete_surface_passed\":true,\"workbench_linear_material_delete_model_sha256\":\"sha256:$linear_material_delete_model_hash\",\"workbench_linear_material_delete_receipt_sha256\":\"sha256:$linear_material_delete_receipt_hash\",\"workbench_linear_material_delete_request_sha256\":\"sha256:$linear_material_delete_request_hash\",\"workbench_linear_material_delete_result_ir_sha256\":\"sha256:$linear_material_delete_result_ir_hash\",\"workbench_linear_material_delete_recovery_sha256\":\"sha256:$linear_material_delete_recovery_hash\","
+v37_receipt_json="${v37_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_material_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v37_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

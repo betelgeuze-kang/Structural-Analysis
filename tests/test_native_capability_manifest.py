@@ -245,6 +245,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "model-delete-frame3d-leaf-member" in workbench["claim"]
     assert "model-delete-truss3d-leaf-member" in workbench["claim"]
     assert "model-delete-fixed-constraint" in workbench["claim"]
+    assert "model-delete-linear-material" in workbench["claim"]
     assert "English/Korean bounded self-hashed NDTHA response-history view" in workbench["claim"]
     assert "English/Korean exact-profile deformed-shape view" in workbench["claim"]
     assert "neither surface is WCAG, PDF/UA" in workbench["claim"]
@@ -349,6 +350,32 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in load_pattern_deletion["claim"]
     assert "HIP C2" in load_pattern_deletion["claim"]
     assert "C6" in load_pattern_deletion["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_linear_material_deletion"
+        )
+        is True
+    )
+    material_deletion = payload["capabilities"][
+        "modelir_linear_material_deletion"
+    ]
+    assert material_deletion["cutover_gate"] == "C5"
+    assert material_deletion["owner"] == "structural-workbench"
+    assert (
+        "last contiguous neutral unreferenced parameter-set-v1 "
+        "linear_elastic_isotropic material"
+        in material_deletion["claim"]
+    )
+    assert "element material_id references" in material_deletion["claim"]
+    assert (
+        "section steel_material_id or concrete_material_id references"
+        in material_deletion["claim"]
+    )
+    assert "single C ABI into C++" in material_deletion["claim"]
+    assert "exact retained material and active load" in material_deletion["claim"]
+    assert "fallback 0" in material_deletion["claim"]
+    assert "HIP C2" in material_deletion["claim"]
+    assert "C6" in material_deletion["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "modelir_truss3d_leaf_deletion")
         is True
@@ -773,6 +800,7 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v34" in distribution["claim"]
     assert "append-only v35" in distribution["claim"]
     assert "append-only v36" in distribution["claim"]
+    assert "append-only v37" in distribution["claim"]
     assert "exact normalized-MGT-to-ModelIR-linear" in distribution["claim"]
     assert "existing-constraint prescribed-value edits" in distribution["claim"]
     assert "existing-v1-linear-elastic-material" in distribution["claim"]
@@ -782,13 +810,14 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "exact-profile deformed-shape projections" in distribution["claim"]
     assert "installed Korean topology, response and deformed views" in distribution["claim"]
     assert "frozen v1 through v19 receipts" in distribution["claim"]
-    assert "frozen v1 through v35 receipts" in distribution["claim"]
+    assert "frozen v1 through v36 receipts" in distribution["claim"]
     assert "last-neutral-truss-leaf deletion" in distribution["claim"]
     assert "last-neutral-frame-leaf deletion" in distribution["claim"]
     assert "orientation/offset/release metadata" in distribution["claim"]
     assert "last-neutral-fixed-constraint deletion" in distribution["claim"]
     assert "last-neutral-nodal-load deletion" in distribution["claim"]
     assert "last-neutral-linear-load-pattern deletion" in distribution["claim"]
+    assert "last-neutral-linear-material deletion" in distribution["claim"]
     assert "distinct baseline/section/property displacement" in distribution["claim"]
     assert "one-real-iteration restart parity" in distribution["claim"]
     assert "structural-catalog" in distribution["claim"]
@@ -814,7 +843,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "English/Korean ModelIR topology" in deployment["claim"]
     assert "English/Korean NDTHA response-history" in deployment["claim"]
     assert "exact-profile deformed-shape views" in deployment["claim"]
-    assert "distribution v36 E2E" in deployment["claim"]
+    assert "distribution v37 E2E" in deployment["claim"]
     assert "frame/truss-section" in deployment["claim"]
     assert "compatible frame/truss-property" in deployment["claim"]
     assert "truss-section area replacement" in deployment["claim"]
@@ -825,6 +854,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral fixed-constraint deletion" in deployment["claim"]
     assert "last-neutral nodal-load deletion" in deployment["claim"]
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
+    assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
     assert "v6 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "frozen v1 through v5 rootfs receipts" in deployment["claim"]

@@ -38,6 +38,9 @@ absent from the runtime image.
   source-owned, multiple-load, minimum-pattern or nonterminal candidates.
   `model-add-linear-material` adds one bounded v1 linear-elastic isotropic material with the fixed
   stateless trial/commit/rollback schema without changing existing references.
+  `model-delete-linear-material` removes only the last contiguous neutral unreferenced v1 linear
+  material while retaining another material and rejecting element, section, mapped, source-owned,
+  minimum-material or nonterminal candidates.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
   parameters without changing existing references. `model-add-truss-section` adds one bounded v1
   truss section, and `model-add-truss3d-member` adds one node plus one connected linear truss3d
@@ -150,6 +153,8 @@ structural-workbench model-add-linear-material /workspace/model.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
   --output-dir /workspace/added-material-model
+structural-workbench model-delete-linear-material /workspace/added-material-model/model-ir.json \
+  --material M2 --output-dir /workspace/deleted-material-model
 structural-workbench model-add-frame-section /workspace/model.json \
   --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
   --torsional-constant-m4 0.000005 \

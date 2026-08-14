@@ -82,7 +82,10 @@ source ownership, empty extensions, and the fixed stateless trial/commit/rollbac
 preserves every existing round-trip row and blocker and revalidates through C++. It does not edit
 element references, create sections, broaden constitutive laws, or expose nonlinear material
 state. See `docs/native/modelir-linear-material-add-v1.md` for the exact artifact and installed E2E
-boundary.
+boundary. Its bounded inverse removes only the last contiguous neutral unreferenced v1 linear
+material while retaining another material and rejecting element, section, unsupported-feature and
+direct round-trip references without cascade, reindexing, or retargeting. See
+`docs/native/modelir-linear-material-deletion-v1.md`.
 The bounded frame-section creator appends one unique contiguous-index v1 `frame_3d` section with
 six positive finite SI parameters, neutral source ownership, and empty extensions. It preserves
 every existing round-trip row and blocker, revalidates through C++, and does not edit member
@@ -215,6 +218,8 @@ structural-workbench model-add-linear-material MODEL.json \
   --material M2 --elastic-modulus-pa 100000000000 \
   --poisson-ratio 0.3 --density-kg-m3 2700 \
   --output-dir ADDED-MATERIAL-MODEL
+structural-workbench model-delete-linear-material ADDED-MATERIAL-MODEL/model-ir.json \
+  --material M2 --output-dir DELETED-MATERIAL-MODEL
 structural-workbench model-add-frame-section MODEL.json \
   --section S2 --area-m2 0.01 --iy-m4 0.00004 --iz-m4 0.000025 \
   --torsional-constant-m4 0.000005 \
