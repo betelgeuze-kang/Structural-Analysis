@@ -88,7 +88,13 @@ truss element's compatible v1 material/section references. Both commands preserv
 fields, bind previous and edited values, revalidate through C++, and compose into distinct typed
 CPU recovery with byte-identical restart. See `docs/native/modelir-truss3d-editing-v1.md` for the
 exact boundary.
-The bounded truss3d leaf deleter is the narrow inverse of member authoring: it removes only the
+The bounded frame3d leaf deleter is the narrow inverse of frame member authoring: it removes only
+the last contiguous neutral `frame_3d`/`euler_bernoulli_3d` row and its last orphan endpoint node.
+It binds the removed orientation, offsets, releases, property references and source identities,
+while the common frame/truss preflight rejects retained references, source ownership and topology
+drift. Its reduced frame-only model executes with fallback 0 and byte-identical restart. See
+`docs/native/modelir-frame3d-leaf-deletion-v1.md` for the exact boundary.
+The bounded truss3d leaf deleter is the narrow inverse of truss member authoring: it removes only the
 last contiguous neutral `truss_3d`/`linear_truss_3d` row and its last orphan endpoint node. It
 rejects every retained element/load/constraint/stage/unsupported-feature/round-trip reference,
 source-owned or nonterminal rows, and minimum-topology violations before C++ revalidation and
@@ -203,6 +209,8 @@ structural-workbench model-add-truss-section MODEL.json \
 structural-workbench model-add-truss3d-member ADDED-TRUSS-SECTION-MODEL/model-ir.json \
   --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
   --material M1 --section T1 --output-dir ADDED-TRUSS-MEMBER-MODEL
+structural-workbench model-delete-frame3d-leaf-member ADDED-FRAME-MEMBER-MODEL/model-ir.json \
+  --element E2 --node N3 --output-dir DELETED-FRAME-LEAF-MODEL
 structural-workbench model-delete-truss3d-leaf-member ADDED-TRUSS-MEMBER-MODEL/model-ir.json \
   --element E2 --node N3 --output-dir DELETED-TRUSS-LEAF-MODEL
 structural-workbench model-create-linear-analysis-request MODEL.json \

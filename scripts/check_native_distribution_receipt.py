@@ -307,6 +307,15 @@ V32_TRUSS3D_LEAF_DELETION_KEYS = {
     "workbench_truss3d_leaf_deletion_recovery_sha256",
 }
 V32_EXPECTED_KEYS = V31_EXPECTED_KEYS | V32_TRUSS3D_LEAF_DELETION_KEYS
+V33_FRAME3D_LEAF_DELETION_KEYS = {
+    "workbench_frame3d_leaf_deletion_surface_passed",
+    "workbench_frame3d_leaf_deletion_model_sha256",
+    "workbench_frame3d_leaf_deletion_receipt_sha256",
+    "workbench_frame3d_leaf_deletion_request_sha256",
+    "workbench_frame3d_leaf_deletion_result_ir_sha256",
+    "workbench_frame3d_leaf_deletion_recovery_sha256",
+}
+V33_EXPECTED_KEYS = V32_EXPECTED_KEYS | V33_FRAME3D_LEAF_DELETION_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -381,13 +390,17 @@ def validate(
         "structural-native-distribution-e2e.v30": V30_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v31": V31_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v32": V32_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v33": V33_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
     elif set(payload) != expected_keys:
         errors.append(f"receipt keys differ from the exact {schema_version} contract")
     cumulative_receipt_schema_version = receipt_schema_version
-    if receipt_schema_version == "structural-native-distribution-e2e.v32":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v32",
+        "structural-native-distribution-e2e.v33",
+    }:
         cumulative_receipt_schema_version = "structural-native-distribution-e2e.v31"
     if cumulative_receipt_schema_version in {
         "structural-native-distribution-e2e.v14",
@@ -1147,7 +1160,10 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
-    if receipt_schema_version == "structural-native-distribution-e2e.v32":
+    if receipt_schema_version in {
+        "structural-native-distribution-e2e.v32",
+        "structural-native-distribution-e2e.v33",
+    }:
         if payload.get("workbench_truss3d_leaf_deletion_surface_passed") is not True:
             errors.append("workbench_truss3d_leaf_deletion_surface_passed must be true")
         for name in (
@@ -1156,6 +1172,18 @@ def validate(
             "workbench_truss3d_leaf_deletion_request_sha256",
             "workbench_truss3d_leaf_deletion_result_ir_sha256",
             "workbench_truss3d_leaf_deletion_recovery_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if receipt_schema_version == "structural-native-distribution-e2e.v33":
+        if payload.get("workbench_frame3d_leaf_deletion_surface_passed") is not True:
+            errors.append("workbench_frame3d_leaf_deletion_surface_passed must be true")
+        for name in (
+            "workbench_frame3d_leaf_deletion_model_sha256",
+            "workbench_frame3d_leaf_deletion_receipt_sha256",
+            "workbench_frame3d_leaf_deletion_request_sha256",
+            "workbench_frame3d_leaf_deletion_result_ir_sha256",
+            "workbench_frame3d_leaf_deletion_recovery_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

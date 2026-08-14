@@ -97,6 +97,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-frame-section-add-v1.md"),
     Path("docs/native/modelir-truss3d-authoring-v1.md"),
     Path("docs/native/modelir-truss3d-editing-v1.md"),
+    Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-linear-analysis-request-create-v1.md"),
     Path("docs/native/modelir-nodal-load-edit-v1.md"),
@@ -222,6 +223,10 @@ EXPECTED_FEATURES = {
         False,
     ),
     "bounded_cpp_revalidated_linear_truss3d_member_add": (
+        "c5_implemented",
+        False,
+    ),
+    "bounded_cpp_revalidated_last_neutral_frame3d_leaf_member_delete": (
         "c5_implemented",
         False,
     ),
@@ -380,6 +385,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-frame-section",
         "model-add-truss-section",
         "model-add-truss3d-member",
+        "model-delete-frame3d-leaf-member",
         "model-delete-truss3d-leaf-member",
         "model-create-linear-analysis-request",
     ]:
@@ -1821,7 +1827,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     extension_claim = manifest.get("native_surface_extension_claim")
     expected_extension_claim = (
         "compatible frame3d element and truss3d material/section edits, truss3d "
-        "section/member authoring, and one last-neutral-truss3d-leaf deletion"
+        "section/member authoring, and family-specific "
+        "last-neutral-frame3d/truss3d-leaf deletion"
     )
     if extension_claim != expected_extension_claim:
         blockers.append("workbench_ui_native_surface_extension_claim_invalid")
@@ -1829,7 +1836,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
         "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
-        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, and one last-neutral-truss3d-leaf deletion",
+        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

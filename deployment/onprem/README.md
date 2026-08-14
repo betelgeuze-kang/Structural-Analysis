@@ -34,10 +34,11 @@ absent from the runtime image.
   `model-add-frame-section` adds one bounded v1 frame3d section with six positive finite SI
   parameters without changing existing references. `model-add-truss-section` adds one bounded v1
   truss section, and `model-add-truss3d-member` adds one node plus one connected linear truss3d
-  member using existing compatible identities. `model-delete-truss3d-leaf-member` removes only
-  that last contiguous neutral member and its last orphan endpoint node when no other element,
-  load, constraint, stage, unsupported-feature source, or round-trip row references them; it never
-  cascades or reindexes. The
+  member using existing compatible identities. `model-delete-frame3d-leaf-member` and
+  `model-delete-truss3d-leaf-member` remove only a last contiguous neutral member of their exact
+  family and its last orphan endpoint node when no other element, load, constraint, stage,
+  unsupported-feature source, or round-trip row references them; neither cascades nor reindexes.
+  The
   `model-create-linear-analysis-request` surface binds one existing linear-static pattern and
   bounded PCG controls through C++ assembly preflight.
 - `/opt/structural/share/structural-report` carries the exact embedded-font provenance and complete
@@ -146,6 +147,9 @@ structural-workbench model-add-truss-section /workspace/model.json \
 structural-workbench model-add-truss3d-member /workspace/added-truss-section-model/model-ir.json \
   --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
   --material M1 --section T1 --output-dir /workspace/added-truss-member-model
+structural-workbench model-delete-frame3d-leaf-member \
+  /workspace/added-frame-member-model/model-ir.json \
+  --element E2 --node N3 --output-dir /workspace/deleted-frame-leaf-model
 structural-workbench model-delete-truss3d-leaf-member \
   /workspace/added-truss-member-model/model-ir.json \
   --element E2 --node N3 --output-dir /workspace/deleted-truss-leaf-model

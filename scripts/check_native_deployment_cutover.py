@@ -47,6 +47,7 @@ REQUIRED_FILES = (
     Path("docs/native/distribution-lifecycle.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/modelir-truss3d-editing-v1.md"),
+    Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
 )
 
@@ -191,6 +192,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-add-frame3d-member",
             "model-add-truss-section",
             "model-add-truss3d-member",
+            "model-delete-frame3d-leaf-member",
             "model-delete-truss3d-leaf-member",
             "model-add-nodal-load",
             "model-add-frame-section",
@@ -318,7 +320,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
-        "structural-native-distribution-e2e.v32",
+        "structural-native-distribution-e2e.v33",
         "exercise_nodal_load_edit_surface",
         "workbench_nodal_load_edit_surface_passed",
         "workbench_nodal_load_edit_receipt_sha256",
@@ -426,6 +428,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_truss3d_leaf_deletion_request_sha256",
         "workbench_truss3d_leaf_deletion_result_ir_sha256",
         "workbench_truss3d_leaf_deletion_recovery_sha256",
+        "exercise_frame3d_leaf_deletion_surface",
+        "model-delete-frame3d-leaf-member",
+        "workbench_frame3d_leaf_deletion_surface_passed",
+        "workbench_frame3d_leaf_deletion_model_sha256",
+        "workbench_frame3d_leaf_deletion_receipt_sha256",
+        "workbench_frame3d_leaf_deletion_request_sha256",
+        "workbench_frame3d_leaf_deletion_result_ir_sha256",
+        "workbench_frame3d_leaf_deletion_recovery_sha256",
         "exercise_model_linear_request_create_surface",
         "model-create-linear-analysis-request",
         "workbench_model_linear_request_create_surface_passed",
@@ -490,7 +500,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
-            "structural-native-distribution-e2e.v32",
+            "structural-native-distribution-e2e.v33",
+            "V33_FRAME3D_LEAF_DELETION_KEYS",
+            "workbench_frame3d_leaf_deletion_surface_passed",
+            "workbench_frame3d_leaf_deletion_recovery_sha256",
             "V32_TRUSS3D_LEAF_DELETION_KEYS",
             "workbench_truss3d_leaf_deletion_surface_passed",
             "workbench_truss3d_leaf_deletion_recovery_sha256",
@@ -505,9 +518,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
-            "append-only v32 hash-bound receipt",
-            "frozen v1 through v31 receipts",
-            "no pre-v32 receipt",
+            "append-only v33 hash-bound receipt",
+            "frozen v1 through v32 receipts",
+            "no pre-v33 receipt",
         ),
         blockers=blockers,
     )
@@ -539,6 +552,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Installed static and shared package E2E v32",
             "Frozen v1 through v31",
             "receipts preserve their narrower authority",
+        ),
+        blockers=blockers,
+    )
+
+    frame_leaf_deletion_doc = _text(
+        root, Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
+        text=frame_leaf_deletion_doc,
+        tokens=(
+            "model-delete-frame3d-leaf-member",
+            "Installed static and shared package E2E v33",
+            "Frozen v1 through v32",
+            "receipts keep their narrower authority",
         ),
         blockers=blockers,
     )
@@ -611,6 +639,38 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     f"modelir_truss3d_editing_capability_claim_missing:{token}"
                 )
+    frame_leaf_deletion_capability = (
+        capabilities.get("modelir_frame3d_leaf_deletion")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(frame_leaf_deletion_capability, dict):
+        blockers.append("modelir_frame3d_leaf_deletion_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if frame_leaf_deletion_capability.get(field) != expected:
+                blockers.append(
+                    f"modelir_frame3d_leaf_deletion_capability_field_invalid:{field}"
+                )
+        frame_leaf_deletion_claim = str(
+            frame_leaf_deletion_capability.get("claim", "")
+        )
+        for token in (
+            "last contiguous neutral frame_3d/euler_bernoulli_3d member",
+            "last contiguous orphan endpoint node",
+            "local rotation, offsets, releases",
+            "installed static/shared E2E",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in frame_leaf_deletion_claim:
+                blockers.append(
+                    f"modelir_frame3d_leaf_deletion_capability_claim_missing:{token}"
+                )
     truss_leaf_deletion_capability = (
         capabilities.get("modelir_truss3d_leaf_deletion")
         if isinstance(capabilities, dict)
@@ -660,8 +720,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "cpu-only static native distribution",
             "no network namespace, listener, port, secret, Python, Node or React runtime",
             "ModelIR/MGT/ModelIR-linear/normalized-MGT-linear flows",
-            "CPU static/shared distribution v32 E2E",
+            "CPU static/shared distribution v33 E2E",
+            "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
+            "removed-frame-field binding",
             "v6 self-hashed local_rootfs_diagnostic_c5 receipt",
             "final C6 remain open",
         ):

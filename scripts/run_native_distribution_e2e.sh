@@ -2037,6 +2037,135 @@ exercise_truss3d_editing_surface() {
 }
 exercise_truss3d_editing_surface
 
+exercise_frame3d_leaf_deletion_surface() {
+  local source_model="$e2e_root/frame3d-member-add-first/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/frame3d-leaf-deletion-$label"
+    request_directory="$e2e_root/frame3d-leaf-deletion-$label-request"
+    direct_directory="$e2e_root/frame3d-leaf-deletion-$label-direct"
+    partial_directory="$e2e_root/frame3d-leaf-deletion-$label-partial"
+    resumed_directory="$e2e_root/frame3d-leaf-deletion-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-frame3d-leaf-member "$source_model" \
+      --element E2 --node N3 --output-dir "$delete_directory" \
+      > "$e2e_root/frame3d-leaf-deletion-$label.stdout.json"
+    grep -Fq '"operation":"frame3d_leaf_member_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_id":"N3"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_index":2' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_element_id":"E2"' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_element_index":1' "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_element_type":"frame_3d"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_formulation":"euler_bernoulli_3d"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_node_ids":["N2","N3"]' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_material_id":"M1"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_section_id":"S1"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_local_axis_rotation_rad":0' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_releases":{"i":[],"j":[]}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-frame3d-leaf-member.v1"' \
+      "$delete_directory/model-ir.json"
+    if grep -Fq '"id":"E2"' "$delete_directory/model-ir.json" \
+      || grep -Fq '"id":"N3"' "$delete_directory/model-ir.json"; then
+      echo "installed frame3d leaf deletion retained E2 or N3" >&2
+      exit 1
+    fi
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/frame3d-leaf-deletion-$label-validation.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case frame3d-leaf-deletion-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/frame3d-leaf-deletion-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/frame3d-leaf-deletion-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 1 \
+      > "$e2e_root/frame3d-leaf-deletion-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/frame3d-leaf-deletion-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/frame3d-leaf-deletion-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/frame3d-leaf-deletion-first$suffix" \
+      "$e2e_root/frame3d-leaf-deletion-second$suffix" \
+      > "$e2e_root/frame3d-leaf-deletion-$diff_label-diff.txt"
+  done
+  for suffix in '' -request -direct -partial -resumed; do
+    cmp "$e2e_root/frame3d-leaf-deletion-first$suffix.stdout.json" \
+      "$e2e_root/frame3d-leaf-deletion-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/frame3d-leaf-deletion-first-validation.json" \
+    "$e2e_root/frame3d-leaf-deletion-second-validation.json"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed frame3d leaf deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local referenced_source="$e2e_root/fixed-constraint-add-first/model-ir.json"
+  local rejected_destination="$e2e_root/frame3d-leaf-deletion-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-frame3d-leaf-member "$referenced_source" \
+    --element E2 --node N3 --output-dir "$rejected_destination" \
+    > "$e2e_root/frame3d-leaf-deletion-referenced-rejected.stdout.json"; then
+    echo "installed frame3d leaf deletion accepted a constrained endpoint" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_frame3d_leaf_node_referenced_by_constraint' \
+    "$e2e_root/frame3d-leaf-deletion-referenced-rejected.stdout.json"
+  test ! -e "$rejected_destination"
+}
+exercise_frame3d_leaf_deletion_surface
+
 exercise_truss3d_leaf_deletion_surface() {
   local source_model="$e2e_root/truss3d-authoring-first-member/model-ir.json"
   local source_before_hash
@@ -2499,6 +2628,11 @@ truss3d_leaf_deletion_receipt_hash="$(sha256sum "$e2e_root/truss3d-leaf-deletion
 truss3d_leaf_deletion_request_hash="$(sha256sum "$e2e_root/truss3d-leaf-deletion-first-request/analysis-request.json" | awk '{print $1}')"
 truss3d_leaf_deletion_result_ir_hash="$(sha256sum "$e2e_root/truss3d-leaf-deletion-first-direct/result-ir.json" | awk '{print $1}')"
 truss3d_leaf_deletion_recovery_hash="$(sha256sum "$e2e_root/truss3d-leaf-deletion-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+frame3d_leaf_deletion_model_hash="$(sha256sum "$e2e_root/frame3d-leaf-deletion-first/model-ir.json" | awk '{print $1}')"
+frame3d_leaf_deletion_receipt_hash="$(sha256sum "$e2e_root/frame3d-leaf-deletion-first/edit-receipt.json" | awk '{print $1}')"
+frame3d_leaf_deletion_request_hash="$(sha256sum "$e2e_root/frame3d-leaf-deletion-first-request/analysis-request.json" | awk '{print $1}')"
+frame3d_leaf_deletion_result_ir_hash="$(sha256sum "$e2e_root/frame3d-leaf-deletion-first-direct/result-ir.json" | awk '{print $1}')"
+frame3d_leaf_deletion_recovery_hash="$(sha256sum "$e2e_root/frame3d-leaf-deletion-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 result_view_top_displacement_hash="$(sha256sum "$e2e_root/result-view-top-displacement-first.txt" | awk '{print $1}')"
 result_view_drift_ratio_hash="$(sha256sum "$e2e_root/result-view-drift-ratio-first.txt" | awk '{print $1}')"
 result_view_base_shear_hash="$(sha256sum "$e2e_root/result-view-base-shear-first.txt" | awk '{print $1}')"
@@ -2592,6 +2726,10 @@ v32_receipt_json="${v31_receipt_json/structural-native-distribution-e2e.v31/stru
 truss3d_leaf_deletion_receipt_fields="\"workbench_truss3d_leaf_deletion_surface_passed\":true,\"workbench_truss3d_leaf_deletion_model_sha256\":\"sha256:$truss3d_leaf_deletion_model_hash\",\"workbench_truss3d_leaf_deletion_receipt_sha256\":\"sha256:$truss3d_leaf_deletion_receipt_hash\",\"workbench_truss3d_leaf_deletion_request_sha256\":\"sha256:$truss3d_leaf_deletion_request_hash\",\"workbench_truss3d_leaf_deletion_result_ir_sha256\":\"sha256:$truss3d_leaf_deletion_result_ir_hash\",\"workbench_truss3d_leaf_deletion_recovery_sha256\":\"sha256:$truss3d_leaf_deletion_recovery_hash\","
 v32_receipt_json="${v32_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss3d_leaf_deletion_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v32_receipt_json" > "$temporary_receipt"
+v33_receipt_json="${v32_receipt_json/structural-native-distribution-e2e.v32/structural-native-distribution-e2e.v33}"
+frame3d_leaf_deletion_receipt_fields="\"workbench_frame3d_leaf_deletion_surface_passed\":true,\"workbench_frame3d_leaf_deletion_model_sha256\":\"sha256:$frame3d_leaf_deletion_model_hash\",\"workbench_frame3d_leaf_deletion_receipt_sha256\":\"sha256:$frame3d_leaf_deletion_receipt_hash\",\"workbench_frame3d_leaf_deletion_request_sha256\":\"sha256:$frame3d_leaf_deletion_request_hash\",\"workbench_frame3d_leaf_deletion_result_ir_sha256\":\"sha256:$frame3d_leaf_deletion_result_ir_hash\",\"workbench_frame3d_leaf_deletion_recovery_sha256\":\"sha256:$frame3d_leaf_deletion_recovery_hash\","
+v33_receipt_json="${v33_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame3d_leaf_deletion_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v33_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"
