@@ -171,6 +171,17 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   `[0,12]`, active DOFs `[6,7,8,9,10,11]`, active load `[0,-10000,0,0,0,0]`, fallback 0 and
   byte-identical initialized-checkpoint restart. Coordinate editing, creation/deletion, reference
   cascades and visual dragging remain separate or open.
+- `model-edit-node-identity-cascade`: deterministic replacement of one referenced node identity
+  with a distinct unique ModelIR stable ID. Rust atomically rewrites every typed element,
+  constraint and nodal-load reference plus direct node round-trip ownership, degrades exact or
+  canonicalized direct mappings to approximated, and preserves the node index, exact SI
+  coordinates, source identity, extensions and unrelated rows. Installed E2E v76 replaces `N2`
+  with `N2_LINKED` and proves one element plus four nodal-load references, frame recovery type
+  `[1]`, offsets `[0,12]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+  `[25000,-12000,5000,0,0,0]` through retained `COMBO_RENAMED`, fallback 0 and byte-identical
+  initialized-checkpoint restart. Untyped
+  extension and unsupported-feature cascades, broader reference families and visual manipulation
+  remain open.
 - `model-edit-element-identity`: deterministic replacement of one existing unreferenced element
   identity with a distinct unique ModelIR stable ID. Rust preserves the contiguous index and exact
   typed row, rejects construction-stage/unsupported-feature/round-trip ownership without cascade,

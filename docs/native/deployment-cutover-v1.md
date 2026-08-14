@@ -15,7 +15,8 @@ browser, React, package-manager, or external-renderer runtime lookup.
 
 The same installed payload exposes the C++-verified general ModelIR topology view and the bounded,
 provenance-bound `model-edit-node` coordinate, `model-edit-node-identity` unreferenced stable-
-identity, `model-edit-nodal-load` existing-load component,
+identity, `model-edit-node-identity-cascade` typed element/constraint/nodal-load/direct-node-
+round-trip reference cascade, `model-edit-nodal-load` existing-load component,
 `model-edit-nodal-load-target` existing-load target-node,
 `model-edit-nodal-load-identity` existing-load stable-identity,
 `model-edit-linear-load-pattern-identity` unreferenced linear-pattern stable-identity,
@@ -129,7 +130,15 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v75 proves repeated model-identity-edited/request/artifact
+assembly preflight. Distribution E2E v76 proves repeated node-identity-cascade-edited/request/
+artifact bytes and retains every v75 assertion while replacing referenced `N2` with `N2_LINKED`
+through `model-edit-node-identity-cascade`, atomically updating one element and four nodal-load
+references plus direct node round-trip ownership, degrading exact mappings to approximated,
+rejecting malformed, no-op, colliding and unreferenced identities plus unsupported-feature
+ownership, and proving exact typed frame recovery `[1]`, offsets `[0,12]`, active DOFs
+`[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]` through retained
+`COMBO_RENAMED`, byte-identical initialized-checkpoint restart and fallback 0. Distribution E2E v75
+proves repeated model-identity-edited/request/artifact
 bytes and retains every v74 assertion while replacing root `engine-v2-frame-cantilever` with
 `engine-v2-frame-cantilever-renamed` through `model-edit-model-identity`, binding the exact expected
 source identity and complete source-document-without-identity hash, rejecting malformed, no-op and

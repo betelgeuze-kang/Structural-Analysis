@@ -14,7 +14,8 @@ absent from the runtime image.
   deterministic Inspect -> explicit Review -> Export handoff and fixed-label English/Korean PDF
   export. It also exposes the session-independent, C++-verified ASCII `model-view` topology surface
   and expected-source-bound `model-edit-model-identity` root identity replacement, plus
-  provenance-bound `model-edit-node` coordinate and `model-edit-nodal-load` existing-load
+  provenance-bound `model-edit-node` coordinate, `model-edit-node-identity-cascade` typed-reference
+  cascade and `model-edit-nodal-load` existing-load
   component, `model-edit-nodal-load-target` existing-load target-node and
   `model-edit-constraint-value` existing-restrained-DOF commands for current
   semantically valid ModelIR v2 inputs. It also exposes closed `model-edit-linear-material` and
@@ -181,6 +182,9 @@ structural-workbench model-edit-model-identity /workspace/model.json \
   --output-dir /workspace/renamed-model
 structural-workbench model-edit-node /workspace/model.json --node N2 \
   --coordinates 2 1 1 --output-dir /workspace/edited-model
+structural-workbench model-edit-node-identity-cascade /workspace/model.json \
+  --node N2 --new-node N2_LINKED \
+  --output-dir /workspace/renamed-referenced-node-model
 structural-workbench model-edit-nodal-load /workspace/model.json \
   --load-pattern LC_WEAK --load L_WEAK_N2 \
   --components 0 -20000 0 0 0 0 --output-dir /workspace/edited-load-model

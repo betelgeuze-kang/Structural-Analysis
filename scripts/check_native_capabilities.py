@@ -44,6 +44,7 @@ EXPECTED_OWNERS = {
     "modelir_model_identity_edit": "structural-workbench",
     "modelir_node_add": "structural-workbench",
     "modelir_node_identity_edit": "structural-workbench",
+    "modelir_node_identity_cascade_edit": "structural-workbench",
     "modelir_element_identity_edit": "structural-workbench",
     "modelir_linear_load_combination_identity_edit": "structural-workbench",
     "modelir_orphan_node_delete": "structural-workbench",

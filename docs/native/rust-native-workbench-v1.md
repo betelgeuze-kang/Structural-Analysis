@@ -107,6 +107,11 @@ The separate `model-edit-node-identity` command changes only one unreferenced no
 preserves its index/exact SI coordinates/source/extensions, rejects element, constraint, nodal-load,
 unsupported-feature and round-trip ownership without cascade, and C++-revalidates the edited
 snapshot. See `docs/native/modelir-node-identity-edit-v1.md`.
+The separate `model-edit-node-identity-cascade` command changes one referenced node's stable ID
+and atomically rewrites typed element, constraint, nodal-load and direct node round-trip references.
+It preserves the node's index/exact SI coordinates/source/extensions, degrades exact direct mappings
+to approximated, rejects unsupported-feature ownership and unreferenced nodes, then C++-revalidates
+the edited snapshot. See `docs/native/modelir-node-identity-cascade-edit-v2.md`.
 The separate `model-edit-element-identity` command changes only one unreferenced element's stable
 ID, preserves its index and exact typed row, rejects construction-stage, unsupported-feature and
 round-trip ownership without cascade, and C++-revalidates the edited snapshot. See

@@ -47,6 +47,7 @@ REQUIRED_FILES = (
     Path("docs/native/distribution-lifecycle.md"),
     Path("docs/native/rust-native-workbench-v1.md"),
     Path("docs/native/modelir-model-identity-edit-v1.md"),
+    Path("docs/native/modelir-node-identity-cascade-edit-v2.md"),
     Path("docs/native/modelir-truss3d-editing-v1.md"),
     Path("docs/native/modelir-frame3d-leaf-deletion-v1.md"),
     Path("docs/native/modelir-truss3d-leaf-deletion-v1.md"),
@@ -252,6 +253,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Distribution E2E v76",
+            "model-edit-node-identity-cascade",
+            "N2_LINKED",
             "Distribution E2E v75",
             "model-edit-model-identity",
             "engine-v2-frame-cantilever-renamed",
@@ -958,6 +962,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_model_identity_edit_recovery_sha256",
         "workbench_model_identity_edit_report_ir_sha256",
         "workbench_model_identity_edit_restart_passed",
+        "exercise_node_identity_cascade_edit_surface",
+        "model-edit-node-identity-cascade",
+        "structural-native:model-edit-node-identity-cascade.v2",
+        "workbench_node_identity_cascade_edit_surface_passed",
+        "workbench_node_identity_cascade_edit_model_sha256",
+        "workbench_node_identity_cascade_edit_receipt_sha256",
+        "workbench_node_identity_cascade_edit_request_receipt_sha256",
+        "workbench_node_identity_cascade_edit_request_sha256",
+        "workbench_node_identity_cascade_edit_assembly_receipt_sha256",
+        "workbench_node_identity_cascade_edit_checkpoint_sha256",
+        "workbench_node_identity_cascade_edit_result_ir_sha256",
+        "workbench_node_identity_cascade_edit_recovery_sha256",
+        "workbench_node_identity_cascade_edit_report_ir_sha256",
+        "workbench_node_identity_cascade_edit_restart_passed",
         "exercise_nodal_load_add_surface",
         "model-add-nodal-load",
         "workbench_nodal_load_add_surface_passed",
@@ -1160,6 +1178,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v76",
+            "V76_NODE_IDENTITY_CASCADE_EDIT_KEYS",
+            "workbench_node_identity_cascade_edit_surface_passed",
+            "workbench_node_identity_cascade_edit_receipt_sha256",
+            "workbench_node_identity_cascade_edit_request_receipt_sha256",
+            "workbench_node_identity_cascade_edit_recovery_sha256",
+            "workbench_node_identity_cascade_edit_restart_passed",
             "structural-native-distribution-e2e.v75",
             "V75_MODEL_IDENTITY_EDIT_KEYS",
             "workbench_model_identity_edit_surface_passed",
@@ -1887,6 +1912,29 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "structural-native:model-edit-model-identity.v1",
             "model_identity_edit",
             "append-only v75",
+            "[1]",
+            "[0,12]",
+            "[6,7,8,9,10,11]",
+            "[25000,-12000,5000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "authorize C6",
+        ),
+        blockers=blockers,
+    )
+
+    node_identity_cascade_doc = _text(
+        root, Path("docs/native/modelir-node-identity-cascade-edit-v2.md"), blockers
+    )
+    _require_tokens(
+        relative=Path("docs/native/modelir-node-identity-cascade-edit-v2.md"),
+        text=node_identity_cascade_doc,
+        tokens=(
+            "model-edit-node-identity-cascade",
+            "single C ABI into C++ semantic",
+            "structural-native:model-edit-node-identity-cascade.v2",
+            "node_identity_cascade_edit",
+            "append-only v76",
             "[1]",
             "[0,12]",
             "[6,7,8,9,10,11]",
@@ -3000,6 +3048,47 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in model_identity_edit_claim:
                 blockers.append(
                     "modelir_model_identity_edit_capability_" f"claim_missing:{token}"
+                )
+
+    node_identity_cascade_capability = (
+        capabilities.get("modelir_node_identity_cascade_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
+    if not isinstance(node_identity_cascade_capability, dict):
+        blockers.append("modelir_node_identity_cascade_edit_capability_missing")
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if node_identity_cascade_capability.get(field) != expected:
+                blockers.append(
+                    "modelir_node_identity_cascade_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        node_identity_cascade_claim = str(node_identity_cascade_capability.get("claim", ""))
+        for token in (
+            "replaces exactly one existing referenced node ID",
+            "atomically updates every typed elements[].node_ids",
+            "direct node round-trip model_ir_entity_id",
+            "exact or canonicalized direct mappings degrade to approximated",
+            "unsupported-feature source_entity_id ownership of either source or replacement",
+            "single C ABI into C++ semantic/reference validation",
+            "distribution v76 E2E",
+            "N2_LINKED",
+            "exact active DOFs [6,7,8,9,10,11]",
+            "combined active load [25000,-12000,5000,0,0,0]",
+            "typed frame recovery [1] with offsets [0,12]",
+            "byte-identical initialized restart",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in node_identity_cascade_claim:
+                blockers.append(
+                    "modelir_node_identity_cascade_edit_capability_"
+                    f"claim_missing:{token}"
                 )
 
     linear_load_combination_identity_edit_capability = (

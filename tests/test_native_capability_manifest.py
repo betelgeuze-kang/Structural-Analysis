@@ -237,6 +237,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "general ModelIR terminal topology view" in workbench["claim"]
     assert "closed `en-US`/`ko-KR` paths" in workbench["claim"]
     assert "provenance-bound editors cover the root model identity" in workbench["claim"]
+    assert "typed-reference-cascading node identity" in workbench["claim"]
     assert "v1 frame and truss sections" in workbench["claim"]
     assert "compatible frame and truss element property references" in workbench["claim"]
     assert "model-edit-truss-section" in workbench["claim"]
@@ -286,6 +287,25 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in node_add["claim"]
     assert "HIP C2" in node_add["claim"]
     assert "C6" in node_add["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_node_identity_cascade_edit"
+        )
+        is True
+    )
+    node_identity_cascade = payload["capabilities"][
+        "modelir_node_identity_cascade_edit"
+    ]
+    assert node_identity_cascade["cutover_gate"] == "C5"
+    assert node_identity_cascade["owner"] == "structural-workbench"
+    assert "atomically updates every typed" in node_identity_cascade["claim"]
+    assert "direct node round-trip" in node_identity_cascade["claim"]
+    assert "distribution v76 E2E" in node_identity_cascade["claim"]
+    assert "N2_LINKED" in node_identity_cascade["claim"]
+    assert "byte-identical initialized restart" in node_identity_cascade["claim"]
+    assert "fallback 0" in node_identity_cascade["claim"]
+    assert "approved HIP C2" in node_identity_cascade["claim"]
+    assert "C6" in node_identity_cascade["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_orphan_node_delete") is True
     orphan_node_delete = payload["capabilities"]["modelir_orphan_node_delete"]
     assert orphan_node_delete["cutover_gate"] == "C5"
