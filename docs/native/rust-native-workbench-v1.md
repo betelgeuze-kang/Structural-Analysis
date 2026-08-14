@@ -61,6 +61,12 @@ stage and direct load-pattern round-trip references. It preserves the complete p
 degrades exact direct mappings to approximated, rejects unsupported-feature ownership and
 unreferenced patterns, then C++-revalidates the edited snapshot. See
 `docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md`.
+The separate `model-edit-linear-load-combination-identity-cascade` command changes one referenced
+bounded direct or acyclic nested linear combination ID and atomically rewrites every typed
+downstream combination term plus direct load-combination round-trip ownership. It preserves the
+target and downstream mathematical expansions, degrades exact direct mappings to approximated,
+rejects unsupported-feature ownership and unreferenced roots, then C++-revalidates the edited
+snapshot. See `docs/native/modelir-linear-load-combination-identity-cascade-edit-v2.md`.
 The constraint-value editor changes one finite prescribed value only when the named DOF is already
 restrained by the named existing constraint. The separate `model-edit-constraint-target` command
 changes only one existing `fixed_dofs` constraint's `node_id` to a distinct existing node, preserves

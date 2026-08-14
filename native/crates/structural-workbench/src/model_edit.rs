@@ -93,6 +93,8 @@ const LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-linear-load-combination.v1";
 const LINEAR_LOAD_COMBINATION_IDENTITY_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-linear-load-combination-identity.v1";
+const LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-linear-load-combination-identity-cascade.v2";
 const DIRECT_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
     "structural-native:model-add-direct-linear-load-combination.v2";
 const NESTED_LINEAR_LOAD_COMBINATION_ADD_EXTENSION_KEY: &str =
@@ -178,6 +180,7 @@ const LINEAR_LOAD_PATTERN_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_reva
 const LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_linear_static_load_pattern_identity_replacement_to_distinct_unique_stable_id_with_index_analysis_type_self_weight_complete_nodal_loads_source_extensions_and_unrelated_rows_preserved_and_typed_load_combination_construction_stage_plus_direct_load_pattern_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_pattern_load_node_creation_deletion_component_target_combination_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_distinct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_solver_execution_or_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_acyclic_direct_or_nested_linear_static_load_combination_identity_replacement_to_distinct_unique_stable_id_with_index_type_terms_source_extensions_and_expansion_preserved_depth_eight_expanded_64_terms_without_downstream_combination_unsupported_feature_or_roundtrip_cascade_not_term_factor_reference_order_count_combination_creation_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_acyclic_direct_or_nested_linear_static_load_combination_identity_replacement_to_distinct_unique_stable_id_with_index_type_terms_source_extensions_target_and_downstream_expansions_preserved_depth_eight_expanded_64_terms_and_typed_downstream_combination_plus_direct_load_combination_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_term_factor_reference_order_count_combination_creation_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_to_64_unique_direct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_acyclic_nested_linear_static_load_combination_addition_depth_eight_expanded_64_terms_not_term_edit_nested_deletion_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_neutral_unreferenced_extension_free_two_to_64_unique_direct_linear_static_load_pattern_combination_single_existing_term_factor_edit_not_reference_identity_order_count_nested_combination_source_owned_roundtrip_unsupported_feature_cascade_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
@@ -569,6 +572,14 @@ pub struct ModelLinearLoadCombinationAddOutcomeV1 {
 /// Complete deterministic artifact pair produced by one bounded linear-combination identity edit.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ModelLinearLoadCombinationIdentityEditOutcomeV1 {
+    pub model_ir_json: String,
+    pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair produced by one referenced load-combination identity
+/// cascade.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelLinearLoadCombinationIdentityCascadeEditOutcomeV2 {
     pub model_ir_json: String,
     pub receipt_json: String,
 }
@@ -1256,6 +1267,36 @@ pub fn publish_model_linear_load_combination_identity_edit(
 ) -> Result<ModelLinearLoadCombinationIdentityEditOutcomeV1, WorkbenchError> {
     let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
     let outcome = edit_model_linear_load_combination_identity(
+        &source,
+        load_combination_id,
+        replacement_load_combination_id,
+    )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one referenced bounded linear load-combination identity and publish it atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or colliding identities, invalid source or edited semantics,
+/// missing or out-of-profile combinations, a combination with no typed downstream reference,
+/// malformed typed references, unsupported-feature ownership, invalid round-trip ownership,
+/// no-op edits, or publication failure.
+pub fn publish_model_linear_load_combination_identity_cascade_edit(
+    source_path: &Path,
+    load_combination_id: &str,
+    replacement_load_combination_id: &str,
+    output_directory: &Path,
+) -> Result<ModelLinearLoadCombinationIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_linear_load_combination_identity_cascade(
         &source,
         load_combination_id,
         replacement_load_combination_id,
@@ -5228,6 +5269,15 @@ struct RenamedLinearLoadCombinationV1 {
     expansion: ExpandedLinearLoadCombinationV1,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct CascadedLinearLoadCombinationIdentityV2 {
+    load_combination_index: usize,
+    retained_combination_without_identity: Value,
+    expansion: ExpandedLinearLoadCombinationV1,
+    downstream_combination_reference_count: usize,
+    roundtrip_reference_count: usize,
+}
+
 /// Replace one unreferenced bounded direct or nested linear load-combination identity in memory.
 ///
 /// # Errors
@@ -5338,6 +5388,127 @@ pub fn edit_model_linear_load_combination_identity(
         "claim_boundary": LINEAR_LOAD_COMBINATION_IDENTITY_EDIT_CLAIM_BOUNDARY,
     }))?;
     Ok(ModelLinearLoadCombinationIdentityEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
+/// Replace one referenced bounded direct or nested linear load-combination identity in memory and
+/// cascade every typed downstream combination and direct round-trip reference.
+///
+/// # Errors
+///
+/// Rejects invalid or colliding identities, invalid source semantics, missing or out-of-profile
+/// combinations, a source without a typed downstream reference, malformed typed references,
+/// unsupported-feature ownership, invalid direct round-trip ownership, schema drift, target or
+/// downstream expansion drift, or edited semantics rejected by C++.
+#[allow(clippy::too_many_lines)]
+pub fn edit_model_linear_load_combination_identity_cascade(
+    source_bytes: &[u8],
+    load_combination_id: &str,
+    replacement_load_combination_id: &str,
+) -> Result<ModelLinearLoadCombinationIdentityCascadeEditOutcomeV2, WorkbenchError> {
+    validate_linear_load_combination_identity_edit_request(
+        source_bytes.len(),
+        load_combination_id,
+        replacement_load_combination_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let cascaded = replace_linear_load_combination_identity_cascade(
+        &mut edited,
+        load_combination_id,
+        replacement_load_combination_id,
+    )?;
+    bind_linear_load_combination_identity_cascade_edit_provenance(
+        &mut edited,
+        load_combination_id,
+        replacement_load_combination_id,
+        &cascaded,
+        &source_content_hash,
+        &source_semantic_hash,
+        &source_provenance_hash,
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the load-combination identity-cascaded ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let root_term_count = cascaded.expansion.root_terms.as_array().map_or(0, Vec::len);
+    let expanded_pattern_count = cascaded
+        .expansion
+        .expanded_pattern_terms
+        .as_array()
+        .map_or(0, Vec::len);
+    let editing_profile = if cascaded.expansion.nested {
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    } else {
+        "unique_direct_linear_static_patterns_2_to_64"
+    };
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "linear_load_combination_identity_cascade_edit",
+        "editing_profile": editing_profile,
+        "model_id": edited_validation.report.model_id,
+        "source_load_combination_id": load_combination_id,
+        "replacement_load_combination_id": replacement_load_combination_id,
+        "load_combination_index": cascaded.load_combination_index,
+        "combination_type": "linear",
+        "nested": cascaded.expansion.nested,
+        "root_term_count": root_term_count,
+        "combination_depth": cascaded.expansion.max_depth,
+        "expanded_term_count": cascaded.expansion.expanded_term_count,
+        "expanded_pattern_count": expanded_pattern_count,
+        "expanded_pattern_terms": cascaded.expansion.expanded_pattern_terms,
+        "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+        "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+        "retained_combination_without_identity": cascaded.retained_combination_without_identity,
+        "downstream_combination_reference_count": cascaded.downstream_combination_reference_count,
+        "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+        "typed_reference_cascade_verified": true,
+        "target_and_downstream_expansion_preserved": true,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearLoadCombinationIdentityCascadeEditOutcomeV2 {
         model_ir_json,
         receipt_json,
     })
@@ -14211,6 +14382,303 @@ fn replace_linear_load_combination_identity(
     })
 }
 
+#[allow(clippy::too_many_lines)]
+fn replace_linear_load_combination_identity_cascade(
+    model: &mut Value,
+    load_combination_id: &str,
+    replacement_load_combination_id: &str,
+) -> Result<CascadedLinearLoadCombinationIdentityV2, WorkbenchError> {
+    if load_combination_id == replacement_load_combination_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement load-combination identity is identical to the source identity",
+        ));
+    }
+    let load_combinations = model
+        .get("load_combinations")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_combinations"))?;
+    let load_combination_index = load_combinations
+        .iter()
+        .position(|combination| {
+            combination.get("id").and_then(Value::as_str) == Some(load_combination_id)
+        })
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_linear_load_combination_identity_combination_missing",
+                format!("ModelIR has no load combination with identity {load_combination_id}"),
+            )
+        })?;
+    if load_combinations.iter().any(|combination| {
+        combination.get("id").and_then(Value::as_str) == Some(replacement_load_combination_id)
+    }) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_replacement_exists",
+            format!(
+                "ModelIR already has a load combination with identity {replacement_load_combination_id}"
+            ),
+        ));
+    }
+    if model
+        .get("load_patterns")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_patterns"))?
+        .iter()
+        .any(|pattern| {
+            pattern.get("id").and_then(Value::as_str) == Some(replacement_load_combination_id)
+        })
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_replacement_ambiguous",
+            format!(
+                "replacement identity {replacement_load_combination_id} already names a load pattern"
+            ),
+        ));
+    }
+
+    let load_combination = &load_combinations[load_combination_index];
+    if load_combination.get("index").and_then(Value::as_u64)
+        != u64::try_from(load_combination_index).ok()
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_index_mismatch",
+            "identity-cascaded load-combination index must match its contiguous position",
+        ));
+    }
+    if load_combination
+        .get("combination_type")
+        .and_then(Value::as_str)
+        != Some("linear")
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_type_unsupported",
+            "load-combination identity cascade accepts only a linear combination",
+        ));
+    }
+    let mut retained_combination = load_combination
+        .as_object()
+        .ok_or_else(|| snapshot_error("load combination"))?
+        .clone();
+    if retained_combination.remove("id").is_none() {
+        return Err(snapshot_error("load combination id"));
+    }
+    let retained_combination_without_identity = Value::Object(retained_combination);
+    let expansion =
+        require_bounded_linear_load_combination(model, load_combination_id).map_err(|error| {
+            WorkbenchError::new(
+                "workbench_model_edit_linear_load_combination_identity_cascade_profile_unsupported",
+                error.to_string(),
+            )
+        })?;
+    let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == load_combination_id || id == replacement_load_combination_id);
+    if model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?
+        .iter()
+        .any(|feature| identity_matches(feature.get("source_entity_id").and_then(Value::as_str)))
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_cascade_unsupported_feature_owned",
+            "load-combination identity cascade refuses source or replacement ownership by an unsupported feature",
+        ));
+    }
+
+    let mut downstream_combination_reference_count = 0usize;
+    let mut downstream_expansions = Vec::new();
+    for (index, combination) in load_combinations.iter().enumerate() {
+        let combination_identity = combination
+            .get("id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| snapshot_error("load combination id"))?;
+        let terms = combination
+            .get("terms")
+            .and_then(Value::as_array)
+            .ok_or_else(|| snapshot_error("load combination terms"))?;
+        let mut references_source = false;
+        for term in terms {
+            let reference_kind = term
+                .get("ref_kind")
+                .and_then(Value::as_str)
+                .ok_or_else(|| snapshot_error("load combination term ref_kind"))?;
+            let reference_id = term
+                .get("ref_id")
+                .and_then(Value::as_str)
+                .ok_or_else(|| snapshot_error("load combination term ref_id"))?;
+            match reference_kind {
+                "load_pattern" => {}
+                "load_combination" => {
+                    if reference_id == replacement_load_combination_id {
+                        return Err(WorkbenchError::new(
+                            "workbench_model_edit_linear_load_combination_identity_cascade_replacement_combination_owned",
+                            "replacement load-combination identity is already referenced by another combination",
+                        ));
+                    }
+                    if reference_id == load_combination_id {
+                        if index == load_combination_index {
+                            return Err(WorkbenchError::new(
+                                "workbench_model_edit_linear_load_combination_identity_cascade_self_reference",
+                                "load-combination identity cascade refuses a self-reference",
+                            ));
+                        }
+                        downstream_combination_reference_count += 1;
+                        references_source = true;
+                    }
+                }
+                _ => return Err(snapshot_error("load combination term ref_kind")),
+            }
+        }
+        if references_source {
+            let downstream_expansion =
+                require_bounded_linear_load_combination(model, combination_identity).map_err(
+                    |error| {
+                        WorkbenchError::new(
+                            "workbench_model_edit_linear_load_combination_identity_cascade_downstream_profile_unsupported",
+                            error.to_string(),
+                        )
+                    },
+                )?;
+            downstream_expansions.push((combination_identity.to_owned(), downstream_expansion));
+        }
+    }
+    if downstream_combination_reference_count == 0 {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_cascade_unreferenced",
+            "load-combination identity cascade requires at least one typed downstream combination reference; use the non-cascading identity editor for an orphan root",
+        ));
+    }
+
+    let roundtrip_rows = model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?;
+    let mut roundtrip_reference_count = 0usize;
+    for row in roundtrip_rows {
+        let mapped = row
+            .get("model_ir_entity_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| snapshot_error("roundtrip model_ir_entity_id"))?;
+        if mapped == replacement_load_combination_id {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_linear_load_combination_identity_cascade_replacement_roundtrip_owned",
+                "replacement load-combination identity is already owned by a round-trip mapping",
+            ));
+        }
+        if mapped != load_combination_id {
+            continue;
+        }
+        if row.get("entity_kind").and_then(Value::as_str) != Some("load_combination") {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_linear_load_combination_identity_cascade_roundtrip_kind_mismatch",
+                "direct round-trip ownership of the source combination must have entity_kind load_combination",
+            ));
+        }
+        if !matches!(
+            row.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized" | "approximated" | "unsupported")
+        ) {
+            return Err(snapshot_error("roundtrip mapping_status"));
+        }
+        roundtrip_reference_count += 1;
+    }
+
+    for combination in model
+        .get_mut("load_combinations")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("load_combinations"))?
+    {
+        for term in combination
+            .get_mut("terms")
+            .and_then(Value::as_array_mut)
+            .ok_or_else(|| snapshot_error("load combination terms"))?
+        {
+            if term.get("ref_kind").and_then(Value::as_str) == Some("load_combination")
+                && term.get("ref_id").and_then(Value::as_str) == Some(load_combination_id)
+            {
+                term.as_object_mut()
+                    .ok_or_else(|| snapshot_error("load combination term"))?
+                    .insert("ref_id".to_owned(), json!(replacement_load_combination_id));
+            }
+        }
+    }
+    for row in model
+        .get_mut("roundtrip_map")
+        .and_then(Value::as_array_mut)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?
+    {
+        if row.get("model_ir_entity_id").and_then(Value::as_str) != Some(load_combination_id) {
+            continue;
+        }
+        let object = row
+            .as_object_mut()
+            .ok_or_else(|| snapshot_error("roundtrip row"))?;
+        object.insert(
+            "model_ir_entity_id".to_owned(),
+            json!(replacement_load_combination_id),
+        );
+        if matches!(
+            object.get("mapping_status").and_then(Value::as_str),
+            Some("exact" | "canonicalized")
+        ) {
+            object.insert("mapping_status".to_owned(), json!("approximated"));
+        }
+    }
+    model
+        .get_mut("load_combinations")
+        .and_then(Value::as_array_mut)
+        .and_then(|combinations| combinations.get_mut(load_combination_index))
+        .and_then(Value::as_object_mut)
+        .ok_or_else(|| snapshot_error("load combination"))?
+        .insert("id".to_owned(), json!(replacement_load_combination_id));
+
+    let edited_expansion =
+        require_bounded_linear_load_combination(model, replacement_load_combination_id).map_err(
+            |error| {
+                WorkbenchError::new(
+                    "workbench_model_edit_linear_load_combination_identity_cascade_profile_drift",
+                    error.to_string(),
+                )
+            },
+        )?;
+    if edited_expansion != expansion {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_linear_load_combination_identity_cascade_profile_drift",
+            "target load-combination expansion changed while cascading only its identity",
+        ));
+    }
+    for (downstream_identity, source_downstream_expansion) in downstream_expansions {
+        let edited_downstream_expansion =
+            require_bounded_linear_load_combination(model, &downstream_identity).map_err(|error| {
+                WorkbenchError::new(
+                    "workbench_model_edit_linear_load_combination_identity_cascade_downstream_profile_drift",
+                    error.to_string(),
+                )
+            })?;
+        if edited_downstream_expansion.expanded_pattern_terms
+            != source_downstream_expansion.expanded_pattern_terms
+            || edited_downstream_expansion.max_depth != source_downstream_expansion.max_depth
+            || edited_downstream_expansion.expanded_term_count
+                != source_downstream_expansion.expanded_term_count
+            || edited_downstream_expansion.nested != source_downstream_expansion.nested
+        {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_linear_load_combination_identity_cascade_downstream_profile_drift",
+                format!(
+                    "downstream load-combination {downstream_identity} expansion changed while cascading only a referenced identity"
+                ),
+            ));
+        }
+    }
+
+    Ok(CascadedLinearLoadCombinationIdentityV2 {
+        load_combination_index,
+        retained_combination_without_identity,
+        expansion,
+        downstream_combination_reference_count,
+        roundtrip_reference_count,
+    })
+}
+
 fn append_linear_load_combination(
     model: &mut Value,
     load_combination_id: &str,
@@ -20547,6 +21015,53 @@ fn bind_linear_load_combination_identity_edit_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_linear_load_combination_identity_cascade_edit_provenance(
+    model: &mut Value,
+    load_combination_id: &str,
+    replacement_load_combination_id: &str,
+    cascaded: &CascadedLinearLoadCombinationIdentityV2,
+    source_content_hash: &str,
+    source_semantic_hash: &str,
+    source_provenance_hash: &str,
+) -> Result<(), WorkbenchError> {
+    let editing_profile = if cascaded.expansion.nested {
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    } else {
+        "unique_direct_linear_static_patterns_2_to_64"
+    };
+    bind_parameter_edit_provenance(
+        model,
+        LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "linear_load_combination_identity_cascade_edit",
+            "editing_profile": editing_profile,
+            "source_load_combination_id": load_combination_id,
+            "replacement_load_combination_id": replacement_load_combination_id,
+            "load_combination_index": cascaded.load_combination_index,
+            "combination_type": "linear",
+            "nested": cascaded.expansion.nested,
+            "root_term_count": cascaded.expansion.root_terms.as_array().map_or(0, Vec::len),
+            "combination_depth": cascaded.expansion.max_depth,
+            "expanded_term_count": cascaded.expansion.expanded_term_count,
+            "expanded_pattern_count": cascaded.expansion.expanded_pattern_terms.as_array().map_or(0, Vec::len),
+            "expanded_pattern_terms": cascaded.expansion.expanded_pattern_terms.clone(),
+            "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+            "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+            "retained_combination_without_identity": cascaded.retained_combination_without_identity.clone(),
+            "downstream_combination_reference_count": cascaded.downstream_combination_reference_count,
+            "roundtrip_reference_count": cascaded.roundtrip_reference_count,
+            "typed_reference_cascade_verified": true,
+            "target_and_downstream_expansion_preserved": true,
+            "source_content_hash": source_content_hash,
+            "source_semantic_hash": source_semantic_hash,
+            "source_provenance_hash": source_provenance_hash,
+            "claim_boundary": LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY
+        }),
+        source_content_hash,
+    )
+}
+
 fn bind_linear_load_combination_add_provenance(
     model: &mut Value,
     load_combination_id: &str,
@@ -22309,13 +22824,15 @@ mod tests {
         replace_direct_linear_load_combination_reference, replace_element_identity,
         replace_fixed_constraint_identity, replace_frame_section_identity,
         replace_frame_section_identity_cascade, replace_linear_load_combination_identity,
-        replace_linear_load_pattern_identity, replace_linear_load_pattern_identity_cascade,
-        replace_linear_material_identity, replace_linear_material_identity_cascade,
-        replace_model_identity, replace_nested_linear_load_combination_factor,
+        replace_linear_load_combination_identity_cascade, replace_linear_load_pattern_identity,
+        replace_linear_load_pattern_identity_cascade, replace_linear_material_identity,
+        replace_linear_material_identity_cascade, replace_model_identity,
+        replace_nested_linear_load_combination_factor,
         replace_nested_linear_load_combination_reference, replace_nodal_load_identity,
         replace_nodal_load_target, replace_node_identity, replace_node_identity_cascade,
         replace_truss_section_identity, replace_truss_section_identity_cascade,
-        validate_constraint_target_edit_request, validate_constraint_value_edit_request,
+        require_bounded_linear_load_combination, validate_constraint_target_edit_request,
+        validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request,
         validate_direct_linear_load_combination_term_add_request,
@@ -25233,6 +25750,190 @@ mod tests {
         );
 
         assert_linear_load_combination_identity_rejections(&direct);
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn linear_load_combination_identity_cascade_updates_typed_downstream_references_and_mappings() {
+        let mut model = json!({
+            "load_patterns": [
+                {"id": "LC1", "analysis_type": "linear_static"},
+                {"id": "LC2", "analysis_type": "linear_static"},
+                {"id": "LC3", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": [
+                {
+                    "id": "COMBO_BASE", "index": 0, "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "LC1", "ref_kind": "load_pattern", "factor": 1.0},
+                        {"ref_id": "LC2", "ref_kind": "load_pattern", "factor": 0.5}
+                    ],
+                    "source_id": "source:COMBO_BASE", "extensions": {"fixture": true}
+                },
+                {
+                    "id": "COMBO_PARENT", "index": 1, "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 1.25},
+                        {"ref_id": "LC3", "ref_kind": "load_pattern", "factor": -0.25}
+                    ],
+                    "source_id": null, "extensions": {}
+                },
+                {
+                    "id": "COMBO_SIBLING", "index": 2, "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.75},
+                        {"ref_id": "LC3", "ref_kind": "load_pattern", "factor": 0.5}
+                    ],
+                    "source_id": null, "extensions": {}
+                }
+            ],
+            "unsupported_features": [],
+            "roundtrip_map": [
+                {"source_entity_id": "source:base:exact", "entity_kind": "load_combination", "model_ir_entity_id": "COMBO_BASE", "mapping_status": "exact"},
+                {"source_entity_id": "source:base:canonicalized", "entity_kind": "load_combination", "model_ir_entity_id": "COMBO_BASE", "mapping_status": "canonicalized"},
+                {"source_entity_id": "source:base:approximated", "entity_kind": "load_combination", "model_ir_entity_id": "COMBO_BASE", "mapping_status": "approximated"},
+                {"source_entity_id": "source:base:unsupported", "entity_kind": "load_combination", "model_ir_entity_id": "COMBO_BASE", "mapping_status": "unsupported"},
+                {"source_entity_id": "source:parent", "entity_kind": "load_combination", "model_ir_entity_id": "COMBO_PARENT", "mapping_status": "exact"}
+            ]
+        });
+        let source_target = model["load_combinations"][0].clone();
+        let unrelated_mapping = model["roundtrip_map"][4].clone();
+        let source_parent_expansion =
+            require_bounded_linear_load_combination(&model, "COMBO_PARENT")
+                .expect("source parent expansion");
+        let source_sibling_expansion =
+            require_bounded_linear_load_combination(&model, "COMBO_SIBLING")
+                .expect("source sibling expansion");
+
+        let mut edited = model.clone();
+        let cascaded = replace_linear_load_combination_identity_cascade(
+            &mut edited,
+            "COMBO_BASE",
+            "COMBO_BASE_LINKED",
+        )
+        .expect("cascade referenced combination identity");
+        assert_eq!(cascaded.load_combination_index, 0);
+        assert!(!cascaded.expansion.nested);
+        assert_eq!(cascaded.downstream_combination_reference_count, 2);
+        assert_eq!(cascaded.roundtrip_reference_count, 4);
+        assert_eq!(edited["load_combinations"][0]["id"], "COMBO_BASE_LINKED");
+        for key in [
+            "index",
+            "combination_type",
+            "terms",
+            "source_id",
+            "extensions",
+        ] {
+            assert_eq!(edited["load_combinations"][0][key], source_target[key]);
+        }
+        assert_eq!(
+            edited["load_combinations"][1]["terms"][0]["ref_id"],
+            "COMBO_BASE_LINKED"
+        );
+        assert_eq!(
+            edited["load_combinations"][2]["terms"][0]["ref_id"],
+            "COMBO_BASE_LINKED"
+        );
+        for index in 0..4 {
+            assert_eq!(
+                edited["roundtrip_map"][index]["model_ir_entity_id"],
+                "COMBO_BASE_LINKED"
+            );
+        }
+        assert_eq!(edited["roundtrip_map"][0]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][1]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][2]["mapping_status"], "approximated");
+        assert_eq!(edited["roundtrip_map"][3]["mapping_status"], "unsupported");
+        assert_eq!(edited["roundtrip_map"][4], unrelated_mapping);
+        for (identity, source_expansion) in [
+            ("COMBO_PARENT", source_parent_expansion),
+            ("COMBO_SIBLING", source_sibling_expansion),
+        ] {
+            let edited_expansion = require_bounded_linear_load_combination(&edited, identity)
+                .expect("edited downstream expansion");
+            assert_eq!(
+                edited_expansion.expanded_pattern_terms,
+                source_expansion.expanded_pattern_terms
+            );
+            assert_eq!(edited_expansion.max_depth, source_expansion.max_depth);
+            assert_eq!(
+                edited_expansion.expanded_term_count,
+                source_expansion.expanded_term_count
+            );
+        }
+
+        let mut nested_target = edited.clone();
+        nested_target["load_combinations"]
+            .as_array_mut()
+            .expect("load combinations")
+            .push(json!({
+                "id": "COMBO_TOP", "index": 3, "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "COMBO_PARENT", "ref_kind": "load_combination", "factor": 1.0},
+                    {"ref_id": "LC3", "ref_kind": "load_pattern", "factor": 0.25}
+                ],
+                "source_id": null, "extensions": {}
+            }));
+        let nested = replace_linear_load_combination_identity_cascade(
+            &mut nested_target,
+            "COMBO_PARENT",
+            "COMBO_PARENT_LINKED",
+        )
+        .expect("cascade nested target identity");
+        assert!(nested.expansion.nested);
+        assert_eq!(nested.downstream_combination_reference_count, 1);
+        assert_eq!(
+            nested_target["load_combinations"][3]["terms"][0]["ref_id"],
+            "COMBO_PARENT_LINKED"
+        );
+
+        let mut unreferenced = model.clone();
+        unreferenced["load_combinations"] = json!([source_target]);
+        assert_eq!(
+            replace_linear_load_combination_identity_cascade(
+                &mut unreferenced,
+                "COMBO_BASE",
+                "COMBO_BASE_LINKED",
+            )
+            .expect_err("orphan combination uses non-cascading editor")
+            .code,
+            "workbench_model_edit_linear_load_combination_identity_cascade_unreferenced"
+        );
+        let mut feature_owned = model.clone();
+        feature_owned["unsupported_features"] = json!([{"source_entity_id": "COMBO_BASE"}]);
+        assert_eq!(
+            replace_linear_load_combination_identity_cascade(
+                &mut feature_owned,
+                "COMBO_BASE",
+                "COMBO_BASE_LINKED",
+            )
+            .expect_err("unsupported feature owns combination")
+            .code,
+            "workbench_model_edit_linear_load_combination_identity_cascade_unsupported_feature_owned"
+        );
+        let mut kind_mismatch = model.clone();
+        kind_mismatch["roundtrip_map"][0]["entity_kind"] = json!("load_pattern");
+        assert_eq!(
+            replace_linear_load_combination_identity_cascade(
+                &mut kind_mismatch,
+                "COMBO_BASE",
+                "COMBO_BASE_LINKED",
+            )
+            .expect_err("direct mapping kind must be load_combination")
+            .code,
+            "workbench_model_edit_linear_load_combination_identity_cascade_roundtrip_kind_mismatch"
+        );
+        model["roundtrip_map"][4]["model_ir_entity_id"] = json!("COMBO_BASE_LINKED");
+        assert_eq!(
+            replace_linear_load_combination_identity_cascade(
+                &mut model,
+                "COMBO_BASE",
+                "COMBO_BASE_LINKED",
+            )
+            .expect_err("replacement mapping ownership")
+            .code,
+            "workbench_model_edit_linear_load_combination_identity_cascade_replacement_roundtrip_owned"
+        );
     }
 
     fn linear_load_combination_identity_fixture() -> Value {

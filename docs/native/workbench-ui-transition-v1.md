@@ -242,6 +242,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   DOFs `[6,7,8,9,10,11]`, combined active load `[25000,-12000,5000,0,0,0]`, fallback 0 and
   byte-identical initialized-checkpoint restart. Term editing, creation/deletion, reference
   cascades and visual manipulation remain separate or open.
+- `model-edit-linear-load-combination-identity-cascade`: deterministic replacement of one
+  referenced bounded direct or acyclic nested linear load-combination identity. Rust atomically
+  rewrites every typed downstream combination term and direct combination round-trip ownership,
+  degrades exact or canonicalized direct mappings to approximated, preserves the complete target
+  row, and verifies target plus downstream mathematical expansions are unchanged. Installed E2E
+  v81 replaces child `COMBO_RENAMED` with `COMBO_BASE_LINKED` beneath `COMBO_PARENT` and proves
+  frame-plus-truss recovery types `[1,2]`, offsets `[0,12,15]`, active DOFs
+  `[6,7,8,9,10,11]`, combined active load `[35000,-12000,5000,0,0,0]`, fallback 0 and
+  byte-identical initialized-checkpoint restart. Untyped extension and unsupported-feature
+  cascades, term editing, creation/deletion and visual manipulation remain open.
 - `model-edit-model-identity`: expected-source-bound replacement of the root ModelIR `model_id`.
   Rust hashes and compares the complete verified document with `model_id` removed before binding
   explicit edit provenance, rejects malformed/no-op/mismatched identities and unsupported-feature

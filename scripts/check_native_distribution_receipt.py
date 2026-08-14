@@ -930,6 +930,22 @@ V80_LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_KEYS = {
     "workbench_linear_load_pattern_identity_cascade_edit_restart_passed",
 }
 V80_EXPECTED_KEYS = V79_EXPECTED_KEYS | V80_LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_KEYS
+V81_LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_KEYS = {
+    "workbench_linear_load_combination_identity_cascade_edit_surface_passed",
+    "workbench_linear_load_combination_identity_cascade_edit_model_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_receipt_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_request_receipt_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_request_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_assembly_receipt_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_checkpoint_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_result_ir_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_recovery_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_report_ir_sha256",
+    "workbench_linear_load_combination_identity_cascade_edit_restart_passed",
+}
+V81_EXPECTED_KEYS = (
+    V80_EXPECTED_KEYS | V81_LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_KEYS
+)
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -971,6 +987,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v81_receipt = receipt_schema_version == "structural-native-distribution-e2e.v81"
+    if is_v81_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v80"
     is_v80_receipt = receipt_schema_version == "structural-native-distribution-e2e.v80"
     if is_v80_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v79"
@@ -1265,6 +1284,7 @@ def validate(
         "structural-native-distribution-e2e.v78": V78_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v79": V79_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v80": V80_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v81": V81_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1402,6 +1422,26 @@ def validate(
             "mgt_import_health_sha256",
             "mgt_result_ir_sha256",
             "mgt_report_pdf_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v81_receipt:
+        for name in (
+            "workbench_linear_load_combination_identity_cascade_edit_surface_passed",
+            "workbench_linear_load_combination_identity_cascade_edit_restart_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "workbench_linear_load_combination_identity_cascade_edit_model_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_receipt_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_request_receipt_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_request_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_assembly_receipt_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_checkpoint_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_result_ir_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_recovery_sha256",
+            "workbench_linear_load_combination_identity_cascade_edit_report_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

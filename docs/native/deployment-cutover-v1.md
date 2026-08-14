@@ -38,6 +38,9 @@ existing-property commands, plus
 unreferenced stable-identity replacement for one existing element, plus
 `model-edit-linear-load-combination-identity` bounded direct-or-nested unreferenced
 load-combination stable-identity replacement without reference cascade, plus
+`model-edit-linear-load-combination-identity-cascade` bounded direct-or-nested referenced
+load-combination identity replacement with typed downstream-combination and direct round-trip
+reference cascade, plus
 `model-edit-model-identity` expected-source-bound root model-identity replacement with complete
 pre-provenance retained-document hash equality.
 The installed `model-add-frame3d-member` command appends one connected linear frame3d node/member
@@ -134,7 +137,15 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v80 proves repeated load-pattern-identity-cascade-edited/
+assembly preflight. Distribution E2E v81 proves repeated load-combination-identity-cascade-edited/
+request/artifact bytes and retains every v80 assertion while adding `COMBO_PARENT`, replacing its
+referenced child `COMBO_RENAMED` with `COMBO_BASE_LINKED` through
+`model-edit-linear-load-combination-identity-cascade`, and atomically updating the typed parent
+term. It rejects malformed, no-op, colliding, ambiguous and unreferenced identities, verifies the
+target and parent mathematical expansions are unchanged, and proves exact frame-plus-truss
+recovery `[1,2]`, offsets `[0,12,15]`, active DOFs `[6,7,8,9,10,11]`, combined active load
+`[35000,-12000,5000,0,0,0]`, byte-identical initialized-checkpoint restart and fallback 0.
+Distribution E2E v80 proves repeated load-pattern-identity-cascade-edited/
 request/artifact bytes and retains every v79 assertion while replacing referenced `LC_WEAK` with
 `LC_WEAK_LINKED` through `model-edit-linear-load-pattern-identity-cascade`. It atomically updates
 the typed term inside retained `COMBO_RENAMED`, rejects malformed, no-op, colliding and unreferenced

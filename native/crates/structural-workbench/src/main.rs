@@ -677,6 +677,11 @@ fn run(arguments: &[OsString]) -> ExitCode {
             parse_model_edit_linear_load_combination_identity(arguments)
                 .and_then(|command| run_model_edit_linear_load_combination_identity(&command))
         }
+        Some("model-edit-linear-load-combination-identity-cascade") => {
+            parse_model_edit_linear_load_combination_identity_cascade(arguments).and_then(
+                |command| run_model_edit_linear_load_combination_identity_cascade(&command),
+            )
+        }
         Some("model-add-linear-load-combination-term") => {
             parse_model_add_direct_linear_load_combination_term(arguments)
                 .and_then(|command| run_model_add_direct_linear_load_combination_term(&command))
@@ -1357,6 +1362,20 @@ fn run_model_edit_linear_load_combination_identity(
         &command.replacement_load_combination_id,
         &command.output_directory,
     )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_edit_linear_load_combination_identity_cascade(
+    command: &ModelEditLinearLoadCombinationIdentityCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome =
+        structural_workbench::publish_model_linear_load_combination_identity_cascade_edit(
+            &command.model,
+            &command.load_combination_id,
+            &command.replacement_load_combination_id,
+            &command.output_directory,
+        )?;
     println!("{}", outcome.receipt_json);
     Ok(())
 }
@@ -2850,6 +2869,32 @@ fn parse_model_edit_linear_load_combination_identity(
         replacement_load_combination_id: parse_bounded_edit_id(
             &arguments[5],
             "model-edit-linear-load-combination-identity replacement load-combination ID",
+        )?,
+        output_directory: PathBuf::from(&arguments[7]),
+    })
+}
+
+fn parse_model_edit_linear_load_combination_identity_cascade(
+    arguments: &[OsString],
+) -> Result<ModelEditLinearLoadCombinationIdentityCommand, WorkbenchError> {
+    if arguments.len() != 8
+        || arguments[2] != "--load-combination"
+        || arguments[4] != "--new-load-combination"
+        || arguments[6] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-edit-linear-load-combination-identity-cascade requires MODEL.json --load-combination SOURCE-ID --new-load-combination NEW-ID --output-dir DIR",
+        ));
+    }
+    Ok(ModelEditLinearLoadCombinationIdentityCommand {
+        model: PathBuf::from(&arguments[1]),
+        load_combination_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-edit-linear-load-combination-identity-cascade source load-combination ID",
+        )?,
+        replacement_load_combination_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-edit-linear-load-combination-identity-cascade replacement load-combination ID",
         )?,
         output_directory: PathBuf::from(&arguments[7]),
     })
@@ -4787,7 +4832,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-truss-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-element-identity <MODEL.json> --element <SOURCE-ID> --new-element <NEW-ID> --output-dir <DIR>",
-        "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
+        "\n  structural-workbench model-add-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --term <PATTERN> <FACTOR> [--term <PATTERN> <FACTOR> ... up to 64] --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-identity-cascade <MODEL.json> --load-combination <SOURCE-ID> --new-load-combination <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-insert-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <NEW-PATTERN-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-reorder-linear-load-combination-term <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --to-index <0..63> --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination <MODEL.json> --load-combination <NEW-ID> --combination-term <COMBINATION> <FACTOR> --pattern-term <PATTERN> <FACTOR> [additional typed terms ... up to 64] --output-dir <DIR>\n  structural-workbench model-add-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-factor <MODEL.json> --load-combination <ID> --load-pattern <PATTERN-ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-combination-reference <MODEL.json> --load-combination <ID> --load-pattern <SOURCE-PATTERN-ID> --replacement-load-pattern <NEW-PATTERN-ID> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-factor <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --factor <NONZERO-F64> --output-dir <DIR>\n  structural-workbench model-edit-nested-linear-load-combination-reference <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --replacement-ref-kind <load_pattern|load_combination> --replacement-ref-id <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-combination <MODEL.json> --load-combination <ID> --output-dir <DIR>",
         "\n  structural-workbench model-insert-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <NEW-ID> --factor <NONZERO-F64> --at-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
@@ -4826,6 +4871,7 @@ mod tests {
         parse_model_edit_frame_element_properties, parse_model_edit_frame_section,
         parse_model_edit_frame_section_identity, parse_model_edit_frame_section_identity_cascade,
         parse_model_edit_linear_load_combination_identity,
+        parse_model_edit_linear_load_combination_identity_cascade,
         parse_model_edit_linear_load_pattern_identity,
         parse_model_edit_linear_load_pattern_identity_cascade, parse_model_edit_linear_material,
         parse_model_edit_linear_material_identity,
@@ -5642,6 +5688,38 @@ mod tests {
         let mut wrong_option = arguments;
         wrong_option[4] = OsString::from("--replacement");
         assert!(parse_model_edit_linear_load_combination_identity(&wrong_option).is_err());
+    }
+
+    #[test]
+    fn model_edit_linear_load_combination_identity_cascade_parser_is_closed_and_bounded() {
+        let arguments = [
+            OsString::from("model-edit-linear-load-combination-identity-cascade"),
+            OsString::from("model.json"),
+            OsString::from("--load-combination"),
+            OsString::from("COMBO_BASE"),
+            OsString::from("--new-load-combination"),
+            OsString::from("COMBO_BASE_LINKED"),
+            OsString::from("--output-dir"),
+            OsString::from("edited"),
+        ];
+        let parsed = parse_model_edit_linear_load_combination_identity_cascade(&arguments)
+            .expect("valid load-combination identity cascade command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.load_combination_id, "COMBO_BASE");
+        assert_eq!(parsed.replacement_load_combination_id, "COMBO_BASE_LINKED");
+        assert_eq!(parsed.output_directory, PathBuf::from("edited"));
+
+        let mut empty_source = arguments.clone();
+        empty_source[3] = OsString::new();
+        assert!(parse_model_edit_linear_load_combination_identity_cascade(&empty_source).is_err());
+        let mut empty_replacement = arguments.clone();
+        empty_replacement[5] = OsString::new();
+        assert!(
+            parse_model_edit_linear_load_combination_identity_cascade(&empty_replacement).is_err()
+        );
+        let mut wrong_option = arguments;
+        wrong_option[4] = OsString::from("--replacement");
+        assert!(parse_model_edit_linear_load_combination_identity_cascade(&wrong_option).is_err());
     }
 
     #[test]

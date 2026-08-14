@@ -43,6 +43,7 @@
       "model-edit-element-connectivity",
       "model-edit-element-identity",
       "model-edit-linear-load-combination-identity",
+      "model-edit-linear-load-combination-identity-cascade",
       "model-add-frame3d-member",
       "model-add-nodal-load",
       "model-delete-nodal-load",

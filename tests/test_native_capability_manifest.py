@@ -383,6 +383,26 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in load_pattern_identity_cascade["claim"]
     assert "approved HIP C2" in load_pattern_identity_cascade["claim"]
     assert "C6" in load_pattern_identity_cascade["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_linear_load_combination_identity_cascade_edit"
+        )
+        is True
+    )
+    load_combination_identity_cascade = payload["capabilities"][
+        "modelir_linear_load_combination_identity_cascade_edit"
+    ]
+    assert load_combination_identity_cascade["cutover_gate"] == "C5"
+    assert load_combination_identity_cascade["owner"] == "structural-workbench"
+    assert "atomically updates every downstream" in load_combination_identity_cascade["claim"]
+    assert "direct load_combination round-trip" in load_combination_identity_cascade["claim"]
+    assert "mathematical expansion is verified unchanged" in load_combination_identity_cascade["claim"]
+    assert "distribution v81 E2E" in load_combination_identity_cascade["claim"]
+    assert "COMBO_BASE_LINKED" in load_combination_identity_cascade["claim"]
+    assert "byte-identical initialized restart" in load_combination_identity_cascade["claim"]
+    assert "fallback 0" in load_combination_identity_cascade["claim"]
+    assert "approved HIP C2" in load_combination_identity_cascade["claim"]
+    assert "C6" in load_combination_identity_cascade["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_orphan_node_delete") is True
     orphan_node_delete = payload["capabilities"]["modelir_orphan_node_delete"]
     assert orphan_node_delete["cutover_gate"] == "C5"
