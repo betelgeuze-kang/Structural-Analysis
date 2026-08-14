@@ -95,6 +95,9 @@ Its bounded inverse removes only the last contiguous neutral unreferenced parame
 `frame_3d` section while retaining another section and rejecting element, unsupported-feature and
 direct round-trip references without cascade, reindexing, or retargeting. See
 `docs/native/modelir-frame-section-deletion-v1.md`.
+The truss-section inverse applies the same boundary to the last contiguous neutral unreferenced
+parameter-set-v1 `truss_3d` row, additionally requiring another truss section to remain. See
+`docs/native/modelir-truss-section-deletion-v1.md`.
 The bounded truss3d authoring pair appends one v1 `truss_3d` area section and then one connected
 `truss_3d`/`linear_truss_3d` node/member using an existing compatible material. It preserves every
 round-trip row, omits frame-only rotation/release fields, revalidates through C++, and composes
@@ -233,6 +236,8 @@ structural-workbench model-delete-frame-section ADDED-SECTION-MODEL/model-ir.jso
   --section S2 --output-dir DELETED-SECTION-MODEL
 structural-workbench model-add-truss-section MODEL.json \
   --section T1 --area-m2 0.005 --output-dir ADDED-TRUSS-SECTION-MODEL
+structural-workbench model-delete-truss-section MODEL-WITH-T1-AND-T2.json \
+  --section T2 --output-dir DELETED-TRUSS-SECTION-MODEL
 structural-workbench model-add-truss3d-member ADDED-TRUSS-SECTION-MODEL/model-ir.json \
   --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
   --material M1 --section T1 --output-dir ADDED-TRUSS-MEMBER-MODEL

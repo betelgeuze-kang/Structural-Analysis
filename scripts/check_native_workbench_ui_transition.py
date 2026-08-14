@@ -244,6 +244,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_cpp_revalidated_last_neutral_truss3d_section_delete": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_cpp_revalidated_linear_truss3d_member_add": (
         "c5_implemented",
         False,
@@ -411,6 +415,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "model-add-frame-section",
         "model-delete-frame-section",
         "model-add-truss-section",
+        "model-delete-truss-section",
         "model-add-truss3d-member",
         "model-delete-frame3d-leaf-member",
         "model-delete-truss3d-leaf-member",
@@ -991,6 +996,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native:model-delete-linear-material.v1",
             "structural-native:model-add-frame-section.v1",
             "structural-native:model-delete-frame-section.v1",
+            "structural-native:model-delete-truss-section.v1",
             "pub fn edit_model_linear_material",
             "pub fn edit_model_frame_section",
             "pub fn edit_model_frame_element_orientation",
@@ -1005,6 +1011,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn delete_model_linear_material",
             "pub fn add_model_frame_section",
             "pub fn delete_model_frame_section",
+            "pub fn delete_model_truss_section",
             'mark_roundtrip_entity_approximated(&mut edited, "material", material_id)',
             'mark_roundtrip_entity_approximated(&mut edited, "section", section_id)',
             'mark_roundtrip_entity_approximated(&mut edited, "element", element_id)',
@@ -1609,6 +1616,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             'Some("model-delete-linear-material")',
             'Some("model-add-frame-section")',
             'Some("model-delete-frame-section")',
+            'Some("model-delete-truss-section")',
             'Some("model-create-linear-analysis-request")',
         ),
         blockers,
@@ -1836,6 +1844,23 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    truss_section_deletion_doc = _text(
+        root, Path("docs/native/modelir-truss-section-deletion-v1.md"), blockers
+    )
+    _require_tokens(
+        Path("docs/native/modelir-truss-section-deletion-v1.md"),
+        truss_section_deletion_doc,
+        (
+            "model-delete-truss-section",
+            "Rust -> C ABI -> C++",
+            "structural-native:model-delete-truss-section.v1",
+            "last contiguous",
+            "section_id",
+            "fallback 0",
+            "C6",
+        ),
+        blockers,
+    )
     frame_element_properties_doc = _text(
         root, Path("docs/native/modelir-frame-element-properties-edit-v1.md"), blockers
     )
@@ -1881,6 +1906,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "model-delete-linear-material",
             "model-add-frame-section",
             "model-delete-frame-section",
+            "model-delete-truss-section",
             "model-create-linear-analysis-request",
             "never infers this decision",
             "seven active workflows",
@@ -1956,7 +1982,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     expected_extension_claim = (
         "compatible frame3d element and truss3d material/section edits, truss3d "
         "section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, "
-        "frame3d-section and fixed-constraint deletion, and "
+        "frame3d-section, truss3d-section and fixed-constraint deletion, and "
         "family-specific last-neutral-frame3d/truss3d-leaf deletion"
     )
     if extension_claim != expected_extension_claim:
@@ -1965,7 +1991,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     for token in (
         "direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0",
         "existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation",
-        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+        "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

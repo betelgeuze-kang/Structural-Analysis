@@ -2575,6 +2575,171 @@ exercise_truss3d_authoring_surface() {
 }
 exercise_truss3d_authoring_surface
 
+exercise_truss_section_deletion_surface() {
+  local retained_model="$e2e_root/truss3d-authoring-first-composed/model-ir.json"
+  local source_directory="$e2e_root/truss-section-delete-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-truss-section "$retained_model" --section T2 --area-m2 0.0025 \
+    --output-dir "$source_directory" \
+    > "$e2e_root/truss-section-delete-source.stdout.json"
+
+  local source_model="$source_directory/model-ir.json"
+  local source_before_hash
+  source_before_hash="$(sha256sum "$source_model" | awk '{print $1}')"
+
+  local label delete_directory request_directory direct_directory
+  local partial_directory resumed_directory
+  for label in first second; do
+    delete_directory="$e2e_root/truss-section-delete-$label"
+    request_directory="$e2e_root/truss-section-delete-$label-request"
+    direct_directory="$e2e_root/truss-section-delete-$label-direct"
+    partial_directory="$e2e_root/truss-section-delete-$label-partial"
+    resumed_directory="$e2e_root/truss-section-delete-$label-resumed"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-delete-truss-section "$source_model" \
+      --section T2 --output-dir "$delete_directory" \
+      > "$e2e_root/truss-section-delete-$label.stdout.json"
+    grep -Fq '"operation":"truss_section_delete"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_section_id":"T2"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_section_index":2' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_family_id":"truss_3d"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameter_set_version":"1"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"removed_parameters_si":{"area_m2":0.0025}' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"cpp_semantic_snapshot_verified":true' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"analysis_ready":true' "$delete_directory/edit-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$delete_directory/edit-receipt.json"
+    grep -Fq '"structural-native:model-delete-truss-section.v1"' \
+      "$delete_directory/model-ir.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" model validate \
+      "$delete_directory/model-ir.json" --require-analysis-ready \
+      > "$e2e_root/truss-section-delete-$label-validation.json"
+    grep -Fq '"entity_counts":{"nodes":3,"materials":1,"sections":2' \
+      "$e2e_root/truss-section-delete-$label-validation.json"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" model-view \
+      "$delete_directory/model-ir.json" \
+      > "$e2e_root/truss-section-delete-$label-view.txt"
+    grep -Fq 'Inventory: nodes=3 elements=2 constraints=2 load_patterns=4' \
+      "$e2e_root/truss-section-delete-$label-view.txt"
+    grep -Fq '"family_id":"truss_3d","id":"T1","index":1' \
+      "$delete_directory/model-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-linear-analysis-request "$delete_directory/model-ir.json" \
+      --case truss-section-delete-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir "$request_directory" \
+      > "$e2e_root/truss-section-delete-$label-request.stdout.json"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$direct_directory" \
+      > "$e2e_root/truss-section-delete-$label-direct.stdout.json"
+    grep -Fq '"status":"completed"' "$direct_directory/run-receipt.json"
+    grep -Fq '"active_dof_indices":[6,7,8,9,10,11]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"active_external_load":[0,-10000,0,0,0,0]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_element_types":[1,2]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"recovery_offsets":[0,12,15]' \
+      "$direct_directory/result-recovery-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$direct_directory/result-recovery-ir.json"
+
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-run "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" --output-dir "$partial_directory" \
+      --iteration-budget 0 \
+      > "$e2e_root/truss-section-delete-$label-partial.stdout.json"
+    grep -Fq '"status":"active"' "$partial_directory/run-receipt.json"
+    test -s "$partial_directory/checkpoint.mlpcp"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis \
+      model-linear-resume "$delete_directory/model-ir.json" \
+      "$request_directory/analysis-request.json" "$partial_directory/checkpoint.mlpcp" \
+      --output-dir "$resumed_directory" \
+      > "$e2e_root/truss-section-delete-$label-resumed.stdout.json"
+    diff -r "$direct_directory" "$resumed_directory" \
+      > "$e2e_root/truss-section-delete-$label-restart-diff.txt"
+  done
+
+  local suffix diff_label
+  for suffix in '' -request -direct -partial -resumed; do
+    diff_label="${suffix#-}"
+    if [[ -z "$diff_label" ]]; then
+      diff_label=model
+    fi
+    diff -r "$e2e_root/truss-section-delete-first$suffix" \
+      "$e2e_root/truss-section-delete-second$suffix" \
+      > "$e2e_root/truss-section-delete-$diff_label-diff.txt"
+    cmp "$e2e_root/truss-section-delete-first$suffix.stdout.json" \
+      "$e2e_root/truss-section-delete-second$suffix.stdout.json"
+  done
+  cmp "$e2e_root/truss-section-delete-first-validation.json" \
+    "$e2e_root/truss-section-delete-second-validation.json"
+  cmp "$e2e_root/truss-section-delete-first-view.txt" \
+    "$e2e_root/truss-section-delete-second-view.txt"
+  if [[ "$(sha256sum "$source_model" | awk '{print $1}')" != "$source_before_hash" ]]; then
+    echo "installed truss-section deletion mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local referenced_source="$e2e_root/truss-section-delete-referenced-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-edit-truss-element-properties "$source_model" \
+    --element E2 --material M1 --section T2 --output-dir "$referenced_source" \
+    > "$e2e_root/truss-section-delete-referenced-source.stdout.json"
+  local referenced_destination="$e2e_root/truss-section-delete-referenced-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-truss-section "$referenced_source/model-ir.json" --section T2 \
+    --output-dir "$referenced_destination" \
+    > "$e2e_root/truss-section-delete-referenced-rejected.stdout.json"; then
+    echo "installed truss-section deletion accepted an element-referenced section" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_truss_section_referenced_by_element' \
+    "$e2e_root/truss-section-delete-referenced-rejected.stdout.json"
+  test ! -e "$referenced_destination"
+
+  local later_source="$e2e_root/truss-section-delete-later-source"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-add-truss-section "$source_model" --section T3 --area-m2 0.001 \
+    --output-dir "$later_source" \
+    > "$e2e_root/truss-section-delete-later-source.stdout.json"
+  local nonterminal_destination="$e2e_root/truss-section-delete-nonterminal-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-truss-section "$later_source/model-ir.json" --section T2 \
+    --output-dir "$nonterminal_destination" \
+    > "$e2e_root/truss-section-delete-nonterminal-rejected.stdout.json"; then
+    echo "installed truss-section deletion accepted a nonterminal section" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_truss_section_not_terminal' \
+    "$e2e_root/truss-section-delete-nonterminal-rejected.stdout.json"
+  test ! -e "$nonterminal_destination"
+
+  local minimum_destination="$e2e_root/truss-section-delete-minimum-rejected"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-delete-truss-section "$retained_model" --section T1 \
+    --output-dir "$minimum_destination" \
+    > "$e2e_root/truss-section-delete-minimum-rejected.stdout.json"; then
+    echo "installed truss-section deletion accepted the last truss section" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_delete_truss_section_minimum_family' \
+    "$e2e_root/truss-section-delete-minimum-rejected.stdout.json"
+  test ! -e "$minimum_destination"
+}
+exercise_truss_section_deletion_surface
+
 exercise_truss3d_editing_surface() {
   local authored_model="$e2e_root/truss3d-authoring-first-composed/model-ir.json"
   local alternate_section="$e2e_root/truss3d-editing-alternate-section"
@@ -3320,6 +3485,11 @@ truss3d_authoring_composed_model_hash="$(sha256sum "$e2e_root/truss3d-authoring-
 truss3d_authoring_request_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-request/analysis-request.json" | awk '{print $1}')"
 truss3d_authoring_result_ir_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-ir.json" | awk '{print $1}')"
 truss3d_authoring_recovery_hash="$(sha256sum "$e2e_root/truss3d-authoring-first-direct/result-recovery-ir.json" | awk '{print $1}')"
+truss_section_delete_model_hash="$(sha256sum "$e2e_root/truss-section-delete-first/model-ir.json" | awk '{print $1}')"
+truss_section_delete_receipt_hash="$(sha256sum "$e2e_root/truss-section-delete-first/edit-receipt.json" | awk '{print $1}')"
+truss_section_delete_request_hash="$(sha256sum "$e2e_root/truss-section-delete-first-request/analysis-request.json" | awk '{print $1}')"
+truss_section_delete_result_ir_hash="$(sha256sum "$e2e_root/truss-section-delete-first-direct/result-ir.json" | awk '{print $1}')"
+truss_section_delete_recovery_hash="$(sha256sum "$e2e_root/truss-section-delete-first-direct/result-recovery-ir.json" | awk '{print $1}')"
 truss3d_editing_section_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/model-ir.json" | awk '{print $1}')"
 truss3d_editing_section_receipt_hash="$(sha256sum "$e2e_root/truss3d-editing-first-section/edit-receipt.json" | awk '{print $1}')"
 truss3d_editing_properties_model_hash="$(sha256sum "$e2e_root/truss3d-editing-first-properties/model-ir.json" | awk '{print $1}')"
@@ -3455,6 +3625,10 @@ v38_receipt_json="${v37_receipt_json/structural-native-distribution-e2e.v37/stru
 frame_section_delete_receipt_fields="\"workbench_frame_section_delete_surface_passed\":true,\"workbench_frame_section_delete_model_sha256\":\"sha256:$frame_section_delete_model_hash\",\"workbench_frame_section_delete_receipt_sha256\":\"sha256:$frame_section_delete_receipt_hash\",\"workbench_frame_section_delete_request_sha256\":\"sha256:$frame_section_delete_request_hash\",\"workbench_frame_section_delete_result_ir_sha256\":\"sha256:$frame_section_delete_result_ir_hash\",\"workbench_frame_section_delete_recovery_sha256\":\"sha256:$frame_section_delete_recovery_hash\","
 v38_receipt_json="${v38_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame_section_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v38_receipt_json" > "$temporary_receipt"
+v39_receipt_json="${v38_receipt_json/structural-native-distribution-e2e.v38/structural-native-distribution-e2e.v39}"
+truss_section_delete_receipt_fields="\"workbench_truss_section_delete_surface_passed\":true,\"workbench_truss_section_delete_model_sha256\":\"sha256:$truss_section_delete_model_hash\",\"workbench_truss_section_delete_receipt_sha256\":\"sha256:$truss_section_delete_receipt_hash\",\"workbench_truss_section_delete_request_sha256\":\"sha256:$truss_section_delete_request_hash\",\"workbench_truss_section_delete_result_ir_sha256\":\"sha256:$truss_section_delete_result_ir_hash\",\"workbench_truss_section_delete_recovery_sha256\":\"sha256:$truss_section_delete_recovery_hash\","
+v39_receipt_json="${v39_receipt_json/\"workbench_result_view_surface_passed\":true,/${truss_section_delete_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v39_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

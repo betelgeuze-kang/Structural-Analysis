@@ -47,7 +47,10 @@ absent from the runtime image.
   section and rejecting element, mapped, source-owned, minimum-section or nonterminal candidates.
   `model-add-truss-section` adds one bounded v1
   truss section, and `model-add-truss3d-member` adds one node plus one connected linear truss3d
-  member using existing compatible identities. `model-delete-frame3d-leaf-member` and
+  member using existing compatible identities. `model-delete-truss-section` removes only the last
+  contiguous neutral unreferenced parameter-set-v1 truss3d section while retaining another truss
+  section and rejecting element, mapped, source-owned, minimum-family or nonterminal candidates.
+  `model-delete-frame3d-leaf-member` and
   `model-delete-truss3d-leaf-member` remove only a last contiguous neutral member of their exact
   family and its last orphan endpoint node when no other element, load, constraint, stage,
   unsupported-feature source, or round-trip row references them; neither cascades nor reindexes.
@@ -167,6 +170,8 @@ structural-workbench model-delete-frame-section /workspace/added-section-model/m
   --section S2 --output-dir /workspace/deleted-section-model
 structural-workbench model-add-truss-section /workspace/model.json \
   --section T1 --area-m2 0.005 --output-dir /workspace/added-truss-section-model
+structural-workbench model-delete-truss-section /workspace/model-with-t1-and-t2.json \
+  --section T2 --output-dir /workspace/deleted-truss-section-model
 structural-workbench model-add-truss3d-member /workspace/added-truss-section-model/model-ir.json \
   --node N3 --coordinates 2 1 0 --element E2 --from-node N2 \
   --material M1 --section T1 --output-dir /workspace/added-truss-member-model

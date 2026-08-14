@@ -180,6 +180,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   retained section and active load, typed frame recovery, byte-identical restart and fallback 0.
   General section/property deletion, cascade/reindex, reference retargeting, other families and
   visual authoring remain open.
+- `model-delete-truss-section`: deterministic deletion of only the last contiguous neutral,
+  unreferenced parameter-set-v1 `truss_3d` section while retaining another truss section. Rust
+  rejects source-owned/nonterminal/index/family/version/area drift plus every element `section_id`,
+  unsupported-feature source, or direct round-trip reference before mutation, then strictly
+  reparses and C++-revalidates before create-new publication. Installed E2E preserves a retained
+  truss member and proves the exact active load, typed frame-plus-truss recovery, byte-identical
+  restart and fallback 0. General section/property deletion, cascade/reindex, reference
+  retargeting, other families and visual authoring remain open.
 - `model-create-linear-analysis-request`: deterministic selection of one existing `linear_static`
   load pattern and bounded CPU/PCG controls. Rust binds exact ModelIR identities, then enters the
   same ABI v1.13 C++ assembly and generated sparse-request preparation used by execution before

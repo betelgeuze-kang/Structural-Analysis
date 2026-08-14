@@ -37,6 +37,7 @@
       "model-add-frame-section",
       "model-delete-frame-section",
       "model-add-truss-section",
+      "model-delete-truss-section",
       "model-add-truss3d-member",
       "model-delete-frame3d-leaf-member",
       "model-delete-truss3d-leaf-member",
@@ -393,6 +394,12 @@
       "removal_blocker": false
     },
     {
+      "feature": "bounded_cpp_revalidated_last_neutral_truss3d_section_delete",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
       "feature": "bounded_cpp_revalidated_linear_truss3d_member_add",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
@@ -481,7 +488,7 @@
     "clean_machine_product_e2e_complete": false,
     "native_result_error_checksum_parity_complete": false
   },
-  "native_surface_extension_claim": "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
+  "native_surface_extension_claim": "compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, and family-specific last-neutral-frame3d/truss3d-leaf deletion",
   "c6_complete": false,
   "claim_boundary": "This inventory proves the bounded Rust-native analysis, inspect, explicit-review, export, benchmark-catalog build, evidence-bundle build, en-US/ko-KR UTF-8 general ModelIR topology view and bounded NDTHA response-history view, en-US/ko-KR exact-profile selected-step deformed-shape overlay, frontend clean-build plus direct npm dependency-install and policy-explicit high-level dependency-audit orchestration, TypeScript/Vite build and development-server orchestration, verified production-delivery preview server, exact Playwright Chromium installation orchestration, direct Cargo entrypoints for hosted frontend/browser product commands with npm package-script entrypoints 0, direct Cargo entrypoints for every frontend command sequenced by the Python quality gate, offline prototype static contract, Viewer/Workbench prototype/Workbench v2 browser-smoke wrappers, Viewer JavaScript syntax-gate orchestration, Viewer README verified-before-publish capture, Viewer PDF verified-before-publish export and verification wrappers, Viewer sample-workflow, performance and visual-regression process/artifact verifiers, process and output lifetimes, scoped loopback and SPA serving, and read-only browsing surfaces plus the provenance-bound C++-revalidated node-coordinate, existing-nodal-load component, existing-constraint prescribed-value, existing-linear-elastic-material parameter, existing-frame3d-section parameter, existing-frame3d-element orientation and existing-two-node-element connectivity edits, one connected linear frame3d node/member addition, one existing-pattern/existing-node linear-static nodal-load addition, and one homogeneous six-DOF fixed-constraint addition, one atomic zero-self-weight linear-static pattern with its first nonzero nodal load, one stateless linear-elastic-material addition composed into a referencing member, and one frame3d-section addition composed into a referencing member, all with native linear execution, plus C++-assembly-preflighted bounded ModelIR linear CPU request creation while keeping every active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible. A numeric nonzero audit exit is only an unclassified advisory_or_tool_failure receipt: the hosted audit policy is deliberately non-blocking, while the strict quality-gate policy publishes that receipt and then returns command failure; neither is a vulnerability, dependency, or license clearance. The automated install, audit, build and syntax gates, browser installation, sample workflow and README capture are not runtime behavior or human approval. The localized bounded ModelIR topology projection, response table and exact fixed-guided displacement overlay remain linear text/ASCII presentation and are not WCAG conformance, general localization, general nodal-field, or 3D result exploration. This does not authorize source deletion or claim general native UI parity, approved HIP C2, deprecation, rollback, clean-machine publication, or C6."
 }

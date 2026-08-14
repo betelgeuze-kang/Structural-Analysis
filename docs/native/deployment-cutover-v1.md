@@ -52,6 +52,10 @@ references.
 The installed `model-delete-frame-section` command removes only the last contiguous neutral
 unreferenced parameter-set-v1 frame3d section while retaining another section, and rejects element,
 mapped, source-owned, minimum-section or nonterminal candidates before strict C++ revalidation.
+The installed `model-delete-truss-section` command removes only the last contiguous neutral
+unreferenced parameter-set-v1 truss3d section while retaining another truss section, and rejects
+element, mapped, source-owned, minimum-family or nonterminal candidates before strict C++
+revalidation.
 The installed truss surface creates one v1 area section and connected neutral linear-truss leaf,
 edits one existing truss area or compatible material/section assignment, and removes only the last
 contiguous neutral unreferenced truss leaf plus its last orphan endpoint node. The deletion rejects
@@ -59,7 +63,7 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v38 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v39 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
@@ -78,6 +82,8 @@ plus last-neutral linear-material deletion with exact retained material and N2-F
 typed frame recovery, referenced/nonterminal rejection and restart parity,
 plus last-neutral frame-section deletion with exact retained section and N2-FY active load,
 typed frame recovery, referenced/nonterminal rejection and restart parity,
+plus last-neutral truss-section deletion with an exact retained truss section and N2-FY active
+load, typed frame-plus-truss recovery, referenced/nonterminal rejection and restart parity,
 and source nonmutation plus deterministic bounded NDTHA response-history,
 exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed projections and an
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
