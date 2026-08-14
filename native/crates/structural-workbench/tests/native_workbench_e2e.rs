@@ -980,6 +980,34 @@ fn run_nested_linear_load_combination_factor_edit(
     ])
 }
 
+#[allow(clippy::too_many_arguments)]
+fn run_nested_linear_load_combination_reference_edit(
+    source: &Path,
+    destination: &Path,
+    load_combination_id: &str,
+    reference_kind: &str,
+    reference_id: &str,
+    replacement_reference_kind: &str,
+    replacement_reference_id: &str,
+) -> Output {
+    run_workbench(&[
+        text("model-edit-nested-linear-load-combination-reference"),
+        source.as_os_str(),
+        text("--load-combination"),
+        text(load_combination_id),
+        text("--ref-kind"),
+        text(reference_kind),
+        text("--ref-id"),
+        text(reference_id),
+        text("--replacement-ref-kind"),
+        text(replacement_reference_kind),
+        text("--replacement-ref-id"),
+        text(replacement_reference_id),
+        text("--output-dir"),
+        destination.as_os_str(),
+    ])
+}
+
 fn run_linear_load_combination_delete(
     source: &Path,
     destination: &Path,
@@ -6541,6 +6569,251 @@ fn nested_linear_load_combination_factor_edit_executes_and_restarts_without_fall
     assert!(String::from_utf8_lossy(&rejected.stdout)
         .contains("workbench_model_edit_nested_linear_load_combination_term_missing"));
     assert!(!typed_mismatch.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nested_linear_load_combination_reference_edit_executes_and_restarts_without_fallback() {
+    let temporary = TestDirectory::create();
+    let source =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let base = temporary.0.join("nested-reference-edit-base");
+    assert_success(&run_linear_load_combination_add(
+        &source,
+        &base,
+        "COMBO_BASE",
+        ["LC_WEAK", "1.2"],
+        ["LC_STRONG", "-0.5"],
+    ));
+    let alternate = temporary.0.join("nested-reference-edit-alternate");
+    assert_success(&run_linear_load_combination_add(
+        &base.join("model-ir.json"),
+        &alternate,
+        "COMBO_ALTERNATE",
+        ["LC_WEAK", "0.8"],
+        ["LC_STRONG", "0.2"],
+    ));
+    let nested = temporary.0.join("nested-reference-edit-authored");
+    assert_success(&run_nested_linear_load_combination_add(
+        &alternate.join("model-ir.json"),
+        &nested,
+        "COMBO_NESTED",
+        &[
+            ["--combination-term", "COMBO_BASE", "0.5"],
+            ["--pattern-term", "LC_AXIAL", "0.25"],
+        ],
+    ));
+    let nested_path = nested.join("model-ir.json");
+    let nested_bytes = std::fs::read(&nested_path).expect("nested reference-edit source");
+    let nested_document = parse_model_ir_v2(&nested_bytes).expect("strict nested source");
+    let first = temporary.0.join("nested-reference-edit-first");
+    let second = temporary.0.join("nested-reference-edit-second");
+    for destination in [&first, &second] {
+        let output = run_nested_linear_load_combination_reference_edit(
+            &nested_path,
+            destination,
+            "COMBO_NESTED",
+            "load_pattern",
+            "LC_AXIAL",
+            "load_combination",
+            "COMBO_ALTERNATE",
+        );
+        assert_success(&output);
+        let receipt = std::fs::read(destination.join("edit-receipt.json"))
+            .expect("nested reference-edit receipt");
+        assert_eq!(output.stdout, [receipt.as_slice(), b"\n"].concat());
+    }
+    for artifact in ["model-ir.json", "edit-receipt.json"] {
+        assert_eq!(
+            std::fs::read(first.join(artifact)).expect("first nested reference-edit artifact"),
+            std::fs::read(second.join(artifact)).expect("second nested reference-edit artifact")
+        );
+    }
+    assert_eq!(
+        std::fs::read(&nested_path).expect("unchanged nested reference-edit source"),
+        nested_bytes
+    );
+
+    let edited_bytes =
+        std::fs::read(first.join("model-ir.json")).expect("nested reference-edited ModelIR");
+    let edited = parse_model_ir_v2(&edited_bytes).expect("strict nested reference-edited ModelIR");
+    let validation =
+        validate_model_bytes(&edited_bytes).expect("C++-validated nested reference edit");
+    assert!(validation.report.analysis_ready);
+    assert_eq!(
+        edited.value()["load_combinations"][2]["terms"],
+        serde_json::json!([
+            {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+            {"ref_id": "COMBO_ALTERNATE", "ref_kind": "load_combination", "factor": 0.25}
+        ])
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][0],
+        nested_document.value()["load_combinations"][0]
+    );
+    assert_eq!(
+        edited.value()["load_combinations"][1],
+        nested_document.value()["load_combinations"][1]
+    );
+    let extension = edited.value()["extensions"]
+        .get("structural-native:model-edit-nested-linear-load-combination-reference.v1")
+        .expect("nested reference-edit provenance extension");
+    assert_eq!(
+        extension["operation"],
+        "nested_linear_load_combination_reference_edit"
+    );
+    assert_eq!(
+        extension["editing_profile"],
+        "acyclic_nested_linear_static_depth_8_expanded_terms_64"
+    );
+    assert_eq!(extension["load_combination_index"], 2);
+    assert_eq!(extension["reference_kind"], "load_pattern");
+    assert_eq!(extension["reference_id"], "LC_AXIAL");
+    assert_eq!(extension["replacement_reference_kind"], "load_combination");
+    assert_eq!(extension["replacement_reference_id"], "COMBO_ALTERNATE");
+    assert_eq!(extension["term_index"], 1);
+    assert_eq!(extension["term_count"], 2);
+    assert_eq!(extension["preserved_factor"], 0.25);
+    assert_eq!(extension["source_combination_depth"], 2);
+    assert_eq!(extension["edited_combination_depth"], 2);
+    assert_eq!(extension["source_expanded_term_count"], 3);
+    assert_eq!(extension["edited_expanded_term_count"], 4);
+    assert_eq!(extension["source_expanded_pattern_count"], 3);
+    assert_eq!(extension["edited_expanded_pattern_count"], 2);
+    assert_eq!(
+        extension["edited_expanded_pattern_terms"],
+        serde_json::json!([
+            {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.8},
+            {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.2}
+        ])
+    );
+
+    let mut edit_receipt: Value = serde_json::from_slice(
+        &std::fs::read(first.join("edit-receipt.json")).expect("nested reference-edit receipt"),
+    )
+    .expect("nested reference-edit receipt JSON");
+    assert_eq!(
+        edit_receipt["operation"],
+        "nested_linear_load_combination_reference_edit"
+    );
+    assert_eq!(edit_receipt["reference_kind"], "load_pattern");
+    assert_eq!(edit_receipt["reference_id"], "LC_AXIAL");
+    assert_eq!(
+        edit_receipt["replacement_reference_kind"],
+        "load_combination"
+    );
+    assert_eq!(edit_receipt["replacement_reference_id"], "COMBO_ALTERNATE");
+    assert_eq!(edit_receipt["preserved_factor"], 0.25);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    assert_self_hashed_edit_receipt(&mut edit_receipt);
+
+    let request_directory = temporary.0.join("nested-reference-edit-request");
+    assert_success(&run_model_linear_combination_request_create(
+        &first.join("model-ir.json"),
+        &request_directory,
+        "nested-reference-edit-c5",
+        "COMBO_NESTED",
+    ));
+    let request_bytes = std::fs::read(request_directory.join("analysis-request.json"))
+        .expect("nested reference-edit request");
+    let direct = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, u32::MAX)
+        .expect("nested reference-edited direct CPU execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("nested reference-edit recovery"),
+    )
+    .expect("nested reference-edit recovery JSON");
+    assert_eq!(recovery["load_pattern_id"], "COMBO_NESTED");
+    assert_eq!(
+        recovery["active_external_load"],
+        serde_json::json!([0, -8000, 2000, 0, 0, 0])
+    );
+    assert_eq!(recovery["fallback_count"], 0);
+
+    let partial = execute_model_ir_linear_analysis(&edited_bytes, &request_bytes, None, 0)
+        .expect("nested reference-edit initial checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &edited_bytes,
+        &request_bytes,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("nested reference-edit resumed CPU execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+
+    let cases = [
+        (
+            "no-change",
+            "load_pattern",
+            "LC_AXIAL",
+            "workbench_model_edit_no_change",
+        ),
+        (
+            "duplicate",
+            "load_combination",
+            "COMBO_BASE",
+            "workbench_model_edit_nested_linear_load_combination_replacement_reference_duplicate",
+        ),
+        (
+            "missing",
+            "load_combination",
+            "COMBO_MISSING",
+            "workbench_model_edit_nested_linear_load_combination_replacement_combination_missing",
+        ),
+        (
+            "cycle",
+            "load_combination",
+            "COMBO_NESTED",
+            "workbench_model_linear_nested_combination_cycle",
+        ),
+    ];
+    for (label, replacement_kind, replacement_id, expected_code) in cases {
+        let destination = temporary
+            .0
+            .join(format!("nested-reference-edit-{label}-rejected"));
+        let rejected = run_nested_linear_load_combination_reference_edit(
+            &nested_path,
+            &destination,
+            "COMBO_NESTED",
+            "load_pattern",
+            "LC_AXIAL",
+            replacement_kind,
+            replacement_id,
+        );
+        assert!(
+            !rejected.status.success(),
+            "accepted {label} reference edit"
+        );
+        assert!(
+            String::from_utf8_lossy(&rejected.stdout).contains(expected_code),
+            "unexpected {label} error: {}",
+            String::from_utf8_lossy(&rejected.stdout)
+        );
+        assert!(!destination.exists());
+    }
+
+    let direct_degradation = temporary.0.join("nested-reference-edit-direct-rejected");
+    let rejected = run_nested_linear_load_combination_reference_edit(
+        &nested_path,
+        &direct_degradation,
+        "COMBO_NESTED",
+        "load_combination",
+        "COMBO_BASE",
+        "load_pattern",
+        "LC_WEAK",
+    );
+    assert!(!rejected.status.success());
+    assert!(String::from_utf8_lossy(&rejected.stdout)
+        .contains("workbench_model_edit_nested_linear_load_combination_direct_unsupported"));
+    assert!(!direct_degradation.exists());
 }
 
 #[test]

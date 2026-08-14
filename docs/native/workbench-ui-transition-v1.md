@@ -184,8 +184,16 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   rejects no-op, missing, nonlinear, duplicate, nested or owned inputs; then strictly reparses and
   C++-revalidates before create-new publication. Installed E2E v51 proves exact active load
   `[120000,0,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
-  Factor editing remains separate; insertion/removal/reorder, nested reference replacement,
-  downstream-referenced editing, HIP parity and engineering acceptance remain open.
+  Factor editing and bounded nested reference replacement remain separate; insertion/removal/
+  reorder, downstream-referenced editing, HIP parity and engineering acceptance remain open.
+- `model-edit-nested-linear-load-combination-reference`: deterministic replacement of one typed
+  root reference in a neutral, extension-free, unreferenced acyclic nested combination. Rust
+  preserves the selected factor, root order/count and every descendant row; rejects no-op,
+  missing/incompatible/duplicate, cyclic and direct-degrading replacements; then strictly reparses
+  and C++-revalidates before create-new publication. Installed E2E v52 proves exact active load
+  `[0,-8000,2000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart output.
+  Factor editing remains separate; root insertion/removal/reorder, descendant or downstream-root
+  mutation, HIP parity and engineering acceptance remain open.
 - `model-add-nested-linear-load-combination`: deterministic creation of one acyclic nested
   `linear` combination with two through 64 explicitly typed root terms, root-inclusive depth at
   most eight, at most 64 expanded leaf contributions and two through 64 resolved nonzero unique

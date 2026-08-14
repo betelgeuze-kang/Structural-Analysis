@@ -367,8 +367,14 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    `COMBO_SERVICE`, preserves every factor plus declaration order and term count, proves exact
    active load `[120000,0,5000,0,0,0]`, typed recovery, fallback 0 and byte-identical initialized
    checkpoint/restart output, then emits an append-only v51 receipt binding the edited ModelIR,
+   edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR;
+67. creates direct `COMBO_ALTERNATE`, replaces root pattern `LC_AXIAL` in neutral unreferenced
+   `COMBO_NESTED` with that typed combination while preserving factor `0.25`, root order/count and
+   every descendant row, proves exact active load `[0,-8000,2000,0,0,0]`, typed recovery,
+   cycle/direct-degradation rejection, fallback 0 and byte-identical initialized checkpoint/restart
+   output, then emits an append-only v52 receipt binding the source ModelIR, edited ModelIR,
    edit/request/assembly receipts, analysis request, checkpoint, ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v50 receipts
+   The receipt checker continues to accept frozen v1 through v51 receipts
    (including frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
    v1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
@@ -419,7 +425,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    linear-load-combination typed-root-factor edit, source/edited expansion, exact active-load,
    typed recovery and restart authority; and no pre-v51 receipt is installed bounded direct
    linear-load-combination single-pattern-reference edit, preserved-factor/order/count, exact
-   active-load, typed recovery and restart authority.
+   active-load, typed recovery and restart authority; and no pre-v52 receipt is installed bounded
+   nested linear-load-combination typed-root-reference edit, source/edited expansion binding,
+   cycle/direct-degradation rejection, exact active-load, typed recovery and restart authority.
 
 The reference command is:
 

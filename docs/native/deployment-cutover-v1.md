@@ -49,6 +49,12 @@ The installed `model-edit-linear-load-combination-reference` command replaces ex
 direct-pattern term identity in the same bounded ownership profile. It preserves all factors, term
 order and count, fails closed on no-op/missing/nonlinear/duplicate/nested/owned inputs, and
 C++-revalidates the edited graph before create-new publication.
+The installed `model-edit-nested-linear-load-combination-reference` command replaces one root term
+selected by explicit reference kind and identity in a neutral, extension-free and unreferenced
+bounded nested combination. It preserves the selected factor, root order/count and every
+descendant row, rejects duplicate/missing/incompatible/cyclic/direct-degrading replacements, and
+binds source and edited depth-eight/64-leaf expansions before C++-revalidated create-new
+publication.
 The installed `model-add-nested-linear-load-combination` command appends one bounded acyclic root
 with explicitly typed pattern/combination terms, root-inclusive depth at most eight and at most 64
 expanded leaves. Rust and C++ independently flatten and validate it; v3 receipts bind both root and
@@ -93,13 +99,14 @@ loaded, constrained, staged, mapped, source-owned or nonterminal rows without ca
 The installed frame leaf deletion uses the same reference preflight and additionally binds the
 removed local orientation, offsets, releases and compatible properties before C++ revalidation.
 The same installed payload creates one model-bound CPU linear request after authoritative C++
-assembly preflight. Distribution E2E v51 proves repeated edited/request/artifact bytes, exact
+assembly preflight. Distribution E2E v52 proves repeated edited/request/artifact bytes, exact
 load/constraint/material/section/element identity, fixed law/family/version/type/formulation and SI
 value/endpoint bindings, contiguous new topology/load/constraint/pattern indices, exact added
 N3-UY and custom N2-FX external loads, six-DOF N3 fixation, active-DOF reduction, changed
 displacement, added-model linear execution, and newly added material and section rows each
 referenced by a composed member with changed recovered displacement under the same active load,
 compatible M2/S2 assignment to E1 with the same active load and changed recovered displacement,
+kind-changing nested root reference replacement with exact active load `[0,-8000,2000,0,0,0]`,
 truss3d authoring/editing with typed frame-plus-truss recovery, and last-neutral-truss-leaf deletion
 plus last-neutral-frame-leaf deletion with frame-only recovery, constrained-endpoint rejection and
 one-real-iteration restart parity, plus last-neutral fixed-constraint deletion with exact restored
@@ -135,6 +142,10 @@ plus bounded nested linear-load-combination typed-root-factor editing with prese
 references/order/count and descendants, source/edited depth-eight/64-leaf expansion binding, exact
 active load `[25000,-9000,3750,0,0,0]`, typed recovery, fallback 0 and byte-identical
 checkpoint/restart output through `model-edit-nested-linear-load-combination-factor`,
+plus bounded nested linear-load-combination typed-root-reference editing with preserved factor,
+root order/count and descendants, source/edited depth-eight/64-leaf expansion binding, exact active
+load `[0,-8000,2000,0,0,0]`, typed recovery, fallback 0 and byte-identical checkpoint/restart
+output through `model-edit-nested-linear-load-combination-reference`,
 plus bounded acyclic nested linear-load-combination authoring and CPU execution with depth eight,
 64 expanded leaves, v3 provenance/request receipts, exact nested active load, typed recovery,
 fallback 0 and byte-identical checkpoint/restart output,

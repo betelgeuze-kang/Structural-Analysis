@@ -51,6 +51,10 @@ absent from the runtime image.
   neutral, extension-free and unreferenced bounded nested combination while preserving root
   references/order/count and every descendant; installed v50 E2E binds source/edited expansions,
   exact changed load, restart parity and fallback 0.
+  `model-edit-nested-linear-load-combination-reference` replaces exactly one typed root reference
+  in the same bounded ownership profile while preserving its factor, root order/count and every
+  descendant; installed v52 E2E binds source/edited expansions, proves exact changed load,
+  cycle/direct-degradation rejection, restart parity and fallback 0.
   `model-add-nested-linear-load-combination` adds one bounded acyclic root with explicitly typed
   pattern/combination terms, root-inclusive depth at most eight and at most 64 expanded leaves.
   Rust and C++ independently flatten and validate it before native CPU execution; v3 receipts bind

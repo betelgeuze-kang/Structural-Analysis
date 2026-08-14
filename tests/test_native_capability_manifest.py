@@ -482,6 +482,30 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in nested_combination_factor_edit["claim"]
     assert (
         capabilities.capability_is_enabled(
+            payload, "modelir_nested_linear_load_combination_reference_edit"
+        )
+        is True
+    )
+    nested_combination_reference_edit = payload["capabilities"][
+        "modelir_nested_linear_load_combination_reference_edit"
+    ]
+    assert nested_combination_reference_edit["cutover_gate"] == "C5"
+    assert nested_combination_reference_edit["owner"] == "structural-workbench"
+    assert "replaces exactly one existing root" in nested_combination_reference_edit["claim"]
+    assert "explicit source and replacement kinds" in nested_combination_reference_edit["claim"]
+    assert "selected factor" in nested_combination_reference_edit["claim"]
+    assert "root term order/count" in nested_combination_reference_edit["claim"]
+    assert "descendant combinations" in nested_combination_reference_edit["claim"]
+    assert "root-inclusive depth at most eight" in nested_combination_reference_edit["claim"]
+    assert "both complete expansions" in nested_combination_reference_edit["claim"]
+    assert "distribution v52 E2E" in nested_combination_reference_edit["claim"]
+    assert "[0,-8000,2000,0,0,0]" in nested_combination_reference_edit["claim"]
+    assert "byte-identical direct/restart output" in nested_combination_reference_edit["claim"]
+    assert "fallback 0" in nested_combination_reference_edit["claim"]
+    assert "approved HIP C2" in nested_combination_reference_edit["claim"]
+    assert "C6" in nested_combination_reference_edit["claim"]
+    assert (
+        capabilities.capability_is_enabled(
             payload, "modelir_nested_linear_load_combination_deletion"
         )
         is True

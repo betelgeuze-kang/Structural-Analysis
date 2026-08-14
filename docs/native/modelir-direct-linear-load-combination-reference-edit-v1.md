@@ -38,7 +38,7 @@ same flow by replacing `LC_WEAK` with `LC_AXIAL` in `COMBO_SERVICE`, proves exac
 `[120000,0,5000,0,0,0]` with an empty executable lookup path, and binds its artifacts in the
 append-only v51 distribution receipt.
 
-This is not general combination editing. Factor editing remains a separate surface; term
-insertion/removal/reorder, nested typed-reference replacement, descendant or downstream-referenced
-mutation, source-format writeback, visual editing, arbitrary solver selection, approved HIP C2,
-engineering acceptance and C6 remain open.
+This is not general combination editing. Factor editing and bounded nested typed-reference
+replacement remain separate surfaces. Term insertion/removal/reorder, descendant or downstream-
+referenced mutation, source-format writeback, visual editing, arbitrary solver selection,
+approved HIP C2, engineering acceptance and C6 remain open.

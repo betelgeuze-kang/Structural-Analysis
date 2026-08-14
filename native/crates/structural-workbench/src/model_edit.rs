@@ -65,6 +65,8 @@ const DIRECT_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-direct-linear-load-combination-reference.v1";
 const NESTED_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_EXTENSION_KEY: &str =
     "structural-native:model-edit-nested-linear-load-combination-factor.v1";
+const NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_EXTENSION_KEY: &str =
+    "structural-native:model-edit-nested-linear-load-combination-reference.v1";
 const LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
     "structural-native:model-delete-linear-load-combination.v1";
 const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_EXTENSION_KEY: &str =
@@ -107,6 +109,7 @@ const NESTED_LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_rev
 const DIRECT_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_neutral_unreferenced_extension_free_two_to_64_unique_direct_linear_static_load_pattern_combination_single_existing_term_factor_edit_not_reference_identity_order_count_nested_combination_source_owned_roundtrip_unsupported_feature_cascade_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_neutral_unreferenced_extension_free_two_to_64_unique_direct_linear_static_load_pattern_combination_single_existing_term_reference_edit_with_factor_order_count_preserved_not_factor_identity_order_count_nested_combination_source_owned_roundtrip_unsupported_feature_cascade_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const NESTED_LINEAR_LOAD_COMBINATION_FACTOR_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_neutral_unreferenced_extension_free_acyclic_nested_linear_static_root_single_existing_typed_term_factor_edit_depth_eight_expanded_64_terms_not_reference_identity_order_count_descendant_edit_source_owned_roundtrip_unsupported_feature_cascade_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
+const NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_neutral_unreferenced_extension_free_acyclic_nested_linear_static_root_single_existing_typed_term_reference_edit_with_factor_order_count_preserved_depth_eight_expanded_64_terms_not_factor_order_count_descendant_edit_direct_degradation_source_owned_roundtrip_unsupported_feature_cascade_general_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_distinct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const DIRECT_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_two_to_64_unique_direct_linear_static_load_pattern_term_linear_combination_deletion_not_source_owned_nested_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const NESTED_LINEAR_LOAD_COMBINATION_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_acyclic_nested_linear_static_load_combination_deletion_depth_eight_expanded_64_terms_not_source_owned_direct_combination_roundtrip_unsupported_feature_term_edit_reindexing_general_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
@@ -752,6 +755,44 @@ pub fn publish_model_nested_linear_load_combination_factor_edit(
         reference_kind,
         reference_id,
         factor,
+    )?;
+    publish_new_directory(
+        output_directory,
+        &[
+            ("model-ir.json", outcome.model_ir_json.as_bytes()),
+            ("edit-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Replace one typed root reference in a bounded nested linear load combination and publish it
+/// atomically.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid identities or reference kinds, invalid source or edited
+/// semantics, source-owned, extended, referenced, direct, unsupported-feature-owned or
+/// round-trip-owned combinations, missing or duplicate typed references, no-op edits, cycles,
+/// direct degradation, out-of-profile expansion, and publication failures.
+#[allow(clippy::too_many_arguments)]
+pub fn publish_model_nested_linear_load_combination_reference_edit(
+    source_path: &Path,
+    load_combination_id: &str,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: &str,
+    replacement_reference_kind: LinearLoadCombinationReferenceKindV1,
+    replacement_reference_id: &str,
+    output_directory: &Path,
+) -> Result<ModelLinearLoadCombinationReferenceEditOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome = edit_model_nested_linear_load_combination_reference(
+        &source,
+        load_combination_id,
+        reference_kind,
+        reference_id,
+        replacement_reference_kind,
+        replacement_reference_id,
     )?;
     publish_new_directory(
         output_directory,
@@ -2630,6 +2671,143 @@ pub fn edit_model_nested_linear_load_combination_factor(
     })
 }
 
+/// Replace one existing typed root reference in a provenance-bound nested linear load
+/// combination.
+///
+/// # Errors
+///
+/// Rejects invalid identities, invalid source semantics, source-owned, extended, referenced,
+/// direct, unsupported-feature-owned or round-trip-owned roots, malformed, missing or duplicate
+/// typed references, no-op edits, cycles, direct degradation, depth/expansion overflow, schema
+/// drift, or edited semantics rejected by C++.
+#[allow(clippy::too_many_lines)]
+pub fn edit_model_nested_linear_load_combination_reference(
+    source_bytes: &[u8],
+    load_combination_id: &str,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: &str,
+    replacement_reference_kind: LinearLoadCombinationReferenceKindV1,
+    replacement_reference_id: &str,
+) -> Result<ModelLinearLoadCombinationReferenceEditOutcomeV1, WorkbenchError> {
+    validate_nested_linear_load_combination_reference_edit_request(
+        source_bytes.len(),
+        load_combination_id,
+        reference_id,
+        replacement_reference_id,
+    )?;
+
+    let source_validation = validate_model_bytes(source_bytes)
+        .map_err(|error| input_error("workbench_model_edit_source_validation_failed", &error))?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    let source_document = &source_validation.snapshot;
+    let source_content_hash = source_document.content_hash().to_owned();
+    let source_semantic_hash = source_document.semantic_hash().to_owned();
+    let source_provenance_hash = source_document.provenance_hash().to_owned();
+    let source_input_sha256 = sha256_identity(source_bytes);
+    let mut edited = source_document.value().clone();
+    let reference_edit = replace_nested_linear_load_combination_reference(
+        &mut edited,
+        load_combination_id,
+        reference_kind,
+        reference_id,
+        replacement_reference_kind,
+        replacement_reference_id,
+    )?;
+    bind_nested_linear_load_combination_reference_edit_provenance(
+        &mut edited,
+        load_combination_id,
+        reference_kind,
+        reference_id,
+        replacement_reference_kind,
+        replacement_reference_id,
+        &reference_edit,
+        SourceModelHashesV1 {
+            content: &source_content_hash,
+            semantic: &source_semantic_hash,
+            provenance: &source_provenance_hash,
+        },
+    )?;
+
+    let edited_wire = canonicalize_model_ir_v2(&edited)
+        .map_err(|error| input_error("workbench_model_edit_serialization_failed", &error))?;
+    parse_model_ir_v2(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_contract_invalid", &error))?;
+    let edited_validation = validate_model_bytes(edited_wire.as_bytes())
+        .map_err(|error| input_error("workbench_model_edit_validation_failed", &error))?;
+    if !edited_validation.report.contract_valid || !edited_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_semantics_invalid",
+            "native C++ validation rejected the reference-edited nested-combination ModelIR semantics",
+        ));
+    }
+    let model_ir_json = edited_validation.snapshot.canonical_json().to_owned();
+    let model_artifact = artifact_entry(
+        "edited_model_ir",
+        "model-ir.json",
+        "application/json",
+        model_ir_json.as_bytes(),
+    )?;
+    let source_expanded_pattern_count = reference_edit
+        .source_expansion
+        .expanded_pattern_terms
+        .as_array()
+        .map_or(0, Vec::len);
+    let edited_expanded_pattern_count = reference_edit
+        .edited_expansion
+        .expanded_pattern_terms
+        .as_array()
+        .map_or(0, Vec::len);
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": EDIT_SCHEMA_V1,
+        "operation": "nested_linear_load_combination_reference_edit",
+        "editing_profile": "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+        "model_id": edited_validation.report.model_id,
+        "load_combination_id": load_combination_id,
+        "load_combination_index": reference_edit.load_combination_index,
+        "combination_type": "linear",
+        "reference_kind": reference_kind.as_str(),
+        "reference_id": reference_id,
+        "replacement_reference_kind": replacement_reference_kind.as_str(),
+        "replacement_reference_id": replacement_reference_id,
+        "term_index": reference_edit.term_index,
+        "term_count": reference_edit.edited_expansion.root_terms.as_array().map_or(0, Vec::len),
+        "preserved_factor": reference_edit.preserved_factor,
+        "source_terms": reference_edit.source_expansion.root_terms,
+        "edited_terms": reference_edit.edited_expansion.root_terms,
+        "source_combination_depth": reference_edit.source_expansion.max_depth,
+        "source_expanded_term_count": reference_edit.source_expansion.expanded_term_count,
+        "source_expanded_pattern_count": source_expanded_pattern_count,
+        "source_expanded_pattern_terms": reference_edit.source_expansion.expanded_pattern_terms,
+        "edited_combination_depth": reference_edit.edited_expansion.max_depth,
+        "edited_expanded_term_count": reference_edit.edited_expansion.expanded_term_count,
+        "edited_expanded_pattern_count": edited_expanded_pattern_count,
+        "edited_expanded_pattern_terms": reference_edit.edited_expansion.expanded_pattern_terms,
+        "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+        "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+        "source_input_sha256": source_input_sha256,
+        "source_content_hash": source_content_hash,
+        "source_semantic_hash": source_semantic_hash,
+        "source_provenance_hash": source_provenance_hash,
+        "edited_content_hash": edited_validation.report.content_hash,
+        "edited_semantic_hash": edited_validation.report.semantic_hash,
+        "edited_provenance_hash": edited_validation.report.provenance_hash,
+        "cpp_semantic_snapshot_verified": true,
+        "analysis_ready": edited_validation.report.analysis_ready,
+        "blocking_feature_ids": edited_validation.report.blocking_feature_ids,
+        "artifacts": [model_artifact],
+        "claim_boundary": NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelLinearLoadCombinationReferenceEditOutcomeV1 {
+        model_ir_json,
+        receipt_json,
+    })
+}
+
 /// Add one provenance-bound bounded acyclic nested linear load combination in memory.
 ///
 /// # Errors
@@ -2765,6 +2943,15 @@ struct NestedLinearLoadCombinationFactorEditV1 {
     load_combination_index: usize,
     term_index: usize,
     previous_factor: f64,
+    source_expansion: ExpandedLinearLoadCombinationV1,
+    edited_expansion: ExpandedLinearLoadCombinationV1,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+struct NestedLinearLoadCombinationReferenceEditV1 {
+    load_combination_index: usize,
+    term_index: usize,
+    preserved_factor: f64,
     source_expansion: ExpandedLinearLoadCombinationV1,
     edited_expansion: ExpandedLinearLoadCombinationV1,
 }
@@ -5227,6 +5414,22 @@ fn validate_nested_linear_load_combination_factor_edit_request(
     Ok(())
 }
 
+fn validate_nested_linear_load_combination_reference_edit_request(
+    source_length: usize,
+    load_combination_id: &str,
+    reference_id: &str,
+    replacement_reference_id: &str,
+) -> Result<(), WorkbenchError> {
+    validate_bounded_edit_identity(source_length, load_combination_id, "load combination")?;
+    validate_bounded_edit_identity(0, reference_id, "source nested typed reference")?;
+    validate_bounded_edit_identity(
+        0,
+        replacement_reference_id,
+        "replacement nested typed reference",
+    )?;
+    Ok(())
+}
+
 fn validate_nested_linear_load_combination_add_request(
     source_length: usize,
     load_combination_id: &str,
@@ -6745,6 +6948,290 @@ fn replace_nested_linear_load_combination_factor(
         load_combination_index,
         term_index,
         previous_factor,
+        source_expansion,
+        edited_expansion,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn replace_nested_linear_load_combination_reference(
+    model: &mut Value,
+    load_combination_id: &str,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: &str,
+    replacement_reference_kind: LinearLoadCombinationReferenceKindV1,
+    replacement_reference_id: &str,
+) -> Result<NestedLinearLoadCombinationReferenceEditV1, WorkbenchError> {
+    let source_expansion = require_bounded_linear_load_combination(model, load_combination_id)?;
+    if !source_expansion.nested {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_direct_unsupported",
+            "nested reference editing requires a root with at least one load-combination term",
+        ));
+    }
+    let load_combinations = model
+        .get("load_combinations")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("load_combinations"))?;
+    let load_combination_index = load_combinations
+        .iter()
+        .position(|combination| {
+            combination.get("id").and_then(Value::as_str) == Some(load_combination_id)
+        })
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_nested_linear_load_combination_missing",
+                format!("ModelIR has no load combination with identity {load_combination_id}"),
+            )
+        })?;
+    let combination = &load_combinations[load_combination_index];
+    if combination.get("index").and_then(Value::as_u64)
+        != u64::try_from(load_combination_index).ok()
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_index_mismatch",
+            "edited nested load-combination index must match its contiguous position",
+        ));
+    }
+    if combination.get("combination_type").and_then(Value::as_str) != Some("linear") {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_type_unsupported",
+            "nested reference editing accepts only a linear load combination",
+        ));
+    }
+    if !combination.get("source_id").is_some_and(Value::is_null) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_source_owned",
+            "nested reference editing accepts only a neutral root combination with null source_id",
+        ));
+    }
+    if !combination
+        .get("extensions")
+        .and_then(Value::as_object)
+        .is_some_and(serde_json::Map::is_empty)
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_extensions_unsupported",
+            "nested reference editing accepts only a root combination with empty extensions",
+        ));
+    }
+    let terms = combination
+        .get("terms")
+        .and_then(Value::as_array)
+        .filter(|terms| {
+            (MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1
+                ..=MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1)
+                .contains(&terms.len())
+        })
+        .ok_or_else(|| {
+            WorkbenchError::new(
+                "workbench_model_edit_nested_linear_load_combination_terms_unsupported",
+                "edited nested load-combination root must contain between two and 64 terms",
+            )
+        })?;
+    let mut typed_references = Vec::with_capacity(terms.len());
+    let mut term_index = None;
+    let mut preserved_factor = None;
+    for (index, term) in terms.iter().enumerate() {
+        let source_reference_kind = match term.get("ref_kind").and_then(Value::as_str) {
+            Some("load_pattern") => LinearLoadCombinationReferenceKindV1::LoadPattern,
+            Some("load_combination") => LinearLoadCombinationReferenceKindV1::LoadCombination,
+            _ => {
+                return Err(WorkbenchError::new(
+                    "workbench_model_edit_nested_linear_load_combination_reference_kind_unsupported",
+                    "nested reference editing accepts load_pattern or load_combination root terms only",
+                ));
+            }
+        };
+        let source_reference_id = term
+            .get("ref_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| snapshot_error("nested load-combination term ref_id"))?;
+        let source_factor = term
+            .get("factor")
+            .and_then(Value::as_f64)
+            .filter(|value| value.is_finite() && *value != 0.0)
+            .ok_or_else(|| {
+                WorkbenchError::new(
+                    "workbench_model_edit_nested_linear_load_combination_source_factor_unsupported",
+                    "source nested load-combination factors must be finite and non-zero",
+                )
+            })?;
+        let typed_reference = format!(
+            "{}\u{0}{source_reference_id}",
+            source_reference_kind.as_str()
+        );
+        if typed_references.contains(&typed_reference) {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_nested_linear_load_combination_reference_duplicate",
+                "edited nested load-combination root must contain unique typed references",
+            ));
+        }
+        typed_references.push(typed_reference);
+        if source_reference_kind == reference_kind && source_reference_id == reference_id {
+            term_index = Some(index);
+            preserved_factor = Some(source_factor);
+        }
+    }
+    let term_index = term_index.ok_or_else(|| {
+        WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_term_missing",
+            format!(
+                "load combination {load_combination_id} has no {} term {reference_id}",
+                reference_kind.as_str()
+            ),
+        )
+    })?;
+    let preserved_factor =
+        preserved_factor.ok_or_else(|| snapshot_error("source nested term preserved factor"))?;
+    if reference_kind == replacement_reference_kind && reference_id == replacement_reference_id {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_no_change",
+            "replacement nested typed reference is identical to the source term",
+        ));
+    }
+    let replacement_typed_reference = format!(
+        "{}\u{0}{replacement_reference_id}",
+        replacement_reference_kind.as_str()
+    );
+    if typed_references.contains(&replacement_typed_reference) {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_replacement_reference_duplicate",
+            format!(
+                "replacement {} {replacement_reference_id} already occurs in the root terms",
+                replacement_reference_kind.as_str()
+            ),
+        ));
+    }
+    match replacement_reference_kind {
+        LinearLoadCombinationReferenceKindV1::LoadPattern => {
+            let load_patterns = model
+                .get("load_patterns")
+                .and_then(Value::as_array)
+                .ok_or_else(|| snapshot_error("load_patterns"))?;
+            let replacement = load_patterns
+                .iter()
+                .find(|pattern| {
+                    pattern.get("id").and_then(Value::as_str)
+                        == Some(replacement_reference_id)
+                })
+                .ok_or_else(|| {
+                    WorkbenchError::new(
+                        "workbench_model_edit_nested_linear_load_combination_replacement_pattern_missing",
+                        format!(
+                            "ModelIR has no replacement load pattern with identity {replacement_reference_id}"
+                        ),
+                    )
+                })?;
+            if replacement.get("analysis_type").and_then(Value::as_str) != Some("linear_static") {
+                return Err(WorkbenchError::new(
+                    "workbench_model_edit_nested_linear_load_combination_replacement_pattern_unsupported",
+                    format!(
+                        "replacement load pattern {replacement_reference_id} is not linear_static"
+                    ),
+                ));
+            }
+        }
+        LinearLoadCombinationReferenceKindV1::LoadCombination => {
+            let replacement = load_combinations
+                .iter()
+                .find(|candidate| {
+                    candidate.get("id").and_then(Value::as_str)
+                        == Some(replacement_reference_id)
+                })
+                .ok_or_else(|| {
+                    WorkbenchError::new(
+                        "workbench_model_edit_nested_linear_load_combination_replacement_combination_missing",
+                        format!(
+                            "ModelIR has no replacement load combination with identity {replacement_reference_id}"
+                        ),
+                    )
+                })?;
+            if replacement.get("combination_type").and_then(Value::as_str) != Some("linear") {
+                return Err(WorkbenchError::new(
+                    "workbench_model_edit_nested_linear_load_combination_replacement_combination_unsupported",
+                    format!(
+                        "replacement load combination {replacement_reference_id} is not linear"
+                    ),
+                ));
+            }
+        }
+    }
+    if load_combinations
+        .iter()
+        .enumerate()
+        .any(|(index, candidate)| {
+            index != load_combination_index
+                && candidate
+                    .get("terms")
+                    .and_then(Value::as_array)
+                    .is_some_and(|candidate_terms| {
+                        candidate_terms.iter().any(|term| {
+                            term.get("ref_kind").and_then(Value::as_str) == Some("load_combination")
+                                && term.get("ref_id").and_then(Value::as_str)
+                                    == Some(load_combination_id)
+                        })
+                    })
+        })
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_referenced_by_combination",
+            format!("load combination {load_combination_id} is referenced by another combination"),
+        ));
+    }
+    if model
+        .get("unsupported_features")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("unsupported_features"))?
+        .iter()
+        .any(|feature| {
+            feature.get("source_entity_id").and_then(Value::as_str) == Some(load_combination_id)
+        })
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_unsupported_feature_owned",
+            "nested reference editing refuses a root referenced by an unsupported feature",
+        ));
+    }
+    if model
+        .get("roundtrip_map")
+        .and_then(Value::as_array)
+        .ok_or_else(|| snapshot_error("roundtrip_map"))?
+        .iter()
+        .any(|row| {
+            row.get("model_ir_entity_id").and_then(Value::as_str) == Some(load_combination_id)
+        })
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_roundtrip_owned",
+            "nested reference editing refuses a root with a direct round-trip mapping",
+        ));
+    }
+
+    {
+        let combination = model
+            .get_mut("load_combinations")
+            .and_then(Value::as_array_mut)
+            .and_then(|combinations| combinations.get_mut(load_combination_index))
+            .ok_or_else(|| snapshot_error("reference-edited nested load combination"))?;
+        let terms = combination
+            .get_mut("terms")
+            .and_then(Value::as_array_mut)
+            .ok_or_else(|| snapshot_error("reference-edited nested load-combination terms"))?;
+        terms[term_index]["ref_kind"] = json!(replacement_reference_kind.as_str());
+        terms[term_index]["ref_id"] = json!(replacement_reference_id);
+    }
+    let edited_expansion = require_bounded_linear_load_combination(model, load_combination_id)?;
+    if !edited_expansion.nested {
+        return Err(WorkbenchError::new(
+            "workbench_model_edit_nested_linear_load_combination_direct_unsupported",
+            "reference-edited load-combination root must remain nested",
+        ));
+    }
+    Ok(NestedLinearLoadCombinationReferenceEditV1 {
+        load_combination_index,
+        term_index,
+        preserved_factor,
         source_expansion,
         edited_expansion,
     })
@@ -9830,6 +10317,68 @@ fn bind_nested_linear_load_combination_factor_edit_provenance(
     )
 }
 
+#[allow(clippy::too_many_arguments)]
+fn bind_nested_linear_load_combination_reference_edit_provenance(
+    model: &mut Value,
+    load_combination_id: &str,
+    reference_kind: LinearLoadCombinationReferenceKindV1,
+    reference_id: &str,
+    replacement_reference_kind: LinearLoadCombinationReferenceKindV1,
+    replacement_reference_id: &str,
+    reference_edit: &NestedLinearLoadCombinationReferenceEditV1,
+    source_hashes: SourceModelHashesV1<'_>,
+) -> Result<(), WorkbenchError> {
+    bind_parameter_edit_provenance(
+        model,
+        NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_EXTENSION_KEY,
+        json!({
+            "operation": "nested_linear_load_combination_reference_edit",
+            "editing_profile": "acyclic_nested_linear_static_depth_8_expanded_terms_64",
+            "load_combination_id": load_combination_id,
+            "load_combination_index": reference_edit.load_combination_index,
+            "combination_type": "linear",
+            "reference_kind": reference_kind.as_str(),
+            "reference_id": reference_id,
+            "replacement_reference_kind": replacement_reference_kind.as_str(),
+            "replacement_reference_id": replacement_reference_id,
+            "term_index": reference_edit.term_index,
+            "term_count": reference_edit.edited_expansion.root_terms.as_array().map_or(0, Vec::len),
+            "preserved_factor": reference_edit.preserved_factor,
+            "source_terms": reference_edit.source_expansion.root_terms.clone(),
+            "edited_terms": reference_edit.edited_expansion.root_terms.clone(),
+            "source_combination_depth": reference_edit.source_expansion.max_depth,
+            "source_expanded_term_count": reference_edit.source_expansion.expanded_term_count,
+            "source_expanded_pattern_count": reference_edit
+                .source_expansion
+                .expanded_pattern_terms
+                .as_array()
+                .map_or(0, Vec::len),
+            "source_expanded_pattern_terms": reference_edit
+                .source_expansion
+                .expanded_pattern_terms
+                .clone(),
+            "edited_combination_depth": reference_edit.edited_expansion.max_depth,
+            "edited_expanded_term_count": reference_edit.edited_expansion.expanded_term_count,
+            "edited_expanded_pattern_count": reference_edit
+                .edited_expansion
+                .expanded_pattern_terms
+                .as_array()
+                .map_or(0, Vec::len),
+            "edited_expanded_pattern_terms": reference_edit
+                .edited_expansion
+                .expanded_pattern_terms
+                .clone(),
+            "maximum_combination_depth": MODEL_LINEAR_LOAD_COMBINATION_MAX_NESTED_DEPTH_V1,
+            "maximum_expanded_terms": MODEL_LINEAR_LOAD_COMBINATION_MAX_EXPANDED_TERMS_V1,
+            "source_content_hash": source_hashes.content,
+            "source_semantic_hash": source_hashes.semantic,
+            "source_provenance_hash": source_hashes.provenance,
+            "claim_boundary": NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_CLAIM_BOUNDARY
+        }),
+        source_hashes.content,
+    )
+}
+
 fn bind_nested_linear_load_combination_add_provenance(
     model: &mut Value,
     load_combination_id: &str,
@@ -10857,7 +11406,8 @@ mod tests {
         remove_nodal_load, remove_orphan_node, remove_truss3d_leaf_member, remove_truss_section,
         replace_direct_linear_load_combination_factor,
         replace_direct_linear_load_combination_reference,
-        replace_nested_linear_load_combination_factor, validate_constraint_value_edit_request,
+        replace_nested_linear_load_combination_factor,
+        replace_nested_linear_load_combination_reference, validate_constraint_value_edit_request,
         validate_direct_linear_load_combination_factor_edit_request,
         validate_direct_linear_load_combination_reference_edit_request, validate_edit_request,
         validate_element_connectivity_edit_request, validate_fixed_constraint_add_request,
@@ -10871,6 +11421,7 @@ mod tests {
         validate_linear_material_delete_request, validate_linear_material_edit_request,
         validate_nested_linear_load_combination_add_request,
         validate_nested_linear_load_combination_factor_edit_request,
+        validate_nested_linear_load_combination_reference_edit_request,
         validate_nodal_load_add_request, validate_nodal_load_delete_request,
         validate_nodal_load_edit_request, validate_node_add_request,
         validate_orphan_node_delete_request, validate_truss3d_leaf_member_delete_request,
@@ -12362,6 +12913,212 @@ mod tests {
                 LinearLoadCombinationReferenceKindV1::LoadCombination,
                 "COMBO_BASE",
                 0.75,
+            )
+            .expect_err("referenced nested root")
+            .code,
+            "workbench_model_edit_nested_linear_load_combination_referenced_by_combination"
+        );
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn nested_linear_load_combination_reference_edit_is_typed_bounded_and_non_cascading() {
+        validate_nested_linear_load_combination_reference_edit_request(
+            0,
+            "COMBO_NESTED",
+            "LC_AXIAL",
+            "COMBO_ALTERNATE",
+        )
+        .expect("valid nested reference edit request");
+        assert!(
+            validate_nested_linear_load_combination_reference_edit_request(
+                0,
+                "COMBO_NESTED",
+                "LC_AXIAL",
+                "",
+            )
+            .is_err()
+        );
+
+        let model = json!({
+            "load_patterns": [
+                {"id": "LC_AXIAL", "analysis_type": "linear_static"},
+                {"id": "LC_WEAK", "analysis_type": "linear_static"},
+                {"id": "LC_STRONG", "analysis_type": "linear_static"}
+            ],
+            "load_combinations": [
+                {
+                    "id": "COMBO_BASE",
+                    "index": 0,
+                    "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 1.2},
+                        {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.5}
+                    ],
+                    "source_id": null,
+                    "extensions": {}
+                },
+                {
+                    "id": "COMBO_ALTERNATE",
+                    "index": 1,
+                    "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.8},
+                        {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 0.2}
+                    ],
+                    "source_id": null,
+                    "extensions": {}
+                },
+                {
+                    "id": "COMBO_NESTED",
+                    "index": 2,
+                    "combination_type": "linear",
+                    "terms": [
+                        {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+                        {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+                    ],
+                    "source_id": null,
+                    "extensions": {}
+                }
+            ],
+            "unsupported_features": [],
+            "roundtrip_map": []
+        });
+        let mut edited = model.clone();
+        let result = replace_nested_linear_load_combination_reference(
+            &mut edited,
+            "COMBO_NESTED",
+            LinearLoadCombinationReferenceKindV1::LoadPattern,
+            "LC_AXIAL",
+            LinearLoadCombinationReferenceKindV1::LoadCombination,
+            "COMBO_ALTERNATE",
+        )
+        .expect("replace a pattern root term with a combination term");
+        assert_eq!(result.load_combination_index, 2);
+        assert_eq!(result.term_index, 1);
+        assert_eq!(result.preserved_factor.to_bits(), 0.25_f64.to_bits());
+        assert_eq!(
+            edited["load_combinations"][0],
+            model["load_combinations"][0]
+        );
+        assert_eq!(
+            edited["load_combinations"][1],
+            model["load_combinations"][1]
+        );
+        assert_eq!(
+            edited["load_combinations"][2]["terms"],
+            json!([
+                {"ref_id": "COMBO_BASE", "ref_kind": "load_combination", "factor": 0.5},
+                {"ref_id": "COMBO_ALTERNATE", "ref_kind": "load_combination", "factor": 0.25}
+            ])
+        );
+        assert_eq!(
+            result.source_expansion.expanded_pattern_terms,
+            json!([
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.6},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.25},
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 0.25}
+            ])
+        );
+        assert_eq!(
+            result.edited_expansion.expanded_pattern_terms,
+            json!([
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": 0.8},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": -0.2}
+            ])
+        );
+        assert_eq!(result.source_expansion.expanded_term_count, 3);
+        assert_eq!(result.edited_expansion.expanded_term_count, 4);
+
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut model.clone(),
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+            )
+            .expect_err("no-op nested reference edit")
+            .code,
+            "workbench_model_edit_no_change"
+        );
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut model.clone(),
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+                LinearLoadCombinationReferenceKindV1::LoadCombination,
+                "COMBO_BASE",
+            )
+            .expect_err("duplicate replacement typed reference")
+            .code,
+            "workbench_model_edit_nested_linear_load_combination_replacement_reference_duplicate"
+        );
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut model.clone(),
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+                LinearLoadCombinationReferenceKindV1::LoadCombination,
+                "COMBO_MISSING",
+            )
+            .expect_err("missing replacement combination")
+            .code,
+            "workbench_model_edit_nested_linear_load_combination_replacement_combination_missing"
+        );
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut model.clone(),
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadCombination,
+                "COMBO_BASE",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_WEAK",
+            )
+            .expect_err("reference edit cannot degrade the nested root to direct")
+            .code,
+            "workbench_model_edit_nested_linear_load_combination_direct_unsupported"
+        );
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut model.clone(),
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+                LinearLoadCombinationReferenceKindV1::LoadCombination,
+                "COMBO_NESTED",
+            )
+            .expect_err("self-cycle replacement")
+            .code,
+            "workbench_model_linear_nested_combination_cycle"
+        );
+
+        let mut referenced = model;
+        referenced["load_combinations"]
+            .as_array_mut()
+            .expect("load combinations")
+            .push(json!({
+                "id": "COMBO_PARENT",
+                "index": 3,
+                "combination_type": "linear",
+                "terms": [
+                    {"ref_id": "COMBO_NESTED", "ref_kind": "load_combination", "factor": 0.5},
+                    {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 0.25}
+                ],
+                "source_id": null,
+                "extensions": {}
+            }));
+        assert_eq!(
+            replace_nested_linear_load_combination_reference(
+                &mut referenced,
+                "COMBO_NESTED",
+                LinearLoadCombinationReferenceKindV1::LoadPattern,
+                "LC_AXIAL",
+                LinearLoadCombinationReferenceKindV1::LoadCombination,
+                "COMBO_ALTERNATE",
             )
             .expect_err("referenced nested root")
             .code,

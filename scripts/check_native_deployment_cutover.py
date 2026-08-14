@@ -56,6 +56,7 @@ REQUIRED_FILES = (
     Path("docs/native/modelir-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-direct-linear-load-combination-deletion-v1.md"),
     Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+    Path("docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"),
     Path("docs/native/modelir-fixed-constraint-deletion-v1.md"),
     Path("docs/native/modelir-nodal-load-deletion-v1.md"),
 )
@@ -212,6 +213,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "model-edit-linear-load-combination-factor",
             "model-edit-linear-load-combination-reference",
             "model-edit-nested-linear-load-combination-factor",
+            "model-edit-nested-linear-load-combination-reference",
+            "installed v52 E2E",
             "installed v51 E2E",
             "installed v50 E2E",
             "model-add-nested-linear-load-combination",
@@ -234,7 +237,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
-            "Distribution E2E v51",
+            "Distribution E2E v52",
+            "model-edit-nested-linear-load-combination-reference",
+            "[0,-8000,2000,0,0,0]",
             "model-edit-linear-load-combination-reference",
             "[120000,0,5000,0,0,0]",
             "model-edit-linear-load-combination-factor",
@@ -367,6 +372,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v49",
         "structural-native-distribution-e2e.v50",
         "structural-native-distribution-e2e.v51",
+        "structural-native-distribution-e2e.v52",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -458,6 +464,20 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "workbench_direct_linear_load_combination_reference_edit_recovery_sha256",
         "workbench_direct_linear_load_combination_reference_edit_report_ir_sha256",
         "workbench_direct_linear_load_combination_reference_edit_restart_passed",
+        "exercise_nested_linear_load_combination_reference_edit_surface",
+        "model-edit-nested-linear-load-combination-reference",
+        "structural-native:model-edit-nested-linear-load-combination-reference.v1",
+        "workbench_nested_linear_load_combination_reference_edit_surface_passed",
+        "workbench_nested_linear_load_combination_reference_edit_model_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_receipt_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_request_receipt_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_request_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_assembly_receipt_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_checkpoint_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_result_ir_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_recovery_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_report_ir_sha256",
+        "workbench_nested_linear_load_combination_reference_edit_restart_passed",
         "exercise_nested_linear_load_combination_surface",
         "model-add-nested-linear-load-combination",
         "structural-native-model-linear-nested-combination-request-create-receipt.v3",
@@ -732,6 +752,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v52",
+            "V52_NESTED_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_KEYS",
+            "workbench_nested_linear_load_combination_reference_edit_surface_passed",
+            "workbench_nested_linear_load_combination_reference_edit_receipt_sha256",
+            "workbench_nested_linear_load_combination_reference_edit_request_receipt_sha256",
+            "workbench_nested_linear_load_combination_reference_edit_recovery_sha256",
+            "workbench_nested_linear_load_combination_reference_edit_restart_passed",
             "structural-native-distribution-e2e.v51",
             "V51_DIRECT_LINEAR_LOAD_COMBINATION_REFERENCE_EDIT_KEYS",
             "workbench_direct_linear_load_combination_reference_edit_surface_passed",
@@ -838,8 +865,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v52 receipt",
+            "frozen v1 through v51 receipts",
+            "no pre-v52 receipt",
             "append-only v51 receipt",
-            "frozen v1 through v50 receipts",
             "no pre-v51 receipt",
             "append-only v50 hash-bound receipt",
             "no pre-v50 receipt",
@@ -1265,6 +1294,30 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers=blockers,
     )
+    nested_linear_load_combination_reference_edit_doc = _text(
+        root,
+        Path("docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md"
+        ),
+        text=nested_linear_load_combination_reference_edit_doc,
+        tokens=(
+            "model-edit-nested-linear-load-combination-reference",
+            "root-inclusive depth at most eight",
+            "single C ABI into C++ semantic, reference and cycle validation",
+            "structural-native:model-edit-nested-linear-load-combination-reference.v1",
+            "nested_linear_load_combination_reference_edit",
+            "append-only v52",
+            "[0,-8000,2000,0,0,0]",
+            "fallback 0",
+            "approved HIP C2",
+            "C6",
+        ),
+        blockers=blockers,
+    )
 
     manifest = _json_object(root, CUTOVER_MANIFEST, blockers)
     expected_manifest = {
@@ -1582,6 +1635,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         if isinstance(capabilities, dict)
         else None
     )
+    nested_linear_load_combination_reference_edit_capability = (
+        capabilities.get("modelir_nested_linear_load_combination_reference_edit")
+        if isinstance(capabilities, dict)
+        else None
+    )
     if not isinstance(nested_linear_load_combination_factor_edit_capability, dict):
         blockers.append(
             "modelir_nested_linear_load_combination_factor_edit_capability_missing"
@@ -1617,6 +1675,46 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             if token not in nested_linear_load_combination_factor_edit_claim:
                 blockers.append(
                     "modelir_nested_linear_load_combination_factor_edit_capability_"
+                    f"claim_missing:{token}"
+                )
+    if not isinstance(nested_linear_load_combination_reference_edit_capability, dict):
+        blockers.append(
+            "modelir_nested_linear_load_combination_reference_edit_capability_missing"
+        )
+    else:
+        for field, expected in (
+            ("status", "implemented"),
+            ("cutover_gate", "C5"),
+            ("owner", "structural-workbench"),
+        ):
+            if (
+                nested_linear_load_combination_reference_edit_capability.get(field)
+                != expected
+            ):
+                blockers.append(
+                    "modelir_nested_linear_load_combination_reference_edit_capability_"
+                    f"field_invalid:{field}"
+                )
+        nested_linear_load_combination_reference_edit_claim = str(
+            nested_linear_load_combination_reference_edit_capability.get("claim", "")
+        )
+        for token in (
+            "replaces exactly one existing root load_pattern or load_combination reference",
+            "explicit source and replacement kinds and identities",
+            "selected factor, root term order/count",
+            "descendant combinations",
+            "root-inclusive depth at most eight",
+            "both complete expansions",
+            "single C ABI into C++ semantic/reference/cycle validation",
+            "distribution v52 E2E",
+            "exact active load [0,-8000,2000,0,0,0]",
+            "byte-identical direct/restart output",
+            "fallback 0",
+            "C6 remain open",
+        ):
+            if token not in nested_linear_load_combination_reference_edit_claim:
+                blockers.append(
+                    "modelir_nested_linear_load_combination_reference_edit_capability_"
                     f"claim_missing:{token}"
                 )
     if not isinstance(nested_linear_load_combination_deletion_capability, dict):

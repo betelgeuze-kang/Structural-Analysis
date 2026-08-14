@@ -37,6 +37,7 @@
       "model-edit-linear-load-combination-factor",
       "model-edit-linear-load-combination-reference",
       "model-edit-nested-linear-load-combination-factor",
+      "model-edit-nested-linear-load-combination-reference",
       "model-delete-linear-load-combination",
       "model-delete-linear-load-pattern",
       "model-add-linear-material",
@@ -408,6 +409,12 @@
     },
     {
       "feature": "bounded_cpp_revalidated_nested_linear_load_combination_factor_edit",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_cpp_revalidated_nested_linear_load_combination_reference_edit",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false

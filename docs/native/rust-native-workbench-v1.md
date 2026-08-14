@@ -112,6 +112,11 @@ term by explicit reference kind and identity. It preserves root references/order
 descendant, requires the source and edited graphs to remain within depth eight and 64 expanded
 leaves, and binds both complete expansions after strict Rust plus C++ validation. See
 `docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md`.
+The bounded `model-edit-nested-linear-load-combination-reference` surface replaces one typed root
+reference while preserving its factor, root order/count and every descendant row. Source and edited
+graphs must both remain nested, acyclic, depth-eight/64-leaf bounded and C++ valid; duplicate,
+missing, cyclic and direct-degrading replacements fail closed. See
+`docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md`.
 The bounded `--load-combination` request surface uses the frozen v1
 selector alias to assemble and execute direct or bounded nested terms through C++ and CPU PCG, with exact active
 load, typed recovery, fallback 0, and checkpoint/restart parity. General combination evaluation,
@@ -125,6 +130,7 @@ solver selection, HIP parity and engineering acceptance remain open. See
 `docs/native/modelir-direct-linear-load-combination-deletion-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md` and
+`docs/native/modelir-nested-linear-load-combination-reference-edit-v1.md` and
 `docs/native/modelir-nested-linear-load-combination-deletion-v1.md` boundaries.
 The bounded linear-material creator appends one unique contiguous-index v1
 `linear_elastic_isotropic` material with a complete finite physical SI parameter object, neutral
@@ -299,6 +305,15 @@ structural-workbench model-add-nested-linear-load-combination MODEL.json \
   --load-combination COMBO_NESTED \
   --combination-term COMBO_SERVICE 0.5 --pattern-term LC_AXIAL 0.25 \
   --output-dir ADDED-NESTED-COMBINATION-MODEL
+structural-workbench model-edit-nested-linear-load-combination-factor \
+  ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_NESTED --ref-kind load_combination \
+  --ref-id COMBO_SERVICE --factor 0.75 --output-dir FACTOR-EDITED-NESTED-COMBINATION-MODEL
+structural-workbench model-edit-nested-linear-load-combination-reference \
+  ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
+  --load-combination COMBO_NESTED --ref-kind load_pattern --ref-id LC_AXIAL \
+  --replacement-ref-kind load_combination --replacement-ref-id COMBO_ALTERNATE \
+  --output-dir REFERENCE-EDITED-NESTED-COMBINATION-MODEL
 structural-workbench model-delete-linear-load-combination \
   ADDED-NESTED-COMBINATION-MODEL/model-ir.json \
   --load-combination COMBO_NESTED \
