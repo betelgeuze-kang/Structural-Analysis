@@ -31,7 +31,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V2: &str = "structural-native-rootfs-isolati
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V3: &str = "structural-native-rootfs-isolation-e2e.v3";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V4: &str = "structural-native-rootfs-isolation-e2e.v4";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V5: &str = "structural-native-rootfs-isolation-e2e.v5";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v6";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V6: &str = "structural-native-rootfs-isolation-e2e.v6";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v7";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -49,7 +50,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V2: &str = "This source-bound local C5 diagn
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V3: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The exact MGT-linear flow binds original source bytes, normalized import health, typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. The ModelIR-linear flow also binds localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The exact MGT-linear flow binds original source bytes, normalized import health, typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. The ModelIR-linear flow also binds localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery and constrained-reaction ResultIR through review and handoff export; the MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -466,6 +468,23 @@ pub struct RootfsIsolationReceiptV6 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV7 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV6,
+    pub model_ir_linear_reaction_result_ir_sha256: String,
+    pub mgt_model_ir_linear_reaction_result_ir_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV7 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV7,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -475,6 +494,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V4(Box<RootfsIsolationReceiptV4>),
     V5(Box<RootfsIsolationReceiptV5>),
     V6(Box<RootfsIsolationReceiptV6>),
+    V7(Box<RootfsIsolationReceiptV7>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -762,7 +782,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV6, DistributionError> {
+) -> Result<RootfsIsolationReceiptV7, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -937,7 +957,7 @@ pub fn create_rootfs_isolation_receipt(
         &OperatorSurfaceProbe {
             import_kind: "model_ir",
             analysis_profile: Some("model_ir_linear_cpu_v1"),
-            expected_export_artifact_count: 8,
+            expected_export_artifact_count: 9,
             inspect_before_review: request.model_ir_linear_workbench_inspect_before_review,
             review_show: request.model_ir_linear_workbench_review_show,
             inspect_after_review: request.model_ir_linear_workbench_inspect_after_review,
@@ -951,7 +971,7 @@ pub fn create_rootfs_isolation_receipt(
         &OperatorSurfaceProbe {
             import_kind: "mgt",
             analysis_profile: Some("model_ir_linear_cpu_v1"),
-            expected_export_artifact_count: 8,
+            expected_export_artifact_count: 9,
             inspect_before_review: request.mgt_model_ir_linear_workbench_inspect_before_review,
             review_show: request.mgt_model_ir_linear_workbench_review_show,
             inspect_after_review: request.mgt_model_ir_linear_workbench_inspect_after_review,
@@ -987,7 +1007,7 @@ pub fn create_rootfs_isolation_receipt(
     )?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
-        claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY.to_owned(),
+        claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
         isolation_technology: ROOTFS_ISOLATION_TECHNOLOGY.to_owned(),
         release_id: manifest.release_id.clone(),
         source_sha256: manifest.source_sha256.clone(),
@@ -1083,7 +1103,7 @@ pub fn create_rootfs_isolation_receipt(
         model_ir_linear_localized_pdf_en_us_receipt_sha256: localized_pdf_surface.en_us_receipt,
         model_ir_linear_localized_pdf_ko_kr_receipt_sha256: localized_pdf_surface.ko_kr_receipt,
     };
-    let evidence = RootfsIsolationEvidenceV6 {
+    let evidence_v6 = RootfsIsolationEvidenceV6 {
         prior,
         mgt_model_ir_linear_workbench_stage: mgt_model_ir_linear_summary.stage,
         mgt_model_ir_linear_workbench_terminal_status: mgt_model_ir_linear_summary.terminal_status,
@@ -1128,7 +1148,29 @@ pub fn create_rootfs_isolation_receipt(
         mgt_model_ir_linear_workbench_export_sha256: mgt_model_ir_linear_workbench_operator
             .export_sha256,
     };
-    validate_rootfs_isolation_evidence_v6(&evidence)?;
+    validate_rootfs_isolation_evidence_v6(&evidence_v6)?;
+    let mut prior = evidence_v6;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.prior.claim_boundary);
+    let evidence = RootfsIsolationEvidenceV7 {
+        prior,
+        model_ir_linear_reaction_result_ir_sha256: model_ir_linear_summary
+            .reaction_result_ir_sha256
+            .ok_or_else(|| {
+                DistributionError::new(
+                    "rootfs_workbench_incomplete",
+                    "ModelIR linear Workbench has no constrained-reaction ResultIR artifact",
+                )
+            })?,
+        mgt_model_ir_linear_reaction_result_ir_sha256: mgt_model_ir_linear_summary
+            .reaction_result_ir_sha256
+            .ok_or_else(|| {
+                DistributionError::new(
+                    "rootfs_workbench_incomplete",
+                    "normalized MGT ModelIR linear Workbench has no constrained-reaction ResultIR artifact",
+                )
+            })?,
+    };
+    validate_rootfs_isolation_evidence_v7(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -1243,7 +1285,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V5(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V6) => {
             let receipt: RootfsIsolationReceiptV6 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v6(&receipt.evidence)?;
@@ -1259,6 +1301,28 @@ pub fn verify_rootfs_isolation_receipt(
                 &receipt.evidence.prior.prior.workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V6(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV7 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v7(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &receipt.evidence.prior.prior.prior.release_id,
+                &receipt.evidence.prior.prior.prior.source_sha256,
+                &receipt.evidence.prior.prior.prior.bundle_manifest_hash,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .bundle_manifest_file_sha256,
+                &receipt.evidence.prior.prior.prior.installer_sha256,
+                &receipt.evidence.prior.prior.prior.workbench_sha256,
+                &receipt.evidence.prior.prior.prior.workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V7(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -1881,6 +1945,7 @@ struct ReportedWorkbenchSummary {
     comparison_ir_sha256: String,
     report_pdf_sha256: String,
     result_recovery_ir_sha256: Option<String>,
+    reaction_result_ir_sha256: Option<String>,
     report_document_sha256: Option<String>,
     mgt_source_sha256: Option<String>,
     mgt_import_health_sha256: Option<String>,
@@ -2299,16 +2364,19 @@ fn inspect_reported_workbench(
     if let Some(value) = mgt_import_health_sha256.as_deref() {
         validate_sha256_identity(value, "rootfs Workbench MGT import-health SHA-256")?;
     }
-    let (result_recovery_ir_sha256, report_document_sha256) =
+    let (result_recovery_ir_sha256, reaction_result_ir_sha256, report_document_sha256) =
         if expected_analysis_profile == Some("model_ir_linear_cpu_v1") {
             (
                 Some(sha256_file(
                     &root.join("04-resume/result-recovery-ir.json"),
                 )?),
+                Some(sha256_file(
+                    &root.join("04-resume/reaction-result-ir.json"),
+                )?),
                 Some(sha256_file(&root.join("06-report/report.md"))?),
             )
         } else {
-            (None, None)
+            (None, None, None)
         };
     Ok(ReportedWorkbenchSummary {
         session_id: session_id.to_owned(),
@@ -2320,6 +2388,7 @@ fn inspect_reported_workbench(
         comparison_ir_sha256: sha256_file(&root.join("05-compare/external-comparison-ir.json"))?,
         report_pdf_sha256: sha256_file(&root.join("06-report/report.pdf"))?,
         result_recovery_ir_sha256,
+        reaction_result_ir_sha256,
         report_document_sha256,
         mgt_source_sha256,
         mgt_import_health_sha256,
@@ -2485,6 +2554,32 @@ fn optional_operator_string_matches(
     }
 }
 
+fn optional_export_artifact_matches(
+    value: &serde_json::Value,
+    role: &str,
+    file: &str,
+    expected_hash: Option<&str>,
+) -> bool {
+    let Some(artifacts) = value.get("artifacts").and_then(serde_json::Value::as_array) else {
+        return false;
+    };
+    let matching = artifacts
+        .iter()
+        .filter(|artifact| artifact.get("role").and_then(serde_json::Value::as_str) == Some(role))
+        .collect::<Vec<_>>();
+    match expected_hash {
+        Some(expected_hash) => {
+            matching.len() == 1
+                && matching[0].get("file").and_then(serde_json::Value::as_str) == Some(file)
+                && matching[0]
+                    .get("content_hash")
+                    .and_then(serde_json::Value::as_str)
+                    == Some(expected_hash)
+        }
+        None => matching.is_empty(),
+    }
+}
+
 #[allow(clippy::too_many_lines)]
 fn inspect_workbench_operator_surface(
     workspace: &Path,
@@ -2572,6 +2667,11 @@ fn inspect_workbench_operator_surface(
         )
         && optional_operator_string_matches(
             &review,
+            "reaction_result_artifact_hash",
+            reported.reaction_result_ir_sha256.as_deref(),
+        )
+        && optional_operator_string_matches(
+            &review,
             "report_document_artifact_hash",
             reported.report_document_sha256.as_deref(),
         );
@@ -2603,7 +2703,13 @@ fn inspect_workbench_operator_surface(
         && export
             .get("artifacts")
             .and_then(serde_json::Value::as_array)
-            .is_some_and(|items| items.len() == probe.expected_export_artifact_count);
+            .is_some_and(|items| items.len() == probe.expected_export_artifact_count)
+        && optional_export_artifact_matches(
+            &export,
+            "reaction_result_ir",
+            "04-resume/reaction-result-ir.json",
+            reported.reaction_result_ir_sha256.as_deref(),
+        );
     if !before_valid || !review_valid || !after_valid || !export_valid {
         return Err(DistributionError::new(
             "rootfs_operator_artifact_contract_invalid",
@@ -2866,10 +2972,10 @@ fn linux_ipv4_route_count() -> Result<u64, DistributionError> {
 }
 
 fn seal_rootfs_isolation_evidence(
-    evidence: RootfsIsolationEvidenceV6,
-) -> Result<RootfsIsolationReceiptV6, DistributionError> {
+    evidence: RootfsIsolationEvidenceV7,
+) -> Result<RootfsIsolationReceiptV7, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
-    Ok(RootfsIsolationReceiptV6 {
+    Ok(RootfsIsolationReceiptV7 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -3254,7 +3360,7 @@ fn validate_rootfs_isolation_evidence_v5(
 fn validate_rootfs_isolation_evidence_v6(
     evidence: &RootfsIsolationEvidenceV6,
 ) -> Result<(), DistributionError> {
-    if evidence.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    if evidence.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6
         || evidence.mgt_model_ir_linear_workbench_stage != "reported"
         || evidence.mgt_model_ir_linear_workbench_terminal_status != "completed"
         || !evidence.mgt_model_ir_linear_workbench_comparison_passed
@@ -3326,6 +3432,33 @@ fn validate_rootfs_isolation_evidence_v6(
     let mut prior = evidence.prior.clone();
     ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5.clone_into(&mut prior.prior.claim_boundary);
     validate_rootfs_isolation_evidence_v5(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v7(
+    evidence: &RootfsIsolationEvidenceV7,
+) -> Result<(), DistributionError> {
+    if evidence.prior.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v7 receipt weakens or exceeds the exact constrained-reaction diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_linear_reaction_result_ir_sha256,
+            "rootfs ModelIR linear constrained-reaction ResultIR SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_reaction_result_ir_sha256,
+            "rootfs normalized-MGT linear constrained-reaction ResultIR SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.clone_into(&mut prior.prior.prior.claim_boundary);
+    validate_rootfs_isolation_evidence_v6(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -4179,9 +4312,9 @@ mod tests {
         }
     }
 
-    fn rootfs_evidence() -> RootfsIsolationEvidenceV6 {
+    fn rootfs_evidence_v6() -> RootfsIsolationEvidenceV6 {
         let mut prior = rootfs_evidence_v5();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.claim_boundary);
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.clone_into(&mut prior.prior.claim_boundary);
         let identity = |value: u8| format!("sha256:{value:064x}");
         RootfsIsolationEvidenceV6 {
             prior,
@@ -4204,6 +4337,36 @@ mod tests {
             mgt_model_ir_linear_workbench_inspect_after_review_sha256: identity(48),
             mgt_model_ir_linear_workbench_export_sha256: identity(49),
         }
+    }
+
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV7 {
+        let mut prior = rootfs_evidence_v6();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.prior.claim_boundary);
+        RootfsIsolationEvidenceV7 {
+            prior,
+            model_ir_linear_reaction_result_ir_sha256: format!("sha256:{:064x}", 50),
+            mgt_model_ir_linear_reaction_result_ir_sha256: format!("sha256:{:064x}", 51),
+        }
+    }
+
+    fn bind_rootfs_evidence_to_bundle(
+        evidence: &mut RootfsIsolationEvidenceV4,
+        manifest: &DistributionManifestV1,
+        bundle: &Path,
+    ) {
+        let payload = bundle.join(PAYLOAD_DIRECTORY);
+        evidence.release_id.clone_from(&manifest.release_id);
+        evidence.source_sha256.clone_from(&manifest.source_sha256);
+        evidence
+            .bundle_manifest_hash
+            .clone_from(&manifest.manifest_hash);
+        evidence.bundle_manifest_file_sha256 =
+            sha256_file(&bundle.join(MANIFEST_NAME)).expect("hash fixture manifest");
+        evidence.installer_sha256 =
+            sha256_file(&payload.join("bin/structural-installer")).expect("hash fixture installer");
+        evidence.workbench_sha256 =
+            sha256_file(&payload.join("bin/structural-workbench")).expect("hash fixture Workbench");
+        evidence.workbench_version = "structural-workbench 0.1.0".to_owned();
     }
 
     fn rootfs_evidence_v1() -> RootfsIsolationEvidenceV1 {
@@ -4401,25 +4564,28 @@ mod tests {
             .expect("frozen v4 evidence remains verifiable");
         validate_rootfs_isolation_evidence_v5(&rootfs_evidence_v5())
             .expect("frozen v5 evidence remains verifiable");
+        validate_rootfs_isolation_evidence_v6(&rootfs_evidence_v6())
+            .expect("frozen v6 evidence remains verifiable");
 
         let evidence = rootfs_evidence();
-        validate_rootfs_isolation_evidence_v6(&evidence).expect("valid bounded evidence");
+        validate_rootfs_isolation_evidence_v7(&evidence).expect("valid bounded evidence");
         let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
         assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
         assert_eq!(
             receipt.receipt_hash,
             sha256_identity(&canonical_json(&evidence).expect("canonical evidence"))
         );
-        assert!(!receipt.evidence.prior.prior.container_image_built);
-        assert!(!receipt.evidence.prior.prior.customer_image_receipt);
+        assert!(!receipt.evidence.prior.prior.prior.container_image_built);
+        assert!(!receipt.evidence.prior.prior.prior.customer_image_receipt);
 
         let mut promoting = evidence.clone();
         promoting
             .prior
             .prior
+            .prior
             .model_ir_linear_workbench_review_decision = "pass".to_owned();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v6(&promoting)
+            validate_rootfs_isolation_evidence_v7(&promoting)
                 .expect_err("promoting review decision must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -4429,10 +4595,11 @@ mod tests {
         weakened
             .prior
             .prior
+            .prior
             .network_interfaces
             .push("eth0".to_owned());
         assert_eq!(
-            validate_rootfs_isolation_evidence_v6(&weakened)
+            validate_rootfs_isolation_evidence_v7(&weakened)
                 .expect_err("external interface must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -4444,24 +4611,8 @@ mod tests {
         let temporary = TestDirectory::create("rootfs-v5-receipt");
         let bundle = make_bundle(&temporary, "rootfs-v5-release", "v5");
         let manifest = verify_bundle(&bundle).expect("verify v5 fixture bundle");
-        let payload = bundle.join(PAYLOAD_DIRECTORY);
         let mut evidence = rootfs_evidence_v5();
-        evidence.prior.release_id.clone_from(&manifest.release_id);
-        evidence
-            .prior
-            .source_sha256
-            .clone_from(&manifest.source_sha256);
-        evidence
-            .prior
-            .bundle_manifest_hash
-            .clone_from(&manifest.manifest_hash);
-        evidence.prior.bundle_manifest_file_sha256 =
-            sha256_file(&bundle.join(MANIFEST_NAME)).expect("hash v5 fixture manifest");
-        evidence.prior.installer_sha256 = sha256_file(&payload.join("bin/structural-installer"))
-            .expect("hash v5 fixture installer");
-        evidence.prior.workbench_sha256 = sha256_file(&payload.join("bin/structural-workbench"))
-            .expect("hash v5 fixture Workbench");
-        evidence.prior.workbench_version = "structural-workbench 0.1.0".to_owned();
+        bind_rootfs_evidence_to_bundle(&mut evidence.prior, &manifest, &bundle);
         validate_rootfs_isolation_evidence_v5(&evidence).expect("validate frozen v5 evidence");
         let receipt = RootfsIsolationReceiptV5 {
             schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V5.to_owned(),
@@ -4480,6 +4631,56 @@ mod tests {
             verify_rootfs_isolation_receipt(&receipt_path, &bundle)
                 .expect("verify frozen v5 receipt against its bundle"),
             VerifiedRootfsIsolationReceipt::V5(_)
+        ));
+    }
+
+    #[test]
+    fn frozen_rootfs_v6_receipt_remains_bundle_verifiable() {
+        let temporary = TestDirectory::create("rootfs-v6-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v6-release", "v6");
+        let manifest = verify_bundle(&bundle).expect("verify v6 fixture bundle");
+        let mut evidence = rootfs_evidence_v6();
+        bind_rootfs_evidence_to_bundle(&mut evidence.prior.prior, &manifest, &bundle);
+        validate_rootfs_isolation_evidence_v6(&evidence).expect("validate frozen v6 evidence");
+        let receipt = RootfsIsolationReceiptV6 {
+            schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V6.to_owned(),
+            receipt_hash: sha256_identity(
+                &canonical_json(&evidence).expect("canonical frozen v6 evidence"),
+            ),
+            evidence,
+        };
+        let receipt_path = temporary.0.join("rootfs-v6-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical frozen v6 receipt"),
+        )
+        .expect("write frozen v6 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify frozen v6 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V6(_)
+        ));
+    }
+
+    #[test]
+    fn current_rootfs_v7_receipt_is_bundle_verifiable() {
+        let temporary = TestDirectory::create("rootfs-v7-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v7-release", "v7");
+        let manifest = verify_bundle(&bundle).expect("verify v7 fixture bundle");
+        let mut evidence = rootfs_evidence();
+        bind_rootfs_evidence_to_bundle(&mut evidence.prior.prior.prior, &manifest, &bundle);
+        validate_rootfs_isolation_evidence_v7(&evidence).expect("validate current v7 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v7 evidence");
+        let receipt_path = temporary.0.join("rootfs-v7-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v7 receipt"),
+        )
+        .expect("write current v7 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v7 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V7(_)
         ));
     }
 

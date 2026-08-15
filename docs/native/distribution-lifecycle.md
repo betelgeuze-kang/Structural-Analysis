@@ -75,8 +75,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
 4. selects and executes the installed ABI backend;
 5. runs stage-by-stage and one-shot Workbench flows from strict ModelIR, the bounded MGT source and
    the ModelIR linear product path, then byte-compares every direct/restarted artifact; the MGT path
-   preserves import-health evidence, while the linear path binds the language-neutral external
-   oracle, typed recovery, comparison, deterministic sparse-linear PDF and both PDF/report receipts;
+   preserves import-health evidence, while both linear paths bind constrained-reaction ResultIR and
+   typed recovery through review/export in addition to the language-neutral external oracle,
+   comparison, deterministic sparse-linear PDF and both PDF/report receipts;
 6. exercises deterministic inspect, immutable explicit `review`, review reopen and handoff export
    from both installed sessions without inferring an engineering approval;
 7. checks and rebuilds the tracked 26-case catalog with the installed `structural-catalog` binary,
@@ -254,9 +255,11 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    all four default response views and the explicit-window identity,
    all four deformed-shape projection identities and the explicit step/scale identity, Korean
    response/deformed-view identities, ModelIR linear restart/direct/operator checks, review/export,
-   ResultIR/recovery, PDF and PDF/report receipt identities, Python/Node lookup count 0 and fallback
+   ResultIR/recovery/constrained-reaction, PDF and PDF/report receipt identities, Python/Node lookup
+   count 0 and fallback
    count 0, plus the localized ModelIR-linear PDF and receipt identities and the exact MGT-linear
-   source, normalized import-health, ResultIR/recovery, PDF, receipt and review/export identities.
+   source, normalized import-health, ResultIR/recovery/constrained-reaction, PDF, receipt and
+   review/export identities.
 40. removes the last contiguous neutral unreferenced parameter-set-v1 `frame_3d` section twice
    while retaining the original section, proves byte-identical ModelIR/receipt output and unchanged
    source bytes, rejects element-referenced and nonterminal sections without publishing output,
