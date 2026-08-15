@@ -1967,6 +1967,25 @@ def valid_v85_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v86_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v85_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v86",
+            "model_ir_linear_reaction_audit_surface_passed": True,
+            "model_ir_linear_reaction_audit_restart_parity_passed": True,
+            "model_ir_linear_reaction_audit_en_us_sha256": "sha256:" + "c" * 64,
+            "model_ir_linear_reaction_audit_ko_kr_sha256": "sha256:" + "d" * 64,
+            "mgt_model_ir_linear_reaction_audit_surface_passed": True,
+            "mgt_model_ir_linear_reaction_audit_restart_parity_passed": True,
+            "mgt_model_ir_linear_reaction_audit_en_us_sha256": "sha256:" + "e" * 64,
+            "mgt_model_ir_linear_reaction_audit_ko_kr_sha256": "sha256:" + "f" * 64,
+            "workbench_reaction_audit_wrong_profile_rejected": True,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4503,6 +4522,55 @@ def test_distribution_receipt_rejects_colliding_v85_reaction_view_identities(
     assert any("window identity must differ" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_reaction_audit_v86_contract(tmp_path: Path):
+    receipt, manifest = valid_v86_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v86_reaction_audit(tmp_path: Path):
+    receipt, manifest = valid_v86_contract()
+    receipt["model_ir_linear_reaction_audit_restart_parity_passed"] = False
+    receipt["mgt_model_ir_linear_reaction_audit_en_us_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_linear_reaction_audit_restart_parity_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "mgt_model_ir_linear_reaction_audit_en_us_sha256" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_colliding_v86_reaction_audit_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v86_contract()
+    receipt["model_ir_linear_reaction_audit_ko_kr_sha256"] = receipt[
+        "model_ir_linear_reaction_audit_en_us_sha256"
+    ]
+    receipt["mgt_model_ir_linear_reaction_audit_ko_kr_sha256"] = receipt[
+        "mgt_model_ir_linear_reaction_audit_en_us_sha256"
+    ]
+    receipt["mgt_model_ir_linear_reaction_audit_en_us_sha256"] = receipt[
+        "model_ir_linear_reaction_audit_en_us_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "reaction audit locale identities must differ" in error
+        for error in validation["errors"]
+    )
+    assert any("strict and MGT" in error for error in validation["errors"])
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -4525,6 +4593,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v6",
         "structural-native-rootfs-isolation-e2e.v7",
         "structural-native-rootfs-isolation-e2e.v8",
+        "structural-native-rootfs-isolation-e2e.v9",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -4538,6 +4607,10 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "mgt_model_ir_linear_reaction_view_en_us_sha256",
         "workbench_reaction_view_wrong_profile_rejected",
         "validate_rootfs_isolation_evidence_v8",
+        "model_ir_linear_reaction_audit_en_us_sha256",
+        "mgt_model_ir_linear_reaction_audit_en_us_sha256",
+        "workbench_reaction_audit_wrong_profile_rejected",
+        "validate_rootfs_isolation_evidence_v9",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -5011,6 +5084,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_model_ir_linear_reaction_view_en_us_sha256" in e2e
     assert "mgt_model_ir_linear_reaction_view_ko_kr_sha256" in e2e
     assert "workbench_reaction_view_wrong_profile_rejected" in e2e
+    assert "structural-native-distribution-e2e.v86" in e2e
+    assert "exercise_model_ir_linear_reaction_audit_surface" in e2e
+    assert "reaction-audit" in e2e
+    assert "model_ir_linear_reaction_audit_surface_passed" in e2e
+    assert "model_ir_linear_reaction_audit_restart_parity_passed" in e2e
+    assert "model_ir_linear_reaction_audit_en_us_sha256" in e2e
+    assert "model_ir_linear_reaction_audit_ko_kr_sha256" in e2e
+    assert "mgt_model_ir_linear_reaction_audit_surface_passed" in e2e
+    assert "mgt_model_ir_linear_reaction_audit_restart_parity_passed" in e2e
+    assert "mgt_model_ir_linear_reaction_audit_en_us_sha256" in e2e
+    assert "mgt_model_ir_linear_reaction_audit_ko_kr_sha256" in e2e
+    assert "workbench_reaction_audit_wrong_profile_rejected" in e2e
     assert "workbench_fixed_constraint_identity_cascade_edit_restart_passed" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
@@ -5046,6 +5131,12 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--model-ir-linear-reaction-view-window" in rootfs_e2e
     assert "--mgt-model-ir-linear-reaction-view-ko-kr-second" in rootfs_e2e
     assert "--workbench-reaction-view-wrong-profile-failure" in rootfs_e2e
+    assert "reaction-audit" in rootfs_e2e
+    assert "--model-ir-linear-reaction-audit-en-us-first" in rootfs_e2e
+    assert "--model-ir-linear-reaction-audit-ko-kr-second" in rootfs_e2e
+    assert "--mgt-model-ir-linear-reaction-audit-en-us-first" in rootfs_e2e
+    assert "--mgt-model-ir-linear-reaction-audit-ko-kr-second" in rootfs_e2e
+    assert "--workbench-reaction-audit-wrong-profile-failure" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

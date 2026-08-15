@@ -193,6 +193,15 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-model-ir-linear-reaction-view-ko-kr-first",
             "--mgt-model-ir-linear-reaction-view-ko-kr-second",
             "--workbench-reaction-view-wrong-profile-failure",
+            "--model-ir-linear-reaction-audit-en-us-first",
+            "--model-ir-linear-reaction-audit-en-us-second",
+            "--model-ir-linear-reaction-audit-ko-kr-first",
+            "--model-ir-linear-reaction-audit-ko-kr-second",
+            "--mgt-model-ir-linear-reaction-audit-en-us-first",
+            "--mgt-model-ir-linear-reaction-audit-en-us-second",
+            "--mgt-model-ir-linear-reaction-audit-ko-kr-first",
+            "--mgt-model-ir-linear-reaction-audit-ko-kr-second",
+            "--workbench-reaction-audit-wrong-profile-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -279,6 +288,24 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--mgt-model-ir-linear-reaction-view-ko-kr-second")?;
     let workbench_reaction_view_wrong_profile_failure =
         required_path(options, "--workbench-reaction-view-wrong-profile-failure")?;
+    let model_ir_linear_reaction_audit_en_us_first =
+        required_path(options, "--model-ir-linear-reaction-audit-en-us-first")?;
+    let model_ir_linear_reaction_audit_en_us_second =
+        required_path(options, "--model-ir-linear-reaction-audit-en-us-second")?;
+    let model_ir_linear_reaction_audit_ko_kr_first =
+        required_path(options, "--model-ir-linear-reaction-audit-ko-kr-first")?;
+    let model_ir_linear_reaction_audit_ko_kr_second =
+        required_path(options, "--model-ir-linear-reaction-audit-ko-kr-second")?;
+    let mgt_model_ir_linear_reaction_audit_en_us_first =
+        required_path(options, "--mgt-model-ir-linear-reaction-audit-en-us-first")?;
+    let mgt_model_ir_linear_reaction_audit_en_us_second =
+        required_path(options, "--mgt-model-ir-linear-reaction-audit-en-us-second")?;
+    let mgt_model_ir_linear_reaction_audit_ko_kr_first =
+        required_path(options, "--mgt-model-ir-linear-reaction-audit-ko-kr-first")?;
+    let mgt_model_ir_linear_reaction_audit_ko_kr_second =
+        required_path(options, "--mgt-model-ir-linear-reaction-audit-ko-kr-second")?;
+    let workbench_reaction_audit_wrong_profile_failure =
+        required_path(options, "--workbench-reaction-audit-wrong-profile-failure")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -339,6 +366,20 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             &mgt_model_ir_linear_reaction_view_ko_kr_second,
         workbench_reaction_view_wrong_profile_failure:
             &workbench_reaction_view_wrong_profile_failure,
+        model_ir_linear_reaction_audit_en_us_first: &model_ir_linear_reaction_audit_en_us_first,
+        model_ir_linear_reaction_audit_en_us_second: &model_ir_linear_reaction_audit_en_us_second,
+        model_ir_linear_reaction_audit_ko_kr_first: &model_ir_linear_reaction_audit_ko_kr_first,
+        model_ir_linear_reaction_audit_ko_kr_second: &model_ir_linear_reaction_audit_ko_kr_second,
+        mgt_model_ir_linear_reaction_audit_en_us_first:
+            &mgt_model_ir_linear_reaction_audit_en_us_first,
+        mgt_model_ir_linear_reaction_audit_en_us_second:
+            &mgt_model_ir_linear_reaction_audit_en_us_second,
+        mgt_model_ir_linear_reaction_audit_ko_kr_first:
+            &mgt_model_ir_linear_reaction_audit_ko_kr_first,
+        mgt_model_ir_linear_reaction_audit_ko_kr_second:
+            &mgt_model_ir_linear_reaction_audit_ko_kr_second,
+        workbench_reaction_audit_wrong_profile_failure:
+            &workbench_reaction_audit_wrong_profile_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -431,7 +472,14 @@ fn usage_error(detail: &str) -> CliError {
     CliError::Usage(detail.to_owned())
 }
 
-fn usage() -> &'static str {
+fn usage() -> String {
+    frozen_usage_v8().replace(
+        " --workbench-catalog",
+        " --model-ir-linear-reaction-audit-en-us-first FILE --model-ir-linear-reaction-audit-en-us-second FILE --model-ir-linear-reaction-audit-ko-kr-first FILE --model-ir-linear-reaction-audit-ko-kr-second FILE --mgt-model-ir-linear-reaction-audit-en-us-first FILE --mgt-model-ir-linear-reaction-audit-en-us-second FILE --mgt-model-ir-linear-reaction-audit-ko-kr-first FILE --mgt-model-ir-linear-reaction-audit-ko-kr-second FILE --workbench-reaction-audit-wrong-profile-failure FILE --workbench-catalog",
+    )
+}
+
+fn frozen_usage_v8() -> &'static str {
     "usage:\n  structural-distribution bundle-create --payload DIR --output DIR --release-id ID --package-version VERSION --backend cpu-only|rocm --linkage shared|static --source-sha256 sha256:HEX\n  structural-distribution bundle-verify --bundle DIR\n  structural-distribution runtime-probe --bundle DIR --payload-root DIR --workspace DIR --workbench-root DIR --mgt-workbench-root DIR --model-ir-linear-workbench-root DIR --mgt-model-ir-linear-workbench-root DIR --workbench-inspect-before-review FILE --workbench-review-show FILE --workbench-inspect-after-review FILE --workbench-export FILE --mgt-workbench-inspect-before-review FILE --mgt-workbench-review-show FILE --mgt-workbench-inspect-after-review FILE --mgt-workbench-export FILE --model-ir-linear-workbench-inspect-before-review FILE --model-ir-linear-workbench-review-show FILE --model-ir-linear-workbench-inspect-after-review FILE --model-ir-linear-workbench-export FILE --mgt-model-ir-linear-workbench-inspect-before-review FILE --mgt-model-ir-linear-workbench-review-show FILE --mgt-model-ir-linear-workbench-inspect-after-review FILE --mgt-model-ir-linear-workbench-export FILE --model-ir-linear-workbench-session-before-localized-pdf FILE --model-ir-linear-localized-pdf-en-us-first-root DIR --model-ir-linear-localized-pdf-en-us-second-root DIR --model-ir-linear-localized-pdf-ko-kr-first-root DIR --model-ir-linear-localized-pdf-ko-kr-second-root DIR --model-ir-linear-workbench-session-before-reaction-view FILE --mgt-model-ir-linear-workbench-session-before-reaction-view FILE --model-ir-linear-reaction-view-en-us-first FILE --model-ir-linear-reaction-view-en-us-second FILE --model-ir-linear-reaction-view-ko-kr-first FILE --model-ir-linear-reaction-view-ko-kr-second FILE --model-ir-linear-reaction-view-window FILE --mgt-model-ir-linear-reaction-view-en-us-first FILE --mgt-model-ir-linear-reaction-view-en-us-second FILE --mgt-model-ir-linear-reaction-view-ko-kr-first FILE --mgt-model-ir-linear-reaction-view-ko-kr-second FILE --workbench-reaction-view-wrong-profile-failure FILE --workbench-catalog FILE --workbench-evidence FILE --receipt FILE\n  structural-distribution runtime-receipt-verify --receipt FILE --bundle DIR\n  structural-distribution install --bundle DIR --root DIR\n  structural-distribution update --bundle DIR --root DIR\n  structural-distribution rollback --root DIR\n  structural-distribution recover --root DIR\n  structural-distribution status --root DIR"
 }
 

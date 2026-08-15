@@ -209,6 +209,33 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/reaction-view-wrong-profile-stderr.txt
+    for profile in model-ir-linear mgt-model-ir-linear; do
+      if [ "$profile" = model-ir-linear ]; then
+        audit_workspace=/mnt/model-ir-linear-workbench
+      else
+        audit_workspace=/mnt/mgt-model-ir-linear-workbench
+      fi
+      for locale in en-US ko-KR; do
+        for repeat in first second; do
+          /opt/payload/bin/structural-workbench reaction-audit \
+            --workspace "$audit_workspace" --locale "$locale" \
+            > "/mnt/$profile-reaction-audit-$locale-$repeat.txt"
+        done
+        /usr/bin/cmp "/mnt/$profile-reaction-audit-$locale-first.txt" \
+          "/mnt/$profile-reaction-audit-$locale-second.txt"
+      done
+      if /usr/bin/cmp -s "/mnt/$profile-reaction-audit-en-US-first.txt" \
+        "/mnt/$profile-reaction-audit-ko-KR-first.txt"; then
+        exit 1
+      fi
+    done
+    if /opt/payload/bin/structural-workbench reaction-audit \
+      --workspace /mnt/modelir-workbench \
+      > /mnt/reaction-audit-wrong-profile-failure.json \
+      2> /mnt/reaction-audit-wrong-profile-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/reaction-audit-wrong-profile-stderr.txt
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -288,6 +315,24 @@ unshare -Urn bwrap \
         /mnt/mgt-model-ir-linear-reaction-view-ko-KR-second.txt \
       --workbench-reaction-view-wrong-profile-failure \
         /mnt/reaction-view-wrong-profile-failure.json \
+      --model-ir-linear-reaction-audit-en-us-first \
+        /mnt/model-ir-linear-reaction-audit-en-US-first.txt \
+      --model-ir-linear-reaction-audit-en-us-second \
+        /mnt/model-ir-linear-reaction-audit-en-US-second.txt \
+      --model-ir-linear-reaction-audit-ko-kr-first \
+        /mnt/model-ir-linear-reaction-audit-ko-KR-first.txt \
+      --model-ir-linear-reaction-audit-ko-kr-second \
+        /mnt/model-ir-linear-reaction-audit-ko-KR-second.txt \
+      --mgt-model-ir-linear-reaction-audit-en-us-first \
+        /mnt/mgt-model-ir-linear-reaction-audit-en-US-first.txt \
+      --mgt-model-ir-linear-reaction-audit-en-us-second \
+        /mnt/mgt-model-ir-linear-reaction-audit-en-US-second.txt \
+      --mgt-model-ir-linear-reaction-audit-ko-kr-first \
+        /mnt/mgt-model-ir-linear-reaction-audit-ko-KR-first.txt \
+      --mgt-model-ir-linear-reaction-audit-ko-kr-second \
+        /mnt/mgt-model-ir-linear-reaction-audit-ko-KR-second.txt \
+      --workbench-reaction-audit-wrong-profile-failure \
+        /mnt/reaction-audit-wrong-profile-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

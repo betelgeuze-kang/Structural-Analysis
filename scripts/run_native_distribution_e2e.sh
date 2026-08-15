@@ -352,6 +352,90 @@ fi
 grep -Fq 'workbench_profile_unsupported' \
   "$e2e_root/reaction-view-wrong-profile-rejected.json"
 
+verify_reaction_audit_self_hash() {
+  local audit="$1"
+  local locale="$2"
+  local label declared unsigned actual
+  if [[ "$locale" == "ko-KR" ]]; then
+    label='감사 해시: sha256:'
+  else
+    label='Audit hash: sha256:'
+  fi
+  declared="$(sed -n "s/^$label//p" "$audit")"
+  if [[ ! "$declared" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "installed reaction audit has no valid self-hash: $audit" >&2
+    exit 1
+  fi
+  unsigned="$audit.unsigned"
+  sed '$d' "$audit" > "$unsigned"
+  actual="$(sha256sum "$unsigned" | awk '{print $1}')"
+  if [[ "$actual" != "$declared" ]]; then
+    echo "installed reaction audit self-hash mismatch: $audit" >&2
+    exit 1
+  fi
+}
+
+exercise_model_ir_linear_reaction_audit_surface() {
+  local label="$1"
+  local workspace="$2"
+  local restarted_workspace="$3"
+  local workspace_before="$e2e_root/$label-reaction-audit-workspace-before"
+  cp -a -- "$workspace" "$workspace_before"
+  local locale first second
+  for locale in en-US ko-KR; do
+    first="$e2e_root/$label-reaction-audit-$locale-first.txt"
+    second="$e2e_root/$label-reaction-audit-$locale-second.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-audit \
+      --workspace "$workspace" --locale "$locale" > "$first"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-audit \
+      --workspace "$workspace" --locale "$locale" > "$second"
+    cmp "$first" "$second"
+    grep -Fq 'structural-native-workbench-model-ir-linear-reaction-audit.v1' "$first"
+    grep -Fq '256*IEEE754_BINARY64_EPSILON*max(1,absolute_contribution_scale)' "$first"
+    grep -Fq 'within_numeric_tolerance' "$first"
+    grep -Fq 'fallback 0' "$first"
+    if LC_ALL=C grep -q $'\033' "$first"; then
+      echo "installed reaction audit contains an ANSI escape" >&2
+      exit 1
+    fi
+    verify_reaction_audit_self_hash "$first" "$locale"
+  done
+  if cmp -s "$e2e_root/$label-reaction-audit-en-US-first.txt" \
+    "$e2e_root/$label-reaction-audit-ko-KR-first.txt"; then
+    echo "installed reaction audits must have distinct locale identities" >&2
+    exit 1
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-audit \
+    --workspace "$restarted_workspace" --locale en-US \
+    > "$e2e_root/$label-reaction-audit-restarted.txt"
+  cmp "$e2e_root/$label-reaction-audit-en-US-first.txt" \
+    "$e2e_root/$label-reaction-audit-restarted.txt"
+  diff -r "$workspace_before" "$workspace" \
+    > "$e2e_root/$label-reaction-audit-workspace-diff.txt"
+}
+
+exercise_model_ir_linear_reaction_audit_surface \
+  model-ir-linear "$linear_direct" "$linear_restarted"
+exercise_model_ir_linear_reaction_audit_surface \
+  mgt-model-ir-linear "$mgt_linear_direct" "$mgt_linear_restarted"
+
+grep -Fq 'Force closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N' \
+  "$e2e_root/model-ir-linear-reaction-audit-en-US-first.txt"
+grep -Fq 'Moment closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N*m' \
+  "$e2e_root/model-ir-linear-reaction-audit-en-US-first.txt"
+grep -Fq 'Force closure residual: X=-1.16415321826934814e-10' \
+  "$e2e_root/mgt-model-ir-linear-reaction-audit-en-US-first.txt"
+grep -Fq 'Moment closure residual: X=+0.00000000000000000e0; Y=-5.82076609134674072e-10' \
+  "$e2e_root/mgt-model-ir-linear-reaction-audit-en-US-first.txt"
+
+if env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-audit \
+  --workspace "$direct" > "$e2e_root/reaction-audit-wrong-profile-rejected.json"; then
+  echo "installed reaction audit accepted the NDTHA profile" >&2
+  exit 1
+fi
+grep -Fq 'workbench_profile_unsupported' \
+  "$e2e_root/reaction-audit-wrong-profile-rejected.json"
+
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 mgt_restarted="$e2e_root/mgt-workbench-restarted"
@@ -9932,6 +10016,8 @@ linear_reaction_hash="$(sha256sum "$linear_direct/04-resume/reaction-result-ir.j
 linear_reaction_view_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-en-US-first.txt" | awk '{print $1}')"
 linear_reaction_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-ko-KR-first.txt" | awk '{print $1}')"
 linear_reaction_view_window_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-window.txt" | awk '{print $1}')"
+linear_reaction_audit_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-audit-en-US-first.txt" | awk '{print $1}')"
+linear_reaction_audit_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-audit-ko-KR-first.txt" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -9948,6 +10034,8 @@ mgt_linear_recovery_hash="$(sha256sum "$mgt_linear_direct/04-resume/result-recov
 mgt_linear_reaction_hash="$(sha256sum "$mgt_linear_direct/04-resume/reaction-result-ir.json" | awk '{print $1}')"
 mgt_linear_reaction_view_en_us_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-view-en-US-first.txt" | awk '{print $1}')"
 mgt_linear_reaction_view_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-view-ko-KR-first.txt" | awk '{print $1}')"
+mgt_linear_reaction_audit_en_us_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-audit-en-US-first.txt" | awk '{print $1}')"
+mgt_linear_reaction_audit_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-audit-ko-KR-first.txt" | awk '{print $1}')"
 mgt_linear_report_hash="$(sha256sum "$mgt_linear_direct/06-report/report.pdf" | awk '{print $1}')"
 mgt_linear_pdf_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 mgt_linear_report_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -10769,6 +10857,10 @@ v85_receipt_json="${v84_receipt_json/structural-native-distribution-e2e.v84/stru
 reaction_view_receipt_fields="\"model_ir_linear_reaction_view_surface_passed\":true,\"model_ir_linear_reaction_view_restart_parity_passed\":true,\"model_ir_linear_reaction_view_en_us_sha256\":\"sha256:$linear_reaction_view_en_us_hash\",\"model_ir_linear_reaction_view_ko_kr_sha256\":\"sha256:$linear_reaction_view_ko_kr_hash\",\"model_ir_linear_reaction_view_window_sha256\":\"sha256:$linear_reaction_view_window_hash\",\"mgt_model_ir_linear_reaction_view_surface_passed\":true,\"mgt_model_ir_linear_reaction_view_restart_parity_passed\":true,\"mgt_model_ir_linear_reaction_view_en_us_sha256\":\"sha256:$mgt_linear_reaction_view_en_us_hash\",\"mgt_model_ir_linear_reaction_view_ko_kr_sha256\":\"sha256:$mgt_linear_reaction_view_ko_kr_hash\",\"workbench_reaction_view_wrong_profile_rejected\":true,"
 v85_receipt_json="${v85_receipt_json/\"workbench_result_view_surface_passed\":true,/${reaction_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v85_receipt_json" > "$temporary_receipt"
+v86_receipt_json="${v85_receipt_json/structural-native-distribution-e2e.v85/structural-native-distribution-e2e.v86}"
+reaction_audit_receipt_fields="\"model_ir_linear_reaction_audit_surface_passed\":true,\"model_ir_linear_reaction_audit_restart_parity_passed\":true,\"model_ir_linear_reaction_audit_en_us_sha256\":\"sha256:$linear_reaction_audit_en_us_hash\",\"model_ir_linear_reaction_audit_ko_kr_sha256\":\"sha256:$linear_reaction_audit_ko_kr_hash\",\"mgt_model_ir_linear_reaction_audit_surface_passed\":true,\"mgt_model_ir_linear_reaction_audit_restart_parity_passed\":true,\"mgt_model_ir_linear_reaction_audit_en_us_sha256\":\"sha256:$mgt_linear_reaction_audit_en_us_hash\",\"mgt_model_ir_linear_reaction_audit_ko_kr_sha256\":\"sha256:$mgt_linear_reaction_audit_ko_kr_hash\",\"workbench_reaction_audit_wrong_profile_rejected\":true,"
+v86_receipt_json="${v86_receipt_json/\"workbench_result_view_surface_passed\":true,/${reaction_audit_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v86_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

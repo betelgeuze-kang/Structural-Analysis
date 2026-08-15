@@ -33,7 +33,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V4: &str = "structural-native-rootfs-isolati
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V5: &str = "structural-native-rootfs-isolation-e2e.v5";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V6: &str = "structural-native-rootfs-isolation-e2e.v6";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V7: &str = "structural-native-rootfs-isolation-e2e.v7";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v8";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V8: &str = "structural-native-rootfs-isolation-e2e.v8";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v9";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -53,7 +54,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V4: &str = "This source-bound local C5 diagn
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V5: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT and ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The linear flow binds typed recovery, external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The exact MGT-linear flow binds original source bytes, normalized import health, typed recovery, external comparison, deterministic PDF, document source and PDF/report receipts. The ModelIR-linear flow also binds localized PDF/receipt identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V7: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery and constrained-reaction ResultIR through review and handoff export; the MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, and deterministic self-hashed en-US/ko-KR constrained-reaction views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR and repeated reaction-view identities through review and handoff export; the strict ModelIR-linear surface also binds a bounded reaction-view window, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, and deterministic self-hashed en-US/ko-KR constrained-reaction views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR and repeated reaction-view identities through review and handoff export; the strict ModelIR-linear surface also binds a bounded reaction-view window, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, and deterministic self-hashed en-US/ko-KR algebraic global reaction audits as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views and independently verified force, global-origin moment and active-equation numeric closure; both durable sessions remain unmodified and the NDTHA profile is rejected. The MGT-linear audit retains visible nonzero FP64 roundoff within the fixed tolerance policy, original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a support-design, stability, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -172,6 +174,15 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub mgt_model_ir_linear_reaction_view_ko_kr_first: &'a Path,
     pub mgt_model_ir_linear_reaction_view_ko_kr_second: &'a Path,
     pub workbench_reaction_view_wrong_profile_failure: &'a Path,
+    pub model_ir_linear_reaction_audit_en_us_first: &'a Path,
+    pub model_ir_linear_reaction_audit_en_us_second: &'a Path,
+    pub model_ir_linear_reaction_audit_ko_kr_first: &'a Path,
+    pub model_ir_linear_reaction_audit_ko_kr_second: &'a Path,
+    pub mgt_model_ir_linear_reaction_audit_en_us_first: &'a Path,
+    pub mgt_model_ir_linear_reaction_audit_en_us_second: &'a Path,
+    pub mgt_model_ir_linear_reaction_audit_ko_kr_first: &'a Path,
+    pub mgt_model_ir_linear_reaction_audit_ko_kr_second: &'a Path,
+    pub workbench_reaction_audit_wrong_profile_failure: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -522,6 +533,28 @@ pub struct RootfsIsolationReceiptV8 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV9 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV8,
+    pub model_ir_linear_reaction_audit_surface_passed: bool,
+    pub model_ir_linear_reaction_audit_en_us_sha256: String,
+    pub model_ir_linear_reaction_audit_ko_kr_sha256: String,
+    pub mgt_model_ir_linear_reaction_audit_surface_passed: bool,
+    pub mgt_model_ir_linear_reaction_audit_en_us_sha256: String,
+    pub mgt_model_ir_linear_reaction_audit_ko_kr_sha256: String,
+    pub workbench_reaction_audit_wrong_profile_rejected: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV9 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV9,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -533,6 +566,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V6(Box<RootfsIsolationReceiptV6>),
     V7(Box<RootfsIsolationReceiptV7>),
     V8(Box<RootfsIsolationReceiptV8>),
+    V9(Box<RootfsIsolationReceiptV9>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -816,11 +850,12 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 /// bundle and executing payload are identical, the root and payload reject writes with `EROFS`,
 /// the operator workspace accepts writes, only loopback networking is visible, and all four
 /// native Workbench sessions reached their reported terminal state, including the typed
-/// ModelIR-linear and normalized-MGT-to-ModelIR-linear report surfaces.
+/// ModelIR-linear and normalized-MGT-to-ModelIR-linear report and algebraic reaction-audit
+/// surfaces.
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV8, DistributionError> {
+) -> Result<RootfsIsolationReceiptV9, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1049,6 +1084,12 @@ pub fn create_rootfs_isolation_receipt(
         &mgt_model_ir_linear_root,
         request,
     )?;
+    let reaction_audit_surface = inspect_rootfs_reaction_audit_surface(
+        &workspace,
+        &model_ir_linear_root,
+        &mgt_model_ir_linear_root,
+        request,
+    )?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
@@ -1215,8 +1256,8 @@ pub fn create_rootfs_isolation_receipt(
             })?,
     };
     validate_rootfs_isolation_evidence_v7(&evidence_v7)?;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut evidence_v7.prior.prior.prior.claim_boundary);
-    let evidence = RootfsIsolationEvidenceV8 {
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8.clone_into(&mut evidence_v7.prior.prior.prior.claim_boundary);
+    let mut evidence_v8 = RootfsIsolationEvidenceV8 {
         prior: evidence_v7,
         model_ir_linear_reaction_view_surface_passed: true,
         model_ir_linear_reaction_view_en_us_sha256: reaction_view_surface.model_en_us,
@@ -1227,7 +1268,20 @@ pub fn create_rootfs_isolation_receipt(
         mgt_model_ir_linear_reaction_view_ko_kr_sha256: reaction_view_surface.mgt_ko_kr,
         workbench_reaction_view_wrong_profile_rejected: true,
     };
-    validate_rootfs_isolation_evidence_v8(&evidence)?;
+    validate_rootfs_isolation_evidence_v8(&evidence_v8)?;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        .clone_into(&mut evidence_v8.prior.prior.prior.prior.claim_boundary);
+    let evidence = RootfsIsolationEvidenceV9 {
+        prior: evidence_v8,
+        model_ir_linear_reaction_audit_surface_passed: true,
+        model_ir_linear_reaction_audit_en_us_sha256: reaction_audit_surface.model_en_us,
+        model_ir_linear_reaction_audit_ko_kr_sha256: reaction_audit_surface.model_ko_kr,
+        mgt_model_ir_linear_reaction_audit_surface_passed: true,
+        mgt_model_ir_linear_reaction_audit_en_us_sha256: reaction_audit_surface.mgt_en_us,
+        mgt_model_ir_linear_reaction_audit_ko_kr_sha256: reaction_audit_surface.mgt_ko_kr,
+        workbench_reaction_audit_wrong_profile_rejected: true,
+    };
+    validate_rootfs_isolation_evidence_v9(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -1381,7 +1435,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V7(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V8) => {
             let receipt: RootfsIsolationReceiptV8 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v8(&receipt.evidence)?;
@@ -1409,6 +1463,58 @@ pub fn verify_rootfs_isolation_receipt(
                 &receipt.evidence.prior.prior.prior.prior.workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V8(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV9 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v9(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &receipt.evidence.prior.prior.prior.prior.prior.release_id,
+                &receipt.evidence.prior.prior.prior.prior.prior.source_sha256,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .bundle_manifest_hash,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .bundle_manifest_file_sha256,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .installer_sha256,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .workbench_sha256,
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V9(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -2092,6 +2198,30 @@ struct ReactionViewProbe<'a> {
     window: Option<&'a Path>,
 }
 
+struct ReactionAuditSurfaceSummary {
+    model_en_us: String,
+    model_ko_kr: String,
+    mgt_en_us: String,
+    mgt_ko_kr: String,
+}
+
+#[derive(Debug)]
+struct ReactionAuditArtifact {
+    bytes: Vec<u8>,
+    sha256: String,
+}
+
+struct ReactionAuditProbe<'a> {
+    label: &'a str,
+    workbench_root: &'a Path,
+    session_before: &'a Path,
+    en_us_first: &'a Path,
+    en_us_second: &'a Path,
+    ko_kr_first: &'a Path,
+    ko_kr_second: &'a Path,
+    normalized_mgt: bool,
+}
+
 fn resolve_real_directory(path: &Path, label: &str) -> Result<PathBuf, DistributionError> {
     ensure_directory(path, label)?;
     path.canonicalize()
@@ -2472,6 +2602,287 @@ fn inspect_rootfs_reaction_view_surface(
         model_en_us: model.0,
         model_ko_kr: model.1,
         model_window: model.2.expect("ModelIR reaction window is required"),
+        mgt_en_us: mgt.0,
+        mgt_ko_kr: mgt.1,
+    })
+}
+
+#[allow(clippy::too_many_lines)]
+fn inspect_reaction_audit_artifact(
+    workspace: &Path,
+    path: &Path,
+    locale: &str,
+    normalized_mgt: bool,
+    label: &str,
+) -> Result<ReactionAuditArtifact, DistributionError> {
+    let bytes = read_direct_workspace_file(workspace, path, label)?;
+    if bytes.contains(&0x1b) {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_unsafe",
+            format!("{label} contains an ANSI escape byte"),
+        ));
+    }
+    let text = std::str::from_utf8(&bytes).map_err(|_| {
+        DistributionError::new(
+            "rootfs_reaction_audit_invalid",
+            format!("{label} must be UTF-8"),
+        )
+    })?;
+    let without_final_newline = text.strip_suffix('\n').ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_reaction_audit_noncanonical",
+            format!("{label} must end with one newline"),
+        )
+    })?;
+    let final_line_start = without_final_newline
+        .rfind('\n')
+        .map_or(0, |position| position + 1);
+    let final_line = &without_final_newline[final_line_start..];
+    let hash_label = match locale {
+        "en-US" => "Audit hash: ",
+        "ko-KR" => "감사 해시: ",
+        _ => {
+            return Err(DistributionError::new(
+                "rootfs_reaction_audit_invalid",
+                "reaction audit locale contract is unsupported",
+            ));
+        }
+    };
+    let declared_hash = final_line.strip_prefix(hash_label).ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_reaction_audit_hash_missing",
+            format!("{label} has no terminal self-hash"),
+        )
+    })?;
+    validate_sha256_identity(declared_hash, "rootfs reaction audit self-hash")?;
+    if declared_hash != sha256_identity(&bytes[..final_line_start]) {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_hash_mismatch",
+            format!("{label} self-hash does not verify"),
+        ));
+    }
+
+    let (schema_line, locale_line, status_lines, force_closure, moment_closure) =
+        match (locale, normalized_mgt) {
+            ("en-US", false) => (
+                "Schema: structural-native-workbench-model-ir-linear-reaction-audit.v1",
+                "Locale: en-US",
+                [
+                    "Force status: within_numeric_tolerance",
+                    "Moment status: within_numeric_tolerance",
+                    "Active equation status: within_numeric_tolerance",
+                    "Overall numeric status: within_numeric_tolerance",
+                ],
+                "Force closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "Moment closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N*m",
+            ),
+            ("en-US", true) => (
+                "Schema: structural-native-workbench-model-ir-linear-reaction-audit.v1",
+                "Locale: en-US",
+                [
+                    "Force status: within_numeric_tolerance",
+                    "Moment status: within_numeric_tolerance",
+                    "Active equation status: within_numeric_tolerance",
+                    "Overall numeric status: within_numeric_tolerance",
+                ],
+                "Force closure residual: X=-1.16415321826934814e-10; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "Moment closure residual: X=+0.00000000000000000e0; Y=-5.82076609134674072e-10; Z=+0.00000000000000000e0 N*m",
+            ),
+            ("ko-KR", false) => (
+                "스키마: structural-native-workbench-model-ir-linear-reaction-audit.v1",
+                "로케일: ko-KR",
+                [
+                    "힘 상태: within_numeric_tolerance",
+                    "모멘트 상태: within_numeric_tolerance",
+                    "활성 방정식 상태: within_numeric_tolerance",
+                    "종합 수치 상태: within_numeric_tolerance",
+                ],
+                "힘 폐합 잔차: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "모멘트 폐합 잔차: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N*m",
+            ),
+            ("ko-KR", true) => (
+                "스키마: structural-native-workbench-model-ir-linear-reaction-audit.v1",
+                "로케일: ko-KR",
+                [
+                    "힘 상태: within_numeric_tolerance",
+                    "모멘트 상태: within_numeric_tolerance",
+                    "활성 방정식 상태: within_numeric_tolerance",
+                    "종합 수치 상태: within_numeric_tolerance",
+                ],
+                "힘 폐합 잔차: X=-1.16415321826934814e-10; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "모멘트 폐합 잔차: X=+0.00000000000000000e0; Y=-5.82076609134674072e-10; Z=+0.00000000000000000e0 N*m",
+            ),
+            _ => unreachable!("locale was validated above"),
+        };
+    if !text.lines().any(|line| line == schema_line)
+        || !text.lines().any(|line| line == locale_line)
+        || !text.lines().any(|line| line == force_closure)
+        || !text.lines().any(|line| line == moment_closure)
+        || status_lines
+            .iter()
+            .any(|expected| !text.lines().any(|line| line == *expected))
+        || !text.contains("256*IEEE754_BINARY64_EPSILON*max(1,absolute_contribution_scale)")
+        || !text.contains("fallback 0")
+    {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_contract_invalid",
+            format!("{label} does not expose the exact algebraic reaction-audit contract"),
+        ));
+    }
+    Ok(ReactionAuditArtifact {
+        sha256: sha256_identity(&bytes),
+        bytes,
+    })
+}
+
+fn inspect_reaction_audit_probe(
+    workspace: &Path,
+    probe: &ReactionAuditProbe<'_>,
+) -> Result<(String, String), DistributionError> {
+    let session_before = read_direct_workspace_file(
+        workspace,
+        probe.session_before,
+        &format!("{} pre-audit session", probe.label),
+    )?;
+    let session_after = read_bounded_regular_file(
+        &probe.workbench_root.join("workbench-session.json"),
+        MAX_MANIFEST_BYTES,
+    )?;
+    if session_before != session_after {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_session_mutated",
+            format!("{} reaction audit mutated its durable session", probe.label),
+        ));
+    }
+    let inspect = |path, locale, suffix| {
+        inspect_reaction_audit_artifact(
+            workspace,
+            path,
+            locale,
+            probe.normalized_mgt,
+            &format!("{} {locale} {suffix} reaction audit", probe.label),
+        )
+    };
+    let en_us_first = inspect(probe.en_us_first, "en-US", "first")?;
+    let en_us_second = inspect(probe.en_us_second, "en-US", "second")?;
+    let ko_kr_first = inspect(probe.ko_kr_first, "ko-KR", "first")?;
+    let ko_kr_second = inspect(probe.ko_kr_second, "ko-KR", "second")?;
+    if en_us_first.bytes != en_us_second.bytes || ko_kr_first.bytes != ko_kr_second.bytes {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_determinism_failed",
+            format!("{} repeated reaction audits differ", probe.label),
+        ));
+    }
+    if en_us_first.sha256 == ko_kr_first.sha256 {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_locale_collision",
+            format!(
+                "{} reaction audit locales have the same identity",
+                probe.label
+            ),
+        ));
+    }
+    Ok((en_us_first.sha256, ko_kr_first.sha256))
+}
+
+fn inspect_reaction_audit_wrong_profile_failure(
+    workspace: &Path,
+    path: &Path,
+) -> Result<(), DistributionError> {
+    let bytes = read_direct_workspace_file(workspace, path, "wrong-profile reaction audit")?;
+    let canonical = bytes.strip_suffix(b"\n").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_reaction_audit_failure_noncanonical",
+            "wrong-profile reaction audit failure must be one JSON line",
+        )
+    })?;
+    let value = structural_contracts::model_ir::decode_json_strict(canonical).map_err(|error| {
+        DistributionError::new(
+            "rootfs_reaction_audit_failure_invalid",
+            format!("wrong-profile reaction audit failure is invalid JSON: {error}"),
+        )
+    })?;
+    let object = value.as_object().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_reaction_audit_failure_invalid",
+            "wrong-profile reaction audit failure must be a JSON object",
+        )
+    })?;
+    let actual = object.keys().map(String::as_str).collect::<BTreeSet<_>>();
+    let expected = ["code", "detail", "schema_version"]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    if actual != expected {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_failure_invalid",
+            "wrong-profile reaction audit failure has an unexpected field set",
+        ));
+    }
+    if value
+        .get("schema_version")
+        .and_then(serde_json::Value::as_str)
+        != Some("structural-native-workbench-failure.v1")
+        || value.get("code").and_then(serde_json::Value::as_str)
+            != Some("workbench_profile_unsupported")
+        || match value.get("detail").and_then(serde_json::Value::as_str) {
+            Some(detail) => detail.is_empty(),
+            None => true,
+        }
+        || compact_operator_json(&value)? != canonical
+    {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_failure_invalid",
+            "wrong-profile reaction audit failure does not match the exact fail-closed contract",
+        ));
+    }
+    Ok(())
+}
+
+fn inspect_rootfs_reaction_audit_surface(
+    workspace: &Path,
+    model_ir_linear_root: &Path,
+    mgt_model_ir_linear_root: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<ReactionAuditSurfaceSummary, DistributionError> {
+    let model = inspect_reaction_audit_probe(
+        workspace,
+        &ReactionAuditProbe {
+            label: "ModelIR linear",
+            workbench_root: model_ir_linear_root,
+            session_before: request.model_ir_linear_workbench_session_before_reaction_view,
+            en_us_first: request.model_ir_linear_reaction_audit_en_us_first,
+            en_us_second: request.model_ir_linear_reaction_audit_en_us_second,
+            ko_kr_first: request.model_ir_linear_reaction_audit_ko_kr_first,
+            ko_kr_second: request.model_ir_linear_reaction_audit_ko_kr_second,
+            normalized_mgt: false,
+        },
+    )?;
+    let mgt = inspect_reaction_audit_probe(
+        workspace,
+        &ReactionAuditProbe {
+            label: "normalized-MGT linear",
+            workbench_root: mgt_model_ir_linear_root,
+            session_before: request.mgt_model_ir_linear_workbench_session_before_reaction_view,
+            en_us_first: request.mgt_model_ir_linear_reaction_audit_en_us_first,
+            en_us_second: request.mgt_model_ir_linear_reaction_audit_en_us_second,
+            ko_kr_first: request.mgt_model_ir_linear_reaction_audit_ko_kr_first,
+            ko_kr_second: request.mgt_model_ir_linear_reaction_audit_ko_kr_second,
+            normalized_mgt: true,
+        },
+    )?;
+    inspect_reaction_audit_wrong_profile_failure(
+        workspace,
+        request.workbench_reaction_audit_wrong_profile_failure,
+    )?;
+    if model.0 == mgt.0 {
+        return Err(DistributionError::new(
+            "rootfs_reaction_audit_profile_collision",
+            "strict-ModelIR and normalized-MGT reaction audits have the same identity",
+        ));
+    }
+    Ok(ReactionAuditSurfaceSummary {
+        model_en_us: model.0,
+        model_ko_kr: model.1,
         mgt_en_us: mgt.0,
         mgt_ko_kr: mgt.1,
     })
@@ -3447,10 +3858,10 @@ fn linux_ipv4_route_count() -> Result<u64, DistributionError> {
 }
 
 fn seal_rootfs_isolation_evidence(
-    evidence: RootfsIsolationEvidenceV8,
-) -> Result<RootfsIsolationReceiptV8, DistributionError> {
+    evidence: RootfsIsolationEvidenceV9,
+) -> Result<RootfsIsolationReceiptV9, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
-    Ok(RootfsIsolationReceiptV8 {
+    Ok(RootfsIsolationReceiptV9 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -3939,7 +4350,7 @@ fn validate_rootfs_isolation_evidence_v7(
 fn validate_rootfs_isolation_evidence_v8(
     evidence: &RootfsIsolationEvidenceV8,
 ) -> Result<(), DistributionError> {
-    if evidence.prior.prior.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    if evidence.prior.prior.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8
         || !evidence.model_ir_linear_reaction_view_surface_passed
         || !evidence.mgt_model_ir_linear_reaction_view_surface_passed
         || !evidence.workbench_reaction_view_wrong_profile_rejected
@@ -3985,6 +4396,51 @@ fn validate_rootfs_isolation_evidence_v8(
     let mut prior = evidence.prior.clone();
     ROOTFS_RECEIPT_CLAIM_BOUNDARY_V7.clone_into(&mut prior.prior.prior.prior.claim_boundary);
     validate_rootfs_isolation_evidence_v7(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v9(
+    evidence: &RootfsIsolationEvidenceV9,
+) -> Result<(), DistributionError> {
+    if evidence.prior.prior.prior.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_linear_reaction_audit_surface_passed
+        || !evidence.mgt_model_ir_linear_reaction_audit_surface_passed
+        || !evidence.workbench_reaction_audit_wrong_profile_rejected
+        || evidence.model_ir_linear_reaction_audit_en_us_sha256
+            == evidence.model_ir_linear_reaction_audit_ko_kr_sha256
+        || evidence.mgt_model_ir_linear_reaction_audit_en_us_sha256
+            == evidence.mgt_model_ir_linear_reaction_audit_ko_kr_sha256
+        || evidence.model_ir_linear_reaction_audit_en_us_sha256
+            == evidence.mgt_model_ir_linear_reaction_audit_en_us_sha256
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v9 receipt weakens or exceeds the exact algebraic reaction-audit diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_linear_reaction_audit_en_us_sha256,
+            "rootfs ModelIR linear en-US reaction audit SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_reaction_audit_ko_kr_sha256,
+            "rootfs ModelIR linear ko-KR reaction audit SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_reaction_audit_en_us_sha256,
+            "rootfs normalized-MGT linear en-US reaction audit SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_reaction_audit_ko_kr_sha256,
+            "rootfs normalized-MGT linear ko-KR reaction audit SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8.clone_into(&mut prior.prior.prior.prior.prior.claim_boundary);
+    validate_rootfs_isolation_evidence_v8(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -4875,9 +5331,9 @@ mod tests {
         }
     }
 
-    fn rootfs_evidence() -> RootfsIsolationEvidenceV8 {
+    fn rootfs_evidence_v8() -> RootfsIsolationEvidenceV8 {
         let mut prior = rootfs_evidence_v7();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.prior.prior.claim_boundary);
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8.clone_into(&mut prior.prior.prior.prior.claim_boundary);
         let identity = |value: u8| format!("sha256:{value:064x}");
         RootfsIsolationEvidenceV8 {
             prior,
@@ -4889,6 +5345,22 @@ mod tests {
             mgt_model_ir_linear_reaction_view_en_us_sha256: identity(55),
             mgt_model_ir_linear_reaction_view_ko_kr_sha256: identity(56),
             workbench_reaction_view_wrong_profile_rejected: true,
+        }
+    }
+
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV9 {
+        let mut prior = rootfs_evidence_v8();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(&mut prior.prior.prior.prior.prior.claim_boundary);
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV9 {
+            prior,
+            model_ir_linear_reaction_audit_surface_passed: true,
+            model_ir_linear_reaction_audit_en_us_sha256: identity(57),
+            model_ir_linear_reaction_audit_ko_kr_sha256: identity(58),
+            mgt_model_ir_linear_reaction_audit_surface_passed: true,
+            mgt_model_ir_linear_reaction_audit_en_us_sha256: identity(59),
+            mgt_model_ir_linear_reaction_audit_ko_kr_sha256: identity(60),
+            workbench_reaction_audit_wrong_profile_rejected: true,
         }
     }
 
@@ -4910,6 +5382,34 @@ mod tests {
         }
         let identity = sha256_identity(unsigned.as_bytes());
         format!("{unsigned}View hash: {identity}\n").into_bytes()
+    }
+
+    fn reaction_audit_fixture(normalized_mgt: bool) -> Vec<u8> {
+        let (force_closure, moment_closure) = if normalized_mgt {
+            (
+                "Force closure residual: X=-1.16415321826934814e-10; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "Moment closure residual: X=+0.00000000000000000e0; Y=-5.82076609134674072e-10; Z=+0.00000000000000000e0 N*m",
+            )
+        } else {
+            (
+                "Force closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N",
+                "Moment closure residual: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N*m",
+            )
+        };
+        let unsigned = format!(
+            "Schema: structural-native-workbench-model-ir-linear-reaction-audit.v1\n\
+             Locale: en-US\n\
+             Backend: cpu / FP64 / ABI 0x0001000e / fallback 0\n\
+             Tolerance policy: 256*IEEE754_BINARY64_EPSILON*max(1,absolute_contribution_scale)\n\
+             {force_closure}\n\
+             {moment_closure}\n\
+             Force status: within_numeric_tolerance\n\
+             Moment status: within_numeric_tolerance\n\
+             Active equation status: within_numeric_tolerance\n\
+             Overall numeric status: within_numeric_tolerance\n"
+        );
+        let identity = sha256_identity(unsigned.as_bytes());
+        format!("{unsigned}Audit hash: {identity}\n").into_bytes()
     }
 
     fn bind_rootfs_evidence_to_bundle(
@@ -5110,6 +5610,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn rootfs_receipt_is_exact_hash_bound_and_non_promoting() {
         let frozen_v1 = rootfs_evidence_v1();
         validate_rootfs_isolation_evidence_v1(&frozen_v1)
@@ -5131,9 +5632,11 @@ mod tests {
             .expect("frozen v6 evidence remains verifiable");
         validate_rootfs_isolation_evidence_v7(&rootfs_evidence_v7())
             .expect("frozen v7 evidence remains verifiable");
+        validate_rootfs_isolation_evidence_v8(&rootfs_evidence_v8())
+            .expect("frozen v8 evidence remains verifiable");
 
         let evidence = rootfs_evidence();
-        validate_rootfs_isolation_evidence_v8(&evidence).expect("valid bounded evidence");
+        validate_rootfs_isolation_evidence_v9(&evidence).expect("valid bounded evidence");
         let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
         assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
         assert_eq!(
@@ -5147,11 +5650,13 @@ mod tests {
                 .prior
                 .prior
                 .prior
+                .prior
                 .container_image_built
         );
         assert!(
             !receipt
                 .evidence
+                .prior
                 .prior
                 .prior
                 .prior
@@ -5165,21 +5670,36 @@ mod tests {
             .prior
             .prior
             .prior
+            .prior
             .model_ir_linear_workbench_review_decision = "pass".to_owned();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v8(&promoting)
+            validate_rootfs_isolation_evidence_v9(&promoting)
                 .expect_err("promoting review decision must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
 
         let mut colliding_view = evidence.clone();
-        colliding_view.model_ir_linear_reaction_view_ko_kr_sha256 = colliding_view
+        colliding_view
+            .prior
+            .model_ir_linear_reaction_view_ko_kr_sha256 = colliding_view
+            .prior
             .model_ir_linear_reaction_view_en_us_sha256
             .clone();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v8(&colliding_view)
+            validate_rootfs_isolation_evidence_v9(&colliding_view)
                 .expect_err("colliding reaction view identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+
+        let mut colliding_audit = evidence.clone();
+        colliding_audit.model_ir_linear_reaction_audit_ko_kr_sha256 = colliding_audit
+            .model_ir_linear_reaction_audit_en_us_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v9(&colliding_audit)
+                .expect_err("colliding reaction audit identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
@@ -5190,10 +5710,11 @@ mod tests {
             .prior
             .prior
             .prior
+            .prior
             .network_interfaces
             .push("eth0".to_owned());
         assert_eq!(
-            validate_rootfs_isolation_evidence_v8(&weakened)
+            validate_rootfs_isolation_evidence_v9(&weakened)
                 .expect_err("external interface must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -5250,6 +5771,79 @@ mod tests {
             .expect_err("wrong unit must fail")
             .code,
             "rootfs_reaction_view_row_invalid"
+        );
+    }
+
+    #[test]
+    fn rootfs_reaction_audit_artifact_is_self_hashed_and_closure_bound() {
+        let temporary = TestDirectory::create("rootfs-reaction-audit");
+        let workspace = temporary.0.canonicalize().expect("resolve workspace");
+        let audit = workspace.join("reaction-audit.txt");
+        fs::write(&audit, reaction_audit_fixture(false)).expect("write valid reaction audit");
+        let artifact = inspect_reaction_audit_artifact(
+            &workspace,
+            &audit,
+            "en-US",
+            false,
+            "fixture reaction audit",
+        )
+        .expect("inspect valid reaction audit");
+        assert_eq!(artifact.sha256, sha256_file(&audit).expect("hash fixture"));
+
+        let mut tampered = reaction_audit_fixture(false);
+        tampered[0] = b'X';
+        fs::write(&audit, tampered).expect("write tampered reaction audit");
+        assert_eq!(
+            inspect_reaction_audit_artifact(
+                &workspace,
+                &audit,
+                "en-US",
+                false,
+                "tampered reaction audit",
+            )
+            .expect_err("tampered audit must fail")
+            .code,
+            "rootfs_reaction_audit_hash_mismatch"
+        );
+
+        fs::write(&audit, reaction_audit_fixture(true)).expect("write wrong-closure audit");
+        assert_eq!(
+            inspect_reaction_audit_artifact(
+                &workspace,
+                &audit,
+                "en-US",
+                false,
+                "wrong-closure reaction audit",
+            )
+            .expect_err("wrong closure must fail")
+            .code,
+            "rootfs_reaction_audit_contract_invalid"
+        );
+    }
+
+    #[test]
+    fn rootfs_reaction_audit_wrong_profile_failure_is_exact() {
+        let temporary = TestDirectory::create("rootfs-reaction-audit-failure");
+        let workspace = temporary.0.canonicalize().expect("resolve workspace");
+        let failure = workspace.join("reaction-audit-failure.json");
+        fs::write(
+            &failure,
+            b"{\"code\":\"workbench_profile_unsupported\",\"detail\":\"reaction audit requires ModelIR linear CPU\",\"schema_version\":\"structural-native-workbench-failure.v1\"}\n",
+        )
+        .expect("write exact wrong-profile failure");
+        inspect_reaction_audit_wrong_profile_failure(&workspace, &failure)
+            .expect("accept exact wrong-profile failure");
+
+        fs::write(
+            &failure,
+            b"{\"code\":\"workbench_profile_unsupported\",\"detail\":\"reaction audit requires ModelIR linear CPU\",\"extra\":true,\"schema_version\":\"structural-native-workbench-failure.v1\"}\n",
+        )
+        .expect("write widened wrong-profile failure");
+        assert_eq!(
+            inspect_reaction_audit_wrong_profile_failure(&workspace, &failure)
+                .expect_err("widened failure must be rejected")
+                .code,
+            "rootfs_reaction_audit_failure_invalid"
         );
     }
 
@@ -5338,14 +5932,20 @@ mod tests {
     }
 
     #[test]
-    fn current_rootfs_v8_receipt_is_bundle_verifiable() {
+    fn frozen_rootfs_v8_receipt_remains_bundle_verifiable() {
         let temporary = TestDirectory::create("rootfs-v8-receipt");
         let bundle = make_bundle(&temporary, "rootfs-v8-release", "v8");
         let manifest = verify_bundle(&bundle).expect("verify v8 fixture bundle");
-        let mut evidence = rootfs_evidence();
+        let mut evidence = rootfs_evidence_v8();
         bind_rootfs_evidence_to_bundle(&mut evidence.prior.prior.prior.prior, &manifest, &bundle);
-        validate_rootfs_isolation_evidence_v8(&evidence).expect("validate current v8 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v8 evidence");
+        validate_rootfs_isolation_evidence_v8(&evidence).expect("validate frozen v8 evidence");
+        let receipt = RootfsIsolationReceiptV8 {
+            schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V8.to_owned(),
+            receipt_hash: sha256_identity(
+                &canonical_json(&evidence).expect("canonical frozen v8 evidence"),
+            ),
+            evidence,
+        };
         let receipt_path = temporary.0.join("rootfs-v8-receipt.json");
         fs::write(
             &receipt_path,
@@ -5356,6 +5956,32 @@ mod tests {
             verify_rootfs_isolation_receipt(&receipt_path, &bundle)
                 .expect("verify current v8 receipt against its bundle"),
             VerifiedRootfsIsolationReceipt::V8(_)
+        ));
+    }
+
+    #[test]
+    fn current_rootfs_v9_receipt_is_bundle_verifiable() {
+        let temporary = TestDirectory::create("rootfs-v9-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v9-release", "v9");
+        let manifest = verify_bundle(&bundle).expect("verify v9 fixture bundle");
+        let mut evidence = rootfs_evidence();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence.prior.prior.prior.prior.prior,
+            &manifest,
+            &bundle,
+        );
+        validate_rootfs_isolation_evidence_v9(&evidence).expect("validate current v9 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v9 evidence");
+        let receipt_path = temporary.0.join("rootfs-v9-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v9 receipt"),
+        )
+        .expect("write current v9 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v9 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V9(_)
         ));
     }
 
