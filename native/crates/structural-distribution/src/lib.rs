@@ -35,7 +35,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V6: &str = "structural-native-rootfs-isolati
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V7: &str = "structural-native-rootfs-isolation-e2e.v7";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V8: &str = "structural-native-rootfs-isolation-e2e.v8";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V9: &str = "structural-native-rootfs-isolation-e2e.v9";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v10";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V10: &str = "structural-native-rootfs-isolation-e2e.v10";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v11";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -57,7 +58,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6: &str = "This source-bound local C5 diagn
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V7: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, and repeated en-US/ko-KR embedded-font sparse-linear PDF export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery and constrained-reaction ResultIR through review and handoff export; the MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, and deterministic self-hashed en-US/ko-KR constrained-reaction views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR and repeated reaction-view identities through review and handoff export; the strict ModelIR-linear surface also binds a bounded reaction-view window, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V9: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, and deterministic self-hashed en-US/ko-KR algebraic global reaction audits as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views and independently verified force, global-origin moment and active-equation numeric closure; both durable sessions remain unmodified and the NDTHA profile is rejected. The MGT-linear audit retains visible nonzero FP64 roundoff within the fixed tolerance policy, original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a support-design, stability, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, deterministic algebraic global reaction audits, and deterministic self-hashed en-US/ko-KR bounded nodal-displacement views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views, reaction audits and exact six-component nodal displacement rows; a strict-ModelIR bounded displacement window is distinct, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear evidence retains original source bytes, normalized import health and visible nonzero reaction-audit FP64 roundoff within the fixed tolerance policy. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a deformed-shape, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, deterministic algebraic global reaction audits, and deterministic self-hashed en-US/ko-KR bounded nodal-displacement views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views, reaction audits and exact six-component nodal displacement rows; a strict-ModelIR bounded displacement window is distinct, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear evidence retains original source bytes, normalized import health and visible nonzero reaction-audit FP64 roundoff within the fixed tolerance policy. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a deformed-shape, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded two-node original/deformed centerline projections as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The view applies recovered UX/UY/UZ translation at a fixed visual scale, reports but does not apply RX/RY/RZ, binds backend and all model/result/recovery/execution identities, proves repeated output from resumed durable terminal sessions, preserves both sessions, distinguishes a strict-ModelIR alternate projection and rejects invalid linear state selection. It retains all v10 reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. It is not member curvature, rigid-offset rotation, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -195,6 +197,16 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub mgt_model_ir_linear_nodal_displacement_view_ko_kr_first: &'a Path,
     pub mgt_model_ir_linear_nodal_displacement_view_ko_kr_second: &'a Path,
     pub workbench_nodal_displacement_view_wrong_profile_failure: &'a Path,
+    pub model_ir_linear_deformed_view_en_us_first: &'a Path,
+    pub model_ir_linear_deformed_view_en_us_second: &'a Path,
+    pub model_ir_linear_deformed_view_ko_kr_first: &'a Path,
+    pub model_ir_linear_deformed_view_ko_kr_second: &'a Path,
+    pub model_ir_linear_deformed_view_projection: &'a Path,
+    pub mgt_model_ir_linear_deformed_view_en_us_first: &'a Path,
+    pub mgt_model_ir_linear_deformed_view_en_us_second: &'a Path,
+    pub mgt_model_ir_linear_deformed_view_ko_kr_first: &'a Path,
+    pub mgt_model_ir_linear_deformed_view_ko_kr_second: &'a Path,
+    pub workbench_linear_deformed_view_invalid_step_failure: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -590,6 +602,29 @@ pub struct RootfsIsolationReceiptV10 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV11 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV10,
+    pub model_ir_linear_deformed_view_surface_passed: bool,
+    pub model_ir_linear_deformed_view_en_us_sha256: String,
+    pub model_ir_linear_deformed_view_ko_kr_sha256: String,
+    pub model_ir_linear_deformed_view_projection_sha256: String,
+    pub mgt_model_ir_linear_deformed_view_surface_passed: bool,
+    pub mgt_model_ir_linear_deformed_view_en_us_sha256: String,
+    pub mgt_model_ir_linear_deformed_view_ko_kr_sha256: String,
+    pub workbench_linear_deformed_view_invalid_step_rejected: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV11 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV11,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -603,6 +638,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V8(Box<RootfsIsolationReceiptV8>),
     V9(Box<RootfsIsolationReceiptV9>),
     V10(Box<RootfsIsolationReceiptV10>),
+    V11(Box<RootfsIsolationReceiptV11>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -887,11 +923,11 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 /// the operator workspace accepts writes, only loopback networking is visible, and all four
 /// native Workbench sessions reached their reported terminal state, including the typed
 /// ModelIR-linear and normalized-MGT-to-ModelIR-linear report, algebraic reaction-audit, and
-/// bounded nodal-displacement-view surfaces.
+/// bounded nodal-displacement-view and two-node linear deformed-view surfaces.
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV10, DistributionError> {
+) -> Result<RootfsIsolationReceiptV11, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1132,6 +1168,12 @@ pub fn create_rootfs_isolation_receipt(
         &mgt_model_ir_linear_root,
         request,
     )?;
+    let linear_deformed_view_surface = inspect_rootfs_linear_deformed_view_surface(
+        &workspace,
+        &model_ir_linear_root,
+        &mgt_model_ir_linear_root,
+        request,
+    )?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
@@ -1324,9 +1366,9 @@ pub fn create_rootfs_isolation_receipt(
         workbench_reaction_audit_wrong_profile_rejected: true,
     };
     validate_rootfs_isolation_evidence_v9(&evidence_v9)?;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10
         .clone_into(&mut evidence_v9.prior.prior.prior.prior.prior.claim_boundary);
-    let evidence = RootfsIsolationEvidenceV10 {
+    let mut evidence_v10 = RootfsIsolationEvidenceV10 {
         prior: evidence_v9,
         model_ir_linear_nodal_displacement_view_surface_passed: true,
         model_ir_linear_nodal_displacement_view_en_us_sha256: nodal_displacement_view_surface
@@ -1342,7 +1384,30 @@ pub fn create_rootfs_isolation_receipt(
             .mgt_ko_kr,
         workbench_nodal_displacement_view_wrong_profile_rejected: true,
     };
-    validate_rootfs_isolation_evidence_v10(&evidence)?;
+    validate_rootfs_isolation_evidence_v10(&evidence_v10)?;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        &mut evidence_v10
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    let evidence = RootfsIsolationEvidenceV11 {
+        prior: evidence_v10,
+        model_ir_linear_deformed_view_surface_passed: true,
+        model_ir_linear_deformed_view_en_us_sha256: linear_deformed_view_surface.model_en_us,
+        model_ir_linear_deformed_view_ko_kr_sha256: linear_deformed_view_surface.model_ko_kr,
+        model_ir_linear_deformed_view_projection_sha256: linear_deformed_view_surface
+            .model_projection,
+        mgt_model_ir_linear_deformed_view_surface_passed: true,
+        mgt_model_ir_linear_deformed_view_en_us_sha256: linear_deformed_view_surface.mgt_en_us,
+        mgt_model_ir_linear_deformed_view_ko_kr_sha256: linear_deformed_view_surface.mgt_ko_kr,
+        workbench_linear_deformed_view_invalid_step_rejected: true,
+    };
+    validate_rootfs_isolation_evidence_v11(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -1577,7 +1642,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V9(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V10) => {
             let receipt: RootfsIsolationReceiptV10 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v10(&receipt.evidence)?;
@@ -1649,6 +1714,24 @@ pub fn verify_rootfs_isolation_receipt(
                     .workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V10(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV11 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v11(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            let base = &receipt.evidence.prior.prior.prior.prior.prior.prior.prior;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &base.release_id,
+                &base.source_sha256,
+                &base.bundle_manifest_hash,
+                &base.bundle_manifest_file_sha256,
+                &base.installer_sha256,
+                &base.workbench_sha256,
+                &base.workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V11(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -2355,6 +2438,32 @@ struct NodalDisplacementViewProbe<'a> {
     ko_kr_first: &'a Path,
     ko_kr_second: &'a Path,
     window: Option<&'a Path>,
+}
+
+struct LinearDeformedViewSurfaceSummary {
+    model_en_us: String,
+    model_ko_kr: String,
+    model_projection: String,
+    mgt_en_us: String,
+    mgt_ko_kr: String,
+}
+
+#[derive(Debug)]
+struct LinearDeformedViewArtifact {
+    bytes: Vec<u8>,
+    sha256: String,
+}
+
+struct LinearDeformedViewProbe<'a> {
+    label: &'a str,
+    workbench_root: &'a Path,
+    session_before: &'a Path,
+    projection: &'a str,
+    en_us_first: &'a Path,
+    en_us_second: &'a Path,
+    ko_kr_first: &'a Path,
+    ko_kr_second: &'a Path,
+    alternate_projection: Option<&'a Path>,
 }
 
 struct ReactionAuditSurfaceSummary {
@@ -3077,6 +3186,332 @@ fn inspect_rootfs_nodal_displacement_view_surface(
         model_en_us: model.0,
         model_ko_kr: model.1,
         model_window: model.2.expect("ModelIR displacement window is required"),
+        mgt_en_us: mgt.0,
+        mgt_ko_kr: mgt.1,
+    })
+}
+
+fn contains_nonfinite_number_token(text: &str) -> bool {
+    text.split(|character: char| {
+        !(character.is_ascii_alphanumeric() || matches!(character, '+' | '-' | '.' | '_'))
+    })
+    .any(|token| {
+        token.eq_ignore_ascii_case("nan")
+            || token.eq_ignore_ascii_case("+nan")
+            || token.eq_ignore_ascii_case("-nan")
+            || token.eq_ignore_ascii_case("inf")
+            || token.eq_ignore_ascii_case("+inf")
+            || token.eq_ignore_ascii_case("-inf")
+            || token.eq_ignore_ascii_case("infinity")
+            || token.eq_ignore_ascii_case("+infinity")
+            || token.eq_ignore_ascii_case("-infinity")
+    })
+}
+
+#[allow(clippy::too_many_lines)] // Keep the independent fail-closed artifact checks auditable.
+fn inspect_linear_deformed_view_artifact(
+    workspace: &Path,
+    path: &Path,
+    locale: &str,
+    projection: &str,
+    label: &str,
+) -> Result<LinearDeformedViewArtifact, DistributionError> {
+    let bytes = read_direct_workspace_file(workspace, path, label)?;
+    if bytes.contains(&0x1b) {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_unsafe",
+            format!("{label} contains an ANSI escape byte"),
+        ));
+    }
+    let text = std::str::from_utf8(&bytes).map_err(|_| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_invalid",
+            format!("{label} must be UTF-8"),
+        )
+    })?;
+    let unsigned = text.strip_suffix('\n').ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_noncanonical",
+            format!("{label} must end with one newline"),
+        )
+    })?;
+    let final_line_start = unsigned.rfind('\n').map_or(0, |position| position + 1);
+    let final_line = &unsigned[final_line_start..];
+    let (hash_label, required_lines) = match locale {
+        "en-US" => (
+            "View hash: ",
+            [
+                "Schema: structural-native-workbench-model-ir-linear-deformed-view.v1",
+                "Locale: en-US",
+                "Authority: bounded candidate",
+                "Profile: model_ir_linear_cpu_v1",
+                "Viewport: 73x25 cells",
+                "Selected state: 1 of 1 (terminal linear static)",
+                "Visual magnification: 1.00000000000000000e3",
+                "Applied components: UX/UY/UZ translational displacement in m",
+                "Rotation treatment: RX/RY/RZ are reported in rad but are not applied to centerline coordinates",
+                "Inventory: nodes=2 elements=1",
+            ],
+        ),
+        "ko-KR" => (
+            "보기 해시: ",
+            [
+                "스키마: structural-native-workbench-model-ir-linear-deformed-view.v1",
+                "로케일: ko-KR",
+                "권한: bounded candidate",
+                "프로파일: model_ir_linear_cpu_v1",
+                "뷰포트: 73x25 cells",
+                "선택 상태: 1 of 1 (terminal linear static)",
+                "시각 확대 배율: 1.00000000000000000e3",
+                "적용 성분: UX/UY/UZ translational displacement in m",
+                "회전 처리: RX/RY/RZ are reported in rad but are not applied to centerline coordinates",
+                "재고: nodes=2 elements=1",
+            ],
+        ),
+        _ => {
+            return Err(DistributionError::new(
+                "rootfs_linear_deformed_view_invalid",
+                "linear deformed-view locale contract is unsupported",
+            ));
+        }
+    };
+    let declared_hash = final_line.strip_prefix(hash_label).ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_hash_missing",
+            format!("{label} has no terminal self-hash"),
+        )
+    })?;
+    validate_sha256_identity(declared_hash, "rootfs linear deformed-view self-hash")?;
+    if declared_hash != sha256_identity(&bytes[..final_line_start]) {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_hash_mismatch",
+            format!("{label} self-hash does not verify"),
+        ));
+    }
+    if required_lines
+        .iter()
+        .any(|required| !text.lines().any(|line| line == *required))
+        || !text.lines().any(|line| {
+            line == format!("Projection: {projection}")
+                || line == format!("투영: {projection}")
+        })
+        || !text.contains("fallback 0")
+        || !text.contains("H2D 0 / D2H 0 / sync 0")
+        || !text.contains("bounded_read_only_modelir_linear_two_node_centerline_original_and_magnified_translational_displacement_projection_not_member_curvature_rigid_offset_rotation_stress_contour_modal_serviceability_support_design_engineering_acceptance_or_design_code_compliance")
+        || contains_nonfinite_number_token(text)
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_contract_invalid",
+            format!("{label} does not expose the exact bounded linear deformed-view contract"),
+        ));
+    }
+
+    let border = format!("+{}+", "-".repeat(73));
+    let border_count = text.lines().filter(|line| *line == border).count();
+    let canvas_rows = text
+        .lines()
+        .filter(|line| line.len() == 75 && line.starts_with('|') && line.ends_with('|'))
+        .count();
+    let node_rows = text
+        .lines()
+        .filter(|line| {
+            line.starts_with("  00000")
+                && line.contains(" original_xyz_m=[")
+                && line.contains(" translation_m=[")
+                && line.contains(" rotation_rad=[")
+                && line.contains(" magnified_xyz_m=[")
+                && line.contains(" original_cell=[")
+                && line.contains(" deformed_cell=[")
+        })
+        .count();
+    let element_rows = text
+        .lines()
+        .filter(|line| {
+            line.starts_with("  000001 ")
+                && line.contains(" element_index=0000000000 ")
+                && (line.contains(" frame_3d ") || line.contains(" truss_3d "))
+                && line.contains(" -> ")
+        })
+        .count();
+    if border_count != 2 || canvas_rows != 25 || node_rows != 2 || element_rows != 1 {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_geometry_invalid",
+            format!("{label} has an invalid bounded canvas or topology inventory"),
+        ));
+    }
+    Ok(LinearDeformedViewArtifact {
+        sha256: sha256_identity(&bytes),
+        bytes,
+    })
+}
+
+fn inspect_linear_deformed_view_probe(
+    workspace: &Path,
+    probe: &LinearDeformedViewProbe<'_>,
+) -> Result<(String, String, Option<String>), DistributionError> {
+    let session_before = read_direct_workspace_file(
+        workspace,
+        probe.session_before,
+        &format!("{} pre-deformed-view session", probe.label),
+    )?;
+    let session_after = read_bounded_regular_file(
+        &probe.workbench_root.join("workbench-session.json"),
+        MAX_MANIFEST_BYTES,
+    )?;
+    if session_before != session_after {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_session_mutated",
+            format!("{} linear deformed view mutated its session", probe.label),
+        ));
+    }
+    let inspect = |path, locale, projection, suffix| {
+        inspect_linear_deformed_view_artifact(
+            workspace,
+            path,
+            locale,
+            projection,
+            &format!("{} {locale} {suffix} linear deformed view", probe.label),
+        )
+    };
+    let en_us_first = inspect(probe.en_us_first, "en-US", probe.projection, "first")?;
+    let en_us_second = inspect(probe.en_us_second, "en-US", probe.projection, "second")?;
+    let ko_kr_first = inspect(probe.ko_kr_first, "ko-KR", probe.projection, "first")?;
+    let ko_kr_second = inspect(probe.ko_kr_second, "ko-KR", probe.projection, "second")?;
+    if en_us_first.bytes != en_us_second.bytes || ko_kr_first.bytes != ko_kr_second.bytes {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_determinism_failed",
+            format!("{} repeated linear deformed views differ", probe.label),
+        ));
+    }
+    if en_us_first.sha256 == ko_kr_first.sha256 {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_locale_collision",
+            format!("{} linear deformed-view locales collide", probe.label),
+        ));
+    }
+    let alternate = probe
+        .alternate_projection
+        .map(|path| inspect(path, "en-US", "xz", "alternate projection"))
+        .transpose()?;
+    if alternate
+        .as_ref()
+        .is_some_and(|artifact| artifact.sha256 == en_us_first.sha256)
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_projection_collision",
+            format!(
+                "{} alternate projection equals its primary view",
+                probe.label
+            ),
+        ));
+    }
+    Ok((
+        en_us_first.sha256,
+        ko_kr_first.sha256,
+        alternate.map(|artifact| artifact.sha256),
+    ))
+}
+
+fn inspect_linear_deformed_view_invalid_step_failure(
+    workspace: &Path,
+    path: &Path,
+) -> Result<(), DistributionError> {
+    let bytes = read_direct_workspace_file(workspace, path, "invalid-step deformed-view failure")?;
+    let canonical = bytes.strip_suffix(b"\n").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_failure_noncanonical",
+            "invalid-step deformed-view failure must be one JSON line",
+        )
+    })?;
+    let value = structural_contracts::model_ir::decode_json_strict(canonical).map_err(|error| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_failure_invalid",
+            format!("invalid-step deformed-view failure is invalid JSON: {error}"),
+        )
+    })?;
+    let object = value.as_object().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_deformed_view_failure_invalid",
+            "invalid-step deformed-view failure must be an object",
+        )
+    })?;
+    let actual = object.keys().map(String::as_str).collect::<BTreeSet<_>>();
+    let expected = ["code", "detail", "schema_version"]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    if actual != expected
+        || value
+            .get("schema_version")
+            .and_then(serde_json::Value::as_str)
+            != Some("structural-native-workbench-failure.v1")
+        || value.get("code").and_then(serde_json::Value::as_str)
+            != Some("workbench_deformed_view_step_invalid")
+        || value
+            .get("detail")
+            .and_then(serde_json::Value::as_str)
+            .map_or(true, str::is_empty)
+        || compact_operator_json(&value)? != canonical
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_failure_invalid",
+            "invalid-step deformed-view failure does not match the fail-closed contract",
+        ));
+    }
+    Ok(())
+}
+
+fn inspect_rootfs_linear_deformed_view_surface(
+    workspace: &Path,
+    model_ir_linear_root: &Path,
+    mgt_model_ir_linear_root: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<LinearDeformedViewSurfaceSummary, DistributionError> {
+    let model = inspect_linear_deformed_view_probe(
+        workspace,
+        &LinearDeformedViewProbe {
+            label: "ModelIR linear",
+            workbench_root: model_ir_linear_root,
+            session_before: request.model_ir_linear_workbench_session_before_reaction_view,
+            projection: "xy",
+            en_us_first: request.model_ir_linear_deformed_view_en_us_first,
+            en_us_second: request.model_ir_linear_deformed_view_en_us_second,
+            ko_kr_first: request.model_ir_linear_deformed_view_ko_kr_first,
+            ko_kr_second: request.model_ir_linear_deformed_view_ko_kr_second,
+            alternate_projection: Some(request.model_ir_linear_deformed_view_projection),
+        },
+    )?;
+    let mgt = inspect_linear_deformed_view_probe(
+        workspace,
+        &LinearDeformedViewProbe {
+            label: "normalized-MGT linear",
+            workbench_root: mgt_model_ir_linear_root,
+            session_before: request.mgt_model_ir_linear_workbench_session_before_reaction_view,
+            projection: "xz",
+            en_us_first: request.mgt_model_ir_linear_deformed_view_en_us_first,
+            en_us_second: request.mgt_model_ir_linear_deformed_view_en_us_second,
+            ko_kr_first: request.mgt_model_ir_linear_deformed_view_ko_kr_first,
+            ko_kr_second: request.mgt_model_ir_linear_deformed_view_ko_kr_second,
+            alternate_projection: None,
+        },
+    )?;
+    inspect_linear_deformed_view_invalid_step_failure(
+        workspace,
+        request.workbench_linear_deformed_view_invalid_step_failure,
+    )?;
+    let model_projection = model.2.expect("ModelIR alternate projection is required");
+    let identities = [&model.0, &model.1, &model_projection, &mgt.0, &mgt.1]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    if identities.len() != 5 {
+        return Err(DistributionError::new(
+            "rootfs_linear_deformed_view_profile_collision",
+            "linear deformed-view locale, projection, or profile identities collide",
+        ));
+    }
+    Ok(LinearDeformedViewSurfaceSummary {
+        model_en_us: model.0,
+        model_ko_kr: model.1,
+        model_projection,
         mgt_en_us: mgt.0,
         mgt_ko_kr: mgt.1,
     })
@@ -4344,11 +4779,23 @@ fn seal_rootfs_isolation_evidence_v9(
     })
 }
 
-fn seal_rootfs_isolation_evidence(
+#[cfg(test)]
+fn seal_rootfs_isolation_evidence_v10(
     evidence: RootfsIsolationEvidenceV10,
 ) -> Result<RootfsIsolationReceiptV10, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
     Ok(RootfsIsolationReceiptV10 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V10.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV11,
+) -> Result<RootfsIsolationReceiptV11, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV11 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -4952,7 +5399,8 @@ fn validate_rootfs_isolation_evidence_v10(
     ]
     .into_iter()
     .collect::<BTreeSet<_>>();
-    if evidence.prior.prior.prior.prior.prior.prior.claim_boundary != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+    if evidence.prior.prior.prior.prior.prior.prior.claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10
         || !evidence.model_ir_linear_nodal_displacement_view_surface_passed
         || !evidence.mgt_model_ir_linear_nodal_displacement_view_surface_passed
         || !evidence.workbench_nodal_displacement_view_wrong_profile_rejected
@@ -4992,6 +5440,75 @@ fn validate_rootfs_isolation_evidence_v10(
     ROOTFS_RECEIPT_CLAIM_BOUNDARY_V9
         .clone_into(&mut prior.prior.prior.prior.prior.prior.claim_boundary);
     validate_rootfs_isolation_evidence_v9(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v11(
+    evidence: &RootfsIsolationEvidenceV11,
+) -> Result<(), DistributionError> {
+    let identities = [
+        evidence.model_ir_linear_deformed_view_en_us_sha256.as_str(),
+        evidence.model_ir_linear_deformed_view_ko_kr_sha256.as_str(),
+        evidence
+            .model_ir_linear_deformed_view_projection_sha256
+            .as_str(),
+        evidence
+            .mgt_model_ir_linear_deformed_view_en_us_sha256
+            .as_str(),
+        evidence
+            .mgt_model_ir_linear_deformed_view_ko_kr_sha256
+            .as_str(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
+    if evidence
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_linear_deformed_view_surface_passed
+        || !evidence.mgt_model_ir_linear_deformed_view_surface_passed
+        || !evidence.workbench_linear_deformed_view_invalid_step_rejected
+        || identities.len() != 5
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v11 receipt weakens or exceeds the exact bounded linear deformed-view diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_linear_deformed_view_en_us_sha256,
+            "rootfs ModelIR linear en-US deformed view SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_deformed_view_ko_kr_sha256,
+            "rootfs ModelIR linear ko-KR deformed view SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_deformed_view_projection_sha256,
+            "rootfs ModelIR linear alternate-projection deformed view SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_deformed_view_en_us_sha256,
+            "rootfs normalized-MGT linear en-US deformed view SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_deformed_view_ko_kr_sha256,
+            "rootfs normalized-MGT linear ko-KR deformed view SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10
+        .clone_into(&mut prior.prior.prior.prior.prior.prior.prior.claim_boundary);
+    validate_rootfs_isolation_evidence_v10(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -5916,9 +6433,9 @@ mod tests {
         }
     }
 
-    fn rootfs_evidence() -> RootfsIsolationEvidenceV10 {
+    fn rootfs_evidence_v10() -> RootfsIsolationEvidenceV10 {
         let mut prior = rootfs_evidence_v9();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10
             .clone_into(&mut prior.prior.prior.prior.prior.prior.claim_boundary);
         let identity = |value: u8| format!("sha256:{value:064x}");
         RootfsIsolationEvidenceV10 {
@@ -5931,6 +6448,24 @@ mod tests {
             mgt_model_ir_linear_nodal_displacement_view_en_us_sha256: identity(64),
             mgt_model_ir_linear_nodal_displacement_view_ko_kr_sha256: identity(65),
             workbench_nodal_displacement_view_wrong_profile_rejected: true,
+        }
+    }
+
+    fn rootfs_evidence() -> RootfsIsolationEvidenceV11 {
+        let mut prior = rootfs_evidence_v10();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY
+            .clone_into(&mut prior.prior.prior.prior.prior.prior.prior.claim_boundary);
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV11 {
+            prior,
+            model_ir_linear_deformed_view_surface_passed: true,
+            model_ir_linear_deformed_view_en_us_sha256: identity(66),
+            model_ir_linear_deformed_view_ko_kr_sha256: identity(67),
+            model_ir_linear_deformed_view_projection_sha256: identity(68),
+            mgt_model_ir_linear_deformed_view_surface_passed: true,
+            mgt_model_ir_linear_deformed_view_en_us_sha256: identity(69),
+            mgt_model_ir_linear_deformed_view_ko_kr_sha256: identity(70),
+            workbench_linear_deformed_view_invalid_step_rejected: true,
         }
     }
 
@@ -5993,6 +6528,41 @@ mod tests {
              000002\tN2\t0000000001\t+1.00000000000000000e-3\t+0.00000000000000000e0\t+0.00000000000000000e0\t+0.00000000000000000e0\t+0.00000000000000000e0\t+0.00000000000000000e0\n\
              Boundary: bounded read-only nodal displacement components from one verified ModelIR linear CPU recovery; not a deformed-shape, stress, contour, modal, serviceability, support-design, or engineering verdict.\n"
         );
+        let identity = sha256_identity(unsigned.as_bytes());
+        format!("{unsigned}View hash: {identity}\n").into_bytes()
+    }
+
+    fn linear_deformed_view_fixture(projection: &str) -> Vec<u8> {
+        use std::fmt::Write as _;
+
+        let mut unsigned = format!(
+            "Structural ModelIR Linear Workbench - Deformed Shape\n\
+             Schema: structural-native-workbench-model-ir-linear-deformed-view.v1\n\
+             Locale: en-US\n\
+             Authority: bounded candidate\n\
+             Profile: model_ir_linear_cpu_v1\n\
+             Projection: {projection}\n\
+             Viewport: 73x25 cells\n\
+             Selected state: 1 of 1 (terminal linear static)\n\
+             Visual magnification: 1.00000000000000000e3\n\
+             Applied components: UX/UY/UZ translational displacement in m\n\
+             Rotation treatment: RX/RY/RZ are reported in rad but are not applied to centerline coordinates\n\
+             Inventory: nodes=2 elements=1\n\
+             Backend: cpu / FP64 / ABI 0x0001000e / fallback 0\n\
+             Transfer/sync counts: H2D 0 / D2H 0 / sync 0\n"
+        );
+        let border = format!("+{}+\n", "-".repeat(73));
+        unsigned.push_str(&border);
+        for _ in 0..25 {
+            writeln!(unsigned, "|{}|", " ".repeat(73)).expect("write fixture canvas");
+        }
+        unsigned.push_str(&border);
+        unsigned.push_str(concat!(
+            "  000001 N1 original_xyz_m=[+0.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] translation_m=[+0.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] rotation_rad=[+0.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] magnified_xyz_m=[+0.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] original_cell=[0,0] deformed_cell=[0,0]\n",
+            "  000002 N2 original_xyz_m=[+1.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] translation_m=[+1.00000000000000000e-3,+0.00000000000000000e0,+0.00000000000000000e0] rotation_rad=[+0.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] magnified_xyz_m=[+2.00000000000000000e0,+0.00000000000000000e0,+0.00000000000000000e0] original_cell=[72,24] deformed_cell=[72,24]\n",
+            "  000001 E1 element_index=0000000000 frame_3d N1 -> N2\n",
+            "Claim boundary: bounded_read_only_modelir_linear_two_node_centerline_original_and_magnified_translational_displacement_projection_not_member_curvature_rigid_offset_rotation_stress_contour_modal_serviceability_support_design_engineering_acceptance_or_design_code_compliance\n",
+        ));
         let identity = sha256_identity(unsigned.as_bytes());
         format!("{unsigned}View hash: {identity}\n").into_bytes()
     }
@@ -6221,9 +6791,11 @@ mod tests {
             .expect("frozen v8 evidence remains verifiable");
         validate_rootfs_isolation_evidence_v9(&rootfs_evidence_v9())
             .expect("frozen v9 evidence remains verifiable");
+        validate_rootfs_isolation_evidence_v10(&rootfs_evidence_v10())
+            .expect("frozen v10 evidence remains verifiable");
 
         let evidence = rootfs_evidence();
-        validate_rootfs_isolation_evidence_v10(&evidence).expect("valid bounded evidence");
+        validate_rootfs_isolation_evidence_v11(&evidence).expect("valid bounded evidence");
         let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
         assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
         assert_eq!(
@@ -6233,6 +6805,7 @@ mod tests {
         assert!(
             !receipt
                 .evidence
+                .prior
                 .prior
                 .prior
                 .prior
@@ -6250,6 +6823,7 @@ mod tests {
                 .prior
                 .prior
                 .prior
+                .prior
                 .customer_image_receipt
         );
 
@@ -6261,9 +6835,10 @@ mod tests {
             .prior
             .prior
             .prior
+            .prior
             .model_ir_linear_workbench_review_decision = "pass".to_owned();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v10(&promoting)
+            validate_rootfs_isolation_evidence_v11(&promoting)
                 .expect_err("promoting review decision must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -6273,13 +6848,15 @@ mod tests {
         colliding_view
             .prior
             .prior
+            .prior
             .model_ir_linear_reaction_view_ko_kr_sha256 = colliding_view
+            .prior
             .prior
             .prior
             .model_ir_linear_reaction_view_en_us_sha256
             .clone();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v10(&colliding_view)
+            validate_rootfs_isolation_evidence_v11(&colliding_view)
                 .expect_err("colliding reaction view identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -6288,25 +6865,40 @@ mod tests {
         let mut colliding_audit = evidence.clone();
         colliding_audit
             .prior
+            .prior
             .model_ir_linear_reaction_audit_ko_kr_sha256 = colliding_audit
+            .prior
             .prior
             .model_ir_linear_reaction_audit_en_us_sha256
             .clone();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v10(&colliding_audit)
+            validate_rootfs_isolation_evidence_v11(&colliding_audit)
                 .expect_err("colliding reaction audit identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
 
         let mut colliding_displacement = evidence.clone();
-        colliding_displacement.model_ir_linear_nodal_displacement_view_window_sha256 =
-            colliding_displacement
-                .model_ir_linear_nodal_displacement_view_en_us_sha256
-                .clone();
+        colliding_displacement
+            .prior
+            .model_ir_linear_nodal_displacement_view_window_sha256 = colliding_displacement
+            .prior
+            .model_ir_linear_nodal_displacement_view_en_us_sha256
+            .clone();
         assert_eq!(
-            validate_rootfs_isolation_evidence_v10(&colliding_displacement)
+            validate_rootfs_isolation_evidence_v11(&colliding_displacement)
                 .expect_err("colliding displacement view identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+
+        let mut colliding_deformed = evidence.clone();
+        colliding_deformed.model_ir_linear_deformed_view_projection_sha256 = colliding_deformed
+            .model_ir_linear_deformed_view_en_us_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v11(&colliding_deformed)
+                .expect_err("colliding deformed-view identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );
@@ -6319,10 +6911,11 @@ mod tests {
             .prior
             .prior
             .prior
+            .prior
             .network_interfaces
             .push("eth0".to_owned());
         assert_eq!(
-            validate_rootfs_isolation_evidence_v10(&weakened)
+            validate_rootfs_isolation_evidence_v11(&weakened)
                 .expect_err("external interface must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
@@ -6466,6 +7059,87 @@ mod tests {
                 .expect_err("widened displacement failure must be rejected")
                 .code,
             "rootfs_nodal_displacement_view_failure_invalid"
+        );
+    }
+
+    #[test]
+    fn rootfs_linear_deformed_view_is_self_hashed_and_geometry_bound() {
+        assert!(!contains_nonfinite_number_token(
+            "Model provenance hash: sha256:0123456789abcdef"
+        ));
+        assert!(contains_nonfinite_number_token(
+            "translation_m=[+NaN,+0.0,+0.0]"
+        ));
+        let temporary = TestDirectory::create("rootfs-linear-deformed-view");
+        let workspace = temporary.0.canonicalize().expect("resolve workspace");
+        let view = workspace.join("linear-deformed-view.txt");
+        fs::write(&view, linear_deformed_view_fixture("xy"))
+            .expect("write valid linear deformed view");
+        let artifact = inspect_linear_deformed_view_artifact(
+            &workspace,
+            &view,
+            "en-US",
+            "xy",
+            "fixture linear deformed view",
+        )
+        .expect("inspect valid linear deformed view");
+        assert_eq!(artifact.sha256, sha256_file(&view).expect("hash fixture"));
+
+        let mut tampered = linear_deformed_view_fixture("xy");
+        tampered[0] = b'X';
+        fs::write(&view, tampered).expect("write tampered linear deformed view");
+        assert_eq!(
+            inspect_linear_deformed_view_artifact(
+                &workspace,
+                &view,
+                "en-US",
+                "xy",
+                "tampered linear deformed view",
+            )
+            .expect_err("tampered linear deformed view must fail")
+            .code,
+            "rootfs_linear_deformed_view_hash_mismatch"
+        );
+
+        fs::write(&view, linear_deformed_view_fixture("xz"))
+            .expect("write wrong-projection linear deformed view");
+        assert_eq!(
+            inspect_linear_deformed_view_artifact(
+                &workspace,
+                &view,
+                "en-US",
+                "xy",
+                "wrong-projection linear deformed view",
+            )
+            .expect_err("wrong projection must fail")
+            .code,
+            "rootfs_linear_deformed_view_contract_invalid"
+        );
+    }
+
+    #[test]
+    fn rootfs_linear_deformed_view_invalid_step_failure_is_exact() {
+        let temporary = TestDirectory::create("rootfs-linear-deformed-view-failure");
+        let workspace = temporary.0.canonicalize().expect("resolve workspace");
+        let failure = workspace.join("linear-deformed-view-failure.json");
+        fs::write(
+            &failure,
+            b"{\"code\":\"workbench_deformed_view_step_invalid\",\"detail\":\"linear static deformed view only supports step 1\",\"schema_version\":\"structural-native-workbench-failure.v1\"}\n",
+        )
+        .expect("write exact invalid-step failure");
+        inspect_linear_deformed_view_invalid_step_failure(&workspace, &failure)
+            .expect("accept exact invalid-step failure");
+
+        fs::write(
+            &failure,
+            b"{\"code\":\"workbench_deformed_view_step_invalid\",\"detail\":\"linear static deformed view only supports step 1\",\"extra\":true,\"schema_version\":\"structural-native-workbench-failure.v1\"}\n",
+        )
+        .expect("write widened invalid-step failure");
+        assert_eq!(
+            inspect_linear_deformed_view_invalid_step_failure(&workspace, &failure)
+                .expect_err("widened invalid-step failure must be rejected")
+                .code,
+            "rootfs_linear_deformed_view_failure_invalid"
         );
     }
 
@@ -6681,18 +7355,18 @@ mod tests {
     }
 
     #[test]
-    fn current_rootfs_v10_receipt_is_bundle_verifiable() {
+    fn frozen_rootfs_v10_receipt_remains_bundle_verifiable() {
         let temporary = TestDirectory::create("rootfs-v10-receipt");
         let bundle = make_bundle(&temporary, "rootfs-v10-release", "v10");
         let manifest = verify_bundle(&bundle).expect("verify v10 fixture bundle");
-        let mut evidence = rootfs_evidence();
+        let mut evidence = rootfs_evidence_v10();
         bind_rootfs_evidence_to_bundle(
             &mut evidence.prior.prior.prior.prior.prior.prior,
             &manifest,
             &bundle,
         );
         validate_rootfs_isolation_evidence_v10(&evidence).expect("validate current v10 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v10 evidence");
+        let receipt = seal_rootfs_isolation_evidence_v10(evidence).expect("seal v10 evidence");
         let receipt_path = temporary.0.join("rootfs-v10-receipt.json");
         fs::write(
             &receipt_path,
@@ -6703,6 +7377,32 @@ mod tests {
             verify_rootfs_isolation_receipt(&receipt_path, &bundle)
                 .expect("verify current v10 receipt against its bundle"),
             VerifiedRootfsIsolationReceipt::V10(_)
+        ));
+    }
+
+    #[test]
+    fn current_rootfs_v11_receipt_is_bundle_verifiable() {
+        let temporary = TestDirectory::create("rootfs-v11-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v11-release", "v11");
+        let manifest = verify_bundle(&bundle).expect("verify v11 fixture bundle");
+        let mut evidence = rootfs_evidence();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence.prior.prior.prior.prior.prior.prior.prior,
+            &manifest,
+            &bundle,
+        );
+        validate_rootfs_isolation_evidence_v11(&evidence).expect("validate current v11 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v11 evidence");
+        let receipt_path = temporary.0.join("rootfs-v11-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v11 receipt"),
+        )
+        .expect("write current v11 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v11 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V11(_)
         ));
     }
 

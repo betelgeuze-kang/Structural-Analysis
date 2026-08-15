@@ -2016,6 +2016,36 @@ def valid_v87_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v88_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v87_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v88",
+            "model_ir_linear_deformed_view_surface_passed": True,
+            "model_ir_linear_deformed_view_restart_parity_passed": True,
+            "model_ir_linear_deformed_view_en_us_sha256": "sha256:"
+            + "1" * 63
+            + "1",
+            "model_ir_linear_deformed_view_ko_kr_sha256": "sha256:"
+            + "1" * 63
+            + "2",
+            "model_ir_linear_deformed_view_projection_sha256": "sha256:"
+            + "1" * 63
+            + "3",
+            "mgt_model_ir_linear_deformed_view_surface_passed": True,
+            "mgt_model_ir_linear_deformed_view_restart_parity_passed": True,
+            "mgt_model_ir_linear_deformed_view_en_us_sha256": "sha256:"
+            + "1" * 63
+            + "4",
+            "mgt_model_ir_linear_deformed_view_ko_kr_sha256": "sha256:"
+            + "1" * 63
+            + "5",
+            "workbench_linear_deformed_view_invalid_step_rejected": True,
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4651,6 +4681,53 @@ def test_distribution_receipt_rejects_colliding_v87_displacement_identities(
     )
 
 
+def test_distribution_receipt_accepts_linear_deformed_view_v88_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v88_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v88_linear_deformed_view(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v88_contract()
+    receipt["model_ir_linear_deformed_view_restart_parity_passed"] = False
+    receipt["mgt_model_ir_linear_deformed_view_en_us_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_linear_deformed_view_restart_parity_passed" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "mgt_model_ir_linear_deformed_view_en_us_sha256" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_colliding_v88_deformed_view_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v88_contract()
+    receipt["model_ir_linear_deformed_view_projection_sha256"] = receipt[
+        "model_ir_linear_deformed_view_en_us_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all linear deformed-view locale, projection, and profile identities must differ"
+        in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -4675,6 +4752,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v8",
         "structural-native-rootfs-isolation-e2e.v9",
         "structural-native-rootfs-isolation-e2e.v10",
+        "structural-native-rootfs-isolation-e2e.v11",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -4698,6 +4776,12 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "workbench_nodal_displacement_view_wrong_profile_rejected",
         "inspect_rootfs_nodal_displacement_view_surface",
         "validate_rootfs_isolation_evidence_v10",
+        "model_ir_linear_deformed_view_en_us_sha256",
+        "model_ir_linear_deformed_view_projection_sha256",
+        "mgt_model_ir_linear_deformed_view_en_us_sha256",
+        "workbench_linear_deformed_view_invalid_step_rejected",
+        "inspect_rootfs_linear_deformed_view_surface",
+        "validate_rootfs_isolation_evidence_v11",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -5196,6 +5280,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_model_ir_linear_nodal_displacement_view_en_us_sha256" in e2e
     assert "mgt_model_ir_linear_nodal_displacement_view_ko_kr_sha256" in e2e
     assert "workbench_nodal_displacement_view_wrong_profile_rejected" in e2e
+    assert "structural-native-distribution-e2e.v88" in e2e
+    assert "exercise_model_ir_linear_deformed_view_surface" in e2e
+    assert "model_ir_linear_deformed_view_surface_passed" in e2e
+    assert "model_ir_linear_deformed_view_restart_parity_passed" in e2e
+    assert "model_ir_linear_deformed_view_en_us_sha256" in e2e
+    assert "model_ir_linear_deformed_view_ko_kr_sha256" in e2e
+    assert "model_ir_linear_deformed_view_projection_sha256" in e2e
+    assert "mgt_model_ir_linear_deformed_view_surface_passed" in e2e
+    assert "mgt_model_ir_linear_deformed_view_restart_parity_passed" in e2e
+    assert "mgt_model_ir_linear_deformed_view_en_us_sha256" in e2e
+    assert "mgt_model_ir_linear_deformed_view_ko_kr_sha256" in e2e
+    assert "workbench_linear_deformed_view_invalid_step_rejected" in e2e
     assert "workbench_fixed_constraint_identity_cascade_edit_restart_passed" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
@@ -5243,6 +5339,12 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--mgt-model-ir-linear-nodal-displacement-view-en-us-first" in rootfs_e2e
     assert "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-second" in rootfs_e2e
     assert "--workbench-nodal-displacement-view-wrong-profile-failure" in rootfs_e2e
+    assert "result-deformed-view" in rootfs_e2e
+    assert "--model-ir-linear-deformed-view-en-us-first" in rootfs_e2e
+    assert "--model-ir-linear-deformed-view-projection" in rootfs_e2e
+    assert "--mgt-model-ir-linear-deformed-view-en-us-first" in rootfs_e2e
+    assert "--mgt-model-ir-linear-deformed-view-ko-kr-second" in rootfs_e2e
+    assert "--workbench-linear-deformed-view-invalid-step-failure" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

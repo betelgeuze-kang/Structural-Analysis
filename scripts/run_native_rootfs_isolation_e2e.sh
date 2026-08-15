@@ -267,6 +267,44 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/nodal-displacement-view-wrong-profile-stderr.txt
+    for profile in model-ir-linear mgt-model-ir-linear; do
+      if [ "$profile" = model-ir-linear ]; then
+        deformed_workspace=/mnt/model-ir-linear-workbench
+        deformed_projection=xy
+      else
+        deformed_workspace=/mnt/mgt-model-ir-linear-workbench
+        deformed_projection=xz
+      fi
+      for locale in en-US ko-KR; do
+        for repeat in first second; do
+          /opt/payload/bin/structural-workbench result-deformed-view \
+            --workspace "$deformed_workspace" --locale "$locale" \
+            --projection "$deformed_projection" --scale 1000 \
+            > "/mnt/$profile-deformed-view-$locale-$repeat.txt"
+        done
+        /usr/bin/cmp "/mnt/$profile-deformed-view-$locale-first.txt" \
+          "/mnt/$profile-deformed-view-$locale-second.txt"
+      done
+      if /usr/bin/cmp -s "/mnt/$profile-deformed-view-en-US-first.txt" \
+        "/mnt/$profile-deformed-view-ko-KR-first.txt"; then
+        exit 1
+      fi
+    done
+    /opt/payload/bin/structural-workbench result-deformed-view \
+      --workspace /mnt/model-ir-linear-workbench --locale en-US \
+      --projection xz --scale 1000 \
+      > /mnt/model-ir-linear-deformed-view-projection.txt
+    if /usr/bin/cmp -s /mnt/model-ir-linear-deformed-view-en-US-first.txt \
+      /mnt/model-ir-linear-deformed-view-projection.txt; then
+      exit 1
+    fi
+    if /opt/payload/bin/structural-workbench result-deformed-view \
+      --workspace /mnt/model-ir-linear-workbench --step 2 \
+      > /mnt/linear-deformed-view-invalid-step-failure.json \
+      2> /mnt/linear-deformed-view-invalid-step-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/linear-deformed-view-invalid-step-stderr.txt
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -384,6 +422,26 @@ unshare -Urn bwrap \
         /mnt/mgt-model-ir-linear-nodal-displacement-view-ko-KR-second.txt \
       --workbench-nodal-displacement-view-wrong-profile-failure \
         /mnt/nodal-displacement-view-wrong-profile-failure.json \
+      --model-ir-linear-deformed-view-en-us-first \
+        /mnt/model-ir-linear-deformed-view-en-US-first.txt \
+      --model-ir-linear-deformed-view-en-us-second \
+        /mnt/model-ir-linear-deformed-view-en-US-second.txt \
+      --model-ir-linear-deformed-view-ko-kr-first \
+        /mnt/model-ir-linear-deformed-view-ko-KR-first.txt \
+      --model-ir-linear-deformed-view-ko-kr-second \
+        /mnt/model-ir-linear-deformed-view-ko-KR-second.txt \
+      --model-ir-linear-deformed-view-projection \
+        /mnt/model-ir-linear-deformed-view-projection.txt \
+      --mgt-model-ir-linear-deformed-view-en-us-first \
+        /mnt/mgt-model-ir-linear-deformed-view-en-US-first.txt \
+      --mgt-model-ir-linear-deformed-view-en-us-second \
+        /mnt/mgt-model-ir-linear-deformed-view-en-US-second.txt \
+      --mgt-model-ir-linear-deformed-view-ko-kr-first \
+        /mnt/mgt-model-ir-linear-deformed-view-ko-KR-first.txt \
+      --mgt-model-ir-linear-deformed-view-ko-kr-second \
+        /mnt/mgt-model-ir-linear-deformed-view-ko-KR-second.txt \
+      --workbench-linear-deformed-view-invalid-step-failure \
+        /mnt/linear-deformed-view-invalid-step-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

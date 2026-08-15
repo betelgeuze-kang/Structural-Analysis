@@ -212,6 +212,16 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-first",
             "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-second",
             "--workbench-nodal-displacement-view-wrong-profile-failure",
+            "--model-ir-linear-deformed-view-en-us-first",
+            "--model-ir-linear-deformed-view-en-us-second",
+            "--model-ir-linear-deformed-view-ko-kr-first",
+            "--model-ir-linear-deformed-view-ko-kr-second",
+            "--model-ir-linear-deformed-view-projection",
+            "--mgt-model-ir-linear-deformed-view-en-us-first",
+            "--mgt-model-ir-linear-deformed-view-en-us-second",
+            "--mgt-model-ir-linear-deformed-view-ko-kr-first",
+            "--mgt-model-ir-linear-deformed-view-ko-kr-second",
+            "--workbench-linear-deformed-view-invalid-step-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -354,6 +364,28 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         options,
         "--workbench-nodal-displacement-view-wrong-profile-failure",
     )?;
+    let model_ir_linear_deformed_view_en_us_first =
+        required_path(options, "--model-ir-linear-deformed-view-en-us-first")?;
+    let model_ir_linear_deformed_view_en_us_second =
+        required_path(options, "--model-ir-linear-deformed-view-en-us-second")?;
+    let model_ir_linear_deformed_view_ko_kr_first =
+        required_path(options, "--model-ir-linear-deformed-view-ko-kr-first")?;
+    let model_ir_linear_deformed_view_ko_kr_second =
+        required_path(options, "--model-ir-linear-deformed-view-ko-kr-second")?;
+    let model_ir_linear_deformed_view_projection =
+        required_path(options, "--model-ir-linear-deformed-view-projection")?;
+    let mgt_model_ir_linear_deformed_view_en_us_first =
+        required_path(options, "--mgt-model-ir-linear-deformed-view-en-us-first")?;
+    let mgt_model_ir_linear_deformed_view_en_us_second =
+        required_path(options, "--mgt-model-ir-linear-deformed-view-en-us-second")?;
+    let mgt_model_ir_linear_deformed_view_ko_kr_first =
+        required_path(options, "--mgt-model-ir-linear-deformed-view-ko-kr-first")?;
+    let mgt_model_ir_linear_deformed_view_ko_kr_second =
+        required_path(options, "--mgt-model-ir-linear-deformed-view-ko-kr-second")?;
+    let workbench_linear_deformed_view_invalid_step_failure = required_path(
+        options,
+        "--workbench-linear-deformed-view-invalid-step-failure",
+    )?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -448,6 +480,21 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             &mgt_model_ir_linear_nodal_displacement_view_ko_kr_second,
         workbench_nodal_displacement_view_wrong_profile_failure:
             &workbench_nodal_displacement_view_wrong_profile_failure,
+        model_ir_linear_deformed_view_en_us_first: &model_ir_linear_deformed_view_en_us_first,
+        model_ir_linear_deformed_view_en_us_second: &model_ir_linear_deformed_view_en_us_second,
+        model_ir_linear_deformed_view_ko_kr_first: &model_ir_linear_deformed_view_ko_kr_first,
+        model_ir_linear_deformed_view_ko_kr_second: &model_ir_linear_deformed_view_ko_kr_second,
+        model_ir_linear_deformed_view_projection: &model_ir_linear_deformed_view_projection,
+        mgt_model_ir_linear_deformed_view_en_us_first:
+            &mgt_model_ir_linear_deformed_view_en_us_first,
+        mgt_model_ir_linear_deformed_view_en_us_second:
+            &mgt_model_ir_linear_deformed_view_en_us_second,
+        mgt_model_ir_linear_deformed_view_ko_kr_first:
+            &mgt_model_ir_linear_deformed_view_ko_kr_first,
+        mgt_model_ir_linear_deformed_view_ko_kr_second:
+            &mgt_model_ir_linear_deformed_view_ko_kr_second,
+        workbench_linear_deformed_view_invalid_step_failure:
+            &workbench_linear_deformed_view_invalid_step_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -541,6 +588,13 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> String {
+    frozen_usage_v10().replace(
+        " --workbench-catalog",
+        " --model-ir-linear-deformed-view-en-us-first FILE --model-ir-linear-deformed-view-en-us-second FILE --model-ir-linear-deformed-view-ko-kr-first FILE --model-ir-linear-deformed-view-ko-kr-second FILE --model-ir-linear-deformed-view-projection FILE --mgt-model-ir-linear-deformed-view-en-us-first FILE --mgt-model-ir-linear-deformed-view-en-us-second FILE --mgt-model-ir-linear-deformed-view-ko-kr-first FILE --mgt-model-ir-linear-deformed-view-ko-kr-second FILE --workbench-linear-deformed-view-invalid-step-failure FILE --workbench-catalog",
+    )
+}
+
+fn frozen_usage_v10() -> String {
     frozen_usage_v9().replace(
         " --workbench-catalog",
         " --model-ir-linear-nodal-displacement-view-en-us-first FILE --model-ir-linear-nodal-displacement-view-en-us-second FILE --model-ir-linear-nodal-displacement-view-ko-kr-first FILE --model-ir-linear-nodal-displacement-view-ko-kr-second FILE --model-ir-linear-nodal-displacement-view-window FILE --mgt-model-ir-linear-nodal-displacement-view-en-us-first FILE --mgt-model-ir-linear-nodal-displacement-view-en-us-second FILE --mgt-model-ir-linear-nodal-displacement-view-ko-kr-first FILE --mgt-model-ir-linear-nodal-displacement-view-ko-kr-second FILE --workbench-nodal-displacement-view-wrong-profile-failure FILE --workbench-catalog",
