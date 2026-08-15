@@ -86,7 +86,9 @@ to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bou
 and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
 also publishes the ABI v1.14 constrained vectors as a self-hashed reaction ResultIR through exact
 direct/restart, durable job/service, Workbench, installed distribution v84 and rootfs diagnostic
-v7 bindings without promoting this numerical family past C1.
+v7 bindings without promoting this numerical family past C1. Installed distribution v85 and
+rootfs diagnostic v8 separately bind the read-only constrained-reaction view without expanding
+that numerical authority.
 
 Still open: those excluded formulations and general load semantics, shell graph support, stateful
 trial/commit/rollback aggregation, nonzero prescribed-constraint reactions, authoritative

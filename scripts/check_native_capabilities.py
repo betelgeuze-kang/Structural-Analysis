@@ -153,9 +153,9 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "authority": "hosted_cpu_c5",
     },
     "native_deployment": {
-        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v7",
-        "frozen_rootfs_receipts": "v1-v6",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v84",
+        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v8",
+        "frozen_rootfs_receipts": "v1-v7",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v85",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },

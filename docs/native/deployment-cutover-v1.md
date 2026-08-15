@@ -435,6 +435,12 @@ normalized-MGT-linear constrained-reaction ResultIR hashes, verifies that each e
 through the human review and export, and preserves frozen v1 through v6 verification. It consumes
 the installed append-only distribution v84 reaction fields without promoting either receipt past
 bounded CPU C5 authority.
+Append-only v8 additionally executes the installed strict-ModelIR and normalized-MGT
+`reaction-view` surfaces inside the non-root read-only boundary, independently verifies their
+self-hashes, exact row/value/unit contract, repeated en-US/ko-KR determinism, bounded-window
+identity, session nonmutation and fail-closed NDTHA rejection, preserves frozen v1 through v7
+verification, and requires the installed append-only distribution v85 authority. This remains a
+local diagnostic rather than a customer image or C6 receipt.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

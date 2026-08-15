@@ -175,6 +175,44 @@ unshare -Urn bwrap \
     fi
     /usr/bin/cmp /mnt/model-ir-linear-session-before-localized-pdf.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
+    /bin/cp /mnt/model-ir-linear-workbench/workbench-session.json \
+      /mnt/model-ir-linear-session-before-reaction-view.json
+    /bin/cp /mnt/mgt-model-ir-linear-workbench/workbench-session.json \
+      /mnt/mgt-model-ir-linear-session-before-reaction-view.json
+    for profile in model-ir-linear mgt-model-ir-linear; do
+      if [ "$profile" = model-ir-linear ]; then
+        reaction_workspace=/mnt/model-ir-linear-workbench
+      else
+        reaction_workspace=/mnt/mgt-model-ir-linear-workbench
+      fi
+      for locale in en-US ko-KR; do
+        for repeat in first second; do
+          /opt/payload/bin/structural-workbench reaction-view \
+            --workspace "$reaction_workspace" --locale "$locale" \
+            > "/mnt/$profile-reaction-view-$locale-$repeat.txt"
+        done
+        /usr/bin/cmp "/mnt/$profile-reaction-view-$locale-first.txt" \
+          "/mnt/$profile-reaction-view-$locale-second.txt"
+      done
+      if /usr/bin/cmp -s "/mnt/$profile-reaction-view-en-US-first.txt" \
+        "/mnt/$profile-reaction-view-ko-KR-first.txt"; then
+        exit 1
+      fi
+    done
+    /opt/payload/bin/structural-workbench reaction-view \
+      --workspace /mnt/model-ir-linear-workbench --locale en-US \
+      --start-row 2 --count 2 > /mnt/model-ir-linear-reaction-view-window.txt
+    if /opt/payload/bin/structural-workbench reaction-view \
+      --workspace /mnt/modelir-workbench \
+      > /mnt/reaction-view-wrong-profile-failure.json \
+      2> /mnt/reaction-view-wrong-profile-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/reaction-view-wrong-profile-stderr.txt
+    /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
+      /mnt/model-ir-linear-workbench/workbench-session.json
+    /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
+      /mnt/mgt-model-ir-linear-workbench/workbench-session.json
     /opt/payload/bin/structural-workbench catalog --truth geometry_only --size large \
       > /mnt/workbench-catalog.json
     IFS= read -r catalog_line < /mnt/workbench-catalog.json
@@ -226,6 +264,30 @@ unshare -Urn bwrap \
         /mnt/model-ir-linear-localized-pdf-ko-KR-first \
       --model-ir-linear-localized-pdf-ko-kr-second-root \
         /mnt/model-ir-linear-localized-pdf-ko-KR-second \
+      --model-ir-linear-workbench-session-before-reaction-view \
+        /mnt/model-ir-linear-session-before-reaction-view.json \
+      --mgt-model-ir-linear-workbench-session-before-reaction-view \
+        /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
+      --model-ir-linear-reaction-view-en-us-first \
+        /mnt/model-ir-linear-reaction-view-en-US-first.txt \
+      --model-ir-linear-reaction-view-en-us-second \
+        /mnt/model-ir-linear-reaction-view-en-US-second.txt \
+      --model-ir-linear-reaction-view-ko-kr-first \
+        /mnt/model-ir-linear-reaction-view-ko-KR-first.txt \
+      --model-ir-linear-reaction-view-ko-kr-second \
+        /mnt/model-ir-linear-reaction-view-ko-KR-second.txt \
+      --model-ir-linear-reaction-view-window \
+        /mnt/model-ir-linear-reaction-view-window.txt \
+      --mgt-model-ir-linear-reaction-view-en-us-first \
+        /mnt/mgt-model-ir-linear-reaction-view-en-US-first.txt \
+      --mgt-model-ir-linear-reaction-view-en-us-second \
+        /mnt/mgt-model-ir-linear-reaction-view-en-US-second.txt \
+      --mgt-model-ir-linear-reaction-view-ko-kr-first \
+        /mnt/mgt-model-ir-linear-reaction-view-ko-KR-first.txt \
+      --mgt-model-ir-linear-reaction-view-ko-kr-second \
+        /mnt/mgt-model-ir-linear-reaction-view-ko-KR-second.txt \
+      --workbench-reaction-view-wrong-profile-failure \
+        /mnt/reaction-view-wrong-profile-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

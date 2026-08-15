@@ -154,7 +154,8 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   survives a real-iteration durable restart, and re-projects ResultIR, typed recovery IR,
   constrained-reaction ResultIR, ReportIR and Markdown before publication through CLI or the
   bounded loopback service reaction route. Workbench review/export, installed distribution v84
-  and rootfs diagnostic v7 bind the same exact reaction bytes. None of these separate capabilities
+  and rootfs diagnostic v7 bind the same exact reaction bytes; installed distribution v85 and
+  rootfs diagnostic v8 additionally bind the deterministic read-only reaction view. None of these separate capabilities
   promotes D3 beyond sequential C1. The
   same product-owned HIP candidate assembles a 38-DOF
   overlapping five-element graph without atomics in stable order and matches CPU with zero error

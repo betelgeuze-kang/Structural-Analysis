@@ -1049,6 +1049,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "byte-identical direct/restart views" in reaction_view["claim"]
     assert "frozen pre-reaction missing-artifact rejection" in reaction_view["claim"]
     assert "installed static/shared CPU distribution v85" in reaction_view["claim"]
+    assert "local rootfs diagnostic v8" in reaction_view["claim"]
     assert "public/customer distribution publication" in reaction_view["claim"]
     assert "HIP C2" in reaction_view["claim"]
     assert "C6" in reaction_view["claim"]
@@ -1574,17 +1575,18 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v6 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
-    assert "frozen v1 through v5 rootfs receipts" in deployment["claim"]
+    assert "v8 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
+    assert "frozen v1 through v7 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v7"
+        == "structural-native-rootfs-isolation-e2e.v8"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v6"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v7"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v84"
+        == "structural-native-distribution-e2e.v85"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

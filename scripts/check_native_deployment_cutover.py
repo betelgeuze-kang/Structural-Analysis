@@ -1296,6 +1296,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--model-ir-linear-workbench-session-before-localized-pdf",
         "--model-ir-linear-localized-pdf-en-us-first-root",
         "--model-ir-linear-localized-pdf-ko-kr-second-root",
+        "reaction-view",
+        "--model-ir-linear-workbench-session-before-reaction-view",
+        "--mgt-model-ir-linear-workbench-session-before-reaction-view",
+        "--model-ir-linear-reaction-view-en-us-first",
+        "--model-ir-linear-reaction-view-window",
+        "--mgt-model-ir-linear-reaction-view-ko-kr-second",
+        "--workbench-reaction-view-wrong-profile-failure",
         "structural-native-benchmark-catalog-view.v1",
         "structural-native-evidence-bundle-view.v1",
         "--workbench-catalog",
@@ -1310,6 +1317,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         root, Path("native/crates/structural-distribution/src/lib.rs"), blockers
     )
     for token in (
+        "structural-native-rootfs-isolation-e2e.v8",
+        "RootfsIsolationEvidenceV8",
+        "model_ir_linear_reaction_view_en_us_sha256",
+        "mgt_model_ir_linear_reaction_view_en_us_sha256",
+        "workbench_reaction_view_wrong_profile_rejected",
+        "inspect_rootfs_reaction_view_surface",
+        "validate_rootfs_isolation_evidence_v8",
         "structural-native-rootfs-isolation-e2e.v7",
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1660,7 +1674,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=distribution_doc,
         tokens=(
             "append-only v7 receipt",
-            "frozen v1 through v6 rootfs receipts",
+            "frozen v1 through v7 rootfs receipts",
             "append-only v57 receipt",
             "frozen v1 through v56 receipts",
             "no pre-v57 receipt",
@@ -4842,16 +4856,17 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",
-            "v6 self-hashed local_rootfs_diagnostic_c5 receipt",
+            "v8 self-hashed local_rootfs_diagnostic_c5 receipt",
+            "strict-ModelIR and normalized-MGT constrained-reaction views",
             "final C6 remain open",
         ):
             if token not in capability_claim:
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
         evidence_contract = capability.get("evidence_contract")
         if evidence_contract != {
-            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v7",
-            "frozen_rootfs_receipts": "v1-v6",
-            "required_installed_receipt_schema": "structural-native-distribution-e2e.v84",
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v8",
+            "frozen_rootfs_receipts": "v1-v7",
+            "required_installed_receipt_schema": "structural-native-distribution-e2e.v85",
             "authority": "local_rootfs_diagnostic_c5",
             "customer_image_authority": False,
         }:

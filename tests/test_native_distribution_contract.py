@@ -4524,6 +4524,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-install-transaction.v1",
         "structural-native-rootfs-isolation-e2e.v6",
         "structural-native-rootfs-isolation-e2e.v7",
+        "structural-native-rootfs-isolation-e2e.v8",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -4533,6 +4534,10 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "mgt_model_ir_linear_import_health_sha256",
         "mgt_model_ir_linear_result_recovery_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
+        "model_ir_linear_reaction_view_en_us_sha256",
+        "mgt_model_ir_linear_reaction_view_en_us_sha256",
+        "workbench_reaction_view_wrong_profile_rejected",
+        "validate_rootfs_isolation_evidence_v8",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -5034,6 +5039,13 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-ir-linear-localized-pdf-en-US-first" in rootfs_e2e
     assert "--model-ir-linear-workbench-session-before-localized-pdf" in rootfs_e2e
     assert "--model-ir-linear-localized-pdf-ko-kr-second-root" in rootfs_e2e
+    assert "reaction-view" in rootfs_e2e
+    assert "--model-ir-linear-workbench-session-before-reaction-view" in rootfs_e2e
+    assert "--mgt-model-ir-linear-workbench-session-before-reaction-view" in rootfs_e2e
+    assert "--model-ir-linear-reaction-view-en-us-first" in rootfs_e2e
+    assert "--model-ir-linear-reaction-view-window" in rootfs_e2e
+    assert "--mgt-model-ir-linear-reaction-view-ko-kr-second" in rootfs_e2e
+    assert "--workbench-reaction-view-wrong-profile-failure" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

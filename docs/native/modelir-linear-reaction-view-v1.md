@@ -34,6 +34,11 @@ prove direct/restart parity and wrong-profile rejection, and publish those facts
 `structural-native-distribution-e2e.v85` hosted CPU C5 receipt. Frozen v1 through v84 distribution
 receipts retain their narrower authority.
 
+The append-only `structural-native-rootfs-isolation-e2e.v8` diagnostic repeats both installed
+profiles as UID/GID 65532 with an empty PATH and read-only root/payload, independently checks the
+view self-hashes and exact rows, proves locale/window separation and session nonmutation, and binds
+the wrong-profile rejection. Frozen rootfs v1 through v7 receipts remain verifiable.
+
 This is not an equilibrium audit, support-design verdict, general nodal-field/stress/contour/modal
 viewer, engineering acceptance, design-code compliance, public/customer distribution publication,
 approved HIP C2 evidence, or C6 authority.
