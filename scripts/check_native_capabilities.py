@@ -137,8 +137,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v85",
-        "frozen_installed_receipts": "v1-v84",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v86",
+        "frozen_installed_receipts": "v1-v85",
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",
             "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -150,12 +150,18 @@ EXPECTED_EVIDENCE_CONTRACTS = {
             "mgt_model_ir_linear_reaction_view_en_us_sha256",
             "mgt_model_ir_linear_reaction_view_ko_kr_sha256",
         ],
+        "reaction_audit_hash_fields": [
+            "model_ir_linear_reaction_audit_en_us_sha256",
+            "model_ir_linear_reaction_audit_ko_kr_sha256",
+            "mgt_model_ir_linear_reaction_audit_en_us_sha256",
+            "mgt_model_ir_linear_reaction_audit_ko_kr_sha256",
+        ],
         "authority": "hosted_cpu_c5",
     },
     "native_deployment": {
-        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v8",
-        "frozen_rootfs_receipts": "v1-v7",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v85",
+        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v9",
+        "frozen_rootfs_receipts": "v1-v8",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v86",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },

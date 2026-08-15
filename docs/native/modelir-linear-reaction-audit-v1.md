@@ -42,8 +42,14 @@ output byte, and the command never mutates or re-executes the workspace.
 Clean-environment E2E binds byte-identical direct/restart output for strict ModelIR and normalized
 MGT linear workflows, repeated locale output, exact self-hashes, visible nonzero roundoff closure,
 durable-session nonmutation, frozen pre-reaction rejection, and terminal-receipt tamper rejection
-with no Python or Node. Installed static/shared distribution and non-root read-only rootfs
-publication for this new command remain open until their append-only successor receipts are built.
+with no Python or Node. The append-only
+`structural-native-distribution-e2e.v86` hosted CPU C5 receipt repeats both locale outputs, binds
+direct/restart parity and wrong-profile rejection, and records four distinct full-file audit
+SHA-256 identities. The append-only
+`structural-native-rootfs-isolation-e2e.v9` local diagnostic independently re-verifies those exact
+four identities as UID/GID 65532 with an empty `PATH`, read-only root and payload, writable operator
+workspace, and loopback-only networking. Frozen distribution v1 through v85 and rootfs v1 through
+v8 receipts remain verifiable with their narrower authority.
 
 This audit is limited to algebraic global resultants and the active equation residual for the
 bounded frame3d/truss3d linear CPU candidate. It is not support design, stability or singularity
