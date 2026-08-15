@@ -315,6 +315,7 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         "workbench-session.json",
         "04-resume/result-ir.json",
         "04-resume/result-recovery-ir.json",
+        "04-resume/reaction-result-ir.json",
         "04-resume/report-ir.json",
         "04-resume/report.md",
         "04-resume/run-receipt.json",
@@ -322,6 +323,7 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         "05-compare/comparison-receipt.json",
         "06-report/result-ir.json",
         "06-report/result-recovery-ir.json",
+        "06-report/reaction-result-ir.json",
         "06-report/report-ir.json",
         "06-report/report.md",
         "06-report/report.pdf",
@@ -355,6 +357,22 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     let pdf = fs::read(restarted.join("06-report/report.pdf")).expect("linear PDF");
     validate_deterministic_pdf_v1(&pdf).expect("linear PDF structure");
     assert_eq!(report_receipt["pdf_hash"], sha256_identity(&pdf));
+    let reaction_bytes =
+        fs::read(restarted.join("04-resume/reaction-result-ir.json")).expect("reaction ResultIR");
+    let reaction = verify_self_hash(&reaction_bytes, "result_hash");
+    assert_eq!(
+        reaction["constrained_dof_indices"],
+        json!([0, 1, 2, 3, 4, 5])
+    );
+    assert_eq!(
+        reaction["summary"]["maximum_absolute_reaction_component"],
+        20_000
+    );
+    assert_eq!(reaction["backend_receipt"]["fallback_count"], 0);
+    assert_eq!(
+        report_receipt["source_reaction_hash"],
+        reaction["result_hash"]
+    );
 
     let inspected = run_workbench(&stage_arguments("inspect", &restarted));
     assert_success(&inspected);
@@ -363,6 +381,10 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_eq!(
         inspected["report"]["source_recovery_hash"],
         report_receipt["source_recovery_hash"]
+    );
+    assert_eq!(
+        inspected["constrained_reactions"]["result_hash"],
+        reaction["result_hash"]
     );
     let report_view = run_workbench(&[
         text("report-view"),
@@ -374,6 +396,7 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_success(&report_view);
     let report_text = String::from_utf8_lossy(&report_view.stdout);
     assert!(report_text.contains("구조 ModelIR 선형 Workbench 보고서"));
+    assert!(report_text.contains("최대 절대 구속 반력"));
     assert!(report_text.contains("structural-native-workbench-model-ir-linear-report-view.v1"));
     assert!(report_text.contains("# Sparse Linear Analysis Report"));
 
@@ -449,6 +472,14 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         fs::read(restarted.join("07-review/review.json")).expect("restarted review"),
         fs::read(direct.join("07-review/review.json")).expect("direct review")
     );
+    let review = verify_self_hash(
+        &fs::read(restarted.join("07-review/review.json")).expect("review"),
+        "review_hash",
+    );
+    assert_eq!(
+        review["reaction_result_artifact_hash"],
+        sha256_identity(&reaction_bytes)
+    );
     let exported = run_workbench(&stage_arguments("export", &restarted));
     assert_success(&exported);
     let exported = verify_self_hash(&exported.stdout, "export_hash");
@@ -460,9 +491,21 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         .map(|artifact| artifact["role"].as_str().expect("artifact role"))
         .collect::<Vec<_>>();
     assert!(roles.contains(&"result_recovery_ir"));
+    assert!(roles.contains(&"reaction_result_ir"));
     assert!(roles.contains(&"sparse_linear_pdf_report"));
     assert!(roles.contains(&"pdf_ready_document_source"));
     assert!(!roles.contains(&"pdf_report"));
+
+    let reaction_path = restarted.join("04-resume/reaction-result-ir.json");
+    let mut tampered_reaction = reaction_bytes.clone();
+    tampered_reaction[32] ^= 1;
+    fs::write(&reaction_path, tampered_reaction).expect("tamper reactions");
+    let rejected = run_workbench(&stage_arguments("inspect", &restarted));
+    assert!(!rejected.status.success());
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
+    fs::write(&reaction_path, &reaction_bytes).expect("restore reactions");
 
     let mut tampered_pdf = pdf;
     tampered_pdf[32] ^= 1;
@@ -578,6 +621,17 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
             .abs()
             <= 1e-14
     );
+    let reaction: Value = serde_json::from_slice(
+        &fs::read(restarted.join("04-resume/reaction-result-ir.json"))
+            .expect("MGT linear reactions"),
+    )
+    .expect("MGT linear reaction JSON");
+    assert_eq!(reaction["load_pattern_id"], "LP_PUSH");
+    assert_eq!(
+        reaction["constrained_dof_indices"],
+        json!([0, 1, 2, 3, 4, 5])
+    );
+    assert_eq!(reaction["backend_receipt"]["fallback_count"], 0);
     validate_deterministic_pdf_v1(
         &fs::read(restarted.join("06-report/report.pdf")).expect("MGT linear PDF"),
     )

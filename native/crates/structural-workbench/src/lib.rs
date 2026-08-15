@@ -25,7 +25,12 @@ use structural_contracts::model_ir::{
 };
 use structural_contracts::model_linear_comparison::parse_model_ir_linear_external_result_v1;
 use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
-use structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1;
+use structural_contracts::model_linear_reactions::{
+    parse_model_ir_linear_reaction_result_ir_v1, verify_model_ir_linear_reaction_result_v1,
+};
+use structural_contracts::model_linear_recovery::{
+    parse_model_ir_linear_result_recovery_ir_v1, verify_model_ir_linear_result_recovery_v1,
+};
 use structural_contracts::product_ir::{parse_model_ir_ndtha_analysis_request_v1, sha256_identity};
 use structural_contracts::product_ir::{
     parse_nonlinear_ndtha_report_ir_v1, parse_nonlinear_ndtha_result_ir_v1,
@@ -320,6 +325,8 @@ struct WorkbenchReviewV1 {
     pdf_artifact_hash: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     result_recovery_artifact_hash: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    reaction_result_artifact_hash: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     report_document_artifact_hash: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -1106,6 +1113,29 @@ impl NativeWorkbench {
         } else {
             (Value::Null, Value::Null)
         };
+        let constrained_reactions = if self.session.stage >= WorkbenchStageV1::Terminal
+            && self.session.analysis_profile.is_some()
+        {
+            read_optional_bounded_regular_file(
+                &self
+                    .root
+                    .join(RESUME_DIRECTORY)
+                    .join("reaction-result-ir.json"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )?
+            .map_or(Ok(Value::Null), |bytes| {
+                let reaction = parse_model_ir_linear_reaction_result_ir_v1(&bytes)
+                    .map_err(|error| input_error("workbench_reaction_view_invalid", &error))?;
+                Ok(json!({
+                    "result_hash": reaction.result_hash(),
+                    "summary": reaction.result().summary,
+                    "units": reaction.result().units,
+                    "backend_receipt": reaction.result().backend_receipt,
+                }))
+            })?
+        } else {
+            Value::Null
+        };
         let comparison = if self.session.stage >= WorkbenchStageV1::Compared {
             let receipt = verified_receipt_json(
                 &self
@@ -1141,6 +1171,7 @@ impl NativeWorkbench {
                         "document_source_hash": receipt.get("document_source_hash").cloned().unwrap_or(Value::Null),
                         "source_result_hash": receipt.get("source_result_hash").cloned().unwrap_or(Value::Null),
                         "source_recovery_hash": receipt.get("source_recovery_hash").cloned().unwrap_or(Value::Null),
+                        "source_reaction_hash": receipt.get("source_reaction_hash").cloned().unwrap_or(Value::Null),
                         "source_report_hash": receipt.get("source_report_hash").cloned().unwrap_or(Value::Null),
                     })
                 }
@@ -1184,6 +1215,7 @@ impl NativeWorkbench {
             "terminal_status": self.session.terminal_status,
             "result_summary": result_summary,
             "backend_receipt": backend_receipt,
+            "constrained_reactions": constrained_reactions,
             "comparison": comparison,
             "report": report,
             "human_review": review_view,
@@ -1246,34 +1278,38 @@ impl NativeWorkbench {
                 .join("external-comparison-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
-        let (pdf_artifact_hash, result_recovery_artifact_hash, report_document_artifact_hash) =
-            match self.session.analysis_profile {
-                None => (
-                    Some(sha256_identity(&read_bounded_regular_file(
-                        &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
-                        MAX_PRODUCT_ARTIFACT_BYTES,
-                    )?)),
-                    None,
-                    None,
-                ),
-                Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
-                    Some(sha256_identity(&read_bounded_regular_file(
-                        &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
-                        MAX_PRODUCT_ARTIFACT_BYTES,
-                    )?)),
-                    Some(sha256_identity(&read_bounded_regular_file(
-                        &self
-                            .root
-                            .join(RESUME_DIRECTORY)
-                            .join("result-recovery-ir.json"),
-                        MAX_PRODUCT_ARTIFACT_BYTES,
-                    )?)),
-                    Some(sha256_identity(&read_bounded_regular_file(
-                        &self.root.join(REPORT_DIRECTORY).join("report.md"),
-                        MAX_PRODUCT_ARTIFACT_BYTES,
-                    )?)),
-                ),
-            };
+        let pdf_artifact_hash = Some(sha256_identity(&read_bounded_regular_file(
+            &self.root.join(REPORT_DIRECTORY).join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?));
+        let (
+            result_recovery_artifact_hash,
+            reaction_result_artifact_hash,
+            report_document_artifact_hash,
+        ) = match self.session.analysis_profile {
+            None => (None, None, None),
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &self
+                        .root
+                        .join(RESUME_DIRECTORY)
+                        .join("result-recovery-ir.json"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+                read_optional_bounded_regular_file(
+                    &self
+                        .root
+                        .join(RESUME_DIRECTORY)
+                        .join("reaction-result-ir.json"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?
+                .map(|bytes| sha256_identity(&bytes)),
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &self.root.join(REPORT_DIRECTORY).join("report.md"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+            ),
+        };
         let review = WorkbenchReviewV1 {
             schema_version: REVIEW_SCHEMA_V1.to_owned(),
             session_id: self.session.session_id.clone(),
@@ -1285,6 +1321,7 @@ impl NativeWorkbench {
             comparison_artifact_hash: sha256_identity(&comparison),
             pdf_artifact_hash,
             result_recovery_artifact_hash,
+            reaction_result_artifact_hash,
             report_document_artifact_hash,
             analysis_profile: self.session.analysis_profile,
             claim_boundary: review_claim_boundary(self.session.analysis_profile).to_owned(),
@@ -1351,6 +1388,7 @@ impl NativeWorkbench {
                 &result,
             )?,
         ];
+        let mut reaction_included = false;
         if self.session.analysis_profile.is_some() {
             let recovery = read_bounded_regular_file(
                 &self
@@ -1365,6 +1403,21 @@ impl NativeWorkbench {
                 "application/json",
                 &recovery,
             )?);
+            if let Some(reaction) = read_optional_bounded_regular_file(
+                &self
+                    .root
+                    .join(RESUME_DIRECTORY)
+                    .join("reaction-result-ir.json"),
+                MAX_PRODUCT_ARTIFACT_BYTES,
+            )? {
+                reaction_included = true;
+                artifacts.push(artifact_entry(
+                    "reaction_result_ir",
+                    "04-resume/reaction-result-ir.json",
+                    "application/json",
+                    &reaction,
+                )?);
+            }
         }
         artifacts.extend([
             artifact_entry(
@@ -1428,8 +1481,10 @@ impl NativeWorkbench {
             "decision": review.decision,
             "review_hash": review.review_hash,
             "artifacts": artifacts,
-            "claim_boundary": if self.session.analysis_profile.is_some() {
-                "deterministic_model_ir_linear_native_handoff_manifest_with_pdf_and_document_source_not_an_archive_signature_or_engineering_acceptance"
+            "claim_boundary": if reaction_included {
+                "deterministic_model_ir_linear_native_handoff_manifest_with_constrained_reactions_pdf_and_document_source_not_an_archive_signature_or_engineering_acceptance"
+            } else if self.session.analysis_profile.is_some() {
+                "deterministic_model_ir_linear_legacy_native_handoff_manifest_without_constrained_reactions_with_pdf_and_document_source_not_an_archive_signature_or_engineering_acceptance"
             } else {
                 "deterministic_native_handoff_manifest_not_an_archive_signature_or_engineering_acceptance"
             },
@@ -1554,12 +1609,17 @@ impl NativeWorkbench {
         locale: WorkbenchReportLocaleV1,
     ) -> Result<String, WorkbenchError> {
         let report_directory = self.root.join(REPORT_DIRECTORY);
+        verify_receipt_directory(&report_directory, "report-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &report_directory.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let recovery_bytes = read_bounded_regular_file(
             &report_directory.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reaction_bytes = read_optional_bounded_regular_file(
+            &report_directory.join("reaction-result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let report_bytes = read_bounded_regular_file(
@@ -1593,17 +1653,27 @@ impl NativeWorkbench {
             .map_err(|error| input_error("workbench_linear_report_result_invalid", &error))?;
         let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
             .map_err(|error| input_error("workbench_linear_report_recovery_invalid", &error))?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery)
+            .map_err(|error| input_error("workbench_linear_report_recovery_invalid", &error))?;
+        let reaction = reaction_bytes
+            .as_deref()
+            .map(parse_model_ir_linear_reaction_result_ir_v1)
+            .transpose()
+            .map_err(|error| input_error("workbench_linear_report_reaction_invalid", &error))?;
+        if let Some(reaction) = reaction.as_ref() {
+            verify_model_ir_linear_reaction_result_v1(&result, &recovery, reaction)
+                .map_err(|error| input_error("workbench_linear_report_reaction_invalid", &error))?;
+        }
         let report = parse_sparse_linear_report_ir_v1(&report_bytes)
             .map_err(|error| input_error("workbench_linear_report_report_invalid", &error))?;
         let expected = build_sparse_linear_report_v1(&result)
             .map_err(|error| input_error("workbench_linear_report_projection_failed", &error))?;
-        if recovery.recovery().source_result_hash != result.result_hash()
-            || report.canonical_json() != expected.report_ir.canonical_json()
+        if report.canonical_json() != expected.report_ir.canonical_json()
             || document_bytes != expected.document_source.as_bytes()
         {
             return Err(WorkbenchError::new(
                 "workbench_linear_report_binding_mismatch",
-                "stored linear recovery, ReportIR, or document differs from the exact ResultIR projection",
+                "stored linear recovery, reactions, ReportIR, or document differs from the exact ResultIR projection",
             ));
         }
         let comparison = verified_receipt_json(
@@ -1655,8 +1725,30 @@ impl NativeWorkbench {
                 "verified report document source is not UTF-8",
             )
         })?;
+        let reaction_lines = reaction.as_ref().map_or_else(
+            || match locale {
+                WorkbenchReportLocaleV1::EnUs => {
+                    "Constrained reactions: unavailable in legacy artifact set\n".to_owned()
+                }
+                WorkbenchReportLocaleV1::KoKr => "구속 반력: 기존 산출물 세트에 없음\n".to_owned(),
+            },
+            |reaction| {
+                let label = match locale {
+                    WorkbenchReportLocaleV1::EnUs => "Maximum absolute constrained reaction",
+                    WorkbenchReportLocaleV1::KoKr => "최대 절대 구속 반력",
+                };
+                format!(
+                    "{label}: {:.17e}\nReaction hash: {}\n",
+                    reaction
+                        .result()
+                        .summary
+                        .maximum_absolute_reaction_component,
+                    reaction.result_hash(),
+                )
+            },
+        );
         let mut output = format!(
-            "{title}\nSchema: structural-native-workbench-model-ir-linear-report-view.v1\nLocale: {}\n{case_label}: {}\n{status_label}: completed\n{comparison_label}: {comparison_status}\nMatrix order: {}\nPCG iterations: {}\nMaximum absolute global displacement: {:.17e}\nActive residual infinity norm: {:.17e}\nResult hash: {}\nRecovery hash: {}\nReport hash: {}\nPDF hash: {}\nComparison hash: {comparison_hash}\nBoundary: {boundary}\n\n{source_label}\n\n",
+            "{title}\nSchema: structural-native-workbench-model-ir-linear-report-view.v1\nLocale: {}\n{case_label}: {}\n{status_label}: completed\n{comparison_label}: {comparison_status}\nMatrix order: {}\nPCG iterations: {}\nMaximum absolute global displacement: {:.17e}\nActive residual infinity norm: {:.17e}\nResult hash: {}\nRecovery hash: {}\n{reaction_lines}Report hash: {}\nPDF hash: {}\nComparison hash: {comparison_hash}\nBoundary: {boundary}\n\n{source_label}\n\n",
             locale.label(),
             result.result().case_id,
             result.result().summary.order,
@@ -1871,6 +1963,7 @@ impl NativeWorkbench {
         output_directory: &Path,
     ) -> Result<String, WorkbenchError> {
         let report_directory = self.root.join(REPORT_DIRECTORY);
+        verify_receipt_directory(&report_directory, "report-receipt.json")?;
         let result = read_bounded_regular_file(
             &report_directory.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -2180,6 +2273,7 @@ impl NativeWorkbench {
         self.persist()
     }
 
+    #[allow(clippy::too_many_lines)]
     fn publish_model_ir_linear_pdf_report(&mut self) -> Result<(), WorkbenchError> {
         let terminal = self.root.join(RESUME_DIRECTORY);
         let result_bytes = read_bounded_regular_file(
@@ -2188,6 +2282,10 @@ impl NativeWorkbench {
         )?;
         let recovery_bytes = read_bounded_regular_file(
             &terminal.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reaction_bytes = read_optional_bounded_regular_file(
+            &terminal.join("reaction-result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let report_bytes = read_bounded_regular_file(
@@ -2200,23 +2298,82 @@ impl NativeWorkbench {
             .map_err(|error| input_error("workbench_report_result_invalid", &error))?;
         let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
             .map_err(|error| input_error("workbench_report_recovery_invalid", &error))?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery)
+            .map_err(|error| input_error("workbench_report_recovery_invalid", &error))?;
+        let reaction = reaction_bytes
+            .as_deref()
+            .map(parse_model_ir_linear_reaction_result_ir_v1)
+            .transpose()
+            .map_err(|error| input_error("workbench_report_reaction_invalid", &error))?;
+        if let Some(reaction) = reaction.as_ref() {
+            verify_model_ir_linear_reaction_result_v1(&result, &recovery, reaction)
+                .map_err(|error| input_error("workbench_report_reaction_invalid", &error))?;
+        }
         let report = parse_sparse_linear_report_ir_v1(&report_bytes)
             .map_err(|error| input_error("workbench_report_ir_invalid", &error))?;
         let expected = build_sparse_linear_report_v1(&result)
             .map_err(|error| input_error("workbench_report_projection_failed", &error))?;
-        if recovery.recovery().source_result_hash != result.result_hash()
-            || report.report().source_result_hash != result.result_hash()
+        if report.report().source_result_hash != result.result_hash()
             || report.canonical_json() != expected.report_ir.canonical_json()
             || document_bytes != expected.document_source.as_bytes()
         {
             return Err(WorkbenchError::new(
                 "workbench_report_projection_mismatch",
-                "terminal recovery, ReportIR, or document source is not the exact sparse ResultIR projection",
+                "terminal recovery, reactions, ReportIR, or document source is not the exact sparse ResultIR projection",
             ));
         }
         let pdf = execute_sparse_linear_pdf_report(&result_bytes, &report_bytes, &document_bytes)
             .map_err(|error| input_error("workbench_report_pdf_failed", &error))?;
-        let receipt = canonical_self_hashed(json!({
+        let mut artifacts = vec![
+            artifact_entry(
+                "result_ir",
+                "result-ir.json",
+                "application/json",
+                &result_bytes,
+            )?,
+            artifact_entry(
+                "result_recovery_ir",
+                "result-recovery-ir.json",
+                "application/json",
+                &recovery_bytes,
+            )?,
+            artifact_entry(
+                "report_ir",
+                "report-ir.json",
+                "application/json",
+                &report_bytes,
+            )?,
+            artifact_entry(
+                "pdf_ready_document_source",
+                "report.md",
+                "text/markdown; charset=utf-8",
+                &document_bytes,
+            )?,
+            artifact_entry(
+                "sparse_linear_pdf_report",
+                "report.pdf",
+                "application/pdf",
+                pdf.pdf_bytes(),
+            )?,
+            artifact_entry(
+                "sparse_linear_pdf_receipt",
+                "pdf-receipt.json",
+                "application/json",
+                pdf.receipt_json().as_bytes(),
+            )?,
+        ];
+        if let Some(bytes) = reaction_bytes.as_deref() {
+            artifacts.insert(
+                2,
+                artifact_entry(
+                    "reaction_result_ir",
+                    "reaction-result-ir.json",
+                    "application/json",
+                    bytes,
+                )?,
+            );
+        }
+        let mut receipt_value = json!({
             "schema_version": "structural-native-model-ir-linear-pdf-report-receipt.v1",
             "session_id": self.session.session_id,
             "status": "reported",
@@ -2226,28 +2383,36 @@ impl NativeWorkbench {
             "document_source_hash": sha256_identity(&document_bytes),
             "pdf_hash": sha256_identity(pdf.pdf_bytes()),
             "pdf_receipt_hash": sha256_identity(pdf.receipt_json().as_bytes()),
-            "artifacts": [
-                artifact_entry("result_ir", "result-ir.json", "application/json", &result_bytes)?,
-                artifact_entry("result_recovery_ir", "result-recovery-ir.json", "application/json", &recovery_bytes)?,
-                artifact_entry("report_ir", "report-ir.json", "application/json", &report_bytes)?,
-                artifact_entry("pdf_ready_document_source", "report.md", "text/markdown; charset=utf-8", &document_bytes)?,
-                artifact_entry("sparse_linear_pdf_report", "report.pdf", "application/pdf", pdf.pdf_bytes())?,
-                artifact_entry("sparse_linear_pdf_receipt", "pdf-receipt.json", "application/json", pdf.receipt_json().as_bytes())?,
-            ],
-            "claim_boundary": "verified_deterministic_sparse_report_ir_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance",
-        }))?;
-        publish_new_directory(
-            &self.root.join(REPORT_DIRECTORY),
-            &[
-                ("result-ir.json", &result_bytes),
-                ("result-recovery-ir.json", &recovery_bytes),
-                ("report-ir.json", &report_bytes),
-                ("report.md", &document_bytes),
-                ("report.pdf", pdf.pdf_bytes()),
-                ("pdf-receipt.json", pdf.receipt_json().as_bytes()),
-                ("report-receipt.json", receipt.as_bytes()),
-            ],
-        )?;
+            "artifacts": artifacts,
+            "claim_boundary": if reaction.is_some() {
+                "verified_deterministic_sparse_report_ir_constrained_reactions_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance"
+            } else {
+                "legacy_verified_deterministic_sparse_report_ir_without_constrained_reactions_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance"
+            },
+        });
+        if let Some(reaction) = reaction.as_ref() {
+            receipt_value
+                .as_object_mut()
+                .expect("report receipt is an object")
+                .insert(
+                    "source_reaction_hash".to_owned(),
+                    json!(reaction.result_hash()),
+                );
+        }
+        let receipt = canonical_self_hashed(receipt_value)?;
+        let mut published_artifacts = vec![
+            ("result-ir.json", result_bytes.as_slice()),
+            ("result-recovery-ir.json", recovery_bytes.as_slice()),
+            ("report-ir.json", report_bytes.as_slice()),
+            ("report.md", document_bytes.as_slice()),
+            ("report.pdf", pdf.pdf_bytes()),
+            ("pdf-receipt.json", pdf.receipt_json().as_bytes()),
+            ("report-receipt.json", receipt.as_bytes()),
+        ];
+        if let Some(bytes) = reaction_bytes.as_deref() {
+            published_artifacts.insert(2, ("reaction-result-ir.json", bytes));
+        }
+        publish_new_directory(&self.root.join(REPORT_DIRECTORY), &published_artifacts)?;
         self.session.stage = WorkbenchStageV1::Reported;
         self.persist()
     }
@@ -2427,40 +2592,48 @@ fn verify_review_binding(
             .join("external-comparison-ir.json"),
         MAX_PRODUCT_ARTIFACT_BYTES,
     )?;
-    let (expected_pdf, expected_recovery, expected_document) = match session.analysis_profile {
-        None => (
-            Some(sha256_identity(&read_bounded_regular_file(
-                &root.join(REPORT_DIRECTORY).join("report.pdf"),
-                MAX_PRODUCT_ARTIFACT_BYTES,
-            )?)),
-            None,
-            None,
-        ),
-        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
-            Some(sha256_identity(&read_bounded_regular_file(
-                &root.join(REPORT_DIRECTORY).join("report.pdf"),
-                MAX_PRODUCT_ARTIFACT_BYTES,
-            )?)),
-            Some(sha256_identity(&read_bounded_regular_file(
-                &root.join(RESUME_DIRECTORY).join("result-recovery-ir.json"),
-                MAX_PRODUCT_ARTIFACT_BYTES,
-            )?)),
-            Some(sha256_identity(&read_bounded_regular_file(
-                &root.join(REPORT_DIRECTORY).join("report.md"),
-                MAX_PRODUCT_ARTIFACT_BYTES,
-            )?)),
-        ),
-    };
+    let (expected_pdf, expected_recovery, expected_reaction, expected_document) =
+        match session.analysis_profile {
+            None => (
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &root.join(REPORT_DIRECTORY).join("report.pdf"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+                None,
+                None,
+                None,
+            ),
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &root.join(REPORT_DIRECTORY).join("report.pdf"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &root.join(RESUME_DIRECTORY).join("result-recovery-ir.json"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+                read_optional_bounded_regular_file(
+                    &root.join(RESUME_DIRECTORY).join("reaction-result-ir.json"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?
+                .map(|bytes| sha256_identity(&bytes)),
+                Some(sha256_identity(&read_bounded_regular_file(
+                    &root.join(REPORT_DIRECTORY).join("report.md"),
+                    MAX_PRODUCT_ARTIFACT_BYTES,
+                )?)),
+            ),
+        };
     if review.source_session_hash != expected_session_hash
         || review.result_artifact_hash != sha256_identity(&result)
         || review.comparison_artifact_hash != sha256_identity(&comparison)
         || review.pdf_artifact_hash != expected_pdf
         || review.result_recovery_artifact_hash != expected_recovery
+        || review.reaction_result_artifact_hash != expected_reaction
         || review.report_document_artifact_hash != expected_document
     {
         return Err(WorkbenchError::new(
             "workbench_review_binding_mismatch",
-            "human review is not bound to the verified session, result, comparison and PDF",
+            "human review is not bound to the verified session, result, reactions, comparison and PDF",
         ));
     }
     Ok(())
@@ -3268,6 +3441,20 @@ fn read_bounded_regular_file(path: &Path, maximum_bytes: u64) -> Result<Vec<u8>,
         ));
     }
     Ok(bytes)
+}
+
+fn read_optional_bounded_regular_file(
+    path: &Path,
+    maximum_bytes: u64,
+) -> Result<Option<Vec<u8>>, WorkbenchError> {
+    match fs::symlink_metadata(path) {
+        Ok(_) => read_bounded_regular_file(path, maximum_bytes).map(Some),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(io_error(
+            "read optional Workbench artifact metadata",
+            &error,
+        )),
+    }
 }
 
 fn verify_slice_bound(bytes: &[u8], maximum_bytes: u64, label: &str) -> Result<(), WorkbenchError> {
