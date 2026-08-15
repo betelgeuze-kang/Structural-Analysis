@@ -3231,7 +3231,14 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "RX/RY/RZ in radians",
             "at most 512 nodes and 1,024 two-node elements",
             "strict ModelIR and normalized MGT linear workflows",
-            "Installed static/shared successor distribution",
+            "Installed static/shared distribution",
+            "v88 now binds",
+            "Local rootfs diagnostic v11",
+            "e1d8034dc2552dce00c9fed990053a83f2ce6890",
+            "39f58bf00f6213e8b7db3929b9b720b0aa2fe787cd2bb1b96e5a799a8324176b",
+            "63b49e860c861117a4d6b197140a5a492b94f281ae537a8c306b9882ade00abb",
+            "185b53d6819b51ee6f7f63f73039ba6d3d9b27266ef56415046265b7a7aa434e",
+            "e043d3fda09b3d43daf0f0df495457ee8853db9ce0dc879b48808836f56fa5eb",
             "interactive 3D",
             "approved HIP C2",
             "C6 remain open",
@@ -3393,8 +3400,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR "
         "ModelIR-linear nodal-displacement, bounded deformed-centerline and constrained-reaction "
         "views, algebraic "
-        "global-resultant reaction audit, and installed distribution v87/rootfs v10 "
-        "nodal-displacement evidence"
+        "global-resultant reaction audit, installed distribution v87/rootfs v10 "
+        "nodal-displacement evidence, and installed distribution v88/rootfs v11 bounded "
+        "deformed-centerline evidence"
     )
     if extension_claim != expected_extension_claim:
         blockers.append("workbench_ui_native_surface_extension_claim_invalid")
@@ -3405,7 +3413,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity, plus one last-neutral depth-eight/64-leaf acyclic nested linear-load-combination deletion with v3 root/expanded-term provenance, retained child-combination CPU execution, exact active load [0,-12000,5000,0,0,0], typed recovery and checkpoint/restart parity",
         "one bounded direct linear-load-combination single-factor edit preserving reference kind/identity/order/count with exact active load [25000,-13500,5000,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
         "one bounded nested linear-load-combination typed-root-factor edit preserving root reference kind/identity/order/count and every descendant, binding source/edited depth-eight/64-leaf expansions with exact active load [25000,-9000,3750,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
-        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR ModelIR-linear nodal-displacement, bounded deformed-centerline and constrained-reaction views, algebraic global-resultant reaction audit, and installed distribution v87/rootfs v10 nodal-displacement evidence",
+        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR ModelIR-linear nodal-displacement, bounded deformed-centerline and constrained-reaction views, algebraic global-resultant reaction audit, installed distribution v87/rootfs v10 nodal-displacement evidence, and installed distribution v88/rootfs v11 bounded deformed-centerline evidence",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

@@ -457,6 +457,16 @@ preserves frozen v1 through v9 verification, and requires installed append-only 
 authority. The static, shared and isolated paths bind the same five displacement-view identities.
 It remains a bounded numeric table diagnostic, not a deformed-shape, stress, contour, modal,
 serviceability, support-design, engineering-acceptance, customer-image, HIP C2 or C6 receipt.
+Append-only v11 additionally executes the installed strict-ModelIR and normalized-MGT
+`result-deformed-view` linear surfaces inside the same boundary, independently verifies their
+terminal self-hashes, exact locale/schema/projection/73x25-canvas/node/element contract, finite
+original and translated coordinates, fallback 0, repeated en-US/ko-KR determinism, a distinct
+strict-ModelIR projection, five-way locale/projection/profile identity separation, session
+nonmutation and fail-closed invalid-step rejection, preserves frozen v1 through v10 verification,
+and requires installed append-only distribution v88 authority. The static, shared and isolated
+paths bind the same five linear deformed-view identities. It remains a bounded two-node centerline
+diagnostic, not general interactive 3D, element curvature, shell, stress, contour, modal,
+serviceability, support-design, engineering-acceptance, customer-image, HIP C2 or C6 authority.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.
