@@ -448,6 +448,15 @@ normalized-MGT FP64 roundoff closure, repeated en-US/ko-KR determinism, session 
 fail-closed NDTHA rejection, preserves frozen v1 through v8 verification, and requires the
 installed append-only distribution v86 authority. It remains an algebraic numeric diagnostic, not
 support design, stability assessment, engineering acceptance, a customer image or a C6 receipt.
+Append-only v10 additionally executes the installed strict-ModelIR and normalized-MGT
+`nodal-displacement-view` surfaces inside the same boundary, independently verifies their terminal
+self-hashes, exact locale/schema/window/row/unit contract, finite six-component FP64 values,
+fallback 0, repeated en-US/ko-KR determinism, a distinct bounded strict-ModelIR window, five-way
+locale/window/profile identity separation, session nonmutation and fail-closed NDTHA rejection,
+preserves frozen v1 through v9 verification, and requires installed append-only distribution v87
+authority. The static, shared and isolated paths bind the same five displacement-view identities.
+It remains a bounded numeric table diagnostic, not a deformed-shape, stress, contour, modal,
+serviceability, support-design, engineering-acceptance, customer-image, HIP C2 or C6 receipt.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

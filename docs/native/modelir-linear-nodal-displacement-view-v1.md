@@ -28,9 +28,22 @@ mutates or re-executes the workspace.
 Clean-environment E2E binds byte-identical direct/restart output for strict ModelIR and normalized
 MGT linear workflows, repeated locale output, exact rows and self-hashes, bounded-window rejection,
 durable-session nonmutation, frozen pre-reaction compatibility, wrong-profile rejection, terminal-
-receipt tamper rejection, and no Python or Node lookup. Installed static/shared distribution and
-non-root read-only rootfs publication for this new command remain open until append-only successor
-receipts are built.
+receipt tamper rejection, and no Python or Node lookup. Installed static/shared distribution v87
+now binds the same five distinct strict-ModelIR/normalized-MGT locale and window identities with
+direct/restart parity, Python/Node lookup 0 and fallback 0. Local rootfs diagnostic v10 independently
+re-verifies those five identities as UID/GID 65532 with an empty PATH, read-only root and payload,
+writable workspace and loopback-only networking. Frozen distribution v1-v86 and rootfs v1-v9
+receipts retain their narrower authority.
+
+The source-bound evidence was built from commit `038a2b868ac89ebb6790222071071f933a542ef6`
+with source identity
+`sha256:e57f5733e787c932999896de64a08bb9b35179c4aa2cad046a92bb60c6e6a885`.
+The static v87 receipt file is
+`sha256:943f021c218615e5e41178691085382343440cbe887a0a0c0d96f0ad05cdd159`,
+the shared v87 receipt file is
+`sha256:6ead38b73e3a89682178d272df9f230c5d1c5054feaf3de0f75e6f18ddcef675`,
+and the rootfs v10 receipt file is
+`sha256:1f6329b1ec86b487d4f3cb65aeda7cce02b4a2bde4932ac9192be6c7e672f0c9`.
 
 This view is a numeric table over one verified linear-static recovery. It is not a deformed-shape,
 stress, contour, modal, serviceability, support-design, design-code, engineering-acceptance,

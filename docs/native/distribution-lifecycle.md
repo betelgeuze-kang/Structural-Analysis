@@ -638,11 +638,21 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    receipt carrying four distinct audit identities and five positive surface/parity/rejection
    gates. This is installed static/shared hosted CPU C5 authority, not support design, public or
    customer publication, HIP C2, an engineering verdict or C6.
+101. runs `structural-workbench nodal-displacement-view` for both strict-ModelIR-linear and
+   normalized-MGT-linear installed workspaces, verifies exact six-component node rows in metres and
+   radians, self-hashed ANSI-free en-US and ko-KR output, a distinct bounded strict-ModelIR window,
+   byte-identical direct/restart and repeated-locale output, durable-workspace nonmutation and
+   fail-closed NDTHA-profile rejection, then emits an append-only v87 receipt carrying five distinct
+   view identities and five positive surface/parity/rejection gates. Static and shared receipts are
+   authoritative hosted CPU C5 evidence with Python/Node lookup 0 and fallback 0; this is not a
+   deformed-shape, stress, contour, modal, serviceability, support-design, public/customer package,
+   HIP C2, engineering-verdict or C6 receipt.
 
-   The receipt checker continues to accept frozen v1 through v85 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v86 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
-   audit authority. Its explicit compatibility markers retain
+   audit authority; no pre-v87 receipt is installed nodal-displacement-view authority. Its explicit
+   compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
    frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts,
@@ -794,7 +804,7 @@ inspect, an explicit non-promoting `review`, review reopen, post-review inspect 
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v9 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v10 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
 The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
@@ -816,12 +826,18 @@ profiles, independently verifies exact schema, locale, terminal self-hash, ANSI 
 tolerance policy, numeric-status vocabulary, strict zero closure, visible nonzero normalized-MGT
 roundoff closure, repeated locale determinism, locale/profile identity separation, durable-session
 nonmutation and fail-closed NDTHA rejection, and binds four full-file SHA-256 identities. The
-installer continues to verify frozen v1 through v8 rootfs receipts against their original bundles
-and claim boundaries; v3 first carried catalog/evidence surface evidence, v4 first carried the
+append-only v10 receipt additionally runs the installed bounded nodal-displacement view for both
+linear profiles, independently verifies the terminal self-hash, exact schema/locale/window,
+two exact six-component node rows in metre/radian units, finite FP64 values, fallback 0 and ANSI
+absence, proves repeated en-US/ko-KR determinism, locale/window/profile identity separation,
+durable-session nonmutation and fail-closed NDTHA rejection, and binds five distinct full-file
+SHA-256 identities. The installer continues to verify frozen v1 through v9 rootfs receipts against
+their original bundles and claim boundaries; v3 first carried catalog/evidence surface evidence,
+v4 first carried the
 ModelIR-linear surface, v5 first carried its localized PDF surface, and only v6 carries the exact
 normalized-MGT-linear isolated surface; only v7 requires constrained-reaction ResultIR evidence,
 only v8 requires constrained-reaction-view evidence, and only v9 requires algebraic-reaction-audit
-evidence.
+evidence; only v10 requires bounded nodal-displacement-view evidence.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
 frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.
