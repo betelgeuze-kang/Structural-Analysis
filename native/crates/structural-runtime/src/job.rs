@@ -34,6 +34,7 @@ const MAX_RESULT_BYTES: usize = 64 * 1024 * 1024;
 const MAX_REPORT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_DOCUMENT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_RECOVERY_BYTES: usize = 64 * 1024 * 1024;
+const MAX_REACTION_RESULT_BYTES: usize = 64 * 1024 * 1024;
 const MAX_EVENT_BYTES: usize = 1024 * 1024;
 const MIN_LEASE_MILLIS: u64 = 1_000;
 const MAX_LEASE_MILLIS: u64 = 3_600_000;
@@ -97,6 +98,7 @@ enum JobArtifactRoleV1 {
     ReportIr,
     ReportDocument,
     ResultRecoveryIr,
+    ReactionResultIr,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -142,6 +144,8 @@ struct JobEventV1 {
     report_document: Option<JobArtifactReferenceV1>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     result_recovery_ir: Option<JobArtifactReferenceV1>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    reaction_result_ir: Option<JobArtifactReferenceV1>,
     error_code: Option<String>,
     created_unix_ms: u64,
     updated_unix_ms: u64,
@@ -170,6 +174,8 @@ pub struct DurableJobViewV1 {
     pub report_document: Option<JobArtifactReferenceV1>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub result_recovery_ir: Option<JobArtifactReferenceV1>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reaction_result_ir: Option<JobArtifactReferenceV1>,
     pub error_code: Option<String>,
     pub created_unix_ms: u64,
     pub updated_unix_ms: u64,
@@ -198,6 +204,7 @@ pub struct ModelIrLinearDurableJobCompletionV1<'a> {
     pub checkpoint_bytes: &'a [u8],
     pub result_ir_bytes: &'a [u8],
     pub result_recovery_ir_bytes: &'a [u8],
+    pub reaction_result_ir_bytes: &'a [u8],
     pub report_ir_bytes: &'a [u8],
     pub report_document_bytes: &'a [u8],
 }
@@ -213,6 +220,7 @@ struct ModelIrLinearCompletionReferencesV1 {
     checkpoint: JobArtifactReferenceV1,
     result_ir: JobArtifactReferenceV1,
     result_recovery_ir: JobArtifactReferenceV1,
+    reaction_result_ir: JobArtifactReferenceV1,
     report_ir: JobArtifactReferenceV1,
     report_document: JobArtifactReferenceV1,
 }
@@ -339,6 +347,7 @@ impl DurableJobStoreV1 {
             report_ir: None,
             report_document: None,
             result_recovery_ir: None,
+            reaction_result_ir: None,
             error_code: None,
             created_unix_ms: now_unix_ms,
             updated_unix_ms: now_unix_ms,
@@ -437,6 +446,7 @@ impl DurableJobStoreV1 {
             report_ir: None,
             report_document: None,
             result_recovery_ir: None,
+            reaction_result_ir: None,
             error_code: None,
             created_unix_ms: now_unix_ms,
             updated_unix_ms: now_unix_ms,
@@ -853,8 +863,8 @@ impl DurableJobStoreV1 {
 
     /// Publish a converged typed-`ModelIR` linear checkpoint and every deterministic terminal IR.
     ///
-    /// The store reconstructs the model assembly, sparse request, result, recovery, report IR and
-    /// document source before committing any artifact reference.
+    /// The store reconstructs the model assembly, sparse request, result, active recovery,
+    /// constrained reactions, report IR and document source before committing any reference.
     ///
     /// # Errors
     ///
@@ -900,8 +910,8 @@ impl DurableJobStoreV1 {
         let expected_report = build_sparse_linear_report_v1(&expected_result)
             .map_err(|error| contract_source_error("job_report_projection_failed", &error))?;
         let runtime = Runtime::new().map_err(|error| runtime_source_error(&error))?;
-        let expected_recovery = runtime
-            .recover_model_ir_linear_product(
+        let expected_recovered = runtime
+            .recover_model_ir_linear_product_artifacts(
                 restored.request.model_ir(),
                 restored.request.analysis_request(),
                 &restored.prepared,
@@ -910,7 +920,10 @@ impl DurableJobStoreV1 {
             .map_err(|error| runtime_source_error(&error))?;
         if restored.checkpoint.as_bytes() != completion.checkpoint_bytes
             || expected_result.canonical_bytes() != completion.result_ir_bytes
-            || expected_recovery.as_bytes() != completion.result_recovery_ir_bytes
+            || expected_recovered.result_recovery_json.as_bytes()
+                != completion.result_recovery_ir_bytes
+            || expected_recovered.reaction_result_json.as_bytes()
+                != completion.reaction_result_ir_bytes
             || expected_report.report_ir.canonical_json().as_bytes() != completion.report_ir_bytes
             || expected_report.document_source.as_bytes() != completion.report_document_bytes
         {
@@ -929,6 +942,7 @@ impl DurableJobStoreV1 {
         next.resume_contract_hash = Some(restored.checkpoint.receipt().checkpoint_hash);
         next.result_ir = Some(references.result_ir);
         next.result_recovery_ir = Some(references.result_recovery_ir);
+        next.reaction_result_ir = Some(references.reaction_result_ir);
         next.report_ir = Some(references.report_ir);
         next.report_document = Some(references.report_document);
         next.error_code = None;
@@ -1095,6 +1109,19 @@ impl DurableJobStoreV1 {
             job_id,
             |event| event.result_recovery_ir.as_ref(),
             MAX_RECOVERY_BYTES,
+        )
+    }
+
+    /// Read the published typed-`ModelIR` constrained-reaction `ResultIR` for a succeeded job.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error if the artifact is absent, corrupt, symlinked, or oversized.
+    pub fn read_reaction_result_ir(&self, job_id: &str) -> Result<Vec<u8>, DurableJobError> {
+        self.read_published(
+            job_id,
+            |event| event.reaction_result_ir.as_ref(),
+            MAX_REACTION_RESULT_BYTES,
         )
     }
 
@@ -1471,6 +1498,12 @@ impl DurableJobStoreV1 {
                 "application/json",
                 MAX_RECOVERY_BYTES,
             )?,
+            reaction_result_ir: self.store_blob_locked(
+                JobArtifactRoleV1::ReactionResultIr,
+                completion.reaction_result_ir_bytes,
+                "application/json",
+                MAX_REACTION_RESULT_BYTES,
+            )?,
             report_ir: self.store_blob_locked(
                 JobArtifactRoleV1::ReportIr,
                 completion.report_ir_bytes,
@@ -1657,6 +1690,7 @@ fn valid_genesis(event: &JobEventV1) -> bool {
         && event.report_ir.is_none()
         && event.report_document.is_none()
         && event.result_recovery_ir.is_none()
+        && event.reaction_result_ir.is_none()
         && event.error_code.is_none()
         && event.created_unix_ms == event.updated_unix_ms
         && event.previous_event_hash.is_none()
@@ -1673,7 +1707,8 @@ fn valid_transition_shape(previous: &JobEventV1, next: &JobEventV1) -> bool {
             && (next.result_ir != previous.result_ir
                 || next.report_ir != previous.report_ir
                 || next.report_document != previous.report_document
-                || next.result_recovery_ir != previous.result_recovery_ir))
+                || next.result_recovery_ir != previous.result_recovery_ir
+                || next.reaction_result_ir != previous.reaction_result_ir))
     {
         return false;
     }
@@ -1871,6 +1906,11 @@ fn validate_event_invariants(event: &JobEventV1) -> Result<(), DurableJobError> 
         "result_recovery_ir",
         MAX_RECOVERY_BYTES,
     )?;
+    validate_optional_artifact(
+        event.reaction_result_ir.as_ref(),
+        "reaction_result_ir",
+        MAX_REACTION_RESULT_BYTES,
+    )?;
     if event.checkpoint.is_some() != event.resume_contract_hash.is_some() {
         return Err(job_error(
             "job_event_checkpoint_identity_invalid",
@@ -1901,10 +1941,13 @@ fn validate_terminal_artifacts(event: &JobEventV1) -> Result<(), DurableJobError
     let any_terminal_artifact = event.result_ir.is_some()
         || event.report_ir.is_some()
         || event.report_document.is_some()
-        || event.result_recovery_ir.is_some();
+        || event.result_recovery_ir.is_some()
+        || event.reaction_result_ir.is_some();
     let profile_terminal_valid = match analysis_profile(event) {
         DurableJobAnalysisProfileV1::NonlinearNdthaCpuV1 => {
-            event.result_recovery_ir.is_none() && event.progress_completed == event.progress_total
+            event.result_recovery_ir.is_none()
+                && event.reaction_result_ir.is_none()
+                && event.progress_completed == event.progress_total
         }
         DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => {
             event.result_recovery_ir.is_some() && event.progress_completed <= event.progress_total
@@ -1942,6 +1985,7 @@ fn view(event: &JobEventV1) -> DurableJobViewV1 {
         report_ir: event.report_ir.clone(),
         report_document: event.report_document.clone(),
         result_recovery_ir: event.result_recovery_ir.clone(),
+        reaction_result_ir: event.reaction_result_ir.clone(),
         error_code: event.error_code.clone(),
         created_unix_ms: event.created_unix_ms,
         updated_unix_ms: event.updated_unix_ms,
@@ -2065,6 +2109,7 @@ fn artifact_role(role: JobArtifactRoleV1) -> &'static str {
         JobArtifactRoleV1::ReportIr => "report_ir",
         JobArtifactRoleV1::ReportDocument => "report_document",
         JobArtifactRoleV1::ResultRecoveryIr => "result_recovery_ir",
+        JobArtifactRoleV1::ReactionResultIr => "reaction_result_ir",
     }
 }
 
@@ -2209,6 +2254,11 @@ fn validate_model_ir_linear_completion_sizes(
         completion.result_recovery_ir_bytes,
         MAX_RECOVERY_BYTES,
         "/result_recovery_ir",
+    )?;
+    require_size(
+        completion.reaction_result_ir_bytes,
+        MAX_REACTION_RESULT_BYTES,
+        "/reaction_result_ir",
     )?;
     require_size(completion.report_ir_bytes, MAX_REPORT_BYTES, "/report_ir")?;
     require_size(

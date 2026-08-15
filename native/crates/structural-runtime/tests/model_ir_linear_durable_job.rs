@@ -63,6 +63,7 @@ struct Boundary {
     checkpoint: ModelIrLinearCheckpointV1,
     result_ir: Option<Vec<u8>>,
     recovery_ir: Option<Vec<u8>>,
+    reaction_ir: Option<Vec<u8>>,
     report_ir: Option<Vec<u8>>,
     report_document: Option<Vec<u8>>,
 }
@@ -94,30 +95,31 @@ fn advance(envelope: &[u8], checkpoint: Option<&[u8]>, budget: u32) -> Boundary 
     };
     let checkpoint =
         ModelIrLinearCheckpointV1::create(progress.checkpoint, &bindings).expect("outer boundary");
-    let (result_ir, recovery_ir, report_ir, report_document) =
-        progress
-            .result_ir
-            .map_or((None, None, None, None), |result| {
-                let recovery = runtime
-                    .recover_model_ir_linear_product(
-                        request.model_ir(),
-                        request.analysis_request(),
-                        &prepared,
-                        &result,
-                    )
-                    .expect("terminal recovery");
-                let report = build_sparse_linear_report_v1(&result).expect("terminal report");
-                (
-                    Some(result.canonical_bytes().to_vec()),
-                    Some(recovery.into_bytes()),
-                    Some(report.report_ir.canonical_json().as_bytes().to_vec()),
-                    Some(report.document_source.into_bytes()),
+    let (result_ir, recovery_ir, reaction_ir, report_ir, report_document) = progress
+        .result_ir
+        .map_or((None, None, None, None, None), |result| {
+            let recovered = runtime
+                .recover_model_ir_linear_product_artifacts(
+                    request.model_ir(),
+                    request.analysis_request(),
+                    &prepared,
+                    &result,
                 )
-            });
+                .expect("terminal recovery");
+            let report = build_sparse_linear_report_v1(&result).expect("terminal report");
+            (
+                Some(result.canonical_bytes().to_vec()),
+                Some(recovered.result_recovery_json.into_bytes()),
+                Some(recovered.reaction_result_json.into_bytes()),
+                Some(report.report_ir.canonical_json().as_bytes().to_vec()),
+                Some(report.document_source.into_bytes()),
+            )
+        });
     Boundary {
         checkpoint,
         result_ir,
         recovery_ir,
+        reaction_ir,
         report_ir,
         report_document,
     }
@@ -128,6 +130,7 @@ fn completion(boundary: &Boundary) -> ModelIrLinearDurableJobCompletionV1<'_> {
         checkpoint_bytes: boundary.checkpoint.as_bytes(),
         result_ir_bytes: boundary.result_ir.as_deref().expect("ResultIR"),
         result_recovery_ir_bytes: boundary.recovery_ir.as_deref().expect("recovery IR"),
+        reaction_result_ir_bytes: boundary.reaction_ir.as_deref().expect("reaction ResultIR"),
         report_ir_bytes: boundary.report_ir.as_deref().expect("ReportIR"),
         report_document_bytes: boundary
             .report_document
@@ -205,6 +208,7 @@ fn model_linear_job_reopens_resumes_and_revalidates_every_terminal_projection() 
     );
     assert_eq!(resumed_boundary.result_ir, direct_boundary.result_ir);
     assert_eq!(resumed_boundary.recovery_ir, direct_boundary.recovery_ir);
+    assert_eq!(resumed_boundary.reaction_ir, direct_boundary.reaction_ir);
     assert_eq!(resumed_boundary.report_ir, direct_boundary.report_ir);
     assert_eq!(
         resumed_boundary.report_document,
@@ -237,6 +241,25 @@ fn model_linear_job_reopens_resumes_and_revalidates_every_terminal_projection() 
         DurableJobStatusV1::Running
     );
 
+    let mut forged_reaction = resumed_boundary
+        .reaction_ir
+        .as_ref()
+        .expect("reaction ResultIR")
+        .clone();
+    forged_reaction[0] ^= 1;
+    let mut forged = completion(&resumed_boundary);
+    forged.reaction_result_ir_bytes = &forged_reaction;
+    let error = reopened
+        .complete_model_ir_linear_job(
+            &resumed.job.job_id,
+            "worker-resume",
+            &resumed.lease_token,
+            forged,
+            1_400,
+        )
+        .expect_err("forged reactions rejected");
+    assert_eq!(error.code, "job_completion_projection_mismatch");
+
     let succeeded = reopened
         .complete_model_ir_linear_job(
             &resumed.job.job_id,
@@ -253,6 +276,12 @@ fn model_linear_job_reopens_resumes_and_revalidates_every_terminal_projection() 
             .read_result_recovery_ir(&succeeded.job_id)
             .expect("published recovery"),
         direct_boundary.recovery_ir.expect("direct recovery")
+    );
+    assert_eq!(
+        reopened
+            .read_reaction_result_ir(&succeeded.job_id)
+            .expect("published reactions"),
+        direct_boundary.reaction_ir.expect("direct reactions")
     );
 }
 

@@ -495,6 +495,10 @@ impl NativeJobHttpApiV1 {
                 .store
                 .read_result_recovery_ir(job_id)
                 .map(|bytes| artifact_response("application/json", bytes)),
+            "reaction-result-ir" => self
+                .store
+                .read_reaction_result_ir(job_id)
+                .map(|bytes| artifact_response("application/json", bytes)),
             _ => {
                 return error_response(
                     404,
@@ -1291,7 +1295,8 @@ mod tests {
     }
 
     #[test]
-    fn model_ir_linear_submit_worker_and_recovery_route_are_socket_free_and_profile_bound() {
+    #[allow(clippy::too_many_lines)]
+    fn model_ir_linear_submit_worker_and_reaction_routes_are_socket_free_and_profile_bound() {
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("clock")
@@ -1389,6 +1394,24 @@ mod tests {
             value["schema_version"],
             "structural-model-ir-linear-result-recovery-ir.v1"
         );
+        let reaction = api.handle(&HttpRequest {
+            method: "GET".to_owned(),
+            path: format!("/v1/jobs/{job_id}/reaction-result-ir"),
+            headers: BTreeMap::from([(
+                "authorization".to_owned(),
+                format!("Bearer {client_token}"),
+            )]),
+            body: Vec::new(),
+        });
+        assert_eq!(reaction.status, 200);
+        assert_eq!(reaction.content_type, "application/json");
+        let value: serde_json::Value =
+            serde_json::from_slice(&reaction.body).expect("reaction JSON");
+        assert_eq!(
+            value["schema_version"],
+            "structural-model-ir-linear-reaction-result-ir.v1"
+        );
+        assert_eq!(value["backend_receipt"]["fallback_count"], 0);
         std::fs::remove_dir_all(root).expect("cleanup");
     }
 

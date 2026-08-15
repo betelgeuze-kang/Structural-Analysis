@@ -247,6 +247,10 @@ fn advance_model_ir_linear_job(
             outcome.result_recovery_ir_json(),
             "result_recovery_ir",
         )?,
+        reaction_result_ir_bytes: required_artifact(
+            outcome.reaction_result_ir_json(),
+            "reaction_result_ir",
+        )?,
         report_ir_bytes: required_artifact(outcome.report_ir_json(), "report_ir")?,
         report_document_bytes: required_artifact(outcome.report_document(), "report_document")?,
     };
@@ -298,11 +302,19 @@ pub fn export_durable_job(
     } else {
         None
     };
+    let reaction = if view.analysis_profile == DurableJobAnalysisProfileV1::ModelIrLinearCpuV1
+        && view.reaction_result_ir.is_some()
+    {
+        Some(store.read_reaction_result_ir(job_id)?)
+    } else {
+        None
+    };
     let receipt = build_export_receipt(
         &view,
         &checkpoint,
         &result_ir,
         recovery.as_deref(),
+        reaction.as_deref(),
         &report_ir,
         &report_document,
     )?;
@@ -321,6 +333,9 @@ pub fn export_durable_job(
     ];
     if let Some(recovery) = recovery.as_deref() {
         artifacts.push(("result-recovery-ir.json", recovery));
+    }
+    if let Some(reaction) = reaction.as_deref() {
+        artifacts.push(("reaction-result-ir.json", reaction));
     }
     publish_artifact_directory(output_directory, &artifacts)?;
     Ok(receipt)
@@ -343,6 +358,7 @@ fn build_export_receipt(
     checkpoint: &[u8],
     result_ir: &[u8],
     result_recovery_ir: Option<&[u8]>,
+    reaction_result_ir: Option<&[u8]>,
     report_ir: &[u8],
     report_document: &[u8],
 ) -> Result<String, DurableJobCommandError> {
@@ -371,6 +387,41 @@ fn build_export_receipt(
                     "terminal ModelIR linear job did not expose result_recovery_ir",
                 )
             })?;
+            let mut artifacts = vec![
+                artifact_entry(
+                    "checkpoint",
+                    "checkpoint.mlpcp",
+                    "application/vnd.structural.model-ir-linear-checkpoint",
+                    checkpoint,
+                )?,
+                artifact_entry("result_ir", "result-ir.json", "application/json", result_ir)?,
+                artifact_entry("report_ir", "report-ir.json", "application/json", report_ir)?,
+                artifact_entry(
+                    "report_document_source",
+                    "report.md",
+                    "text/markdown",
+                    report_document,
+                )?,
+                artifact_entry(
+                    "result_recovery_ir",
+                    "result-recovery-ir.json",
+                    "application/json",
+                    recovery,
+                )?,
+            ];
+            if let Some(reaction) = reaction_result_ir {
+                artifacts.push(artifact_entry(
+                    "reaction_result_ir",
+                    "reaction-result-ir.json",
+                    "application/json",
+                    reaction,
+                )?);
+            }
+            let claim_boundary = if reaction_result_ir.is_some() {
+                "single_host_bounded_cpu_model_ir_linear_durable_job_export_with_constrained_reactions_not_distributed_hip_or_release_authority"
+            } else {
+                "single_host_bounded_cpu_model_ir_linear_legacy_durable_job_export_without_constrained_reactions_not_distributed_hip_or_release_authority"
+            };
             json!({
                 "schema_version": "structural-native-durable-job-export-receipt.v1",
                 "job_id": view.job_id,
@@ -380,14 +431,8 @@ fn build_export_receipt(
                 "attempt": view.attempt,
                 "request_hash": view.request.content_hash,
                 "terminal_event_hash": view.terminal_event_hash,
-                "artifacts": [
-                    artifact_entry("checkpoint", "checkpoint.mlpcp", "application/vnd.structural.model-ir-linear-checkpoint", checkpoint)?,
-                    artifact_entry("result_ir", "result-ir.json", "application/json", result_ir)?,
-                    artifact_entry("report_ir", "report-ir.json", "application/json", report_ir)?,
-                    artifact_entry("report_document_source", "report.md", "text/markdown", report_document)?,
-                    artifact_entry("result_recovery_ir", "result-recovery-ir.json", "application/json", recovery)?,
-                ],
-                "claim_boundary": "single_host_bounded_cpu_model_ir_linear_durable_job_export_not_distributed_hip_or_release_authority",
+                "artifacts": artifacts,
+                "claim_boundary": claim_boundary,
                 "receipt_hash": ""
             })
         }

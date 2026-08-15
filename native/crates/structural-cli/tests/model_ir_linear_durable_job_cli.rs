@@ -56,7 +56,7 @@ fn verify_export_receipt(directory: &Path, mut receipt: Value) {
     assert_eq!(receipt["analysis_profile"], "model_ir_linear_cpu_v1");
     assert_eq!(
         receipt["claim_boundary"],
-        "single_host_bounded_cpu_model_ir_linear_durable_job_export_not_distributed_hip_or_release_authority"
+        "single_host_bounded_cpu_model_ir_linear_durable_job_export_with_constrained_reactions_not_distributed_hip_or_release_authority"
     );
     let receipt_hash = receipt["receipt_hash"]
         .as_str()
@@ -69,7 +69,7 @@ fn verify_export_receipt(directory: &Path, mut receipt: Value) {
     let unsigned = canonicalize_model_ir_v2(&receipt).expect("canonical receipt");
     assert_eq!(receipt_hash, sha256_identity(unsigned.as_bytes()));
     let artifacts = receipt["artifacts"].as_array().expect("artifact list");
-    assert_eq!(artifacts.len(), 5);
+    assert_eq!(artifacts.len(), 6);
     for artifact in artifacts {
         let file = artifact["file"].as_str().expect("artifact file");
         let bytes = fs::read(directory.join(file)).expect("exported artifact");
@@ -181,6 +181,7 @@ fn clean_process_job_restart_and_export_match_direct_model_product() {
         ("checkpoint.mlpcp", "checkpoint.mlpcp"),
         ("result-ir.json", "result-ir.json"),
         ("result-recovery-ir.json", "result-recovery-ir.json"),
+        ("reaction-result-ir.json", "reaction-result-ir.json"),
         ("report-ir.json", "report-ir.json"),
         ("report.md", "report.md"),
     ] {
