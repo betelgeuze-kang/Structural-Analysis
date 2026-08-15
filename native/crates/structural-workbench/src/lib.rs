@@ -47,6 +47,7 @@ mod catalog;
 mod deformed_view;
 mod evidence;
 mod linear_combination;
+mod linear_deformed_view;
 mod model_edit;
 mod model_view;
 mod nodal_displacement_view;
@@ -1871,6 +1872,110 @@ impl NativeWorkbench {
         )
     }
 
+    /// Return a deterministic original/deformed centerline overlay for a verified linear result.
+    ///
+    /// The view revalidates the immutable `ModelIR` through the native C++ boundary, applies only
+    /// the exact recovered UX/UY/UZ components to node coordinates, and preserves RX/RY/RZ as
+    /// reported-but-not-applied values. Visual magnification never mutates or re-executes the
+    /// durable workspace.
+    ///
+    /// # Errors
+    ///
+    /// Requires a `ModelIR` linear session at terminal or later and rejects receipt drift,
+    /// source-binding drift, non-two-node topology, non-finite coordinates, or an unsafe scale.
+    pub fn model_ir_linear_deformed_shape_view_text(
+        &self,
+        projection: ModelTopologyProjectionV1,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        self.model_ir_linear_deformed_shape_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            projection,
+            scale,
+        )
+    }
+
+    /// Return a localized deterministic linear-static original/deformed centerline overlay.
+    ///
+    /// Locale changes labels only. Exact node mappings, coordinates, recovered components,
+    /// execution receipt, provenance identities, and projection geometry remain visible.
+    ///
+    /// # Errors
+    ///
+    /// Requires the same verified terminal artifact set as the English linear deformed view.
+    pub fn model_ir_linear_deformed_shape_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        projection: ModelTopologyProjectionV1,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        if self.session.analysis_profile != Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) {
+            return Err(WorkbenchError::new(
+                "workbench_profile_unsupported",
+                "ModelIR linear deformed view is available only for the ModelIR linear CPU profile",
+            ));
+        }
+        if self.session.stage < WorkbenchStageV1::Terminal {
+            return Err(WorkbenchError::new(
+                "workbench_transition_invalid",
+                format!(
+                    "terminal or later is required but the durable stage is {}",
+                    self.session.stage.label()
+                ),
+            ));
+        }
+        let terminal = self.root.join(RESUME_DIRECTORY);
+        verify_receipt_directory(&terminal, "run-receipt.json")?;
+        let result_bytes = read_bounded_regular_file(
+            &terminal.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &terminal.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes).map_err(|error| {
+            input_error("workbench_linear_deformed_view_result_invalid", &error)
+        })?;
+        let recovery =
+            parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes).map_err(|error| {
+                input_error("workbench_linear_deformed_view_recovery_invalid", &error)
+            })?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery).map_err(|error| {
+            input_error("workbench_linear_deformed_view_recovery_invalid", &error)
+        })?;
+        let model_bytes = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
+        let validation = validate_model_bytes(&model_bytes).map_err(|error| {
+            input_error("workbench_linear_deformed_view_validation_failed", &error)
+        })?;
+        if !validation.report.contract_valid || !validation.report.semantics_valid {
+            return Err(WorkbenchError::new(
+                "workbench_linear_deformed_view_model_invalid",
+                "native C++ validation rejected the immutable ModelIR",
+            ));
+        }
+        let model = parse_model_ir_v2(&model_bytes)
+            .map_err(|error| input_error("workbench_linear_deformed_view_model_invalid", &error))?;
+        if validation.report.model_id != model.model_id()
+            || validation.report.content_hash != model.content_hash()
+            || validation.report.semantic_hash != model.semantic_hash()
+            || validation.report.provenance_hash != model.provenance_hash()
+        {
+            return Err(WorkbenchError::new(
+                "workbench_linear_deformed_view_binding_mismatch",
+                "Rust ModelIR identities differ from the native C++ semantic validation report",
+            ));
+        }
+        linear_deformed_view::render_model_ir_linear_deformed_view(
+            &model,
+            result.result(),
+            recovery.recovery(),
+            locale,
+            projection,
+            scale,
+        )
+    }
+
     /// Return a deterministic bounded window over verified `ModelIR` linear constrained reactions.
     ///
     /// The view maps each global constrained DOF back to the immutable `ModelIR` node identifier,
@@ -2117,6 +2222,57 @@ impl NativeWorkbench {
         let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
             .map_err(|error| input_error("workbench_result_view_result_invalid", &error))?;
         result_view::render_ndtha_response_view(result.result(), locale, channel, start_step, count)
+    }
+
+    /// Return the deterministic deformed-shape surface for the durable analysis profile.
+    ///
+    /// Legacy sessions retain the exact fixed-guided NDTHA selected-step projection. Explicit
+    /// `model_ir_linear_cpu_v1` sessions use the one terminal linear-static state and require an
+    /// omitted step or step 1.
+    ///
+    /// # Errors
+    ///
+    /// Rejects a profile-incompatible step and otherwise preserves the selected profile surface's
+    /// receipt, identity, result, topology, and scale checks.
+    pub fn deformed_shape_view_text(
+        &self,
+        projection: ModelTopologyProjectionV1,
+        step: Option<u32>,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        self.deformed_shape_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            projection,
+            step,
+            scale,
+        )
+    }
+
+    /// Return the localized deterministic deformed-shape surface for the durable profile.
+    ///
+    /// # Errors
+    ///
+    /// Applies the same closed profile and artifact checks as the English surface.
+    pub fn deformed_shape_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        projection: ModelTopologyProjectionV1,
+        step: Option<u32>,
+        scale: f64,
+    ) -> Result<String, WorkbenchError> {
+        match self.session.analysis_profile {
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
+                if step.is_some_and(|value| value != 1) {
+                    return Err(WorkbenchError::new(
+                        "workbench_deformed_view_step_invalid",
+                        "ModelIR linear static deformed view has exactly one terminal state; step must be 1",
+                    ));
+                }
+                self.model_ir_linear_deformed_shape_view_text_localized(locale, projection, scale)
+            }
+            None => self
+                .fixed_guided_deformed_shape_view_text_localized(locale, projection, step, scale),
+        }
     }
 
     /// Return a deterministic original/deformed overlay for the executed fixed-guided profile.

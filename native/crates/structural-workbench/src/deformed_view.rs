@@ -14,8 +14,8 @@ pub(crate) const DEFORMED_VIEW_SCHEMA_V1: &str =
     "structural-native-workbench-fixed-guided-deformed-view.v1";
 pub const WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1: f64 = 1_000.0;
 pub const WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1: f64 = 1_000_000.0;
-const VIEW_WIDTH: usize = 73;
-const VIEW_HEIGHT: usize = 25;
+pub(crate) const VIEW_WIDTH: usize = 73;
+pub(crate) const VIEW_HEIGHT: usize = 25;
 const VIEW_MAX_COLUMN_F64: f64 = 72.0;
 const VIEW_MAX_ROW_F64: f64 = 24.0;
 const CLAIM_BOUNDARY: &str = "exact_executed_fixed_guided_frame3d_x_profile_selected_step_global_x_top_displacement_overlay_not_general_nodal_displacement_3d_modal_contour_engineering_acceptance_or_design_code_compliance";
@@ -411,7 +411,7 @@ fn deformed_view_labels(locale: WorkbenchReportLocaleV1) -> DeformedViewLabels {
     }
 }
 
-fn validate_scale(scale: f64) -> Result<(), WorkbenchError> {
+pub(crate) fn validate_scale(scale: f64) -> Result<(), WorkbenchError> {
     if !scale.is_finite() || scale <= 0.0 || scale > WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1 {
         return Err(view_error(
             "workbench_deformed_view_scale_invalid",
@@ -517,7 +517,7 @@ fn find_node(snapshot: &Value, id: &str) -> Result<[f64; 3], WorkbenchError> {
     Ok(coordinates)
 }
 
-fn project_points(
+pub(crate) fn project_points(
     points: &[[f64; 3]],
     projection: ModelTopologyProjectionV1,
 ) -> Vec<(usize, usize)> {
@@ -574,7 +574,7 @@ fn bounded_cell(value: f64, maximum: f64) -> usize {
     value.round().clamp(0.0, maximum) as usize
 }
 
-fn draw_segment(
+pub(crate) fn draw_segment(
     canvas: &mut [Vec<char>],
     first: (usize, usize),
     second: (usize, usize),

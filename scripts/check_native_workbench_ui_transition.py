@@ -409,6 +409,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_modelir_linear_deformed_shape_view_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_modelir_linear_constrained_reaction_view_en_us_ko_kr": (
         "c5_implemented",
         False,
@@ -1078,6 +1082,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "pub fn ndtha_response_view_text_localized",
             "pub fn fixed_guided_deformed_shape_view_text",
             "pub fn fixed_guided_deformed_shape_view_text_localized",
+            "pub fn model_ir_linear_deformed_shape_view_text",
+            "pub fn model_ir_linear_deformed_shape_view_text_localized",
+            "pub fn deformed_shape_view_text_localized",
             "render_model_topology_view_file_localized",
             "render_model_topology_view_localized",
             "pub fn publish_review",
@@ -1189,6 +1196,26 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "C++ 고정-가이드 어댑터 실행",
             'semantic_snapshot_value: "verified"',
             "not_general_nodal_displacement_3d_modal_contour",
+        ),
+        blockers,
+    )
+    native_linear_deformed_view = _text(
+        root,
+        Path("native/crates/structural-workbench/src/linear_deformed_view.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/linear_deformed_view.rs"),
+        native_linear_deformed_view,
+        (
+            "structural-native-workbench-model-ir-linear-deformed-view.v1",
+            "MAX_VIEW_NODES",
+            "MAX_VIEW_ELEMENTS",
+            "UX/UY/UZ translational displacement in m",
+            "RX/RY/RZ are reported in rad but are not applied",
+            "bounded linear deformed view supports only two-node elements",
+            "workbench_linear_deformed_view_unsafe",
+            "not_member_curvature_rigid_offset_rotation_stress_contour_modal",
         ),
         blockers,
     )
@@ -3188,6 +3215,29 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         ),
         blockers,
     )
+    linear_deformed_view_doc = _text(
+        root,
+        Path("docs/native/modelir-linear-deformed-shape-view-v1.md"),
+        blockers,
+    )
+    _require_tokens(
+        Path("docs/native/modelir-linear-deformed-shape-view-v1.md"),
+        linear_deformed_view_doc,
+        (
+            "structural-workbench result-deformed-view",
+            "model_ir_linear_cpu_v1",
+            "native C++",
+            "UX/UY/UZ translational displacement",
+            "RX/RY/RZ in radians",
+            "at most 512 nodes and 1,024 two-node elements",
+            "strict ModelIR and normalized MGT linear workflows",
+            "Installed static/shared successor distribution",
+            "interactive 3D",
+            "approved HIP C2",
+            "C6 remain open",
+        ),
+        blockers,
+    )
     transition_doc = _text(
         root, Path("docs/native/workbench-ui-transition-v1.md"), blockers
     )
@@ -3201,6 +3251,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "bounded embedded-font PDF export is C5-implemented",
             "bounded NDTHA response-history view is C5-implemented",
             "fixed-guided deformed-shape view is C5-implemented",
+            "ModelIR-linear deformed-shape view is C5-implemented",
             "localized NDTHA result views are C5-implemented",
             "model-edit-model-identity",
             "model-edit-nodal-load",
@@ -3340,7 +3391,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, "
         "frame3d-section, truss3d-section and fixed-constraint deletion, "
         "family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR "
-        "ModelIR-linear nodal-displacement and constrained-reaction views, algebraic "
+        "ModelIR-linear nodal-displacement, bounded deformed-centerline and constrained-reaction "
+        "views, algebraic "
         "global-resultant reaction audit, and installed distribution v87/rootfs v10 "
         "nodal-displacement evidence"
     )
@@ -3353,7 +3405,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity, plus one last-neutral depth-eight/64-leaf acyclic nested linear-load-combination deletion with v3 root/expanded-term provenance, retained child-combination CPU execution, exact active load [0,-12000,5000,0,0,0], typed recovery and checkpoint/restart parity",
         "one bounded direct linear-load-combination single-factor edit preserving reference kind/identity/order/count with exact active load [25000,-13500,5000,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
         "one bounded nested linear-load-combination typed-root-factor edit preserving root reference kind/identity/order/count and every descendant, binding source/edited depth-eight/64-leaf expansions with exact active load [25000,-9000,3750,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
-        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR ModelIR-linear nodal-displacement and constrained-reaction views, algebraic global-resultant reaction audit, and installed distribution v87/rootfs v10 nodal-displacement evidence",
+        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR ModelIR-linear nodal-displacement, bounded deformed-centerline and constrained-reaction views, algebraic global-resultant reaction audit, and installed distribution v87/rootfs v10 nodal-displacement evidence",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

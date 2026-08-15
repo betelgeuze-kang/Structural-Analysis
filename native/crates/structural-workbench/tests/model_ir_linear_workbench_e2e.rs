@@ -305,6 +305,14 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
     let validated_session =
         fs::read(restarted.join("workbench-session.json")).expect("validated session");
+    let premature_deformed_view = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_eq!(premature_deformed_view.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&premature_deformed_view.stdout)
+        .contains("workbench_transition_invalid"));
     assert_success(&run_workbench(&[
         text("run"),
         text("--workspace"),
@@ -597,6 +605,177 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         assert_eq!(rejected.status.code(), Some(2));
     }
 
+    let deformed_view_arguments = [
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--projection"),
+        text("xy"),
+        text("--scale"),
+        text("1000"),
+    ];
+    let deformed_view_first = run_workbench(&deformed_view_arguments);
+    let deformed_view_second = run_workbench(&deformed_view_arguments);
+    assert_success(&deformed_view_first);
+    assert_eq!(deformed_view_first.stdout, deformed_view_second.stdout);
+    assert!(!deformed_view_first.stdout.contains(&0x1b));
+    let direct_deformed_view = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--projection"),
+        text("xy"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    assert_success(&direct_deformed_view);
+    assert_eq!(deformed_view_first.stdout, direct_deformed_view.stdout);
+    let explicit_state = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--projection"),
+        text("xy"),
+        text("--step"),
+        text("1"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    assert_success(&explicit_state);
+    assert_eq!(deformed_view_first.stdout, explicit_state.stdout);
+    let deformed_view =
+        String::from_utf8(deformed_view_first.stdout).expect("ASCII linear deformed view");
+    assert!(deformed_view.starts_with("Structural ModelIR Linear Workbench - Deformed Shape\n"));
+    assert!(deformed_view
+        .contains("Schema: structural-native-workbench-model-ir-linear-deformed-view.v1\n"));
+    assert!(deformed_view.contains("Locale: en-US\n"));
+    assert!(deformed_view.contains("Projection: xy\n"));
+    assert!(deformed_view.contains("Selected state: 1 of 1 (terminal linear static)\n"));
+    assert!(deformed_view.contains("Visual magnification: 1.00000000000000000e3\n"));
+    assert!(deformed_view.contains("Inventory: nodes=2 elements=1\n"));
+    assert!(deformed_view.contains(&format!(
+        "Backend: cpu / fp64 / ABI {} / fallback 0\n",
+        result["backend_receipt"]["abi_version"]
+            .as_str()
+            .expect("sparse ABI version")
+    )));
+    assert!(deformed_view.contains(
+        "Rotation treatment: RX/RY/RZ are reported in rad but are not applied to centerline coordinates\n"
+    ));
+    for hash in [
+        recovery["source_result_hash"]
+            .as_str()
+            .expect("source result hash"),
+        recovery["recovery_hash"].as_str().expect("recovery hash"),
+        recovery["analysis_request_hash"]
+            .as_str()
+            .expect("analysis request hash"),
+        recovery["assembly_hash"].as_str().expect("assembly hash"),
+        recovery["model_identity"]["content_hash"]
+            .as_str()
+            .expect("model content hash"),
+        recovery["model_identity"]["semantic_hash"]
+            .as_str()
+            .expect("model semantic hash"),
+        recovery["model_identity"]["provenance_hash"]
+            .as_str()
+            .expect("model provenance hash"),
+        result["identity"]["request_hash"]
+            .as_str()
+            .expect("sparse request hash"),
+        result["identity"]["model_hash"]
+            .as_str()
+            .expect("sparse model hash"),
+        result["identity"]["state_hash"]
+            .as_str()
+            .expect("state hash"),
+        result["identity"]["execution_hash"]
+            .as_str()
+            .expect("execution hash"),
+        result["identity"]["checkpoint_hash"]
+            .as_str()
+            .expect("checkpoint hash"),
+    ] {
+        assert!(deformed_view.contains(hash));
+    }
+    let tip_displacement = (0..6)
+        .map(|offset| {
+            recovery["global_displacement"][6 + offset]
+                .as_f64()
+                .expect("tip displacement component")
+        })
+        .collect::<Vec<_>>();
+    let expected_tip_prefix = format!(
+        "  000002 N2 original_xyz_m=[{:+.17e},{:+.17e},{:+.17e}] translation_m=[{:+.17e},{:+.17e},{:+.17e}] rotation_rad=[{:+.17e},{:+.17e},{:+.17e}] magnified_xyz_m=[{:+.17e},{:+.17e},{:+.17e}]",
+        2.0,
+        0.0,
+        0.0,
+        tip_displacement[0],
+        tip_displacement[1],
+        tip_displacement[2],
+        tip_displacement[3],
+        tip_displacement[4],
+        tip_displacement[5],
+        2.0 + tip_displacement[0] * 1_000.0,
+        tip_displacement[1] * 1_000.0,
+        tip_displacement[2] * 1_000.0,
+    );
+    assert!(deformed_view
+        .lines()
+        .any(|line| line.starts_with(&expected_tip_prefix)));
+    assert!(deformed_view.contains("  000001 E1 element_index=0000000000 frame_3d N1 -> N2\n"));
+    let (unsigned, hash_line) = deformed_view
+        .rsplit_once("View hash: ")
+        .expect("linear deformed view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_deformed_first = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--projection"),
+        text("xy"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    let korean_deformed_second = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--projection"),
+        text("xy"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    assert_success(&korean_deformed_first);
+    assert_eq!(korean_deformed_first.stdout, korean_deformed_second.stdout);
+    assert_ne!(korean_deformed_first.stdout, deformed_view.as_bytes());
+    assert!(!korean_deformed_first.stdout.contains(&0x1b));
+    let korean_deformed =
+        String::from_utf8(korean_deformed_first.stdout).expect("Korean linear deformed view UTF-8");
+    assert!(korean_deformed.starts_with("Structural ModelIR 선형 Workbench - 변형 형상\n"));
+    assert!(korean_deformed.contains("로케일: ko-KR\n"));
+    assert!(korean_deformed.contains("선택 상태: 1 of 1 (terminal linear static)\n"));
+    let (unsigned, hash_line) = korean_deformed
+        .rsplit_once("보기 해시: ")
+        .expect("Korean linear deformed view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let invalid_linear_step = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step"),
+        text("2"),
+    ]);
+    assert_eq!(invalid_linear_step.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&invalid_linear_step.stdout)
+        .contains("workbench_deformed_view_step_invalid"));
+
     let reaction_view_arguments = [
         text("reaction-view"),
         text("--workspace"),
@@ -867,7 +1046,7 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after reaction views"),
         session_before_result_surfaces,
-        "displacement/reaction view or audit mutated the durable session"
+        "displacement/deformed/reaction view or audit mutated the durable session"
     );
 
     let session_before_localized_export =
@@ -975,15 +1154,22 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     let mut tampered_recovery = recovery_bytes.clone();
     tampered_recovery[32] ^= 1;
     fs::write(&recovery_path, tampered_recovery).expect("tamper recovery");
-    let rejected = run_workbench(&[
-        text("nodal-displacement-view"),
-        text("--workspace"),
-        restarted.as_os_str(),
-    ]);
-    assert!(!rejected.status.success());
-    assert!(
-        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
-    );
+    for rejected in [
+        run_workbench(&[
+            text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+        run_workbench(&[
+            text("result-deformed-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+    ] {
+        assert!(!rejected.status.success());
+        assert!(String::from_utf8_lossy(&rejected.stdout)
+            .contains("workbench_artifact_inventory_mismatch"));
+    }
     fs::write(&recovery_path, &recovery_bytes).expect("restore recovery");
 
     let mut tampered_reaction = reaction_bytes.clone();
@@ -1083,6 +1269,14 @@ fn frozen_linear_workspace_without_reactions_retains_legacy_review_contract() {
             "Schema: structural-native-workbench-model-ir-linear-nodal-displacement-view.v1"
         )
     );
+    let deformed_available = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_success(&deformed_available);
+    assert!(String::from_utf8_lossy(&deformed_available.stdout)
+        .contains("Schema: structural-native-workbench-model-ir-linear-deformed-view.v1"));
 
     assert_success(&run_workbench(&stage_arguments("status", &workspace)));
     assert_success(&run_workbench(&[
@@ -1300,6 +1494,72 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
         .expect("Korean MGT displacement view hash line");
     assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
 
+    let deformed_arguments = [
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--projection"),
+        text("xz"),
+        text("--scale"),
+        text("1000"),
+    ];
+    let deformed_first = run_workbench(&deformed_arguments);
+    let deformed_second = run_workbench(&deformed_arguments);
+    assert_success(&deformed_first);
+    assert_eq!(deformed_first.stdout, deformed_second.stdout);
+    assert!(!deformed_first.stdout.contains(&0x1b));
+    let direct_deformed = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--projection"),
+        text("xz"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    assert_success(&direct_deformed);
+    assert_eq!(deformed_first.stdout, direct_deformed.stdout);
+    let deformed =
+        String::from_utf8(deformed_first.stdout).expect("MGT linear deformed view UTF-8");
+    assert!(
+        deformed.contains("Schema: structural-native-workbench-model-ir-linear-deformed-view.v1\n")
+    );
+    assert!(deformed.contains("Load pattern: LP_PUSH\n"));
+    assert!(deformed.contains("Projection: xz\n"));
+    assert!(deformed.contains("Inventory: nodes=2 elements=1\n"));
+    assert!(deformed.contains(&format!(
+        "translation_m=[{:+.17e}",
+        recovery["global_displacement"][6]
+            .as_f64()
+            .expect("MGT floor UX")
+    )));
+    let (unsigned, hash_line) = deformed
+        .rsplit_once("View hash: ")
+        .expect("MGT linear deformed view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_deformed = run_workbench(&[
+        text("result-deformed-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--projection"),
+        text("xz"),
+        text("--scale"),
+        text("1000"),
+    ]);
+    assert_success(&korean_deformed);
+    let korean_deformed =
+        String::from_utf8(korean_deformed.stdout).expect("Korean MGT deformed UTF-8");
+    assert!(korean_deformed.starts_with("Structural ModelIR 선형 Workbench - 변형 형상\n"));
+    assert!(korean_deformed.contains("로케일: ko-KR\n"));
+    assert!(korean_deformed.contains("요소 (2절점 중심선):\n"));
+    let (unsigned, hash_line) = korean_deformed
+        .rsplit_once("보기 해시: ")
+        .expect("Korean MGT deformed view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
     let audit_arguments = [
         text("reaction-audit"),
         text("--workspace"),
@@ -1351,7 +1611,7 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after MGT audits"),
         session_before_result_surfaces,
-        "MGT displacement/reaction surfaces mutated the durable session"
+        "MGT displacement/deformed/reaction surfaces mutated the durable session"
     );
 
     let mut tampered =
@@ -1363,14 +1623,22 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     assert!(
         String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_binding_mismatch")
     );
-    let rejected_displacement = run_workbench(&[
-        text("nodal-displacement-view"),
-        text("--workspace"),
-        restarted.as_os_str(),
-    ]);
-    assert!(!rejected_displacement.status.success());
-    assert!(String::from_utf8_lossy(&rejected_displacement.stdout)
-        .contains("workbench_mgt_import_binding_mismatch"));
+    for rejected_surface in [
+        run_workbench(&[
+            text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+        run_workbench(&[
+            text("result-deformed-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+    ] {
+        assert!(!rejected_surface.status.success());
+        assert!(String::from_utf8_lossy(&rejected_surface.stdout)
+            .contains("workbench_mgt_import_binding_mismatch"));
+    }
 
     fs::remove_dir_all(root).expect("cleanup");
 }

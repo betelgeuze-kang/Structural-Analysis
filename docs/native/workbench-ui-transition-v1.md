@@ -580,12 +580,14 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   ResultIR v1 has no `dt_s`, so the view preserves step indices and does not invent timestamps;
   `en-US` and `ko-KR` change labels only while exact values and provenance remain visible; general
   3D/deformed/modal/contour exploration remains open.
-- `result-deformed-view`: a deterministic self-hashed ANSI-free original/deformed overlay for the
-  exact executed fixed-guided one-story profile. It revalidates the immutable ModelIR through C++,
-  applies only a selected ResultIR top displacement in global X, records the visual magnification
-  and all provenance hashes, and fails closed outside the completed prefix. Its `en-US` and `ko-KR`
-  paths preserve the same numeric geometry and identities. It is not a general nodal-field, stress,
-  contour, modal, animation, or 3D-result surface.
+- `result-deformed-view`: a deterministic self-hashed ANSI-free original/deformed overlay selected
+  by the durable profile. The exact fixed-guided NDTHA profile retains its selected ResultIR top
+  displacement in global X. The ModelIR-linear profile C++-revalidates the immutable model, applies
+  exact UX/UY/UZ translations to every bounded node for its one terminal static state, overlays
+  original/deformed two-node centerlines, and reports RX/RY/RZ without applying rotations. Both
+  paths record visual magnification and all provenance hashes; `en-US` and `ko-KR` preserve the same
+  numeric geometry and identities. Element curvature/offsets, shells, stress, contour, modal,
+  animation, arbitrary topology and interactive 3D remain open.
 - `report-export-pdf`: a deterministic bounded embedded-font PDF export in `en-US` or `ko-KR`.
   It re-verifies the stored v1 report chain, embeds a renamed OFL-1.1 Type0/ToUnicode subset,
   publishes to a new directory, and leaves the Workbench unchanged. Fixed labels and printable
@@ -723,8 +725,9 @@ last-neutral nodal-load, linear-load-pattern and fixed-constraint deletions, and
 last-neutral-frame/truss-leaf deletion operations. It also provides bounded nodal-load, fixed-constraint,
 linear-static-pattern/first-load, stateless linear-elastic-material, frame/truss
 section construction, a C++-assembly-preflighted ModelIR linear CPU request creator, one
-bounded response-history table, and one exact-profile selected-step deformed-shape overlay, not a
-general visual model editor or arbitrary-nodal-field 3D result explorer.
+bounded response-history table, one exact-profile selected-step NDTHA overlay, and one bounded
+ModelIR-linear original/deformed two-node centerline overlay, not a general visual model editor or
+arbitrary-topology interactive 3D result explorer.
 The transition manifest now enumerates the compatible frame-element property editor, both truss
 editors, truss section/member authoring, last-neutral nodal-load, linear-load-pattern and fixed-constraint deletion, and
 both last-neutral frame/truss leaf deleters explicitly in its native command and feature inventories.
@@ -741,7 +744,7 @@ open.
 
 The bounded general-ModelIR terminal topology view is C5-implemented for the eight current positive
 profiles and all four fixed projections. It closes native semantic-snapshot geometry inspection,
-not solver selection/execution, perspective interaction, or deformed/modal/contour result
+not solver selection/execution, perspective interaction, or general deformed/modal/contour result
 exploration. The separate C++-revalidated node-coordinate, existing-nodal-load component,
 existing-restrained-DOF prescribed-value, existing-linear-elastic-material parameter, and
 existing frame/truss-section parameters, frame orientation, compatible frame/truss property
@@ -787,8 +790,16 @@ support design, general stress/contour/modal exploration, engineering acceptance
 
 The fixed-guided deformed-shape view is C5-implemented for the exact executed one-story adapter
 profile, four fixed projections, and a bounded visual magnification. It closes selected-step
-original/deformed inspection only; general nodal displacement fields, element curvature, stress,
+original/deformed inspection only; element curvature, stress,
 contour, modal, animation, and interactive 3D exploration remain open.
+
+The ModelIR-linear deformed-shape view is C5-implemented for strict ModelIR and exact normalized
+MGT CPU-linear workspaces, their one terminal static state, four fixed projections, all bounded
+nodes and two-node centerlines, and a bounded visual magnification. It applies exact UX/UY/UZ,
+reports but does not apply RX/RY/RZ, and proves direct/restart and en-US/ko-KR byte determinism.
+Arbitrary element topology, member curvature/offsets, shell surfaces, stress/contours, modal,
+animation and interactive 3D exploration remain open, so the composite visual parity row stays
+open.
 
 The localized NDTHA result views are C5-implemented for the closed `en-US` and `ko-KR` locale set.
 The locale changes only labels and operator guidance: exact response values, coordinates and all

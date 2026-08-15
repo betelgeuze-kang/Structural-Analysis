@@ -34,6 +34,9 @@ REQUIRED_TOKENS = {
         "linear_report_text",
         "model_ir_linear_nodal_displacement_view_text",
         "model_ir_linear_nodal_displacement_view_text_localized",
+        "model_ir_linear_deformed_shape_view_text",
+        "model_ir_linear_deformed_shape_view_text_localized",
+        "deformed_shape_view_text_localized",
         "model_ir_linear_reaction_view_text",
         "model_ir_linear_reaction_view_text_localized",
         "model_ir_linear_reaction_audit_text",
@@ -113,6 +116,19 @@ REQUIRED_TOKENS = {
         "C++ 고정-가이드 어댑터 실행",
         'semantic_snapshot_value: "verified"',
         "not_general_nodal_displacement_3d_modal_contour",
+    ),
+    "native/crates/structural-workbench/src/linear_deformed_view.rs": (
+        "structural-native-workbench-model-ir-linear-deformed-view.v1",
+        "MAX_VIEW_NODES",
+        "MAX_VIEW_ELEMENTS",
+        "validate_scale",
+        "UX/UY/UZ translational displacement in m",
+        "RX/RY/RZ are reported in rad but are not applied",
+        "bounded linear deformed view supports only two-node elements",
+        "workbench_linear_deformed_view_unsafe",
+        "Structural ModelIR Linear Workbench - Deformed Shape",
+        "Structural ModelIR 선형 Workbench - 변형 형상",
+        "not_member_curvature_rigid_offset_rotation_stress_contour_modal",
     ),
     "native/crates/structural-workbench/src/model_view.rs": (
         "structural-native-model-topology-view.v1",
@@ -457,6 +473,10 @@ REQUIRED_TOKENS = {
         "structural-native-workbench-model-ir-linear-nodal-displacement-view.v1",
         "Korean displacement view hash line",
         "MGT displacement view hash line",
+        "structural-native-workbench-model-ir-linear-deformed-view.v1",
+        "Korean linear deformed view hash line",
+        "MGT linear deformed view hash line",
+        "workbench_deformed_view_step_invalid",
         "frozen_linear_workspace_without_reactions_retains_legacy_review_contract",
         "structural-native-workbench-model-ir-linear-reaction-view.v1",
         "workbench_reaction_view_missing",
@@ -478,6 +498,7 @@ REQUIRED_TOKENS = {
         "bounded NDTHA response-history view",
         "constrained Reaction-view",
         "fixed-guided deformed-shape view",
+        "ModelIR-linear deformed-shape view",
         "embedded-font PDF export",
         "general ModelIR terminal topology view",
         "provenance-bound ModelIR node-coordinate edit",
@@ -502,6 +523,7 @@ REQUIRED_TOKENS = {
         "reaction-view",
         "Omitting `--locale` preserves the original `en-US` bytes",
         "append-only distribution v12 receipt",
+        "ModelIR-linear clean-environment E2E",
         "not WCAG conformance",
     ),
     "docs/native/modelir-linear-reaction-view-v1.md": (
@@ -536,6 +558,23 @@ REQUIRED_TOKENS = {
         "support-design",
         "approved HIP C2",
         "C6 authority",
+    ),
+    "docs/native/modelir-linear-deformed-shape-view-v1.md": (
+        "structural-workbench result-deformed-view",
+        "model_ir_linear_cpu_v1",
+        "native C++",
+        "UX/UY/UZ translational displacement",
+        "RX/RY/RZ in radians",
+        "73x25 ANSI-free",
+        "at most 512 nodes and 1,024 two-node elements",
+        "strict ModelIR and normalized MGT linear workflows",
+        "byte-identical direct/restart output",
+        "frozen pre-reaction",
+        "Installed static/shared successor distribution",
+        "element curvature",
+        "interactive 3D",
+        "approved HIP C2",
+        "C6 remain open",
     ),
     "docs/native/modelir-linear-reaction-audit-v1.md": (
         "structural-workbench reaction-audit",
@@ -1340,6 +1379,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     nodal_displacement_view_row: dict[str, object] = {}
+    linear_deformed_view_row: dict[str, object] = {}
     reaction_view_row: dict[str, object] = {}
     reaction_audit_row: dict[str, object] = {}
     try:
@@ -1370,6 +1410,9 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
         nodal_displacement_view_row = payload["capabilities"][
             "modelir_linear_nodal_displacement_view"
+        ]
+        linear_deformed_view_row = payload["capabilities"][
+            "modelir_linear_deformed_shape_view"
         ]
         reaction_view_row = payload["capabilities"]["modelir_linear_reaction_view"]
         reaction_audit_row = payload["capabilities"]["modelir_linear_reaction_audit"]
@@ -1410,6 +1453,35 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         if token not in nodal_displacement_view_claim:
             blockers.append(
                 f"native_workbench_nodal_displacement_view_claim_token_missing:{token}"
+            )
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if linear_deformed_view_row.get(field) != expected:
+            blockers.append(
+                f"native_workbench_linear_deformed_view_capability_invalid:{field}"
+            )
+    linear_deformed_view_claim = str(linear_deformed_view_row.get("claim", ""))
+    for token in (
+        "result-deformed-view",
+        "single static state",
+        "native C++ semantic boundary",
+        "UX/UY/UZ metre translations",
+        "reports but does not apply RX/RY/RZ radians",
+        "at most 512 original/deformed nodes plus 1024 two-node centerlines",
+        "fixed 73x25 isometric/xy/xz/yz",
+        "byte-identical strict-ModelIR and normalized-MGT direct/restart views",
+        "frozen pre-reaction compatibility",
+        "installed static/shared successor distribution",
+        "interactive 3D",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in linear_deformed_view_claim:
+            blockers.append(
+                f"native_workbench_linear_deformed_view_claim_token_missing:{token}"
             )
     for field, expected in (
         ("status", "implemented"),

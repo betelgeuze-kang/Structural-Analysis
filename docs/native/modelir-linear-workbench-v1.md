@@ -33,15 +33,18 @@ The restart proof models process death after atomic checkpoint publication.
    Markdown, then renders a deterministic PDF 1.7 page through the native sparse-report renderer.
    The stage receipt binds the source artifacts, PDF, renderer receipt, and all six hashes.
 7. `inspect`, English/Korean `report-view`, English/Korean bounded
-   `nodal-displacement-view`, English/Korean bounded `reaction-view`, English/Korean
-   `reaction-audit`, immutable explicit `review`, and `export` bind the exact session, result,
+   `nodal-displacement-view`, English/Korean bounded `result-deformed-view`, English/Korean bounded
+   `reaction-view`, English/Korean `reaction-audit`, immutable explicit `review`, and `export` bind the exact session, result,
    recovery, constrained reactions, comparison, ReportIR, document source, and PDF. Reaction-view
    re-verifies the source chain,
    maps each constrained global DOF to the immutable ModelIR node ID and fixed DOF label, exposes
    exact internal/external/reaction values and units in a self-hashed 1..256-row window, and never
    mutates the session. Nodal-displacement-view independently maps each verified six-component
    global displacement block to the immutable ModelIR node ID in a self-hashed 1..256-node window;
-   it remains available to frozen pre-reaction workspaces. Export preserves `reaction_result_ir`, `sparse_linear_pdf_report`, and
+   it remains available to frozen pre-reaction workspaces. Result-deformed-view C++-revalidates the
+   immutable ModelIR, applies the verified UX/UY/UZ values under a bounded visual magnification,
+   overlays every supported original/deformed two-node centerline, and reports but does not apply
+   RX/RY/RZ. Export preserves `reaction_result_ir`, `sparse_linear_pdf_report`, and
    `pdf_ready_document_source` as distinct artifacts. The separate `report-export-pdf` command
    revalidates the durable standard-font PDF and publishes an embedded-font localized sparse PDF
    in exactly `en-US` or `ko-KR` without mutating the session. Reaction-audit reconstructs the
@@ -78,6 +81,9 @@ structural-workbench reaction-audit --workspace SESSION --locale ko-KR
 
 structural-workbench nodal-displacement-view --workspace SESSION --locale ko-KR \
   --start-node 1 --count 64
+
+structural-workbench result-deformed-view --workspace SESSION --locale ko-KR \
+  --projection xy --step 1 --scale 1000
 ```
 
 ## Recovery and comparison contract

@@ -1095,6 +1095,29 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "public/customer distribution publication" in displacement_view["claim"]
     assert "HIP C2" in displacement_view["claim"]
     assert "C6" in displacement_view["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_linear_deformed_shape_view"
+        )
+        is True
+    )
+    deformed_view = payload["capabilities"]["modelir_linear_deformed_shape_view"]
+    assert deformed_view["cutover_gate"] == "C5"
+    assert deformed_view["owner"] == "structural-workbench"
+    assert "result-deformed-view" in deformed_view["claim"]
+    assert "single static state" in deformed_view["claim"]
+    assert "native C++ semantic boundary" in deformed_view["claim"]
+    assert "UX/UY/UZ metre translations" in deformed_view["claim"]
+    assert "reports but does not apply RX/RY/RZ radians" in deformed_view["claim"]
+    assert "at most 512 original/deformed nodes plus 1024 two-node centerlines" in deformed_view["claim"]
+    assert "fixed 73x25 isometric/xy/xz/yz" in deformed_view["claim"]
+    assert "byte-identical strict-ModelIR and normalized-MGT direct/restart views" in deformed_view["claim"]
+    assert "frozen pre-reaction compatibility" in deformed_view["claim"]
+    assert "installed static/shared successor distribution" in deformed_view["claim"]
+    assert "interactive 3D" in deformed_view["claim"]
+    assert "public/customer distribution publication" in deformed_view["claim"]
+    assert "HIP C2" in deformed_view["claim"]
+    assert "C6" in deformed_view["claim"]
 
 
 def test_native_evidence_bundle_capability_is_bounded_c5() -> None:

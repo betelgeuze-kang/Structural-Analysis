@@ -1074,7 +1074,7 @@ fn run_deformed_view(command: &DeformedViewCommand) -> Result<(), WorkbenchError
     let workbench = NativeWorkbench::open(&command.workspace)?;
     print!(
         "{}",
-        workbench.fixed_guided_deformed_shape_view_text_localized(
+        workbench.deformed_shape_view_text_localized(
             command.locale,
             command.projection,
             command.step,

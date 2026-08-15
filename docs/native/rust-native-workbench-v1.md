@@ -21,8 +21,10 @@ explicit language-neutral global-DOF mapping; and Report publishes verified Repo
 PDF-ready Markdown and a deterministic single-page sparse PDF. Inspect, English/Korean
 Report-view, English/Korean constrained Reaction-view, localized embedded-font PDF export,
 explicit Review, and Export are profile-aware. Reaction-view is linear-only; Result-view and
-Result-deformed-view remain NDTHA-only. Each wrong-profile call fails with
-`workbench_profile_unsupported`. See
+nodal-displacement-view are linear-only; Result-view remains NDTHA-only. Result-deformed-view is
+profile-aware: NDTHA retains its selected-step fixed-guided overlay, while ModelIR-linear renders
+the single terminal static state's bounded two-node centerline overlay. Unsupported profile/surface
+combinations fail with `workbench_profile_unsupported`. See
 `docs/native/modelir-linear-workbench-v1.md`.
 
 The independent `model-view` read-only surface is broader than that analysis profile. It strictly
@@ -371,10 +373,12 @@ assembly and generated sparse-request preflight used by execution before publish
    infinity norm. Output is windowed to at most 256 exact rows and uses the whole completed channel
    as a stable ASCII plot extent. It uses one-based step indices and does not invent time values
    because ResultIR v1 does not carry `dt_s`.
-11. `Result-deformed-view` re-verifies the immutable ModelIR through C++, binds the executed
-   fixed-guided adapter selectors to the terminal ResultIR, and overlays the original one-member
-   geometry with one selected step's global-X top displacement. Four closed projections and a
-   bounded presentation-only magnification are deterministic and ANSI-free.
+11. `Result-deformed-view` re-verifies the immutable ModelIR through C++ and selects a closed
+   profile surface. The legacy fixed-guided adapter binds one selected NDTHA step's global-X top
+   displacement. The ModelIR-linear profile binds the sparse result and typed recovery, applies
+   exact UX/UY/UZ translations to every supported node, and overlays original/deformed two-node
+   centerlines for its single terminal state while reporting unapplied RX/RY/RZ values. Four closed
+   projections and a bounded presentation-only magnification are deterministic and ANSI-free.
 12. `Catalog` browses the native-owned language-neutral benchmark catalog without executing its
    acquisition or runner strings. `Evidence` verifies and browses only a copied evidence bundle;
    it never reads protected source evidence or generates a readiness verdict.
@@ -544,6 +548,8 @@ structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
 structural-workbench result-deformed-view --workspace SESSION \
   --projection xz --step 2 --scale 250
+structural-workbench result-deformed-view --workspace LINEAR-SESSION \
+  --locale ko-KR --projection xy --step 1 --scale 1000
 structural-workbench report-export-pdf --workspace SESSION \
   --output-dir LOCALIZED-REPORT --locale ko-KR
 structural-workbench status --workspace SESSION
@@ -593,8 +599,8 @@ plus fixed English/Korean labels and is not arbitrary-Unicode coverage.
 The general ModelIR terminal topology view is a bounded native visual inspection alternative. Its
 fixed ASCII canvas and complete node/element tables are self-hashed, ANSI-free, and derive only
 from the C++-verified canonical snapshot. The view itself is read-only and is not a solver selector,
-deformed-result or modal explorer, graphical accessibility claim, or replacement for the remaining
-3D Workbench surface. Its closed `en-US`/`ko-KR` paths translate only fixed labels while retaining
+interactive deformed/modal explorer, graphical accessibility claim, or replacement for the
+remaining 3D Workbench surface. Its closed `en-US`/`ko-KR` paths translate only fixed labels while retaining
 the same canvas, topology, SI values, machine tokens and provenance; omitting `--locale` preserves
 the original English bytes. See `docs/native/modelir-terminal-topology-view-v1.md` and
 `docs/native/localized-modelir-topology-view-v1.md`.
@@ -652,7 +658,14 @@ self-hashed window. It does not infer a deformed shape, stress, contour, modal s
 support design, or engineering verdict; see
 `docs/native/modelir-linear-nodal-displacement-view-v1.md`.
 
-Both result views accept the closed `en-US`/`ko-KR` locale set. Their existing public methods and
+The ModelIR-linear deformed-shape view uses that same verified recovery to apply only UX/UY/UZ to
+the original node coordinates under a bounded visual magnification. It overlays original and
+deformed two-node centerlines, prints exact coordinates/components and preserves all execution
+identities. RX/RY/RZ are reported but not applied; element curvature, offsets, shell surfaces,
+stress/contours, serviceability and engineering acceptance remain outside the claim. See
+`docs/native/modelir-linear-deformed-shape-view-v1.md`.
+
+The terminal result views accept the closed `en-US`/`ko-KR` locale set. Their existing public methods and
 CLI defaults preserve the original English bytes; localized methods translate only fixed labels
 and guidance while retaining exact numeric and provenance fields. See
 `docs/native/localized-terminal-result-views-v1.md`.
@@ -701,7 +714,7 @@ publication, reconciles `03-run`, and completes Resume -> Compare -> Report. It 
 terminal ResultIR, recovery IR, ReportIR, Markdown, comparison, report-source receipts, and session
 bytes against a separate one-shot workflow, including the deterministic PDF and both PDF receipts.
 It also exercises Korean report view, immutable review, handoff export, PDF tamper rejection, and
-fail-closed NDTHA-only command dispatch. The original 14-test NDTHA E2E remains the compatibility
+fail-closed profile-incompatible command dispatch. The original 14-test NDTHA E2E remains the compatibility
 gate for omitted-profile session and receipt bytes.
 
 ## Claim boundary
@@ -716,9 +729,10 @@ general graphical accessibility/localization, arbitrary-Unicode or tagged PDF ou
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6
 removal remain open. The bounded English/Korean UTF-8 linear report view does not close those
 broader UI and document requirements, nor does the fixed-label embedded-font PDF v2 export.
-Likewise, the bounded response-history table and exact fixed-guided selected-step overlay do not
-close the remaining arbitrary-nodal-field, modal, contour, animation, or interactive 3D result
-exploration requirement.
+Likewise, the bounded response-history table, exact fixed-guided selected-step overlay and bounded
+ModelIR-linear two-node centerline overlay do not close the remaining arbitrary-topology,
+member-curvature, shell, stress, modal, contour, animation, or interactive 3D result exploration
+requirement.
 The exact ModelIR and MGT flows do run from the separately verified native install/update/rollback
 packages.
 
