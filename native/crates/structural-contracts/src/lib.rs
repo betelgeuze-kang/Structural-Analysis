@@ -14,6 +14,7 @@ pub mod model_ir;
 pub mod model_linear_comparison;
 pub mod model_linear_job;
 pub mod model_linear_product;
+pub mod model_linear_reactions;
 pub mod model_linear_recovery;
 pub mod product_ir;
 pub mod solver_cpu;

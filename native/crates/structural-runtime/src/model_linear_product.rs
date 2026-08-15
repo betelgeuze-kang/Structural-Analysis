@@ -4,14 +4,21 @@ use structural_contracts::model_ir::{canonicalize_model_ir_v2, ModelIrV2Document
 use structural_contracts::model_linear_product::{
     ModelIrLinearAnalysisRequestDocumentV1, MODEL_IR_LINEAR_MAXIMUM_RECOVERY_RECORDS,
 };
-use structural_contracts::product_ir::sha256_identity;
+use structural_contracts::model_linear_reactions::{
+    build_model_ir_linear_reaction_result_ir_v1, ModelIrLinearReactionProjectionV1,
+};
+use structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1;
+use structural_contracts::product_ir::{sha256_identity, ModelIrIdentityV1};
 use structural_contracts::sparse_product::{
     build_sparse_linear_request_v1, SparseLinearAnalysisRequestDocumentV1,
     SparseLinearAnalysisRequestV1, SparseLinearBackendV1, SparseLinearResultIrDocumentV1,
     SPARSE_LINEAR_MAXIMUM_NONZEROS, SPARSE_LINEAR_MAXIMUM_ORDER, SPARSE_LINEAR_REQUEST_V1,
 };
 
-use crate::{ModelIrLinearAssembly, ModelIrLinearAssemblyRequest, Runtime, RuntimeError};
+use crate::{
+    ModelIrLinearAssembly, ModelIrLinearAssemblyRequest, ModelIrLinearReactionRequest, Runtime,
+    RuntimeError,
+};
 
 /// Exact ABI assembly projection and derived sparse request shared by CLI and durable jobs.
 #[derive(Clone, Debug)]
@@ -20,6 +27,13 @@ pub struct PreparedModelIrLinearProductV1 {
     pub assembly_receipt_json: String,
     pub assembly_hash: String,
     pub generated_request: SparseLinearAnalysisRequestDocumentV1,
+}
+
+/// Exact legacy recovery and constrained-reaction artifacts from one terminal displacement.
+#[derive(Clone, Debug)]
+pub struct RecoveredModelIrLinearProductV1 {
+    pub result_recovery_json: String,
+    pub reaction_result_json: String,
 }
 
 impl Runtime {
@@ -48,13 +62,12 @@ impl Runtime {
         })
     }
 
-    /// Re-enter ABI v1.13 at a converged displacement and construct exact recovery bytes.
+    /// Re-enter the current ABI at a converged displacement and return legacy recovery bytes.
     ///
     /// # Errors
     ///
     /// Returns a stable runtime error for result/map drift, native recovery failure, nonfinite
     /// output, or any immutable operator and same-source JVP invariant violation.
-    #[allow(clippy::too_many_lines)]
     pub fn recover_model_ir_linear_product(
         &self,
         document: &ModelIrV2Document,
@@ -62,6 +75,25 @@ impl Runtime {
         prepared: &PreparedModelIrLinearProductV1,
         result: &SparseLinearResultIrDocumentV1,
     ) -> Result<String, RuntimeError> {
+        Ok(self
+            .recover_model_ir_linear_product_artifacts(document, request, prepared, result)?
+            .result_recovery_json)
+    }
+
+    /// Re-enter ABI v1.14 once and construct exact active-recovery and reaction artifacts.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable runtime error for result/map drift, native recovery failure, nonfinite
+    /// output, immutable operator drift, reaction sign drift, or source/checkpoint identity drift.
+    #[allow(clippy::too_many_lines)]
+    pub fn recover_model_ir_linear_product_artifacts(
+        &self,
+        document: &ModelIrV2Document,
+        request: &ModelIrLinearAnalysisRequestDocumentV1,
+        prepared: &PreparedModelIrLinearProductV1,
+        result: &SparseLinearResultIrDocumentV1,
+    ) -> Result<RecoveredModelIrLinearProductV1, RuntimeError> {
         let initial = &prepared.assembly;
         let global_count = usize::try_from(initial.global_dof_count).map_err(|_| {
             product_error("ModelIR linear global DOF count exceeds the address space")
@@ -81,12 +113,17 @@ impl Runtime {
             })?;
             *slot = *value;
         }
-        let recovered = self.assemble_model_ir_linear_state(
+        let load_pattern_id = request.request().load_pattern_id.clone();
+        let (recovered, reactions) = Self::assemble_model_ir_linear_state_with_reactions(
             document,
             &ModelIrLinearAssemblyRequest {
-                load_pattern_id: request.request().load_pattern_id.clone(),
+                load_pattern_id: load_pattern_id.clone(),
                 direction: try_clone_slice(&global_displacement, "recovery direction")?,
                 displacement: try_clone_slice(&global_displacement, "global displacement")?,
+            },
+            &ModelIrLinearReactionRequest {
+                load_pattern_id,
+                displacement: try_clone_slice(&global_displacement, "reaction displacement")?,
             },
         )?;
         verify_recovered_operator(initial, &recovered)?;
@@ -163,7 +200,31 @@ impl Runtime {
                 "recovery_hash".to_owned(),
                 Value::String(sha256_identity(unsigned.as_bytes())),
             );
-        canonicalize_value(&value, "recovery")
+        let result_recovery_json = canonicalize_value(&value, "recovery")?;
+        let source_recovery =
+            parse_model_ir_linear_result_recovery_ir_v1(result_recovery_json.as_bytes())?;
+        let reaction_result = build_model_ir_linear_reaction_result_ir_v1(
+            result,
+            &source_recovery,
+            ModelIrLinearReactionProjectionV1 {
+                model_identity: ModelIrIdentityV1 {
+                    content_hash: reactions.model_content_hash,
+                    semantic_hash: reactions.model_semantic_hash,
+                    provenance_hash: reactions.model_provenance_hash,
+                },
+                load_pattern_index: reactions.load_pattern_index,
+                global_dof_count: reactions.global_dof_count,
+                constrained_dof_indices: reactions.constrained_dof_indices,
+                constrained_internal_force: reactions.constrained_internal_force,
+                constrained_external_load: reactions.constrained_external_load,
+                reactions: reactions.reactions,
+                fallback_count: reactions.fallback_count,
+            },
+        )?;
+        Ok(RecoveredModelIrLinearProductV1 {
+            result_recovery_json,
+            reaction_result_json: reaction_result.canonical_json().to_owned(),
+        })
     }
 }
 

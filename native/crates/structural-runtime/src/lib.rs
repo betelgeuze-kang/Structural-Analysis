@@ -25,7 +25,7 @@ pub use model_checkpoint::{
 pub use model_linear_checkpoint::{
     ModelIrLinearCheckpointBindingsV1, ModelIrLinearCheckpointReceiptV1, ModelIrLinearCheckpointV1,
 };
-pub use model_linear_product::PreparedModelIrLinearProductV1;
+pub use model_linear_product::{PreparedModelIrLinearProductV1, RecoveredModelIrLinearProductV1};
 pub use sparse_checkpoint::{SparseLinearCheckpointReceiptV1, SparseLinearCheckpointV1};
 pub use spectral_checkpoint::{DenseSpectralCheckpointReceiptV1, DenseSpectralCheckpointV1};
 pub use static_checkpoint::{NonlinearStaticCheckpointReceiptV1, NonlinearStaticCheckpointV1};
@@ -60,7 +60,8 @@ use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
     DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrLinearAssembly,
-    ModelIrLinearAssemblyRequest, ModelIrLinearAssemblySizes, ModelIrNdthaAdaptedProblem,
+    ModelIrLinearAssemblyRequest, ModelIrLinearAssemblySizes, ModelIrLinearReactionRequest,
+    ModelIrLinearReactionSizes, ModelIrLinearReactions, ModelIrNdthaAdaptedProblem,
     ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
     ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
     NonlinearStaticExecutionStatus, NonlinearStaticRestartState, SparseCsrMatrix,
@@ -531,6 +532,47 @@ impl Runtime {
             .map_err(RuntimeError::from)
     }
 
+    /// Recover active and constrained projections from one immutable v1.14 model handle.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable runtime error for table negotiation, graph bounds, state drift, native
+    /// execution, or either caller-owned output contract.
+    pub(crate) fn assemble_model_ir_linear_state_with_reactions(
+        document: &ModelIrV2Document,
+        assembly_request: &ModelIrLinearAssemblyRequest,
+        reaction_request: &ModelIrLinearReactionRequest,
+    ) -> Result<(ModelIrLinearAssembly, ModelIrLinearReactions), RuntimeError> {
+        if assembly_request.load_pattern_id != reaction_request.load_pattern_id
+            || assembly_request.displacement.len() != reaction_request.displacement.len()
+            || assembly_request
+                .displacement
+                .iter()
+                .zip(&reaction_request.displacement)
+                .any(|(left, right)| left.to_bits() != right.to_bits())
+        {
+            return Err(RuntimeError {
+                code: 1100,
+                message: "ModelIR linear active and reaction requests differ".to_owned(),
+            });
+        }
+        let model = Api::load_model_ir_linear_reactions()
+            .map_err(RuntimeError::from)?
+            .create_model_ir(document)
+            .map_err(RuntimeError::from)?;
+        let assembly_sizes = model.linear_assembly_sizes().map_err(RuntimeError::from)?;
+        validate_model_ir_linear_product_sizes(assembly_sizes)?;
+        let reaction_sizes = model.linear_reaction_sizes().map_err(RuntimeError::from)?;
+        validate_model_ir_linear_reaction_product_sizes(assembly_sizes, reaction_sizes)?;
+        let assembly = model
+            .assemble_linear_reference(assembly_request)
+            .map_err(RuntimeError::from)?;
+        let reactions = model
+            .recover_linear_reactions(reaction_request)
+            .map_err(RuntimeError::from)?;
+        Ok((assembly, reactions))
+    }
+
     /// Create a validated zero state for a bounded nonlinear NDTHA execution.
     ///
     /// # Errors
@@ -771,6 +813,30 @@ fn validate_model_ir_linear_product_sizes(
         Err(RuntimeError {
             code: 1100,
             message: "ModelIR linear graph exceeds the bounded sparse product allocation limits"
+                .to_owned(),
+        })
+    }
+}
+
+fn validate_model_ir_linear_reaction_product_sizes(
+    assembly: ModelIrLinearAssemblySizes,
+    reactions: ModelIrLinearReactionSizes,
+) -> Result<(), RuntimeError> {
+    let constrained_count = assembly
+        .global_dof_count
+        .checked_sub(assembly.active_dof_count);
+    let bounded = assembly.global_dof_count > 0
+        && assembly.global_dof_count <= 1_000_000
+        && constrained_count.is_some_and(|count| count > 0)
+        && reactions.global_dof_count == assembly.global_dof_count
+        && Some(reactions.constrained_dof_count) == constrained_count
+        && reactions.model_identity_length == assembly.model_identity_length;
+    if bounded {
+        Ok(())
+    } else {
+        Err(RuntimeError {
+            code: 1100,
+            message: "ModelIR linear reaction graph exceeds the bounded product allocation limits"
                 .to_owned(),
         })
     }

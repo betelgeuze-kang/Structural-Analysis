@@ -8,6 +8,12 @@ use structural_cli::{
     execute_model_ir_linear_analysis, validate_model_ir_linear_analysis_compatibility,
 };
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
+use structural_contracts::model_linear_reactions::{
+    parse_model_ir_linear_reaction_result_ir_v1, verify_model_ir_linear_reaction_result_v1,
+};
+use structural_contracts::model_linear_recovery::{
+    parse_model_ir_linear_result_recovery_ir_v1, verify_model_ir_linear_result_recovery_v1,
+};
 use structural_contracts::product_ir::sha256_identity;
 use structural_contracts::sparse_product::{
     parse_sparse_linear_report_ir_v1, parse_sparse_linear_result_ir_v1,
@@ -261,6 +267,10 @@ fn bounded_two_pattern_combination_executes_and_restarts_exactly() {
         resumed.result_recovery_ir_json(),
         direct.result_recovery_ir_json()
     );
+    assert_eq!(
+        resumed.reaction_result_ir_json(),
+        direct.reaction_result_ir_json()
+    );
     assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
 
     let direct_pattern_request = rebound_request_bytes(&model, "LC_WEAK", 100);
@@ -332,6 +342,10 @@ fn bounded_three_pattern_direct_combination_executes_and_restarts_exactly() {
         resumed.result_recovery_ir_json(),
         direct.result_recovery_ir_json()
     );
+    assert_eq!(
+        resumed.reaction_result_ir_json(),
+        direct.reaction_result_ir_json()
+    );
     assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
 }
 
@@ -377,6 +391,10 @@ fn bounded_nested_combination_executes_and_restarts_exactly() {
     assert_eq!(
         resumed.result_recovery_ir_json(),
         direct.result_recovery_ir_json()
+    );
+    assert_eq!(
+        resumed.reaction_result_ir_json(),
+        direct.reaction_result_ir_json()
     );
     assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
 }
@@ -433,6 +451,7 @@ fn clean_environment_direct_and_real_iteration_resume_are_byte_identical() {
     assert!(partial.join("checkpoint.pcgcp").is_file());
     assert!(!partial.join("result-ir.json").exists());
     assert!(!partial.join("result-recovery-ir.json").exists());
+    assert!(!partial.join("reaction-result-ir.json").exists());
 
     let output = run(&[
         text("analysis"),
@@ -462,6 +481,7 @@ fn clean_environment_direct_and_real_iteration_resume_are_byte_identical() {
         "sparse-run-receipt.json",
         "result-ir.json",
         "result-recovery-ir.json",
+        "reaction-result-ir.json",
         "report-ir.json",
         "report.md",
         "run-receipt.json",
@@ -483,6 +503,13 @@ fn clean_environment_direct_and_real_iteration_resume_are_byte_identical() {
     .expect("strict ReportIR");
     assert_eq!(report.report().source_result_hash, result.result_hash());
     assert_eq!(result.result().backend_receipt.fallback_count, 0);
+    assert_eq!(
+        direct_receipt["artifacts"]
+            .as_array()
+            .expect("artifact inventory")
+            .len(),
+        14
+    );
 
     let assembly: Value = serde_json::from_slice(
         &fs::read(direct.join("assembly-receipt.json")).expect("assembly receipt"),
@@ -517,6 +544,33 @@ fn clean_environment_direct_and_real_iteration_resume_are_byte_identical() {
             .expect("residual")
             <= 1.0e-8
     );
+    let recovery_document = parse_model_ir_linear_result_recovery_ir_v1(
+        &fs::read(direct.join("result-recovery-ir.json")).expect("recovery bytes"),
+    )
+    .expect("strict recovery IR");
+    verify_model_ir_linear_result_recovery_v1(&result, &recovery_document)
+        .expect("recovery binds exact sparse result");
+    let reaction_bytes =
+        fs::read(direct.join("reaction-result-ir.json")).expect("reaction ResultIR");
+    let reaction = parse_model_ir_linear_reaction_result_ir_v1(&reaction_bytes)
+        .expect("strict reaction ResultIR");
+    verify_model_ir_linear_reaction_result_v1(&result, &recovery_document, &reaction)
+        .expect("reaction binds exact sparse result and recovery");
+    assert_eq!(
+        reaction.result().constrained_dof_indices,
+        [0, 1, 2, 3, 4, 5]
+    );
+    assert_eq!(
+        reaction.result().reactions,
+        [0.0, 10_000.0, 0.0, 0.0, 0.0, 20_000.0]
+    );
+    assert_eq!(reaction.result().identity, result.result().identity);
+    assert_eq!(
+        reaction.result().source_recovery_hash,
+        recovery_document.recovery_hash()
+    );
+    assert_eq!(reaction.result().backend_receipt.fallback_count, 0);
+    assert_eq!(reaction.result().backend_receipt.abi_version, "0x0001000e");
     fs::remove_dir_all(root).expect("cleanup");
 }
 
@@ -582,6 +636,7 @@ fn numerical_failure_publishes_both_terminal_checkpoints_without_result_files() 
     assert!(failed.join("checkpoint.pcgcp").is_file());
     assert!(!failed.join("result-ir.json").exists());
     assert!(!failed.join("result-recovery-ir.json").exists());
+    assert!(!failed.join("reaction-result-ir.json").exists());
     assert!(!failed.join("report-ir.json").exists());
     fs::remove_dir_all(root).expect("cleanup");
 }

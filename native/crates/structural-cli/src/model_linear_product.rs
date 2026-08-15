@@ -6,14 +6,19 @@ use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError, Mo
 use structural_contracts::model_linear_product::{
     parse_model_ir_linear_analysis_request_v1, ModelIrLinearAnalysisRequestDocumentV1,
 };
+use structural_contracts::model_linear_reactions::{
+    parse_model_ir_linear_reaction_result_ir_v1, verify_model_ir_linear_reaction_result_v1,
+};
 use structural_contracts::model_linear_recovery::{
     parse_model_ir_linear_result_recovery_ir_v1, verify_model_ir_linear_result_recovery_v1,
 };
 use structural_contracts::product_ir::{sha256_identity, ProductIrContractError};
-use structural_contracts::sparse_product::SparseLinearAnalysisRequestDocumentV1;
+use structural_contracts::sparse_product::{
+    SparseLinearAnalysisRequestDocumentV1, SparseLinearResultIrDocumentV1,
+};
 use structural_runtime::{
     ModelIrLinearCheckpointBindingsV1, ModelIrLinearCheckpointReceiptV1, ModelIrLinearCheckpointV1,
-    Runtime, RuntimeError,
+    PreparedModelIrLinearProductV1, Runtime, RuntimeError,
 };
 
 use crate::product::{artifact_entry, canonicalize_value, publish_artifact_directory};
@@ -99,6 +104,7 @@ pub struct ModelIrLinearAnalysisOutcomeV1 {
     checkpoint_receipt_json: String,
     sparse_outcome: SparseLinearRunOutcomeV1,
     result_recovery_json: Option<String>,
+    reaction_result_json: Option<String>,
     run_receipt_json: String,
 }
 
@@ -136,6 +142,11 @@ impl ModelIrLinearAnalysisOutcomeV1 {
     }
 
     #[must_use]
+    pub fn reaction_result_ir_json(&self) -> Option<&str> {
+        self.reaction_result_json.as_deref()
+    }
+
+    #[must_use]
     pub fn report_ir_json(&self) -> Option<&str> {
         self.sparse_outcome.report_ir_json()
     }
@@ -152,7 +163,9 @@ impl ModelIrLinearAnalysisOutcomeV1 {
 
     #[must_use]
     pub fn is_complete(&self) -> bool {
-        self.sparse_outcome.is_complete() && self.result_recovery_json.is_some()
+        self.sparse_outcome.is_complete()
+            && self.result_recovery_json.is_some()
+            && self.reaction_result_json.is_some()
     }
 }
 
@@ -246,30 +259,14 @@ pub fn execute_model_ir_linear_analysis(
         })?,
         "model_ir_linear_checkpoint_receipt_canonicalization_failed",
     )?;
-    let result_recovery_json = sparse_outcome
+    let recovered_artifacts = sparse_outcome
         .result_ir()
-        .map(|result| -> Result<String, ModelIrLinearProductError> {
-            let recovery = runtime
-                .recover_model_ir_linear_product(&document, &request, &prepared, result)
-                .map_err(ModelIrLinearProductError::from)?;
-            let parsed = parse_model_ir_linear_result_recovery_ir_v1(recovery.as_bytes())?;
-            verify_model_ir_linear_result_recovery_v1(result, &parsed)?;
-            let value = parsed.recovery();
-            if value.model_identity != request.request().model_identity
-                || value.analysis_request_hash != request.request_hash()
-                || value.assembly_hash != prepared.assembly_hash
-                || value.case_id != request.request().case_id
-                || value.load_pattern_id != request.request().load_pattern_id
-            {
-                return Err(contract_error(
-                    "model_ir_linear_recovery_outer_binding_mismatch",
-                    "/result_recovery_ir",
-                    "typed recovery differs from the exact ModelIR, analysis request, or assembly",
-                ));
-            }
-            Ok(parsed.canonical_json().to_owned())
-        })
+        .map(|result| recover_terminal_artifacts(&runtime, &document, &request, &prepared, result))
         .transpose()?;
+    let (result_recovery_json, reaction_result_json) = recovered_artifacts.map_or_else(
+        || (None, None),
+        |(recovery, reaction)| (Some(recovery), Some(reaction)),
+    );
     let run_receipt_json = build_run_receipt(
         &document,
         &request,
@@ -280,6 +277,7 @@ pub fn execute_model_ir_linear_analysis(
         &checkpoint_receipt_json,
         &sparse_outcome,
         result_recovery_json.as_deref(),
+        reaction_result_json.as_deref(),
     )?;
     Ok(ModelIrLinearAnalysisOutcomeV1 {
         model_ir_json: document.canonical_json().to_owned(),
@@ -291,8 +289,44 @@ pub fn execute_model_ir_linear_analysis(
         checkpoint_receipt_json,
         sparse_outcome,
         result_recovery_json,
+        reaction_result_json,
         run_receipt_json,
     })
+}
+
+fn recover_terminal_artifacts(
+    runtime: &Runtime,
+    document: &ModelIrV2Document,
+    request: &ModelIrLinearAnalysisRequestDocumentV1,
+    prepared: &PreparedModelIrLinearProductV1,
+    result: &SparseLinearResultIrDocumentV1,
+) -> Result<(String, String), ModelIrLinearProductError> {
+    let recovered = runtime
+        .recover_model_ir_linear_product_artifacts(document, request, prepared, result)
+        .map_err(ModelIrLinearProductError::from)?;
+    let parsed =
+        parse_model_ir_linear_result_recovery_ir_v1(recovered.result_recovery_json.as_bytes())?;
+    verify_model_ir_linear_result_recovery_v1(result, &parsed)?;
+    let reaction =
+        parse_model_ir_linear_reaction_result_ir_v1(recovered.reaction_result_json.as_bytes())?;
+    verify_model_ir_linear_reaction_result_v1(result, &parsed, &reaction)?;
+    let value = parsed.recovery();
+    if value.model_identity != request.request().model_identity
+        || value.analysis_request_hash != request.request_hash()
+        || value.assembly_hash != prepared.assembly_hash
+        || value.case_id != request.request().case_id
+        || value.load_pattern_id != request.request().load_pattern_id
+    {
+        return Err(contract_error(
+            "model_ir_linear_recovery_outer_binding_mismatch",
+            "/result_recovery_ir",
+            "typed recovery differs from the exact ModelIR, analysis request, or assembly",
+        ));
+    }
+    Ok((
+        parsed.canonical_json().to_owned(),
+        reaction.canonical_json().to_owned(),
+    ))
 }
 
 /// Atomically publish the complete `ModelIR`-derived linear artifact set into a new directory.
@@ -337,14 +371,16 @@ pub fn publish_model_ir_linear_analysis(
         ),
         ("run-receipt.json", outcome.run_receipt_json.as_bytes()),
     ];
-    if let (Some(result), Some(recovery), Some(report), Some(document)) = (
+    if let (Some(result), Some(recovery), Some(reaction), Some(report), Some(document)) = (
         outcome.sparse_outcome.result_ir_json(),
         outcome.result_recovery_json.as_deref(),
+        outcome.reaction_result_json.as_deref(),
         outcome.sparse_outcome.report_ir_json(),
         outcome.sparse_outcome.report_document(),
     ) {
         artifacts.push(("result-ir.json", result.as_bytes()));
         artifacts.push(("result-recovery-ir.json", recovery.as_bytes()));
+        artifacts.push(("reaction-result-ir.json", reaction.as_bytes()));
         artifacts.push(("report-ir.json", report.as_bytes()));
         artifacts.push(("report.md", document.as_bytes()));
     }
@@ -381,6 +417,7 @@ fn build_run_receipt(
     checkpoint_receipt_json: &str,
     sparse: &SparseLinearRunOutcomeV1,
     recovery: Option<&str>,
+    reaction: Option<&str>,
 ) -> Result<String, ModelIrLinearProductError> {
     let mut artifacts = vec![
         artifact_entry(
@@ -438,9 +475,10 @@ fn build_run_receipt(
             sparse.run_receipt_json().as_bytes(),
         )?,
     ];
-    if let (Some(result), Some(recovery), Some(report), Some(document_source)) = (
+    if let (Some(result), Some(recovery), Some(reaction), Some(report), Some(document_source)) = (
         sparse.result_ir_json(),
         recovery,
+        reaction,
         sparse.report_ir_json(),
         sparse.report_document(),
     ) {
@@ -455,6 +493,12 @@ fn build_run_receipt(
             "result-recovery-ir.json",
             "application/json",
             recovery.as_bytes(),
+        )?);
+        artifacts.push(artifact_entry(
+            "reaction_result_ir",
+            "reaction-result-ir.json",
+            "application/json",
+            reaction.as_bytes(),
         )?);
         artifacts.push(artifact_entry(
             "report_ir",
@@ -493,7 +537,7 @@ fn build_run_receipt(
         "sparse_run_receipt_hash": sha256_identity(sparse.run_receipt_json().as_bytes()),
         "checkpoint": checkpoint_receipt,
         "artifacts": artifacts,
-        "claim_boundary": "bounded_typed_modelir_frame3d_truss3d_cpu_assembly_pcg_restart_and_active_dof_recovery_not_sequential_c2_hip_reactions_shell_nonlinear_or_engineering_acceptance",
+        "claim_boundary": "bounded_typed_modelir_frame3d_truss3d_cpu_assembly_pcg_restart_active_dof_recovery_and_constrained_reactions_not_sequential_c2_hip_shell_nonlinear_or_engineering_acceptance",
         "receipt_hash": ""
     });
     value
