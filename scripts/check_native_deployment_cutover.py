@@ -259,6 +259,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         text=cutover_doc,
         tokens=(
             "Import -> Validate -> Run -> Resume -> Compare -> Report",
+            "Append-only v7",
+            "frozen v1 through v6",
+            "distribution v84",
             "Distribution E2E v82",
             "model-edit-element-identity-cascade",
             "E_1",
@@ -488,6 +491,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-distribution-e2e.v55",
         "structural-native-distribution-e2e.v56",
         "structural-native-distribution-e2e.v57",
+        "structural-native-distribution-e2e.v84",
+        "model_ir_linear_reaction_result_ir_sha256",
+        "mgt_model_ir_linear_reaction_result_ir_sha256",
         "exercise_node_add_surface",
         "model-add-node",
         "workbench_node_add_surface_passed",
@@ -1296,6 +1302,21 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         if token not in rootfs_e2e:
             blockers.append(f"native_rootfs_e2e_token_missing:{token}")
 
+    rootfs_receipt_contract = _text(
+        root, Path("native/crates/structural-distribution/src/lib.rs"), blockers
+    )
+    for token in (
+        "structural-native-rootfs-isolation-e2e.v7",
+        "model_ir_linear_reaction_result_ir_sha256",
+        "mgt_model_ir_linear_reaction_result_ir_sha256",
+        "reaction_result_artifact_hash",
+        '"reaction_result_ir"',
+        '"04-resume/reaction-result-ir.json"',
+        "validate_rootfs_isolation_evidence_v7",
+    ):
+        if token not in rootfs_receipt_contract:
+            blockers.append(f"native_rootfs_receipt_contract_token_missing:{token}")
+
     distribution_receipt_check = _text(
         root, Path("scripts/check_native_distribution_receipt.py"), blockers
     )
@@ -1303,6 +1324,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("scripts/check_native_distribution_receipt.py"),
         text=distribution_receipt_check,
         tokens=(
+            "structural-native-distribution-e2e.v84",
+            "V84_REACTION_RESULT_KEYS",
+            "model_ir_linear_reaction_result_ir_sha256",
+            "mgt_model_ir_linear_reaction_result_ir_sha256",
             "structural-native-distribution-e2e.v83",
             "V83_FIXED_CONSTRAINT_IDENTITY_CASCADE_EDIT_KEYS",
             "workbench_fixed_constraint_identity_cascade_edit_surface_passed",
@@ -1626,6 +1651,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         relative=Path("docs/native/distribution-lifecycle.md"),
         text=distribution_doc,
         tokens=(
+            "append-only v7 receipt",
+            "frozen v1 through v6 rootfs receipts",
             "append-only v57 receipt",
             "frozen v1 through v56 receipts",
             "no pre-v57 receipt",
@@ -4812,6 +4839,15 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in capability_claim:
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
+        evidence_contract = capability.get("evidence_contract")
+        if evidence_contract != {
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v7",
+            "frozen_rootfs_receipts": "v1-v6",
+            "required_installed_receipt_schema": "structural-native-distribution-e2e.v84",
+            "authority": "local_rootfs_diagnostic_c5",
+            "customer_image_authority": False,
+        }:
+            blockers.append("native_deployment_capability_evidence_contract_invalid")
 
     blockers = sorted(set(blockers))
     return {

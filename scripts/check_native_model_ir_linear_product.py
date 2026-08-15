@@ -35,6 +35,8 @@ REQUIRED_TOKENS = {
     "native/crates/structural-runtime/src/model_linear_product.rs": (
         "prepare_model_ir_linear_product",
         "recover_model_ir_linear_product",
+        "recover_model_ir_linear_product_artifacts",
+        "build_model_ir_linear_reaction_result_ir_v1",
         "generated_sparse_request",
         "structural-model-ir-linear-assembly-receipt.v1",
         "structural-model-ir-linear-result-recovery-ir.v1",
@@ -52,6 +54,7 @@ REQUIRED_TOKENS = {
         "recover_model_ir_linear_product",
         "checkpoint.mlpcp",
         "result-recovery-ir.json",
+        "reaction-result-ir.json",
         "receipt_hash",
     ),
     "native/crates/structural-cli/src/main.rs": (
@@ -68,6 +71,7 @@ REQUIRED_TOKENS = {
         "every_checkpoint_byte_and_request_drift_fail_before_resume",
         "numerical_failure_publishes_both_terminal_checkpoints_without_result_files",
         "symlink_and_existing_destination_fail_without_partial_publication",
+        '"reaction-result-ir.json"',
         "command.env_clear()",
         'command.env("PATH", "/nonexistent")',
     ),
@@ -85,7 +89,10 @@ REQUIRED_TOKENS = {
         "Python/Node",
         "protected-runner HIP C2",
         "5,000,000 structural entries",
-        "constrained reactions",
+        "append-only ABI v1.14",
+        "constrained-reaction ResultIR",
+        "15 terminal files",
+        "nonzero prescribed",
         "C6",
     ),
 }
@@ -155,8 +162,24 @@ def check_model_ir_linear_product(repo_root: Path = ROOT) -> dict[str, object]:
             "model-linear-run/model-linear-resume",
             "ResultIR/ReportIR/Markdown",
             "active-DOF plus element recovery",
+            "constrained-reaction ResultIR",
+            "15-artifact directories",
             "no Python or Node",
             "protected-runner HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
+    reactions = _capability(
+        payload,
+        "modelir_linear_reaction_results",
+        "C5",
+        "structural-contracts",
+        (
+            "ABI v1.14",
+            "internal-minus-external reaction",
+            "canonical self-hashed reaction ResultIR",
+            "approved protected-runner HIP C2",
             "C6",
         ),
         blockers,
@@ -193,6 +216,7 @@ def check_model_ir_linear_product(repo_root: Path = ROOT) -> dict[str, object]:
         "contract_pass": not blockers,
         "checkpoint_gate": checkpoint.get("cutover_gate"),
         "product_gate": product.get("cutover_gate"),
+        "reaction_result_gate": reactions.get("cutover_gate"),
         "sequential_numerical_gate": dense.get("cutover_gate")
         if isinstance(dense, dict)
         else None,

@@ -1563,6 +1563,18 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "final C6 remain open" in deployment["claim"]
 
 
+def test_reaction_evidence_contract_drift_fails_closed() -> None:
+    payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
+    payload["capabilities"]["native_distribution"]["evidence_contract"][
+        "latest_installed_receipt_schema"
+    ] = "structural-native-distribution-e2e.v83"
+
+    assert (
+        "native_capability_evidence_contract_invalid:native_distribution"
+        in capabilities.validate_capabilities(payload)
+    )
+
+
 def test_native_automation_cutover_is_bounded_c5() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
     assert capabilities.capability_is_enabled(payload, "native_automation_cutover") is True

@@ -73,8 +73,9 @@ Jobs:
      disjoint caller-owned outputs, failure atomicity, sorted-index/load/sign/identity validation
      and concurrent safe Rust immutable execution
    - typed-ModelIR linear CPU composition C4/C5 contract: strict request/model identities, ABI
-     v1.13 assembly -> ABI v1.10 real-iteration PCG, `SAMLPC01` outer checkpoint, terminal recovery,
-     every-byte tamper rejection and clean-environment direct/resume 14-artifact byte equality;
+     v1.13 active assembly plus append-only ABI v1.14 constrained reactions -> ABI v1.10
+     real-iteration PCG, `SAMLPC01` outer checkpoint, terminal recovery and reaction ResultIR,
+     every-byte tamper rejection and clean-environment direct/resume 15-artifact byte equality;
      numerical authority remains C1 pending protected HIP C2
    - strict ModelIR analysis-request wire, exact three-hash identity checks and canonical outer
      checkpoint binding of the adapter request, generated request and inner native state
@@ -224,15 +225,16 @@ Required jobs:
      checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared linear-run/
      linear-resume byte parity, durable numerical-terminal receipts and explicit preservation of
      the open protected-runner C2 gate
-   - bounded typed-ModelIR frame3d/truss3d request -> ABI v1.13 assembly -> generated canonical
-     CSR -> ABI v1.10 PCG -> SAMLPC01 outer checkpoint -> terminal active-DOF/element recovery,
-     with environment-cleared model-linear-run/model-linear-resume 14-artifact byte parity and
+   - bounded typed-ModelIR frame3d/truss3d request -> ABI v1.13 active assembly plus ABI v1.14
+     constrained partition -> generated canonical CSR -> ABI v1.10 PCG -> SAMLPC01 outer
+     checkpoint -> terminal active-DOF/element recovery and constrained-reaction ResultIR,
+     with environment-cleared model-linear-run/model-linear-resume 15-artifact byte parity and
      explicit preservation of the sequential C1/protected C2 boundary
    - the same bounded typed-ModelIR linear profile through a strict language-neutral durable
      envelope, append-only job lifecycle, real-iteration process restart, exact completion
      re-projection, public submit-model-linear/export, loopback submission and authenticated
-     recovery retrieval; this is separate C5 orchestration evidence and cannot promote numerical
-     C2, authoritative C3 or C6
+     recovery plus constrained-reaction retrieval; this is separate C5 orchestration evidence and
+     cannot promote numerical C2, authoritative C3 or C6
    - bounded story-frame strict request -> ABI v1.11 real Newton iteration begin/advance ->
      SASTAC01 checkpoint -> ResultIR/ReportIR/Markdown/receipt, with environment-cleared
      static-run/static-resume byte parity, durable nonconvergence receipts and explicit

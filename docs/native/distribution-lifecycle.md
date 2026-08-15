@@ -777,7 +777,7 @@ inspect, an explicit non-promoting `review`, review reopen, post-review inspect 
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v6 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v7 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
 The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
@@ -787,10 +787,12 @@ typed receipt identities, exact installed TTF/OFL/provenance bytes, locale separ
 session nonmutation. The append-only v6 receipt additionally binds the original MGT bytes,
 normalized import health, typed recovery, external comparison, deterministic PDF/document and
 PDF/report receipts plus inspect/review/export identities for the exact MGT-linear profile. The
-installer continues to verify frozen v1 through v5 rootfs receipts against their original bundles
+append-only v7 receipt additionally binds both the strict ModelIR-linear and normalized-MGT-linear
+`reaction-result-ir.json` hashes through their exact human reviews and handoff exports. The
+installer continues to verify frozen v1 through v6 rootfs receipts against their original bundles
 and claim boundaries; v3 first carried catalog/evidence surface evidence, v4 first carried the
 ModelIR-linear surface, v5 first carried its localized PDF surface, and only v6 carries the exact
-normalized-MGT-linear isolated surface.
+normalized-MGT-linear isolated surface; only v7 requires constrained-reaction ResultIR evidence.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
 frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.

@@ -430,7 +430,11 @@ and inspect/review/export identities while preserving frozen v1 through v5 verif
 verifies self-hashed benchmark-catalog and copied-evidence views, including the
 non-promoting geometry/no-runner and ready/blocked/unavailable boundaries. Its contract fixes
 `container_image_built=false` and `customer_image_receipt=false`; browsing does not generate or
-approve evidence.
+approve evidence. Append-only v7 additionally requires the strict ModelIR-linear and
+normalized-MGT-linear constrained-reaction ResultIR hashes, verifies that each exact hash is bound
+through the human review and export, and preserves frozen v1 through v6 verification. It consumes
+the installed append-only distribution v84 reaction fields without promoting either receipt past
+bounded CPU C5 authority.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

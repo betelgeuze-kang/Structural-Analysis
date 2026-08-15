@@ -19,6 +19,7 @@ def test_repository_contract_passes_without_promoting_numerical_c2() -> None:
     assert report["contract_pass"] is True
     assert report["checkpoint_gate"] == "C4"
     assert report["product_gate"] == "C5"
+    assert report["reaction_result_gate"] == "C5"
     assert report["sequential_numerical_gate"] == "C1"
     assert report["blockers"] == []
     assert "cannot promote C2" in report["claim_boundary"]

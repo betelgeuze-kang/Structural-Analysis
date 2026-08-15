@@ -128,6 +128,30 @@ EXPECTED_OWNERS = {
 }
 VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})
 VALID_CUTOVER_GATES = frozenset({f"C{index}" for index in range(7)})
+EXPECTED_EVIDENCE_CONTRACTS = {
+    "modelir_linear_workbench": {
+        "current_review_claim": "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_constrained_reaction_result_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature",
+        "legacy_review_claim": "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature",
+        "reaction_artifact": "04-resume/reaction-result-ir.json",
+        "compatibility": "frozen_pre_reaction_review_remains_verifiable",
+    },
+    "native_distribution": {
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v84",
+        "frozen_installed_receipts": "v1-v83",
+        "reaction_hash_fields": [
+            "model_ir_linear_reaction_result_ir_sha256",
+            "mgt_model_ir_linear_reaction_result_ir_sha256",
+        ],
+        "authority": "hosted_cpu_c5",
+    },
+    "native_deployment": {
+        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v7",
+        "frozen_rootfs_receipts": "v1-v6",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v84",
+        "authority": "local_rootfs_diagnostic_c5",
+        "customer_image_authority": False,
+    },
+}
 
 
 def load_capabilities(path: Path) -> dict[str, Any]:
@@ -155,6 +179,9 @@ def validate_capabilities(payload: dict[str, Any]) -> list[str]:
             blockers.append(f"native_capability_status_invalid:{capability}:{status}")
         if row.get("owner") != owner:
             blockers.append(f"native_capability_owner_invalid:{capability}:{owner}")
+        expected_evidence = EXPECTED_EVIDENCE_CONTRACTS.get(capability)
+        if expected_evidence is not None and row.get("evidence_contract") != expected_evidence:
+            blockers.append(f"native_capability_evidence_contract_invalid:{capability}")
         if not str(row.get("claim", "")).strip():
             blockers.append(f"native_capability_claim_missing:{capability}")
         if status == "implemented" and gate not in VALID_CUTOVER_GATES:
