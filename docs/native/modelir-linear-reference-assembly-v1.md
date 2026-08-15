@@ -84,9 +84,11 @@ propagate constitutive epochs; reaction projection is available only through ABI
 The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
 to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,
 and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
-does not promote this numerical family past C1.
+also publishes the ABI v1.14 constrained vectors as a self-hashed reaction ResultIR through exact
+direct/restart, durable job/service, Workbench, installed distribution v84 and rootfs diagnostic
+v7 bindings without promoting this numerical family past C1.
 
 Still open: those excluded formulations and general load semantics, shell graph support, stateful
-trial/commit/rollback aggregation, product/restart publication of the ABI v1.14 reaction vectors,
-authoritative sequential C2/C3 promotion, durable job/service integration for this profile, and C6
+trial/commit/rollback aggregation, nonzero prescribed-constraint reactions, authoritative
+sequential C2/C3 promotion, approved protected-runner HIP C2, engineering acceptance, and C6
 decommission.

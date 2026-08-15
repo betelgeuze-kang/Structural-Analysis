@@ -146,15 +146,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the
   bounded active-system C3 integration candidate; append-only ABI v1.14 and safe Rust also publish
   the sorted constrained loads/reactions with exact sizes, failure atomicity and fallback 0.
-  Product/restart reaction artifact publication remains open. A separate
-  CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,
-  `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts and terminal
-  active-DOF/element recovery; direct and resumed 14-file terminal directories are byte-identical
-  without Python/Node lookup. A further separate C5 orchestration slice packages the exact model
-  and analysis request into one strict envelope, survives a real-iteration durable restart, and
-  re-projects ResultIR, typed recovery IR, ReportIR and Markdown before publication through CLI or
-  the bounded loopback service. None of these separate capabilities promotes D3 beyond sequential
-  C1. The
+  A separate CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration
+  PCG, `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts, terminal
+  active-DOF/element recovery and a self-hashed constrained-reaction ResultIR; direct and resumed
+  15-file terminal directories are byte-identical without Python/Node lookup. A further separate
+  C5 orchestration slice packages the exact model and analysis request into one strict envelope,
+  survives a real-iteration durable restart, and re-projects ResultIR, typed recovery IR,
+  constrained-reaction ResultIR, ReportIR and Markdown before publication through CLI or the
+  bounded loopback service reaction route. Workbench review/export, installed distribution v84
+  and rootfs diagnostic v7 bind the same exact reaction bytes. None of these separate capabilities
+  promotes D3 beyond sequential C1. The
   same product-owned HIP candidate assembles a 38-DOF
   overlapping five-element graph without atomics in stable order and matches CPU with zero error
   while retaining element outputs on device; protected-runner C2 promotion remains open.

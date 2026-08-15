@@ -11,6 +11,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_TOKENS = {
+    "native/README.md": (
+        "canonical self-hashed constrained-reaction ResultIR",
+        "byte-identical direct/restart output",
+        "durable jobs and service retrieval",
+        "installed distribution v84",
+        "rootfs diagnostic v7",
+        "underlying C1 numerical gate",
+    ),
     "native/crates/structural-contracts/src/model_linear_product.rs": (
         "structural-model-ir-linear-analysis-request.v1",
         "decode_json_strict",

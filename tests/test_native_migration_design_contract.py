@@ -85,6 +85,10 @@ def test_parity_ledger_requires_every_cutover_stage_and_domain() -> None:
     assert positions == sorted(positions)
     assert "Python remains authoritative oracle" in ledger
     assert "g1_closure remains false" in ledger
+    assert "self-hashed constrained-reaction ResultIR" in ledger
+    assert "15-file terminal directories are byte-identical" in ledger
+    assert "installed distribution v84" in ledger
+    assert "rootfs diagnostic v7" in ledger
 
 
 def test_modelir_slice_uses_tracked_non_lfs_fixtures() -> None:

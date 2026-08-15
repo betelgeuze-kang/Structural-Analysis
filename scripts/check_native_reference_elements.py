@@ -193,6 +193,10 @@ REQUIRED_TOKENS = {
         "ABI v1.13",
         "ABI v1.14",
         "C3 integration candidate",
+        "self-hashed reaction ResultIR",
+        "installed distribution v84",
+        "rootfs diagnostic",
+        "nonzero prescribed-constraint reactions",
         "C6",
     ),
 }

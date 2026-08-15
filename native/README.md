@@ -101,13 +101,17 @@ C3 integration candidate,
 not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
 also exposes the same constrained reaction vectors through append-only ABI v1.14 exact-size and
 failure-atomic execute slots. Its safe Rust wrapper revalidates sorted indices, finite values, the
-reaction sign convention, identities and fallback 0. Product artifact and restart publication of
-those vectors remains open. The slice does not cover nonzero constraints,
+reaction sign convention, identities and fallback 0. A separate bounded C5 capability now
+publishes those exact vectors as a canonical self-hashed constrained-reaction ResultIR through
+byte-identical direct/restart output, durable jobs and service retrieval, Workbench
+inspect/review/export, installed distribution v84 and local rootfs diagnostic v7. This does not
+promote the underlying C1 numerical gate. The slice does not cover nonzero constraints,
 offsets/releases, self-weight, nested or arbitrary-term combinations, stages, or shell/nonlinear
 graphs. A separate Rust composition
 path binds this exact
 assembly to the ABI v1.10 resumable PCG operation, `SAMLPC01` ModelIR provenance envelope,
-self-hashed ResultIR/ReportIR/Markdown, and terminal active-DOF plus element recovery. Public
+self-hashed ResultIR/ReportIR/Markdown, terminal active-DOF plus element recovery, and the
+constrained-reaction ResultIR. Public
 `model-linear-run`/`model-linear-resume` direct and real-iteration resumed directories are
 byte-identical in a clean environment, providing bounded CPU C4/C5 implementation evidence
 without changing the sequential C1 numerical gate. See
