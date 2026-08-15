@@ -581,10 +581,127 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         let rejected = run_workbench(&arguments);
         assert_eq!(rejected.status.code(), Some(2));
     }
+
+    let reaction_audit_arguments = [
+        text("reaction-audit"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let reaction_audit_first = run_workbench(&reaction_audit_arguments);
+    let reaction_audit_second = run_workbench(&reaction_audit_arguments);
+    assert_success(&reaction_audit_first);
+    assert_eq!(reaction_audit_first.stdout, reaction_audit_second.stdout);
+    assert!(!reaction_audit_first.stdout.contains(&0x1b));
+    let direct_reaction_audit = run_workbench(&[
+        text("reaction-audit"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_reaction_audit);
+    assert_eq!(reaction_audit_first.stdout, direct_reaction_audit.stdout);
+    let reaction_audit =
+        String::from_utf8(reaction_audit_first.stdout).expect("ASCII reaction audit");
+    assert!(reaction_audit
+        .starts_with("Structural ModelIR Linear Workbench - Algebraic Global Equilibrium Audit\n"));
+    assert!(reaction_audit
+        .contains("Schema: structural-native-workbench-model-ir-linear-reaction-audit.v1\n"));
+    assert!(reaction_audit.contains(
+        "Tolerance policy: 256*IEEE754_BINARY64_EPSILON*max(1,absolute_contribution_scale)\n"
+    ));
+    assert!(reaction_audit.contains(
+        "Applied force resultant: X=+0.00000000000000000e0; Y=-1.00000000000000000e4; Z=+0.00000000000000000e0 N\n"
+    ));
+    assert!(reaction_audit.contains(
+        "Support reaction force resultant: X=+0.00000000000000000e0; Y=+1.00000000000000000e4; Z=+0.00000000000000000e0 N\n"
+    ));
+    assert!(reaction_audit.contains(
+        "Applied moment resultant: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=-2.00000000000000000e4 N*m\n"
+    ));
+    assert!(reaction_audit.contains(
+        "Support reaction moment resultant: X=+0.00000000000000000e0; Y=+0.00000000000000000e0; Z=+2.00000000000000000e4 N*m\n"
+    ));
+    for status in [
+        "Force status: within_numeric_tolerance\n",
+        "Moment status: within_numeric_tolerance\n",
+        "Active equation status: within_numeric_tolerance\n",
+        "Overall numeric status: within_numeric_tolerance\n",
+    ] {
+        assert!(reaction_audit.contains(status));
+    }
+    for hash in [
+        reaction["source_result_hash"]
+            .as_str()
+            .expect("source result hash"),
+        reaction["source_recovery_hash"]
+            .as_str()
+            .expect("source recovery hash"),
+        reaction["result_hash"].as_str().expect("reaction hash"),
+        reaction["analysis_request_hash"]
+            .as_str()
+            .expect("analysis request hash"),
+        reaction["assembly_hash"].as_str().expect("assembly hash"),
+        reaction["model_identity"]["content_hash"]
+            .as_str()
+            .expect("model content hash"),
+        reaction["model_identity"]["semantic_hash"]
+            .as_str()
+            .expect("model semantic hash"),
+        reaction["model_identity"]["provenance_hash"]
+            .as_str()
+            .expect("model provenance hash"),
+        reaction["identity"]["request_hash"]
+            .as_str()
+            .expect("sparse request hash"),
+        reaction["identity"]["model_hash"]
+            .as_str()
+            .expect("sparse model hash"),
+        reaction["identity"]["state_hash"]
+            .as_str()
+            .expect("state hash"),
+        reaction["identity"]["execution_hash"]
+            .as_str()
+            .expect("execution hash"),
+        reaction["identity"]["checkpoint_hash"]
+            .as_str()
+            .expect("checkpoint hash"),
+    ] {
+        assert!(reaction_audit.contains(hash));
+    }
+    let (unsigned, hash_line) = reaction_audit
+        .rsplit_once("Audit hash: ")
+        .expect("reaction audit hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_reaction_audit_arguments = [
+        text("reaction-audit"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ];
+    let korean_reaction_audit_first = run_workbench(&korean_reaction_audit_arguments);
+    let korean_reaction_audit_second = run_workbench(&korean_reaction_audit_arguments);
+    assert_success(&korean_reaction_audit_first);
+    assert_eq!(
+        korean_reaction_audit_first.stdout,
+        korean_reaction_audit_second.stdout
+    );
+    assert!(!korean_reaction_audit_first.stdout.contains(&0x1b));
+    let korean_reaction_audit =
+        String::from_utf8(korean_reaction_audit_first.stdout).expect("Korean reaction audit UTF-8");
+    assert!(korean_reaction_audit
+        .starts_with("Structural ModelIR 선형 Workbench - 대수적 전역 평형 감사\n"));
+    assert!(korean_reaction_audit.contains("로케일: ko-KR\n"));
+    assert!(korean_reaction_audit.contains("종합 수치 상태: within_numeric_tolerance\n"));
+    let (unsigned, hash_line) = korean_reaction_audit
+        .rsplit_once("감사 해시: ")
+        .expect("Korean reaction audit hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after reaction views"),
         session_before_reaction_views,
-        "reaction view mutated the durable session"
+        "reaction view or audit mutated the durable session"
     );
 
     let session_before_localized_export =
@@ -698,6 +815,11 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
             text("--workspace"),
             restarted.as_os_str(),
         ]),
+        run_workbench(&[
+            text("reaction-audit"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
     ] {
         assert!(!rejected.status.success());
         assert!(String::from_utf8_lossy(&rejected.stdout)
@@ -760,6 +882,14 @@ fn frozen_linear_workspace_without_reactions_retains_legacy_review_contract() {
     assert!(
         String::from_utf8_lossy(&unavailable.stdout).contains("workbench_reaction_view_missing")
     );
+    let audit_unavailable = run_workbench(&[
+        text("reaction-audit"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert!(!audit_unavailable.status.success());
+    assert!(String::from_utf8_lossy(&audit_unavailable.stdout)
+        .contains("workbench_reaction_audit_missing"));
 
     assert_success(&run_workbench(&stage_arguments("status", &workspace)));
     assert_success(&run_workbench(&[
@@ -916,6 +1046,62 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
         &fs::read(restarted.join("06-report/report.pdf")).expect("MGT linear PDF"),
     )
     .expect("MGT linear deterministic PDF");
+
+    let session_before_audits =
+        fs::read(restarted.join("workbench-session.json")).expect("session before MGT audits");
+    let audit_arguments = [
+        text("reaction-audit"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let audit_first = run_workbench(&audit_arguments);
+    let audit_second = run_workbench(&audit_arguments);
+    assert_success(&audit_first);
+    assert_eq!(audit_first.stdout, audit_second.stdout);
+    assert!(!audit_first.stdout.contains(&0x1b));
+    let direct_audit = run_workbench(&[
+        text("reaction-audit"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_audit);
+    assert_eq!(audit_first.stdout, direct_audit.stdout);
+    let audit = String::from_utf8(audit_first.stdout).expect("MGT reaction audit UTF-8");
+    assert!(audit.contains("Load pattern: LP_PUSH\n"));
+    assert!(audit.contains(
+        "Applied force resultant: X=+2.00000000000000000e5; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N\n"
+    ));
+    assert!(audit.contains(
+        "Support reaction force resultant: X=-2.00000000000000116e5; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N\n"
+    ));
+    assert!(audit.contains(
+        "Force closure residual: X=-1.16415321826934814e-10; Y=+0.00000000000000000e0; Z=+0.00000000000000000e0 N\n"
+    ));
+    assert!(audit.contains("Overall numeric status: within_numeric_tolerance\n"));
+    let (unsigned, hash_line) = audit
+        .rsplit_once("Audit hash: ")
+        .expect("MGT reaction audit hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_audit = run_workbench(&[
+        text("reaction-audit"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+    ]);
+    assert_success(&korean_audit);
+    let korean_audit = String::from_utf8(korean_audit.stdout).expect("Korean MGT audit UTF-8");
+    assert!(korean_audit.contains("종합 수치 상태: within_numeric_tolerance\n"));
+    let (unsigned, hash_line) = korean_audit
+        .rsplit_once("감사 해시: ")
+        .expect("Korean MGT reaction audit hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    assert_eq!(
+        fs::read(restarted.join("workbench-session.json")).expect("session after MGT audits"),
+        session_before_audits,
+        "MGT reaction audit mutated the durable session"
+    );
 
     let mut tampered =
         fs::read(restarted.join("01-import/source.mgt")).expect("preserved MGT source");

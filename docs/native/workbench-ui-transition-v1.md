@@ -563,6 +563,11 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   to the actual node ID and fixed DOF label, and preserves internal force, external load, reaction,
   mixed force/moment units, CPU ABI receipt and provenance. Its `en-US` and `ko-KR` paths are
   presentation-only; frozen pre-reaction artifacts and NDTHA sessions fail closed.
+- `reaction-audit`: a deterministic self-hashed ANSI-free algebraic global-resultant audit over
+  the verified ModelIR linear generalized external-load and constrained-reaction partitions. It
+  independently closes force, global-origin moment and active-equation residuals against a fixed
+  visible IEEE 754 tolerance policy in `en-US` or `ko-KR`, leaves the session unchanged, and uses
+  numeric-status vocabulary only. It is not a support-design, stability or engineering verdict.
 - `result-view`: a deterministic self-hashed ANSI-free table and fixed-width plot over one verified
   terminal NDTHA ResultIR. It exposes exact top-displacement, drift-ratio, base-shear or
   residual-infinity values plus per-step convergence metadata through a maximum 256-row window.

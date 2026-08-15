@@ -39,6 +39,8 @@ profiles as UID/GID 65532 with an empty PATH and read-only root/payload, indepen
 view self-hashes and exact rows, proves locale/window separation and session nonmutation, and binds
 the wrong-profile rejection. Frozen rootfs v1 through v7 receipts remain verifiable.
 
-This is not an equilibrium audit, support-design verdict, general nodal-field/stress/contour/modal
-viewer, engineering acceptance, design-code compliance, public/customer distribution publication,
-approved HIP C2 evidence, or C6 authority.
+This command remains a display surface, not an equilibrium audit. The separate bounded
+`reaction-audit` command owns only the numeric algebraic closure described in
+`modelir-linear-reaction-audit-v1.md`. Neither command is a support-design verdict, general
+nodal-field/stress/contour/modal viewer, engineering acceptance, design-code compliance,
+public/customer distribution publication, approved HIP C2 evidence, or C6 authority.

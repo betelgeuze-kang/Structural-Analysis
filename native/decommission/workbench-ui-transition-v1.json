@@ -83,6 +83,7 @@
       "inspect",
       "report-view",
       "reaction-view",
+      "reaction-audit",
       "result-view",
       "result-deformed-view",
       "report-export-pdf",

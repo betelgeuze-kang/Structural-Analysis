@@ -58,6 +58,9 @@ none is a certification or general UI-parity claim. See
 ModelIR-linear-only `reaction-view` additionally binds actual node IDs, constrained DOFs, exact
 internal/external/reaction values and units; see
 `docs/native/modelir-linear-reaction-view-v1.md`.
+The separate read-only `reaction-audit` independently computes algebraic force, global-origin
+moment, and active-equation closure with a visible IEEE 754 numeric-tolerance policy; see
+`docs/native/modelir-linear-reaction-audit-v1.md`. It is not an engineering verdict.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and

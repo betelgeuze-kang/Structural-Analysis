@@ -34,6 +34,8 @@ REQUIRED_TOKENS = {
         "linear_report_text",
         "model_ir_linear_reaction_view_text",
         "model_ir_linear_reaction_view_text_localized",
+        "model_ir_linear_reaction_audit_text",
+        "model_ir_linear_reaction_audit_text_localized",
         "ndtha_response_view_text",
         "ndtha_response_view_text_localized",
         "fixed_guided_deformed_shape_view_text",
@@ -76,6 +78,18 @@ REQUIRED_TOKENS = {
         "workbench_reaction_view_window_invalid",
         "workbench_reaction_view_unsafe",
         "not an equilibrium audit, support-design verdict",
+    ),
+    "native/crates/structural-workbench/src/reaction_audit.rs": (
+        "structural-native-workbench-model-ir-linear-reaction-audit.v1",
+        "256*IEEE754_BINARY64_EPSILON*max(1,absolute_contribution_scale)",
+        "active_dof_indices",
+        "constrained_dof_indices",
+        "coordinates_m",
+        "within_numeric_tolerance",
+        "outside_numeric_tolerance",
+        "workbench_reaction_audit_partition_invalid",
+        "workbench_reaction_audit_unsafe",
+        "not support design, stability or singularity assessment",
     ),
     "native/crates/structural-workbench/src/deformed_view.rs": (
         "structural-native-workbench-fixed-guided-deformed-view.v1",
@@ -338,6 +352,7 @@ REQUIRED_TOKENS = {
         'Some("report")',
         'Some("report-view")',
         'Some("reaction-view")',
+        'Some("reaction-audit")',
         'Some("result-view")',
         'Some("result-deformed-view")',
         'Some("report-export-pdf")',
@@ -427,6 +442,10 @@ REQUIRED_TOKENS = {
         "workbench_mgt_import_binding_mismatch",
         "structural-native-workbench-model-ir-linear-reaction-view.v1",
         "workbench_reaction_view_missing",
+        "structural-native-workbench-model-ir-linear-reaction-audit.v1",
+        "workbench_reaction_audit_missing",
+        "Overall numeric status: within_numeric_tolerance",
+        "Force closure residual: X=-1.16415321826934814e-10",
         "session after reaction views",
         "Korean reaction view hash line",
     ),
@@ -477,6 +496,20 @@ REQUIRED_TOKENS = {
         "structural-native-distribution-e2e.v85",
         "structural-native-rootfs-isolation-e2e.v8",
         "public/customer distribution publication",
+        "approved HIP C2",
+        "C6 authority",
+    ),
+    "docs/native/modelir-linear-reaction-audit-v1.md": (
+        "structural-workbench reaction-audit",
+        "model_ir_linear_cpu_v1",
+        "workbench_reaction_audit_missing",
+        "r x F",
+        "256 * IEEE754_BINARY64_EPSILON",
+        "within_numeric_tolerance",
+        "outside_numeric_tolerance",
+        "strict ModelIR and normalized",
+        "MGT linear workflows",
+        "support design",
         "approved HIP C2",
         "C6 authority",
     ),
@@ -1267,6 +1300,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     reaction_view_row: dict[str, object] = {}
+    reaction_audit_row: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
@@ -1294,6 +1328,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         truss_leaf_deletion_row = payload["capabilities"]["modelir_truss3d_leaf_deletion"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
         reaction_view_row = payload["capabilities"]["modelir_linear_reaction_view"]
+        reaction_audit_row = payload["capabilities"]["modelir_linear_reaction_audit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
         row = {}
@@ -1326,6 +1361,28 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     ):
         if token not in reaction_view_claim:
             blockers.append(f"native_workbench_reaction_view_claim_token_missing:{token}")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if reaction_audit_row.get(field) != expected:
+            blockers.append(f"native_workbench_reaction_audit_capability_invalid:{field}")
+    reaction_audit_claim = str(reaction_audit_row.get("claim", ""))
+    for token in (
+        "reaction-audit",
+        "complete generalized external-load vector",
+        "model-global origin",
+        "256 times IEEE754 binary64 epsilon",
+        "within_numeric_tolerance",
+        "byte-identical strict-ModelIR and normalized-MGT direct/restart audits",
+        "installed static/shared successor distribution",
+        "support design",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in reaction_audit_claim:
+            blockers.append(f"native_workbench_reaction_audit_claim_token_missing:{token}")
     for field, expected in (
         ("status", "implemented"),
         ("cutover_gate", "C5"),

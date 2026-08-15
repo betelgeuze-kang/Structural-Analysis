@@ -537,6 +537,7 @@ structural-workbench report --workspace SESSION
 structural-workbench report-view --workspace SESSION --locale ko-KR
 structural-workbench reaction-view --workspace LINEAR-SESSION --locale ko-KR \
   --start-row 1 --count 64
+structural-workbench reaction-audit --workspace LINEAR-SESSION --locale ko-KR
 structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
 structural-workbench result-deformed-view --workspace SESSION \
