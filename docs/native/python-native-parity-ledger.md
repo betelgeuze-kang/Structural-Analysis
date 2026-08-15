@@ -143,8 +143,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   ModelIR assembly: nonzero constraints, offsets/releases,
   self-weight, nested graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
-  reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust now provide a
-  bounded C3 integration candidate. A separate
+  reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the
+  bounded active-system C3 integration candidate; append-only ABI v1.14 and safe Rust also publish
+  the sorted constrained loads/reactions with exact sizes, failure atomicity and fallback 0.
+  Product/restart reaction artifact publication remains open. A separate
   CPU implementation composition binds zero-state assembly to ABI v1.10 real-iteration PCG,
   `SAMLPC01` C4 restart, public model-linear-run/model-linear-resume C5 artifacts and terminal
   active-DOF/element recovery; direct and resumed 14-file terminal directories are byte-identical

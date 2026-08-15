@@ -81,6 +81,8 @@ def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:
     )
     assert "structural_model_ir_linear_assembly_abi_fuzz" in fuzz_contract
     assert "structural_model_ir_linear_assembly_abi_fuzz_smoke" in fuzz_contract
+    assert "structural_model_ir_linear_reactions_abi_fuzz" in fuzz_contract
+    assert "structural_model_ir_linear_reactions_abi_fuzz_smoke" in fuzz_contract
 
 
 def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
@@ -121,7 +123,7 @@ def test_native_rust_gate_separates_r4_product_and_legacy_runtime_exports() -> N
     assert "structural_reference_elements_abi_tests" in workflow
     assert "structural_model_ir_linear_assembly_abi_tests" in workflow
     assert "structural_generalized_eigen_abi_tests" in workflow
-    assert 'payload["abi_version"] == "0x0001000d"' in workflow
+    assert 'payload["abi_version"] == "0x0001000e"' in workflow
     assert "check_native_backend_selector.py" in workflow
     assert "libmgt_hip_full_residual_rust_ffi.so" in workflow
 

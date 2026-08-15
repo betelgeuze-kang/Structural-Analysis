@@ -148,6 +148,37 @@ pub struct ModelIrLinearAssembly {
     pub fallback_count: u32,
 }
 
+/// Explicit full-state input for one bounded typed-ModelIR constrained-reaction recovery.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModelIrLinearReactionRequest {
+    pub load_pattern_id: String,
+    pub displacement: Vec<f64>,
+}
+
+/// Exact immutable output extents returned before reaction buffer allocation.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct ModelIrLinearReactionSizes {
+    pub global_dof_count: usize,
+    pub constrained_dof_count: usize,
+    pub model_identity_length: usize,
+}
+
+/// Canonical caller-owned CPU output from the ABI v1.14 reaction surface.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModelIrLinearReactions {
+    pub model_content_hash: String,
+    pub model_semantic_hash: String,
+    pub model_provenance_hash: String,
+    pub load_pattern_index: u64,
+    pub global_dof_count: u64,
+    pub constrained_dof_indices: Vec<u32>,
+    pub constrained_internal_force: Vec<f64>,
+    pub constrained_external_load: Vec<f64>,
+    pub reactions: Vec<f64>,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Explicit analysis inputs for the bounded v1.6 ModelIR-to-NDTHA reduction.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -1327,6 +1358,15 @@ impl Api {
     /// Returns a stable ABI error if either assembly slot or its capability is absent.
     pub fn load_model_ir_linear_assembly() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_13)
+    }
+
+    /// Load ABI v1.14 with the bounded typed-ModelIR constrained-reaction surface.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if either reaction slot or its capability is absent.
+    pub fn load_model_ir_linear_reactions() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_14)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -3271,6 +3311,135 @@ impl ModelIrLinearOutputArena {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
+struct ModelIrLinearReactionCounts {
+    global_dof_count: usize,
+    constrained_dof_count: usize,
+    model_identity_length: usize,
+}
+
+struct ModelIrLinearReactionOutputArena {
+    constrained_dof_indices: Vec<u32>,
+    constrained_internal_force: Vec<f64>,
+    constrained_external_load: Vec<f64>,
+    reactions: Vec<f64>,
+    model_content_hash: Vec<u8>,
+    model_semantic_hash: Vec<u8>,
+    model_provenance_hash: Vec<u8>,
+}
+
+impl ModelIrLinearReactionOutputArena {
+    fn allocate(counts: ModelIrLinearReactionCounts) -> Result<Self, Error> {
+        Ok(Self {
+            constrained_dof_indices: allocate_u32_output(counts.constrained_dof_count)?,
+            constrained_internal_force: allocate_f64_output(counts.constrained_dof_count)?,
+            constrained_external_load: allocate_f64_output(counts.constrained_dof_count)?,
+            reactions: allocate_f64_output(counts.constrained_dof_count)?,
+            model_content_hash: allocate_u8_output(counts.model_identity_length)?,
+            model_semantic_hash: allocate_u8_output(counts.model_identity_length)?,
+            model_provenance_hash: allocate_u8_output(counts.model_identity_length)?,
+        })
+    }
+
+    fn descriptor(&mut self) -> Result<sys::SaModelIrLinearReactionOutputsV1, Error> {
+        Ok(sys::SaModelIrLinearReactionOutputsV1 {
+            abi_version: sys::SA_ABI_V1_14,
+            struct_size: abi_size::<sys::SaModelIrLinearReactionOutputsV1>(),
+            constrained_dof_indices: mutable_u32_view(
+                &mut self.constrained_dof_indices,
+                sys::SA_ABI_V1_14,
+            )?,
+            constrained_internal_force: mutable_f64_view(
+                &mut self.constrained_internal_force,
+                sys::SA_ABI_V1_14,
+            )?,
+            constrained_external_load: mutable_f64_view(
+                &mut self.constrained_external_load,
+                sys::SA_ABI_V1_14,
+            )?,
+            reactions: mutable_f64_view(&mut self.reactions, sys::SA_ABI_V1_14)?,
+            model_content_hash: mutable_u8_view(&mut self.model_content_hash, sys::SA_ABI_V1_14)?,
+            model_semantic_hash: mutable_u8_view(&mut self.model_semantic_hash, sys::SA_ABI_V1_14)?,
+            model_provenance_hash: mutable_u8_view(
+                &mut self.model_provenance_hash,
+                sys::SA_ABI_V1_14,
+            )?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn finish(
+        self,
+        raw: &sys::SaModelIrLinearReactionResultV1,
+        counts: ModelIrLinearReactionCounts,
+        expected_content_hash: &str,
+        expected_semantic_hash: &str,
+        expected_provenance_hash: &str,
+        expected_load_pattern_index: Option<u64>,
+    ) -> Result<ModelIrLinearReactions, Error> {
+        let counts_match = raw.abi_version == sys::SA_ABI_V1_14
+            && raw.struct_size == abi_size::<sys::SaModelIrLinearReactionResultV1>()
+            && usize::try_from(raw.global_dof_count) == Ok(counts.global_dof_count)
+            && usize::try_from(raw.constrained_dof_count) == Ok(counts.constrained_dof_count)
+            && Some(raw.load_pattern_index) == expected_load_pattern_index
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved == [0; 2];
+        let indices_are_canonical = self
+            .constrained_dof_indices
+            .windows(2)
+            .all(|pair| pair[0] < pair[1])
+            && self
+                .constrained_dof_indices
+                .iter()
+                .all(|index| u64::from(*index) < raw.global_dof_count);
+        let numerical_values_are_valid = [
+            self.constrained_internal_force.as_slice(),
+            self.constrained_external_load.as_slice(),
+            self.reactions.as_slice(),
+        ]
+        .into_iter()
+        .all(|values| values.iter().all(|value| value.is_finite()))
+            && self
+                .reactions
+                .iter()
+                .zip(&self.constrained_internal_force)
+                .zip(&self.constrained_external_load)
+                .all(|((reaction, internal), external)| {
+                    reaction.to_bits() == (*internal - *external).to_bits()
+                });
+        if !(counts_match && indices_are_canonical && numerical_values_are_valid) {
+            return Err(model_ir_linear_reaction_contract_error());
+        }
+
+        let model_content_hash = String::from_utf8(self.model_content_hash)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?;
+        let model_semantic_hash = String::from_utf8(self.model_semantic_hash)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?;
+        let model_provenance_hash = String::from_utf8(self.model_provenance_hash)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?;
+        if model_content_hash != expected_content_hash
+            || model_semantic_hash != expected_semantic_hash
+            || model_provenance_hash != expected_provenance_hash
+        {
+            return Err(model_ir_linear_reaction_contract_error());
+        }
+        Ok(ModelIrLinearReactions {
+            model_content_hash,
+            model_semantic_hash,
+            model_provenance_hash,
+            load_pattern_index: raw.load_pattern_index,
+            global_dof_count: raw.global_dof_count,
+            constrained_dof_indices: self.constrained_dof_indices,
+            constrained_internal_force: self.constrained_internal_force,
+            constrained_external_load: self.constrained_external_load,
+            reactions: self.reactions,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        })
+    }
+}
+
 /// RAII owner of one deep-copied immutable C++ `ModelIR` handle.
 pub struct ModelIr {
     api: Api,
@@ -3485,6 +3654,142 @@ impl ModelIr {
             return Err(error_from_buffer(status, &storage));
         }
         validate_model_ir_linear_sizes(&raw_sizes)
+    }
+
+    /// Query checked immutable extents for the constrained-reaction projection.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable native or output-contract error for an unsupported table or invalid model
+    /// graph extent.
+    pub fn linear_reaction_sizes(&self) -> Result<ModelIrLinearReactionSizes, Error> {
+        let counts = self.linear_reaction_counts()?;
+        Ok(ModelIrLinearReactionSizes {
+            global_dof_count: counts.global_dof_count,
+            constrained_dof_count: counts.constrained_dof_count,
+            model_identity_length: counts.model_identity_length,
+        })
+    }
+
+    /// Recover sorted constrained loads and reactions from one full linear displacement state.
+    ///
+    /// The wrapper queries exact sizes, allocates seven disjoint caller-owned outputs, executes
+    /// once, and independently revalidates ordering, finite values, the `internal - external`
+    /// sign convention, backend/fallback metadata, and all three `ModelIR` identities.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable native error when the model or request is outside the bounded v1.14
+    /// profile, and `SA_ERR_INTERNAL` if a successful native call violates its output contract.
+    pub fn recover_linear_reactions(
+        &self,
+        request: &ModelIrLinearReactionRequest,
+    ) -> Result<ModelIrLinearReactions, Error> {
+        if self.api.abi_version() < sys::SA_ABI_V1_14 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "ModelIR linear reactions require ABI v1.14".to_owned(),
+            });
+        }
+        if !valid_model_ir_selector(&request.load_pattern_id) {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: "ModelIR linear reaction load-case selector is invalid".to_owned(),
+            });
+        }
+        let counts = self.linear_reaction_counts()?;
+        if request.displacement.len() != counts.global_dof_count
+            || !request.displacement.iter().all(|value| value.is_finite())
+        {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: "ModelIR linear reaction displacement has invalid length or values"
+                    .to_owned(),
+            });
+        }
+
+        let mut output = ModelIrLinearReactionOutputArena::allocate(counts)?;
+        let raw_outputs = output.descriptor()?;
+        let raw_config = sys::SaModelIrLinearReactionConfigV1 {
+            abi_version: sys::SA_ABI_V1_14,
+            struct_size: abi_size::<sys::SaModelIrLinearReactionConfigV1>(),
+            load_pattern_id: input_string_view(&request.load_pattern_id)?,
+            displacement: input_f64_view(&request.displacement, sys::SA_ABI_V1_14)?,
+            flags: 0,
+            reserved: [0; 2],
+        };
+        let mut raw_result = sys::SaModelIrLinearReactionResultV1 {
+            abi_version: sys::SA_ABI_V1_14,
+            struct_size: abi_size::<sys::SaModelIrLinearReactionResultV1>(),
+            ..sys::SaModelIrLinearReactionResultV1::default()
+        };
+        let execute = self
+            .api
+            .table
+            .model_ir_linear_reactions
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(sys::SA_ABI_V1_14, &mut storage);
+        // SAFETY: the immutable handle, selector/displacement, seven disjoint output vectors and
+        // result descriptor remain live and pinned for this synchronous call. Native retains none.
+        let status = unsafe {
+            execute(
+                self.handle.as_ptr(),
+                &raw_config,
+                &raw_outputs,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        output.finish(
+            &raw_result,
+            counts,
+            &self.content_hash,
+            &self.semantic_hash,
+            &self.provenance_hash,
+            self.load_case_indices
+                .iter()
+                .find_map(|(id, index)| (id == &request.load_pattern_id).then_some(*index)),
+        )
+    }
+
+    fn linear_reaction_counts(&self) -> Result<ModelIrLinearReactionCounts, Error> {
+        if self.api.abi_version() < sys::SA_ABI_V1_14 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "ModelIR linear reactions require ABI v1.14".to_owned(),
+            });
+        }
+        let size_operation = self
+            .api
+            .table
+            .model_ir_linear_reaction_sizes
+            .ok_or_else(invalid_table)?;
+        let mut raw_sizes = sys::SaModelIrLinearReactionSizesV1 {
+            abi_version: sys::SA_ABI_V1_14,
+            struct_size: abi_size::<sys::SaModelIrLinearReactionSizesV1>(),
+            ..sys::SaModelIrLinearReactionSizesV1::default()
+        };
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(sys::SA_ABI_V1_14, &mut storage);
+        // SAFETY: the immutable RAII handle and caller-owned exact-size descriptor remain live.
+        let status = unsafe { size_operation(self.handle.as_ptr(), &mut raw_sizes, &mut error) };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let counts = validate_model_ir_linear_reaction_sizes(&raw_sizes)?;
+        let assembly = self.linear_assembly_counts()?;
+        let sizes_agree = counts.global_dof_count == assembly.global_dof_count
+            && counts.constrained_dof_count
+                == assembly.global_dof_count - assembly.active_dof_count
+            && counts.model_identity_length == assembly.model_identity_length;
+        if !sizes_agree {
+            return Err(model_ir_linear_reaction_contract_error());
+        }
+        Ok(counts)
     }
 
     /// Derive one fixed-guided global-X story problem from immutable typed `ModelIR` state.
@@ -4026,6 +4331,31 @@ fn validate_model_ir_linear_sizes(
     })
 }
 
+fn validate_model_ir_linear_reaction_sizes(
+    raw: &sys::SaModelIrLinearReactionSizesV1,
+) -> Result<ModelIrLinearReactionCounts, Error> {
+    const SHA256_IDENTITY_LENGTH: u64 = 71;
+    let valid = raw.abi_version == sys::SA_ABI_V1_14
+        && raw.struct_size == abi_size::<sys::SaModelIrLinearReactionSizesV1>()
+        && raw.reserved == [0; 3]
+        && raw.global_dof_count > 0
+        && raw.global_dof_count <= sys::SA_MODEL_IR_LINEAR_MAX_GLOBAL_DOF_COUNT
+        && raw.constrained_dof_count > 0
+        && raw.constrained_dof_count < raw.global_dof_count
+        && raw.model_identity_length == SHA256_IDENTITY_LENGTH;
+    if !valid {
+        return Err(model_ir_linear_reaction_contract_error());
+    }
+    Ok(ModelIrLinearReactionCounts {
+        global_dof_count: usize::try_from(raw.global_dof_count)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?,
+        constrained_dof_count: usize::try_from(raw.constrained_dof_count)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?,
+        model_identity_length: usize::try_from(raw.model_identity_length)
+            .map_err(|_| model_ir_linear_reaction_contract_error())?,
+    })
+}
+
 fn valid_model_ir_selector(value: &str) -> bool {
     let bytes = value.as_bytes();
     !bytes.is_empty()
@@ -4040,6 +4370,13 @@ fn model_ir_linear_contract_error() -> Error {
     Error {
         code: sys::SA_ERR_INTERNAL,
         message: "native ModelIR linear assembly violated the v1.13 output contract".to_owned(),
+    }
+}
+
+fn model_ir_linear_reaction_contract_error() -> Error {
+    Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "native ModelIR linear reactions violated the v1.14 output contract".to_owned(),
     }
 }
 
@@ -4119,6 +4456,16 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         table.model_ir_linear_assembly_sizes.is_none()
             && table.model_ir_linear_assemble.is_none()
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU == 0
+    };
+    let model_ir_linear_reaction_slots =
+        table.model_ir_linear_reaction_sizes.is_some() && table.model_ir_linear_reactions.is_some();
+    let model_ir_linear_reaction_valid = if requested >= sys::SA_ABI_V1_14 {
+        model_ir_linear_reaction_slots
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU != 0
+    } else {
+        table.model_ir_linear_reaction_sizes.is_none()
+            && table.model_ir_linear_reactions.is_none()
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU == 0
     };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
@@ -4365,6 +4712,36 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU != 0
+    } else if requested == sys::SA_ABI_V1_14 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && sparse_restart_slots
+            && nonlinear_static_restart_slots
+            && backend_selector_slot
+            && model_ir_linear_assembly_slots
+            && model_ir_linear_reaction_slots
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU != 0
     } else {
         false
     };
@@ -4376,6 +4753,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         && nonlinear_static_restart_valid
         && backend_selector_valid
         && model_ir_linear_assembly_valid
+        && model_ir_linear_reaction_valid
     {
         Ok(())
     } else {
@@ -4913,16 +5291,17 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_12, SA_ABI_V1_13, SA_ABI_V1_2,
-        SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8, SA_ABI_V1_9,
-        SA_CAPABILITY_BACKEND_SELECTOR, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_12, SA_ABI_V1_13, SA_ABI_V1_14,
+        SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8,
+        SA_ABI_V1_9, SA_CAPABILITY_BACKEND_SELECTOR, SA_CAPABILITY_BUFFER_VALIDATION,
         SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU,
-        SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
-        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_CAPABILITY_NONLINEAR_NDTHA_CPU,
-        SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU, SA_CAPABILITY_NONLINEAR_STATIC_CPU,
-        SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU, SA_CAPABILITY_REFERENCE_ELEMENTS_CPU,
-        SA_CAPABILITY_SPARSE_LINEAR_CPU, SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU,
-        SA_CAPABILITY_TRACK_POINT_LOAD_CPU, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
+        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
+        SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
+        SA_CAPABILITY_NONLINEAR_STATIC_CPU, SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU,
+        SA_CAPABILITY_REFERENCE_ELEMENTS_CPU, SA_CAPABILITY_SPARSE_LINEAR_CPU,
+        SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU, SA_CAPABILITY_TRACK_POINT_LOAD_CPU,
+        SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -5167,6 +5546,31 @@ mod tests {
                 | SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
                 | SA_CAPABILITY_BACKEND_SELECTOR
                 | SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU
+        );
+    }
+
+    #[test]
+    fn v1_14_table_appends_only_model_ir_linear_reactions() {
+        let api = Api::load_model_ir_linear_reactions().expect("v1.14 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_14);
+        assert_eq!(
+            api.capabilities(),
+            SA_CAPABILITY_BUFFER_VALIDATION
+                | SA_CAPABILITY_MODEL_IR_V2_TYPED
+                | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                | SA_CAPABILITY_TRACK_POINT_LOAD_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_CPU
+                | SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU
+                | SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER
+                | SA_CAPABILITY_REFERENCE_ELEMENTS_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_CPU
+                | SA_CAPABILITY_GENERALIZED_EIGEN_CPU
+                | SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU
+                | SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU
+                | SA_CAPABILITY_BACKEND_SELECTOR
+                | SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU
+                | SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU
         );
     }
 

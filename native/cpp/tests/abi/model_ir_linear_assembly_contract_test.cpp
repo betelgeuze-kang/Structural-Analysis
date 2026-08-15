@@ -186,6 +186,104 @@ struct OutputStorage final {
     };
 }
 
+[[nodiscard]] sa_model_ir_linear_reaction_sizes_v1 empty_reaction_sizes() {
+    return {
+        SA_ABI_V1_14,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_linear_reaction_sizes_v1)),
+        0U,
+        0U,
+        0U,
+        {0U, 0U, 0U},
+    };
+}
+
+[[nodiscard]] sa_buffer_view_v1 reaction_input_view(
+    const double* const data,
+    const std::uint64_t length) {
+    return {
+        SA_ABI_V1_14,
+        static_cast<std::uint32_t>(sizeof(sa_buffer_view_v1)),
+        data,
+        length,
+        sizeof(double),
+        SA_ELEMENT_TYPE_F64,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+}
+
+template <typename Value>
+[[nodiscard]] sa_mut_buffer_view_v1 reaction_output_view(
+    std::vector<Value>& values,
+    const std::uint32_t element_type) {
+    return {
+        SA_ABI_V1_14,
+        static_cast<std::uint32_t>(sizeof(sa_mut_buffer_view_v1)),
+        values.empty() ? nullptr : values.data(),
+        static_cast<std::uint64_t>(values.size()),
+        sizeof(Value),
+        element_type,
+        SA_MEMORY_SPACE_HOST,
+        -1,
+        0U,
+    };
+}
+
+struct ReactionStorage final {
+    std::vector<std::uint32_t> constrained_dof_indices;
+    std::vector<double> constrained_internal_force;
+    std::vector<double> constrained_external_load;
+    std::vector<double> reactions;
+    std::vector<std::uint8_t> model_content_hash;
+    std::vector<std::uint8_t> model_semantic_hash;
+    std::vector<std::uint8_t> model_provenance_hash;
+
+    explicit ReactionStorage(
+        const sa_model_ir_linear_reaction_sizes_v1& sizes,
+        const bool sentinel = false)
+        : constrained_dof_indices(
+              sizes.constrained_dof_count, sentinel ? 0xA5A5A5A5U : 0U),
+          constrained_internal_force(
+              sizes.constrained_dof_count, sentinel ? -123.25 : 0.0),
+          constrained_external_load(
+              sizes.constrained_dof_count, sentinel ? -123.25 : 0.0),
+          reactions(sizes.constrained_dof_count, sentinel ? -123.25 : 0.0),
+          model_content_hash(sizes.model_identity_length, sentinel ? 0xA5U : 0U),
+          model_semantic_hash(sizes.model_identity_length, sentinel ? 0xA5U : 0U),
+          model_provenance_hash(sizes.model_identity_length, sentinel ? 0xA5U : 0U) {}
+
+    [[nodiscard]] sa_model_ir_linear_reaction_outputs_v1 descriptor() {
+        return {
+            SA_ABI_V1_14,
+            static_cast<std::uint32_t>(sizeof(sa_model_ir_linear_reaction_outputs_v1)),
+            reaction_output_view(constrained_dof_indices, SA_ELEMENT_TYPE_U32),
+            reaction_output_view(constrained_internal_force, SA_ELEMENT_TYPE_F64),
+            reaction_output_view(constrained_external_load, SA_ELEMENT_TYPE_F64),
+            reaction_output_view(reactions, SA_ELEMENT_TYPE_F64),
+            reaction_output_view(model_content_hash, SA_ELEMENT_TYPE_U8),
+            reaction_output_view(model_semantic_hash, SA_ELEMENT_TYPE_U8),
+            reaction_output_view(model_provenance_hash, SA_ELEMENT_TYPE_U8),
+            {0U, 0U},
+        };
+    }
+
+    [[nodiscard]] bool operator==(const ReactionStorage&) const = default;
+};
+
+[[nodiscard]] sa_model_ir_linear_reaction_result_v1 empty_reaction_result() {
+    return {
+        SA_ABI_V1_14,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_linear_reaction_result_v1)),
+        0U,
+        0U,
+        0U,
+        0U,
+        0U,
+        {0U, 0U},
+    };
+}
+
 [[nodiscard]] bool table_is_append_only() {
     const auto legacy = load_api(SA_ABI_V1_12, SA_API_V1_12_MIN_SIZE);
     CHECK(legacy.abi_version == SA_ABI_V1_12);
@@ -200,6 +298,141 @@ struct OutputStorage final {
     CHECK((current.capabilities & SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU) != 0U);
     CHECK(current.model_ir_linear_assembly_sizes != nullptr);
     CHECK(current.model_ir_linear_assemble != nullptr);
+    CHECK(current.model_ir_linear_reaction_sizes == nullptr);
+    CHECK(current.model_ir_linear_reactions == nullptr);
+
+    const auto reactions = load_api(SA_ABI_V1_14);
+    CHECK(reactions.abi_version == SA_ABI_V1_14);
+    CHECK((reactions.capabilities & SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU) != 0U);
+    CHECK((reactions.capabilities & SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU) != 0U);
+    CHECK(reactions.model_ir_linear_assembly_sizes != nullptr);
+    CHECK(reactions.model_ir_linear_assemble != nullptr);
+    CHECK(reactions.model_ir_linear_reaction_sizes != nullptr);
+    CHECK(reactions.model_ir_linear_reactions != nullptr);
+
+    sa_api_v1 frozen_prefix {};
+    frozen_prefix.abi_version = SA_ABI_V1_13;
+    frozen_prefix.struct_size = SA_API_V1_13_MIN_SIZE;
+    frozen_prefix.model_ir_linear_reaction_sizes = reactions.model_ir_linear_reaction_sizes;
+    frozen_prefix.model_ir_linear_reactions = reactions.model_ir_linear_reactions;
+    const sa_api_request_v1 frozen_request {
+        SA_ABI_V1_13,
+        static_cast<std::uint32_t>(sizeof(sa_api_request_v1)),
+        0U,
+        {0U, 0U, 0U},
+    };
+    CHECK(sa_get_api_v1(&frozen_request, &frozen_prefix, nullptr) == SA_OK);
+    CHECK(frozen_prefix.abi_version == SA_ABI_V1_13);
+    CHECK(frozen_prefix.struct_size == sizeof(sa_api_v1));
+    CHECK(frozen_prefix.model_ir_linear_reaction_sizes
+          == reactions.model_ir_linear_reaction_sizes);
+    CHECK(frozen_prefix.model_ir_linear_reactions == reactions.model_ir_linear_reactions);
+    return true;
+}
+
+[[nodiscard]] bool constrained_reactions_are_atomic_deterministic_and_concurrent() {
+    const auto api = load_api(SA_ABI_V1_14);
+    structural::tests::ModelIrAssemblyFixture fixture;
+    fixture.nodal_loads[1].node_id = structural::tests::text("n0");
+    fixture.nodal_loads[1].components_si[0] = 7.0;
+    fixture.nodal_loads[1].components_si[1] = 0.0;
+    sa_model_ir_handle_v1* handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
+
+    auto sizes = empty_reaction_sizes();
+    CHECK(api.model_ir_linear_reaction_sizes(handle, &sizes, nullptr) == SA_OK);
+    CHECK(sizes.global_dof_count == 18U);
+    CHECK(sizes.constrained_dof_count == 11U);
+    CHECK(sizes.model_identity_length == 71U);
+    const auto displacement = structural::tests::assembly_displacement();
+    const sa_model_ir_linear_reaction_config_v1 config {
+        SA_ABI_V1_14,
+        static_cast<std::uint32_t>(sizeof(sa_model_ir_linear_reaction_config_v1)),
+        structural::tests::text("lp"),
+        reaction_input_view(displacement.data(), displacement.size()),
+        0U,
+        {0U, 0U},
+    };
+    ReactionStorage storage(sizes);
+    auto outputs = storage.descriptor();
+    auto result = empty_reaction_result();
+    CHECK(api.model_ir_linear_reactions(handle, &config, &outputs, &result, nullptr) == SA_OK);
+    CHECK(result.global_dof_count == 18U);
+    CHECK(result.constrained_dof_count == 11U);
+    CHECK(result.load_pattern_index == 0U);
+    CHECK(result.execution_backend == SA_EXECUTION_BACKEND_CPU);
+    CHECK(result.fallback_count == 0U);
+    CHECK(storage.constrained_dof_indices
+          == std::vector<std::uint32_t>({0U, 1U, 2U, 3U, 4U, 5U, 12U, 14U, 15U, 16U, 17U}));
+    CHECK(storage.constrained_external_load.front() == 7.0);
+    for (std::size_t index = 0U; index < storage.reactions.size(); ++index) {
+        CHECK(storage.reactions[index]
+              == storage.constrained_internal_force[index]
+                  - storage.constrained_external_load[index]);
+    }
+    CHECK(std::string(storage.model_content_hash.begin(), storage.model_content_hash.end())
+          == "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
+
+    ReactionStorage repeated(sizes);
+    auto repeated_outputs = repeated.descriptor();
+    auto repeated_result = empty_reaction_result();
+    CHECK(api.model_ir_linear_reactions(
+              handle, &config, &repeated_outputs, &repeated_result, nullptr)
+          == SA_OK);
+    CHECK(repeated == storage);
+    CHECK(std::memcmp(&repeated_result, &result, sizeof(result)) == 0);
+
+    ReactionStorage rejected(sizes, true);
+    const auto before = rejected;
+    auto rejected_outputs = rejected.descriptor();
+    --rejected_outputs.reactions.length;
+    auto rejected_result = empty_reaction_result();
+    rejected_result.global_dof_count = 0xA5A5U;
+    const auto result_before = rejected_result;
+    CHECK(api.model_ir_linear_reactions(
+              handle, &config, &rejected_outputs, &rejected_result, nullptr)
+          == SA_ERR_BUFFER_TOO_SMALL);
+    CHECK(rejected == before);
+    CHECK(std::memcmp(&rejected_result, &result_before, sizeof(rejected_result)) == 0);
+    rejected_outputs = rejected.descriptor();
+    rejected_outputs.reactions.data = rejected_outputs.constrained_internal_force.data;
+    CHECK(api.model_ir_linear_reactions(
+              handle, &config, &rejected_outputs, &rejected_result, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(rejected == before);
+    CHECK(std::memcmp(&rejected_result, &result_before, sizeof(rejected_result)) == 0);
+
+    std::atomic<bool> passed {true};
+    std::vector<std::thread> workers;
+    for (std::size_t worker = 0U; worker < 8U; ++worker) {
+        workers.emplace_back([&api, handle, &sizes, &config, &storage, &passed] {
+            for (std::size_t iteration = 0U; iteration < 8U; ++iteration) {
+                auto local_sizes = empty_reaction_sizes();
+                ReactionStorage local(sizes);
+                auto local_outputs = local.descriptor();
+                auto local_result = empty_reaction_result();
+                if (api.model_ir_linear_reaction_sizes(handle, &local_sizes, nullptr) != SA_OK
+                    || local_sizes.constrained_dof_count != sizes.constrained_dof_count
+                    || api.model_ir_linear_reactions(
+                           handle, &config, &local_outputs, &local_result, nullptr)
+                        != SA_OK
+                    || local != storage || local_result.fallback_count != 0U) {
+                    passed.store(false, std::memory_order_relaxed);
+                }
+            }
+        });
+    }
+    for (auto& worker : workers) {
+        worker.join();
+    }
+    CHECK(passed.load(std::memory_order_relaxed));
+
+    CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
+    auto stale_sizes = empty_reaction_sizes();
+    const auto stale_before = stale_sizes;
+    CHECK(api.model_ir_linear_reaction_sizes(handle, &stale_sizes, nullptr)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(std::memcmp(&stale_sizes, &stale_before, sizeof(stale_sizes)) == 0);
     return true;
 }
 
@@ -496,6 +729,7 @@ struct OutputStorage final {
 int main() {
     const std::array tests {
         table_is_append_only,
+        constrained_reactions_are_atomic_deterministic_and_concurrent,
         successful_assembly_is_canonical_and_deterministic,
         bounded_direct_linear_combination_crosses_the_frozen_abi,
         bounded_nested_linear_combination_crosses_the_frozen_abi,

@@ -200,6 +200,34 @@ target_link_options(
 )
 structural_set_warnings(structural_model_ir_linear_assembly_abi_fuzz)
 
+add_executable(
+  structural_model_ir_linear_reactions_abi_fuzz
+  model_ir_linear_reactions_abi_fuzz.cpp
+)
+target_include_directories(
+  structural_model_ir_linear_reactions_abi_fuzz
+  PRIVATE
+    ${PROJECT_SOURCE_DIR}/tests/assembly
+)
+target_link_libraries(
+  structural_model_ir_linear_reactions_abi_fuzz
+  PRIVATE
+    structural_c_abi_v1
+)
+target_compile_options(
+  structural_model_ir_linear_reactions_abi_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+target_link_options(
+  structural_model_ir_linear_reactions_abi_fuzz
+  PRIVATE
+    -fsanitize=fuzzer,address,undefined
+    -fno-omit-frame-pointer
+)
+structural_set_warnings(structural_model_ir_linear_reactions_abi_fuzz)
+
 add_custom_target(
   structural_native_fuzzers
   DEPENDS
@@ -214,6 +242,7 @@ add_custom_target(
     structural_sparse_linear_abi_fuzz
     structural_generalized_eigen_abi_fuzz
     structural_model_ir_linear_assembly_abi_fuzz
+    structural_model_ir_linear_reactions_abi_fuzz
 )
 add_test(
   NAME structural_abi_buffer_fuzz_smoke
@@ -323,5 +352,15 @@ set_tests_properties(
   structural_model_ir_linear_assembly_abi_fuzz_smoke
   PROPERTIES
     LABELS "fuzz-smoke;abi;assembly;modelir;elements;materials;solver_cpu"
+    TIMEOUT 30
+)
+add_test(
+  NAME structural_model_ir_linear_reactions_abi_fuzz_smoke
+  COMMAND structural_model_ir_linear_reactions_abi_fuzz -runs=256
+)
+set_tests_properties(
+  structural_model_ir_linear_reactions_abi_fuzz_smoke
+  PROPERTIES
+    LABELS "fuzz-smoke;abi;assembly;reactions;modelir;elements;materials;solver_cpu"
     TIMEOUT 30
 )

@@ -1,7 +1,8 @@
 # Bounded ModelIR Linear Reference Assembly v1
 
-Status: CPU numerical gate C1; ABI v1.13/Rust C3 integration candidate implemented without
-sequential promotion, product solver authority, or HIP promotion.
+Status: CPU numerical gate C1; ABI v1.13 active-system and ABI v1.14 constrained-reaction Rust C3
+integration candidates implemented without sequential promotion, product solver authority, or HIP
+promotion.
 
 ## Owned path
 
@@ -49,7 +50,7 @@ not link Python or Rust.
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
   all three ModelIR identities only after complete success. Public C/C++ layout smoke, stale-handle,
   pointer/stride/length/alias, exact-size, concurrent immutable and failure-atomic tests cover the
-  boundary. `structural-ffi` mirrors the 200-byte table, performs bounded sizes-to-allocation,
+  boundary. `structural-ffi` preserves and validates the 200-byte v1.13 prefix, performs bounded sizes-to-allocation,
   revalidates canonical CSR, recovery offsets, finite values, CPU/fallback metadata and exact model
   identities plus the selected legacy load-case stable index, and has deterministic/concurrent Rust
   integration coverage. Public bounds cap global DOFs and recovery records at 1,000,000 and
@@ -57,10 +58,19 @@ not link Python or Rust.
   libFuzzer target mutates both size and execute descriptors, every output-view metadata family,
   safe aliases and numerical inputs while asserting that every rejected call leaves all caller
   output and result bytes unchanged.
+- C3 constrained-reaction integration candidate: ABI v1.14 preserves the complete 200-byte v1.13
+  prefix and appends exact-sizes plus failure-atomic execute slots for seven disjoint caller-owned
+  buffers. The operation reuses the same immutable stable-order element source and returns sorted
+  constrained global indices, constrained internal/external load, `internal - external` reactions,
+  three ModelIR identities, CPU backend and fallback 0. The 216-byte safe Rust table performs
+  bounded allocation and independently revalidates all of those invariants. C/C++ boundary tests
+  cover layout, older-minor null slots, exact sizes, short/oversized/aliased buffers, failure
+  atomicity, stale handles and concurrent immutable calls; Rust integration tests cover
+  deterministic axial support recovery, selector/state rejection and concurrent reads.
 
 This advances only the bounded D3 CPU reference slice. The sequential gate remains C1 because no
-protected HIP C2 receipt exists for this typed graph path. The v1.13/Rust work is therefore an
-implemented C3 integration candidate, not a promoted sequential C3 gate.
+protected HIP C2 receipt exists for this typed graph path. The v1.13/v1.14 Rust work is therefore
+an implemented C3 integration candidate, not a promoted sequential C3 gate.
 
 ## Fail-closed boundary
 
@@ -69,14 +79,14 @@ end releases, member loads, nonzero prescribed constraints, self-weight, direct 
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
 time functions, construction stages, and declared unsupported features. It does not solve the
-assembled operator by itself, expose constrained reactions through ABI v1.13, reorder DOFs, or
-propagate constitutive epochs.
+assembled operator by itself, add reactions to the frozen ABI v1.13 operation, reorder DOFs, or
+propagate constitutive epochs; reaction projection is available only through ABI v1.14.
 The separate bounded composition in `modelir-linear-product-e2e-v1.md` now feeds this exact output
 to the existing CPU PCG product, wraps its real iteration state in a ModelIR-bound C4 checkpoint,
 and publishes C5 ResultIR/ReportIR plus active-DOF and element recovery. That separate capability
 does not promote this numerical family past C1.
 
 Still open: those excluded formulations and general load semantics, shell graph support, stateful
-trial/commit/rollback aggregation, ABI/Rust/product publication of the C++ reaction vectors,
+trial/commit/rollback aggregation, product/restart publication of the ABI v1.14 reaction vectors,
 authoritative sequential C2/C3 promotion, durable job/service integration for this profile, and C6
 decommission.

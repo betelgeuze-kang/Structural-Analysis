@@ -16,6 +16,8 @@ mod model_ir_ndtha_adapter;
 pub use model_ir_ndtha_adapter::*;
 mod model_ir_linear_assembly;
 pub use model_ir_linear_assembly::*;
+mod model_ir_linear_reactions;
+pub use model_ir_linear_reactions::*;
 mod nonlinear_static;
 pub use nonlinear_static::*;
 mod nonlinear_ndtha;
@@ -30,7 +32,7 @@ pub use track::*;
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_13;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_14;
 pub const SA_OK: SaStatusCodeV1 = 0;
 pub const SA_ERR_INVALID_ARGUMENT: SaStatusCodeV1 = 1000;
 pub const SA_ERR_ABI_VERSION_MISMATCH: SaStatusCodeV1 = 1001;
@@ -136,6 +138,8 @@ pub struct SaApiV1 {
     pub backend_get_api: Option<SaBackendGetApiFnV1>,
     pub model_ir_linear_assembly_sizes: Option<SaModelIrLinearAssemblySizesFnV1>,
     pub model_ir_linear_assemble: Option<SaModelIrLinearAssembleFnV1>,
+    pub model_ir_linear_reaction_sizes: Option<SaModelIrLinearReactionSizesFnV1>,
+    pub model_ir_linear_reactions: Option<SaModelIrLinearReactionsFnV1>,
 }
 
 impl Default for SaApiV1 {
@@ -167,6 +171,8 @@ impl Default for SaApiV1 {
             backend_get_api: None,
             model_ir_linear_assembly_sizes: None,
             model_ir_linear_assemble: None,
+            model_ir_linear_reaction_sizes: None,
+            model_ir_linear_reactions: None,
         }
     }
 }
@@ -202,7 +208,7 @@ mod tests {
         assert_eq!(offset_of!(SaErrorBufferV1, required), 24);
         assert_eq!(size_of::<SaApiRequestV1>(), 40);
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
-        assert_eq!(size_of::<SaApiV1>(), 200);
+        assert_eq!(size_of::<SaApiV1>(), 216);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
@@ -222,6 +228,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, backend_get_api), 176);
         assert_eq!(offset_of!(SaApiV1, model_ir_linear_assembly_sizes), 184);
         assert_eq!(offset_of!(SaApiV1, model_ir_linear_assemble), 192);
+        assert_eq!(offset_of!(SaApiV1, model_ir_linear_reaction_sizes), 200);
+        assert_eq!(offset_of!(SaApiV1, model_ir_linear_reactions), 208);
         assert_eq!(size_of::<SaModelIrLinearAssemblySizesV1>(), 88);
         assert_eq!(size_of::<SaModelIrLinearAssemblyConfigV1>(), 144);
         assert_eq!(size_of::<SaModelIrLinearAssemblyOutputsV1>(), 792);

@@ -99,7 +99,10 @@ assembly operation, and the safe Rust wrapper independently revalidates the cano
 recovery layout, selected legacy load-case index and all three ModelIR identities. That boundary is a
 C3 integration candidate,
 not a gate promotion: HIP C2 is still open, so the capability remains at C1. The bounded slice
-does not expose those constrained reaction vectors yet and does not cover nonzero constraints,
+also exposes the same constrained reaction vectors through append-only ABI v1.14 exact-size and
+failure-atomic execute slots. Its safe Rust wrapper revalidates sorted indices, finite values, the
+reaction sign convention, identities and fallback 0. Product artifact and restart publication of
+those vectors remains open. The slice does not cover nonzero constraints,
 offsets/releases, self-weight, nested or arbitrary-term combinations, stages, or shell/nonlinear
 graphs. A separate Rust composition
 path binds this exact
@@ -369,7 +372,8 @@ offsets 144 and 152. ABI v1.11 appends nonlinear-static Newton begin and advance
 offsets 160 and 168. ABI v1.12 preserves that 176-byte prefix and appends one backend-selector
 slot at offset 176. ABI v1.13 preserves the resulting 184-byte prefix and appends immutable
 typed-ModelIR linear exact-sizes and failure-atomic 16-buffer execute slots at offsets 184 and
-192; the current table is 200 bytes. The selected CPU/HIP table owns the bounded full-residual
+192. ABI v1.14 preserves that 200-byte prefix and appends constrained-reaction exact-sizes and
+failure-atomic 7-buffer execute slots at offsets 200 and 208; the current table is 216 bytes. The selected CPU/HIP table owns the bounded full-residual
 context, telemetry, and no-fallback device choice. Existing callers may continue to provide their
 older struct size, and every request exposes later-minor slots as null.
 

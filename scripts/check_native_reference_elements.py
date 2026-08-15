@@ -80,6 +80,10 @@ REQUIRED_TOKENS = {
         "SA_MODEL_IR_LINEAR_MAX_STRUCTURAL_ENTRIES",
         "model_ir_linear_assembly_sizes",
         "model_ir_linear_assemble",
+        "SA_ABI_V1_14",
+        "SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU",
+        "model_ir_linear_reaction_sizes",
+        "model_ir_linear_reactions",
     ),
     "native/cpp/tests/abi/reference_elements_contract_test.cpp": (
         "table_is_append_only",
@@ -93,6 +97,7 @@ REQUIRED_TOKENS = {
     ),
     "native/cpp/tests/abi/model_ir_linear_assembly_contract_test.cpp": (
         "table_is_append_only",
+        "constrained_reactions_are_atomic_deterministic_and_concurrent",
         "successful_assembly_is_canonical_and_deterministic",
         "failures_are_atomic_and_aliases_fail_closed",
         "immutable_calls_are_concurrent",
@@ -100,6 +105,8 @@ REQUIRED_TOKENS = {
     "native/cpp/tests/fuzz/CMakeLists.txt": (
         "structural_model_ir_linear_assembly_abi_fuzz",
         "structural_model_ir_linear_assembly_abi_fuzz_smoke",
+        "structural_model_ir_linear_reactions_abi_fuzz",
+        "structural_model_ir_linear_reactions_abi_fuzz_smoke",
     ),
     "native/cpp/tests/fuzz/model_ir_linear_assembly_abi_fuzz.cpp": (
         "LLVMFuzzerTestOneInput",
@@ -107,17 +114,32 @@ REQUIRED_TOKENS = {
         "model_ir_linear_assemble",
         "storage == storage_before",
     ),
+    "native/cpp/tests/fuzz/model_ir_linear_reactions_abi_fuzz.cpp": (
+        "LLVMFuzzerTestOneInput",
+        "model_ir_linear_reaction_sizes",
+        "model_ir_linear_reactions",
+        "storage == storage_before",
+    ),
     "native/cpp/tests/package_consumer/main.c": (
-        "SA_ABI_V1_13",
         "SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU",
         "model_ir_linear_assembly_sizes",
         "model_ir_linear_assemble",
+        "SA_ABI_V1_14",
+        "SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU",
+        "model_ir_linear_reaction_sizes",
+        "model_ir_linear_reactions",
     ),
     "native/crates/structural-ffi-sys/src/model_ir_linear_assembly.rs": (
         "SA_ABI_V1_13",
         "SaModelIrLinearAssemblySizesV1",
         "SaModelIrLinearAssemblyOutputsV1",
         "SaModelIrLinearAssembleFnV1",
+    ),
+    "native/crates/structural-ffi-sys/src/model_ir_linear_reactions.rs": (
+        "SA_ABI_V1_14",
+        "SaModelIrLinearReactionSizesV1",
+        "SaModelIrLinearReactionOutputsV1",
+        "SaModelIrLinearReactionsFnV1",
     ),
     "native/crates/structural-ffi/src/lib.rs": (
         "load_reference_elements",
@@ -126,6 +148,9 @@ REQUIRED_TOKENS = {
         "load_model_ir_linear_assembly",
         "assemble_linear_reference",
         "native ModelIR linear assembly violated the v1.13 output contract",
+        "load_model_ir_linear_reactions",
+        "recover_linear_reactions",
+        "native ModelIR linear reactions violated the v1.14 output contract",
     ),
     "native/crates/structural-ffi/tests/reference_elements_parity.rs": (
         "immutable_reference_operation_is_reentrant_and_deterministic",
@@ -135,6 +160,11 @@ REQUIRED_TOKENS = {
         "v1_13_safe_wrapper_preserves_identity_and_canonical_csr",
         "older_model_ir_table_cannot_claim_the_appended_operation",
         "immutable_model_assembly_is_safe_for_concurrent_reads",
+    ),
+    "native/crates/structural-ffi/tests/model_ir_linear_reactions.rs": (
+        "v1_14_safe_wrapper_recovers_canonical_support_reactions",
+        "older_model_ir_table_cannot_claim_reaction_slots",
+        "immutable_reaction_recovery_is_safe_for_concurrent_reads",
     ),
     "tests/test_native_reference_elements_python_parity.py": (
         "independent_numpy_oracle",
@@ -161,6 +191,7 @@ REQUIRED_TOKENS = {
         "43 structural entries",
         "equilibrium_residual = internal_force - external_load",
         "ABI v1.13",
+        "ABI v1.14",
         "C3 integration candidate",
         "C6",
     ),
@@ -196,7 +227,7 @@ def check_native_reference_elements(repo_root: Path = ROOT) -> dict[str, object]
             if token not in claim:
                 blockers.append(f"reference_capability_scope_token_missing:{capability}:{token}")
         if capability == "dense_assembly_cpu":
-            for token in ("ABI v1.13", "C3 integration candidate"):
+            for token in ("ABI v1.13", "ABI v1.14", "C3 integration candidate"):
                 if token not in claim:
                     blockers.append(
                         f"reference_capability_scope_token_missing:{capability}:{token}"

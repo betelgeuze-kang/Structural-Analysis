@@ -161,6 +161,11 @@ symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
   typed-ModelIR linear assembly exact-sizes/execute operation을 append한다. execute는 16개
   disjoint caller-owned host buffer에 canonical CSR, internal/external/equilibrium residual,
   JVP, element recovery와 세 ModelIR identity를 complete-success 뒤에만 게시한다.
+- v1.14는 0x0001000e이며 v1.13의 200-byte prefix를 보존하고 offset 200과 208에
+  bounded typed-ModelIR constrained-reaction exact-sizes/execute operation을 append한다.
+  execute는 sorted constrained global DOF, internal load, external load,
+  `reaction = internal - external`, 세 ModelIR identity를 7개 disjoint caller-owned host
+  buffer에 complete-success 뒤에만 게시한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -200,9 +205,9 @@ serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 ### 5.4 ModelIR v1.1 table extension
 
 과거 v1.0-v1.6 consumer가 제공하던 128-byte table, v1.7의 136-byte table, v1.8-v1.9의
-144-byte table, v1.10의 160-byte table, v1.11의 176-byte table과 v1.12의 184-byte table을
-계속 지원한다. 현재 header의 table은 v1.13 ModelIR linear assembly tail을 포함해 200
-bytes이며 caller의
+144-byte table, v1.10의 160-byte table, v1.11의 176-byte table, v1.12의 184-byte table과
+v1.13의 200-byte table을 계속 지원한다. 현재 header의 table은 v1.14 ModelIR
+constrained-reaction tail을 포함해 216 bytes이며 caller의
 `struct_size`까지만 쓴다.
 v1.0 요청에는 이후 slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability
 bit를 제공한다.
@@ -255,7 +260,24 @@ public `model-linear-run`/`model-linear-resume`은 C4 checkpoint와 C5 ResultIR/
 Markdown 및 terminal active-DOF/element recovery를 원자적으로 게시한다. 이는 별도
 implementation capability일 뿐 sequential C2/C3 권한을 우회하지 않는다.
 
-### 5.6 Stable status taxonomy
+### 5.6 ModelIR constrained reactions v1.14 extension
+
+v1.14의 `model_ir_linear_reaction_sizes`는 동일 immutable ModelIR handle에서 global DOF,
+sorted homogeneous-constrained DOF와 ModelIR identity의 exact length를 구한다.
+`model_ir_linear_reactions`는 exact-length finite full-state displacement를 받고 동일 stable-order
+element source를 평가해 다음 7개 disjoint caller-owned host buffer를 complete-success 후에만
+게시한다.
+
+- sorted constrained global-DOF indices
+- constrained internal force, external load, `reaction = internal - external`
+- content, semantic, provenance identity bytes
+- CPU backend, fallback zero, selected load-case index와 exact result counts
+
+v1.13 exact-sizes와 v1.14 exact-sizes의 global/active/constrained complement를 safe Rust가 다시
+대조한다. 이 경계는 C3 integration candidate이며, product ResultIR/recovery/checkpoint 게시와
+승인된 HIP C2 receipt는 별도로 열려 있다.
+
+### 5.7 Stable status taxonomy
 
 | Code | Symbol | 의미 |
 | ---: | --- | --- |

@@ -25,7 +25,9 @@ _Static_assert(
 _Static_assert(
     SA_MODEL_IR_LINEAR_MAX_EXPANDED_COMBINATION_TERMS == UINT64_C(64),
     "ModelIR nested-combination expansion bound changed");
-_Static_assert(sizeof(sa_api_v1) == 200U, "sa_api_v1 layout changed");
+_Static_assert(sizeof(sa_api_v1) == 216U, "sa_api_v1 layout changed");
+_Static_assert(SA_API_V1_13_MIN_SIZE == 200U, "ABI v1.13 prefix size changed");
+_Static_assert(SA_API_V1_14_MIN_SIZE == 216U, "ABI v1.14 table size changed");
 _Static_assert(sizeof(sa_backend_request_v1) == 40U, "backend request layout changed");
 _Static_assert(sizeof(sa_full_residual_operator_v1) == 544U, "full residual operator layout changed");
 _Static_assert(sizeof(sa_full_residual_eval_config_v1) == 40U, "full residual config layout changed");
@@ -65,6 +67,18 @@ _Static_assert(
 _Static_assert(
     sizeof(sa_model_ir_linear_assembly_result_v1) == 88U,
     "ModelIR linear result layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_reaction_sizes_v1) == 56U,
+    "ModelIR linear reaction sizes layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_reaction_config_v1) == 96U,
+    "ModelIR linear reaction config layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_reaction_outputs_v1) == 360U,
+    "ModelIR linear reaction outputs layout changed");
+_Static_assert(
+    sizeof(sa_model_ir_linear_reaction_result_v1) == 56U,
+    "ModelIR linear reaction result layout changed");
 _Static_assert(sizeof(sa_sparse_csr_matrix_v1) == 176U, "sparse CSR layout changed");
 _Static_assert(sizeof(sa_sparse_linear_config_v1) == 56U, "sparse config layout changed");
 _Static_assert(sizeof(sa_sparse_linear_result_v1) == 80U, "sparse result layout changed");
@@ -97,6 +111,12 @@ _Static_assert(
 _Static_assert(
     offsetof(sa_api_v1, model_ir_linear_assemble) == 192U,
     "ModelIR linear execute slot offset changed");
+_Static_assert(
+    offsetof(sa_api_v1, model_ir_linear_reaction_sizes) == 200U,
+    "ModelIR linear reaction sizes slot offset changed");
+_Static_assert(
+    offsetof(sa_api_v1, model_ir_linear_reactions) == 208U,
+    "ModelIR linear reaction execute slot offset changed");
 _Static_assert(sizeof(sa_sparse_linear_state_v1) == 280U, "sparse restart state layout changed");
 _Static_assert(sizeof(sa_string_view_v1) == 16U, "sa_string_view_v1 layout changed");
 _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor layout changed");

@@ -21,7 +21,7 @@ const SCHEMA_VERSION: &str = "structural-distribution.v1";
 const ACTIVATION_SCHEMA_VERSION: &str = "structural-activation.v1";
 const TRANSACTION_SCHEMA_VERSION: &str = "structural-install-transaction.v1";
 const BUILD_SCHEMA_VERSION: &str = "structural-native-build.v1";
-const ABI_VERSION: &str = "0x0001000d";
+const ABI_VERSION: &str = "0x0001000e";
 const MAX_MANIFEST_BYTES: u64 = 16 * 1024 * 1024;
 const MAX_FILE_COUNT: usize = 16_384;
 const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024 * 1024;
@@ -3998,7 +3998,7 @@ mod tests {
         }
         fs::write(
             root.join("include/structural/abi_v1.h"),
-            "/* ABI v1.13 */\n",
+            "/* ABI v1.14 */\n",
         )
         .expect("write ABI header fixture");
         let library = match linkage {
