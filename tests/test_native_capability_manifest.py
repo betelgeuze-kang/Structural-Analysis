@@ -1070,6 +1070,29 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "public/customer distribution publication" in reaction_audit["claim"]
     assert "HIP C2" in reaction_audit["claim"]
     assert "C6" in reaction_audit["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_linear_nodal_displacement_view"
+        )
+        is True
+    )
+    displacement_view = payload["capabilities"][
+        "modelir_linear_nodal_displacement_view"
+    ]
+    assert displacement_view["cutover_gate"] == "C5"
+    assert displacement_view["owner"] == "structural-workbench"
+    assert "nodal-displacement-view" in displacement_view["claim"]
+    assert "terminal run receipt" in displacement_view["claim"]
+    assert "actual node ID" in displacement_view["claim"]
+    assert "metre/radian FP64 components" in displacement_view["claim"]
+    assert "en-US or ko-KR" in displacement_view["claim"]
+    assert "1 through 256 nodes" in displacement_view["claim"]
+    assert "byte-identical strict-ModelIR and normalized-MGT direct/restart views" in displacement_view["claim"]
+    assert "frozen pre-reaction compatibility" in displacement_view["claim"]
+    assert "installed static/shared successor distribution" in displacement_view["claim"]
+    assert "public/customer distribution publication" in displacement_view["claim"]
+    assert "HIP C2" in displacement_view["claim"]
+    assert "C6" in displacement_view["claim"]
 
 
 def test_native_evidence_bundle_capability_is_bounded_c5() -> None:

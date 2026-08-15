@@ -49,6 +49,7 @@ mod evidence;
 mod linear_combination;
 mod model_edit;
 mod model_view;
+mod nodal_displacement_view;
 mod reaction_audit;
 mod reaction_view;
 mod report_view;
@@ -184,6 +185,10 @@ pub use model_view::{
     render_model_topology_view, render_model_topology_view_file,
     render_model_topology_view_file_localized, render_model_topology_view_localized,
     ModelTopologyProjectionV1,
+};
+pub use nodal_displacement_view::{
+    WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1,
 };
 pub use reaction_view::{
     WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1, WORKBENCH_REACTION_VIEW_MAX_COUNT_V1,
@@ -1779,6 +1784,91 @@ impl NativeWorkbench {
         );
         output.push_str(source);
         Ok(output)
+    }
+
+    /// Return a deterministic bounded node window over verified `ModelIR` linear displacements.
+    ///
+    /// The view maps each six-component global displacement block back to the immutable `ModelIR`
+    /// node identifier, preserves exact FP64 values and source identities, and never mutates or
+    /// re-executes the analysis.
+    ///
+    /// # Errors
+    ///
+    /// Requires a `ModelIR` linear session at terminal or later and rejects receipt drift,
+    /// source-binding drift, invalid node mapping, or an unsafe node window.
+    pub fn model_ir_linear_nodal_displacement_view_text(
+        &self,
+        start_node: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
+        self.model_ir_linear_nodal_displacement_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            start_node,
+            count,
+        )
+    }
+
+    /// Return a localized deterministic bounded node-displacement window.
+    ///
+    /// Locale changes labels only. Exact FP64 values, node mappings, units, execution receipt,
+    /// and provenance identities remain visible in both supported languages.
+    ///
+    /// # Errors
+    ///
+    /// Requires the same verified terminal artifact set as the English displacement view.
+    pub fn model_ir_linear_nodal_displacement_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        start_node: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
+        if self.session.analysis_profile != Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) {
+            return Err(WorkbenchError::new(
+                "workbench_profile_unsupported",
+                "nodal displacement view is available only for the ModelIR linear CPU profile",
+            ));
+        }
+        if self.session.stage < WorkbenchStageV1::Terminal {
+            return Err(WorkbenchError::new(
+                "workbench_transition_invalid",
+                format!(
+                    "terminal or later is required but the durable stage is {}",
+                    self.session.stage.label()
+                ),
+            ));
+        }
+        let terminal = self.root.join(RESUME_DIRECTORY);
+        verify_receipt_directory(&terminal, "run-receipt.json")?;
+        let result_bytes = read_bounded_regular_file(
+            &terminal.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &terminal.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes).map_err(|error| {
+            input_error("workbench_nodal_displacement_view_result_invalid", &error)
+        })?;
+        let recovery =
+            parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes).map_err(|error| {
+                input_error("workbench_nodal_displacement_view_recovery_invalid", &error)
+            })?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery).map_err(|error| {
+            input_error("workbench_nodal_displacement_view_recovery_invalid", &error)
+        })?;
+        let model_bytes = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
+        let model = parse_model_ir_v2(&model_bytes).map_err(|error| {
+            input_error("workbench_nodal_displacement_view_model_invalid", &error)
+        })?;
+        nodal_displacement_view::render_model_ir_linear_nodal_displacement_view(
+            &model,
+            result.result(),
+            recovery.recovery(),
+            locale,
+            start_node,
+            count,
+        )
     }
 
     /// Return a deterministic bounded window over verified `ModelIR` linear constrained reactions.

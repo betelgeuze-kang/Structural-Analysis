@@ -20,6 +20,7 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/model_edit.rs"),
     Path("native/crates/structural-workbench/src/deformed_view.rs"),
     Path("native/crates/structural-workbench/src/model_view.rs"),
+    Path("native/crates/structural-workbench/src/nodal_displacement_view.rs"),
     Path("native/crates/structural-workbench/src/reaction_audit.rs"),
     Path("native/crates/structural-workbench/src/reaction_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
@@ -94,6 +95,7 @@ REQUIRED_PATHS = (
     Path("docs/native/localized-terminal-result-views-v1.md"),
     Path("docs/native/modelir-linear-reaction-view-v1.md"),
     Path("docs/native/modelir-linear-reaction-audit-v1.md"),
+    Path("docs/native/modelir-linear-nodal-displacement-view-v1.md"),
     Path("docs/native/modelir-constraint-value-edit-v1.md"),
     Path("docs/native/modelir-linear-material-edit-v1.md"),
     Path("docs/native/modelir-frame-section-edit-v1.md"),
@@ -403,6 +405,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_modelir_linear_nodal_displacement_view_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_modelir_linear_constrained_reaction_view_en_us_ko_kr": (
         "c5_implemented",
         False,
@@ -595,6 +601,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     if native.get("operator_flow") != [
         "inspect",
         "report-view",
+        "nodal-displacement-view",
         "reaction-view",
         "reaction-audit",
         "result-view",
@@ -1128,6 +1135,25 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "Reaction",
             "workbench_reaction_view_window_invalid",
             "not an equilibrium audit, support-design verdict",
+        ),
+        blockers,
+    )
+    native_nodal_displacement_view = _text(
+        root,
+        Path("native/crates/structural-workbench/src/nodal_displacement_view.rs"),
+        blockers,
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/nodal_displacement_view.rs"),
+        native_nodal_displacement_view,
+        (
+            "structural-native-workbench-model-ir-linear-nodal-displacement-view.v1",
+            "WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1",
+            "verify_model_identity",
+            "UX (m)",
+            "RX (rad)",
+            "workbench_nodal_displacement_view_window_invalid",
+            "not a deformed-shape, stress, contour, modal",
         ),
         blockers,
     )
@@ -1892,6 +1918,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             'Some("inspect")',
             'Some("report-view")',
+            'Some("nodal-displacement-view")',
             'Some("reaction-view")',
             'Some("reaction-audit")',
             'Some("result-view")',
@@ -3312,8 +3339,9 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "material/section edits, truss3d "
         "section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, "
         "frame3d-section, truss3d-section and fixed-constraint deletion, "
-        "family-specific last-neutral-frame3d/truss3d-leaf deletion, and deterministic en-US/ko-KR "
-        "ModelIR-linear constrained-reaction view plus algebraic global-resultant reaction audit"
+        "family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR "
+        "ModelIR-linear nodal-displacement and constrained-reaction views, and algebraic "
+        "global-resultant reaction audit"
     )
     if extension_claim != expected_extension_claim:
         blockers.append("workbench_ui_native_surface_extension_claim_invalid")
@@ -3324,7 +3352,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         "two-to-64 direct linear-load-combination addition with v2 provenance/request receipts beyond two terms, one last-neutral two-to-64 direct linear-load-combination deletion retaining exact-two v1 fields and using v2 provenance beyond two terms, and one depth-eight/64-leaf acyclic nested linear-load-combination addition with v3 provenance/request receipts, bounded CPU execution, exact active loads, typed recovery and checkpoint/restart parity, plus one last-neutral depth-eight/64-leaf acyclic nested linear-load-combination deletion with v3 root/expanded-term provenance, retained child-combination CPU execution, exact active load [0,-12000,5000,0,0,0], typed recovery and checkpoint/restart parity",
         "one bounded direct linear-load-combination single-factor edit preserving reference kind/identity/order/count with exact active load [25000,-13500,5000,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
         "one bounded nested linear-load-combination typed-root-factor edit preserving root reference kind/identity/order/count and every descendant, binding source/edited depth-eight/64-leaf expansions with exact active load [25000,-9000,3750,0,0,0], typed recovery, fallback 0 and checkpoint/restart parity",
-        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, and deterministic en-US/ko-KR ModelIR-linear constrained-reaction view plus algebraic global-resultant reaction audit",
+        "expected-source-bound root model-identity editing, typed-reference-cascading node identity editing, standalone neutral-node authoring and orphan-node deletion, two-pattern linear-load-combination authoring and bounded CPU execution, bounded direct and nested linear-load-combination stable-identity editing plus typed-root factor editing, last-neutral two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination deletion, two-to-64 direct plus depth-eight/64-leaf acyclic nested linear-load-combination authoring and CPU execution, compatible frame3d element and truss3d material/section edits, truss3d section/member authoring, last-neutral nodal-load, linear-load-pattern, linear-material, frame3d-section, truss3d-section and fixed-constraint deletion, family-specific last-neutral-frame3d/truss3d-leaf deletion, deterministic en-US/ko-KR ModelIR-linear nodal-displacement and constrained-reaction views, and algebraic global-resultant reaction audit",
         "active React/TypeScript/JavaScript, npm plus retained Node/TypeScript/Vite install, audit, build, development, syntax, browser installer, exporter, probe, and capture runtimes, npm registry/advisory/cache/lifecycle/configuration and node_modules or external-cache mutation, Playwright-owned downloads, caches, elevation and host-package mutation, Chromium/browser, optional pdftotext, the Python quality-gate sequence, and the native catalog/evidence Bash launcher conveniences visible",
         "does not authorize source deletion",
         "approved HIP C2",

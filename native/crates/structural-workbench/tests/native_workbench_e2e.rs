@@ -19163,6 +19163,14 @@ fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated()
     assert_eq!(unsupported_reactions.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&unsupported_reactions.stdout)
         .contains("workbench_profile_unsupported"));
+    let unsupported_displacements = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(unsupported_displacements.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&unsupported_displacements.stdout)
+        .contains("workbench_profile_unsupported"));
     let result: Value = serde_json::from_slice(
         &std::fs::read(workspace.join("04-resume/result-ir.json")).expect("terminal ResultIR"),
     )

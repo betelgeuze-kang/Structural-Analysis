@@ -563,6 +563,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   to the actual node ID and fixed DOF label, and preserves internal force, external load, reaction,
   mixed force/moment units, CPU ABI receipt and provenance. Its `en-US` and `ko-KR` paths are
   presentation-only; frozen pre-reaction artifacts and NDTHA sessions fail closed.
+- `nodal-displacement-view`: a deterministic self-hashed ANSI-free 1..256-node table over one
+  verified ModelIR linear recovery. It maps contiguous node indices to immutable node IDs, exposes
+  exact `UX/UY/UZ` metre and `RX/RY/RZ` radian components plus CPU ABI/provenance, and leaves the
+  session unchanged. Its `en-US` and `ko-KR` paths are presentation-only; frozen pre-reaction
+  workspaces remain supported and NDTHA sessions fail closed. It is not a deformed-shape, stress,
+  contour, modal, serviceability, support-design, or engineering-verdict surface.
 - `reaction-audit`: a deterministic self-hashed ANSI-free algebraic global-resultant audit over
   the verified ModelIR linear generalized external-load and constrained-reaction partitions. It
   independently closes force, global-origin moment and active-equation residuals against a fixed

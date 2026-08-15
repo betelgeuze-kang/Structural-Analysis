@@ -32,6 +32,8 @@ REQUIRED_TOKENS = {
         "publish_review",
         "inspect_json",
         "linear_report_text",
+        "model_ir_linear_nodal_displacement_view_text",
+        "model_ir_linear_nodal_displacement_view_text_localized",
         "model_ir_linear_reaction_view_text",
         "model_ir_linear_reaction_view_text_localized",
         "model_ir_linear_reaction_audit_text",
@@ -78,6 +80,17 @@ REQUIRED_TOKENS = {
         "workbench_reaction_view_window_invalid",
         "workbench_reaction_view_unsafe",
         "not an equilibrium audit, support-design verdict",
+    ),
+    "native/crates/structural-workbench/src/nodal_displacement_view.rs": (
+        "structural-native-workbench-model-ir-linear-nodal-displacement-view.v1",
+        "WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1",
+        "verify_model_identity",
+        "Node ID",
+        "UX (m)",
+        "RX (rad)",
+        "workbench_nodal_displacement_view_window_invalid",
+        "workbench_nodal_displacement_view_unsafe",
+        "not a deformed-shape, stress, contour, modal",
     ),
     "native/crates/structural-workbench/src/reaction_audit.rs": (
         "structural-native-workbench-model-ir-linear-reaction-audit.v1",
@@ -351,6 +364,7 @@ REQUIRED_TOKENS = {
         'Some("compare")',
         'Some("report")',
         'Some("report-view")',
+        'Some("nodal-displacement-view")',
         'Some("reaction-view")',
         'Some("reaction-audit")',
         'Some("result-view")',
@@ -440,6 +454,10 @@ REQUIRED_TOKENS = {
         "clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_identity",
         "simulate MGT linear process death",
         "workbench_mgt_import_binding_mismatch",
+        "structural-native-workbench-model-ir-linear-nodal-displacement-view.v1",
+        "Korean displacement view hash line",
+        "MGT displacement view hash line",
+        "frozen_linear_workspace_without_reactions_retains_legacy_review_contract",
         "structural-native-workbench-model-ir-linear-reaction-view.v1",
         "workbench_reaction_view_missing",
         "structural-native-workbench-model-ir-linear-reaction-audit.v1",
@@ -496,6 +514,20 @@ REQUIRED_TOKENS = {
         "structural-native-distribution-e2e.v85",
         "structural-native-rootfs-isolation-e2e.v8",
         "public/customer distribution publication",
+        "approved HIP C2",
+        "C6 authority",
+    ),
+    "docs/native/modelir-linear-nodal-displacement-view-v1.md": (
+        "structural-workbench nodal-displacement-view",
+        "model_ir_linear_cpu_v1",
+        "UX`, `UY`, `UZ` in metres",
+        "`RY`, `RZ` in radians",
+        "one through 256 rows",
+        "strict ModelIR and normalized",
+        "MGT linear workflows",
+        "frozen pre-reaction compatibility",
+        "Installed static/shared distribution",
+        "support-design",
         "approved HIP C2",
         "C6 authority",
     ),
@@ -1301,6 +1333,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     frame_leaf_deletion_row: dict[str, object] = {}
     truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
+    nodal_displacement_view_row: dict[str, object] = {}
     reaction_view_row: dict[str, object] = {}
     reaction_audit_row: dict[str, object] = {}
     try:
@@ -1329,6 +1362,9 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         frame_leaf_deletion_row = payload["capabilities"]["modelir_frame3d_leaf_deletion"]
         truss_leaf_deletion_row = payload["capabilities"]["modelir_truss3d_leaf_deletion"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
+        nodal_displacement_view_row = payload["capabilities"][
+            "modelir_linear_nodal_displacement_view"
+        ]
         reaction_view_row = payload["capabilities"]["modelir_linear_reaction_view"]
         reaction_audit_row = payload["capabilities"]["modelir_linear_reaction_audit"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
@@ -1340,6 +1376,33 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         blockers.append("native_workbench_capability_gate_not_c5")
     if row.get("owner") != "structural-workbench":
         blockers.append("native_workbench_capability_owner_invalid")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if nodal_displacement_view_row.get(field) != expected:
+            blockers.append(
+                f"native_workbench_nodal_displacement_view_capability_invalid:{field}"
+            )
+    nodal_displacement_view_claim = str(nodal_displacement_view_row.get("claim", ""))
+    for token in (
+        "nodal-displacement-view",
+        "terminal run receipt",
+        "actual node ID",
+        "metre/radian FP64 components",
+        "1 through 256 nodes",
+        "byte-identical strict-ModelIR and normalized-MGT direct/restart views",
+        "frozen pre-reaction compatibility",
+        "installed static/shared successor distribution",
+        "deformed-shape",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in nodal_displacement_view_claim:
+            blockers.append(
+                f"native_workbench_nodal_displacement_view_claim_token_missing:{token}"
+            )
     for field, expected in (
         ("status", "implemented"),
         ("cutover_gate", "C5"),

@@ -61,6 +61,10 @@ internal/external/reaction values and units; see
 The separate read-only `reaction-audit` independently computes algebraic force, global-origin
 moment, and active-equation closure with a visible IEEE 754 numeric-tolerance policy; see
 `docs/native/modelir-linear-reaction-audit-v1.md`. It is not an engineering verdict.
+The independent `nodal-displacement-view` maps verified recovery blocks to immutable node IDs and
+prints exact translation/rotation components in bounded self-hashed English/Korean windows; see
+`docs/native/modelir-linear-nodal-displacement-view-v1.md`. It is not a deformed-shape or design
+verdict.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and

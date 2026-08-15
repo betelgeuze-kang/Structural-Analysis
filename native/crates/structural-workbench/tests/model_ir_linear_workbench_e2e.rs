@@ -429,8 +429,174 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(report_text.contains("structural-native-workbench-model-ir-linear-report-view.v1"));
     assert!(report_text.contains("# Sparse Linear Analysis Report"));
 
-    let session_before_reaction_views =
-        fs::read(restarted.join("workbench-session.json")).expect("session before reaction views");
+    let session_before_result_surfaces =
+        fs::read(restarted.join("workbench-session.json")).expect("session before result surfaces");
+    let result_bytes =
+        fs::read(restarted.join("04-resume/result-ir.json")).expect("sparse ResultIR");
+    let result = verify_self_hash(&result_bytes, "result_hash");
+    let recovery_bytes = fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+        .expect("linear recovery ResultIR");
+    let recovery = verify_self_hash(&recovery_bytes, "recovery_hash");
+    let displacement_view_arguments = [
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let displacement_view_first = run_workbench(&displacement_view_arguments);
+    let displacement_view_second = run_workbench(&displacement_view_arguments);
+    assert_success(&displacement_view_first);
+    assert_eq!(
+        displacement_view_first.stdout,
+        displacement_view_second.stdout
+    );
+    assert!(!displacement_view_first.stdout.contains(&0x1b));
+    let direct_displacement_view = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_displacement_view);
+    assert_eq!(
+        displacement_view_first.stdout,
+        direct_displacement_view.stdout
+    );
+    let displacement_view =
+        String::from_utf8(displacement_view_first.stdout).expect("ASCII displacement view");
+    assert!(displacement_view
+        .starts_with("Structural ModelIR Linear Workbench - Nodal Displacements\n"));
+    assert!(displacement_view.contains(
+        "Schema: structural-native-workbench-model-ir-linear-nodal-displacement-view.v1\n"
+    ));
+    assert!(displacement_view.contains("Displayed nodes: 1-2 of 2\n"));
+    assert!(displacement_view.contains(&format!(
+        "Backend: cpu / fp64 / ABI {} / fallback 0\n",
+        result["backend_receipt"]["abi_version"]
+            .as_str()
+            .expect("sparse ABI version")
+    )));
+    for hash in [
+        recovery["source_result_hash"]
+            .as_str()
+            .expect("source result hash"),
+        recovery["recovery_hash"].as_str().expect("recovery hash"),
+        recovery["analysis_request_hash"]
+            .as_str()
+            .expect("analysis request hash"),
+        recovery["assembly_hash"].as_str().expect("assembly hash"),
+        recovery["model_identity"]["content_hash"]
+            .as_str()
+            .expect("model content hash"),
+        recovery["model_identity"]["semantic_hash"]
+            .as_str()
+            .expect("model semantic hash"),
+        recovery["model_identity"]["provenance_hash"]
+            .as_str()
+            .expect("model provenance hash"),
+        result["identity"]["request_hash"]
+            .as_str()
+            .expect("sparse request hash"),
+        result["identity"]["model_hash"]
+            .as_str()
+            .expect("sparse model hash"),
+        result["identity"]["state_hash"]
+            .as_str()
+            .expect("state hash"),
+        result["identity"]["execution_hash"]
+            .as_str()
+            .expect("execution hash"),
+        result["identity"]["checkpoint_hash"]
+            .as_str()
+            .expect("checkpoint hash"),
+    ] {
+        assert!(displacement_view.contains(hash));
+    }
+    for (node_index, node_id) in ["N1", "N2"].iter().enumerate() {
+        let offset = node_index * 6;
+        let expected_row = format!(
+            "{:06}\t{}\t{:010}\t{:+.17e}\t{:+.17e}\t{:+.17e}\t{:+.17e}\t{:+.17e}\t{:+.17e}",
+            node_index + 1,
+            node_id,
+            node_index,
+            recovery["global_displacement"][offset]
+                .as_f64()
+                .expect("UX displacement"),
+            recovery["global_displacement"][offset + 1]
+                .as_f64()
+                .expect("UY displacement"),
+            recovery["global_displacement"][offset + 2]
+                .as_f64()
+                .expect("UZ displacement"),
+            recovery["global_displacement"][offset + 3]
+                .as_f64()
+                .expect("RX displacement"),
+            recovery["global_displacement"][offset + 4]
+                .as_f64()
+                .expect("RY displacement"),
+            recovery["global_displacement"][offset + 5]
+                .as_f64()
+                .expect("RZ displacement"),
+        );
+        assert!(displacement_view.lines().any(|line| line == expected_row));
+    }
+    let (unsigned, hash_line) = displacement_view
+        .rsplit_once("View hash: ")
+        .expect("displacement view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_displacement_arguments = [
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--start-node"),
+        text("2"),
+        text("--count"),
+        text("1"),
+    ];
+    let korean_displacement_first = run_workbench(&korean_displacement_arguments);
+    let korean_displacement_second = run_workbench(&korean_displacement_arguments);
+    assert_success(&korean_displacement_first);
+    assert_eq!(
+        korean_displacement_first.stdout,
+        korean_displacement_second.stdout
+    );
+    assert!(!korean_displacement_first.stdout.contains(&0x1b));
+    let korean_displacement = String::from_utf8(korean_displacement_first.stdout)
+        .expect("Korean displacement view UTF-8");
+    assert!(korean_displacement.starts_with("Structural ModelIR 선형 Workbench - 노드 변위\n"));
+    assert!(korean_displacement.contains("로케일: ko-KR\n"));
+    assert!(korean_displacement.contains("표시 노드: 2-2 / 2\n"));
+    assert!(!korean_displacement
+        .lines()
+        .any(|line| line.starts_with("000001\t")));
+    assert!(korean_displacement
+        .lines()
+        .any(|line| line.starts_with("000002\tN2\t")));
+    let (unsigned, hash_line) = korean_displacement
+        .rsplit_once("보기 해시: ")
+        .expect("Korean displacement view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    for arguments in [
+        vec![
+            text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--count"),
+            text("257"),
+        ],
+        vec![
+            text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--start-node"),
+            text("3"),
+        ],
+    ] {
+        let rejected = run_workbench(&arguments);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+
     let reaction_view_arguments = [
         text("reaction-view"),
         text("--workspace"),
@@ -700,8 +866,8 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
 
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after reaction views"),
-        session_before_reaction_views,
-        "reaction view or audit mutated the durable session"
+        session_before_result_surfaces,
+        "displacement/reaction view or audit mutated the durable session"
     );
 
     let session_before_localized_export =
@@ -805,6 +971,21 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(!roles.contains(&"pdf_report"));
 
     let reaction_path = restarted.join("04-resume/reaction-result-ir.json");
+    let recovery_path = restarted.join("04-resume/result-recovery-ir.json");
+    let mut tampered_recovery = recovery_bytes.clone();
+    tampered_recovery[32] ^= 1;
+    fs::write(&recovery_path, tampered_recovery).expect("tamper recovery");
+    let rejected = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert!(!rejected.status.success());
+    assert!(
+        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
+    );
+    fs::write(&recovery_path, &recovery_bytes).expect("restore recovery");
+
     let mut tampered_reaction = reaction_bytes.clone();
     tampered_reaction[32] ^= 1;
     fs::write(&reaction_path, tampered_reaction).expect("tamper reactions");
@@ -890,6 +1071,18 @@ fn frozen_linear_workspace_without_reactions_retains_legacy_review_contract() {
     assert!(!audit_unavailable.status.success());
     assert!(String::from_utf8_lossy(&audit_unavailable.stdout)
         .contains("workbench_reaction_audit_missing"));
+
+    let displacement_available = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_success(&displacement_available);
+    assert!(
+        String::from_utf8_lossy(&displacement_available.stdout).contains(
+            "Schema: structural-native-workbench-model-ir-linear-nodal-displacement-view.v1"
+        )
+    );
 
     assert_success(&run_workbench(&stage_arguments("status", &workspace)));
     assert_success(&run_workbench(&[
@@ -1047,8 +1240,66 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     )
     .expect("MGT linear deterministic PDF");
 
-    let session_before_audits =
-        fs::read(restarted.join("workbench-session.json")).expect("session before MGT audits");
+    let session_before_result_surfaces = fs::read(restarted.join("workbench-session.json"))
+        .expect("session before MGT result surfaces");
+    let displacement_arguments = [
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let displacement_first = run_workbench(&displacement_arguments);
+    let displacement_second = run_workbench(&displacement_arguments);
+    assert_success(&displacement_first);
+    assert_eq!(displacement_first.stdout, displacement_second.stdout);
+    assert!(!displacement_first.stdout.contains(&0x1b));
+    let direct_displacement = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_displacement);
+    assert_eq!(displacement_first.stdout, direct_displacement.stdout);
+    let displacement =
+        String::from_utf8(displacement_first.stdout).expect("MGT displacement view UTF-8");
+    assert!(displacement.contains(
+        "Schema: structural-native-workbench-model-ir-linear-nodal-displacement-view.v1\n"
+    ));
+    assert!(displacement.contains("Load pattern: LP_PUSH\n"));
+    assert!(displacement.contains("Displayed nodes: 1-2 of 2\n"));
+    assert!(displacement.contains(&format!(
+        "{:+.17e}",
+        recovery["global_displacement"][6]
+            .as_f64()
+            .expect("MGT floor UX")
+    )));
+    let (unsigned, hash_line) = displacement
+        .rsplit_once("View hash: ")
+        .expect("MGT displacement view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_displacement = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--start-node"),
+        text("2"),
+        text("--count"),
+        text("1"),
+    ]);
+    assert_success(&korean_displacement);
+    let korean_displacement =
+        String::from_utf8(korean_displacement.stdout).expect("Korean MGT displacement UTF-8");
+    assert!(korean_displacement.contains("표시 노드: 2-2 / 2\n"));
+    assert!(korean_displacement
+        .lines()
+        .any(|line| line.starts_with("000002\tN_2\t")));
+    let (unsigned, hash_line) = korean_displacement
+        .rsplit_once("보기 해시: ")
+        .expect("Korean MGT displacement view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
     let audit_arguments = [
         text("reaction-audit"),
         text("--workspace"),
@@ -1099,8 +1350,8 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after MGT audits"),
-        session_before_audits,
-        "MGT reaction audit mutated the durable session"
+        session_before_result_surfaces,
+        "MGT displacement/reaction surfaces mutated the durable session"
     );
 
     let mut tampered =
@@ -1112,6 +1363,14 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     assert!(
         String::from_utf8_lossy(&rejected.stdout).contains("workbench_mgt_import_binding_mismatch")
     );
+    let rejected_displacement = run_workbench(&[
+        text("nodal-displacement-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert!(!rejected_displacement.status.success());
+    assert!(String::from_utf8_lossy(&rejected_displacement.stdout)
+        .contains("workbench_mgt_import_binding_mismatch"));
 
     fs::remove_dir_all(root).expect("cleanup");
 }

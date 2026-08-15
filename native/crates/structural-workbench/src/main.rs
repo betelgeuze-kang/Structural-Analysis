@@ -14,7 +14,8 @@ use structural_workbench::{
     WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
     MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
-    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_REACTION_VIEW_MAX_COUNT_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
 };
@@ -580,6 +581,14 @@ struct ReactionViewCommand {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct NodalDisplacementViewCommand {
+    workspace: PathBuf,
+    locale: WorkbenchReportLocaleV1,
+    start_node: u32,
+    count: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct ReactionAuditCommand {
     workspace: PathBuf,
     locale: WorkbenchReportLocaleV1,
@@ -885,6 +894,8 @@ fn run(arguments: &[OsString]) -> ExitCode {
             print!("{}", workbench.linear_report_text(locale)?);
             Ok(())
         }),
+        Some("nodal-displacement-view") => parse_nodal_displacement_view(arguments)
+            .and_then(|command| run_nodal_displacement_view(&command)),
         Some("reaction-view") => {
             parse_reaction_view(arguments).and_then(|command| run_reaction_view(&command))
         }
@@ -960,6 +971,7 @@ fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
                     | "workbench_evidence_artifact_id_invalid"
                     | "workbench_evidence_artifact_not_found"
                     | "workbench_evidence_as_of_invalid"
+                    | "workbench_nodal_displacement_view_window_invalid"
                     | "workbench_reaction_view_window_invalid"
                     | "workbench_result_view_window_invalid"
                     | "workbench_deformed_view_step_invalid"
@@ -1028,6 +1040,21 @@ fn run_reaction_view(command: &ReactionViewCommand) -> Result<(), WorkbenchError
         workbench.model_ir_linear_reaction_view_text_localized(
             command.locale,
             command.start_row,
+            command.count,
+        )?
+    );
+    Ok(())
+}
+
+fn run_nodal_displacement_view(
+    command: &NodalDisplacementViewCommand,
+) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    print!(
+        "{}",
+        workbench.model_ir_linear_nodal_displacement_view_text_localized(
+            command.locale,
+            command.start_node,
             command.count,
         )?
     );
@@ -4656,6 +4683,70 @@ fn parse_reaction_view(arguments: &[OsString]) -> Result<ReactionViewCommand, Wo
     })
 }
 
+fn parse_nodal_displacement_view(
+    arguments: &[OsString],
+) -> Result<NodalDisplacementViewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut start_node = 1;
+    let mut start_seen = false;
+    let mut count = WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1;
+    let mut count_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("nodal-displacement-view option has no value"));
+        }
+        let flag = arguments[index].to_str().ok_or_else(|| {
+            usage_error("nodal-displacement-view option names must be valid UTF-8")
+        })?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("nodal-displacement-view locale must be en-US or ko-KR")
+                    })?;
+            }
+            "--start-node" if !start_seen => {
+                start_seen = true;
+                start_node = parse_u32(value, "nodal-displacement-view start node")?;
+                if start_node == 0 {
+                    return Err(usage_error(
+                        "nodal-displacement-view start node must be at least 1",
+                    ));
+                }
+            }
+            "--count" if !count_seen => {
+                count_seen = true;
+                count = parse_u32(value, "nodal-displacement-view count")?;
+                if count == 0 || count > WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error(
+                        "nodal-displacement-view count must be in 1..=256",
+                    ));
+                }
+            }
+            _ => {
+                return Err(usage_error(
+                    "duplicate or unknown nodal-displacement-view option",
+                ))
+            }
+        }
+        index += 2;
+    }
+    Ok(NodalDisplacementViewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
+        start_node,
+        count,
+    })
+}
+
 fn parse_reaction_audit(arguments: &[OsString]) -> Result<ReactionAuditCommand, WorkbenchError> {
     let mut workspace = None;
     let mut locale = WorkbenchReportLocaleV1::EnUs;
@@ -5043,6 +5134,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-linear-material-identity <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
         "\n  structural-workbench reaction-audit --workspace <DIR> [--locale <en-US|ko-KR>]",
+        "\n  structural-workbench nodal-displacement-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-node <N>] [--count <1..256>]",
         "\n  structural-workbench model-edit-linear-material-identity-cascade <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-truss-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
@@ -5106,8 +5198,9 @@ mod tests {
         parse_model_reorder_direct_linear_load_combination_term,
         parse_model_reorder_fixed_constraint_dof,
         parse_model_reorder_nested_linear_load_combination_term, parse_model_view,
-        parse_reaction_audit, parse_reaction_view, parse_report_pdf_export, parse_report_view,
-        parse_result_view, parse_review, parse_stage_command, LinearLoadCombinationReferenceKindV1,
+        parse_nodal_displacement_view, parse_reaction_audit, parse_reaction_view,
+        parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
+        parse_stage_command, LinearLoadCombinationReferenceKindV1,
     };
 
     #[test]
@@ -7643,6 +7736,43 @@ mod tests {
             let mut invalid = window.clone();
             invalid[index] = OsString::from(invalid_value);
             assert!(parse_reaction_view(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn nodal_displacement_view_parser_has_bounded_locale_and_window_options() {
+        let default = [
+            OsString::from("nodal-displacement-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed =
+            parse_nodal_displacement_view(&default).expect("default nodal displacement view");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.locale.label(), "en-US");
+        assert_eq!(parsed.start_node, 1);
+        assert_eq!(parsed.count, 64);
+
+        let window = [
+            OsString::from("nodal-displacement-view"),
+            OsString::from("--count"),
+            OsString::from("2"),
+            OsString::from("--start-node"),
+            OsString::from("3"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_nodal_displacement_view(&window).expect("explicit displacement window");
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.start_node, 3);
+        assert_eq!(parsed.count, 2);
+
+        for (index, invalid_value) in [(2, "257"), (4, "0"), (6, "ko-kr")] {
+            let mut invalid = window.clone();
+            invalid[index] = OsString::from(invalid_value);
+            assert!(parse_nodal_displacement_view(&invalid).is_err());
         }
     }
 

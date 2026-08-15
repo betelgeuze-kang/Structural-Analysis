@@ -538,6 +538,8 @@ structural-workbench report-view --workspace SESSION --locale ko-KR
 structural-workbench reaction-view --workspace LINEAR-SESSION --locale ko-KR \
   --start-row 1 --count 64
 structural-workbench reaction-audit --workspace LINEAR-SESSION --locale ko-KR
+structural-workbench nodal-displacement-view --workspace LINEAR-SESSION --locale ko-KR \
+  --start-node 1 --count 64
 structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
 structural-workbench result-deformed-view --workspace SESSION \
@@ -643,6 +645,12 @@ displacement in global X. It prints original and magnified coordinates, records 
 hides that motion, and preserves ModelIR/request/result/state/execution/checkpoint provenance. It
 does not synthesize a general nodal field, element curvature, stress, contour, modal shape, or
 engineering verdict; see `docs/native/fixed-guided-deformed-shape-view-v1.md`.
+
+The ModelIR-linear nodal-displacement view maps each verified six-component global recovery block
+to the immutable node ID and prints exact `UX/UY/UZ` metre and `RX/RY/RZ` radian values in a bounded
+self-hashed window. It does not infer a deformed shape, stress, contour, modal shape, serviceability,
+support design, or engineering verdict; see
+`docs/native/modelir-linear-nodal-displacement-view-v1.md`.
 
 Both result views accept the closed `en-US`/`ko-KR` locale set. Their existing public methods and
 CLI defaults preserve the original English bytes; localized methods translate only fixed labels
