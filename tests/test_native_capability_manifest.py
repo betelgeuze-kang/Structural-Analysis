@@ -1048,7 +1048,8 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "1 through 256 rows" in reaction_view["claim"]
     assert "byte-identical direct/restart views" in reaction_view["claim"]
     assert "frozen pre-reaction missing-artifact rejection" in reaction_view["claim"]
-    assert "installed distribution publication" in reaction_view["claim"]
+    assert "installed static/shared CPU distribution v85" in reaction_view["claim"]
+    assert "public/customer distribution publication" in reaction_view["claim"]
     assert "HIP C2" in reaction_view["claim"]
     assert "C6" in reaction_view["claim"]
 
@@ -1502,18 +1503,28 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "structural-catalog" in distribution["claim"]
     assert "structural-evidence" in distribution["claim"]
     assert "explicit non-promoting review" in distribution["claim"]
+    assert "append-only v84 binds the exact constrained-reaction ResultIR" in distribution["claim"]
+    assert "append-only v85 binds deterministic installed en-US" in distribution["claim"]
+    assert "frozen v1 through v84 receipts" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v84"
+        == "structural-native-distribution-e2e.v85"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v83"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v84"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
+    ]
+    assert distribution_evidence["reaction_view_hash_fields"] == [
+        "model_ir_linear_reaction_view_en_us_sha256",
+        "model_ir_linear_reaction_view_ko_kr_sha256",
+        "model_ir_linear_reaction_view_window_sha256",
+        "mgt_model_ir_linear_reaction_view_en_us_sha256",
+        "mgt_model_ir_linear_reaction_view_ko_kr_sha256",
     ]
     assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False

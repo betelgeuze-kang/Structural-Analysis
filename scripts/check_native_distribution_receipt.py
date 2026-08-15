@@ -979,6 +979,19 @@ V84_REACTION_RESULT_KEYS = {
     "mgt_model_ir_linear_reaction_result_ir_sha256",
 }
 V84_EXPECTED_KEYS = V83_EXPECTED_KEYS | V84_REACTION_RESULT_KEYS
+V85_REACTION_VIEW_KEYS = {
+    "model_ir_linear_reaction_view_surface_passed",
+    "model_ir_linear_reaction_view_restart_parity_passed",
+    "model_ir_linear_reaction_view_en_us_sha256",
+    "model_ir_linear_reaction_view_ko_kr_sha256",
+    "model_ir_linear_reaction_view_window_sha256",
+    "mgt_model_ir_linear_reaction_view_surface_passed",
+    "mgt_model_ir_linear_reaction_view_restart_parity_passed",
+    "mgt_model_ir_linear_reaction_view_en_us_sha256",
+    "mgt_model_ir_linear_reaction_view_ko_kr_sha256",
+    "workbench_reaction_view_wrong_profile_rejected",
+}
+V85_EXPECTED_KEYS = V84_EXPECTED_KEYS | V85_REACTION_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1020,6 +1033,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v85_receipt = receipt_schema_version == "structural-native-distribution-e2e.v85"
+    if is_v85_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v84"
     is_v84_receipt = receipt_schema_version == "structural-native-distribution-e2e.v84"
     if is_v84_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v83"
@@ -1330,6 +1346,7 @@ def validate(
         "structural-native-distribution-e2e.v82": V82_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v83": V83_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v84": V84_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v85": V85_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1470,6 +1487,37 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v85_receipt:
+        for name in (
+            "model_ir_linear_reaction_view_surface_passed",
+            "model_ir_linear_reaction_view_restart_parity_passed",
+            "mgt_model_ir_linear_reaction_view_surface_passed",
+            "mgt_model_ir_linear_reaction_view_restart_parity_passed",
+            "workbench_reaction_view_wrong_profile_rejected",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name in (
+            "model_ir_linear_reaction_view_en_us_sha256",
+            "model_ir_linear_reaction_view_ko_kr_sha256",
+            "model_ir_linear_reaction_view_window_sha256",
+            "mgt_model_ir_linear_reaction_view_en_us_sha256",
+            "mgt_model_ir_linear_reaction_view_ko_kr_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+        if payload.get("model_ir_linear_reaction_view_en_us_sha256") == payload.get(
+            "model_ir_linear_reaction_view_ko_kr_sha256"
+        ):
+            errors.append("model-ir linear reaction view locale identities must differ")
+        if payload.get("model_ir_linear_reaction_view_en_us_sha256") == payload.get(
+            "model_ir_linear_reaction_view_window_sha256"
+        ):
+            errors.append("model-ir linear reaction view window identity must differ")
+        if payload.get("mgt_model_ir_linear_reaction_view_en_us_sha256") == payload.get(
+            "mgt_model_ir_linear_reaction_view_ko_kr_sha256"
+        ):
+            errors.append("MGT model-ir linear reaction view locale identities must differ")
     if is_v84_receipt:
         for name in (
             "model_ir_linear_reaction_result_ir_sha256",

@@ -623,9 +623,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    MGT-to-ModelIR-linear installed Workbench flows, after restart/direct parity, explicit review and
    handoff export have bound the same artifacts, then emits an append-only v84 receipt carrying both
    SHA-256 identities. This remains hosted CPU C5 evidence with fallback 0, not HIP C2 or C6.
+99. projects those constrained reactions through the installed `structural-workbench reaction-view`
+   surface for both strict-ModelIR-linear and normalized-MGT-linear workspaces, verifies exact
+   node/DOF/value/unit rows, self-hashed ANSI-free en-US and ko-KR output, a bounded row window,
+   byte-identical direct/restart output, durable-workspace nonmutation and fail-closed NDTHA-profile
+   rejection, then emits an append-only v85 receipt carrying five distinct view identities and five
+   positive surface/parity/rejection gates. This is installed static/shared hosted CPU C5 authority,
+   not a public/customer package receipt, HIP C2, an engineering verdict or C6.
 
-   The receipt checker continues to accept frozen v1 through v83 receipts; no pre-v84 receipt is
-   installed constrained-reaction ResultIR authority. Its explicit compatibility markers retain
+   The receipt checker continues to accept frozen v1 through v84 receipts; no pre-v84 receipt is
+   installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
+   constrained-reaction-view authority. Its explicit compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
    frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts,

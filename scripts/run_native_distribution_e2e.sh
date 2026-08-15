@@ -267,6 +267,91 @@ cmp "$mgt_linear_source" "$mgt_linear_direct/01-import/source.mgt"
 diff -r "$mgt_linear_restarted" "$mgt_linear_direct" \
   > "$e2e_root/mgt-model-ir-linear-workbench-diff.txt"
 
+verify_reaction_view_self_hash() {
+  local view="$1"
+  local locale="$2"
+  local label declared unsigned actual
+  if [[ "$locale" == "ko-KR" ]]; then
+    label='보기 해시: sha256:'
+  else
+    label='View hash: sha256:'
+  fi
+  declared="$(sed -n "s/^$label//p" "$view")"
+  if [[ ! "$declared" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "installed reaction view has no valid self-hash: $view" >&2
+    exit 1
+  fi
+  unsigned="$view.unsigned"
+  sed '$d' "$view" > "$unsigned"
+  actual="$(sha256sum "$unsigned" | awk '{print $1}')"
+  if [[ "$actual" != "$declared" ]]; then
+    echo "installed reaction view self-hash mismatch: $view" >&2
+    exit 1
+  fi
+}
+
+exercise_model_ir_linear_reaction_view_surface() {
+  local label="$1"
+  local workspace="$2"
+  local restarted_workspace="$3"
+  local workspace_before="$e2e_root/$label-reaction-view-workspace-before"
+  cp -a -- "$workspace" "$workspace_before"
+  local locale first second
+  for locale in en-US ko-KR; do
+    first="$e2e_root/$label-reaction-view-$locale-first.txt"
+    second="$e2e_root/$label-reaction-view-$locale-second.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-view \
+      --workspace "$workspace" --locale "$locale" > "$first"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-view \
+      --workspace "$workspace" --locale "$locale" > "$second"
+    cmp "$first" "$second"
+    grep -Fq 'structural-native-workbench-model-ir-linear-reaction-view.v1' "$first"
+    grep -Fq 'fallback 0' "$first"
+    grep -Eq $'^000001\t[^\t]+\tUX\t0000000000\t' "$first"
+    if LC_ALL=C grep -q $'\033' "$first"; then
+      echo "installed reaction view contains an ANSI escape" >&2
+      exit 1
+    fi
+    verify_reaction_view_self_hash "$first" "$locale"
+  done
+  if cmp -s "$e2e_root/$label-reaction-view-en-US-first.txt" \
+    "$e2e_root/$label-reaction-view-ko-KR-first.txt"; then
+    echo "installed reaction views must have distinct locale identities" >&2
+    exit 1
+  fi
+  local window="$e2e_root/$label-reaction-view-window.txt"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-view \
+    --workspace "$workspace" --locale en-US --start-row 2 --count 2 > "$window"
+  grep -Fq 'Displayed rows: 2-3 of 6' "$window"
+  if grep -Eq $'^000001\t|^000004\t' "$window"; then
+    echo "installed reaction view window escaped its requested row bounds" >&2
+    exit 1
+  fi
+  grep -Eq $'^000002\t' "$window"
+  grep -Eq $'^000003\t' "$window"
+  verify_reaction_view_self_hash "$window" en-US
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-view \
+    --workspace "$restarted_workspace" --locale en-US \
+    > "$e2e_root/$label-reaction-view-restarted.txt"
+  cmp "$e2e_root/$label-reaction-view-en-US-first.txt" \
+    "$e2e_root/$label-reaction-view-restarted.txt"
+  diff -r "$workspace_before" "$workspace" \
+    > "$e2e_root/$label-reaction-view-workspace-diff.txt"
+}
+
+exercise_model_ir_linear_reaction_view_surface \
+  model-ir-linear "$linear_direct" "$linear_restarted"
+exercise_model_ir_linear_reaction_view_surface \
+  mgt-model-ir-linear "$mgt_linear_direct" "$mgt_linear_restarted"
+
+if env -i PATH="$empty_path" "$active/bin/structural-workbench" reaction-view \
+  --workspace "$direct" > "$e2e_root/reaction-view-wrong-profile-rejected.json"; then
+  echo "installed reaction view accepted the NDTHA profile" >&2
+  exit 1
+fi
+grep -Fq 'workbench_profile_unsupported' \
+  "$e2e_root/reaction-view-wrong-profile-rejected.json"
+
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 mgt_restarted="$e2e_root/mgt-workbench-restarted"
@@ -9844,6 +9929,9 @@ report_hash="$(sha256sum "$direct/06-report/report.pdf" | awk '{print $1}')"
 linear_result_hash="$(sha256sum "$linear_direct/04-resume/result-ir.json" | awk '{print $1}')"
 linear_recovery_hash="$(sha256sum "$linear_direct/04-resume/result-recovery-ir.json" | awk '{print $1}')"
 linear_reaction_hash="$(sha256sum "$linear_direct/04-resume/reaction-result-ir.json" | awk '{print $1}')"
+linear_reaction_view_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-en-US-first.txt" | awk '{print $1}')"
+linear_reaction_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-ko-KR-first.txt" | awk '{print $1}')"
+linear_reaction_view_window_hash="$(sha256sum "$e2e_root/model-ir-linear-reaction-view-window.txt" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -9858,6 +9946,8 @@ mgt_linear_health_hash="$(sha256sum "$mgt_linear_direct/01-import/import-health.
 mgt_linear_result_hash="$(sha256sum "$mgt_linear_direct/04-resume/result-ir.json" | awk '{print $1}')"
 mgt_linear_recovery_hash="$(sha256sum "$mgt_linear_direct/04-resume/result-recovery-ir.json" | awk '{print $1}')"
 mgt_linear_reaction_hash="$(sha256sum "$mgt_linear_direct/04-resume/reaction-result-ir.json" | awk '{print $1}')"
+mgt_linear_reaction_view_en_us_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-view-en-US-first.txt" | awk '{print $1}')"
+mgt_linear_reaction_view_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-reaction-view-ko-KR-first.txt" | awk '{print $1}')"
 mgt_linear_report_hash="$(sha256sum "$mgt_linear_direct/06-report/report.pdf" | awk '{print $1}')"
 mgt_linear_pdf_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 mgt_linear_report_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -10675,6 +10765,10 @@ v84_receipt_json="${v83_receipt_json/structural-native-distribution-e2e.v83/stru
 reaction_result_receipt_fields="\"model_ir_linear_reaction_result_ir_sha256\":\"sha256:$linear_reaction_hash\",\"mgt_model_ir_linear_reaction_result_ir_sha256\":\"sha256:$mgt_linear_reaction_hash\","
 v84_receipt_json="${v84_receipt_json/\"workbench_result_view_surface_passed\":true,/${reaction_result_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v84_receipt_json" > "$temporary_receipt"
+v85_receipt_json="${v84_receipt_json/structural-native-distribution-e2e.v84/structural-native-distribution-e2e.v85}"
+reaction_view_receipt_fields="\"model_ir_linear_reaction_view_surface_passed\":true,\"model_ir_linear_reaction_view_restart_parity_passed\":true,\"model_ir_linear_reaction_view_en_us_sha256\":\"sha256:$linear_reaction_view_en_us_hash\",\"model_ir_linear_reaction_view_ko_kr_sha256\":\"sha256:$linear_reaction_view_ko_kr_hash\",\"model_ir_linear_reaction_view_window_sha256\":\"sha256:$linear_reaction_view_window_hash\",\"mgt_model_ir_linear_reaction_view_surface_passed\":true,\"mgt_model_ir_linear_reaction_view_restart_parity_passed\":true,\"mgt_model_ir_linear_reaction_view_en_us_sha256\":\"sha256:$mgt_linear_reaction_view_en_us_hash\",\"mgt_model_ir_linear_reaction_view_ko_kr_sha256\":\"sha256:$mgt_linear_reaction_view_ko_kr_hash\",\"workbench_reaction_view_wrong_profile_rejected\":true,"
+v85_receipt_json="${v85_receipt_json/\"workbench_result_view_surface_passed\":true,/${reaction_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v85_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

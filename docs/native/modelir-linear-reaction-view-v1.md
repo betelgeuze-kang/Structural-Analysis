@@ -28,6 +28,12 @@ node/DOF/value/unit rows, source-hash visibility, and receipt-tamper rejection. 
 pre-reaction workspace fails with `workbench_reaction_view_missing`. The NDTHA profile fails with
 `workbench_profile_unsupported`; compatibility artifacts are not silently synthesized.
 
+The installed static and shared CPU distributions repeat the strict-ModelIR and normalized-MGT
+flows in an empty PATH, bind the deterministic English, Korean and bounded-window view identities,
+prove direct/restart parity and wrong-profile rejection, and publish those facts in the append-only
+`structural-native-distribution-e2e.v85` hosted CPU C5 receipt. Frozen v1 through v84 distribution
+receipts retain their narrower authority.
+
 This is not an equilibrium audit, support-design verdict, general nodal-field/stress/contour/modal
-viewer, engineering acceptance, design-code compliance, installed distribution publication,
+viewer, engineering acceptance, design-code compliance, public/customer distribution publication,
 approved HIP C2 evidence, or C6 authority.
