@@ -81,6 +81,43 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "nonzero prescribed constraints" in assembly["claim"]
     assert "shell/nonlinear ModelIR graphs" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
+    reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
+    assert reaction_results["cutover_gate"] == "C5"
+    assert reaction_results["owner"] == "structural-contracts"
+    assert "ABI v1.14" in reaction_results["claim"]
+    assert "internal-minus-external reaction" in reaction_results["claim"]
+    assert "canonical self-hashed reaction ResultIR" in reaction_results["claim"]
+    assert "durable jobs and loopback retrieval" in reaction_results["claim"]
+    assert "Workbench inspect/review/export" in reaction_results["claim"]
+    assert "distribution v84" in reaction_results["claim"]
+    assert "rootfs diagnostic v7" in reaction_results["claim"]
+    assert "HIP C2" in reaction_results["claim"]
+    assert "C6" in reaction_results["claim"]
+    model_linear_checkpoint = payload["capabilities"]["modelir_linear_checkpoint"]
+    assert model_linear_checkpoint["cutover_gate"] == "C4"
+    assert model_linear_checkpoint["owner"] == "structural-runtime"
+    assert "SAMLPC01" in model_linear_checkpoint["claim"]
+    assert "separately derived constrained-reaction ResultIR" in model_linear_checkpoint["claim"]
+    assert "not duplicated inside the checkpoint" in model_linear_checkpoint["claim"]
+    model_linear_product = payload["capabilities"]["modelir_linear_product_e2e"]
+    assert model_linear_product["cutover_gate"] == "C5"
+    assert model_linear_product["owner"] == "structural-cli"
+    assert "ABI v1.14" in model_linear_product["claim"]
+    assert "constrained-reaction ResultIR" in model_linear_product["claim"]
+    assert "15-artifact directories" in model_linear_product["claim"]
+    model_linear_jobs = payload["capabilities"]["modelir_linear_durable_jobs"]
+    assert model_linear_jobs["cutover_gate"] == "C5"
+    assert model_linear_jobs["owner"] == "structural-runtime"
+    assert "constrained-reaction ResultIR" in model_linear_jobs["claim"]
+    assert "six artifacts" in model_linear_jobs["claim"]
+    assert "legacy no-reaction claim" in model_linear_jobs["claim"]
+    model_linear_service = payload["capabilities"]["modelir_linear_service_api"]
+    assert model_linear_service["cutover_gate"] == "C5"
+    assert model_linear_service["owner"] == "structural-cli"
+    assert "/v1/jobs/{job_id}/reaction-result-ir" in model_linear_service["claim"]
+    assert "socket-free service test" in model_linear_service["claim"]
+    assert "HIP C2" in model_linear_service["claim"]
+    assert "C6" in model_linear_service["claim"]
     assert capabilities.capability_is_enabled(payload, "sparse_linear_solver_cpu") is True
     sparse = payload["capabilities"]["sparse_linear_solver_cpu"]
     assert sparse["cutover_gate"] == "C1"
@@ -988,6 +1025,14 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "localized sparse PDF" in linear_workbench["claim"]
     assert "authoritative numerical C2/C3" in linear_workbench["claim"]
     assert "C6" in linear_workbench["claim"]
+    linear_workbench_evidence = linear_workbench["evidence_contract"]
+    assert "constrained_reaction_result" in linear_workbench_evidence["current_review_claim"]
+    assert "constrained_reaction_result" not in linear_workbench_evidence["legacy_review_claim"]
+    assert linear_workbench_evidence["reaction_artifact"] == "04-resume/reaction-result-ir.json"
+    assert (
+        linear_workbench_evidence["compatibility"]
+        == "frozen_pre_reaction_review_remains_verifiable"
+    )
 
 
 def test_native_evidence_bundle_capability_is_bounded_c5() -> None:
@@ -1442,6 +1487,17 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
+    distribution_evidence = distribution["evidence_contract"]
+    assert (
+        distribution_evidence["latest_installed_receipt_schema"]
+        == "structural-native-distribution-e2e.v84"
+    )
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v83"
+    assert distribution_evidence["reaction_hash_fields"] == [
+        "model_ir_linear_reaction_result_ir_sha256",
+        "mgt_model_ir_linear_reaction_result_ir_sha256",
+    ]
+    assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
 
 
@@ -1491,6 +1547,18 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "normalized-MGT-linear" in deployment["claim"]
     assert "v6 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "frozen v1 through v5 rootfs receipts" in deployment["claim"]
+    deployment_evidence = deployment["evidence_contract"]
+    assert (
+        deployment_evidence["latest_rootfs_receipt_schema"]
+        == "structural-native-rootfs-isolation-e2e.v7"
+    )
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v6"
+    assert (
+        deployment_evidence["required_installed_receipt_schema"]
+        == "structural-native-distribution-e2e.v84"
+    )
+    assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
+    assert deployment_evidence["customer_image_authority"] is False
     assert "outside .github/workflows" in deployment["claim"]
     assert "final C6 remain open" in deployment["claim"]
 
