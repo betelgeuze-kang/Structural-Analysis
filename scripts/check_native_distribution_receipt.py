@@ -974,6 +974,11 @@ V83_FIXED_CONSTRAINT_IDENTITY_CASCADE_EDIT_KEYS = {
     "workbench_fixed_constraint_identity_cascade_edit_restart_passed",
 }
 V83_EXPECTED_KEYS = V82_EXPECTED_KEYS | V83_FIXED_CONSTRAINT_IDENTITY_CASCADE_EDIT_KEYS
+V84_REACTION_RESULT_KEYS = {
+    "model_ir_linear_reaction_result_ir_sha256",
+    "mgt_model_ir_linear_reaction_result_ir_sha256",
+}
+V84_EXPECTED_KEYS = V83_EXPECTED_KEYS | V84_REACTION_RESULT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1015,6 +1020,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v84_receipt = receipt_schema_version == "structural-native-distribution-e2e.v84"
+    if is_v84_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v83"
     is_v83_receipt = receipt_schema_version == "structural-native-distribution-e2e.v83"
     if is_v83_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v82"
@@ -1321,6 +1329,7 @@ def validate(
         "structural-native-distribution-e2e.v81": V81_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v82": V82_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v83": V83_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v84": V84_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1458,6 +1467,13 @@ def validate(
             "mgt_import_health_sha256",
             "mgt_result_ir_sha256",
             "mgt_report_pdf_sha256",
+        ):
+            if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v84_receipt:
+        for name in (
+            "model_ir_linear_reaction_result_ir_sha256",
+            "mgt_model_ir_linear_reaction_result_ir_sha256",
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")

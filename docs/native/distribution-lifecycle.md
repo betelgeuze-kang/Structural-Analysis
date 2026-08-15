@@ -619,9 +619,13 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    `[200000,0,0,0,0,0]`, fallback 0 and byte-identical initialized checkpoint/restart, then emits
    an append-only v83 receipt binding the edited ModelIR, edit/request/assembly receipts, analysis
    request, checkpoint, ResultIR, recovery and ReportIR.
-   The receipt checker continues to accept frozen v1 through v68 receipts, including frozen v1 through v67 receipts, including frozen v1 through v66 receipts, including frozen v1 through v65 receipts, including frozen v1 through v64 receipts, including frozen v1 through v63 receipts, including frozen v1 through v57 receipts, including frozen v1 through v56 receipts, including frozen v1 through v55 receipts, including frozen v1 through v54 receipts, including frozen v1 through v53 receipts, including frozen v1 through v52 receipts
-   (including frozen v1 through v51 receipts, frozen v1 through v50 receipts, frozen v1 through v49 receipts, frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts, frozen v1 through v45 receipts, frozen v1 through v44 receipts, frozen v1 through v43 receipts, frozen v1 through v42 receipts, frozen v1 through v41 receipts, frozen v1 through v40 receipts, frozen v1 through v39 receipts and frozen v1 through v38 receipts);
-   v1 through v19 are not
+98. publishes the exact constrained-reaction ResultIR from both the ModelIR-linear and normalized-
+   MGT-to-ModelIR-linear installed Workbench flows, after restart/direct parity, explicit review and
+   handoff export have bound the same artifacts, then emits an append-only v84 receipt carrying both
+   SHA-256 identities. This remains hosted CPU C5 evidence with fallback 0, not HIP C2 or C6.
+
+   The receipt checker continues to accept frozen v1 through v83 receipts; no pre-v84 receipt is
+   installed constrained-reaction ResultIR authority. V1 through v19 are not
    installed frame-element-orientation-edit authority, no pre-v21 receipt is installed
    element-connectivity-edit authority, and no pre-v22 receipt is installed bounded ModelIR-linear
    request-creation authority; no pre-v23 receipt is installed connected-frame3d-member-addition
