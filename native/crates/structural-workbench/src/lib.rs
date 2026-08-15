@@ -205,7 +205,8 @@ const REVIEW_SCHEMA_V1: &str = "structural-native-workbench-review.v1";
 const VIEW_SCHEMA_V1: &str = "structural-native-workbench-view.v1";
 const EXPORT_SCHEMA_V1: &str = "structural-native-workbench-export.v1";
 const REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_native_result_comparison_and_pdf_not_an_automated_engineering_verdict_or_signature";
-const MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature";
+const MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY_LEGACY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature";
+const MODEL_IR_LINEAR_REACTION_REVIEW_CLAIM_BOUNDARY: &str = "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_constrained_reaction_result_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature";
 const MAX_MODEL_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_EXTERNAL_RESULT_BYTES: u64 = 4 * 1024 * 1024;
@@ -1310,6 +1311,7 @@ impl NativeWorkbench {
                 )?)),
             ),
         };
+        let reaction_bound = reaction_result_artifact_hash.is_some();
         let review = WorkbenchReviewV1 {
             schema_version: REVIEW_SCHEMA_V1.to_owned(),
             session_id: self.session.session_id.clone(),
@@ -1324,7 +1326,8 @@ impl NativeWorkbench {
             reaction_result_artifact_hash,
             report_document_artifact_hash,
             analysis_profile: self.session.analysis_profile,
-            claim_boundary: review_claim_boundary(self.session.analysis_profile).to_owned(),
+            claim_boundary: review_claim_boundary(self.session.analysis_profile, reaction_bound)
+                .to_owned(),
             review_hash: String::new(),
         };
         let canonical = canonical_review(&review)?;
@@ -2562,7 +2565,6 @@ fn verify_review_binding(
         || review.schema_version != REVIEW_SCHEMA_V1
         || review.session_id != session.session_id
         || review.analysis_profile != session.analysis_profile
-        || review.claim_boundary != review_claim_boundary(session.analysis_profile)
     {
         return Err(WorkbenchError::new(
             "workbench_review_contract_invalid",
@@ -2623,6 +2625,14 @@ fn verify_review_binding(
                 )?)),
             ),
         };
+    if review.claim_boundary
+        != review_claim_boundary(session.analysis_profile, expected_reaction.is_some())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_review_contract_invalid",
+            "review claim boundary does not match the verified reaction binding",
+        ));
+    }
     if review.source_session_hash != expected_session_hash
         || review.result_artifact_hash != sha256_identity(&result)
         || review.comparison_artifact_hash != sha256_identity(&comparison)
@@ -2639,12 +2649,18 @@ fn verify_review_binding(
     Ok(())
 }
 
-const fn review_claim_boundary(profile: Option<WorkbenchAnalysisProfileV1>) -> &'static str {
-    match profile {
-        Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
-            MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY
+const fn review_claim_boundary(
+    profile: Option<WorkbenchAnalysisProfileV1>,
+    reaction_bound: bool,
+) -> &'static str {
+    match (profile, reaction_bound) {
+        (Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1), true) => {
+            MODEL_IR_LINEAR_REACTION_REVIEW_CLAIM_BOUNDARY
         }
-        None => REVIEW_CLAIM_BOUNDARY,
+        (Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1), false) => {
+            MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY_LEGACY
+        }
+        (None, _) => REVIEW_CLAIM_BOUNDARY,
     }
 }
 
@@ -3524,7 +3540,30 @@ fn io_error(action: &str, error: &std::io::Error) -> WorkbenchError {
 
 #[cfg(test)]
 mod tests {
-    use super::{canonical_session, parse_session, WorkbenchSessionV1, WorkbenchStageV1};
+    use super::{
+        canonical_session, parse_session, review_claim_boundary, WorkbenchAnalysisProfileV1,
+        WorkbenchSessionV1, WorkbenchStageV1,
+    };
+
+    #[test]
+    fn review_claim_boundaries_preserve_legacy_and_bind_reactions() {
+        assert_eq!(
+            review_claim_boundary(None, false),
+            super::REVIEW_CLAIM_BOUNDARY
+        );
+        assert_eq!(
+            review_claim_boundary(None, true),
+            super::REVIEW_CLAIM_BOUNDARY
+        );
+        assert_eq!(
+            review_claim_boundary(Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1), false),
+            super::MODEL_IR_LINEAR_REVIEW_CLAIM_BOUNDARY_LEGACY
+        );
+        assert_eq!(
+            review_claim_boundary(Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1), true),
+            super::MODEL_IR_LINEAR_REACTION_REVIEW_CLAIM_BOUNDARY
+        );
+    }
 
     #[test]
     fn session_hash_round_trip_is_strict_and_deterministic() {

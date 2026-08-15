@@ -68,6 +68,35 @@ fn verify_self_hash(bytes: &[u8], field: &str) -> Value {
     value
 }
 
+fn write_self_hashed_json(path: &Path, mut value: Value, field: &str) {
+    value
+        .as_object_mut()
+        .expect("hashed object")
+        .remove(field)
+        .expect("existing self hash");
+    let unsigned = canonicalize_model_ir_v2(&value).expect("canonical unsigned JSON");
+    value.as_object_mut().expect("hashed object").insert(
+        field.to_owned(),
+        json!(sha256_identity(unsigned.as_bytes())),
+    );
+    let canonical = canonicalize_model_ir_v2(&value).expect("canonical hashed JSON");
+    fs::write(path, canonical).expect("rewrite self-hashed JSON");
+}
+
+fn strip_reaction_from_frozen_receipt(path: &Path, claim_boundary: &str) {
+    let mut receipt = verify_self_hash(&fs::read(path).expect("receipt"), "receipt_hash");
+    receipt["artifacts"]
+        .as_array_mut()
+        .expect("artifact inventory")
+        .retain(|artifact| artifact["file"] != "reaction-result-ir.json");
+    receipt
+        .as_object_mut()
+        .expect("receipt object")
+        .remove("source_reaction_hash");
+    receipt["claim_boundary"] = json!(claim_boundary);
+    write_self_hashed_json(path, receipt, "receipt_hash");
+}
+
 struct Inputs {
     model: PathBuf,
     request: PathBuf,
@@ -480,6 +509,10 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
         review["reaction_result_artifact_hash"],
         sha256_identity(&reaction_bytes)
     );
+    assert_eq!(
+        review["claim_boundary"],
+        "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_constrained_reaction_result_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature"
+    );
     let exported = run_workbench(&stage_arguments("export", &restarted));
     assert_success(&exported);
     let exported = verify_self_hash(&exported.stdout, "export_hash");
@@ -515,6 +548,78 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(
         String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
     );
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn frozen_linear_workspace_without_reactions_retains_legacy_review_contract() {
+    let root = temporary_root("legacy-review");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_inputs(&root);
+    let workspace = root.join("legacy");
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    fs::remove_file(workspace.join("04-resume/reaction-result-ir.json"))
+        .expect("remove post-legacy terminal reaction");
+    strip_reaction_from_frozen_receipt(
+        &workspace.join("04-resume/run-receipt.json"),
+        "bounded_typed_modelir_frame3d_truss3d_cpu_assembly_pcg_restart_and_active_dof_recovery_not_sequential_c2_hip_reactions_shell_nonlinear_or_engineering_acceptance",
+    );
+    fs::remove_file(workspace.join("06-report/reaction-result-ir.json"))
+        .expect("remove post-legacy report reaction");
+    strip_reaction_from_frozen_receipt(
+        &workspace.join("06-report/report-receipt.json"),
+        "verified_deterministic_sparse_report_ir_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance",
+    );
+
+    assert_success(&run_workbench(&stage_arguments("status", &workspace)));
+    assert_success(&run_workbench(&[
+        text("review"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--decision"),
+        text("review"),
+        text("--reviewer"),
+        text("Engineer A"),
+        text("--comment"),
+        text("Review frozen pre-reaction evidence."),
+    ]));
+    let review = verify_self_hash(
+        &fs::read(workspace.join("07-review/review.json")).expect("legacy review"),
+        "review_hash",
+    );
+    assert!(review["reaction_result_artifact_hash"].is_null());
+    assert_eq!(
+        review["claim_boundary"],
+        "explicit_human_review_bound_to_verified_model_ir_linear_result_recovery_comparison_report_ir_document_source_and_pdf_not_an_automated_engineering_verdict_or_signature"
+    );
+
+    let export = run_workbench(&stage_arguments("export", &workspace));
+    assert_success(&export);
+    let export = verify_self_hash(&export.stdout, "export_hash");
+    assert_eq!(
+        export["claim_boundary"],
+        "deterministic_model_ir_linear_legacy_native_handoff_manifest_without_constrained_reactions_with_pdf_and_document_source_not_an_archive_signature_or_engineering_acceptance"
+    );
+    assert!(!export["artifacts"]
+        .as_array()
+        .expect("export artifacts")
+        .iter()
+        .any(|artifact| artifact["role"] == "reaction_result_ir"));
 
     fs::remove_dir_all(root).expect("cleanup");
 }
