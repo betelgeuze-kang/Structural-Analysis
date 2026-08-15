@@ -107,6 +107,7 @@ EXPECTED_OWNERS = {
     "modelir_truss3d_leaf_deletion": "structural-workbench",
     "modelir_frame_element_properties_edit": "structural-workbench",
     "modelir_linear_workbench": "structural-workbench",
+    "modelir_linear_reaction_view": "structural-workbench",
     "native_benchmark_catalog": "structural-catalog",
     "native_frontend_build": "structural-frontend-contract",
     "native_frontend_dev": "structural-frontend-contract",

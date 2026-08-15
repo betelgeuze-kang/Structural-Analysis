@@ -19,9 +19,10 @@ cantilever. Its Run publishes a real `checkpoint.mlpcp`; Resume
 publishes sparse ResultIR plus strictly typed global-DOF/element recovery IR; Compare consumes an
 explicit language-neutral global-DOF mapping; and Report publishes verified ReportIR plus
 PDF-ready Markdown and a deterministic single-page sparse PDF. Inspect, English/Korean
-Report-view, localized embedded-font PDF export, explicit Review, and Export are profile-aware.
-Result-view and Result-deformed-view remain NDTHA-only and fail with
-`workbench_profile_unsupported` on the linear profile. See
+Report-view, English/Korean constrained Reaction-view, localized embedded-font PDF export,
+explicit Review, and Export are profile-aware. Reaction-view is linear-only; Result-view and
+Result-deformed-view remain NDTHA-only. Each wrong-profile call fails with
+`workbench_profile_unsupported`. See
 `docs/native/modelir-linear-workbench-v1.md`.
 
 The independent `model-view` read-only surface is broader than that analysis profile. It strictly
@@ -534,6 +535,8 @@ structural-workbench resume --workspace SESSION
 structural-workbench compare --workspace SESSION --require-pass
 structural-workbench report --workspace SESSION
 structural-workbench report-view --workspace SESSION --locale ko-KR
+structural-workbench reaction-view --workspace LINEAR-SESSION --locale ko-KR \
+  --start-row 1 --count 64
 structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
 structural-workbench result-deformed-view --workspace SESSION \

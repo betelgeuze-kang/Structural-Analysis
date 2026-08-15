@@ -14,7 +14,8 @@ use structural_workbench::{
     WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
     MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
-    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_REACTION_VIEW_MAX_COUNT_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
 };
 
@@ -570,6 +571,14 @@ struct ResultViewCommand {
     count: u32,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ReactionViewCommand {
+    workspace: PathBuf,
+    locale: WorkbenchReportLocaleV1,
+    start_row: u32,
+    count: u32,
+}
+
 #[derive(Clone, Debug, PartialEq)]
 struct DeformedViewCommand {
     workspace: PathBuf,
@@ -870,6 +879,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
             print!("{}", workbench.linear_report_text(locale)?);
             Ok(())
         }),
+        Some("reaction-view") => {
+            parse_reaction_view(arguments).and_then(|command| run_reaction_view(&command))
+        }
         Some("result-view") => {
             parse_result_view(arguments).and_then(|command| run_result_view(&command))
         }
@@ -939,6 +951,7 @@ fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
                     | "workbench_evidence_artifact_id_invalid"
                     | "workbench_evidence_artifact_not_found"
                     | "workbench_evidence_as_of_invalid"
+                    | "workbench_reaction_view_window_invalid"
                     | "workbench_result_view_window_invalid"
                     | "workbench_deformed_view_step_invalid"
                     | "workbench_deformed_view_scale_invalid"
@@ -993,6 +1006,19 @@ fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
             command.locale,
             command.channel,
             command.start_step,
+            command.count,
+        )?
+    );
+    Ok(())
+}
+
+fn run_reaction_view(command: &ReactionViewCommand) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    print!(
+        "{}",
+        workbench.model_ir_linear_reaction_view_text_localized(
+            command.locale,
+            command.start_row,
             command.count,
         )?
     );
@@ -4560,6 +4586,58 @@ fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, Workbe
     })
 }
 
+fn parse_reaction_view(arguments: &[OsString]) -> Result<ReactionViewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut start_row = 1;
+    let mut start_seen = false;
+    let mut count = WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1;
+    let mut count_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("reaction-view option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("reaction-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| usage_error("reaction-view locale must be en-US or ko-KR"))?;
+            }
+            "--start-row" if !start_seen => {
+                start_seen = true;
+                start_row = parse_u32(value, "reaction-view start row")?;
+                if start_row == 0 {
+                    return Err(usage_error("reaction-view start row must be at least 1"));
+                }
+            }
+            "--count" if !count_seen => {
+                count_seen = true;
+                count = parse_u32(value, "reaction-view count")?;
+                if count == 0 || count > WORKBENCH_REACTION_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error("reaction-view count must be in 1..=256"));
+                }
+            }
+            _ => return Err(usage_error("duplicate or unknown reaction-view option")),
+        }
+        index += 2;
+    }
+    Ok(ReactionViewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
+        start_row,
+        count,
+    })
+}
+
 fn parse_deformed_view(arguments: &[OsString]) -> Result<DeformedViewCommand, WorkbenchError> {
     let mut workspace = None;
     let mut locale = WorkbenchReportLocaleV1::EnUs;
@@ -4911,7 +4989,7 @@ fn usage_error(detail: &str) -> WorkbenchError {
 
 fn usage() -> &'static str {
     concat!(
-        "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-model-identity <MODEL.json> --model-id <SOURCE-ID> --new-model-id <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-node-identity <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node-identity-cascade <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-node <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-delete-orphan-node <MODEL.json> --node <ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-target <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-identity <MODEL.json> --load-pattern <PATTERN-ID> --load <SOURCE-ID> --new-load <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity-cascade <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-constraint-target <MODEL.json> --constraint <CONSTRAINT-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-delete-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
+        "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-model-identity <MODEL.json> --model-id <SOURCE-ID> --new-model-id <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-node-identity <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node-identity-cascade <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-node <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-delete-orphan-node <MODEL.json> --node <ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-target <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-identity <MODEL.json> --load-pattern <PATTERN-ID> --load <SOURCE-ID> --new-load <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity-cascade <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-constraint-target <MODEL.json> --constraint <CONSTRAINT-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-delete-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench reaction-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-row <N>] [--count <1..256>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-linear-material-identity <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
         "\n  structural-workbench model-edit-linear-material-identity-cascade <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>",
@@ -4977,8 +5055,8 @@ mod tests {
         parse_model_reorder_direct_linear_load_combination_term,
         parse_model_reorder_fixed_constraint_dof,
         parse_model_reorder_nested_linear_load_combination_term, parse_model_view,
-        parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
-        parse_stage_command, LinearLoadCombinationReferenceKindV1,
+        parse_reaction_view, parse_report_pdf_export, parse_report_view, parse_result_view,
+        parse_review, parse_stage_command, LinearLoadCombinationReferenceKindV1,
     };
 
     #[test]
@@ -7478,6 +7556,42 @@ mod tests {
             let mut invalid = window.clone();
             invalid[index] = OsString::from(invalid_value);
             assert!(parse_result_view(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn reaction_view_parser_has_bounded_locale_and_window_options() {
+        let default = [
+            OsString::from("reaction-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_reaction_view(&default).expect("default reaction view");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.locale.label(), "en-US");
+        assert_eq!(parsed.start_row, 1);
+        assert_eq!(parsed.count, 64);
+
+        let window = [
+            OsString::from("reaction-view"),
+            OsString::from("--count"),
+            OsString::from("2"),
+            OsString::from("--start-row"),
+            OsString::from("3"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_reaction_view(&window).expect("explicit reaction window");
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.start_row, 3);
+        assert_eq!(parsed.count, 2);
+
+        for (index, invalid_value) in [(2, "257"), (4, "0"), (6, "ko-kr")] {
+            let mut invalid = window.clone();
+            invalid[index] = OsString::from(invalid_value);
+            assert!(parse_reaction_view(&invalid).is_err());
         }
     }
 

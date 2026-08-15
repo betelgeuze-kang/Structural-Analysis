@@ -1033,6 +1033,24 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
         linear_workbench_evidence["compatibility"]
         == "frozen_pre_reaction_review_remains_verifiable"
     )
+    assert (
+        capabilities.capability_is_enabled(payload, "modelir_linear_reaction_view")
+        is True
+    )
+    reaction_view = payload["capabilities"]["modelir_linear_reaction_view"]
+    assert reaction_view["cutover_gate"] == "C5"
+    assert reaction_view["owner"] == "structural-workbench"
+    assert "reaction-view" in reaction_view["claim"]
+    assert "terminal run receipt" in reaction_view["claim"]
+    assert "actual node ID" in reaction_view["claim"]
+    assert "internal-minus-external reaction" in reaction_view["claim"]
+    assert "en-US or ko-KR" in reaction_view["claim"]
+    assert "1 through 256 rows" in reaction_view["claim"]
+    assert "byte-identical direct/restart views" in reaction_view["claim"]
+    assert "frozen pre-reaction missing-artifact rejection" in reaction_view["claim"]
+    assert "installed distribution publication" in reaction_view["claim"]
+    assert "HIP C2" in reaction_view["claim"]
+    assert "C6" in reaction_view["claim"]
 
 
 def test_native_evidence_bundle_capability_is_bounded_c5() -> None:

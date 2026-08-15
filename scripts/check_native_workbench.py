@@ -32,6 +32,8 @@ REQUIRED_TOKENS = {
         "publish_review",
         "inspect_json",
         "linear_report_text",
+        "model_ir_linear_reaction_view_text",
+        "model_ir_linear_reaction_view_text_localized",
         "ndtha_response_view_text",
         "ndtha_response_view_text_localized",
         "fixed_guided_deformed_shape_view_text",
@@ -62,6 +64,18 @@ REQUIRED_TOKENS = {
         "ResultIR v1 does not carry dt_s",
         "not a time reconstruction, 3D/deformed/modal/contour view",
         "시간값을 추론하지 않습니다",
+    ),
+    "native/crates/structural-workbench/src/reaction_view.rs": (
+        "structural-native-workbench-model-ir-linear-reaction-view.v1",
+        "WORKBENCH_REACTION_VIEW_MAX_COUNT_V1",
+        "verify_model_identity",
+        "Node ID",
+        "Internal force",
+        "External load",
+        "Reaction",
+        "workbench_reaction_view_window_invalid",
+        "workbench_reaction_view_unsafe",
+        "not an equilibrium audit, support-design verdict",
     ),
     "native/crates/structural-workbench/src/deformed_view.rs": (
         "structural-native-workbench-fixed-guided-deformed-view.v1",
@@ -323,6 +337,7 @@ REQUIRED_TOKENS = {
         'Some("compare")',
         'Some("report")',
         'Some("report-view")',
+        'Some("reaction-view")',
         'Some("result-view")',
         'Some("result-deformed-view")',
         'Some("report-export-pdf")',
@@ -410,6 +425,10 @@ REQUIRED_TOKENS = {
         "clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_identity",
         "simulate MGT linear process death",
         "workbench_mgt_import_binding_mismatch",
+        "structural-native-workbench-model-ir-linear-reaction-view.v1",
+        "workbench_reaction_view_missing",
+        "session after reaction views",
+        "Korean reaction view hash line",
     ),
     "docs/native/rust-native-workbench-v1.md": (
         "Import` strictly parses",
@@ -420,6 +439,7 @@ REQUIRED_TOKENS = {
         "explicit human review and handoff export",
         "UTF-8 linear report view",
         "bounded NDTHA response-history view",
+        "constrained Reaction-view",
         "fixed-guided deformed-shape view",
         "embedded-font PDF export",
         "general ModelIR terminal topology view",
@@ -442,9 +462,21 @@ REQUIRED_TOKENS = {
     "docs/native/localized-terminal-result-views-v1.md": (
         "en-US",
         "ko-KR",
+        "reaction-view",
         "Omitting `--locale` preserves the original `en-US` bytes",
         "append-only distribution v12 receipt",
         "not WCAG conformance",
+    ),
+    "docs/native/modelir-linear-reaction-view-v1.md": (
+        "structural-workbench reaction-view",
+        "model_ir_linear_cpu_v1",
+        "actual node ID",
+        "internal-minus-external reaction",
+        "workbench_reaction_view_missing",
+        "workbench_profile_unsupported",
+        "installed distribution publication",
+        "approved HIP C2",
+        "C6 authority",
     ),
     "docs/native/localized-modelir-topology-view-v1.md": (
         "en-US",
@@ -1232,6 +1264,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     frame_leaf_deletion_row: dict[str, object] = {}
     truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
+    reaction_view_row: dict[str, object] = {}
     try:
         payload = json.loads(
             (root / "native/capabilities.json").read_text(encoding="utf-8")
@@ -1258,6 +1291,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         frame_leaf_deletion_row = payload["capabilities"]["modelir_frame3d_leaf_deletion"]
         truss_leaf_deletion_row = payload["capabilities"]["modelir_truss3d_leaf_deletion"]
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
+        reaction_view_row = payload["capabilities"]["modelir_linear_reaction_view"]
     except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
         blockers.append(f"native_workbench_capability_manifest_invalid:{exc}")
         row = {}
@@ -1267,6 +1301,27 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         blockers.append("native_workbench_capability_gate_not_c5")
     if row.get("owner") != "structural-workbench":
         blockers.append("native_workbench_capability_owner_invalid")
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if reaction_view_row.get(field) != expected:
+            blockers.append(f"native_workbench_reaction_view_capability_invalid:{field}")
+    reaction_view_claim = str(reaction_view_row.get("claim", ""))
+    for token in (
+        "reaction-view",
+        "terminal run receipt",
+        "actual node ID",
+        "internal-minus-external reaction",
+        "1 through 256 rows",
+        "byte-identical direct/restart views",
+        "installed distribution publication",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in reaction_view_claim:
+            blockers.append(f"native_workbench_reaction_view_claim_token_missing:{token}")
     for field, expected in (
         ("status", "implemented"),
         ("cutover_gate", "C5"),

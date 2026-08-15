@@ -429,6 +429,164 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert!(report_text.contains("structural-native-workbench-model-ir-linear-report-view.v1"));
     assert!(report_text.contains("# Sparse Linear Analysis Report"));
 
+    let session_before_reaction_views =
+        fs::read(restarted.join("workbench-session.json")).expect("session before reaction views");
+    let reaction_view_arguments = [
+        text("reaction-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let reaction_view_first = run_workbench(&reaction_view_arguments);
+    let reaction_view_second = run_workbench(&reaction_view_arguments);
+    assert_success(&reaction_view_first);
+    assert_eq!(reaction_view_first.stdout, reaction_view_second.stdout);
+    assert!(!reaction_view_first.stdout.contains(&0x1b));
+    let direct_reaction_view = run_workbench(&[
+        text("reaction-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_reaction_view);
+    assert_eq!(reaction_view_first.stdout, direct_reaction_view.stdout);
+    let reaction_view = String::from_utf8(reaction_view_first.stdout).expect("ASCII reaction view");
+    assert!(
+        reaction_view.starts_with("Structural ModelIR Linear Workbench - Constrained Reactions\n")
+    );
+    assert!(reaction_view
+        .contains("Schema: structural-native-workbench-model-ir-linear-reaction-view.v1\n"));
+    assert!(reaction_view.contains("Displayed rows: 1-6 of 6\n"));
+    assert!(reaction_view.contains("Backend: cpu / fp64 / ABI 0x0001000e / fallback 0\n"));
+    for hash in [
+        reaction["source_result_hash"]
+            .as_str()
+            .expect("source result hash"),
+        reaction["source_recovery_hash"]
+            .as_str()
+            .expect("source recovery hash"),
+        reaction["result_hash"].as_str().expect("reaction hash"),
+        reaction["analysis_request_hash"]
+            .as_str()
+            .expect("analysis request hash"),
+        reaction["assembly_hash"].as_str().expect("assembly hash"),
+        reaction["model_identity"]["content_hash"]
+            .as_str()
+            .expect("model content hash"),
+        reaction["model_identity"]["semantic_hash"]
+            .as_str()
+            .expect("model semantic hash"),
+        reaction["model_identity"]["provenance_hash"]
+            .as_str()
+            .expect("model provenance hash"),
+        reaction["identity"]["request_hash"]
+            .as_str()
+            .expect("sparse request hash"),
+        reaction["identity"]["model_hash"]
+            .as_str()
+            .expect("sparse model hash"),
+        reaction["identity"]["state_hash"]
+            .as_str()
+            .expect("state hash"),
+        reaction["identity"]["execution_hash"]
+            .as_str()
+            .expect("execution hash"),
+        reaction["identity"]["checkpoint_hash"]
+            .as_str()
+            .expect("checkpoint hash"),
+    ] {
+        assert!(reaction_view.contains(hash));
+    }
+    let dofs = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
+    for position in 0..6 {
+        let global_dof = reaction["constrained_dof_indices"][position]
+            .as_u64()
+            .expect("constrained global DOF");
+        let component = usize::try_from(global_dof % 6).expect("component index");
+        let unit = if component < 3 { "N" } else { "N*m" };
+        let expected_row = format!(
+            "{:06}\tN1\t{}\t{:010}\t{:+.17e}\t{:+.17e}\t{:+.17e}\t{}",
+            position + 1,
+            dofs[component],
+            global_dof,
+            reaction["constrained_internal_force"][position]
+                .as_f64()
+                .expect("constrained internal force"),
+            reaction["constrained_external_load"][position]
+                .as_f64()
+                .expect("constrained external load"),
+            reaction["reactions"][position]
+                .as_f64()
+                .expect("constrained reaction"),
+            unit,
+        );
+        assert!(reaction_view.lines().any(|line| line == expected_row));
+    }
+    let (unsigned, hash_line) = reaction_view
+        .rsplit_once("View hash: ")
+        .expect("reaction view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_window_arguments = [
+        text("reaction-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--start-row"),
+        text("2"),
+        text("--count"),
+        text("2"),
+    ];
+    let korean_window_first = run_workbench(&korean_window_arguments);
+    let korean_window_second = run_workbench(&korean_window_arguments);
+    assert_success(&korean_window_first);
+    assert_eq!(korean_window_first.stdout, korean_window_second.stdout);
+    assert!(!korean_window_first.stdout.contains(&0x1b));
+    let korean_window =
+        String::from_utf8(korean_window_first.stdout).expect("Korean reaction view UTF-8");
+    assert!(korean_window.starts_with("Structural ModelIR 선형 Workbench - 구속 반력\n"));
+    assert!(korean_window.contains("로케일: ko-KR\n"));
+    assert!(korean_window.contains("표시 행: 2-3 / 6\n"));
+    assert!(!korean_window
+        .lines()
+        .any(|line| line.starts_with("000001\t")));
+    assert!(korean_window
+        .lines()
+        .any(|line| line.starts_with("000002\t")));
+    assert!(korean_window
+        .lines()
+        .any(|line| line.starts_with("000003\t")));
+    assert!(!korean_window
+        .lines()
+        .any(|line| line.starts_with("000004\t")));
+    let (unsigned, hash_line) = korean_window
+        .rsplit_once("보기 해시: ")
+        .expect("Korean reaction view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    for arguments in [
+        vec![
+            text("reaction-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--count"),
+            text("257"),
+        ],
+        vec![
+            text("reaction-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--start-row"),
+            text("7"),
+        ],
+    ] {
+        let rejected = run_workbench(&arguments);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+    assert_eq!(
+        fs::read(restarted.join("workbench-session.json")).expect("session after reaction views"),
+        session_before_reaction_views,
+        "reaction view mutated the durable session"
+    );
+
     let session_before_localized_export =
         fs::read(restarted.join("workbench-session.json")).expect("session before PDF export");
     let mut localized_hashes = Vec::new();
@@ -533,11 +691,18 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     let mut tampered_reaction = reaction_bytes.clone();
     tampered_reaction[32] ^= 1;
     fs::write(&reaction_path, tampered_reaction).expect("tamper reactions");
-    let rejected = run_workbench(&stage_arguments("inspect", &restarted));
-    assert!(!rejected.status.success());
-    assert!(
-        String::from_utf8_lossy(&rejected.stdout).contains("workbench_artifact_inventory_mismatch")
-    );
+    for rejected in [
+        run_workbench(&stage_arguments("inspect", &restarted)),
+        run_workbench(&[
+            text("reaction-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+    ] {
+        assert!(!rejected.status.success());
+        assert!(String::from_utf8_lossy(&rejected.stdout)
+            .contains("workbench_artifact_inventory_mismatch"));
+    }
     fs::write(&reaction_path, &reaction_bytes).expect("restore reactions");
 
     let mut tampered_pdf = pdf;
@@ -584,6 +749,16 @@ fn frozen_linear_workspace_without_reactions_retains_legacy_review_contract() {
     strip_reaction_from_frozen_receipt(
         &workspace.join("06-report/report-receipt.json"),
         "verified_deterministic_sparse_report_ir_markdown_and_single_page_pdf_not_pdf_a_accessibility_engineering_acceptance_or_design_code_compliance",
+    );
+
+    let unavailable = run_workbench(&[
+        text("reaction-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert!(!unavailable.status.success());
+    assert!(
+        String::from_utf8_lossy(&unavailable.stdout).contains("workbench_reaction_view_missing")
     );
 
     assert_success(&run_workbench(&stage_arguments("status", &workspace)));

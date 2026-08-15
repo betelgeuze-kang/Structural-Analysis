@@ -50,11 +50,14 @@ golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and 
 distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A,
 tagged or arbitrary-Unicode PDF output, general accessibility/localization and C6 remain open. The
 bounded Workbench separately provides self-hashed `en-US`/`ko-KR` UTF-8 ModelIR topology, linear
-report, bounded response-history, and exact-profile deformed-shape views plus fixed-label
-embedded-font PDF export;
+report, constrained-reaction, bounded response-history, and exact-profile deformed-shape views
+plus fixed-label embedded-font PDF export;
 none is a certification or general UI-parity claim. See
 `docs/native/localized-modelir-topology-view-v1.md` and
-`docs/native/localized-terminal-result-views-v1.md` for the localized view boundaries.
+`docs/native/localized-terminal-result-views-v1.md` for the localized view boundaries. The
+ModelIR-linear-only `reaction-view` additionally binds actual node IDs, constrained DOFs, exact
+internal/external/reaction values and units; see
+`docs/native/modelir-linear-reaction-view-v1.md`.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and

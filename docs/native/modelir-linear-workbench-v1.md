@@ -32,11 +32,15 @@ The restart proof models process death after atomic checkpoint publication.
 6. `report` strictly re-parses and re-projects the ResultIR, recovery IR, ReportIR, and PDF-ready
    Markdown, then renders a deterministic PDF 1.7 page through the native sparse-report renderer.
    The stage receipt binds the source artifacts, PDF, renderer receipt, and all six hashes.
-7. `inspect`, English/Korean `report-view`, immutable explicit `review`, and `export` bind the exact
-   session, result, recovery, comparison, ReportIR, document source, and PDF. Export preserves both
-   `sparse_linear_pdf_report` and `pdf_ready_document_source` as distinct artifacts. The separate
-   `report-export-pdf` command revalidates the durable standard-font PDF and publishes an
-   embedded-font localized sparse PDF in exactly `en-US` or `ko-KR` without mutating the session.
+7. `inspect`, English/Korean `report-view`, English/Korean bounded `reaction-view`, immutable
+   explicit `review`, and `export` bind the exact session, result, recovery, constrained reactions,
+   comparison, ReportIR, document source, and PDF. Reaction-view re-verifies the source chain,
+   maps each constrained global DOF to the immutable ModelIR node ID and fixed DOF label, exposes
+   exact internal/external/reaction values and units in a self-hashed 1..256-row window, and never
+   mutates the session. Export preserves `reaction_result_ir`, `sparse_linear_pdf_report`, and
+   `pdf_ready_document_source` as distinct artifacts. The separate `report-export-pdf` command
+   revalidates the durable standard-font PDF and publishes an embedded-font localized sparse PDF
+   in exactly `en-US` or `ko-KR` without mutating the session.
 
 The one-shot equivalent is:
 
@@ -57,7 +61,13 @@ structural-workbench workflow-mgt-model-linear SOURCE.mgt MODEL-LINEAR-REQUEST.j
 
 The stage-by-stage entrypoint starts with `import-model-linear` or `import-mgt-model-linear`; all
 subsequent commands use the same `validate`, `run`, `resume`, `compare`, `report`, `inspect`,
-`report-view`, `review`, and `export` verbs as the legacy NDTHA profile.
+`report-view`, `review`, and `export` verbs as the legacy NDTHA profile. The profile-specific
+reaction surface is:
+
+```text
+structural-workbench reaction-view --workspace SESSION --locale ko-KR \
+  --start-row 1 --count 64
+```
 
 ## Recovery and comparison contract
 
@@ -94,9 +104,11 @@ The clean-environment E2E starts a new process for each command, advances exactl
 iteration, restores the pre-Run session file to model process death after atomic checkpoint
 publication, reopens and reconciles the stage, then completes Resume -> Compare -> Report. Every
 terminal result, recovery, report, comparison, PDF, and receipt byte is identical to a separate
-direct one-shot workflow. The same test exercises inspect, Korean report view, repeated English and
-Korean embedded-font localized sparse PDF export, explicit review, export, PDF tamper rejection,
-and fail-closed NDTHA-only result-view access.
+direct one-shot workflow. The same test exercises inspect, Korean report view, repeated
+deterministic English/Korean reaction views, exact node/DOF/value/unit rows, bounded windows,
+frozen pre-reaction rejection, repeated English and Korean embedded-font localized sparse PDF
+export, explicit review, export, reaction/PDF tamper rejection, and fail-closed profile-specific
+result-view access.
 
 The session profile field is optional and omitted for the existing fixed-guided NDTHA profile.
 Existing NDTHA session, import, review, export, PDF, and stage receipt shapes therefore remain

@@ -82,6 +82,7 @@
     "operator_flow": [
       "inspect",
       "report-view",
+      "reaction-view",
       "result-view",
       "result-deformed-view",
       "report-export-pdf",
@@ -653,6 +654,12 @@
     },
     {
       "feature": "bounded_terminal_utf8_linear_report_view_en_us_ko_kr",
+      "native_status": "c5_implemented",
+      "legacy_status": "partial",
+      "removal_blocker": false
+    },
+    {
+      "feature": "bounded_modelir_linear_constrained_reaction_view_en_us_ko_kr",
       "native_status": "c5_implemented",
       "legacy_status": "partial",
       "removal_blocker": false

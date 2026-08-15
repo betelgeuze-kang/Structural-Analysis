@@ -19155,6 +19155,14 @@ fn ndtha_response_view_is_windowed_deterministic_hash_bound_and_terminal_gated()
     for command in ["validate", "run", "resume"] {
         assert_success(&run_workbench(&stage_arguments(command, &workspace)));
     }
+    let unsupported_reactions = run_workbench(&[
+        text("reaction-view"),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]);
+    assert_eq!(unsupported_reactions.status.code(), Some(1));
+    assert!(String::from_utf8_lossy(&unsupported_reactions.stdout)
+        .contains("workbench_profile_unsupported"));
     let result: Value = serde_json::from_slice(
         &std::fs::read(workspace.join("04-resume/result-ir.json")).expect("terminal ResultIR"),
     )

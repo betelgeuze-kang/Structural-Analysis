@@ -557,6 +557,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   re-verifies the exact ResultIR/ReportIR/Markdown/PDF/receipt chain and optional Unicode review,
   uses no ANSI/color/position/graphics semantics, and escapes directional-spoofing controls. It is
   not WCAG/PDF-UA certification; the durable fixed-font v1 PDF remains ASCII-only.
+- `reaction-view`: a deterministic self-hashed ANSI-free 1..256-row table over one verified
+  ModelIR linear constrained-reaction ResultIR. It re-verifies the terminal receipt, sparse result,
+  typed recovery, reaction source bindings and immutable ModelIR identities, maps every global DOF
+  to the actual node ID and fixed DOF label, and preserves internal force, external load, reaction,
+  mixed force/moment units, CPU ABI receipt and provenance. Its `en-US` and `ko-KR` paths are
+  presentation-only; frozen pre-reaction artifacts and NDTHA sessions fail closed.
 - `result-view`: a deterministic self-hashed ANSI-free table and fixed-width plot over one verified
   terminal NDTHA ResultIR. It exposes exact top-displacement, drift-ratio, base-shear or
   residual-infinity values plus per-step convergence metadata through a maximum 256-row window.
@@ -762,6 +768,11 @@ The bounded NDTHA response-history view is C5-implemented for four closed respon
 arbitrary completed-prefix windows of at most 256 rows. It closes exact terminal response-table
 inspection for the current profile, not time reconstruction or 3D/deformed/modal/contour result
 exploration, so the composite visual parity row remains open.
+
+The bounded ModelIR linear constrained-reaction view is C5-implemented for exact node/DOF mapping,
+internal/external/reaction components and mixed units in one-based windows of at most 256 rows.
+It closes read-only reaction inspection for the current CPU linear profile, not equilibrium audit,
+support design, general stress/contour/modal exploration, engineering acceptance, or C6.
 
 The fixed-guided deformed-shape view is C5-implemented for the exact executed one-story adapter
 profile, four fixed projections, and a bounded visual magnification. It closes selected-step

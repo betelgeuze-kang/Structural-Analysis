@@ -20,9 +20,11 @@ REQUIRED_PATHS = (
     Path("native/crates/structural-workbench/src/model_edit.rs"),
     Path("native/crates/structural-workbench/src/deformed_view.rs"),
     Path("native/crates/structural-workbench/src/model_view.rs"),
+    Path("native/crates/structural-workbench/src/reaction_view.rs"),
     Path("native/crates/structural-workbench/src/report_view.rs"),
     Path("native/crates/structural-workbench/src/result_view.rs"),
     Path("native/crates/structural-workbench/tests/native_workbench_e2e.rs"),
+    Path("native/crates/structural-workbench/tests/model_ir_linear_workbench_e2e.rs"),
     Path("native/crates/structural-catalog/src/lib.rs"),
     Path("native/crates/structural-catalog/tests/catalog_builder_product.rs"),
     Path("native/crates/structural-frontend-contract/src/lib.rs"),
@@ -89,6 +91,7 @@ REQUIRED_PATHS = (
     Path("docs/native/modelir-linear-material-identity-cascade-edit-v2.md"),
     Path("docs/native/localized-modelir-topology-view-v1.md"),
     Path("docs/native/localized-terminal-result-views-v1.md"),
+    Path("docs/native/modelir-linear-reaction-view-v1.md"),
     Path("docs/native/modelir-constraint-value-edit-v1.md"),
     Path("docs/native/modelir-linear-material-edit-v1.md"),
     Path("docs/native/modelir-frame-section-edit-v1.md"),
@@ -398,6 +401,10 @@ EXPECTED_FEATURES = {
         "c5_implemented",
         False,
     ),
+    "bounded_modelir_linear_constrained_reaction_view_en_us_ko_kr": (
+        "c5_implemented",
+        False,
+    ),
     "bounded_embedded_font_pdf_en_us_ko_kr": ("c5_implemented", False),
     "accessibility_localization_and_unicode_report_ui": ("open", True),
 }
@@ -582,6 +589,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
     if native.get("operator_flow") != [
         "inspect",
         "report-view",
+        "reaction-view",
         "result-view",
         "result-deformed-view",
         "report-export-pdf",
@@ -1050,6 +1058,8 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "structural-native-workbench-export.v1",
             "pub fn inspect_json",
             "pub fn linear_report_text",
+            "pub fn model_ir_linear_reaction_view_text",
+            "pub fn model_ir_linear_reaction_view_text_localized",
             "pub fn ndtha_response_view_text",
             "pub fn ndtha_response_view_text_localized",
             "pub fn fixed_guided_deformed_shape_view_text",
@@ -1093,6 +1103,24 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
             "ResultIR v1 does not carry dt_s",
             "not a time reconstruction, 3D/deformed/modal/contour view",
             "시간값을 추론하지 않습니다",
+        ),
+        blockers,
+    )
+    native_reaction_view = _text(
+        root, Path("native/crates/structural-workbench/src/reaction_view.rs"), blockers
+    )
+    _require_tokens(
+        Path("native/crates/structural-workbench/src/reaction_view.rs"),
+        native_reaction_view,
+        (
+            "structural-native-workbench-model-ir-linear-reaction-view.v1",
+            "WORKBENCH_REACTION_VIEW_MAX_COUNT_V1",
+            "verify_model_identity",
+            "Internal force",
+            "External load",
+            "Reaction",
+            "workbench_reaction_view_window_invalid",
+            "not an equilibrium audit, support-design verdict",
         ),
         blockers,
     )
@@ -1840,6 +1868,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             'Some("inspect")',
             'Some("report-view")',
+            'Some("reaction-view")',
             'Some("result-view")',
             'Some("result-deformed-view")',
             'Some("report-export-pdf")',
@@ -3116,6 +3145,7 @@ def check_native_workbench_ui_transition(repo_root: Path = ROOT) -> dict[str, ob
         (
             "not a C6 removal receipt",
             "bounded terminal UTF-8 linear report view is C5-implemented",
+            "bounded ModelIR linear constrained-reaction view is C5-implemented",
             "bounded embedded-font PDF export is C5-implemented",
             "bounded NDTHA response-history view is C5-implemented",
             "fixed-guided deformed-shape view is C5-implemented",
