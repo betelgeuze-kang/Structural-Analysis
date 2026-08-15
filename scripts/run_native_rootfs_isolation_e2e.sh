@@ -236,6 +236,37 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/reaction-audit-wrong-profile-stderr.txt
+    for profile in model-ir-linear mgt-model-ir-linear; do
+      if [ "$profile" = model-ir-linear ]; then
+        displacement_workspace=/mnt/model-ir-linear-workbench
+      else
+        displacement_workspace=/mnt/mgt-model-ir-linear-workbench
+      fi
+      for locale in en-US ko-KR; do
+        for repeat in first second; do
+          /opt/payload/bin/structural-workbench nodal-displacement-view \
+            --workspace "$displacement_workspace" --locale "$locale" \
+            > "/mnt/$profile-nodal-displacement-view-$locale-$repeat.txt"
+        done
+        /usr/bin/cmp "/mnt/$profile-nodal-displacement-view-$locale-first.txt" \
+          "/mnt/$profile-nodal-displacement-view-$locale-second.txt"
+      done
+      if /usr/bin/cmp -s "/mnt/$profile-nodal-displacement-view-en-US-first.txt" \
+        "/mnt/$profile-nodal-displacement-view-ko-KR-first.txt"; then
+        exit 1
+      fi
+    done
+    /opt/payload/bin/structural-workbench nodal-displacement-view \
+      --workspace /mnt/model-ir-linear-workbench --locale en-US \
+      --start-node 2 --count 1 \
+      > /mnt/model-ir-linear-nodal-displacement-view-window.txt
+    if /opt/payload/bin/structural-workbench nodal-displacement-view \
+      --workspace /mnt/modelir-workbench \
+      > /mnt/nodal-displacement-view-wrong-profile-failure.json \
+      2> /mnt/nodal-displacement-view-wrong-profile-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/nodal-displacement-view-wrong-profile-stderr.txt
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -333,6 +364,26 @@ unshare -Urn bwrap \
         /mnt/mgt-model-ir-linear-reaction-audit-ko-KR-second.txt \
       --workbench-reaction-audit-wrong-profile-failure \
         /mnt/reaction-audit-wrong-profile-failure.json \
+      --model-ir-linear-nodal-displacement-view-en-us-first \
+        /mnt/model-ir-linear-nodal-displacement-view-en-US-first.txt \
+      --model-ir-linear-nodal-displacement-view-en-us-second \
+        /mnt/model-ir-linear-nodal-displacement-view-en-US-second.txt \
+      --model-ir-linear-nodal-displacement-view-ko-kr-first \
+        /mnt/model-ir-linear-nodal-displacement-view-ko-KR-first.txt \
+      --model-ir-linear-nodal-displacement-view-ko-kr-second \
+        /mnt/model-ir-linear-nodal-displacement-view-ko-KR-second.txt \
+      --model-ir-linear-nodal-displacement-view-window \
+        /mnt/model-ir-linear-nodal-displacement-view-window.txt \
+      --mgt-model-ir-linear-nodal-displacement-view-en-us-first \
+        /mnt/mgt-model-ir-linear-nodal-displacement-view-en-US-first.txt \
+      --mgt-model-ir-linear-nodal-displacement-view-en-us-second \
+        /mnt/mgt-model-ir-linear-nodal-displacement-view-en-US-second.txt \
+      --mgt-model-ir-linear-nodal-displacement-view-ko-kr-first \
+        /mnt/mgt-model-ir-linear-nodal-displacement-view-ko-KR-first.txt \
+      --mgt-model-ir-linear-nodal-displacement-view-ko-kr-second \
+        /mnt/mgt-model-ir-linear-nodal-displacement-view-ko-KR-second.txt \
+      --workbench-nodal-displacement-view-wrong-profile-failure \
+        /mnt/nodal-displacement-view-wrong-profile-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

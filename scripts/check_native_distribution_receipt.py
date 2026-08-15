@@ -1004,6 +1004,19 @@ V86_REACTION_AUDIT_KEYS = {
     "workbench_reaction_audit_wrong_profile_rejected",
 }
 V86_EXPECTED_KEYS = V85_EXPECTED_KEYS | V86_REACTION_AUDIT_KEYS
+V87_NODAL_DISPLACEMENT_VIEW_KEYS = {
+    "model_ir_linear_nodal_displacement_view_surface_passed",
+    "model_ir_linear_nodal_displacement_view_restart_parity_passed",
+    "model_ir_linear_nodal_displacement_view_en_us_sha256",
+    "model_ir_linear_nodal_displacement_view_ko_kr_sha256",
+    "model_ir_linear_nodal_displacement_view_window_sha256",
+    "mgt_model_ir_linear_nodal_displacement_view_surface_passed",
+    "mgt_model_ir_linear_nodal_displacement_view_restart_parity_passed",
+    "mgt_model_ir_linear_nodal_displacement_view_en_us_sha256",
+    "mgt_model_ir_linear_nodal_displacement_view_ko_kr_sha256",
+    "workbench_nodal_displacement_view_wrong_profile_rejected",
+}
+V87_EXPECTED_KEYS = V86_EXPECTED_KEYS | V87_NODAL_DISPLACEMENT_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1045,6 +1058,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v87_receipt = receipt_schema_version == "structural-native-distribution-e2e.v87"
+    if is_v87_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v86"
     is_v86_receipt = receipt_schema_version == "structural-native-distribution-e2e.v86"
     if is_v86_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v85"
@@ -1363,6 +1379,7 @@ def validate(
         "structural-native-distribution-e2e.v84": V84_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v85": V85_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v86": V86_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v87": V87_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1503,6 +1520,36 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v87_receipt:
+        for name in (
+            "model_ir_linear_nodal_displacement_view_surface_passed",
+            "model_ir_linear_nodal_displacement_view_restart_parity_passed",
+            "mgt_model_ir_linear_nodal_displacement_view_surface_passed",
+            "mgt_model_ir_linear_nodal_displacement_view_restart_parity_passed",
+            "workbench_nodal_displacement_view_wrong_profile_rejected",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "model_ir_linear_nodal_displacement_view_en_us_sha256",
+            "model_ir_linear_nodal_displacement_view_ko_kr_sha256",
+            "model_ir_linear_nodal_displacement_view_window_sha256",
+            "mgt_model_ir_linear_nodal_displacement_view_en_us_sha256",
+            "mgt_model_ir_linear_nodal_displacement_view_ko_kr_sha256",
+        )
+        displacement_identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                displacement_identities.append(identity)
+        if len(displacement_identities) == len(hash_names) and len(
+            set(displacement_identities)
+        ) != len(hash_names):
+            errors.append(
+                "all nodal displacement locale, window, and profile identities must differ"
+            )
     if is_v86_receipt:
         for name in (
             "model_ir_linear_reaction_audit_surface_passed",

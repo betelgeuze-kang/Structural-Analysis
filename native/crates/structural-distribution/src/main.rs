@@ -202,6 +202,16 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-model-ir-linear-reaction-audit-ko-kr-first",
             "--mgt-model-ir-linear-reaction-audit-ko-kr-second",
             "--workbench-reaction-audit-wrong-profile-failure",
+            "--model-ir-linear-nodal-displacement-view-en-us-first",
+            "--model-ir-linear-nodal-displacement-view-en-us-second",
+            "--model-ir-linear-nodal-displacement-view-ko-kr-first",
+            "--model-ir-linear-nodal-displacement-view-ko-kr-second",
+            "--model-ir-linear-nodal-displacement-view-window",
+            "--mgt-model-ir-linear-nodal-displacement-view-en-us-first",
+            "--mgt-model-ir-linear-nodal-displacement-view-en-us-second",
+            "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-first",
+            "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-second",
+            "--workbench-nodal-displacement-view-wrong-profile-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -306,6 +316,44 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--mgt-model-ir-linear-reaction-audit-ko-kr-second")?;
     let workbench_reaction_audit_wrong_profile_failure =
         required_path(options, "--workbench-reaction-audit-wrong-profile-failure")?;
+    let model_ir_linear_nodal_displacement_view_en_us_first = required_path(
+        options,
+        "--model-ir-linear-nodal-displacement-view-en-us-first",
+    )?;
+    let model_ir_linear_nodal_displacement_view_en_us_second = required_path(
+        options,
+        "--model-ir-linear-nodal-displacement-view-en-us-second",
+    )?;
+    let model_ir_linear_nodal_displacement_view_ko_kr_first = required_path(
+        options,
+        "--model-ir-linear-nodal-displacement-view-ko-kr-first",
+    )?;
+    let model_ir_linear_nodal_displacement_view_ko_kr_second = required_path(
+        options,
+        "--model-ir-linear-nodal-displacement-view-ko-kr-second",
+    )?;
+    let model_ir_linear_nodal_displacement_view_window =
+        required_path(options, "--model-ir-linear-nodal-displacement-view-window")?;
+    let mgt_model_ir_linear_nodal_displacement_view_en_us_first = required_path(
+        options,
+        "--mgt-model-ir-linear-nodal-displacement-view-en-us-first",
+    )?;
+    let mgt_model_ir_linear_nodal_displacement_view_en_us_second = required_path(
+        options,
+        "--mgt-model-ir-linear-nodal-displacement-view-en-us-second",
+    )?;
+    let mgt_model_ir_linear_nodal_displacement_view_ko_kr_first = required_path(
+        options,
+        "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-first",
+    )?;
+    let mgt_model_ir_linear_nodal_displacement_view_ko_kr_second = required_path(
+        options,
+        "--mgt-model-ir-linear-nodal-displacement-view-ko-kr-second",
+    )?;
+    let workbench_nodal_displacement_view_wrong_profile_failure = required_path(
+        options,
+        "--workbench-nodal-displacement-view-wrong-profile-failure",
+    )?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -380,6 +428,26 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             &mgt_model_ir_linear_reaction_audit_ko_kr_second,
         workbench_reaction_audit_wrong_profile_failure:
             &workbench_reaction_audit_wrong_profile_failure,
+        model_ir_linear_nodal_displacement_view_en_us_first:
+            &model_ir_linear_nodal_displacement_view_en_us_first,
+        model_ir_linear_nodal_displacement_view_en_us_second:
+            &model_ir_linear_nodal_displacement_view_en_us_second,
+        model_ir_linear_nodal_displacement_view_ko_kr_first:
+            &model_ir_linear_nodal_displacement_view_ko_kr_first,
+        model_ir_linear_nodal_displacement_view_ko_kr_second:
+            &model_ir_linear_nodal_displacement_view_ko_kr_second,
+        model_ir_linear_nodal_displacement_view_window:
+            &model_ir_linear_nodal_displacement_view_window,
+        mgt_model_ir_linear_nodal_displacement_view_en_us_first:
+            &mgt_model_ir_linear_nodal_displacement_view_en_us_first,
+        mgt_model_ir_linear_nodal_displacement_view_en_us_second:
+            &mgt_model_ir_linear_nodal_displacement_view_en_us_second,
+        mgt_model_ir_linear_nodal_displacement_view_ko_kr_first:
+            &mgt_model_ir_linear_nodal_displacement_view_ko_kr_first,
+        mgt_model_ir_linear_nodal_displacement_view_ko_kr_second:
+            &mgt_model_ir_linear_nodal_displacement_view_ko_kr_second,
+        workbench_nodal_displacement_view_wrong_profile_failure:
+            &workbench_nodal_displacement_view_wrong_profile_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -473,6 +541,13 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> String {
+    frozen_usage_v9().replace(
+        " --workbench-catalog",
+        " --model-ir-linear-nodal-displacement-view-en-us-first FILE --model-ir-linear-nodal-displacement-view-en-us-second FILE --model-ir-linear-nodal-displacement-view-ko-kr-first FILE --model-ir-linear-nodal-displacement-view-ko-kr-second FILE --model-ir-linear-nodal-displacement-view-window FILE --mgt-model-ir-linear-nodal-displacement-view-en-us-first FILE --mgt-model-ir-linear-nodal-displacement-view-en-us-second FILE --mgt-model-ir-linear-nodal-displacement-view-ko-kr-first FILE --mgt-model-ir-linear-nodal-displacement-view-ko-kr-second FILE --workbench-nodal-displacement-view-wrong-profile-failure FILE --workbench-catalog",
+    )
+}
+
+fn frozen_usage_v9() -> String {
     frozen_usage_v8().replace(
         " --workbench-catalog",
         " --model-ir-linear-reaction-audit-en-us-first FILE --model-ir-linear-reaction-audit-en-us-second FILE --model-ir-linear-reaction-audit-ko-kr-first FILE --model-ir-linear-reaction-audit-ko-kr-second FILE --mgt-model-ir-linear-reaction-audit-en-us-first FILE --mgt-model-ir-linear-reaction-audit-en-us-second FILE --mgt-model-ir-linear-reaction-audit-ko-kr-first FILE --mgt-model-ir-linear-reaction-audit-ko-kr-second FILE --workbench-reaction-audit-wrong-profile-failure FILE --workbench-catalog",
