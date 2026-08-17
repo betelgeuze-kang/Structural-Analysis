@@ -5,6 +5,7 @@ import { buildViewerUrl, createViewerBridge, type ViewerBridge } from '../model/
 import { CopyButton } from './CopyButton'
 import { EngineeringValueText } from './EngineeringValueText'
 import { ImportHealthPanel } from './ImportHealthPanel'
+import { NeutralModelEditor } from './NeutralModelEditor'
 
 interface ModelViewportProps {
   model: CaseModel
@@ -139,6 +140,7 @@ export function ModelViewport({
         </p>
       </section>
       <ImportHealthPanel model={model} />
+      <NeutralModelEditor />
     </>
   )
 }
