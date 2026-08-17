@@ -8,7 +8,7 @@
   },
   "license": {
     "identifier": "example-only-no-redistribution",
-    "training_allowed": false,
+    "training_allowed": true,
     "redistribution_allowed": false,
     "evidence_reference": null
   },
@@ -19,21 +19,24 @@
       "role": "calibration",
       "sample_ids": ["calibration-cycle-set-01"],
       "results_disclosed": true,
-      "parameters_frozen_at": null
+      "parameters_frozen_at": null,
+      "parameter_snapshot_sha256": null
     },
     {
       "group_key": "specimen-validation-01",
       "role": "locked_validation",
       "sample_ids": ["validation-cycle-set-01"],
       "results_disclosed": true,
-      "parameters_frozen_at": "2026-08-17T00:00:00Z"
+      "parameters_frozen_at": "2026-08-17T00:00:00Z",
+      "parameter_snapshot_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
     },
     {
       "group_key": "specimen-blind-01",
       "role": "blind_prediction",
       "sample_ids": ["blind-specimen-01"],
       "results_disclosed": false,
-      "parameters_frozen_at": "2026-08-17T00:00:00Z"
+      "parameters_frozen_at": "2026-08-17T00:00:00Z",
+      "parameter_snapshot_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
     }
   ],
   "claim_boundary": "A valid split manifest prevents declared split leakage only and grants no numerical, experimental-validation, public-support, design, or release authority."
