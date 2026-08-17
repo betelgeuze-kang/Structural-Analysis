@@ -29,6 +29,7 @@ def test_sample_cannot_cross_roles() -> None:
     payload["groups"][1]["sample_ids"] = ["calibration-cycle-set-01"]
     report = validate_split(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
+    assert "duplicate_sample_id:calibration-cycle-set-01" in report["contract_errors"]
     assert any(
         error.startswith("sample_cross_role_leakage:calibration-cycle-set-01")
         for error in report["contract_errors"]
@@ -40,10 +41,31 @@ def test_group_key_cannot_cross_roles() -> None:
     payload["groups"][2]["group_key"] = "specimen-validation-01"
     report = validate_split(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
+    assert "duplicate_group_key:specimen-validation-01" in report["contract_errors"]
     assert any(
         error.startswith("group_key_cross_role_leakage:specimen-validation-01")
         for error in report["contract_errors"]
     )
+
+
+def test_duplicate_sample_in_same_role_cannot_double_count_credit() -> None:
+    payload = copy.deepcopy(SAMPLE)
+    duplicate = copy.deepcopy(payload["groups"][0])
+    duplicate["group_key"] = "specimen-calibration-02"
+    payload["groups"].append(duplicate)
+    report = validate_split(payload, schema=SCHEMA)
+    assert report["contract_pass"] is False
+    assert "duplicate_sample_id:calibration-cycle-set-01" in report["contract_errors"]
+
+
+def test_training_role_requires_license_permission() -> None:
+    payload = copy.deepcopy(SAMPLE)
+    payload["license"]["training_allowed"] = False
+    report = validate_split(payload, schema=SCHEMA)
+    assert report["contract_pass"] is False
+    assert "training_role_not_permitted_by_license:0:calibration" in report[
+        "contract_errors"
+    ]
 
 
 def test_locked_validation_requires_parameter_freeze() -> None:
@@ -54,6 +76,17 @@ def test_locked_validation_requires_parameter_freeze() -> None:
     assert "locked_role_requires_parameters_frozen_at:1:locked_validation" in report[
         "contract_errors"
     ]
+
+
+def test_locked_validation_requires_parameter_snapshot_hash() -> None:
+    payload = copy.deepcopy(SAMPLE)
+    payload["groups"][1]["parameter_snapshot_sha256"] = None
+    report = validate_split(payload, schema=SCHEMA)
+    assert report["contract_pass"] is False
+    assert (
+        "locked_role_requires_parameter_snapshot_sha256:1:locked_validation"
+        in report["contract_errors"]
+    )
 
 
 def test_blind_results_must_remain_undisclosed() -> None:
