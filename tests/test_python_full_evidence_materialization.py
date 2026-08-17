@@ -13,8 +13,9 @@ def _extract_job(workflow: str, job_name: str) -> str:
     marker = f"  {job_name}:"
     try:
         start = lines.index(marker)
-    except ValueError as exc:  # pragma: no cover - assertion message is the contract
-        raise AssertionError(f"workflow job not found: {job_name}") from exc
+    except ValueError as exc:  # pragma: no cover
+        message = f"workflow job not found: {job_name}"
+        raise AssertionError(message) from exc
 
     end = len(lines)
     for index in range(start + 1, len(lines)):
