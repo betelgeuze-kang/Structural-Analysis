@@ -16,11 +16,12 @@ The selected `split_unit` must match the actual independence boundary used for s
 
 ## Mandatory separation
 
-- A `group_key` may appear in only one role.
-- A `sample_id` may appear in only one role.
-- `locked_validation` and `blind_prediction` rows require `parameters_frozen_at`.
+- Every `group_key` is unique across the manifest and may appear in only one role.
+- Every `sample_id` is unique across the manifest and may appear in only one role; duplicate rows cannot double-count evidence even within one role.
+- `locked_validation` and `blind_prediction` rows require both `parameters_frozen_at` and `parameter_snapshot_sha256`.
 - Blind results must remain undisclosed at manifest-validation time.
 - Calibration and development-regression results must be disclosed to the development process.
+- Calibration and development-regression roles are rejected when the declared dataset license does not allow training.
 - Dataset source identity, checksum, and license permissions remain explicit.
 
 Randomly splitting load steps, cycles, frames, or time samples from the same specimen does not create independent validation evidence when the declared split unit is the specimen.
@@ -37,4 +38,4 @@ Randomly splitting load steps, cycles, frames, or time samples from the same spe
 
 ## Claim boundary
 
-Passing the validator proves only that the declared manifest has no cross-role duplicate group or sample identifiers and satisfies the bounded freeze/disclosure rules. It does not prove that the source is scientifically independent, that the selected split unit is appropriate, that the measurements are correct, or that the solver is experimentally validated. It creates no numerical, design, public-support, or release authority.
+Passing the validator proves only that the declared manifest has no duplicate or cross-role group/sample identifiers, that training roles respect the declared license flag, and that bounded freeze/disclosure rules are present. It does not prove that the source is scientifically independent, that the selected split unit is appropriate, that the measurements are correct, or that the solver is experimentally validated. It creates no numerical, design, public-support, or release authority.
