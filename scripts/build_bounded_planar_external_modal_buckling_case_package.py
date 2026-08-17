@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Compatibility entry point for the bounded planar modal/buckling package."""
 
+from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from scripts import build_bounded_planar_external_modal_buckling_case_package_core as _core
 from scripts.generated_package_check import run_package_cli
 
