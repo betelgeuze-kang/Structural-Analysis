@@ -10,6 +10,7 @@ static IMPLEMENTATION_NAME: &[u8] = b"mock-structural-engine\0";
 struct MockApi {
     create_status: sys::Status,
     api_major: u32,
+    error_message: String,
 }
 
 impl MockApi {
@@ -17,6 +18,7 @@ impl MockApi {
         Self {
             create_status: sys::Status::Ok,
             api_major: sys::ABI_VERSION_MAJOR,
+            error_message: "mock native failure".to_owned(),
         }
     }
 }
@@ -69,18 +71,20 @@ impl EngineApi for MockApi {
         buffer_capacity: usize,
         out_required_size: *mut usize,
     ) -> i32 {
-        const MESSAGE: &[u8] = b"mock native failure\0";
-        unsafe { *out_required_size = MESSAGE.len() };
-        if buffer_capacity < MESSAGE.len() {
+        let message = self.error_message.as_bytes();
+        let required = message.len() + 1;
+        unsafe { *out_required_size = required };
+        if buffer.is_null() || buffer_capacity < required {
             return sys::Status::BufferTooSmall as i32;
         }
         unsafe {
             std::ptr::copy_nonoverlapping(
-                MESSAGE.as_ptr().cast::<c_char>(),
+                message.as_ptr().cast::<c_char>(),
                 buffer,
-                MESSAGE.len(),
-            )
-        };
+                message.len(),
+            );
+            *buffer.add(message.len()) = 0;
+        }
         sys::Status::Ok as i32
     }
 }
@@ -105,6 +109,7 @@ fn create_error_preserves_native_status_and_message() {
         MockApi {
             create_status: sys::Status::Unsupported,
             api_major: sys::ABI_VERSION_MAJOR,
+            error_message: "mock native failure".to_owned(),
         },
         EngineConfig::default(),
     )
@@ -120,11 +125,34 @@ fn create_error_preserves_native_status_and_message() {
 }
 
 #[test]
+fn long_native_diagnostic_is_not_truncated() {
+    let message = "diagnostic:".to_owned() + &"x".repeat(2_048);
+    let error = Engine::create(
+        MockApi {
+            create_status: sys::Status::InternalError,
+            api_major: sys::ABI_VERSION_MAJOR,
+            error_message: message.clone(),
+        },
+        EngineConfig::default(),
+    )
+    .err()
+    .expect("native error should fail engine creation");
+    assert_eq!(
+        error,
+        Error::Native {
+            status: sys::Status::InternalError,
+            message,
+        }
+    );
+}
+
+#[test]
 fn incompatible_abi_is_rejected_before_create() {
     let error = Engine::create(
         MockApi {
             create_status: sys::Status::Ok,
             api_major: sys::ABI_VERSION_MAJOR + 1,
+            error_message: "unused".to_owned(),
         },
         EngineConfig::default(),
     )
