@@ -22,6 +22,34 @@ def test_run_hardest_external_10case_program_executes_all_cases(tmp_path: Path) 
     reject_one_preview = kickoff_dir / "external_benchmark_submission_readiness_preview.reject_one.json"
     decision_runner = kickoff_dir / "audit_review_decision_batch_run_report.json"
     case_source_root = tmp_path / "case_sources"
+    signing_private_key = tmp_path / "test_signing_ed25519.pem"
+    signing_public_key = tmp_path / "test_signing_ed25519.pub.pem"
+
+    subprocess.run(
+        [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "ED25519",
+            "-out",
+            str(signing_private_key),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            "openssl",
+            "pkey",
+            "-in",
+            str(signing_private_key),
+            "-pubout",
+            "-out",
+            str(signing_public_key),
+        ],
+        check=True,
+        capture_output=True,
+    )
 
     for case in CASE_CATALOG:
         source_paths = [
@@ -108,6 +136,10 @@ def test_run_hardest_external_10case_program_executes_all_cases(tmp_path: Path) 
             str(kickoff_dir / "hardest_external_10case_program_report.json"),
             "--case-source-root",
             str(case_source_root),
+            "--signing-private-key",
+            str(signing_private_key),
+            "--signing-public-key",
+            str(signing_public_key),
             "--no-refresh-release-surfaces",
         ],
         cwd=Path(__file__).resolve().parents[1],
@@ -115,7 +147,7 @@ def test_run_hardest_external_10case_program_executes_all_cases(tmp_path: Path) 
         text=True,
         check=False,
     )
-    assert proc.returncode == 0, proc.stderr
+    assert proc.returncode == 0, proc.stderr or proc.stdout
     report = json.loads((kickoff_dir / "hardest_external_10case_program_report.json").read_text(encoding="utf-8"))
     assert report["contract_pass"] is True
     assert report["summary"]["task_count"] == 10

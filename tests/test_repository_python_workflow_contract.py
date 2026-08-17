@@ -29,15 +29,24 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
 
     assert "merge_group:" in workflow
     assert 'branches: ["main"]' in workflow
-    assert "python -m pytest -q" in workflow
-    assert "full:\n    if:" not in workflow
-    full_job = workflow.split("  full:", 1)[1]
-    assert "timeout-minutes: 360" in full_job
-    full_checkout = workflow.split("  full:", 1)[1].split(
+    assert "python scripts/run_pytest_shard.py" in workflow
+    shard_job = workflow.split("  full_shards:", 1)[1].split("  full:", 1)[0]
+    assert "name: pytest-full-shard-${{ matrix.shard }}" in shard_job
+    assert "fail-fast: false" in shard_job
+    assert "shard: [0, 1, 2, 3]" in shard_job
+    assert '--shard-index "${{ matrix.shard }}"' in shard_job
+    assert "--shard-count 4" in shard_job
+    assert "timeout-minutes: 360" in shard_job
+    full_checkout = shard_job.split(
         "      - name: Set up Python",
         1,
     )[0]
     assert "fetch-depth: 0" in full_checkout
+    aggregate_job = workflow.split("  full:", 1)[1]
+    assert "name: pytest-full" in aggregate_job
+    assert "if: ${{ always() }}" in aggregate_job
+    assert "needs: full_shards" in aggregate_job
+    assert 'test "$FULL_SHARDS_RESULT" = "success"' in aggregate_job
     pristine_ledger = workflow.index("- name: Validate pristine commercial gap ledger")
     hosted_hip_source = workflow.index(
         "- name: Validate hosted HIP receipt source binding"
@@ -45,7 +54,9 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     materialize = workflow.index(
         "- name: Materialize exact current-source test evidence"
     )
-    full_suite = workflow.index("- name: Run materialized repository test suite")
+    full_suite = workflow.index(
+        "- name: Run materialized repository test suite shard"
+    )
     ledger_nodeid = (
         "tests/test_commercial_gap_ledger_status.py::"
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
@@ -367,3 +378,15 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
         assert "paths:" not in pull_request
         assert "merge_group:" in workflow
         assert f"name: {context}" in workflow
+
+
+def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "python-test-collection.yml"
+    ).read_text(encoding="utf-8")
+
+    assert workflow.count("    name: pytest-full\n") == 1
+    assert workflow.count("  full_shards:\n") == 1
+    assert workflow.count("  full:\n") == 1
+    assert "needs: full_shards" in workflow.split("  full:\n", 1)[1]
+    assert "FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}" in workflow
