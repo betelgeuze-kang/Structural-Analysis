@@ -224,20 +224,68 @@ fn ensure_ok<A: EngineApi>(
 }
 
 fn read_last_error<A: EngineApi>(api: &A, engine: *const sys::Engine) -> String {
-    let mut buffer = vec![0_i8; 512];
     let mut required = 0_usize;
-    let status = unsafe {
+    let probe_status = unsafe {
         api.engine_last_error(
             engine,
-            buffer.as_mut_ptr(),
-            buffer.len(),
+            std::ptr::null_mut(),
+            0,
             &mut required,
         )
     };
-    if sys::Status::from_raw(status) != Some(sys::Status::Ok) {
-        return format!("native error status {status}; required buffer size {required}");
+    match sys::Status::from_raw(probe_status) {
+        Some(sys::Status::Ok | sys::Status::BufferTooSmall) => {}
+        Some(status) => {
+            return format!(
+                "failed to query native error size: status {status:?}; required buffer size {required}"
+            )
+        }
+        None => {
+            return format!(
+                "failed to query native error size: unknown status {probe_status}; required buffer size {required}"
+            )
+        }
     }
-    unsafe { CStr::from_ptr(buffer.as_ptr()) }
-        .to_string_lossy()
-        .into_owned()
+
+    if required == 0 {
+        return String::new();
+    }
+
+    for _ in 0..3 {
+        let mut buffer = vec![0_u8; required];
+        let mut next_required = 0_usize;
+        let read_status = unsafe {
+            api.engine_last_error(
+                engine,
+                buffer.as_mut_ptr().cast(),
+                buffer.len(),
+                &mut next_required,
+            )
+        };
+        match sys::Status::from_raw(read_status) {
+            Some(sys::Status::Ok) => {
+                let Some(nul_index) = buffer.iter().position(|byte| *byte == 0) else {
+                    return "native error message was not NUL terminated".to_owned();
+                };
+                return String::from_utf8_lossy(&buffer[..nul_index]).into_owned();
+            }
+            Some(sys::Status::BufferTooSmall) if next_required > buffer.len() => {
+                required = next_required;
+            }
+            Some(status) => {
+                return format!(
+                    "failed to read native error: status {status:?}; required buffer size {next_required}"
+                )
+            }
+            None => {
+                return format!(
+                    "failed to read native error: unknown status {read_status}; required buffer size {next_required}"
+                )
+            }
+        }
+    }
+
+    format!(
+        "native error message size changed repeatedly; last required buffer size {required}"
+    )
 }
