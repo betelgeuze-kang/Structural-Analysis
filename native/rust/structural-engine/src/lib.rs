@@ -70,6 +70,14 @@ pub enum Error {
     NullHandle,
     UnknownStatus(i32),
     InvalidImplementationName,
+    InvalidNativeShape {
+        dof_count: usize,
+        member_end_force_count: usize,
+    },
+    LoadLength {
+        expected: usize,
+        actual: usize,
+    },
 }
 
 pub trait EngineApi: Clone {
@@ -92,6 +100,36 @@ pub trait EngineApi: Clone {
         buffer_capacity: usize,
         out_required_size: *mut usize,
     ) -> i32;
+
+    unsafe fn compile_linear_frame3d(
+        &self,
+        _engine: *const sys::Engine,
+        _input: *const sys::LinearFrame3DModelInput,
+        _out_model: *mut *mut sys::LinearFrame3DModel,
+    ) -> i32 {
+        sys::Status::Unsupported as i32
+    }
+
+    unsafe fn destroy_linear_frame3d(&self, _model: *mut sys::LinearFrame3DModel) {}
+
+    unsafe fn linear_frame3d_sizes(
+        &self,
+        _model: *const sys::LinearFrame3DModel,
+        _out_dof_count: *mut usize,
+        _out_member_end_force_count: *mut usize,
+    ) -> i32 {
+        sys::Status::Unsupported as i32
+    }
+
+    unsafe fn solve_linear_frame3d(
+        &self,
+        _model: *const sys::LinearFrame3DModel,
+        _load_vector_kn: *const f64,
+        _load_count: usize,
+        _out_result: *mut sys::LinearFrame3DResultBuffers,
+    ) -> i32 {
+        sys::Status::Unsupported as i32
+    }
 }
 
 #[cfg(feature = "native-link")]
@@ -135,6 +173,51 @@ impl EngineApi for NativeApi {
             sys::sa_engine_last_error(engine, buffer, buffer_capacity, out_required_size)
         }
     }
+
+    unsafe fn compile_linear_frame3d(
+        &self,
+        engine: *const sys::Engine,
+        input: *const sys::LinearFrame3DModelInput,
+        out_model: *mut *mut sys::LinearFrame3DModel,
+    ) -> i32 {
+        unsafe { sys::sa_linear_frame3d_model_compile(engine, input, out_model) }
+    }
+
+    unsafe fn destroy_linear_frame3d(&self, model: *mut sys::LinearFrame3DModel) {
+        unsafe { sys::sa_linear_frame3d_model_destroy(model) }
+    }
+
+    unsafe fn linear_frame3d_sizes(
+        &self,
+        model: *const sys::LinearFrame3DModel,
+        out_dof_count: *mut usize,
+        out_member_end_force_count: *mut usize,
+    ) -> i32 {
+        unsafe {
+            sys::sa_linear_frame3d_model_sizes(
+                model,
+                out_dof_count,
+                out_member_end_force_count,
+            )
+        }
+    }
+
+    unsafe fn solve_linear_frame3d(
+        &self,
+        model: *const sys::LinearFrame3DModel,
+        load_vector_kn: *const f64,
+        load_count: usize,
+        out_result: *mut sys::LinearFrame3DResultBuffers,
+    ) -> i32 {
+        unsafe {
+            sys::sa_linear_frame3d_solve(
+                model,
+                load_vector_kn,
+                load_count,
+                out_result,
+            )
+        }
+    }
 }
 
 pub fn query_api_info<A: EngineApi>(api: &A) -> Result<ApiInfo, Error> {
@@ -164,6 +247,36 @@ pub fn query_api_info<A: EngineApi>(api: &A) -> Result<ApiInfo, Error> {
         capability_bits: raw.capability_bits,
         implementation_name,
     })
+}
+
+pub struct LinearFrame3DInput<'a> {
+    pub nodes: &'a [sys::LinearFrame3DNode],
+    pub sections: &'a [sys::LinearFrame3DSection],
+    pub members: &'a [sys::LinearFrame3DMember],
+    pub restrained_dofs: &'a [u32],
+}
+
+impl LinearFrame3DInput<'_> {
+    fn as_raw(&self) -> sys::LinearFrame3DModelInput {
+        sys::LinearFrame3DModelInput {
+            nodes: self.nodes.as_ptr(),
+            node_count: self.nodes.len(),
+            sections: self.sections.as_ptr(),
+            section_count: self.sections.len(),
+            members: self.members.as_ptr(),
+            member_count: self.members.len(),
+            restrained_dofs: self.restrained_dofs.as_ptr(),
+            restrained_dof_count: self.restrained_dofs.len(),
+            ..sys::LinearFrame3DModelInput::default()
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct LinearFrame3DResult {
+    pub displacements: Vec<f64>,
+    pub reactions: Vec<f64>,
+    pub member_end_forces: Vec<f64>,
 }
 
 pub struct Engine<A: EngineApi> {
@@ -197,6 +310,50 @@ impl<A: EngineApi> Engine<A> {
         Ok(capability_bits)
     }
 
+    pub fn compile_linear_frame3d<'engine>(
+        &'engine self,
+        input: &LinearFrame3DInput<'_>,
+    ) -> Result<LinearFrame3DModel<'engine, A>, Error> {
+        let raw_input = input.as_raw();
+        let mut raw_model = std::ptr::null_mut();
+        let status = unsafe {
+            self.api.compile_linear_frame3d(
+                self.handle.as_ptr(),
+                &raw_input,
+                &mut raw_model,
+            )
+        };
+        ensure_ok(&self.api, self.handle.as_ptr(), status)?;
+        let handle = NonNull::new(raw_model).ok_or(Error::NullHandle)?;
+        let mut compiled = LinearFrame3DModel {
+            api: self.api.clone(),
+            engine: self.handle,
+            handle,
+            dof_count: 0,
+            member_end_force_count: 0,
+            _engine_lifetime: PhantomData,
+            _not_send_or_sync: PhantomData,
+        };
+        let status = unsafe {
+            compiled.api.linear_frame3d_sizes(
+                compiled.handle.as_ptr(),
+                &mut compiled.dof_count,
+                &mut compiled.member_end_force_count,
+            )
+        };
+        ensure_ok(&compiled.api, compiled.engine.as_ptr(), status)?;
+        if compiled.dof_count == 0
+            || compiled.member_end_force_count == 0
+            || compiled.member_end_force_count % 12 != 0
+        {
+            return Err(Error::InvalidNativeShape {
+                dof_count: compiled.dof_count,
+                member_end_force_count: compiled.member_end_force_count,
+            });
+        }
+        Ok(compiled)
+    }
+
     pub fn as_raw(&self) -> *mut sys::Engine {
         self.handle.as_ptr()
     }
@@ -205,6 +362,69 @@ impl<A: EngineApi> Engine<A> {
 impl<A: EngineApi> Drop for Engine<A> {
     fn drop(&mut self) {
         unsafe { self.api.destroy_engine(self.handle.as_ptr()) }
+    }
+}
+
+pub struct LinearFrame3DModel<'engine, A: EngineApi> {
+    api: A,
+    engine: NonNull<sys::Engine>,
+    handle: NonNull<sys::LinearFrame3DModel>,
+    dof_count: usize,
+    member_end_force_count: usize,
+    _engine_lifetime: PhantomData<&'engine Engine<A>>,
+    _not_send_or_sync: PhantomData<Rc<()>>,
+}
+
+impl<A: EngineApi> LinearFrame3DModel<'_, A> {
+    pub fn dof_count(&self) -> usize {
+        self.dof_count
+    }
+
+    pub fn member_count(&self) -> usize {
+        self.member_end_force_count / 12
+    }
+
+    pub fn solve(&self, load_vector_kn: &[f64]) -> Result<LinearFrame3DResult, Error> {
+        if load_vector_kn.len() != self.dof_count {
+            return Err(Error::LoadLength {
+                expected: self.dof_count,
+                actual: load_vector_kn.len(),
+            });
+        }
+        let mut result = LinearFrame3DResult {
+            displacements: vec![0.0; self.dof_count],
+            reactions: vec![0.0; self.dof_count],
+            member_end_forces: vec![0.0; self.member_end_force_count],
+        };
+        let mut raw_result = sys::LinearFrame3DResultBuffers {
+            displacements: result.displacements.as_mut_ptr(),
+            displacement_count: result.displacements.len(),
+            reactions: result.reactions.as_mut_ptr(),
+            reaction_count: result.reactions.len(),
+            member_end_forces: result.member_end_forces.as_mut_ptr(),
+            member_end_force_count: result.member_end_forces.len(),
+            ..sys::LinearFrame3DResultBuffers::default()
+        };
+        let status = unsafe {
+            self.api.solve_linear_frame3d(
+                self.handle.as_ptr(),
+                load_vector_kn.as_ptr(),
+                load_vector_kn.len(),
+                &mut raw_result,
+            )
+        };
+        ensure_ok(&self.api, self.engine.as_ptr(), status)?;
+        Ok(result)
+    }
+
+    pub fn as_raw(&self) -> *mut sys::LinearFrame3DModel {
+        self.handle.as_ptr()
+    }
+}
+
+impl<A: EngineApi> Drop for LinearFrame3DModel<'_, A> {
+    fn drop(&mut self) {
+        unsafe { self.api.destroy_linear_frame3d(self.handle.as_ptr()) }
     }
 }
 
