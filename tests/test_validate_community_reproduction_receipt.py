@@ -28,13 +28,25 @@ def test_sample_receipt_is_valid_but_not_independent_credit() -> None:
     assert report["eligible_for_community_reproduction_credit"] is False
 
 
-def test_hip_receipt_requires_rocm_and_gpu_architecture() -> None:
+def test_receipt_requires_engine_and_execution_plan_identity() -> None:
+    receipt = copy.deepcopy(SAMPLE)
+    del receipt["engine_artifact_sha256"]
+    del receipt["execution_plan_sha256"]
+    report = validate_receipt(receipt, schema=SCHEMA)
+    assert report["schema_pass"] is False
+    assert report["contract_pass"] is False
+    assert any("engine_artifact_sha256" in error for error in report["schema_errors"])
+    assert any("execution_plan_sha256" in error for error in report["schema_errors"])
+
+
+def test_hip_receipt_requires_rocm_and_stable_gpu_identity() -> None:
     receipt = copy.deepcopy(SAMPLE)
     receipt["execution"]["backend"] = "hip"
     report = validate_receipt(receipt, schema=SCHEMA)
     assert report["contract_pass"] is False
     assert report["contract_errors"] == [
         "hip_backend_requires_gpu_architecture",
+        "hip_backend_requires_gpu_device_uuid",
         "hip_backend_requires_rocm_version",
     ]
 
