@@ -9,8 +9,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts import build_bounded_planar_external_negative_case_package_core as _core
-from scripts.generated_package_check import run_package_cli
+# These compatibility wrappers must bootstrap the repository root before importing
+# the shared implementation when executed directly from a clean checkout.
+from scripts import build_bounded_planar_external_negative_case_package_core as _core  # noqa: E402
+from scripts.generated_package_check import run_package_cli  # noqa: E402
 
 for _name in dir(_core):
     if not _name.startswith("__"):
