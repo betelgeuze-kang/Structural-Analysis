@@ -36,6 +36,7 @@ function createStaticServer() {
       return
     }
     if (!existsSync(target) || !statSync(target).isFile()) {
+      console.error(`[structure-viewer-static-404] ${decodedPath}`)
       sendText(response, 404, 'Not found')
       return
     }
