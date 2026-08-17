@@ -1,0 +1,40 @@
+{
+  "schema_version": "validation-dataset-split.v1",
+  "dataset_id": "example-structural-validation-dataset",
+  "source": {
+    "title": "Example-only structural validation source",
+    "reference": "example-only",
+    "checksum": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "license": {
+    "identifier": "example-only-no-redistribution",
+    "training_allowed": false,
+    "redistribution_allowed": false,
+    "evidence_reference": null
+  },
+  "split_unit": "specimen",
+  "groups": [
+    {
+      "group_key": "specimen-calibration-01",
+      "role": "calibration",
+      "sample_ids": ["calibration-cycle-set-01"],
+      "results_disclosed": true,
+      "parameters_frozen_at": null
+    },
+    {
+      "group_key": "specimen-validation-01",
+      "role": "locked_validation",
+      "sample_ids": ["validation-cycle-set-01"],
+      "results_disclosed": true,
+      "parameters_frozen_at": "2026-08-17T00:00:00Z"
+    },
+    {
+      "group_key": "specimen-blind-01",
+      "role": "blind_prediction",
+      "sample_ids": ["blind-specimen-01"],
+      "results_disclosed": false,
+      "parameters_frozen_at": "2026-08-17T00:00:00Z"
+    }
+  ],
+  "claim_boundary": "A valid split manifest prevents declared split leakage only and grants no numerical, experimental-validation, public-support, design, or release authority."
+}
