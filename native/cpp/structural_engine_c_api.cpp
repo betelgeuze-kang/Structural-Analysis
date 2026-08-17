@@ -1,18 +1,23 @@
 #include "structural_engine_c_api.h"
 
-#include <algorithm>
 #include <cstring>
 #include <new>
-#include <string>
 
 namespace {
 
 constexpr uint64_t kReferenceCapabilities = SA_CAPABILITY_CPU_REFERENCE;
 constexpr const char *kImplementationName = "structural-engine-cpu-reference-abi";
-thread_local std::string g_last_error;
+constexpr size_t kErrorCapacity = 4096;
+thread_local char g_last_error[kErrorCapacity] = {};
 
-void set_thread_error(const char *message) {
-    g_last_error = message == nullptr ? "" : message;
+void set_thread_error(const char *message) noexcept {
+    const char *source = message == nullptr ? "" : message;
+    size_t index = 0;
+    while (source[index] != '\0' && index + 1 < kErrorCapacity) {
+        g_last_error[index] = source[index];
+        ++index;
+    }
+    g_last_error[index] = '\0';
 }
 
 sa_status validate_config(const sa_engine_config *config) {
@@ -47,22 +52,19 @@ sa_status validate_config(const sa_engine_config *config) {
     return SA_STATUS_OK;
 }
 
-const std::string &error_for(const sa_engine *engine);
+const char *error_for(const sa_engine *engine) noexcept;
 
 }  // namespace
 
 struct sa_engine {
     uint32_t execution_mode;
     uint64_t capability_bits;
-    std::string last_error;
 };
 
 namespace {
 
-const std::string &error_for(const sa_engine *engine) {
-    if (engine != nullptr && !engine->last_error.empty()) {
-        return engine->last_error;
-    }
+const char *error_for(const sa_engine *engine) noexcept {
+    (void)engine;
     return g_last_error;
 }
 
@@ -85,9 +87,6 @@ extern "C" sa_status sa_get_api_info(sa_api_info *out_info) noexcept {
         out_info->implementation_name = kImplementationName;
         set_thread_error("");
         return SA_STATUS_OK;
-    } catch (const std::bad_alloc &) {
-        set_thread_error("allocation failed while querying API information");
-        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while querying API information");
         return SA_STATUS_INTERNAL_ERROR;
@@ -112,7 +111,6 @@ extern "C" sa_status sa_engine_create(
         sa_engine *engine = new (std::nothrow) sa_engine{
             config->execution_mode,
             kReferenceCapabilities,
-            std::string{},
         };
         if (engine == nullptr) {
             set_thread_error("engine allocation failed");
@@ -121,9 +119,6 @@ extern "C" sa_status sa_engine_create(
         *out_engine = engine;
         set_thread_error("");
         return SA_STATUS_OK;
-    } catch (const std::bad_alloc &) {
-        set_thread_error("engine allocation failed");
-        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while creating engine");
         return SA_STATUS_INTERNAL_ERROR;
@@ -175,21 +170,18 @@ extern "C" sa_status sa_engine_last_error(
             set_thread_error("required-size output is null");
             return SA_STATUS_INVALID_ARGUMENT;
         }
-        const std::string &message = error_for(engine);
-        const size_t required = message.size() + 1;
+        const char *message = error_for(engine);
+        const size_t message_size = std::strlen(message);
+        const size_t required = message_size + 1;
         *out_required_size = required;
         if (buffer == nullptr || buffer_capacity < required) {
             return SA_STATUS_BUFFER_TOO_SMALL;
         }
-        const size_t bytes = std::min(message.size(), buffer_capacity - 1);
-        if (bytes > 0) {
-            std::memcpy(buffer, message.data(), bytes);
+        if (message_size > 0) {
+            std::memcpy(buffer, message, message_size);
         }
-        buffer[bytes] = '\0';
+        buffer[message_size] = '\0';
         return SA_STATUS_OK;
-    } catch (const std::bad_alloc &) {
-        set_thread_error("allocation failed while reading last error");
-        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while reading last error");
         return SA_STATUS_INTERNAL_ERROR;
