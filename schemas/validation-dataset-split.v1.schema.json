@@ -53,7 +53,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["group_key", "role", "sample_ids", "results_disclosed"],
+        "required": [
+          "group_key",
+          "role",
+          "sample_ids",
+          "results_disclosed",
+          "parameters_frozen_at",
+          "parameter_snapshot_sha256"
+        ],
         "properties": {
           "group_key": {"type": "string", "minLength": 1},
           "role": {
@@ -75,6 +82,12 @@
           "parameters_frozen_at": {
             "type": ["string", "null"],
             "format": "date-time"
+          },
+          "parameter_snapshot_sha256": {
+            "oneOf": [
+              {"$ref": "#/$defs/sha256"},
+              {"type": "null"}
+            ]
           }
         }
       }
