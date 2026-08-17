@@ -50,6 +50,16 @@ function invalidIssue(index: number, message: string): ImportHealthIssue {
   }
 }
 
+function invalidFieldIssue(field: string, message: string): ImportHealthIssue {
+  return {
+    code: `invalid_import_health_${field}`,
+    severity: 'error',
+    blocking: true,
+    message,
+    remediation: 'Regenerate the import-health receipt with an explicit valid field value.',
+  }
+}
+
 function normalizeIssue(value: unknown, index: number): ImportHealthIssue {
   if (!isRecord(value)) {
     return invalidIssue(index, 'Import-health issue row is not an object.')
@@ -111,10 +121,17 @@ export function summarizeImportHealth(model: CaseModel): ImportHealthSummary {
     }
   }
 
-  const issuesRaw = Array.isArray(raw.issues) ? raw.issues : []
-  const issues = issuesRaw.map(normalizeIssue)
-  if (raw.issues != null && !Array.isArray(raw.issues)) {
-    issues.push(invalidIssue(issues.length, 'model.importHealth.issues is not an array.'))
+  const issues = Array.isArray(raw.issues)
+    ? raw.issues.map(normalizeIssue)
+    : [invalidFieldIssue('issues', 'model.importHealth.issues must be an explicit array.')]
+
+  const schemaVersion = optionalString(raw.schemaVersion)
+  if (!schemaVersion) {
+    issues.push(invalidFieldIssue('schema_version', 'Import-health schemaVersion is missing or invalid.'))
+  }
+  const sourceFormat = optionalString(raw.sourceFormat)
+  if (!sourceFormat) {
+    issues.push(invalidFieldIssue('source_format', 'Import-health sourceFormat is missing or invalid.'))
   }
 
   const silentLossStatus: SilentLossStatus = raw.silentLossDetected === true
@@ -122,9 +139,35 @@ export function summarizeImportHealth(model: CaseModel): ImportHealthSummary {
     : raw.silentLossDetected === false
       ? 'clear'
       : 'unavailable'
+  if (typeof raw.silentLossDetected !== 'boolean') {
+    issues.push(invalidFieldIssue(
+      'silent_loss_detected',
+      'Import-health silentLossDetected must be an explicit boolean.',
+    ))
+  }
+
   const supportedObjectCount = optionalCount(raw.supportedObjectCount)
+  if (supportedObjectCount == null) {
+    issues.push(invalidFieldIssue(
+      'supported_object_count',
+      'Import-health supportedObjectCount must be a non-negative integer.',
+    ))
+  }
   const partialObjectCount = optionalCount(raw.partialObjectCount)
+  if (partialObjectCount == null) {
+    issues.push(invalidFieldIssue(
+      'partial_object_count',
+      'Import-health partialObjectCount must be a non-negative integer.',
+    ))
+  }
   const unsupportedObjectCount = optionalCount(raw.unsupportedObjectCount)
+  if (unsupportedObjectCount == null) {
+    issues.push(invalidFieldIssue(
+      'unsupported_object_count',
+      'Import-health unsupportedObjectCount must be a non-negative integer.',
+    ))
+  }
+
   const hasBlockingIssue = issues.some((issue) => issue.blocking || issue.severity === 'error')
   const needsReview = issues.some((issue) => issue.severity === 'warning')
     || (partialObjectCount ?? 0) > 0
@@ -139,8 +182,8 @@ export function summarizeImportHealth(model: CaseModel): ImportHealthSummary {
 
   return {
     status,
-    schemaVersion: optionalString(raw.schemaVersion),
-    sourceFormat: optionalString(raw.sourceFormat),
+    schemaVersion,
+    sourceFormat,
     supportedObjectCount,
     partialObjectCount,
     unsupportedObjectCount,
