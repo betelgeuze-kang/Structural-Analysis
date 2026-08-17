@@ -8,12 +8,12 @@ import {
   type EditableNeutralModel,
   type EditableNodalLoadRow,
   type EditableNodeRow,
-  type EditableSupportRow,
 } from '../model/editableNeutralModel'
 import './neutralModelEditor.css'
 
 const DOFS = ['ux', 'uy', 'uz', 'rx', 'ry', 'rz'] as const
 const LOAD_FIELDS = ['fx', 'fy', 'fz', 'mx', 'my', 'mz'] as const
+type SupportDof = (typeof DOFS)[number]
 
 function nextId(prefix: string, existing: string[]): string {
   const ids = new Set(existing.map((value) => value.trim()))
@@ -41,14 +41,17 @@ export function NeutralModelEditor(): ReactElement {
     }))
   }
 
-  function updateSupport(
-    index: number,
-    field: keyof EditableSupportRow,
-    value: string | boolean,
-  ): void {
+  function updateSupportNode(index: number, value: string): void {
     setModel((current) => ({
       ...current,
-      supports: current.supports.map((row, rowIndex) => rowIndex === index ? { ...row, [field]: value } : row),
+      supports: current.supports.map((row, rowIndex) => rowIndex === index ? { ...row, nodeId: value } : row),
+    }))
+  }
+
+  function updateSupportDof(index: number, dof: SupportDof, value: boolean): void {
+    setModel((current) => ({
+      ...current,
+      supports: current.supports.map((row, rowIndex) => rowIndex === index ? { ...row, [dof]: value } : row),
     }))
   }
 
@@ -203,14 +206,14 @@ export function NeutralModelEditor(): ReactElement {
             <tbody>
               {model.supports.map((row, index) => (
                 <tr key={`support-${index}`}>
-                  <EditorTextCell label={`Support ${index + 1} node`} value={row.nodeId} onChange={(value) => updateSupport(index, 'nodeId', value)} testId={`support-${index}-node`} />
+                  <EditorTextCell label={`Support ${index + 1} node`} value={row.nodeId} onChange={(value) => updateSupportNode(index, value)} testId={`support-${index}-node`} />
                   {DOFS.map((dof) => (
                     <td key={dof}>
                       <input
                         type="checkbox"
                         checked={row[dof]}
                         aria-label={`Support ${index + 1} ${dof}`}
-                        onChange={(event) => updateSupport(index, dof, event.currentTarget.checked)}
+                        onChange={(event) => updateSupportDof(index, dof, event.currentTarget.checked)}
                         data-neutral-editor-input={`support-${index}-${dof}`}
                       />
                     </td>
