@@ -43,6 +43,8 @@ def validate_receipt(
                 contract_errors.append("hip_backend_requires_rocm_version")
             if not environment.get("gpu_architecture"):
                 contract_errors.append("hip_backend_requires_gpu_architecture")
+            if not environment.get("gpu_device_uuid"):
+                contract_errors.append("hip_backend_requires_gpu_device_uuid")
     if isinstance(attestation, dict) and attestation.get(
         "independent_from_repository_author"
     ):
