@@ -16,6 +16,9 @@ def test_native_abi_surface_is_versioned_and_language_neutral() -> None:
     header = (NATIVE / "include/structural_engine_c_api.h").read_text(
         encoding="utf-8"
     )
+    implementation = (NATIVE / "cpp/structural_engine_c_api.cpp").read_text(
+        encoding="utf-8"
+    )
     assert "SA_ABI_VERSION_MAJOR" in header
     assert "SA_ABI_VERSION_MINOR" in header
     assert "struct_size" in header
@@ -27,6 +30,8 @@ def test_native_abi_surface_is_versioned_and_language_neutral() -> None:
     assert "sa_engine_destroy" in header
     assert "std::" not in header
     assert "Vec<" not in header
+    assert "thread_local char g_last_error" in implementation
+    assert "thread_local std::string" not in implementation
 
 
 def test_native_claim_boundary_remains_bounded() -> None:
