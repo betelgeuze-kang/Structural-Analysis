@@ -32,7 +32,12 @@ def test_observed_product_state_source_rejects_missing_or_blank_identity(
     assert dag._observed_product_state_source(tmp_path) is None
 
 
-def test_product_state_validator_uses_and_restores_persisted_identity(
+def test_repo_root_parser_supports_separate_and_equals_forms(tmp_path: Path) -> None:
+    assert dag._repo_root_from_argv(["--repo-root", str(tmp_path)]) == tmp_path
+    assert dag._repo_root_from_argv([f"--repo-root={tmp_path}"]) == tmp_path
+
+
+def test_cli_temporarily_uses_and_restores_persisted_identity(
     tmp_path: Path,
     monkeypatch,
 ) -> None:
@@ -41,24 +46,30 @@ def test_product_state_validator_uses_and_restores_persisted_identity(
     observed: list[str] = []
     original_source = dag._core.PRODUCT_STATE_NIGHTLY_SOURCE
 
-    def fake_validator(
-        repo_root: Path,
-        *,
-        nightly_workflow_run_event: Path | None,
-    ) -> list[str]:
-        assert repo_root == tmp_path
-        assert nightly_workflow_run_event == Path("nightly.json")
+    def fake_main(argv: list[str] | None = None) -> int:
         observed.append(dag._core.PRODUCT_STATE_NIGHTLY_SOURCE)
-        return []
+        return 0
 
-    monkeypatch.setattr(dag, "_ORIGINAL_PRODUCT_STATE_VALIDATOR", fake_validator)
+    monkeypatch.setattr(dag._core, "main", fake_main)
 
-    assert (
-        dag._validate_product_state_binding(
-            tmp_path,
-            nightly_workflow_run_event=Path("nightly.json"),
-        )
-        == []
-    )
+    assert dag.main(["--repo-root", str(tmp_path)]) == 0
     assert observed == [persisted_source]
+    assert dag._core.PRODUCT_STATE_NIGHTLY_SOURCE == original_source
+
+
+def test_cli_without_persisted_product_state_keeps_original_identity(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    observed: list[str] = []
+    original_source = dag._core.PRODUCT_STATE_NIGHTLY_SOURCE
+
+    def fake_main(argv: list[str] | None = None) -> int:
+        observed.append(dag._core.PRODUCT_STATE_NIGHTLY_SOURCE)
+        return 0
+
+    monkeypatch.setattr(dag._core, "main", fake_main)
+
+    assert dag.main(["--repo-root", str(tmp_path)]) == 0
+    assert observed == [original_source]
     assert dag._core.PRODUCT_STATE_NIGHTLY_SOURCE == original_source

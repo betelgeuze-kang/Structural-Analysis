@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""Validate the artifact DAG while preserving product-state source identity.
+"""Validate the artifact DAG while preserving CLI product-state identity.
 
-The implementation remains in ``check_generated_artifact_dag_core``. This
-entry point keeps the historical import/CLI surface and makes exact producer
-rebuilds use the observation-source identifier already recorded in the
-persisted product-state artifact.
+The unchanged implementation remains in ``check_generated_artifact_dag_core``.
+Only the real CLI entry point temporarily adopts the observation-source value
+persisted in the product-state artifact. Imported producer validators retain
+their original semantics for candidate scopes and focused test fixtures.
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 import sys
-from typing import Any
+from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +25,17 @@ for _name in dir(_core):
     if not _name.startswith("__"):
         globals().setdefault(_name, getattr(_core, _name))
 
-_ORIGINAL_PRODUCT_STATE_VALIDATOR = _core._validate_product_state_binding
+
+def _repo_root_from_argv(argv: Sequence[str] | None) -> Path:
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    for index, argument in enumerate(arguments):
+        if argument == "--repo-root":
+            if index + 1 >= len(arguments):
+                return ROOT
+            return Path(arguments[index + 1]).resolve()
+        if argument.startswith("--repo-root="):
+            return Path(argument.split("=", 1)[1]).resolve()
+    return ROOT
 
 
 def _observed_product_state_source(repo_root: Path) -> str | None:
@@ -42,31 +52,16 @@ def _observed_product_state_source(repo_root: Path) -> str | None:
     return source.strip()
 
 
-def _validate_product_state_binding(
-    repo_root: Path,
-    *,
-    nightly_workflow_run_event: Path | None,
-) -> list[str]:
+def main(argv: list[str] | None = None) -> int:
+    repo_root = _repo_root_from_argv(argv)
     observed_source = _observed_product_state_source(repo_root)
-    if observed_source is None:
-        return ["product_state_observed_main_source_missing"]
-
     previous_source = _core.PRODUCT_STATE_NIGHTLY_SOURCE
     try:
-        _core.PRODUCT_STATE_NIGHTLY_SOURCE = observed_source
-        return _ORIGINAL_PRODUCT_STATE_VALIDATOR(
-            repo_root,
-            nightly_workflow_run_event=nightly_workflow_run_event,
-        )
+        if observed_source is not None:
+            _core.PRODUCT_STATE_NIGHTLY_SOURCE = observed_source
+        return _core.main(argv)
     finally:
         _core.PRODUCT_STATE_NIGHTLY_SOURCE = previous_source
-
-
-_core._validate_product_state_binding = _validate_product_state_binding
-
-
-def main(argv: list[str] | None = None) -> int:
-    return _core.main(argv)
 
 
 if __name__ == "__main__":
