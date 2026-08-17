@@ -61,13 +61,24 @@ function normalizeIssue(value: unknown, index: number): ImportHealthIssue {
   if (!code || !message || !['info', 'warning', 'error'].includes(String(severity))) {
     return invalidIssue(index, 'Import-health issue row has an invalid code, message, or severity.')
   }
+  if (value.blocking != null && typeof value.blocking !== 'boolean') {
+    return invalidIssue(index, 'Import-health issue row has a non-boolean blocking value.')
+  }
+  if (
+    value.sourceLine != null
+    && (
+      typeof value.sourceLine !== 'number'
+      || !Number.isInteger(value.sourceLine)
+      || value.sourceLine <= 0
+    )
+  ) {
+    return invalidIssue(index, 'Import-health issue row has an invalid source line.')
+  }
 
   const blocking = typeof value.blocking === 'boolean'
     ? value.blocking
     : severity === 'error'
   const sourceLine = typeof value.sourceLine === 'number'
-    && Number.isInteger(value.sourceLine)
-    && value.sourceLine > 0
     ? value.sourceLine
     : undefined
 
