@@ -7,6 +7,8 @@
   "required": [
     "schema_version",
     "source_commit",
+    "engine_artifact_sha256",
+    "execution_plan_sha256",
     "model_sha256",
     "result_sha256",
     "environment",
@@ -22,6 +24,12 @@
     "source_commit": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
+    },
+    "engine_artifact_sha256": {
+      "$ref": "#/$defs/sha256"
+    },
+    "execution_plan_sha256": {
+      "$ref": "#/$defs/sha256"
     },
     "model_sha256": {
       "$ref": "#/$defs/sha256"
