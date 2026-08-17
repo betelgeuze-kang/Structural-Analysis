@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/structural-analysis/validation-dataset-split.v1.schema.json",
+  "title": "Structural Analysis validation dataset split manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_id",
+    "source",
+    "license",
+    "split_unit",
+    "groups",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "validation-dataset-split.v1"},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "reference", "checksum"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "reference": {"type": "string", "minLength": 1},
+        "checksum": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifier", "training_allowed", "redistribution_allowed"],
+      "properties": {
+        "identifier": {"type": "string", "minLength": 1},
+        "training_allowed": {"type": "boolean"},
+        "redistribution_allowed": {"type": "boolean"},
+        "evidence_reference": {"type": ["string", "null"]}
+      }
+    },
+    "split_unit": {
+      "enum": [
+        "specimen",
+        "study",
+        "institution",
+        "structural_archetype",
+        "loading_protocol",
+        "material_range"
+      ]
+    },
+    "groups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["group_key", "role", "sample_ids", "results_disclosed"],
+        "properties": {
+          "group_key": {"type": "string", "minLength": 1},
+          "role": {
+            "enum": [
+              "calibration",
+              "development_regression",
+              "locked_validation",
+              "blind_prediction",
+              "community_reproduction"
+            ]
+          },
+          "sample_ids": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          },
+          "results_disclosed": {"type": "boolean"},
+          "parameters_frozen_at": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "claim_boundary": {
+      "const": "A valid split manifest prevents declared split leakage only and grants no numerical, experimental-validation, public-support, design, or release authority."
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}
