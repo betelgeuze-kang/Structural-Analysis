@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
-"""Validate the artifact DAG while preserving CLI product-state identity.
-
-The unchanged implementation remains in ``check_generated_artifact_dag_core``.
-Only the real CLI entry point temporarily adopts the observation-source value
-persisted in the product-state artifact. Imported producer validators retain
-their original semantics for candidate scopes and focused test fixtures.
-"""
+"""Artifact-DAG compatibility entry point with CLI-only source identity replay."""
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 from typing import Any, Sequence
@@ -19,11 +14,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from scripts import check_generated_artifact_dag_core as _core
-
-
-for _name in dir(_core):
-    if not _name.startswith("__"):
-        globals().setdefault(_name, getattr(_core, _name))
 
 
 def _repo_root_from_argv(argv: Sequence[str] | None) -> Path:
@@ -38,13 +28,15 @@ def _repo_root_from_argv(argv: Sequence[str] | None) -> Path:
     return ROOT
 
 
-def _observed_product_state_source(repo_root: Path) -> str | None:
-    output_path = repo_root / _core.EXPECTED_NODE_PATHS["product-state"]["outputs"][0]
-    if not output_path.is_file():
+def _persisted_observation_source(repo_root: Path) -> str | None:
+    output = repo_root / _core.EXPECTED_NODE_PATHS["product-state"]["outputs"][0]
+    if not output.is_file():
         return None
     try:
-        payload: dict[str, Any] = _core._load_json_object(output_path)
-    except (OSError, ValueError):
+        payload: Any = json.loads(output.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
         return None
     source = payload.get("observed_github_main_source")
     if not isinstance(source, str) or not source.strip():
@@ -52,9 +44,8 @@ def _observed_product_state_source(repo_root: Path) -> str | None:
     return source.strip()
 
 
-def main(argv: list[str] | None = None) -> int:
-    repo_root = _repo_root_from_argv(argv)
-    observed_source = _observed_product_state_source(repo_root)
+def _run_cli(argv: list[str] | None = None) -> int:
+    observed_source = _persisted_observation_source(_repo_root_from_argv(argv))
     previous_source = _core.PRODUCT_STATE_NIGHTLY_SOURCE
     try:
         if observed_source is not None:
@@ -65,4 +56,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(_run_cli())
+
+# Imported callers and tests must receive the original module object so
+# monkeypatches continue to affect the globals used by producer validators.
+sys.modules[__name__] = _core
