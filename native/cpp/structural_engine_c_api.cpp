@@ -38,12 +38,11 @@ sa_status validate_config(const sa_engine_config *config) {
         set_thread_error("the reference lifecycle implementation has no device backend");
         return SA_STATUS_UNSUPPORTED;
     }
-    if (std::any_of(
-            std::begin(config->reserved_u32),
-            std::end(config->reserved_u32),
-            [](uint32_t value) { return value != 0; })) {
-        set_thread_error("engine config reserved fields must be zero");
-        return SA_STATUS_INVALID_ARGUMENT;
+    for (const uint32_t value : config->reserved_u32) {
+        if (value != 0) {
+            set_thread_error("engine config reserved fields must be zero");
+            return SA_STATUS_INVALID_ARGUMENT;
+        }
     }
     return SA_STATUS_OK;
 }
