@@ -21,6 +21,7 @@ on:
       - "tests/test_external_vv_clean_runner_contract.py"
       - "tests/test_external_vv_receipt_ancestry_contract.py"
       - "tests/test_product_ci_workflow_contract.py"
+      - "tests/test_long_running_workflow_action_pins.py"
       - "tests/test_build_github_actions_ci_streak_evidence.py"
       - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
@@ -39,11 +40,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout exact merge ref
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 2
 
-      - name: Hydrate only direct-parent ancestry for provenance tests
+      - name: Hydrate direct and nested merge-parent ancestry for provenance tests
         shell: bash
         run: |
           mapfile -t parents < <(
@@ -57,10 +58,19 @@ jobs:
             git fetch --no-tags --depth=512 origin "$parent"
             git cat-file -e "${parent}^{commit}"
           done
+          mapfile -t nested_parents < <(
+            for parent in "${parents[@]}"; do
+              git cat-file -p "$parent" | awk '$1 == "parent" { print $2 }'
+            done | sort -u
+          )
+          for nested_parent in "${nested_parents[@]}"; do
+            git fetch --no-tags --depth=512 origin "$nested_parent"
+            git cat-file -e "${nested_parent}^{commit}"
+          done
           git cat-file -e "${GITHUB_SHA}^{commit}"
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.10"
           cache: pip
@@ -112,7 +122,7 @@ jobs:
       - name: Validate product CI ownership boundaries
         run: python scripts/check_product_ci_boundaries.py --json --fail-blocked
 
-      - name: Verify workflow, boundary, and fail-closed provenance contracts
+      - name: Verify workflow, provenance, action-pin, and CI-streak contracts
         shell: bash
         run: |
           set +e
@@ -124,6 +134,7 @@ jobs:
             tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_probe_preserves_git_errors \
             tests/test_external_vv_clean_runner_contract.py::test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources \
             tests/test_product_ci_workflow_contract.py \
+            tests/test_long_running_workflow_action_pins.py \
             tests/test_build_github_actions_ci_streak_evidence.py \
             tests/test_verify_quality_gate.py \
             > workflow-contract-tests.log 2>&1
@@ -133,7 +144,7 @@ jobs:
 
       - name: Upload workflow contract test log
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: workflow-contract-tests-${{ github.run_id }}
           path: workflow-contract-tests.log
