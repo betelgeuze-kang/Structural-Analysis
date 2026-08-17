@@ -31,7 +31,13 @@ extern "C" {
 #define SA_CAPABILITY_CHECKPOINT     (UINT64_C(1) << 2)
 #define SA_CAPABILITY_RESULT_IR      (UINT64_C(1) << 3)
 
-typedef enum sa_status {
+/*
+ * ABI-facing scalar types use fixed-width integers. C enum underlying types are
+ * implementation-defined and therefore are not used as function return types or
+ * public structure fields across the C/Rust boundary.
+ */
+typedef int32_t sa_status;
+enum {
     SA_STATUS_OK = 0,
     SA_STATUS_INVALID_ARGUMENT = 1,
     SA_STATUS_ABI_MISMATCH = 2,
@@ -39,12 +45,13 @@ typedef enum sa_status {
     SA_STATUS_OUT_OF_MEMORY = 4,
     SA_STATUS_BUFFER_TOO_SMALL = 5,
     SA_STATUS_INTERNAL_ERROR = 6
-} sa_status;
+};
 
-typedef enum sa_execution_mode {
+typedef uint32_t sa_execution_mode;
+enum {
     SA_EXECUTION_MODE_AUDITED = 0,
     SA_EXECUTION_MODE_PERFORMANCE = 1
-} sa_execution_mode;
+};
 
 typedef struct sa_api_info {
     uint32_t struct_size;
