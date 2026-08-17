@@ -22,9 +22,9 @@ This document and the reproduction receipt format prepare a future validation su
 
 1. Obtain permission to execute the software and use every input dataset.
 2. Check out the exact 40-character source commit.
-3. Record model and result SHA-256 values.
+3. Record SHA-256 identities for the built engine artifact, execution plan, model, and result.
 4. Record the command, backend, environment, fallback count, regularization count, runtime, and peak memory.
-5. For HIP, record the ROCm version and GPU architecture.
+5. For HIP, record the ROCm version, GPU architecture, and stable device UUID.
 6. An independent operator records identity, time, and a signature reference.
 7. Validate the receipt:
 
@@ -40,6 +40,8 @@ A valid receipt records one reproduction. It does not grant numerical correctnes
 ## Leakage controls for papers and competitions
 
 Calibration, development regression, locked validation, blind competition, and community reproduction datasets must be separate. Split by specimen, study, institution, structural archetype, loading protocol, and material range rather than by time step or load step within one specimen.
+
+Locked validation and blind-prediction rows must bind the parameter freeze to a SHA-256 snapshot, not only a timestamp. A dataset license that does not allow training cannot be assigned to calibration or development-regression roles.
 
 ## Licensing decision still required
 
