@@ -1,27 +1,42 @@
-# Security policy
+# Security Policy
 
 ## Supported versions
 
-The repository is a Developer Preview and does not currently designate a production-supported release line. Security fixes may target the current default branch and explicitly named preview tags only.
+Structural Analysis is a pre-1.0 Developer Preview. Security fixes are made
+only on the current default branch and explicitly named preview lines. No
+support lifetime, response-time SLA, or production-safety certification is
+promised.
 
 ## Reporting a vulnerability
 
-Do not open a public issue containing exploit details, credentials, private models, customer data, signing material, or restricted benchmark data.
+Do not open a public issue for a suspected vulnerability. Use the repository's
+[private vulnerability reporting form](https://github.com/betelgeuze-kang/Structural-Analysis/security/advisories/new).
+If that surface is unavailable, contact the repository owner privately through
+the contact method published on the owner's GitHub profile.
 
-Use GitHub private vulnerability reporting when it is available for this repository. If that surface is unavailable, contact the repository owner privately through the contact method published on the owner's GitHub profile and include only the minimum information needed to establish a private channel.
+Include:
 
-A useful report includes:
-
-- affected commit or tag;
+- affected commit or tag and execution environment;
 - operating system and architecture;
-- whether ROCm/HIP, a native library, the local web surface, or an imported model is involved;
-- a minimal reproduction that contains no restricted data;
+- whether ROCm/HIP, a native library, the local web surface, or an imported
+  model is involved;
+- a minimal reproduction without secrets, restricted benchmark material, or
+  proprietary customer data;
 - expected and observed behavior;
-- potential confidentiality, integrity, availability, or numerical-authority impact.
+- likely confidentiality, integrity, availability, or numerical-authority
+  impact and any known workaround.
 
-## Numerical and evidence integrity
+Do not attach credentials, signing material, license tokens, customer models,
+unpublished benchmark data, or personally identifying information.
+Maintainers will acknowledge the report when operationally possible, validate
+scope, and coordinate a fix and disclosure plan.
 
-Please treat the following as security-relevant integrity failures:
+## Engineering-safety and evidence-integrity boundary
+
+A numerical discrepancy, silent fallback, evidence-integrity failure, or
+incorrect structural result can be safety relevant even when it is not a
+conventional software exploit. Treat the following as security-relevant
+integrity failures:
 
 - a failed or non-converged run presented as an authoritative result;
 - source, model, checkpoint, result, or evidence hash substitution;
@@ -31,6 +46,10 @@ Please treat the following as security-relevant integrity failures:
 - signing-key, credential, or private-model leakage;
 - a generated artifact being accepted against a different source epoch.
 
-## Disclosure boundary
+Report those cases privately and label them `engineering-safety`. Until
+reviewed, do not use affected results for design, permit, construction, or
+autonomous engineering decisions.
 
-Receipt, hash, or provenance validation does not by itself grant product, design, hardware, external-V&V, or release authority. The repository owner will coordinate disclosure after a fix and reproduction path are available.
+The repository's security policy and any validated reproduction receipt do not
+promote solver, AI, GPU/HIP, external-validation, design, public-support, or
+release authority beyond current evidence-backed status.
