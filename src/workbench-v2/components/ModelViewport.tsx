@@ -4,6 +4,7 @@ import type { DataMode } from '../model/workbenchState'
 import { buildViewerUrl, createViewerBridge, type ViewerBridge } from '../model/viewerBridge'
 import { CopyButton } from './CopyButton'
 import { EngineeringValueText } from './EngineeringValueText'
+import { ImportHealthPanel } from './ImportHealthPanel'
 
 interface ModelViewportProps {
   model: CaseModel
@@ -38,7 +39,6 @@ export function ModelViewport({
   cbRef.current = onMemberSelected
   const [memberInput, setMemberInput] = useState('')
 
-  // Subscribe once: viewer selection -> workbench.
   useEffect(() => {
     const bridge = createViewerBridge()
     bridgeRef.current = bridge
@@ -50,7 +50,6 @@ export function ModelViewport({
     }
   }, [])
 
-  // workbench selection -> viewer (the bridge guards against repeats).
   useEffect(() => {
     bridgeRef.current?.focusMember(selectedMemberId)
   }, [selectedMemberId])
@@ -61,84 +60,85 @@ export function ModelViewport({
   }
 
   return (
-    <section className="wb2-panel wb2-viewport" aria-labelledby="wb2-viewport-title">
-      <h2 id="wb2-viewport-title" className="wb2-panel__title">Model viewport</h2>
+    <>
+      <section className="wb2-panel wb2-viewport" aria-labelledby="wb2-viewport-title">
+        <h2 id="wb2-viewport-title" className="wb2-panel__title">Model viewport</h2>
 
-      <div className="wb2-viewport-frame">
-        <iframe
-          className="wb2-viewport-iframe"
-          src={viewerSrc}
-          title="Structural model viewer"
-          sandbox="allow-scripts allow-same-origin"
-          loading="lazy"
-        />
-      </div>
-
-      <p className="wb2-viewport-meta">
-        <EngineeringValueText value={model.nodeCount} integer /> nodes ·{' '}
-        <EngineeringValueText value={model.elementCount} integer /> elements ·{' '}
-        <EngineeringValueText value={model.dofCount} integer /> DOF
-      </p>
-
-      {/* Selection inspector + manual focus. Selection round-trips with the
-          viewer through the shared channel; this control drives and reflects it. */}
-      <div className="wb2-member-inspector" data-wb2-member-inspector>
-        <div className="wb2-member-current">
-          <span className="wb2-member-current__label">Selected member</span>
-          {selectedMemberId ? (
-            <code className="wb2-mono" data-wb2-selected-member>{selectedMemberId}</code>
-          ) : (
-            <span className="wb2-member-none" data-wb2-selected-member="">none selected</span>
-          )}
+        <div className="wb2-viewport-frame">
+          <iframe
+            className="wb2-viewport-iframe"
+            src={viewerSrc}
+            title="Structural model viewer"
+            sandbox="allow-scripts allow-same-origin"
+            loading="lazy"
+          />
         </div>
 
-        <form
-          className="wb2-member-focus"
-          onSubmit={(e) => {
-            e.preventDefault()
-            focusFromInput()
-          }}
-        >
-          <label className="wb2-member-focus__field">
-            <span className="wb2-member-focus__label">Focus member in viewer</span>
-            <input
-              type="text"
-              className="wb2-review-input"
-              value={memberInput}
-              placeholder="member id (e.g. C12)"
-              data-wb2-member-input
-              onChange={(e) => setMemberInput(e.target.value)}
-            />
-          </label>
-          <div className="wb2-member-focus__actions">
-            <button type="submit" className="wb2-btn" data-wb2-member-focus disabled={!memberInput.trim()}>
-              Focus
-            </button>
-            <button
-              type="button"
-              className="wb2-mode-btn"
-              data-wb2-member-clear
-              disabled={!selectedMemberId}
-              onClick={() => onMemberSelected(null)}
-            >
-              Clear
-            </button>
-            <CopyButton value={deepLink} label="Copy viewer link" />
+        <p className="wb2-viewport-meta">
+          <EngineeringValueText value={model.nodeCount} integer /> nodes ·{' '}
+          <EngineeringValueText value={model.elementCount} integer /> elements ·{' '}
+          <EngineeringValueText value={model.dofCount} integer /> DOF
+        </p>
+
+        <div className="wb2-member-inspector" data-wb2-member-inspector>
+          <div className="wb2-member-current">
+            <span className="wb2-member-current__label">Selected member</span>
+            {selectedMemberId ? (
+              <code className="wb2-mono" data-wb2-selected-member>{selectedMemberId}</code>
+            ) : (
+              <span className="wb2-member-none" data-wb2-selected-member="">none selected</span>
+            )}
           </div>
-        </form>
-      </div>
 
-      <dl className="wb2-kv wb2-viewport-prov">
-        <dt>Analysis source</dt><dd><code className="wb2-mono">{sourcePath}</code></dd>
-        <dt>Source commit</dt><dd><code className="wb2-mono">{sourceCommit.slice(0, 12)}</code></dd>
-      </dl>
+          <form
+            className="wb2-member-focus"
+            onSubmit={(event) => {
+              event.preventDefault()
+              focusFromInput()
+            }}
+          >
+            <label className="wb2-member-focus__field">
+              <span className="wb2-member-focus__label">Focus member in viewer</span>
+              <input
+                type="text"
+                className="wb2-review-input"
+                value={memberInput}
+                placeholder="member id (e.g. C12)"
+                data-wb2-member-input
+                onChange={(event) => setMemberInput(event.target.value)}
+              />
+            </label>
+            <div className="wb2-member-focus__actions">
+              <button type="submit" className="wb2-btn" data-wb2-member-focus disabled={!memberInput.trim()}>
+                Focus
+              </button>
+              <button
+                type="button"
+                className="wb2-mode-btn"
+                data-wb2-member-clear
+                disabled={!selectedMemberId}
+                onClick={() => onMemberSelected(null)}
+              >
+                Clear
+              </button>
+              <CopyButton value={deepLink} label="Copy viewer link" />
+            </div>
+          </form>
+        </div>
 
-      <p className="wb2-note">
-        Selection is synced both ways with the viewer via the shared selection channel.
-        {dataMode === 'demo'
-          ? ' In demo mode the viewer shows its own sample model — not the same artifact as this analysis case — so the two provenances are shown independently and never treated as matching.'
-          : ' Provenance must match the analysis source before results are read as the same model.'}
-      </p>
-    </section>
+        <dl className="wb2-kv wb2-viewport-prov">
+          <dt>Analysis source</dt><dd><code className="wb2-mono">{sourcePath}</code></dd>
+          <dt>Source commit</dt><dd><code className="wb2-mono">{sourceCommit.slice(0, 12)}</code></dd>
+        </dl>
+
+        <p className="wb2-note">
+          Selection is synced both ways with the viewer via the shared selection channel.
+          {dataMode === 'demo'
+            ? ' In demo mode the viewer shows its own sample model — not the same artifact as this analysis case — so the two provenances are shown independently and never treated as matching.'
+            : ' Provenance must match the analysis source before results are read as the same model.'}
+        </p>
+      </section>
+      <ImportHealthPanel model={model} />
+    </>
   )
 }
