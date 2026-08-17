@@ -13,7 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts import check_generated_artifact_dag_core as _core
+# Direct clean-checkout execution needs the repository root on sys.path before
+# importing the shared implementation module.
+from scripts import check_generated_artifact_dag_core as _core  # noqa: E402
 
 
 def _repo_root_from_argv(argv: Sequence[str] | None) -> Path:
