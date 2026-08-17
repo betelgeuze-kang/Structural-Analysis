@@ -1,0 +1,212 @@
+{
+  "schema_version": "open-pr-consolidation-inventory.v1",
+  "snapshot_at": "2026-08-17T09:24:00Z",
+  "source_commit": "2b9cee082611b0009cb053fabfa7935202b71aef",
+  "tracking_issue": 296,
+  "active_implementation_pr_target": 4,
+  "snapshot_open_pr_numbers": [
+    248,
+    249,
+    250,
+    251,
+    252,
+    264,
+    267,
+    269,
+    271,
+    272,
+    273,
+    274,
+    275,
+    276,
+    277,
+    279,
+    284,
+    286,
+    288,
+    294
+  ],
+  "entries": [
+    {
+      "pr_number": 248,
+      "integration_line": "A-product-replay-external-comparison",
+      "base_class": "legacy-stack",
+      "disposition": "preserve-until-replacement",
+      "replacement_destination": "current-main replay and platform parity integration PR",
+      "unique_scope": ["single-wheel Linux/Windows installed-product replay", "Workbench artifact parity", "platform checksum receipts"],
+      "close_condition": "replacement PR contains every unique replay and comparison contract and records the mapping back to PR 248"
+    },
+    {
+      "pr_number": 249,
+      "integration_line": "A-product-replay-external-comparison",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "current-main replay and platform parity integration PR",
+      "unique_scope": ["bounded Planar M1-M5 and L1-L2 corpus", "sparse diagnostic boundary", "corpus execution/status contracts"],
+      "close_condition": "corpus generators, runners, feature-surface guard, and unique tests are present on the replacement with no silent evidence promotion"
+    },
+    {
+      "pr_number": 250,
+      "integration_line": "A-product-replay-external-comparison",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "current-main replay and platform parity integration PR",
+      "unique_scope": ["fresh OpenSees/CalculiX technical comparison workflow", "host/container semantic normalization", "external runtime asset integrity"],
+      "close_condition": "replacement executes the same current-source technical lane while retaining independent-operator and Level-2 promotion as false"
+    },
+    {
+      "pr_number": 251,
+      "integration_line": "B-cpu-mathematical-durable-result",
+      "base_class": "legacy-stack",
+      "disposition": "preserve-until-replacement",
+      "replacement_destination": "current-main CPU accepted-state and durable ResultIR integration PR",
+      "unique_scope": ["physical residual and accepted-state Jacobian/JVP gate", "mutation and non-finite guards", "source-bound directional receipts"],
+      "close_condition": "replacement maps all bounded mathematical contracts and keeps product/release authority false"
+    },
+    {
+      "pr_number": 264,
+      "integration_line": "B-cpu-mathematical-durable-result",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "current-main CPU accepted-state and durable ResultIR integration PR",
+      "unique_scope": ["N1 CPU aggregate gate", "70,560-equation bounded equilibrium evidence", "material-family Newton breadth descriptor"],
+      "close_condition": "replacement preserves unique gate code and explicitly separates historical evidence from current-source validation"
+    },
+    {
+      "pr_number": 274,
+      "integration_line": "B-cpu-mathematical-durable-result",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "current-main CPU accepted-state and durable ResultIR integration PR",
+      "unique_scope": ["durable accepted checkpoints", "terminal CPU ResultIR adapter", "transitive evidence graph guard"],
+      "close_condition": "replacement contains exact restart, authoritative result boundaries, and no-overwrite/rollback tests"
+    },
+    {
+      "pr_number": 252,
+      "integration_line": "C-hip-native-runtime",
+      "base_class": "legacy-stack",
+      "disposition": "preserve-until-replacement",
+      "replacement_destination": "native ABI based CPU/HIP operator integration PR after PR 284",
+      "unique_scope": ["HIP residual/JVP eligibility contract", "device-node and runtime claim guards", "fail-closed hardware attestation boundary"],
+      "close_condition": "replacement maps all software contracts to the versioned native ABI without converting mocked or self-authored claims into hardware credit"
+    },
+    {
+      "pr_number": 267,
+      "integration_line": "C-hip-native-runtime",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "native ABI based CPU/HIP operator integration PR after PR 284",
+      "unique_scope": ["gfx1030 bounded hardware lane", "gfx1100 manual workflow contract", "cross-device gate and source-bound wheel controls"],
+      "close_condition": "unique code is rebased onto the native runtime; historical gfx1030 receipts remain bounded and gfx1100 remains externally blocked"
+    },
+    {
+      "pr_number": 272,
+      "integration_line": "C-hip-native-runtime",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "native ABI based CPU/HIP operator integration PR after PR 284",
+      "unique_scope": ["terminal checkpoint bundle", "CPU/HIP authority projection parity", "performance-sweep and promotion contracts"],
+      "close_condition": "replacement preserves accepted-state blockers and requires independent hardware identity, parity, fallback-zero, and performance evidence"
+    },
+    {
+      "pr_number": 269,
+      "integration_line": "D-frame3d-product-slice",
+      "base_class": "legacy-stack",
+      "disposition": "preserve-until-replacement",
+      "replacement_destination": "current-main elastic linear Frame3D vertical-slice PR",
+      "unique_scope": ["bounded Frame3D integration", "scaled spherical arc-length candidate", "modal/buckling source-bound integration"],
+      "close_condition": "every unique Frame3D element, assembly, and regression path is inventoried; the first replacement ships elastic linear scope before nonlinear promotion"
+    },
+    {
+      "pr_number": 271,
+      "integration_line": "D-frame3d-product-slice",
+      "base_class": "legacy-stack",
+      "disposition": "retain-as-historical-evidence-source",
+      "replacement_destination": "later F3 evidence integration after elastic linear slice",
+      "unique_scope": ["ten-stage F3 vertical evidence", "external signature gate", "historical source-epoch preservation"],
+      "close_condition": "technical stage code and historical receipts are mapped separately; no stage is silently promoted"
+    },
+    {
+      "pr_number": 273,
+      "integration_line": "D-frame3d-product-slice",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "later F3 evidence integration after elastic linear slice",
+      "unique_scope": ["technical versus public promotion axes", "promotion ancestry", "self-waiver non-promotion rule"],
+      "close_condition": "replacement retains all promotion separation rules and public promotion remains independently gated"
+    },
+    {
+      "pr_number": 275,
+      "integration_line": "D-frame3d-product-slice",
+      "base_class": "legacy-stack",
+      "disposition": "extract-after-linear-slice",
+      "replacement_destination": "bounded nonlinear Frame3D continuation PR",
+      "unique_scope": ["multi-member load control", "prefix/suffix advance", "bounded recovery and checkpoint contracts"],
+      "close_condition": "elastic linear Frame3D slice has landed and nonlinear continuation code is extracted with Python-reference parity"
+    },
+    {
+      "pr_number": 276,
+      "integration_line": "D-frame3d-product-slice",
+      "base_class": "legacy-stack",
+      "disposition": "extract-after-linear-slice",
+      "replacement_destination": "durable Frame3D worker and Workbench follow-up PR",
+      "unique_scope": ["durable job request", "lease reclaim and exact suffix resume", "atomic result/evidence publication", "Workbench Frame3D candidate"],
+      "close_condition": "runtime and Workbench changes are rebased after the corresponding solver slice and preserve bounded authority"
+    },
+    {
+      "pr_number": 277,
+      "integration_line": "independent-ci-recovery",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["deterministic four-way pytest sharding", "single fail-closed pytest-full aggregate", "test-order and signing-key isolation"],
+      "close_condition": "all four shards and the protected aggregate pass on the exact merge ref"
+    },
+    {
+      "pr_number": 279,
+      "integration_line": "independent-ci-recovery",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["clean generated-package checks", "Product State observation identity replay", "exact generated-artifact DAG repair"],
+      "close_condition": "Nightly and Product State focused contracts pass and no release authority is promoted"
+    },
+    {
+      "pr_number": 284,
+      "integration_line": "independent-native-foundation",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main and integration line C architecture base",
+      "unique_scope": ["versioned language-neutral C ABI", "C++ CPU lifecycle implementation", "safe non-Send/non-Sync Rust RAII wrapper"],
+      "close_condition": "C/C++ compile contracts, offline Rust tests, ABI/error/ownership tests, and protected checks pass"
+    },
+    {
+      "pr_number": 286,
+      "integration_line": "independent-community-readiness",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["bounded community reproduction receipts", "leakage-resistant dataset splits", "no-license contribution boundary"],
+      "close_condition": "schemas, validators, policy tests, and protected checks pass without changing LICENSE or claiming external credit"
+    },
+    {
+      "pr_number": 288,
+      "integration_line": "independent-workbench-safety",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["fail-closed Import Health normalization", "source/entity/remediation diagnostics", "Workbench evidence-absence state"],
+      "close_condition": "TypeScript/build/E2E and malformed-evidence regressions pass; READY requires complete explicit evidence"
+    },
+    {
+      "pr_number": 294,
+      "integration_line": "independent-ci-recovery",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["single-process shallow ancestry hydration", "Git maintenance race prevention", "semantic workflow contracts"],
+      "close_condition": "workflow-contract and protected checks pass on the exact merge ref and issue 295 closes"
+    }
+  ],
+  "claim_boundary": "This inventory is repository planning metadata. It does not merge code, prove numerical correctness, create external V&V or hardware credit, approve licensing, or grant public, design, paid-pilot, or release authority."
+}
