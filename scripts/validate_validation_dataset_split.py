@@ -14,6 +14,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCHEMA = ROOT / "schemas/validation-dataset-split.v1.schema.json"
 LOCKED_ROLES = {"locked_validation", "blind_prediction"}
+TRAINING_ROLES = {"calibration", "development_regression"}
 
 
 def _load_object(path: Path) -> dict[str, Any]:
@@ -36,6 +37,15 @@ def validate_split(
     contract_errors: list[str] = []
     group_roles: dict[str, str] = {}
     sample_roles: dict[str, str] = {}
+    seen_group_keys: set[str] = set()
+    seen_sample_ids: set[str] = set()
+
+    license_payload = manifest.get("license")
+    training_allowed = (
+        license_payload.get("training_allowed")
+        if isinstance(license_payload, dict)
+        else None
+    )
 
     groups = manifest.get("groups")
     if isinstance(groups, list):
@@ -45,6 +55,9 @@ def validate_split(
             role = group.get("role")
             group_key = group.get("group_key")
             if isinstance(group_key, str) and isinstance(role, str):
+                if group_key in seen_group_keys:
+                    contract_errors.append(f"duplicate_group_key:{group_key}")
+                seen_group_keys.add(group_key)
                 previous_role = group_roles.get(group_key)
                 if previous_role is not None and previous_role != role:
                     contract_errors.append(
@@ -56,23 +69,32 @@ def validate_split(
                 for sample_id in sample_ids:
                     if not isinstance(sample_id, str):
                         continue
+                    if sample_id in seen_sample_ids:
+                        contract_errors.append(f"duplicate_sample_id:{sample_id}")
+                    seen_sample_ids.add(sample_id)
                     previous_role = sample_roles.get(sample_id)
                     if previous_role is not None and previous_role != role:
                         contract_errors.append(
                             f"sample_cross_role_leakage:{sample_id}:{previous_role}:{role}"
                         )
                     sample_roles.setdefault(sample_id, role)
+            if role in TRAINING_ROLES and training_allowed is False:
+                contract_errors.append(
+                    f"training_role_not_permitted_by_license:{index}:{role}"
+                )
             if role in LOCKED_ROLES and not group.get("parameters_frozen_at"):
                 contract_errors.append(
                     f"locked_role_requires_parameters_frozen_at:{index}:{role}"
+                )
+            if role in LOCKED_ROLES and not group.get("parameter_snapshot_sha256"):
+                contract_errors.append(
+                    f"locked_role_requires_parameter_snapshot_sha256:{index}:{role}"
                 )
             if role == "blind_prediction" and group.get("results_disclosed") is not False:
                 contract_errors.append(
                     f"blind_prediction_results_must_be_undisclosed:{index}"
                 )
-            if role in {"calibration", "development_regression"} and group.get(
-                "results_disclosed"
-            ) is not True:
+            if role in TRAINING_ROLES and group.get("results_disclosed") is not True:
                 contract_errors.append(
                     f"development_role_results_must_be_disclosed:{index}:{role}"
                 )
