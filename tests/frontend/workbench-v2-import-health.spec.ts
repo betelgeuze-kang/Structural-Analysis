@@ -16,6 +16,19 @@ function modelWithImportHealth(importHealth: unknown): CaseModel {
   return { importHealth } as unknown as CaseModel
 }
 
+function completeReceipt(overrides: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    schemaVersion: 'workbench-import-health.v1',
+    sourceFormat: 'MGT',
+    silentLossDetected: false,
+    supportedObjectCount: 3,
+    partialObjectCount: 0,
+    unsupportedObjectCount: 0,
+    issues: [],
+    ...overrides,
+  }
+}
+
 test.describe('Workbench v2 — import health', () => {
   test('renders producer evidence without promoting a partial import', async ({ page }) => {
     await open(page)
@@ -39,10 +52,9 @@ test.describe('Workbench v2 — import health', () => {
   })
 
   test('malformed issue rows are preserved as blocking diagnostics', () => {
-    const summary = summarizeImportHealth(modelWithImportHealth({
-      silentLossDetected: false,
+    const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt({
       issues: ['invalid-row'],
-    }))
+    })))
     expect(summary.status).toBe('blocked')
     expect(summary.issues).toHaveLength(1)
     expect(summary.issues[0]).toMatchObject({
@@ -52,23 +64,48 @@ test.describe('Workbench v2 — import health', () => {
     })
   })
 
-  test('detected silent loss blocks an otherwise empty receipt', () => {
+  test('malformed summary fields block instead of degrading to ready or review', () => {
     const summary = summarizeImportHealth(modelWithImportHealth({
-      silentLossDetected: true,
+      schemaVersion: '',
+      sourceFormat: 17,
+      silentLossDetected: 'false',
+      supportedObjectCount: -1,
+      partialObjectCount: 1.5,
+      unsupportedObjectCount: '0',
       issues: [],
     }))
+    expect(summary.status).toBe('blocked')
+    expect(summary.issues.map((issue) => issue.code)).toEqual(expect.arrayContaining([
+      'invalid_import_health_schema_version',
+      'invalid_import_health_source_format',
+      'invalid_import_health_silent_loss_detected',
+      'invalid_import_health_supported_object_count',
+      'invalid_import_health_partial_object_count',
+      'invalid_import_health_unsupported_object_count',
+    ]))
+  })
+
+  test('missing issue array blocks an otherwise complete receipt', () => {
+    const receipt = completeReceipt()
+    delete receipt.issues
+    const summary = summarizeImportHealth(modelWithImportHealth(receipt))
+    expect(summary.status).toBe('blocked')
+    expect(summary.issues).toContainEqual(expect.objectContaining({
+      code: 'invalid_import_health_issues',
+      blocking: true,
+    }))
+  })
+
+  test('detected silent loss blocks an otherwise complete receipt', () => {
+    const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt({
+      silentLossDetected: true,
+    })))
     expect(summary.status).toBe('blocked')
     expect(summary.silentLossStatus).toBe('detected')
   })
 
-  test('ready requires explicit no-loss evidence and no review signal', () => {
-    const summary = summarizeImportHealth(modelWithImportHealth({
-      silentLossDetected: false,
-      supportedObjectCount: 3,
-      partialObjectCount: 0,
-      unsupportedObjectCount: 0,
-      issues: [],
-    }))
+  test('ready requires complete explicit no-loss evidence and no review signal', () => {
+    const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt()))
     expect(summary.status).toBe('ready')
   })
 })
