@@ -38,6 +38,13 @@ sa_status validate_config(const sa_engine_config *config) {
         set_thread_error("the reference lifecycle implementation has no device backend");
         return SA_STATUS_UNSUPPORTED;
     }
+    if (std::any_of(
+            std::begin(config->reserved_u32),
+            std::end(config->reserved_u32),
+            [](uint32_t value) { return value != 0; })) {
+        set_thread_error("engine config reserved fields must be zero");
+        return SA_STATUS_INVALID_ARGUMENT;
+    }
     return SA_STATUS_OK;
 }
 
@@ -79,6 +86,9 @@ extern "C" sa_status sa_get_api_info(sa_api_info *out_info) noexcept {
         out_info->implementation_name = kImplementationName;
         set_thread_error("");
         return SA_STATUS_OK;
+    } catch (const std::bad_alloc &) {
+        set_thread_error("allocation failed while querying API information");
+        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while querying API information");
         return SA_STATUS_INTERNAL_ERROR;
@@ -112,6 +122,9 @@ extern "C" sa_status sa_engine_create(
         *out_engine = engine;
         set_thread_error("");
         return SA_STATUS_OK;
+    } catch (const std::bad_alloc &) {
+        set_thread_error("engine allocation failed");
+        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while creating engine");
         return SA_STATUS_INTERNAL_ERROR;
@@ -131,13 +144,22 @@ extern "C" sa_status sa_engine_capabilities(
     uint64_t *out_capability_bits
 ) noexcept {
     try {
-        if (engine == nullptr || out_capability_bits == nullptr) {
-            set_thread_error("engine or capability output is null");
+        if (out_capability_bits == nullptr) {
+            set_thread_error("capability output is null");
+            return SA_STATUS_INVALID_ARGUMENT;
+        }
+        *out_capability_bits = 0;
+        if (engine == nullptr) {
+            set_thread_error("engine is null");
             return SA_STATUS_INVALID_ARGUMENT;
         }
         *out_capability_bits = engine->capability_bits;
+        set_thread_error("");
         return SA_STATUS_OK;
     } catch (...) {
+        if (out_capability_bits != nullptr) {
+            *out_capability_bits = 0;
+        }
         set_thread_error("unexpected exception while querying capabilities");
         return SA_STATUS_INTERNAL_ERROR;
     }
@@ -166,6 +188,9 @@ extern "C" sa_status sa_engine_last_error(
         }
         buffer[bytes] = '\0';
         return SA_STATUS_OK;
+    } catch (const std::bad_alloc &) {
+        set_thread_error("allocation failed while reading last error");
+        return SA_STATUS_OUT_OF_MEMORY;
     } catch (...) {
         set_thread_error("unexpected exception while reading last error");
         return SA_STATUS_INTERNAL_ERROR;
