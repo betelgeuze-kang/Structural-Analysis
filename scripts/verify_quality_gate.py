@@ -34,6 +34,17 @@ def _frontend_contract(command: str, *arguments: str) -> list[str]:
     ]
 
 
+def _frontend_package_contract(
+    package_script: str,
+    command: str,
+    *arguments: str,
+) -> list[str]:
+    """Bind a package.json verification alias to its Rust-owned command."""
+    if not package_script.startswith("verify:"):
+        raise ValueError(f"frontend verification alias required: {package_script}")
+    return _frontend_contract(command, *arguments)
+
+
 def _lane_command(lane: str) -> list[str]:
     return [
         _python(),
@@ -343,9 +354,14 @@ def _pr_commands(
         ],
         _frontend_contract("check"),
         _frontend_contract("frontend-build"),
-        _frontend_contract("viewer-manifest"),
+        _frontend_package_contract("verify:viewer-manifest", "viewer-manifest"),
         [_python(), "scripts/verify_structure_viewer_contracts.py"],
-        _frontend_contract("browser-smoke", "--mode", "minimal"),
+        _frontend_package_contract(
+            "verify:frontend-browser-smoke",
+            "browser-smoke",
+            "--mode",
+            "minimal",
+        ),
         [
             _python(),
             "-m",
@@ -588,11 +604,23 @@ def _command_groups(mode: str) -> list[list[str]]:
         _lane_command("legacy_evidence"),
         _lane_command("molecular_quarantine"),
         [_python(), "-m", "pytest", "-q"],
-        _frontend_contract("browser-smoke"),
-        _frontend_contract("viewer-sample-workflow"),
-        _frontend_contract("viewer-report-pdf-smoke"),
-        _frontend_contract("viewer-performance-probe"),
-        _frontend_contract("viewer-visual-regression"),
+        _frontend_package_contract("verify:frontend-browser-smoke", "browser-smoke"),
+        _frontend_package_contract(
+            "verify:viewer-sample-workflow",
+            "viewer-sample-workflow",
+        ),
+        _frontend_package_contract(
+            "verify:viewer-report-pdf",
+            "viewer-report-pdf-smoke",
+        ),
+        _frontend_package_contract(
+            "verify:viewer-performance-probe",
+            "viewer-performance-probe",
+        ),
+        _frontend_package_contract(
+            "verify:viewer-visual-regression",
+            "viewer-visual-regression",
+        ),
         [
             _python(),
             "scripts/report_commercialization_level.py",

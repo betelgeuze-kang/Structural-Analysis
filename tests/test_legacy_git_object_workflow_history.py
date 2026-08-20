@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_legacy_git_object_verifiers_checkout_complete_history() -> None:
     workflow_jobs = {
         "ci.yml": "  verify:",
-        "python-test-collection.yml": "  full:",
+        "python-test-collection.yml": "  full_shards:",
         "legacy-evidence-ci.yml": "  legacy-evidence:",
         "nightly-full-quality.yml": "  full-quality:",
         "product-state-current.yml": "  build-current-state:",
