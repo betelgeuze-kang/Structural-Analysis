@@ -628,6 +628,89 @@ if cmp -s "$e2e_root/model-ir-linear-deformed-view-en-US-first.txt" \
   exit 1
 fi
 
+verify_linear_element_recovery_view_self_hash() {
+  local view="$1"
+  local locale="$2"
+  local label declared unsigned actual
+  if [[ "$locale" == "ko-KR" ]]; then
+    label='보기 해시: sha256:'
+  else
+    label='View hash: sha256:'
+  fi
+  declared="$(sed -n "s/^$label//p" "$view")"
+  if [[ ! "$declared" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "installed ModelIR linear element recovery view has no valid self-hash: $view" >&2
+    exit 1
+  fi
+  unsigned="$view.unsigned"
+  sed '$d' "$view" > "$unsigned"
+  actual="$(sha256sum "$unsigned" | awk '{print $1}')"
+  if [[ "$actual" != "$declared" ]]; then
+    echo "installed ModelIR linear element recovery view self-hash mismatch: $view" >&2
+    exit 1
+  fi
+}
+
+exercise_model_ir_linear_element_recovery_view_surface() {
+  local label="$1"
+  local workspace="$2"
+  local restarted_workspace="$3"
+  local workspace_before="$e2e_root/$label-element-recovery-view-workspace-before"
+  cp -a -- "$workspace" "$workspace_before"
+  local locale first second
+  for locale in en-US ko-KR; do
+    first="$e2e_root/$label-element-recovery-view-$locale-first.txt"
+    second="$e2e_root/$label-element-recovery-view-$locale-second.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      element-recovery-view --workspace "$workspace" --locale "$locale" > "$first"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      element-recovery-view --workspace "$workspace" --locale "$locale" > "$second"
+    cmp "$first" "$second"
+    grep -Fq 'structural-native-workbench-model-ir-linear-element-recovery-view.v1' "$first"
+    grep -Fq '1 of 1 (terminal linear static)' "$first"
+    grep -Fq 'frame3d=element_local; truss3d=element_axis' "$first"
+    grep -Fq 'i_FX/i_FY/i_FZ/j_FX/j_FY/j_FZ=N' "$first"
+    grep -Fq 'fallback 0' "$first"
+    grep -Eq $'^000001\t[^\t]+\t0000000000\tframe_3d\t[^\t]+->[^\t]+\telement_local\ti_FX_N=[-+0-9.e]+;' "$first"
+    if LC_ALL=C grep -q $'\033' "$first"; then
+      echo "installed ModelIR linear element recovery view contains an ANSI escape" >&2
+      exit 1
+    fi
+    verify_linear_element_recovery_view_self_hash "$first" "$locale"
+  done
+  if cmp -s "$e2e_root/$label-element-recovery-view-en-US-first.txt" \
+    "$e2e_root/$label-element-recovery-view-ko-KR-first.txt"; then
+    echo "installed ModelIR linear element recovery views must have distinct locale identities" >&2
+    exit 1
+  fi
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    element-recovery-view --workspace "$restarted_workspace" --locale en-US \
+    > "$e2e_root/$label-element-recovery-view-restarted.txt"
+  cmp "$e2e_root/$label-element-recovery-view-en-US-first.txt" \
+    "$e2e_root/$label-element-recovery-view-restarted.txt"
+  diff -r "$workspace_before" "$workspace" \
+    > "$e2e_root/$label-element-recovery-view-workspace-diff.txt"
+}
+
+exercise_model_ir_linear_element_recovery_view_surface \
+  model-ir-linear "$linear_direct" "$linear_restarted"
+exercise_model_ir_linear_element_recovery_view_surface \
+  mgt-model-ir-linear "$mgt_linear_direct" "$mgt_linear_restarted"
+
+if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  element-recovery-view --workspace "$linear_direct" --start-element 2 \
+  > "$e2e_root/linear-element-recovery-view-invalid-window-rejected.json"; then
+  echo "installed ModelIR linear element recovery view accepted an invalid window" >&2
+  exit 1
+fi
+grep -Fq 'workbench_element_recovery_view_window_invalid' \
+  "$e2e_root/linear-element-recovery-view-invalid-window-rejected.json"
+if cmp -s "$e2e_root/model-ir-linear-element-recovery-view-en-US-first.txt" \
+  "$e2e_root/mgt-model-ir-linear-element-recovery-view-en-US-first.txt"; then
+  echo "installed strict-ModelIR and normalized-MGT element recovery views must differ" >&2
+  exit 1
+fi
+
 mgt_source="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_frame3d_x.mgt"
 mgt_request="$repository_root/native/tests/fixtures/mgt_import/workbench_fixed_guided_ndtha_request.json"
 mgt_restarted="$e2e_root/mgt-workbench-restarted"
@@ -732,9 +815,13 @@ exercise_model_ir_linear_localized_pdf_surface() {
         > "$output_directory.stdout.json"
       test -s "$output_directory/report.pdf"
       test -s "$output_directory/pdf-receipt.json"
-      grep -Fq '"schema_version":"structural-native-sparse-linear-localized-pdf-report-receipt.v2"' \
+      grep -Fq '"schema_version":"structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3"' \
         "$output_directory/pdf-receipt.json"
-      grep -Fq '"profile":"sparse_linear_cpu_v1"' \
+      grep -Fq '"profile":"model_ir_linear_cpu_engineering_summary_v1"' \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq '"source_recovery_hash":"sha256:' \
+        "$output_directory/pdf-receipt.json"
+      grep -Fq '"source_reaction_hash":"sha256:' \
         "$output_directory/pdf-receipt.json"
       grep -Fq "\"locale\":\"$locale\"" "$output_directory/pdf-receipt.json"
       grep -Fq "\"content_hash\":\"sha256:$localized_report_font_hash\"" \
@@ -10216,6 +10303,8 @@ linear_nodal_displacement_view_window_hash="$(sha256sum "$e2e_root/model-ir-line
 linear_deformed_view_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-deformed-view-en-US-first.txt" | awk '{print $1}')"
 linear_deformed_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-deformed-view-ko-KR-first.txt" | awk '{print $1}')"
 linear_deformed_view_projection_hash="$(sha256sum "$e2e_root/model-ir-linear-deformed-view-projection.txt" | awk '{print $1}')"
+linear_element_recovery_view_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-element-recovery-view-en-US-first.txt" | awk '{print $1}')"
+linear_element_recovery_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-element-recovery-view-ko-KR-first.txt" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -10238,6 +10327,8 @@ mgt_linear_nodal_displacement_view_en_us_hash="$(sha256sum "$e2e_root/mgt-model-
 mgt_linear_nodal_displacement_view_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-nodal-displacement-view-ko-KR-first.txt" | awk '{print $1}')"
 mgt_linear_deformed_view_en_us_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-deformed-view-en-US-first.txt" | awk '{print $1}')"
 mgt_linear_deformed_view_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-deformed-view-ko-KR-first.txt" | awk '{print $1}')"
+mgt_linear_element_recovery_view_en_us_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-element-recovery-view-en-US-first.txt" | awk '{print $1}')"
+mgt_linear_element_recovery_view_ko_kr_hash="$(sha256sum "$e2e_root/mgt-model-ir-linear-element-recovery-view-ko-KR-first.txt" | awk '{print $1}')"
 mgt_linear_report_hash="$(sha256sum "$mgt_linear_direct/06-report/report.pdf" | awk '{print $1}')"
 mgt_linear_pdf_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 mgt_linear_report_receipt_hash="$(sha256sum "$mgt_linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11071,6 +11162,10 @@ v88_receipt_json="${v87_receipt_json/structural-native-distribution-e2e.v87/stru
 linear_deformed_view_receipt_fields="\"model_ir_linear_deformed_view_surface_passed\":true,\"model_ir_linear_deformed_view_restart_parity_passed\":true,\"model_ir_linear_deformed_view_en_us_sha256\":\"sha256:$linear_deformed_view_en_us_hash\",\"model_ir_linear_deformed_view_ko_kr_sha256\":\"sha256:$linear_deformed_view_ko_kr_hash\",\"model_ir_linear_deformed_view_projection_sha256\":\"sha256:$linear_deformed_view_projection_hash\",\"mgt_model_ir_linear_deformed_view_surface_passed\":true,\"mgt_model_ir_linear_deformed_view_restart_parity_passed\":true,\"mgt_model_ir_linear_deformed_view_en_us_sha256\":\"sha256:$mgt_linear_deformed_view_en_us_hash\",\"mgt_model_ir_linear_deformed_view_ko_kr_sha256\":\"sha256:$mgt_linear_deformed_view_ko_kr_hash\",\"workbench_linear_deformed_view_invalid_step_rejected\":true,"
 v88_receipt_json="${v88_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_deformed_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v88_receipt_json" > "$temporary_receipt"
+v89_receipt_json="${v88_receipt_json/structural-native-distribution-e2e.v88/structural-native-distribution-e2e.v89}"
+linear_element_recovery_view_receipt_fields="\"model_ir_linear_element_recovery_view_surface_passed\":true,\"model_ir_linear_element_recovery_view_restart_parity_passed\":true,\"model_ir_linear_element_recovery_view_en_us_sha256\":\"sha256:$linear_element_recovery_view_en_us_hash\",\"model_ir_linear_element_recovery_view_ko_kr_sha256\":\"sha256:$linear_element_recovery_view_ko_kr_hash\",\"mgt_model_ir_linear_element_recovery_view_surface_passed\":true,\"mgt_model_ir_linear_element_recovery_view_restart_parity_passed\":true,\"mgt_model_ir_linear_element_recovery_view_en_us_sha256\":\"sha256:$mgt_linear_element_recovery_view_en_us_hash\",\"mgt_model_ir_linear_element_recovery_view_ko_kr_sha256\":\"sha256:$mgt_linear_element_recovery_view_ko_kr_hash\",\"workbench_linear_element_recovery_view_invalid_window_rejected\":true,"
+v89_receipt_json="${v89_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_element_recovery_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v89_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

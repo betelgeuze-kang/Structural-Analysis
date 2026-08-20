@@ -1030,6 +1030,18 @@ V88_LINEAR_DEFORMED_VIEW_KEYS = {
     "workbench_linear_deformed_view_invalid_step_rejected",
 }
 V88_EXPECTED_KEYS = V87_EXPECTED_KEYS | V88_LINEAR_DEFORMED_VIEW_KEYS
+V89_LINEAR_ELEMENT_RECOVERY_VIEW_KEYS = {
+    "model_ir_linear_element_recovery_view_surface_passed",
+    "model_ir_linear_element_recovery_view_restart_parity_passed",
+    "model_ir_linear_element_recovery_view_en_us_sha256",
+    "model_ir_linear_element_recovery_view_ko_kr_sha256",
+    "mgt_model_ir_linear_element_recovery_view_surface_passed",
+    "mgt_model_ir_linear_element_recovery_view_restart_parity_passed",
+    "mgt_model_ir_linear_element_recovery_view_en_us_sha256",
+    "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256",
+    "workbench_linear_element_recovery_view_invalid_window_rejected",
+}
+V89_EXPECTED_KEYS = V88_EXPECTED_KEYS | V89_LINEAR_ELEMENT_RECOVERY_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1071,6 +1083,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v89_receipt = receipt_schema_version == "structural-native-distribution-e2e.v89"
+    if is_v89_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v88"
     is_v88_receipt = receipt_schema_version == "structural-native-distribution-e2e.v88"
     if is_v88_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v87"
@@ -1397,6 +1412,7 @@ def validate(
         "structural-native-distribution-e2e.v86": V86_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v87": V87_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v88": V88_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v89": V89_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1537,6 +1553,35 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v89_receipt:
+        for name in (
+            "model_ir_linear_element_recovery_view_surface_passed",
+            "model_ir_linear_element_recovery_view_restart_parity_passed",
+            "mgt_model_ir_linear_element_recovery_view_surface_passed",
+            "mgt_model_ir_linear_element_recovery_view_restart_parity_passed",
+            "workbench_linear_element_recovery_view_invalid_window_rejected",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "model_ir_linear_element_recovery_view_en_us_sha256",
+            "model_ir_linear_element_recovery_view_ko_kr_sha256",
+            "mgt_model_ir_linear_element_recovery_view_en_us_sha256",
+            "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256",
+        )
+        element_recovery_view_identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                element_recovery_view_identities.append(identity)
+        if len(element_recovery_view_identities) == len(hash_names) and len(
+            set(element_recovery_view_identities)
+        ) != len(hash_names):
+            errors.append(
+                "all linear element-recovery-view locale and profile identities must differ"
+            )
     if is_v88_receipt:
         for name in (
             "model_ir_linear_deformed_view_surface_passed",

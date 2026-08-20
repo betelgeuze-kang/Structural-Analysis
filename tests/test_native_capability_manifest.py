@@ -1097,6 +1097,37 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "C6" in displacement_view["claim"]
     assert (
         capabilities.capability_is_enabled(
+            payload, "modelir_linear_element_recovery_view"
+        )
+        is True
+    )
+    element_recovery_view = payload["capabilities"][
+        "modelir_linear_element_recovery_view"
+    ]
+    assert element_recovery_view["cutover_gate"] == "C5"
+    assert element_recovery_view["owner"] == "structural-workbench"
+    assert "element-recovery-view" in element_recovery_view["claim"]
+    assert "terminal run receipt" in element_recovery_view["claim"]
+    assert "native C++ semantic boundary" in element_recovery_view["claim"]
+    assert "immutable element identifiers" in element_recovery_view["claim"]
+    assert "frame3d local end forces" in element_recovery_view["claim"]
+    assert "truss3d axial strain, stress, and force" in element_recovery_view["claim"]
+    assert "en-US or ko-KR" in element_recovery_view["claim"]
+    assert "1 through 256 elements" in element_recovery_view["claim"]
+    assert (
+        "byte-identical strict-ModelIR and normalized-MGT direct/restart views"
+        in element_recovery_view["claim"]
+    )
+    assert "installed CPU static/shared distribution v89" in element_recovery_view["claim"]
+    assert "local rootfs diagnostic v12" in element_recovery_view["claim"]
+    assert "four distinct strict-ModelIR/normalized-MGT locale identities" in element_recovery_view["claim"]
+    assert "Truss3D row formatting remains source-tested" in element_recovery_view["claim"]
+    assert "general stress contour" in element_recovery_view["claim"]
+    assert "public/customer distribution publication" in element_recovery_view["claim"]
+    assert "HIP C2" in element_recovery_view["claim"]
+    assert "C6" in element_recovery_view["claim"]
+    assert (
+        capabilities.capability_is_enabled(
             payload, "modelir_linear_deformed_shape_view"
         )
         is True
@@ -1576,17 +1607,19 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v86 binds deterministic installed algebraic reaction audits" in distribution["claim"]
     assert "append-only v87 binds deterministic installed strict-ModelIR" in distribution["claim"]
     assert "append-only v88 binds deterministic installed strict-ModelIR" in distribution["claim"]
+    assert "append-only v89 binds deterministic installed strict-ModelIR" in distribution["claim"]
+    assert "Frame3D element-local end-force views" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v87 receipts" in distribution["claim"]
+    assert "frozen v1 through v88 receipts" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v88"
+        == "structural-native-distribution-e2e.v89"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v87"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v88"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1617,6 +1650,12 @@ def test_native_distribution_capability_is_bounded_c5():
         "model_ir_linear_deformed_view_projection_sha256",
         "mgt_model_ir_linear_deformed_view_en_us_sha256",
         "mgt_model_ir_linear_deformed_view_ko_kr_sha256",
+    ]
+    assert distribution_evidence["linear_element_recovery_view_hash_fields"] == [
+        "model_ir_linear_element_recovery_view_en_us_sha256",
+        "model_ir_linear_element_recovery_view_ko_kr_sha256",
+        "mgt_model_ir_linear_element_recovery_view_en_us_sha256",
+        "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256",
     ]
     assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
@@ -1666,22 +1705,24 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v11 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "v12 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
     assert "algebraic reaction audits" in deployment["claim"]
     assert "bounded nodal-displacement views" in deployment["claim"]
     assert "bounded linear deformed views" in deployment["claim"]
+    assert "Frame3D element-local end-force views" in deployment["claim"]
+    assert "Truss3D installed execution explicitly open" in deployment["claim"]
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v10 rootfs receipts" in deployment["claim"]
+    assert "frozen v1 through v11 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v11"
+        == "structural-native-rootfs-isolation-e2e.v12"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v10"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v11"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v88"
+        == "structural-native-distribution-e2e.v89"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

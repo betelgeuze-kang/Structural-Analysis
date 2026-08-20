@@ -305,6 +305,37 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/linear-deformed-view-invalid-step-stderr.txt
+    for profile in model-ir-linear mgt-model-ir-linear; do
+      if [ "$profile" = model-ir-linear ]; then
+        element_workspace=/mnt/model-ir-linear-workbench
+      else
+        element_workspace=/mnt/mgt-model-ir-linear-workbench
+      fi
+      for locale in en-US ko-KR; do
+        for repeat in first second; do
+          /opt/payload/bin/structural-workbench element-recovery-view \
+            --workspace "$element_workspace" --locale "$locale" \
+            > "/mnt/$profile-element-recovery-view-$locale-$repeat.txt"
+        done
+        /usr/bin/cmp "/mnt/$profile-element-recovery-view-$locale-first.txt" \
+          "/mnt/$profile-element-recovery-view-$locale-second.txt"
+      done
+      if /usr/bin/cmp -s "/mnt/$profile-element-recovery-view-en-US-first.txt" \
+        "/mnt/$profile-element-recovery-view-ko-KR-first.txt"; then
+        exit 1
+      fi
+    done
+    if /usr/bin/cmp -s /mnt/model-ir-linear-element-recovery-view-en-US-first.txt \
+      /mnt/mgt-model-ir-linear-element-recovery-view-en-US-first.txt; then
+      exit 1
+    fi
+    if /opt/payload/bin/structural-workbench element-recovery-view \
+      --workspace /mnt/model-ir-linear-workbench --start-element 2 \
+      > /mnt/linear-element-recovery-view-invalid-window-failure.json \
+      2> /mnt/linear-element-recovery-view-invalid-window-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/linear-element-recovery-view-invalid-window-stderr.txt
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -442,6 +473,24 @@ unshare -Urn bwrap \
         /mnt/mgt-model-ir-linear-deformed-view-ko-KR-second.txt \
       --workbench-linear-deformed-view-invalid-step-failure \
         /mnt/linear-deformed-view-invalid-step-failure.json \
+      --model-ir-linear-element-recovery-view-en-us-first \
+        /mnt/model-ir-linear-element-recovery-view-en-US-first.txt \
+      --model-ir-linear-element-recovery-view-en-us-second \
+        /mnt/model-ir-linear-element-recovery-view-en-US-second.txt \
+      --model-ir-linear-element-recovery-view-ko-kr-first \
+        /mnt/model-ir-linear-element-recovery-view-ko-KR-first.txt \
+      --model-ir-linear-element-recovery-view-ko-kr-second \
+        /mnt/model-ir-linear-element-recovery-view-ko-KR-second.txt \
+      --mgt-model-ir-linear-element-recovery-view-en-us-first \
+        /mnt/mgt-model-ir-linear-element-recovery-view-en-US-first.txt \
+      --mgt-model-ir-linear-element-recovery-view-en-us-second \
+        /mnt/mgt-model-ir-linear-element-recovery-view-en-US-second.txt \
+      --mgt-model-ir-linear-element-recovery-view-ko-kr-first \
+        /mnt/mgt-model-ir-linear-element-recovery-view-ko-KR-first.txt \
+      --mgt-model-ir-linear-element-recovery-view-ko-kr-second \
+        /mnt/mgt-model-ir-linear-element-recovery-view-ko-KR-second.txt \
+      --workbench-linear-element-recovery-view-invalid-window-failure \
+        /mnt/linear-element-recovery-view-invalid-window-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

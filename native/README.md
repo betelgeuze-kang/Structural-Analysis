@@ -50,7 +50,8 @@ golden, not live solver evidence. Broader solver coverage, TLS/non-loopback and 
 distributed API authority, live same-mesh external validation, HIP C2, broader Workbench, PDF/A,
 tagged or arbitrary-Unicode PDF output, general accessibility/localization and C6 remain open. The
 bounded Workbench separately provides self-hashed `en-US`/`ko-KR` UTF-8 ModelIR topology, linear
-report, constrained-reaction, bounded response-history, and exact-profile deformed-shape views
+report, nodal-displacement, element-recovery, constrained-reaction, bounded response-history, and
+exact-profile deformed-shape views
 plus fixed-label embedded-font PDF export;
 none is a certification or general UI-parity claim. See
 `docs/native/localized-modelir-topology-view-v1.md` and
@@ -65,6 +66,11 @@ The independent `nodal-displacement-view` maps verified recovery blocks to immut
 prints exact translation/rotation components in bounded self-hashed English/Korean windows; see
 `docs/native/modelir-linear-nodal-displacement-view-v1.md`. It is not a deformed-shape or design
 verdict.
+The independent `element-recovery-view` C++-revalidates the immutable ModelIR, maps stable recovery
+indices to element IDs/connectivity, and prints exact frame3d local end forces or truss3d axial
+strain/stress/force in bounded self-hashed English/Korean windows; see
+`docs/native/modelir-linear-element-recovery-view-v1.md`. It is not a shell/general stress contour,
+design utilization, or engineering verdict.
 The legacy five-symbol ABI is unchanged.
 `inplace_scale_f32` is frozen only as an alias/checksum compatibility probe used by the old
 Python producer hook. It is not a structural product capability, receives no C0-C6 promotion and

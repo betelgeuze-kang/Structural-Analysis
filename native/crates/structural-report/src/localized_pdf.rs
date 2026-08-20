@@ -1,5 +1,11 @@
 use std::fmt::Write as _;
 
+use structural_contracts::model_linear_reactions::{
+    verify_model_ir_linear_reaction_result_v1, ModelIrLinearReactionResultDocumentV1,
+};
+use structural_contracts::model_linear_recovery::{
+    verify_model_ir_linear_result_recovery_v1, ModelIrLinearResultRecoveryDocumentV1,
+};
 use structural_contracts::product_ir::{
     sha256_identity, NonlinearNdthaReportIrDocumentV1, NonlinearNdthaResultIrDocumentV1,
     NonlinearNdthaTerminalStatusV1,
@@ -19,6 +25,7 @@ use crate::{build_nonlinear_ndtha_report_v1, build_sparse_linear_report_v1, PdfR
 
 const PDF_MEDIA_TYPE: &str = "application/pdf";
 const PDF_CLAIM_BOUNDARY: &str = "deterministic_single_page_embedded_font_projection_for_fixed_en_us_or_ko_kr_labels_and_portable_ascii_dynamic_values_not_arbitrary_unicode_pdf_ua_accessibility_engineering_acceptance_or_design_code_compliance";
+const MODEL_IR_ENGINEERING_PDF_CLAIM_BOUNDARY: &str = "deterministic_single_page_modelir_linear_engineering_summary_bound_to_result_recovery_constrained_reactions_report_and_document_source_not_a_complete_member_schedule_pdf_ua_accessibility_engineering_acceptance_or_design_code_compliance";
 const OBJECT_COUNT: usize = 10;
 const INFO_OBJECT_ID: usize = 10;
 
@@ -65,6 +72,101 @@ pub struct NonlinearNdthaLocalizedPdfDocumentV2 {
 /// document. The alias names the accepted source profile at call sites; the renderer's sparse
 /// input types and the profile-typed receipt enforce the actual boundary.
 pub type SparseLinearLocalizedPdfDocumentV2 = NonlinearNdthaLocalizedPdfDocumentV2;
+
+/// Deterministic `ModelIR` linear engineering-summary PDF bound to verified result artifacts.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelIrLinearEngineeringLocalizedPdfDocumentV3 {
+    bytes: Vec<u8>,
+    locale: PdfReportLocaleV2,
+    source_result_hash: String,
+    source_recovery_hash: String,
+    source_reaction_hash: String,
+    source_report_hash: String,
+    document_source_hash: String,
+    pdf_hash: String,
+}
+
+impl ModelIrLinearEngineeringLocalizedPdfDocumentV3 {
+    #[must_use]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+
+    #[must_use]
+    pub fn locale(&self) -> PdfReportLocaleV2 {
+        self.locale
+    }
+
+    #[must_use]
+    pub fn source_result_hash(&self) -> &str {
+        &self.source_result_hash
+    }
+
+    #[must_use]
+    pub fn source_recovery_hash(&self) -> &str {
+        &self.source_recovery_hash
+    }
+
+    #[must_use]
+    pub fn source_reaction_hash(&self) -> &str {
+        &self.source_reaction_hash
+    }
+
+    #[must_use]
+    pub fn source_report_hash(&self) -> &str {
+        &self.source_report_hash
+    }
+
+    #[must_use]
+    pub fn document_source_hash(&self) -> &str {
+        &self.document_source_hash
+    }
+
+    #[must_use]
+    pub fn pdf_hash(&self) -> &str {
+        &self.pdf_hash
+    }
+
+    #[must_use]
+    pub fn embedded_font_hash(&self) -> &'static str {
+        LOCALIZED_FONT_HASH
+    }
+
+    #[must_use]
+    pub fn embedded_font_byte_length(&self) -> usize {
+        LOCALIZED_FONT_BYTE_LENGTH
+    }
+
+    #[must_use]
+    pub fn embedded_font_postscript_name(&self) -> &'static str {
+        LOCALIZED_FONT_POSTSCRIPT_NAME
+    }
+
+    #[must_use]
+    pub fn embedded_font_license_notice_hash(&self) -> &'static str {
+        LOCALIZED_FONT_LICENSE_NOTICE_HASH
+    }
+
+    #[must_use]
+    pub fn embedded_font_license_notice_byte_length(&self) -> usize {
+        LOCALIZED_FONT_LICENSE_NOTICE_BYTE_LENGTH
+    }
+
+    #[must_use]
+    pub fn embedded_font_provenance_hash(&self) -> &'static str {
+        LOCALIZED_FONT_PROVENANCE_HASH
+    }
+
+    #[must_use]
+    pub fn embedded_font_provenance_byte_length(&self) -> usize {
+        LOCALIZED_FONT_PROVENANCE_BYTE_LENGTH
+    }
+
+    #[must_use]
+    pub fn claim_boundary(&self) -> &'static str {
+        MODEL_IR_ENGINEERING_PDF_CLAIM_BOUNDARY
+    }
+}
 
 impl NonlinearNdthaLocalizedPdfDocumentV2 {
     #[must_use]
@@ -198,6 +300,44 @@ pub fn render_sparse_linear_localized_pdf_v2(
     Ok(SparseLinearLocalizedPdfDocumentV2 {
         pdf_hash: sha256_identity(&bytes),
         source_result_hash: result.result_hash().to_owned(),
+        source_report_hash: report.report_hash().to_owned(),
+        document_source_hash: sha256_identity(document_source),
+        locale,
+        bytes,
+    })
+}
+
+/// Render a deterministic `ModelIR` linear engineering-summary PDF.
+///
+/// Unlike the frozen sparse-linear v2 profile, this append-only profile binds the exact typed
+/// displacement/element recovery and constrained-reaction artifacts. The page reports component-
+/// family extrema for `Frame3D` end forces and moments; it deliberately remains a bounded summary,
+/// not a complete member schedule or force diagram.
+///
+/// # Errors
+///
+/// Rejects any sparse report projection drift, recovery/reaction binding drift, unsupported
+/// element recovery family, embedded-font drift, or malformed generated PDF object graph.
+pub fn render_model_ir_linear_engineering_localized_pdf_v3(
+    result: &SparseLinearResultIrDocumentV1,
+    recovery: &ModelIrLinearResultRecoveryDocumentV1,
+    reaction: &ModelIrLinearReactionResultDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    document_source: &[u8],
+    locale: PdfReportLocaleV2,
+) -> Result<ModelIrLinearEngineeringLocalizedPdfDocumentV3, PdfRenderError> {
+    verify_exact_sparse_projection(result, report, document_source)?;
+    verify_model_ir_linear_result_recovery_v1(result, recovery)?;
+    verify_model_ir_linear_reaction_result_v1(result, recovery, reaction)?;
+    verify_font_asset()?;
+    require_portable_dynamic_text(&result.result().case_id, "/result_ir/case_id")?;
+    let bytes = build_model_ir_engineering_pdf_bytes(result, recovery, reaction, report, locale)?;
+    validate_deterministic_localized_pdf_v2(&bytes)?;
+    Ok(ModelIrLinearEngineeringLocalizedPdfDocumentV3 {
+        pdf_hash: sha256_identity(&bytes),
+        source_result_hash: result.result_hash().to_owned(),
+        source_recovery_hash: recovery.recovery_hash().to_owned(),
+        source_reaction_hash: reaction.result_hash().to_owned(),
         source_report_hash: report.report_hash().to_owned(),
         document_source_hash: sha256_identity(document_source),
         locale,
@@ -995,6 +1135,522 @@ fn build_sparse_pdf_bytes(
         .as_bytes(),
     );
     assemble_pdf(&objects, &identity)
+}
+
+#[derive(Clone, Copy, Debug)]
+struct EngineeringExtreme {
+    magnitude: f64,
+    signed_value: f64,
+    stable_index: u32,
+    component: &'static str,
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct EngineeringExtrema {
+    frame_count: usize,
+    truss_count: usize,
+    axial_force: Option<EngineeringExtreme>,
+    shear_force: Option<EngineeringExtreme>,
+    torsional_moment: Option<EngineeringExtreme>,
+    bending_moment: Option<EngineeringExtreme>,
+    truss_axial_force: Option<EngineeringExtreme>,
+}
+
+struct EngineeringLabels {
+    title: &'static str,
+    subtitle: &'static str,
+    summary: &'static str,
+    case_id: &'static str,
+    displacement: &'static str,
+    translational_reaction: &'static str,
+    rotational_reaction: &'static str,
+    active_residual: &'static str,
+    member_results: &'static str,
+    frame_count: &'static str,
+    axial_force: &'static str,
+    shear_force: &'static str,
+    torsional_moment: &'static str,
+    bending_moment: &'static str,
+    truss_count: &'static str,
+    truss_axial_force: &'static str,
+    provenance: &'static str,
+    provenance_headings: [&'static str; 6],
+    authority_boundary: &'static str,
+    boundary_line_one: &'static str,
+    boundary_line_two: &'static str,
+    footer: &'static str,
+    page: &'static str,
+}
+
+fn engineering_labels(locale: PdfReportLocaleV2) -> EngineeringLabels {
+    match locale {
+        PdfReportLocaleV2::EnUs => EngineeringLabels {
+            title: "Structural Analysis Report",
+            subtitle: "ModelIR linear engineering summary - deterministic native PDF v3",
+            summary: "Analysis summary",
+            case_id: "Case",
+            displacement: "Maximum global displacement",
+            translational_reaction: "Maximum translational reaction",
+            rotational_reaction: "Maximum rotational reaction",
+            active_residual: "Active residual infinity norm",
+            member_results: "Frame3D / Truss3D recovered results",
+            frame_count: "Frame3D records",
+            axial_force: "Maximum axial force",
+            shear_force: "Maximum shear force",
+            torsional_moment: "Maximum torsional moment",
+            bending_moment: "Maximum bending moment",
+            truss_count: "Truss3D records",
+            truss_axial_force: "Maximum truss axial force",
+            provenance: "Provenance",
+            provenance_headings: [
+                "Result",
+                "Recovery",
+                "Reaction",
+                "Report",
+                "Execution",
+                "Checkpoint",
+            ],
+            authority_boundary: "Authority boundary",
+            boundary_line_one:
+                "Bounded CPU engineering summary. Not a complete member schedule or design verdict.",
+            boundary_line_two:
+                "Verify ResultIR, recovery, reactions, ReportIR and receipt hashes before review.",
+            footer: "structural-native / ModelIR-report-pdf.v3 / en-US",
+            page: "Page 1 / 1",
+        },
+        PdfReportLocaleV2::KoKr => EngineeringLabels {
+            title: "구조 해석 보고서",
+            subtitle: "제한된 ModelIR 선형 해석 결정론적 네이티브 PDF v3",
+            summary: "해석 요약",
+            case_id: "케이스",
+            displacement: "Maximum global displacement",
+            translational_reaction: "Maximum translational reaction",
+            rotational_reaction: "Maximum rotational reaction",
+            active_residual: "Active residual infinity norm",
+            member_results: "Frame3D / Truss3D results",
+            frame_count: "Frame3D records",
+            axial_force: "Maximum axial force",
+            shear_force: "Maximum shear force",
+            torsional_moment: "Maximum torsional moment",
+            bending_moment: "Maximum bending moment",
+            truss_count: "Truss3D records",
+            truss_axial_force: "Maximum truss axial force",
+            provenance: "출처",
+            provenance_headings: [
+                "Result",
+                "Recovery",
+                "Reaction",
+                "Report",
+                "Execution",
+                "Checkpoint",
+            ],
+            authority_boundary: "권한 경계",
+            boundary_line_one: "제한된 후보 결과. 공학적 승인 또는 설계 기준 적합성 인증이 아님.",
+            boundary_line_two:
+                "검토 또는 재배포 전에 결과 보고서 문서와 영수증 해시를 확인하십시오.",
+            footer: "구조 네이티브 / ModelIR-report-pdf.v3 / ko-KR",
+            page: "페이지 1 / 1",
+        },
+    }
+}
+
+#[allow(clippy::too_many_lines)]
+fn build_model_ir_engineering_pdf_bytes(
+    result: &SparseLinearResultIrDocumentV1,
+    recovery: &ModelIrLinearResultRecoveryDocumentV1,
+    reaction: &ModelIrLinearReactionResultDocumentV1,
+    report: &SparseLinearReportIrDocumentV1,
+    locale: PdfReportLocaleV2,
+) -> Result<Vec<u8>, PdfRenderError> {
+    let source = result.result();
+    let recovered = recovery.recovery();
+    let reactions = reaction.result();
+    let report_source = report.report();
+    let labels = engineering_labels(locale);
+    let extrema = engineering_extrema(recovered)?;
+    let (translation_reaction, rotation_reaction) = reaction_component_extrema(reactions);
+
+    let mut content = String::new();
+    writeln!(&mut content, "q").expect("String writes cannot fail");
+    writeln!(&mut content, "0.055 0.118 0.204 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 742 595 100 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "0.129 0.588 0.953 rg").expect("String writes cannot fail");
+    writeln!(&mut content, "0 734 595 8 re f").expect("String writes cannot fail");
+    writeln!(&mut content, "Q").expect("String writes cannot fail");
+    text_line(&mut content, 21.0, 1.0, 1.0, 1.0, 48.0, 794.0, labels.title)?;
+    text_line(
+        &mut content,
+        10.0,
+        0.82,
+        0.88,
+        0.95,
+        48.0,
+        773.0,
+        labels.subtitle,
+    )?;
+
+    panel(&mut content, 48.0, 570.0, 499.0, 135.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        680.0,
+        labels.summary,
+    )?;
+    label_value(&mut content, 66.0, 655.0, labels.case_id, &source.case_id)?;
+    label_value(
+        &mut content,
+        66.0,
+        635.0,
+        labels.displacement,
+        &format!("{:.8e} m", recovered.summary.maximum_absolute_displacement),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        615.0,
+        labels.translational_reaction,
+        &format!("{translation_reaction:.8e} N"),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        595.0,
+        labels.rotational_reaction,
+        &format!("{rotation_reaction:.8e} N*m"),
+    )?;
+    label_value(
+        &mut content,
+        318.0,
+        655.0,
+        labels.active_residual,
+        &format!("{:.8e}", recovered.summary.active_residual_inf),
+    )?;
+
+    panel(&mut content, 48.0, 350.0, 499.0, 200.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        524.0,
+        labels.member_results,
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        499.0,
+        labels.frame_count,
+        &extrema.frame_count.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        479.0,
+        labels.axial_force,
+        &format_extreme(extrema.axial_force, "N"),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        459.0,
+        labels.shear_force,
+        &format_extreme(extrema.shear_force, "N"),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        439.0,
+        labels.torsional_moment,
+        &format_extreme(extrema.torsional_moment, "N*m"),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        419.0,
+        labels.bending_moment,
+        &format_extreme(extrema.bending_moment, "N*m"),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        399.0,
+        labels.truss_count,
+        &extrema.truss_count.to_string(),
+    )?;
+    label_value(
+        &mut content,
+        66.0,
+        379.0,
+        labels.truss_axial_force,
+        &format_extreme(extrema.truss_axial_force, "N"),
+    )?;
+
+    panel(&mut content, 48.0, 170.0, 499.0, 160.0)?;
+    text_line(
+        &mut content,
+        13.0,
+        0.055,
+        0.118,
+        0.204,
+        66.0,
+        304.0,
+        labels.provenance,
+    )?;
+    let provenance = [
+        source.result_hash.as_str(),
+        recovered.recovery_hash.as_str(),
+        reactions.result_hash.as_str(),
+        report_source.report_hash.as_str(),
+        source.identity.execution_hash.as_str(),
+        source.identity.checkpoint_hash.as_str(),
+    ];
+    for (index, (label, hash)) in labels
+        .provenance_headings
+        .iter()
+        .zip(provenance.iter())
+        .enumerate()
+    {
+        let index = u32::try_from(index).map_err(|_| {
+            pdf_error(
+                "pdf_layout_overflow",
+                "engineering provenance row index exceeded the bounded page layout",
+            )
+        })?;
+        let y = 279.0 - f64::from(index) * 20.0;
+        text_line(&mut content, 7.2, 0.29, 0.35, 0.43, 66.0, y, label)?;
+        text_line(&mut content, 7.2, 0.08, 0.12, 0.18, 126.0, y, hash)?;
+    }
+
+    text_line(
+        &mut content,
+        9.0,
+        0.55,
+        0.16,
+        0.10,
+        48.0,
+        136.0,
+        labels.authority_boundary,
+    )?;
+    text_line(
+        &mut content,
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        119.0,
+        labels.boundary_line_one,
+    )?;
+    text_line(
+        &mut content,
+        8.5,
+        0.27,
+        0.31,
+        0.38,
+        48.0,
+        103.0,
+        labels.boundary_line_two,
+    )?;
+    writeln!(&mut content, "0.78 0.81 0.85 RG 0.5 w 48 72 m 547 72 l S")
+        .expect("String writes cannot fail");
+    text_line(
+        &mut content,
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        48.0,
+        54.0,
+        labels.footer,
+    )?;
+    text_line(
+        &mut content,
+        7.5,
+        0.42,
+        0.46,
+        0.52,
+        505.0,
+        54.0,
+        labels.page,
+    )?;
+
+    let content_object = stream_object(content.as_bytes(), None);
+    let widths = font_widths()?;
+    let to_unicode = build_to_unicode_cmap()?;
+    let font_file_object = stream_object(
+        LOCALIZED_FONT_BYTES,
+        Some(&format!("/Length1 {LOCALIZED_FONT_BYTE_LENGTH}")),
+    );
+    let to_unicode_object = stream_object(to_unicode.as_bytes(), None);
+    let title = pdf_literal("Localized ModelIR Linear Engineering Report")?;
+    let subject = pdf_literal("ModelIR linear deterministic engineering summary")?;
+    let producer = pdf_literal("structural-report 0.1.0 native localized PDF renderer")?;
+    let objects = vec![
+        format!(
+            "<< /Type /Catalog /Pages 2 0 R /Lang ({}) /ViewerPreferences << /DisplayDocTitle true >> >>\n",
+            locale.language_tag()
+        )
+        .into_bytes(),
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>\n".to_vec(),
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>\n".to_vec(),
+        content_object,
+        format!(
+            "<< /Type /Font /Subtype /Type0 /BaseFont /{LOCALIZED_FONT_POSTSCRIPT_NAME} /Encoding /Identity-H /DescendantFonts [6 0 R] /ToUnicode 9 0 R >>\n"
+        )
+        .into_bytes(),
+        format!(
+            "<< /Type /Font /Subtype /CIDFontType2 /BaseFont /{LOCALIZED_FONT_POSTSCRIPT_NAME} /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> /FontDescriptor 7 0 R /DW 1000 /W [1 [{widths}]] /CIDToGIDMap /Identity >>\n"
+        )
+        .into_bytes(),
+        format!(
+            "<< /Type /FontDescriptor /FontName /{LOCALIZED_FONT_POSTSCRIPT_NAME} /Flags 4 /FontBBox [9 -198 1005 785] /ItalicAngle 0 /Ascent 920 /Descent -230 /CapHeight 700 /StemV 80 /FontFile2 8 0 R >>\n"
+        )
+        .into_bytes(),
+        font_file_object,
+        to_unicode_object,
+        format!("<< /Title ({title}) /Subject ({subject}) /Creator ({producer}) /Producer ({producer}) /Trapped /False >>\n").into_bytes(),
+    ];
+    let identity = sha256_identity(
+        format!(
+            "modelir-linear-engineering|{}|{}|{}|{}|{}",
+            result.result_hash(),
+            recovery.recovery_hash(),
+            reaction.result_hash(),
+            locale.language_tag(),
+            LOCALIZED_FONT_HASH
+        )
+        .as_bytes(),
+    );
+    assemble_pdf(&objects, &identity)
+}
+
+fn engineering_extrema(
+    recovery: &structural_contracts::model_linear_recovery::ModelIrLinearResultRecoveryIrV1,
+) -> Result<EngineeringExtrema, PdfRenderError> {
+    const FRAME_COMPONENTS: [&str; 12] = [
+        "Fx_i", "Fy_i", "Fz_i", "Mx_i", "My_i", "Mz_i", "Fx_j", "Fy_j", "Fz_j", "Mx_j", "My_j",
+        "Mz_j",
+    ];
+    let mut extrema = EngineeringExtrema::default();
+    for (position, (&stable_index, &element_type)) in recovery
+        .recovery_stable_indices
+        .iter()
+        .zip(&recovery.recovery_element_types)
+        .enumerate()
+    {
+        let begin = usize::try_from(recovery.recovery_offsets[position]).map_err(|_| {
+            binding_error(
+                "pdf_engineering_recovery_invalid",
+                "/recovery/recovery_offsets",
+                "recovery offset does not fit the native address space",
+            )
+        })?;
+        let end = usize::try_from(recovery.recovery_offsets[position + 1]).map_err(|_| {
+            binding_error(
+                "pdf_engineering_recovery_invalid",
+                "/recovery/recovery_offsets",
+                "recovery offset does not fit the native address space",
+            )
+        })?;
+        let values = recovery.recovery_values.get(begin..end).ok_or_else(|| {
+            binding_error(
+                "pdf_engineering_recovery_invalid",
+                "/recovery/recovery_values",
+                "recovery offsets exceed the value array",
+            )
+        })?;
+        match element_type {
+            1 if values.len() == 12 => {
+                extrema.frame_count += 1;
+                for (component_index, (&value, &component)) in
+                    values.iter().zip(FRAME_COMPONENTS.iter()).enumerate()
+                {
+                    let target = match component_index % 6 {
+                        0 => &mut extrema.axial_force,
+                        1 | 2 => &mut extrema.shear_force,
+                        3 => &mut extrema.torsional_moment,
+                        4 | 5 => &mut extrema.bending_moment,
+                        _ => unreachable!("Frame3D component index is modulo six"),
+                    };
+                    update_extreme(target, value, stable_index, component);
+                }
+            }
+            2 if values.len() == 3 => {
+                extrema.truss_count += 1;
+                update_extreme(
+                    &mut extrema.truss_axial_force,
+                    values[2],
+                    stable_index,
+                    "axial_force",
+                );
+            }
+            _ => {
+                return Err(binding_error(
+                    "pdf_engineering_recovery_invalid",
+                    "/recovery/recovery_element_types",
+                    "engineering PDF supports only typed Frame3D and Truss3D recovery records",
+                ))
+            }
+        }
+    }
+    Ok(extrema)
+}
+
+fn update_extreme(
+    target: &mut Option<EngineeringExtreme>,
+    value: f64,
+    stable_index: u32,
+    component: &'static str,
+) {
+    let magnitude = value.abs();
+    if target
+        .as_ref()
+        .map_or(true, |current| magnitude > current.magnitude)
+    {
+        *target = Some(EngineeringExtreme {
+            magnitude,
+            signed_value: value,
+            stable_index,
+            component,
+        });
+    }
+}
+
+fn format_extreme(extreme: Option<EngineeringExtreme>, unit: &str) -> String {
+    extreme.map_or_else(
+        || "unavailable".to_owned(),
+        |value| {
+            format!(
+                "{:.8e} {unit} (element {} / {})",
+                value.signed_value, value.stable_index, value.component
+            )
+        },
+    )
+}
+
+fn reaction_component_extrema(
+    reaction: &structural_contracts::model_linear_reactions::ModelIrLinearReactionResultIrV1,
+) -> (f64, f64) {
+    let mut translation = 0.0_f64;
+    let mut rotation = 0.0_f64;
+    for (&global_dof, &value) in reaction
+        .constrained_dof_indices
+        .iter()
+        .zip(&reaction.reactions)
+    {
+        if global_dof % 6 < 3 {
+            translation = translation.max(value.abs());
+        } else {
+            rotation = rotation.max(value.abs());
+        }
+    }
+    (translation, rotation)
 }
 
 fn font_widths() -> Result<String, PdfRenderError> {

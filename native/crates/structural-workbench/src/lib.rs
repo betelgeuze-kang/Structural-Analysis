@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use structural_cli::{
     execute_external_comparison, execute_localized_pdf_report, execute_model_ir_linear_analysis,
+    execute_model_ir_linear_engineering_localized_pdf_report,
     execute_model_ir_linear_external_comparison, execute_model_ir_native_analysis,
     execute_native_mgt_import, execute_pdf_report, execute_sparse_linear_localized_pdf_report,
     execute_sparse_linear_pdf_report, publish_external_comparison, publish_localized_pdf_report,
@@ -45,6 +46,7 @@ use structural_report::build_sparse_linear_report_v1;
 mod analysis_request;
 mod catalog;
 mod deformed_view;
+mod element_recovery_view;
 mod evidence;
 mod linear_combination;
 mod linear_deformed_view;
@@ -67,6 +69,9 @@ pub use catalog::{
 };
 pub use deformed_view::{
     WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1, WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1,
+};
+pub use element_recovery_view::{
+    WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1,
 };
 pub use evidence::{browse_evidence_bundle, show_evidence_artifact};
 pub use model_edit::{
@@ -1872,6 +1877,109 @@ impl NativeWorkbench {
         )
     }
 
+    /// Return a deterministic bounded window over verified `ModelIR` linear element recovery.
+    ///
+    /// The view maps stable recovery indices back to immutable element identifiers and exposes
+    /// frame3d local end forces or truss3d axial strain, stress, and force without re-execution.
+    ///
+    /// # Errors
+    ///
+    /// Requires a `ModelIR` linear session at terminal or later and rejects receipt drift,
+    /// source-binding drift, family/index mismatch, non-finite values, or an unsafe window.
+    pub fn model_ir_linear_element_recovery_view_text(
+        &self,
+        start_element: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
+        self.model_ir_linear_element_recovery_view_text_localized(
+            WorkbenchReportLocaleV1::EnUs,
+            start_element,
+            count,
+        )
+    }
+
+    /// Return a localized deterministic bounded element-recovery window.
+    ///
+    /// Locale changes presentation labels only. Exact FP64 recovery components, element mapping,
+    /// units, coordinate frames, execution receipt, and provenance identities remain visible.
+    ///
+    /// # Errors
+    ///
+    /// Requires the same verified terminal artifact set as the English element recovery view.
+    pub fn model_ir_linear_element_recovery_view_text_localized(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        start_element: u32,
+        count: u32,
+    ) -> Result<String, WorkbenchError> {
+        if self.session.analysis_profile != Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) {
+            return Err(WorkbenchError::new(
+                "workbench_profile_unsupported",
+                "element recovery view is available only for the ModelIR linear CPU profile",
+            ));
+        }
+        if self.session.stage < WorkbenchStageV1::Terminal {
+            return Err(WorkbenchError::new(
+                "workbench_transition_invalid",
+                format!(
+                    "terminal or later is required but the durable stage is {}",
+                    self.session.stage.label()
+                ),
+            ));
+        }
+        let terminal = self.root.join(RESUME_DIRECTORY);
+        verify_receipt_directory(&terminal, "run-receipt.json")?;
+        let result_bytes = read_bounded_regular_file(
+            &terminal.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &terminal.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes).map_err(|error| {
+            input_error("workbench_element_recovery_view_result_invalid", &error)
+        })?;
+        let recovery =
+            parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes).map_err(|error| {
+                input_error("workbench_element_recovery_view_recovery_invalid", &error)
+            })?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery).map_err(|error| {
+            input_error("workbench_element_recovery_view_recovery_invalid", &error)
+        })?;
+        let model_bytes = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
+        let validation = validate_model_bytes(&model_bytes).map_err(|error| {
+            input_error("workbench_element_recovery_view_validation_failed", &error)
+        })?;
+        if !validation.report.contract_valid || !validation.report.semantics_valid {
+            return Err(WorkbenchError::new(
+                "workbench_element_recovery_view_model_invalid",
+                "native C++ validation rejected the immutable ModelIR",
+            ));
+        }
+        let model = parse_model_ir_v2(&model_bytes).map_err(|error| {
+            input_error("workbench_element_recovery_view_model_invalid", &error)
+        })?;
+        if validation.report.model_id != model.model_id()
+            || validation.report.content_hash != model.content_hash()
+            || validation.report.semantic_hash != model.semantic_hash()
+            || validation.report.provenance_hash != model.provenance_hash()
+        {
+            return Err(WorkbenchError::new(
+                "workbench_element_recovery_view_binding_mismatch",
+                "Rust ModelIR identities differ from the native C++ semantic validation report",
+            ));
+        }
+        element_recovery_view::render_model_ir_linear_element_recovery_view(
+            &model,
+            result.result(),
+            recovery.recovery(),
+            locale,
+            start_element,
+            count,
+        )
+    }
+
     /// Return a deterministic original/deformed centerline overlay for a verified linear result.
     ///
     /// The view revalidates the immutable `ModelIR` through the native C++ boundary, applies only
@@ -2420,6 +2528,14 @@ impl NativeWorkbench {
             &report_directory.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
+        let recovery = read_bounded_regular_file(
+            &report_directory.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reaction = read_optional_bounded_regular_file(
+            &report_directory.join("reaction-result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
         let report = read_bounded_regular_file(
             &report_directory.join("report-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -2450,9 +2566,14 @@ impl NativeWorkbench {
             WorkbenchReportLocaleV1::EnUs => PdfReportLocaleV2::EnUs,
             WorkbenchReportLocaleV1::KoKr => PdfReportLocaleV2::KoKr,
         };
-        let outcome =
+        let outcome = if let Some(reaction) = reaction.as_deref() {
+            execute_model_ir_linear_engineering_localized_pdf_report(
+                &result, &recovery, reaction, &report, &document, locale,
+            )
+        } else {
             execute_sparse_linear_localized_pdf_report(&result, &report, &document, locale)
-                .map_err(|error| input_error("workbench_localized_pdf_render_failed", &error))?;
+        }
+        .map_err(|error| input_error("workbench_localized_pdf_render_failed", &error))?;
         publish_localized_pdf_report(output_directory, &outcome)
             .map_err(|error| input_error("workbench_localized_pdf_publish_failed", &error))?;
         Ok(outcome.receipt_json().to_owned())

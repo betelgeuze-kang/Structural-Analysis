@@ -34,6 +34,8 @@ REQUIRED_TOKENS = {
         "linear_report_text",
         "model_ir_linear_nodal_displacement_view_text",
         "model_ir_linear_nodal_displacement_view_text_localized",
+        "model_ir_linear_element_recovery_view_text",
+        "model_ir_linear_element_recovery_view_text_localized",
         "model_ir_linear_deformed_shape_view_text",
         "model_ir_linear_deformed_shape_view_text_localized",
         "deformed_shape_view_text_localized",
@@ -94,6 +96,17 @@ REQUIRED_TOKENS = {
         "workbench_nodal_displacement_view_window_invalid",
         "workbench_nodal_displacement_view_unsafe",
         "not a deformed-shape, stress, contour, modal",
+    ),
+    "native/crates/structural-workbench/src/element_recovery_view.rs": (
+        "structural-native-workbench-model-ir-linear-element-recovery-view.v1",
+        "WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1",
+        "verify_model_identity",
+        "Element ID",
+        "frame3d=element_local",
+        "axial_stress_Pa",
+        "workbench_element_recovery_view_window_invalid",
+        "workbench_element_recovery_view_unsafe",
+        "not_shell_general_stress_contour_design_utilization",
     ),
     "native/crates/structural-workbench/src/reaction_audit.rs": (
         "structural-native-workbench-model-ir-linear-reaction-audit.v1",
@@ -380,6 +393,7 @@ REQUIRED_TOKENS = {
         'Some("compare")',
         'Some("report")',
         'Some("report-view")',
+        'Some("element-recovery-view")',
         'Some("nodal-displacement-view")',
         'Some("reaction-view")',
         'Some("reaction-audit")',
@@ -473,6 +487,9 @@ REQUIRED_TOKENS = {
         "structural-native-workbench-model-ir-linear-nodal-displacement-view.v1",
         "Korean displacement view hash line",
         "MGT displacement view hash line",
+        "structural-native-workbench-model-ir-linear-element-recovery-view.v1",
+        "Korean element recovery view hash line",
+        "MGT element recovery view hash line",
         "structural-native-workbench-model-ir-linear-deformed-view.v1",
         "Korean linear deformed view hash line",
         "MGT linear deformed view hash line",
@@ -498,6 +515,7 @@ REQUIRED_TOKENS = {
         "bounded NDTHA response-history view",
         "constrained Reaction-view",
         "fixed-guided deformed-shape view",
+        "ModelIR-linear element-recovery view",
         "ModelIR-linear deformed-shape view",
         "embedded-font PDF export",
         "general ModelIR terminal topology view",
@@ -521,6 +539,7 @@ REQUIRED_TOKENS = {
         "en-US",
         "ko-KR",
         "reaction-view",
+        "element-recovery-view",
         "Omitting `--locale` preserves the original `en-US` bytes",
         "append-only distribution v12 receipt",
         "ModelIR-linear clean-environment E2E",
@@ -556,6 +575,21 @@ REQUIRED_TOKENS = {
         "6ead38b73e3a89682178d272df9f230c5d1c5054feaf3de0f75e6f18ddcef675",
         "1f6329b1ec86b487d4f3cb65aeda7cce02b4a2bde4932ac9192be6c7e672f0c9",
         "support-design",
+        "approved HIP C2",
+        "C6 authority",
+    ),
+    "docs/native/modelir-linear-element-recovery-view-v1.md": (
+        "structural-workbench element-recovery-view",
+        "model_ir_linear_cpu_v1",
+        "frame3d local end forces",
+        "truss3d axial strain, stress, and force",
+        "one through 256 elements",
+        "strict ModelIR and normalized MGT linear workflows",
+        "native C++ semantic boundary",
+        "Installed CPU static/shared distribution v89",
+        "Local rootfs diagnostic v12",
+        "Truss3D formatting remains",
+        "general stress contour",
         "approved HIP C2",
         "C6 authority",
     ),
@@ -1386,6 +1420,7 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
     truss_leaf_deletion_row: dict[str, object] = {}
     property_edit_row: dict[str, object] = {}
     nodal_displacement_view_row: dict[str, object] = {}
+    element_recovery_view_row: dict[str, object] = {}
     linear_deformed_view_row: dict[str, object] = {}
     reaction_view_row: dict[str, object] = {}
     reaction_audit_row: dict[str, object] = {}
@@ -1417,6 +1452,9 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         property_edit_row = payload["capabilities"]["modelir_frame_element_properties_edit"]
         nodal_displacement_view_row = payload["capabilities"][
             "modelir_linear_nodal_displacement_view"
+        ]
+        element_recovery_view_row = payload["capabilities"][
+            "modelir_linear_element_recovery_view"
         ]
         linear_deformed_view_row = payload["capabilities"][
             "modelir_linear_deformed_shape_view"
@@ -1460,6 +1498,37 @@ def check_native_workbench(repo_root: Path = ROOT) -> dict[str, object]:
         if token not in nodal_displacement_view_claim:
             blockers.append(
                 f"native_workbench_nodal_displacement_view_claim_token_missing:{token}"
+            )
+    for field, expected in (
+        ("status", "implemented"),
+        ("cutover_gate", "C5"),
+        ("owner", "structural-workbench"),
+    ):
+        if element_recovery_view_row.get(field) != expected:
+            blockers.append(
+                f"native_workbench_element_recovery_view_capability_invalid:{field}"
+            )
+    element_recovery_view_claim = str(element_recovery_view_row.get("claim", ""))
+    for token in (
+        "element-recovery-view",
+        "terminal run receipt",
+        "native C++ semantic boundary",
+        "immutable element identifiers",
+        "frame3d local end forces",
+        "truss3d axial strain, stress, and force",
+        "1 through 256 elements",
+        "byte-identical strict-ModelIR and normalized-MGT direct/restart views",
+        "installed CPU static/shared distribution v89",
+        "local rootfs diagnostic v12",
+        "four distinct strict-ModelIR/normalized-MGT locale identities",
+        "Truss3D row formatting remains source-tested",
+        "general stress contour",
+        "HIP C2",
+        "C6",
+    ):
+        if token not in element_recovery_view_claim:
+            blockers.append(
+                f"native_workbench_element_recovery_view_claim_token_missing:{token}"
             )
     for field, expected in (
         ("status", "implemented"),

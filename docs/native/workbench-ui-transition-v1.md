@@ -569,6 +569,12 @@ subprocess, or an external renderer. The same Rust binary now also provides:
   session unchanged. Its `en-US` and `ko-KR` paths are presentation-only; frozen pre-reaction
   workspaces remain supported and NDTHA sessions fail closed. It is not a deformed-shape, stress,
   contour, modal, serviceability, support-design, or engineering-verdict surface.
+- `element-recovery-view`: a deterministic self-hashed ANSI-free 1..256-element table over one
+  verified ModelIR linear recovery. It C++-revalidates the immutable model, maps stable recovery
+  indices to element IDs and two-node connectivity, exposes exact frame3d local end forces or
+  truss3d axial strain/stress/force with fixed SI units and coordinate frames, and leaves the
+  session unchanged. Its `en-US` and `ko-KR` paths are presentation-only. It is not a shell or
+  general stress contour, design-utilization, support-design, or engineering-verdict surface.
 - `reaction-audit`: a deterministic self-hashed ANSI-free algebraic global-resultant audit over
   the verified ModelIR linear generalized external-load and constrained-reaction partitions. It
   independently closes force, global-origin moment and active-equation residuals against a fixed
@@ -787,6 +793,14 @@ The bounded ModelIR linear constrained-reaction view is C5-implemented for exact
 internal/external/reaction components and mixed units in one-based windows of at most 256 rows.
 It closes read-only reaction inspection for the current CPU linear profile, not equilibrium audit,
 support design, general stress/contour/modal exploration, engineering acceptance, or C6.
+
+The bounded ModelIR linear element-recovery view is C5-implemented for strict ModelIR and exact
+normalized MGT CPU-linear workspaces. It revalidates the immutable model through the native C++
+boundary, preserves stable element identity/connectivity, and exposes exact frame3d/truss3d typed
+recovery in a one-based window of at most 256 elements. Installed static/shared v89 and non-root
+read-only rootfs v12 bind the Frame3D locale/profile identities and invalid-window rejection;
+Truss3D installed execution remains open, and shell/general stress contours,
+design utilization, engineering acceptance, HIP C2, and C6 remain open.
 
 The fixed-guided deformed-shape view is C5-implemented for the exact executed one-story adapter
 profile, four fixed projections, and a bounded visual magnification. It closes selected-step

@@ -46,6 +46,7 @@ REQUIRED_TOKENS = {
     ),
     "native/crates/structural-report/src/localized_pdf.rs": (
         "render_sparse_linear_localized_pdf_v2",
+        "render_model_ir_linear_engineering_localized_pdf_v3",
         "verify_exact_sparse_projection",
     ),
     "native/crates/structural-cli/src/report.rs": (
@@ -54,6 +55,8 @@ REQUIRED_TOKENS = {
         "sparse_linear_pdf_report",
         "execute_sparse_linear_localized_pdf_report",
         "structural-native-sparse-linear-localized-pdf-report-receipt.v2",
+        "execute_model_ir_linear_engineering_localized_pdf_report",
+        "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3",
     ),
     "native/crates/structural-workbench/src/lib.rs": (
         "WorkbenchAnalysisProfileV1",
@@ -67,6 +70,7 @@ REQUIRED_TOKENS = {
         "publish_model_ir_linear_pdf_report",
         "execute_sparse_linear_pdf_report",
         "execute_sparse_linear_localized_pdf_report",
+        "execute_model_ir_linear_engineering_localized_pdf_report",
         "export_model_ir_linear_localized_pdf",
         "structural-native-model-ir-linear-pdf-report-receipt.v1",
         "sparse_linear_pdf_report",
@@ -105,7 +109,7 @@ REQUIRED_TOKENS = {
         "Import -> Validate -> Run -> Resume -> Compare -> Report",
         "PDF-ready Markdown",
         "deterministic single-page sparse PDF",
-        "embedded-font localized sparse PDF",
+        "embedded-font localized engineering-summary PDF v3",
         "import-mgt-model-linear",
         "render_sparse_linear_pdf_v1",
         "process death after atomic checkpoint publication",
@@ -147,7 +151,7 @@ def check_model_ir_linear_workbench(repo_root: Path = ROOT) -> dict[str, object]
         "clean-environment process restart",
         "no Python, Node, browser, CLI subprocess",
         "existing fixed-guided NDTHA session and receipt bytes",
-        "embedded-font localized sparse PDF",
+        "embedded-font localized engineering-summary PDF v3",
         "original MGT bytes",
         "import-health",
         "approved protected-runner HIP C2",

@@ -14,7 +14,9 @@ use structural_workbench::{
     WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
     MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
-    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1,
+    WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_REACTION_VIEW_MAX_COUNT_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
@@ -589,6 +591,14 @@ struct NodalDisplacementViewCommand {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct ElementRecoveryViewCommand {
+    workspace: PathBuf,
+    locale: WorkbenchReportLocaleV1,
+    start_element: u32,
+    count: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct ReactionAuditCommand {
     workspace: PathBuf,
     locale: WorkbenchReportLocaleV1,
@@ -896,6 +906,8 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }),
         Some("nodal-displacement-view") => parse_nodal_displacement_view(arguments)
             .and_then(|command| run_nodal_displacement_view(&command)),
+        Some("element-recovery-view") => parse_element_recovery_view(arguments)
+            .and_then(|command| run_element_recovery_view(&command)),
         Some("reaction-view") => {
             parse_reaction_view(arguments).and_then(|command| run_reaction_view(&command))
         }
@@ -971,6 +983,7 @@ fn finish(result: Result<(), WorkbenchError>) -> ExitCode {
                     | "workbench_evidence_artifact_id_invalid"
                     | "workbench_evidence_artifact_not_found"
                     | "workbench_evidence_as_of_invalid"
+                    | "workbench_element_recovery_view_window_invalid"
                     | "workbench_nodal_displacement_view_window_invalid"
                     | "workbench_reaction_view_window_invalid"
                     | "workbench_result_view_window_invalid"
@@ -1055,6 +1068,19 @@ fn run_nodal_displacement_view(
         workbench.model_ir_linear_nodal_displacement_view_text_localized(
             command.locale,
             command.start_node,
+            command.count,
+        )?
+    );
+    Ok(())
+}
+
+fn run_element_recovery_view(command: &ElementRecoveryViewCommand) -> Result<(), WorkbenchError> {
+    let workbench = NativeWorkbench::open(&command.workspace)?;
+    print!(
+        "{}",
+        workbench.model_ir_linear_element_recovery_view_text_localized(
+            command.locale,
+            command.start_element,
             command.count,
         )?
     );
@@ -4747,6 +4773,70 @@ fn parse_nodal_displacement_view(
     })
 }
 
+fn parse_element_recovery_view(
+    arguments: &[OsString],
+) -> Result<ElementRecoveryViewCommand, WorkbenchError> {
+    let mut workspace = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut start_element = 1;
+    let mut start_seen = false;
+    let mut count = WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1;
+    let mut count_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("element-recovery-view option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("element-recovery-view option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("element-recovery-view locale must be en-US or ko-KR")
+                    })?;
+            }
+            "--start-element" if !start_seen => {
+                start_seen = true;
+                start_element = parse_u32(value, "element-recovery-view start element")?;
+                if start_element == 0 {
+                    return Err(usage_error(
+                        "element-recovery-view start element must be at least 1",
+                    ));
+                }
+            }
+            "--count" if !count_seen => {
+                count_seen = true;
+                count = parse_u32(value, "element-recovery-view count")?;
+                if count == 0 || count > WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error(
+                        "element-recovery-view count must be in 1..=256",
+                    ));
+                }
+            }
+            _ => {
+                return Err(usage_error(
+                    "duplicate or unknown element-recovery-view option",
+                ))
+            }
+        }
+        index += 2;
+    }
+    Ok(ElementRecoveryViewCommand {
+        workspace: workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        locale,
+        start_element,
+        count,
+    })
+}
+
 fn parse_reaction_audit(arguments: &[OsString]) -> Result<ReactionAuditCommand, WorkbenchError> {
     let mut workspace = None;
     let mut locale = WorkbenchReportLocaleV1::EnUs;
@@ -5135,6 +5225,7 @@ fn usage() -> &'static str {
         ,
         "\n  structural-workbench reaction-audit --workspace <DIR> [--locale <en-US|ko-KR>]",
         "\n  structural-workbench nodal-displacement-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-node <N>] [--count <1..256>]",
+        "\n  structural-workbench element-recovery-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-element <N>] [--count <1..256>]",
         "\n  structural-workbench model-edit-linear-material-identity-cascade <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-frame-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
         "\n  structural-workbench model-edit-truss-section-identity-cascade <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>",
@@ -5155,12 +5246,12 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_deformed_view, parse_evidence, parse_import,
-        parse_model_add_direct_linear_load_combination_term, parse_model_add_fixed_constraint,
-        parse_model_add_fixed_constraint_dof, parse_model_add_frame3d_member,
-        parse_model_add_frame_section, parse_model_add_linear_load_combination,
-        parse_model_add_linear_load_pattern, parse_model_add_linear_material,
-        parse_model_add_nested_linear_load_combination,
+        parse_catalog, parse_catalog_show, parse_deformed_view, parse_element_recovery_view,
+        parse_evidence, parse_import, parse_model_add_direct_linear_load_combination_term,
+        parse_model_add_fixed_constraint, parse_model_add_fixed_constraint_dof,
+        parse_model_add_frame3d_member, parse_model_add_frame_section,
+        parse_model_add_linear_load_combination, parse_model_add_linear_load_pattern,
+        parse_model_add_linear_material, parse_model_add_nested_linear_load_combination,
         parse_model_add_nested_linear_load_combination_term, parse_model_add_nodal_load,
         parse_model_add_node, parse_model_add_truss3d_member, parse_model_add_truss_section,
         parse_model_create_linear_analysis_request,
@@ -7773,6 +7864,42 @@ mod tests {
             let mut invalid = window.clone();
             invalid[index] = OsString::from(invalid_value);
             assert!(parse_nodal_displacement_view(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn element_recovery_view_parser_has_bounded_locale_and_window_options() {
+        let default = [
+            OsString::from("element-recovery-view"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_element_recovery_view(&default).expect("default element recovery view");
+        assert_eq!(parsed.workspace, PathBuf::from("session"));
+        assert_eq!(parsed.locale.label(), "en-US");
+        assert_eq!(parsed.start_element, 1);
+        assert_eq!(parsed.count, 64);
+
+        let window = [
+            OsString::from("element-recovery-view"),
+            OsString::from("--count"),
+            OsString::from("2"),
+            OsString::from("--start-element"),
+            OsString::from("3"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ];
+        let parsed = parse_element_recovery_view(&window).expect("explicit element window");
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.start_element, 3);
+        assert_eq!(parsed.count, 2);
+
+        for (index, invalid_value) in [(2, "257"), (4, "0"), (6, "ko-kr")] {
+            let mut invalid = window.clone();
+            invalid[index] = OsString::from(invalid_value);
+            assert!(parse_element_recovery_view(&invalid).is_err());
         }
     }
 

@@ -1,6 +1,6 @@
 # Localized terminal result views v1
 
-`structural-workbench` exposes three deterministic terminal result views in the closed locale set
+`structural-workbench` exposes five deterministic terminal result views in the closed locale set
 `en-US` and `ko-KR`:
 
 ```text
@@ -11,6 +11,10 @@ structural-workbench result-deformed-view --workspace <DIR> --locale <en-US|ko-K
   [--projection <isometric|xy|xz|yz>] [--step <N|1>] [--scale <F64>]
 structural-workbench reaction-view --workspace <LINEAR-DIR> --locale <en-US|ko-KR> \
   [--start-row <N>] [--count <1..256>]
+structural-workbench nodal-displacement-view --workspace <LINEAR-DIR> --locale <en-US|ko-KR> \
+  [--start-node <N>] [--count <1..256>]
+structural-workbench element-recovery-view --workspace <LINEAR-DIR> --locale <en-US|ko-KR> \
+  [--start-element <N>] [--count <1..256>]
 ```
 
 Omitting `--locale` preserves the original `en-US` bytes. The public Rust methods without a locale
@@ -21,6 +25,10 @@ snapshot verification, and the fixed-guided adapter execution receipt remain vis
 reaction view additionally preserves actual ModelIR node IDs, constrained global DOFs, exact
 internal/external/reaction components, mixed force/moment units, source result/recovery hashes,
 assembly identity, and its CPU ABI/fallback receipt.
+The nodal-displacement view preserves actual ModelIR node IDs and exact six-component metre/radian
+rows. The element-recovery view preserves actual element IDs, stable indices, two-node
+connectivity, frame3d local end forces, truss3d axial strain/stress/force, fixed SI units and
+coordinate frames, plus the same recovery and execution identities.
 
 All three views are UTF-8, contain no ANSI escape byte, do not depend on color, and append a SHA-256
 identity computed over every preceding output byte. The response view preserves one-based step
@@ -46,6 +54,13 @@ The reaction view's source-level clean-environment E2E separately proves repeate
 bytes, direct/restart parity, one-based windows of at most 256 rows, session nonmutation, legacy
 missing-artifact rejection, wrong-profile rejection, and receipt tamper rejection. Installed
 distribution publication remains an explicit later gate and is not inferred from that test.
+
+The element-recovery view's source-level clean-environment E2E separately proves strict-ModelIR and
+normalized-MGT direct/restart parity, repeated English/Korean labels with identical numeric rows,
+bounded element windows, session nonmutation, preterminal and wrong-profile rejection, and
+receipt/source tamper rejection. Installed static/shared v89 and rootfs v12 now bind the repeated
+Frame3D locale/profile identities and invalid-window rejection; Truss3D installed execution,
+customer publication and release authority remain explicit successor gates.
 
 This is a bounded C5 linear-text result-inspection slice. It is not WCAG conformance, assistive-
 technology certification, general application localization, arbitrary Unicode certification,

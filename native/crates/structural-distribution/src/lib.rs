@@ -36,7 +36,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V7: &str = "structural-native-rootfs-isolati
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V8: &str = "structural-native-rootfs-isolation-e2e.v8";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V9: &str = "structural-native-rootfs-isolation-e2e.v9";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V10: &str = "structural-native-rootfs-isolation-e2e.v10";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v11";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V11: &str = "structural-native-rootfs-isolation-e2e.v11";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v12";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -45,10 +46,11 @@ const ROOTFS_RUNTIME_GID: u32 = 65_532;
 const ROOTFS_REVIEWER: &str = "native-rootfs-c5";
 const ROOTFS_REVIEW_COMMENT: &str =
     "Explicit isolated C5 handoff review; no engineering approval is inferred.";
-const SPARSE_LOCALIZED_PDF_RECEIPT_SCHEMA: &str =
-    "structural-native-sparse-linear-localized-pdf-report-receipt.v2";
-const SPARSE_LOCALIZED_PDF_PROFILE: &str = "sparse_linear_cpu_v1";
-const SPARSE_LOCALIZED_PDF_CLAIM_BOUNDARY: &str = "inventory_for_one_deterministic_bounded_sparse_linear_fixed_en_us_or_ko_kr_embedded_font_candidate_pdf_not_arbitrary_unicode_pdf_ua_accessibility_or_engineering_acceptance";
+const MODEL_IR_ENGINEERING_LOCALIZED_PDF_RECEIPT_SCHEMA: &str =
+    "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3";
+const MODEL_IR_ENGINEERING_LOCALIZED_PDF_PROFILE: &str =
+    "model_ir_linear_cpu_engineering_summary_v1";
+const MODEL_IR_ENGINEERING_LOCALIZED_PDF_CLAIM_BOUNDARY: &str = "inventory_for_one_deterministic_modelir_linear_result_recovery_reaction_bound_engineering_summary_pdf_not_a_complete_member_schedule_force_diagram_pdf_ua_accessibility_engineering_acceptance_or_design_code_compliance";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V1: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V2: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, and handoff export as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V3: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR and MGT Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, and hash-bound copied evidence-bundle browsing as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
@@ -59,7 +61,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V7: &str = "This source-bound local C5 diagn
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V8: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, and deterministic self-hashed en-US/ko-KR constrained-reaction views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR and repeated reaction-view identities through review and handoff export; the strict ModelIR-linear surface also binds a bounded reaction-view window, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear flow also binds original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It does not generate or approve evidence and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, engineering approval, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V9: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, and deterministic self-hashed en-US/ko-KR algebraic global reaction audits as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views and independently verified force, global-origin moment and active-equation numeric closure; both durable sessions remain unmodified and the NDTHA profile is rejected. The MGT-linear audit retains visible nonzero FP64 roundoff within the fixed tolerance policy, original source bytes and normalized import health. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a support-design, stability, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed ModelIR, MGT, ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows plus deterministic inspect, explicit non-promoting review, review reopen, handoff export, embedded benchmark catalog browsing, hash-bound copied evidence-bundle browsing, repeated en-US/ko-KR embedded-font sparse-linear PDF export, deterministic constrained-reaction views, deterministic algebraic global reaction audits, and deterministic self-hashed en-US/ko-KR bounded nodal-displacement views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Both exact linear flows bind typed recovery, constrained-reaction ResultIR, reaction views, reaction audits and exact six-component nodal displacement rows; a strict-ModelIR bounded displacement window is distinct, both durable sessions remain unmodified, and the NDTHA profile is rejected. The MGT-linear evidence retains original source bytes, normalized import health and visible nonzero reaction-audit FP64 roundoff within the fixed tolerance policy. The receipt additionally binds external comparison, deterministic PDF, document source, PDF/report receipts, localized PDF identities, exact installed font/license/provenance and durable-session nonmutation. It is not a deformed-shape, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded two-node original/deformed centerline projections as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The view applies recovered UX/UY/UZ translation at a fixed visual scale, reports but does not apply RX/RY/RZ, binds backend and all model/result/recovery/execution identities, proves repeated output from resumed durable terminal sessions, preserves both sessions, distinguishes a strict-ModelIR alternate projection and rejects invalid linear state selection. It retains all v10 reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. It is not member curvature, rigid-offset rotation, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded two-node original/deformed centerline projections as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The view applies recovered UX/UY/UZ translation at a fixed visual scale, reports but does not apply RX/RY/RZ, binds backend and all model/result/recovery/execution identities, proves repeated output from resumed durable terminal sessions, preserves both sessions, distinguishes a strict-ModelIR alternate projection and rejects invalid linear state selection. It retains all v10 reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. It is not member curvature, rigid-offset rotation, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded Frame3D element-local end-force views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Each installed view binds typed recovery, backend and all model/result/recovery/execution identities, proves repeated output and direct/resumed parity, preserves both durable sessions, and rejects an out-of-range element window. It retains all v11 deformed, reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. Truss3D row formatting remains source-tested but is not independently exercised by this installed receipt; it is not shell, general stress, contour, design utilization, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -207,6 +210,15 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub mgt_model_ir_linear_deformed_view_ko_kr_first: &'a Path,
     pub mgt_model_ir_linear_deformed_view_ko_kr_second: &'a Path,
     pub workbench_linear_deformed_view_invalid_step_failure: &'a Path,
+    pub model_ir_linear_element_recovery_view_en_us_first: &'a Path,
+    pub model_ir_linear_element_recovery_view_en_us_second: &'a Path,
+    pub model_ir_linear_element_recovery_view_ko_kr_first: &'a Path,
+    pub model_ir_linear_element_recovery_view_ko_kr_second: &'a Path,
+    pub mgt_model_ir_linear_element_recovery_view_en_us_first: &'a Path,
+    pub mgt_model_ir_linear_element_recovery_view_en_us_second: &'a Path,
+    pub mgt_model_ir_linear_element_recovery_view_ko_kr_first: &'a Path,
+    pub mgt_model_ir_linear_element_recovery_view_ko_kr_second: &'a Path,
+    pub workbench_linear_element_recovery_view_invalid_window_failure: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -625,6 +637,28 @@ pub struct RootfsIsolationReceiptV11 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV12 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV11,
+    pub model_ir_linear_element_recovery_view_surface_passed: bool,
+    pub model_ir_linear_element_recovery_view_en_us_sha256: String,
+    pub model_ir_linear_element_recovery_view_ko_kr_sha256: String,
+    pub mgt_model_ir_linear_element_recovery_view_surface_passed: bool,
+    pub mgt_model_ir_linear_element_recovery_view_en_us_sha256: String,
+    pub mgt_model_ir_linear_element_recovery_view_ko_kr_sha256: String,
+    pub workbench_linear_element_recovery_view_invalid_window_rejected: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV12 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV12,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -639,6 +673,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V9(Box<RootfsIsolationReceiptV9>),
     V10(Box<RootfsIsolationReceiptV10>),
     V11(Box<RootfsIsolationReceiptV11>),
+    V12(Box<RootfsIsolationReceiptV12>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -927,7 +962,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV11, DistributionError> {
+) -> Result<RootfsIsolationReceiptV12, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1174,6 +1209,12 @@ pub fn create_rootfs_isolation_receipt(
         &mgt_model_ir_linear_root,
         request,
     )?;
+    let linear_element_recovery_view_surface = inspect_rootfs_linear_element_recovery_view_surface(
+        &workspace,
+        &model_ir_linear_root,
+        &mgt_model_ir_linear_root,
+        request,
+    )?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
@@ -1385,7 +1426,7 @@ pub fn create_rootfs_isolation_receipt(
         workbench_nodal_displacement_view_wrong_profile_rejected: true,
     };
     validate_rootfs_isolation_evidence_v10(&evidence_v10)?;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11.clone_into(
         &mut evidence_v10
             .prior
             .prior
@@ -1395,7 +1436,7 @@ pub fn create_rootfs_isolation_receipt(
             .prior
             .claim_boundary,
     );
-    let evidence = RootfsIsolationEvidenceV11 {
+    let mut evidence_v11 = RootfsIsolationEvidenceV11 {
         prior: evidence_v10,
         model_ir_linear_deformed_view_surface_passed: true,
         model_ir_linear_deformed_view_en_us_sha256: linear_deformed_view_surface.model_en_us,
@@ -1407,7 +1448,33 @@ pub fn create_rootfs_isolation_receipt(
         mgt_model_ir_linear_deformed_view_ko_kr_sha256: linear_deformed_view_surface.mgt_ko_kr,
         workbench_linear_deformed_view_invalid_step_rejected: true,
     };
-    validate_rootfs_isolation_evidence_v11(&evidence)?;
+    validate_rootfs_isolation_evidence_v11(&evidence_v11)?;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        &mut evidence_v11
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    let evidence = RootfsIsolationEvidenceV12 {
+        prior: evidence_v11,
+        model_ir_linear_element_recovery_view_surface_passed: true,
+        model_ir_linear_element_recovery_view_en_us_sha256: linear_element_recovery_view_surface
+            .model_en_us,
+        model_ir_linear_element_recovery_view_ko_kr_sha256: linear_element_recovery_view_surface
+            .model_ko_kr,
+        mgt_model_ir_linear_element_recovery_view_surface_passed: true,
+        mgt_model_ir_linear_element_recovery_view_en_us_sha256:
+            linear_element_recovery_view_surface.mgt_en_us,
+        mgt_model_ir_linear_element_recovery_view_ko_kr_sha256:
+            linear_element_recovery_view_surface.mgt_ko_kr,
+        workbench_linear_element_recovery_view_invalid_window_rejected: true,
+    };
+    validate_rootfs_isolation_evidence_v12(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -1715,7 +1782,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V10(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V11) => {
             let receipt: RootfsIsolationReceiptV11 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v11(&receipt.evidence)?;
@@ -1732,6 +1799,33 @@ pub fn verify_rootfs_isolation_receipt(
                 &base.workbench_version,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V11(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV12 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v12(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            let base = &receipt
+                .evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &base.release_id,
+                &base.source_sha256,
+                &base.bundle_manifest_hash,
+                &base.bundle_manifest_file_sha256,
+                &base.installer_sha256,
+                &base.workbench_sha256,
+                &base.workbench_version,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V12(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -2464,6 +2558,29 @@ struct LinearDeformedViewProbe<'a> {
     ko_kr_first: &'a Path,
     ko_kr_second: &'a Path,
     alternate_projection: Option<&'a Path>,
+}
+
+struct LinearElementRecoveryViewSurfaceSummary {
+    model_en_us: String,
+    model_ko_kr: String,
+    mgt_en_us: String,
+    mgt_ko_kr: String,
+}
+
+#[derive(Debug)]
+struct LinearElementRecoveryViewArtifact {
+    bytes: Vec<u8>,
+    sha256: String,
+}
+
+struct LinearElementRecoveryViewProbe<'a> {
+    label: &'a str,
+    workbench_root: &'a Path,
+    session_before: &'a Path,
+    en_us_first: &'a Path,
+    en_us_second: &'a Path,
+    ko_kr_first: &'a Path,
+    ko_kr_second: &'a Path,
 }
 
 struct ReactionAuditSurfaceSummary {
@@ -3517,6 +3634,339 @@ fn inspect_rootfs_linear_deformed_view_surface(
     })
 }
 
+#[allow(clippy::too_many_lines)] // Keep independent fail-closed artifact checks auditable.
+fn inspect_linear_element_recovery_view_artifact(
+    workspace: &Path,
+    path: &Path,
+    locale: &str,
+    label: &str,
+) -> Result<LinearElementRecoveryViewArtifact, DistributionError> {
+    let bytes = read_direct_workspace_file(workspace, path, label)?;
+    if bytes.contains(&0x1b) {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_unsafe",
+            format!("{label} contains an ANSI escape byte"),
+        ));
+    }
+    let text = std::str::from_utf8(&bytes).map_err(|_| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_invalid",
+            format!("{label} must be UTF-8"),
+        )
+    })?;
+    let unsigned = text.strip_suffix('\n').ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_noncanonical",
+            format!("{label} must end with one newline"),
+        )
+    })?;
+    let final_line_start = unsigned.rfind('\n').map_or(0, |position| position + 1);
+    let final_line = &unsigned[final_line_start..];
+    let (hash_label, required_lines, identity_labels) = match locale {
+        "en-US" => (
+            "View hash: ",
+            [
+                "Schema: structural-native-workbench-model-ir-linear-element-recovery-view.v1",
+                "Locale: en-US",
+                "Authority: bounded candidate",
+                "Profile: model_ir_linear_cpu_v1",
+                "Selected state: 1 of 1 (terminal linear static)",
+                "Elements: 1",
+                "Displayed elements: 1-1 of 1",
+                "Frame3d components: i_FX/i_FY/i_FZ/j_FX/j_FY/j_FZ=N; i_MX/i_MY/i_MZ/j_MX/j_MY/j_MZ=N*m",
+                "Truss3d components: axial_strain=1; axial_stress=Pa; axial_force=N",
+                "Coordinate frames: frame3d=element_local; truss3d=element_axis",
+            ],
+            [
+                "Model content hash",
+                "Model semantic hash",
+                "Model provenance hash",
+                "Source result hash",
+                "Recovery hash",
+                "Analysis request hash",
+                "Assembly hash",
+                "Sparse request hash",
+                "Sparse model hash",
+                "State hash",
+                "Execution hash",
+                "Checkpoint hash",
+            ],
+        ),
+        "ko-KR" => (
+            "보기 해시: ",
+            [
+                "스키마: structural-native-workbench-model-ir-linear-element-recovery-view.v1",
+                "로케일: ko-KR",
+                "권한: 제한된 후보",
+                "프로파일: model_ir_linear_cpu_v1",
+                "선택 상태: 1 of 1 (terminal linear static)",
+                "요소: 1",
+                "표시 요소: 1-1 of 1",
+                "Frame3d 성분: i_FX/i_FY/i_FZ/j_FX/j_FY/j_FZ=N; i_MX/i_MY/i_MZ/j_MX/j_MY/j_MZ=N*m",
+                "Truss3d 성분: axial_strain=1; axial_stress=Pa; axial_force=N",
+                "좌표계: frame3d=element_local; truss3d=element_axis",
+            ],
+            [
+                "모델 콘텐츠 해시",
+                "모델 의미 해시",
+                "모델 출처 해시",
+                "소스 결과 해시",
+                "복원 해시",
+                "분석 요청 해시",
+                "조립 해시",
+                "희소 요청 해시",
+                "희소 모델 해시",
+                "상태 해시",
+                "실행 해시",
+                "체크포인트 해시",
+            ],
+        ),
+        _ => {
+            return Err(DistributionError::new(
+                "rootfs_linear_element_recovery_view_invalid",
+                "element recovery view locale contract is unsupported",
+            ));
+        }
+    };
+    let declared_hash = final_line.strip_prefix(hash_label).ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_hash_missing",
+            format!("{label} has no terminal self-hash"),
+        )
+    })?;
+    validate_sha256_identity(
+        declared_hash,
+        "rootfs linear element recovery view self-hash",
+    )?;
+    if declared_hash != sha256_identity(&bytes[..final_line_start]) {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_hash_mismatch",
+            format!("{label} self-hash does not verify"),
+        ));
+    }
+    if required_lines
+        .iter()
+        .any(|required| !text.lines().any(|line| line == *required))
+        || !text.contains("fallback 0")
+        || !text.contains("H2D 0 / D2H 0 / sync 0")
+        || !text.contains("bounded_read_only_modelir_linear_frame3d_local_end_force_and_truss3d_axis_strain_stress_force_projection_not_shell_general_stress_contour_design_utilization_support_design_engineering_acceptance_or_code_compliance")
+        || contains_nonfinite_number_token(text)
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_contract_invalid",
+            format!("{label} does not expose the exact bounded element recovery contract"),
+        ));
+    }
+    for identity_label in identity_labels {
+        let prefix = format!("{identity_label}: ");
+        let identity = text
+            .lines()
+            .find_map(|line| line.strip_prefix(&prefix))
+            .ok_or_else(|| {
+                DistributionError::new(
+                    "rootfs_linear_element_recovery_view_identity_missing",
+                    format!("{label} omits {identity_label}"),
+                )
+            })?;
+        validate_sha256_identity(identity, "rootfs element recovery bound identity")?;
+    }
+    let rows = text
+        .lines()
+        .filter(|line| {
+            let bytes = line.as_bytes();
+            bytes.len() >= 7 && bytes[..6].iter().all(u8::is_ascii_digit) && bytes[6] == b'\t'
+        })
+        .collect::<Vec<_>>();
+    if rows.len() != 1 {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_row_invalid",
+            format!("{label} must contain exactly one bounded element row"),
+        ));
+    }
+    let fields = rows[0].split('\t').collect::<Vec<_>>();
+    let component_names = [
+        "i_FX_N", "i_FY_N", "i_FZ_N", "i_MX_N_m", "i_MY_N_m", "i_MZ_N_m", "j_FX_N", "j_FY_N",
+        "j_FZ_N", "j_MX_N_m", "j_MY_N_m", "j_MZ_N_m",
+    ];
+    let component_values = fields
+        .get(6)
+        .map(|value| value.split(';').collect::<Vec<_>>())
+        .unwrap_or_default();
+    let components_valid = component_values.len() == component_names.len()
+        && component_values
+            .iter()
+            .zip(component_names)
+            .all(|(component, expected_name)| {
+                component.split_once('=').is_some_and(|(name, value)| {
+                    name == expected_name && value.parse::<f64>().is_ok_and(f64::is_finite)
+                })
+            });
+    if fields.len() != 7
+        || fields[0] != "000001"
+        || fields[1].is_empty()
+        || fields[2] != "0000000000"
+        || fields[3] != "frame_3d"
+        || !fields[4].contains("->")
+        || fields[5] != "element_local"
+        || !components_valid
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_row_invalid",
+            format!("{label} has an invalid Frame3D recovery row"),
+        ));
+    }
+    Ok(LinearElementRecoveryViewArtifact {
+        sha256: sha256_identity(&bytes),
+        bytes,
+    })
+}
+
+fn inspect_linear_element_recovery_view_probe(
+    workspace: &Path,
+    probe: &LinearElementRecoveryViewProbe<'_>,
+) -> Result<(String, String), DistributionError> {
+    let session_before = read_direct_workspace_file(
+        workspace,
+        probe.session_before,
+        &format!("{} pre-element-recovery-view session", probe.label),
+    )?;
+    let session_after = read_bounded_regular_file(
+        &probe.workbench_root.join("workbench-session.json"),
+        MAX_MANIFEST_BYTES,
+    )?;
+    if session_before != session_after {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_session_mutated",
+            format!("{} element recovery view mutated its session", probe.label),
+        ));
+    }
+    let inspect = |path, locale, suffix| {
+        inspect_linear_element_recovery_view_artifact(
+            workspace,
+            path,
+            locale,
+            &format!("{} {locale} {suffix} element recovery view", probe.label),
+        )
+    };
+    let en_us_first = inspect(probe.en_us_first, "en-US", "first")?;
+    let en_us_second = inspect(probe.en_us_second, "en-US", "second")?;
+    let ko_kr_first = inspect(probe.ko_kr_first, "ko-KR", "first")?;
+    let ko_kr_second = inspect(probe.ko_kr_second, "ko-KR", "second")?;
+    if en_us_first.bytes != en_us_second.bytes || ko_kr_first.bytes != ko_kr_second.bytes {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_determinism_failed",
+            format!("{} repeated element recovery views differ", probe.label),
+        ));
+    }
+    if en_us_first.sha256 == ko_kr_first.sha256 {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_locale_collision",
+            format!("{} element recovery view locales collide", probe.label),
+        ));
+    }
+    Ok((en_us_first.sha256, ko_kr_first.sha256))
+}
+
+fn inspect_linear_element_recovery_view_invalid_window_failure(
+    workspace: &Path,
+    path: &Path,
+) -> Result<(), DistributionError> {
+    let bytes =
+        read_direct_workspace_file(workspace, path, "invalid-window element recovery failure")?;
+    let canonical = bytes.strip_suffix(b"\n").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_failure_noncanonical",
+            "invalid-window element recovery failure must be one JSON line",
+        )
+    })?;
+    let value = structural_contracts::model_ir::decode_json_strict(canonical).map_err(|error| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_failure_invalid",
+            format!("invalid-window element recovery failure is invalid JSON: {error}"),
+        )
+    })?;
+    let object = value.as_object().ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_linear_element_recovery_view_failure_invalid",
+            "invalid-window element recovery failure must be an object",
+        )
+    })?;
+    let actual = object.keys().map(String::as_str).collect::<BTreeSet<_>>();
+    let expected = ["code", "detail", "schema_version"]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    if actual != expected
+        || value
+            .get("schema_version")
+            .and_then(serde_json::Value::as_str)
+            != Some("structural-native-workbench-failure.v1")
+        || value.get("code").and_then(serde_json::Value::as_str)
+            != Some("workbench_element_recovery_view_window_invalid")
+        || value
+            .get("detail")
+            .and_then(serde_json::Value::as_str)
+            .map_or(true, str::is_empty)
+        || compact_operator_json(&value)? != canonical
+    {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_failure_invalid",
+            "invalid-window element recovery failure does not match the fail-closed contract",
+        ));
+    }
+    Ok(())
+}
+
+fn inspect_rootfs_linear_element_recovery_view_surface(
+    workspace: &Path,
+    model_ir_linear_root: &Path,
+    mgt_model_ir_linear_root: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<LinearElementRecoveryViewSurfaceSummary, DistributionError> {
+    let model = inspect_linear_element_recovery_view_probe(
+        workspace,
+        &LinearElementRecoveryViewProbe {
+            label: "ModelIR linear",
+            workbench_root: model_ir_linear_root,
+            session_before: request.model_ir_linear_workbench_session_before_reaction_view,
+            en_us_first: request.model_ir_linear_element_recovery_view_en_us_first,
+            en_us_second: request.model_ir_linear_element_recovery_view_en_us_second,
+            ko_kr_first: request.model_ir_linear_element_recovery_view_ko_kr_first,
+            ko_kr_second: request.model_ir_linear_element_recovery_view_ko_kr_second,
+        },
+    )?;
+    let mgt = inspect_linear_element_recovery_view_probe(
+        workspace,
+        &LinearElementRecoveryViewProbe {
+            label: "normalized-MGT linear",
+            workbench_root: mgt_model_ir_linear_root,
+            session_before: request.mgt_model_ir_linear_workbench_session_before_reaction_view,
+            en_us_first: request.mgt_model_ir_linear_element_recovery_view_en_us_first,
+            en_us_second: request.mgt_model_ir_linear_element_recovery_view_en_us_second,
+            ko_kr_first: request.mgt_model_ir_linear_element_recovery_view_ko_kr_first,
+            ko_kr_second: request.mgt_model_ir_linear_element_recovery_view_ko_kr_second,
+        },
+    )?;
+    inspect_linear_element_recovery_view_invalid_window_failure(
+        workspace,
+        request.workbench_linear_element_recovery_view_invalid_window_failure,
+    )?;
+    let identities = [&model.0, &model.1, &mgt.0, &mgt.1]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+    if identities.len() != 4 {
+        return Err(DistributionError::new(
+            "rootfs_linear_element_recovery_view_profile_collision",
+            "linear element recovery view locale or profile identities collide",
+        ));
+    }
+    Ok(LinearElementRecoveryViewSurfaceSummary {
+        model_en_us: model.0,
+        model_ko_kr: model.1,
+        mgt_en_us: mgt.0,
+        mgt_ko_kr: mgt.1,
+    })
+}
+
 #[allow(clippy::too_many_lines)]
 fn inspect_reaction_audit_artifact(
     workspace: &Path,
@@ -3821,7 +4271,7 @@ fn require_exact_json_keys(
 }
 
 #[allow(clippy::too_many_lines)]
-fn inspect_sparse_localized_pdf_output(
+fn inspect_model_ir_engineering_localized_pdf_output(
     workspace: &Path,
     payload_root: &Path,
     output_root: &Path,
@@ -3834,13 +4284,13 @@ fn inspect_sparse_localized_pdf_output(
     let receipt: serde_json::Value = serde_json::from_slice(&receipt_bytes).map_err(|error| {
         DistributionError::new(
             "rootfs_localized_pdf_receipt_invalid",
-            format!("localized sparse PDF receipt is invalid JSON: {error}"),
+            format!("localized ModelIR engineering PDF receipt is invalid JSON: {error}"),
         )
     })?;
     if compact_operator_json(&receipt)? != receipt_bytes {
         return Err(DistributionError::new(
             "rootfs_localized_pdf_receipt_noncanonical",
-            "localized sparse PDF receipt is not canonical JSON",
+            "localized ModelIR engineering PDF receipt is not canonical JSON",
         ));
     }
     require_exact_json_keys(
@@ -3857,41 +4307,63 @@ fn inspect_sparse_localized_pdf_output(
             "profile",
             "receipt_hash",
             "schema_version",
+            "source_reaction_hash",
+            "source_recovery_hash",
             "source_report_hash",
             "source_result_hash",
         ],
-        "localized sparse PDF receipt",
+        "localized ModelIR engineering PDF receipt",
     )?;
-    verify_operator_self_hash(&receipt, "receipt_hash", "localized sparse PDF receipt")?;
-    let exact_profile =
-        require_operator_string(&receipt, "schema_version", "localized sparse PDF receipt")?
-            == SPARSE_LOCALIZED_PDF_RECEIPT_SCHEMA
-            && require_operator_string(&receipt, "profile", "localized sparse PDF receipt")?
-                == SPARSE_LOCALIZED_PDF_PROFILE
-            && require_operator_string(&receipt, "locale", "localized sparse PDF receipt")?
-                == locale
-            && require_operator_string(&receipt, "claim_boundary", "localized sparse PDF receipt")?
-                == SPARSE_LOCALIZED_PDF_CLAIM_BOUNDARY;
+    verify_operator_self_hash(
+        &receipt,
+        "receipt_hash",
+        "localized ModelIR engineering PDF receipt",
+    )?;
+    let exact_profile = require_operator_string(
+        &receipt,
+        "schema_version",
+        "localized ModelIR engineering PDF receipt",
+    )? == MODEL_IR_ENGINEERING_LOCALIZED_PDF_RECEIPT_SCHEMA
+        && require_operator_string(
+            &receipt,
+            "profile",
+            "localized ModelIR engineering PDF receipt",
+        )? == MODEL_IR_ENGINEERING_LOCALIZED_PDF_PROFILE
+        && require_operator_string(
+            &receipt,
+            "locale",
+            "localized ModelIR engineering PDF receipt",
+        )? == locale
+        && require_operator_string(
+            &receipt,
+            "claim_boundary",
+            "localized ModelIR engineering PDF receipt",
+        )? == MODEL_IR_ENGINEERING_LOCALIZED_PDF_CLAIM_BOUNDARY;
     if !exact_profile {
         return Err(DistributionError::new(
             "rootfs_localized_pdf_receipt_invalid",
-            "localized sparse PDF receipt profile, locale, or authority boundary is invalid",
+            "localized ModelIR engineering PDF receipt profile, locale, or authority boundary is invalid",
         ));
     }
     for field in [
         "source_result_hash",
+        "source_recovery_hash",
+        "source_reaction_hash",
         "source_report_hash",
         "document_source_hash",
         "pdf_hash",
         "receipt_hash",
     ] {
         validate_sha256_identity(
-            require_operator_string(&receipt, field, "localized sparse PDF receipt")?,
+            require_operator_string(&receipt, field, "localized ModelIR engineering PDF receipt")?,
             field,
         )?;
     }
-    if require_operator_string(&receipt, "pdf_hash", "localized sparse PDF receipt")?
-        != sha256_identity(&pdf)
+    if require_operator_string(
+        &receipt,
+        "pdf_hash",
+        "localized ModelIR engineering PDF receipt",
+    )? != sha256_identity(&pdf)
         || !pdf.starts_with(b"%PDF-1.7\n%\xe2\xe3\xcf\xd3\n")
         || !pdf.ends_with(b"%%EOF\n")
         || !pdf
@@ -3903,7 +4375,7 @@ fn inspect_sparse_localized_pdf_output(
     {
         return Err(DistributionError::new(
             "rootfs_localized_pdf_artifact_invalid",
-            "localized sparse PDF bytes do not match the receipt or embedded-font container",
+            "localized ModelIR engineering PDF bytes do not match the receipt or embedded-font container",
         ));
     }
 
@@ -3914,23 +4386,35 @@ fn inspect_sparse_localized_pdf_output(
         .ok_or_else(|| {
             DistributionError::new(
                 "rootfs_localized_pdf_receipt_invalid",
-                "localized sparse PDF receipt must contain exactly one artifact",
+                "localized ModelIR engineering PDF receipt must contain exactly one artifact",
             )
         })?;
     let artifact = &artifacts[0];
     require_exact_json_keys(
         artifact,
         &["byte_length", "content_hash", "file", "media_type", "role"],
-        "localized sparse PDF artifact",
+        "localized ModelIR engineering PDF artifact",
     )?;
-    if require_operator_string(artifact, "role", "localized sparse PDF artifact")?
-        != "sparse_linear_localized_pdf_report"
-        || require_operator_string(artifact, "file", "localized sparse PDF artifact")?
-            != "report.pdf"
-        || require_operator_string(artifact, "media_type", "localized sparse PDF artifact")?
-            != "application/pdf"
-        || require_operator_string(artifact, "content_hash", "localized sparse PDF artifact")?
-            != sha256_identity(&pdf)
+    if require_operator_string(
+        artifact,
+        "role",
+        "localized ModelIR engineering PDF artifact",
+    )? != "model_ir_linear_engineering_localized_pdf_report"
+        || require_operator_string(
+            artifact,
+            "file",
+            "localized ModelIR engineering PDF artifact",
+        )? != "report.pdf"
+        || require_operator_string(
+            artifact,
+            "media_type",
+            "localized ModelIR engineering PDF artifact",
+        )? != "application/pdf"
+        || require_operator_string(
+            artifact,
+            "content_hash",
+            "localized ModelIR engineering PDF artifact",
+        )? != sha256_identity(&pdf)
         || artifact
             .get("byte_length")
             .and_then(serde_json::Value::as_u64)
@@ -3938,7 +4422,7 @@ fn inspect_sparse_localized_pdf_output(
     {
         return Err(DistributionError::new(
             "rootfs_localized_pdf_artifact_invalid",
-            "localized sparse PDF artifact inventory does not match report.pdf",
+            "localized ModelIR engineering PDF artifact inventory does not match report.pdf",
         ));
     }
 
@@ -4064,14 +4548,30 @@ fn inspect_model_ir_linear_localized_pdf_surface(
             "localized sparse PDF export mutated the durable ModelIR-linear session",
         ));
     }
-    let (en_first_pdf, en_first_receipt) =
-        inspect_sparse_localized_pdf_output(workspace, payload_root, en_us_first_root, "en-US")?;
-    let (en_second_pdf, en_second_receipt) =
-        inspect_sparse_localized_pdf_output(workspace, payload_root, en_us_second_root, "en-US")?;
-    let (ko_first_pdf, ko_first_receipt) =
-        inspect_sparse_localized_pdf_output(workspace, payload_root, ko_kr_first_root, "ko-KR")?;
-    let (ko_second_pdf, ko_second_receipt) =
-        inspect_sparse_localized_pdf_output(workspace, payload_root, ko_kr_second_root, "ko-KR")?;
+    let (en_first_pdf, en_first_receipt) = inspect_model_ir_engineering_localized_pdf_output(
+        workspace,
+        payload_root,
+        en_us_first_root,
+        "en-US",
+    )?;
+    let (en_second_pdf, en_second_receipt) = inspect_model_ir_engineering_localized_pdf_output(
+        workspace,
+        payload_root,
+        en_us_second_root,
+        "en-US",
+    )?;
+    let (ko_first_pdf, ko_first_receipt) = inspect_model_ir_engineering_localized_pdf_output(
+        workspace,
+        payload_root,
+        ko_kr_first_root,
+        "ko-KR",
+    )?;
+    let (ko_second_pdf, ko_second_receipt) = inspect_model_ir_engineering_localized_pdf_output(
+        workspace,
+        payload_root,
+        ko_kr_second_root,
+        "ko-KR",
+    )?;
     if en_first_pdf != en_second_pdf
         || en_first_receipt != en_second_receipt
         || ko_first_pdf != ko_second_pdf
@@ -4791,11 +5291,23 @@ fn seal_rootfs_isolation_evidence_v10(
     })
 }
 
-fn seal_rootfs_isolation_evidence(
+#[cfg(test)]
+fn seal_rootfs_isolation_evidence_v11(
     evidence: RootfsIsolationEvidenceV11,
 ) -> Result<RootfsIsolationReceiptV11, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
     Ok(RootfsIsolationReceiptV11 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V11.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV12,
+) -> Result<RootfsIsolationReceiptV12, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV12 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -5469,7 +5981,7 @@ fn validate_rootfs_isolation_evidence_v11(
         .prior
         .prior
         .claim_boundary
-        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11
         || !evidence.model_ir_linear_deformed_view_surface_passed
         || !evidence.mgt_model_ir_linear_deformed_view_surface_passed
         || !evidence.workbench_linear_deformed_view_invalid_step_rejected
@@ -5509,6 +6021,81 @@ fn validate_rootfs_isolation_evidence_v11(
     ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10
         .clone_into(&mut prior.prior.prior.prior.prior.prior.prior.claim_boundary);
     validate_rootfs_isolation_evidence_v10(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v12(
+    evidence: &RootfsIsolationEvidenceV12,
+) -> Result<(), DistributionError> {
+    let identities = [
+        evidence
+            .model_ir_linear_element_recovery_view_en_us_sha256
+            .as_str(),
+        evidence
+            .model_ir_linear_element_recovery_view_ko_kr_sha256
+            .as_str(),
+        evidence
+            .mgt_model_ir_linear_element_recovery_view_en_us_sha256
+            .as_str(),
+        evidence
+            .mgt_model_ir_linear_element_recovery_view_ko_kr_sha256
+            .as_str(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
+    if evidence
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_linear_element_recovery_view_surface_passed
+        || !evidence.mgt_model_ir_linear_element_recovery_view_surface_passed
+        || !evidence.workbench_linear_element_recovery_view_invalid_window_rejected
+        || identities.len() != 4
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v12 receipt weakens or exceeds the exact bounded linear element recovery view diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_linear_element_recovery_view_en_us_sha256,
+            "rootfs ModelIR linear en-US element recovery view SHA-256",
+        ),
+        (
+            &evidence.model_ir_linear_element_recovery_view_ko_kr_sha256,
+            "rootfs ModelIR linear ko-KR element recovery view SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_element_recovery_view_en_us_sha256,
+            "rootfs normalized-MGT linear en-US element recovery view SHA-256",
+        ),
+        (
+            &evidence.mgt_model_ir_linear_element_recovery_view_ko_kr_sha256,
+            "rootfs normalized-MGT linear ko-KR element recovery view SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11.clone_into(
+        &mut prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    validate_rootfs_isolation_evidence_v11(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -6453,7 +7040,7 @@ mod tests {
 
     fn rootfs_evidence() -> RootfsIsolationEvidenceV11 {
         let mut prior = rootfs_evidence_v10();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11
             .clone_into(&mut prior.prior.prior.prior.prior.prior.prior.claim_boundary);
         let identity = |value: u8| format!("sha256:{value:064x}");
         RootfsIsolationEvidenceV11 {
@@ -6466,6 +7053,32 @@ mod tests {
             mgt_model_ir_linear_deformed_view_en_us_sha256: identity(69),
             mgt_model_ir_linear_deformed_view_ko_kr_sha256: identity(70),
             workbench_linear_deformed_view_invalid_step_rejected: true,
+        }
+    }
+
+    fn rootfs_evidence_v12() -> RootfsIsolationEvidenceV12 {
+        let mut prior = rootfs_evidence();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+            &mut prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .claim_boundary,
+        );
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV12 {
+            prior,
+            model_ir_linear_element_recovery_view_surface_passed: true,
+            model_ir_linear_element_recovery_view_en_us_sha256: identity(71),
+            model_ir_linear_element_recovery_view_ko_kr_sha256: identity(72),
+            mgt_model_ir_linear_element_recovery_view_surface_passed: true,
+            mgt_model_ir_linear_element_recovery_view_en_us_sha256: identity(73),
+            mgt_model_ir_linear_element_recovery_view_ko_kr_sha256: identity(74),
+            workbench_linear_element_recovery_view_invalid_window_rejected: true,
         }
     }
 
@@ -6796,8 +7409,8 @@ mod tests {
 
         let evidence = rootfs_evidence();
         validate_rootfs_isolation_evidence_v11(&evidence).expect("valid bounded evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal evidence");
-        assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION);
+        let receipt = seal_rootfs_isolation_evidence_v11(evidence.clone()).expect("seal evidence");
+        assert_eq!(receipt.schema_version, ROOTFS_RECEIPT_SCHEMA_VERSION_V11);
         assert_eq!(
             receipt.receipt_hash,
             sha256_identity(&canonical_json(&evidence).expect("canonical evidence"))
@@ -7392,7 +8005,7 @@ mod tests {
             &bundle,
         );
         validate_rootfs_isolation_evidence_v11(&evidence).expect("validate current v11 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence).expect("seal v11 evidence");
+        let receipt = seal_rootfs_isolation_evidence_v11(evidence).expect("seal v11 evidence");
         let receipt_path = temporary.0.join("rootfs-v11-receipt.json");
         fs::write(
             &receipt_path,
@@ -7404,6 +8017,43 @@ mod tests {
                 .expect("verify current v11 receipt against its bundle"),
             VerifiedRootfsIsolationReceipt::V11(_)
         ));
+    }
+
+    #[test]
+    fn current_rootfs_v12_receipt_is_bundle_verifiable_and_fail_closed() {
+        let temporary = TestDirectory::create("rootfs-v12-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v12-release", "v12");
+        let manifest = verify_bundle(&bundle).expect("verify v12 fixture bundle");
+        let mut evidence = rootfs_evidence_v12();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence.prior.prior.prior.prior.prior.prior.prior.prior,
+            &manifest,
+            &bundle,
+        );
+        validate_rootfs_isolation_evidence_v12(&evidence).expect("validate current v12 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v12 evidence");
+        let receipt_path = temporary.0.join("rootfs-v12-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v12 receipt"),
+        )
+        .expect("write current v12 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v12 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V12(_)
+        ));
+
+        let mut colliding = evidence;
+        colliding.mgt_model_ir_linear_element_recovery_view_en_us_sha256 = colliding
+            .model_ir_linear_element_recovery_view_en_us_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v12(&colliding)
+                .expect_err("colliding element recovery identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
     }
 
     #[cfg(unix)]

@@ -9,8 +9,9 @@ mod localized_pdf;
 mod pdf;
 
 pub use localized_pdf::{
-    render_nonlinear_ndtha_localized_pdf_v2, render_sparse_linear_localized_pdf_v2,
-    validate_deterministic_localized_pdf_v2, NonlinearNdthaLocalizedPdfDocumentV2,
+    render_model_ir_linear_engineering_localized_pdf_v3, render_nonlinear_ndtha_localized_pdf_v2,
+    render_sparse_linear_localized_pdf_v2, validate_deterministic_localized_pdf_v2,
+    ModelIrLinearEngineeringLocalizedPdfDocumentV3, NonlinearNdthaLocalizedPdfDocumentV2,
     PdfReportLocaleV2, SparseLinearLocalizedPdfDocumentV2,
 };
 pub use pdf::{

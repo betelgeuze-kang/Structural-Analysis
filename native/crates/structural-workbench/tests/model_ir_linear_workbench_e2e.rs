@@ -313,6 +313,16 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_eq!(premature_deformed_view.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&premature_deformed_view.stdout)
         .contains("workbench_transition_invalid"));
+    let premature_element_recovery_view = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_eq!(premature_element_recovery_view.status.code(), Some(2));
+    assert!(
+        String::from_utf8_lossy(&premature_element_recovery_view.stdout)
+            .contains("workbench_transition_invalid")
+    );
     assert_success(&run_workbench(&[
         text("run"),
         text("--workspace"),
@@ -599,6 +609,154 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
             restarted.as_os_str(),
             text("--start-node"),
             text("3"),
+        ],
+    ] {
+        let rejected = run_workbench(&arguments);
+        assert_eq!(rejected.status.code(), Some(2));
+    }
+
+    let element_view_arguments = [
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let element_view_first = run_workbench(&element_view_arguments);
+    let element_view_second = run_workbench(&element_view_arguments);
+    assert_success(&element_view_first);
+    assert_eq!(element_view_first.stdout, element_view_second.stdout);
+    assert!(!element_view_first.stdout.contains(&0x1b));
+    let direct_element_view = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_element_view);
+    assert_eq!(element_view_first.stdout, direct_element_view.stdout);
+    let element_view =
+        String::from_utf8(element_view_first.stdout).expect("ASCII element recovery view");
+    assert!(element_view.starts_with("Structural ModelIR Linear Workbench - Element Recovery\n"));
+    assert!(element_view.contains(
+        "Schema: structural-native-workbench-model-ir-linear-element-recovery-view.v1\n"
+    ));
+    assert!(element_view.contains("Locale: en-US\n"));
+    assert!(element_view.contains("Selected state: 1 of 1 (terminal linear static)\n"));
+    assert!(element_view.contains("Elements: 1\n"));
+    assert!(element_view.contains("Displayed elements: 1-1 of 1\n"));
+    assert!(
+        element_view.contains("Coordinate frames: frame3d=element_local; truss3d=element_axis\n")
+    );
+    assert!(element_view.contains(&format!(
+        "Backend: cpu / fp64 / ABI {} / fallback 0\n",
+        result["backend_receipt"]["abi_version"]
+            .as_str()
+            .expect("sparse ABI version")
+    )));
+    for hash in [
+        recovery["source_result_hash"]
+            .as_str()
+            .expect("source result hash"),
+        recovery["recovery_hash"].as_str().expect("recovery hash"),
+        recovery["analysis_request_hash"]
+            .as_str()
+            .expect("analysis request hash"),
+        recovery["assembly_hash"].as_str().expect("assembly hash"),
+        recovery["model_identity"]["content_hash"]
+            .as_str()
+            .expect("model content hash"),
+        recovery["model_identity"]["semantic_hash"]
+            .as_str()
+            .expect("model semantic hash"),
+        recovery["model_identity"]["provenance_hash"]
+            .as_str()
+            .expect("model provenance hash"),
+        result["identity"]["request_hash"]
+            .as_str()
+            .expect("sparse request hash"),
+        result["identity"]["model_hash"]
+            .as_str()
+            .expect("sparse model hash"),
+        result["identity"]["state_hash"]
+            .as_str()
+            .expect("state hash"),
+        result["identity"]["execution_hash"]
+            .as_str()
+            .expect("execution hash"),
+        result["identity"]["checkpoint_hash"]
+            .as_str()
+            .expect("checkpoint hash"),
+    ] {
+        assert!(element_view.contains(hash));
+    }
+    assert_eq!(recovery["recovery_stable_indices"], json!([0]));
+    assert_eq!(recovery["recovery_element_types"], json!([1]));
+    assert_eq!(recovery["recovery_offsets"], json!([0, 12]));
+    let frame_components = [
+        "i_FX_N", "i_FY_N", "i_FZ_N", "i_MX_N_m", "i_MY_N_m", "i_MZ_N_m", "j_FX_N", "j_FY_N",
+        "j_FZ_N", "j_MX_N_m", "j_MY_N_m", "j_MZ_N_m",
+    ]
+    .iter()
+    .zip(
+        recovery["recovery_values"]
+            .as_array()
+            .expect("frame recovery values"),
+    )
+    .map(|(name, value)| {
+        format!(
+            "{name}={:+.17e}",
+            value.as_f64().expect("frame recovery FP64 value")
+        )
+    })
+    .collect::<Vec<_>>()
+    .join(";");
+    let expected_element_row =
+        format!("000001\tE1\t0000000000\tframe_3d\tN1->N2\telement_local\t{frame_components}");
+    assert!(element_view
+        .lines()
+        .any(|line| line == expected_element_row));
+    let (unsigned, hash_line) = element_view
+        .rsplit_once("View hash: ")
+        .expect("element recovery view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
+    let korean_element_view = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--locale"),
+        text("ko-KR"),
+        text("--start-element"),
+        text("1"),
+        text("--count"),
+        text("1"),
+    ]);
+    assert_success(&korean_element_view);
+    assert!(!korean_element_view.stdout.contains(&0x1b));
+    let korean_element_view =
+        String::from_utf8(korean_element_view.stdout).expect("Korean element recovery view UTF-8");
+    assert!(korean_element_view.starts_with("Structural ModelIR 선형 Workbench - 요소 복원\n"));
+    assert!(korean_element_view.contains("로케일: ko-KR\n"));
+    assert!(korean_element_view.contains("표시 요소: 1-1 of 1\n"));
+    assert!(korean_element_view
+        .lines()
+        .any(|line| line == expected_element_row));
+    let (unsigned, hash_line) = korean_element_view
+        .rsplit_once("보기 해시: ")
+        .expect("Korean element recovery view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+    for arguments in [
+        vec![
+            text("element-recovery-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--count"),
+            text("257"),
+        ],
+        vec![
+            text("element-recovery-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+            text("--start-element"),
+            text("2"),
         ],
     ] {
         let rejected = run_workbench(&arguments);
@@ -1046,7 +1204,7 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after reaction views"),
         session_before_result_surfaces,
-        "displacement/deformed/reaction view or audit mutated the durable session"
+        "displacement/element/deformed/reaction view or audit mutated the durable session"
     );
 
     let session_before_localized_export =
@@ -1069,10 +1227,36 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
             let receipt = verify_self_hash(&output.stdout, "receipt_hash");
             assert_eq!(
                 receipt["schema_version"],
-                "structural-native-sparse-linear-localized-pdf-report-receipt.v2"
+                "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3"
             );
-            assert_eq!(receipt["profile"], "sparse_linear_cpu_v1");
+            assert_eq!(
+                receipt["profile"],
+                "model_ir_linear_cpu_engineering_summary_v1"
+            );
             assert_eq!(receipt["locale"], locale);
+            let report_directory = restarted.join("06-report");
+            let result: Value = serde_json::from_slice(
+                &fs::read(report_directory.join("result-ir.json")).expect("reported ResultIR"),
+            )
+            .expect("reported ResultIR JSON");
+            let recovery: Value = serde_json::from_slice(
+                &fs::read(report_directory.join("result-recovery-ir.json"))
+                    .expect("reported recovery IR"),
+            )
+            .expect("reported recovery JSON");
+            let reaction: Value = serde_json::from_slice(
+                &fs::read(report_directory.join("reaction-result-ir.json"))
+                    .expect("reported reaction IR"),
+            )
+            .expect("reported reaction JSON");
+            let report: Value = serde_json::from_slice(
+                &fs::read(report_directory.join("report-ir.json")).expect("reported ReportIR"),
+            )
+            .expect("reported ReportIR JSON");
+            assert_eq!(receipt["source_result_hash"], result["result_hash"]);
+            assert_eq!(receipt["source_recovery_hash"], recovery["recovery_hash"]);
+            assert_eq!(receipt["source_reaction_hash"], reaction["result_hash"]);
+            assert_eq!(receipt["source_report_hash"], report["report_hash"]);
             let localized_pdf =
                 fs::read(output_directory.join("report.pdf")).expect("localized linear PDF");
             validate_deterministic_localized_pdf_v2(&localized_pdf)
@@ -1157,6 +1341,11 @@ fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     for rejected in [
         run_workbench(&[
             text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+        run_workbench(&[
+            text("element-recovery-view"),
             text("--workspace"),
             restarted.as_os_str(),
         ]),
@@ -1494,6 +1683,41 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
         .expect("Korean MGT displacement view hash line");
     assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
 
+    let element_arguments = [
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ];
+    let element_first = run_workbench(&element_arguments);
+    let element_second = run_workbench(&element_arguments);
+    assert_success(&element_first);
+    assert_eq!(element_first.stdout, element_second.stdout);
+    assert!(!element_first.stdout.contains(&0x1b));
+    let direct_element = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        direct.as_os_str(),
+    ]);
+    assert_success(&direct_element);
+    assert_eq!(element_first.stdout, direct_element.stdout);
+    let element = String::from_utf8(element_first.stdout).expect("MGT element recovery UTF-8");
+    assert!(element.contains(
+        "Schema: structural-native-workbench-model-ir-linear-element-recovery-view.v1\n"
+    ));
+    assert!(element.contains("Load pattern: LP_PUSH\n"));
+    assert!(element.contains("Displayed elements: 1-1 of 1\n"));
+    assert!(element.contains("\tframe_3d\tN_1->N_2\telement_local\t"));
+    assert!(element.contains(&format!(
+        "i_FX_N={:+.17e}",
+        recovery["recovery_values"][0]
+            .as_f64()
+            .expect("MGT frame recovery")
+    )));
+    let (unsigned, hash_line) = element
+        .rsplit_once("View hash: ")
+        .expect("MGT element recovery view hash line");
+    assert_eq!(hash_line.trim_end(), sha256_identity(unsigned.as_bytes()));
+
     let deformed_arguments = [
         text("result-deformed-view"),
         text("--workspace"),
@@ -1611,7 +1835,7 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     assert_eq!(
         fs::read(restarted.join("workbench-session.json")).expect("session after MGT audits"),
         session_before_result_surfaces,
-        "MGT displacement/deformed/reaction surfaces mutated the durable session"
+        "MGT displacement/element/deformed/reaction surfaces mutated the durable session"
     );
 
     let mut tampered =
@@ -1626,6 +1850,11 @@ fn clean_environment_mgt_linear_workflow_preserves_import_health_and_restart_ide
     for rejected_surface in [
         run_workbench(&[
             text("nodal-displacement-view"),
+            text("--workspace"),
+            restarted.as_os_str(),
+        ]),
+        run_workbench(&[
+            text("element-recovery-view"),
             text("--workspace"),
             restarted.as_os_str(),
         ]),

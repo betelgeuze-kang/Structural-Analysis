@@ -544,6 +544,8 @@ structural-workbench reaction-view --workspace LINEAR-SESSION --locale ko-KR \
 structural-workbench reaction-audit --workspace LINEAR-SESSION --locale ko-KR
 structural-workbench nodal-displacement-view --workspace LINEAR-SESSION --locale ko-KR \
   --start-node 1 --count 64
+structural-workbench element-recovery-view --workspace LINEAR-SESSION --locale ko-KR \
+  --start-element 1 --count 64
 structural-workbench result-view --workspace SESSION --channel drift-ratio \
   --start-step 1 --count 64
 structural-workbench result-deformed-view --workspace SESSION \
@@ -552,6 +554,9 @@ structural-workbench result-deformed-view --workspace LINEAR-SESSION \
   --locale ko-KR --projection xy --step 1 --scale 1000
 structural-workbench report-export-pdf --workspace SESSION \
   --output-dir LOCALIZED-REPORT --locale ko-KR
+
+# A current ModelIR-linear session emits the reaction-bound engineering-summary v3 profile;
+# frozen pre-reaction sessions retain the localized sparse-linear v2 profile.
 structural-workbench status --workspace SESSION
 structural-workbench inspect --workspace SESSION
 structural-workbench review --workspace SESSION --decision review \
@@ -657,6 +662,13 @@ to the immutable node ID and prints exact `UX/UY/UZ` metre and `RX/RY/RZ` radian
 self-hashed window. It does not infer a deformed shape, stress, contour, modal shape, serviceability,
 support design, or engineering verdict; see
 `docs/native/modelir-linear-nodal-displacement-view-v1.md`.
+
+The ModelIR-linear element-recovery view maps each verified stable recovery index to the immutable
+element ID and two-node connectivity, then prints exact frame3d local end forces or truss3d axial
+strain, stress, and force with fixed SI units and coordinate frames in a bounded self-hashed window.
+It does not infer a shell or general stress contour, design utilization, serviceability, support
+design, or engineering verdict; see
+`docs/native/modelir-linear-element-recovery-view-v1.md`.
 
 The ModelIR-linear deformed-shape view uses that same verified recovery to apply only UX/UY/UZ to
 the original node coordinates under a bounded visual magnification. It overlays original and

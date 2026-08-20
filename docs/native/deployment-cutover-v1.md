@@ -381,7 +381,8 @@ exact-profile selected-step deformed-shape views, Korean UTF-8 response/deformed
 English-compatible/Korean localized topology projection for CPU static and shared packages. The
 same installed-package gate now also executes the ModelIR linear staged/restart/direct Workbench
 path and binds typed recovery, external comparison, deterministic PDF and both report receipts. It
-also proves repeated `en-US`/`ko-KR` embedded-font sparse PDF exports, locale separation and
+also proves repeated `en-US`/`ko-KR` embedded-font ModelIR engineering-summary PDF v3 exports,
+locale separation and
 durable-session nonmutation from the installed package.
 The v16 addition also runs the exact normalized cantilever MGT through the ModelIR-linear profile,
 simulates process death after its one-iteration checkpoint, proves restart/direct artifact-tree
@@ -423,7 +424,8 @@ emit and re-verify a self-hashed `local_rootfs_diagnostic_c5` receipt. The exact
 IPv4 routes, reported/completed comparison-passing sessions, and hash-bound ResultIR/report/MGT
 artifacts. Its append-only v4 adds typed linear recovery, external comparison, deterministic PDF,
 document source, PDF/report receipts and inspect/review/export identities. The append-only v5 adds
-repeated `en-US`/`ko-KR` embedded-font sparse PDF export, exact installed font/license/provenance,
+repeated `en-US`/`ko-KR` embedded-font ModelIR engineering-summary PDF v3 export, exact installed
+font/license/provenance,
 locale separation and durable-session nonmutation. The append-only v6 binds the exact MGT-linear
 source, normalized import health, ResultIR/recovery/comparison, PDF/document, PDF/report receipts
 and inspect/review/export identities while preserving frozen v1 through v5 verification. It also
@@ -467,6 +469,13 @@ and requires installed append-only distribution v88 authority. The static, share
 paths bind the same five linear deformed-view identities. It remains a bounded two-node centerline
 diagnostic, not general interactive 3D, element curvature, shell, stress, contour, modal,
 serviceability, support-design, engineering-acceptance, customer-image, HIP C2 or C6 authority.
+Append-only v12 additionally executes installed strict-ModelIR and normalized-MGT
+`element-recovery-view` surfaces, independently verifies their self-hashes, exact locale/window/
+Frame3D element-local end-force row and bound identities, repeated output, four-way locale/profile
+separation, session nonmutation and invalid-window rejection, preserves frozen v1 through v11
+verification, and requires installed distribution v89 authority. Static, shared and isolated paths
+bind the same four Frame3D identities. Truss3D formatting remains source-tested and is not promoted
+to installed or rootfs execution authority.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

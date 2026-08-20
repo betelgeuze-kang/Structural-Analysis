@@ -58,6 +58,10 @@ export does not mutate the durable Workbench. Distribution E2E v7 binds the orig
 surface; append-only v15 binds the installed ModelIR-linear locale surface without widening frozen
 v1-v14 receipts.
 
+A current reaction-bearing ModelIR-linear Workbench session now selects the append-only v3
+engineering-summary profile documented in `pdf-report-modelir-engineering-v3.md`. Standalone
+sparse-linear CLI output and frozen pre-reaction Workbench sessions retain this v2 profile.
+
 Poppler is verification tooling, not a product dependency. `pdfinfo` recognizes one A4 PDF 1.7
 page, `pdffonts` reports an embedded CID TrueType font with Unicode mapping, `pdftotext` reconstructs
 the complete Korean authority statement, and a rendered PNG was visually checked for legibility,

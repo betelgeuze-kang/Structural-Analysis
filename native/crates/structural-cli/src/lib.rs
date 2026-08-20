@@ -48,7 +48,8 @@ pub use product::{
     NativeAnalysisRunOutcomeV1,
 };
 pub use report::{
-    execute_localized_pdf_report, execute_pdf_report, execute_sparse_linear_localized_pdf_report,
+    execute_localized_pdf_report, execute_model_ir_linear_engineering_localized_pdf_report,
+    execute_pdf_report, execute_sparse_linear_localized_pdf_report,
     execute_sparse_linear_pdf_report, publish_localized_pdf_report, publish_pdf_report,
     NativeLocalizedPdfReportOutcomeV2, NativePdfReportError, NativePdfReportOutcomeV1,
 };

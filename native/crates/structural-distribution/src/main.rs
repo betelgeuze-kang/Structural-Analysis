@@ -222,6 +222,15 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-model-ir-linear-deformed-view-ko-kr-first",
             "--mgt-model-ir-linear-deformed-view-ko-kr-second",
             "--workbench-linear-deformed-view-invalid-step-failure",
+            "--model-ir-linear-element-recovery-view-en-us-first",
+            "--model-ir-linear-element-recovery-view-en-us-second",
+            "--model-ir-linear-element-recovery-view-ko-kr-first",
+            "--model-ir-linear-element-recovery-view-ko-kr-second",
+            "--mgt-model-ir-linear-element-recovery-view-en-us-first",
+            "--mgt-model-ir-linear-element-recovery-view-en-us-second",
+            "--mgt-model-ir-linear-element-recovery-view-ko-kr-first",
+            "--mgt-model-ir-linear-element-recovery-view-ko-kr-second",
+            "--workbench-linear-element-recovery-view-invalid-window-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -386,6 +395,42 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         options,
         "--workbench-linear-deformed-view-invalid-step-failure",
     )?;
+    let model_ir_linear_element_recovery_view_en_us_first = required_path(
+        options,
+        "--model-ir-linear-element-recovery-view-en-us-first",
+    )?;
+    let model_ir_linear_element_recovery_view_en_us_second = required_path(
+        options,
+        "--model-ir-linear-element-recovery-view-en-us-second",
+    )?;
+    let model_ir_linear_element_recovery_view_ko_kr_first = required_path(
+        options,
+        "--model-ir-linear-element-recovery-view-ko-kr-first",
+    )?;
+    let model_ir_linear_element_recovery_view_ko_kr_second = required_path(
+        options,
+        "--model-ir-linear-element-recovery-view-ko-kr-second",
+    )?;
+    let mgt_model_ir_linear_element_recovery_view_en_us_first = required_path(
+        options,
+        "--mgt-model-ir-linear-element-recovery-view-en-us-first",
+    )?;
+    let mgt_model_ir_linear_element_recovery_view_en_us_second = required_path(
+        options,
+        "--mgt-model-ir-linear-element-recovery-view-en-us-second",
+    )?;
+    let mgt_model_ir_linear_element_recovery_view_ko_kr_first = required_path(
+        options,
+        "--mgt-model-ir-linear-element-recovery-view-ko-kr-first",
+    )?;
+    let mgt_model_ir_linear_element_recovery_view_ko_kr_second = required_path(
+        options,
+        "--mgt-model-ir-linear-element-recovery-view-ko-kr-second",
+    )?;
+    let workbench_linear_element_recovery_view_invalid_window_failure = required_path(
+        options,
+        "--workbench-linear-element-recovery-view-invalid-window-failure",
+    )?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -495,6 +540,24 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             &mgt_model_ir_linear_deformed_view_ko_kr_second,
         workbench_linear_deformed_view_invalid_step_failure:
             &workbench_linear_deformed_view_invalid_step_failure,
+        model_ir_linear_element_recovery_view_en_us_first:
+            &model_ir_linear_element_recovery_view_en_us_first,
+        model_ir_linear_element_recovery_view_en_us_second:
+            &model_ir_linear_element_recovery_view_en_us_second,
+        model_ir_linear_element_recovery_view_ko_kr_first:
+            &model_ir_linear_element_recovery_view_ko_kr_first,
+        model_ir_linear_element_recovery_view_ko_kr_second:
+            &model_ir_linear_element_recovery_view_ko_kr_second,
+        mgt_model_ir_linear_element_recovery_view_en_us_first:
+            &mgt_model_ir_linear_element_recovery_view_en_us_first,
+        mgt_model_ir_linear_element_recovery_view_en_us_second:
+            &mgt_model_ir_linear_element_recovery_view_en_us_second,
+        mgt_model_ir_linear_element_recovery_view_ko_kr_first:
+            &mgt_model_ir_linear_element_recovery_view_ko_kr_first,
+        mgt_model_ir_linear_element_recovery_view_ko_kr_second:
+            &mgt_model_ir_linear_element_recovery_view_ko_kr_second,
+        workbench_linear_element_recovery_view_invalid_window_failure:
+            &workbench_linear_element_recovery_view_invalid_window_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -588,6 +651,13 @@ fn usage_error(detail: &str) -> CliError {
 }
 
 fn usage() -> String {
+    frozen_usage_v11().replace(
+        " --workbench-catalog",
+        " --model-ir-linear-element-recovery-view-en-us-first FILE --model-ir-linear-element-recovery-view-en-us-second FILE --model-ir-linear-element-recovery-view-ko-kr-first FILE --model-ir-linear-element-recovery-view-ko-kr-second FILE --mgt-model-ir-linear-element-recovery-view-en-us-first FILE --mgt-model-ir-linear-element-recovery-view-en-us-second FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-first FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-second FILE --workbench-linear-element-recovery-view-invalid-window-failure FILE --workbench-catalog",
+    )
+}
+
+fn frozen_usage_v11() -> String {
     frozen_usage_v10().replace(
         " --workbench-catalog",
         " --model-ir-linear-deformed-view-en-us-first FILE --model-ir-linear-deformed-view-en-us-second FILE --model-ir-linear-deformed-view-ko-kr-first FILE --model-ir-linear-deformed-view-ko-kr-second FILE --model-ir-linear-deformed-view-projection FILE --mgt-model-ir-linear-deformed-view-en-us-first FILE --mgt-model-ir-linear-deformed-view-en-us-second FILE --mgt-model-ir-linear-deformed-view-ko-kr-first FILE --mgt-model-ir-linear-deformed-view-ko-kr-second FILE --workbench-linear-deformed-view-invalid-step-failure FILE --workbench-catalog",

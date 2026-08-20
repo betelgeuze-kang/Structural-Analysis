@@ -2,6 +2,8 @@ use std::fmt;
 use std::path::Path;
 
 use serde_json::{json, Value};
+use structural_contracts::model_linear_reactions::parse_model_ir_linear_reaction_result_ir_v1;
+use structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1;
 use structural_contracts::product_ir::{
     parse_nonlinear_ndtha_report_ir_v1, parse_nonlinear_ndtha_result_ir_v1, sha256_identity,
     ProductIrContractError,
@@ -10,9 +12,9 @@ use structural_contracts::sparse_product::{
     parse_sparse_linear_report_ir_v1, parse_sparse_linear_result_ir_v1,
 };
 use structural_report::{
-    render_nonlinear_ndtha_localized_pdf_v2, render_nonlinear_ndtha_pdf_v1,
-    render_sparse_linear_localized_pdf_v2, render_sparse_linear_pdf_v1, PdfRenderError,
-    PdfReportLocaleV2,
+    render_model_ir_linear_engineering_localized_pdf_v3, render_nonlinear_ndtha_localized_pdf_v2,
+    render_nonlinear_ndtha_pdf_v1, render_sparse_linear_localized_pdf_v2,
+    render_sparse_linear_pdf_v1, PdfRenderError, PdfReportLocaleV2,
 };
 
 use crate::product::{
@@ -181,6 +183,58 @@ pub fn execute_sparse_linear_localized_pdf_report(
         result.result().case_id.as_str(),
         locale,
         pdf.source_result_hash(),
+        pdf.source_report_hash(),
+        pdf.document_source_hash(),
+        pdf.pdf_hash(),
+        pdf.embedded_font_hash(),
+        pdf.embedded_font_byte_length(),
+        pdf.embedded_font_postscript_name(),
+        pdf.embedded_font_license_notice_hash(),
+        pdf.embedded_font_license_notice_byte_length(),
+        pdf.embedded_font_provenance_hash(),
+        pdf.embedded_font_provenance_byte_length(),
+        pdf.claim_boundary(),
+        pdf.as_bytes(),
+    )?;
+    Ok(NativeLocalizedPdfReportOutcomeV2 {
+        pdf_bytes: pdf.as_bytes().to_vec(),
+        receipt_json,
+    })
+}
+
+/// Verify the complete `ModelIR` linear result binding and render an engineering-summary PDF.
+///
+/// # Errors
+///
+/// Rejects malformed or forged result, recovery, reaction, `ReportIR`, or document inputs;
+/// component-family recovery drift; embedded-font drift; PDF structure failure; and receipt
+/// canonicalization errors.
+pub fn execute_model_ir_linear_engineering_localized_pdf_report(
+    result_ir_bytes: &[u8],
+    recovery_ir_bytes: &[u8],
+    reaction_ir_bytes: &[u8],
+    report_ir_bytes: &[u8],
+    document_source_bytes: &[u8],
+    locale: PdfReportLocaleV2,
+) -> Result<NativeLocalizedPdfReportOutcomeV2, NativePdfReportError> {
+    let result = parse_sparse_linear_result_ir_v1(result_ir_bytes)?;
+    let recovery = parse_model_ir_linear_result_recovery_ir_v1(recovery_ir_bytes)?;
+    let reaction = parse_model_ir_linear_reaction_result_ir_v1(reaction_ir_bytes)?;
+    let report = parse_sparse_linear_report_ir_v1(report_ir_bytes)?;
+    let pdf = render_model_ir_linear_engineering_localized_pdf_v3(
+        &result,
+        &recovery,
+        &reaction,
+        &report,
+        document_source_bytes,
+        locale,
+    )?;
+    let receipt_json = build_model_ir_linear_engineering_localized_pdf_receipt(
+        result.result().case_id.as_str(),
+        locale,
+        pdf.source_result_hash(),
+        pdf.source_recovery_hash(),
+        pdf.source_reaction_hash(),
         pdf.source_report_hash(),
         pdf.document_source_hash(),
         pdf.pdf_hash(),
@@ -512,6 +566,93 @@ fn build_sparse_localized_pdf_receipt(
     canonicalize_value(
         &receipt,
         "sparse_localized_pdf_receipt_canonicalization_failed",
+    )
+    .map_err(Into::into)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn build_model_ir_linear_engineering_localized_pdf_receipt(
+    case_id: &str,
+    locale: PdfReportLocaleV2,
+    source_result_hash: &str,
+    source_recovery_hash: &str,
+    source_reaction_hash: &str,
+    source_report_hash: &str,
+    document_source_hash: &str,
+    pdf_hash: &str,
+    embedded_font_hash: &str,
+    embedded_font_byte_length: usize,
+    embedded_font_postscript_name: &str,
+    license_notice_hash: &str,
+    license_notice_byte_length: usize,
+    provenance_hash: &str,
+    provenance_byte_length: usize,
+    pdf_claim_boundary: &str,
+    pdf_bytes: &[u8],
+) -> Result<String, NativePdfReportError> {
+    let mut receipt = json!({
+        "schema_version": "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3",
+        "profile": "model_ir_linear_cpu_engineering_summary_v1",
+        "case_id": case_id,
+        "locale": locale.language_tag(),
+        "source_result_hash": source_result_hash,
+        "source_recovery_hash": source_recovery_hash,
+        "source_reaction_hash": source_reaction_hash,
+        "source_report_hash": source_report_hash,
+        "document_source_hash": document_source_hash,
+        "pdf_hash": pdf_hash,
+        "pdf_claim_boundary": pdf_claim_boundary,
+        "embedded_font": {
+            "postscript_name": embedded_font_postscript_name,
+            "content_hash": embedded_font_hash,
+            "byte_length": u64::try_from(embedded_font_byte_length).map_err(|_| {
+                receipt_error("embedded font byte length exceeds the receipt integer boundary")
+            })?,
+            "license": {
+                "id": "OFL-1.1",
+                "distribution_path": "share/structural-report/OFL-1.1.txt",
+                "content_hash": license_notice_hash,
+                "byte_length": u64::try_from(license_notice_byte_length).map_err(|_| {
+                    receipt_error("font license notice byte length exceeds the receipt integer boundary")
+                })?
+            },
+            "provenance": {
+                "distribution_path": "share/structural-report/StructuralReportKoreanSubset.provenance.json",
+                "content_hash": provenance_hash,
+                "byte_length": u64::try_from(provenance_byte_length).map_err(|_| {
+                    receipt_error("font provenance byte length exceeds the receipt integer boundary")
+                })?
+            }
+        },
+        "artifacts": [artifact_entry(
+            "model_ir_linear_engineering_localized_pdf_report",
+            "report.pdf",
+            "application/pdf",
+            pdf_bytes,
+        )?],
+        "claim_boundary": "inventory_for_one_deterministic_modelir_linear_result_recovery_reaction_bound_engineering_summary_pdf_not_a_complete_member_schedule_force_diagram_pdf_ua_accessibility_engineering_acceptance_or_design_code_compliance",
+        "receipt_hash": ""
+    });
+    receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .ok_or_else(|| {
+            receipt_error("ModelIR engineering localized PDF receipt is not an object")
+        })?;
+    let unsigned = canonicalize_value(
+        &receipt,
+        "model_ir_engineering_localized_pdf_receipt_canonicalization_failed",
+    )?;
+    receipt
+        .as_object_mut()
+        .expect("ModelIR engineering localized PDF receipt object was checked above")
+        .insert(
+            "receipt_hash".to_owned(),
+            Value::String(sha256_identity(unsigned.as_bytes())),
+        );
+    canonicalize_value(
+        &receipt,
+        "model_ir_engineering_localized_pdf_receipt_canonicalization_failed",
     )
     .map_err(Into::into)
 }

@@ -657,12 +657,21 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    lookup 0 and fallback 0; this is not general interactive 3D, element curvature, shell, stress,
    contour, modal, serviceability, support-design, public/customer package, HIP C2,
    engineering-verdict or C6 authority.
+103. runs `structural-workbench element-recovery-view` for both strict-ModelIR-linear and
+   normalized-MGT-linear installed workspaces, verifies the deterministic self-hashed ANSI-free
+   en-US/ko-KR Frame3D element-local 12-component end-force rows, bound model/result/recovery/
+   execution identities, byte-identical direct/restart and repeated output, durable-workspace
+   nonmutation and fail-closed invalid-window rejection, then emits append-only v89 with four
+   distinct locale/profile identities. Static and shared receipts are hosted CPU C5 evidence with
+   Python/Node lookup 0 and fallback 0. Truss3D formatting remains source-tested and is not
+   independently exercised by v89.
 
-   The receipt checker continues to accept frozen v1 through v87 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v88 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
-   pre-v88 receipt is installed ModelIR-linear deformed-view authority. Its explicit compatibility
+   pre-v88 receipt is installed ModelIR-linear deformed-view authority, and no pre-v89 receipt is
+   installed ModelIR-linear element-recovery-view authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
@@ -815,12 +824,12 @@ inspect, an explicit non-promoting `review`, review reopen, post-review inspect 
 It also browses the embedded catalog and a copied evidence fixture. `structural-installer` verifies
 each operator artifact's canonical self-hash, session binding, ResultIR/comparison/PDF binding,
 fixed `review` decision, conservative geometry/no-runner catalog projection, and
-ready/blocked/unavailable evidence projection before it creates and validates the v11 self-hashed
+ready/blocked/unavailable evidence projection before it creates and validates the v12 self-hashed
 receipt. Its authority is deliberately `local_rootfs_diagnostic_c5`; it records that neither an
 OCI image nor a customer image receipt, generated evidence, or engineering approval was created.
 The v4 receipt additionally binds the ModelIR-linear typed recovery, external comparison,
 deterministic PDF, document source, PDF/report receipts and inspect/review/export identities. The
-append-only v5 receipt additionally binds repeated `en-US`/`ko-KR` embedded-font sparse PDF and
+append-only v5 receipt additionally binds repeated `en-US`/`ko-KR` embedded-font localized PDF and
 typed receipt identities, exact installed TTF/OFL/provenance bytes, locale separation and durable
 session nonmutation. The append-only v6 receipt additionally binds the original MGT bytes,
 normalized import health, typed recovery, external comparison, deterministic PDF/document and
@@ -848,14 +857,23 @@ terminal self-hash, exact schema/locale/projection/73x25 canvas, two exact origi
 one two-node element, finite FP64 coordinates, fallback 0 and ANSI absence, proves repeated
 en-US/ko-KR determinism, locale/projection/profile identity separation, durable-session
 nonmutation and fail-closed invalid-step rejection, and binds five distinct full-file SHA-256
-identities. The installer continues to verify frozen v1 through v10 rootfs receipts against their
+identities. The installer continues to verify frozen v1 through v11 rootfs receipts against their
 original bundles and claim boundaries; v3 first carried catalog/evidence surface evidence,
 v4 first carried the
-ModelIR-linear surface, v5 first carried its localized PDF surface, and only v6 carries the exact
+ModelIR-linear surface, v5 first carried its localized PDF surface (now emitted as the
+reaction-bound engineering-summary v3 profile while frozen pre-reaction workspaces retain v2),
+and only v6 carries the exact
 normalized-MGT-linear isolated surface; only v7 requires constrained-reaction ResultIR evidence,
 only v8 requires constrained-reaction-view evidence, and only v9 requires algebraic-reaction-audit
 evidence; only v10 requires bounded nodal-displacement-view evidence.
 Only v11 requires bounded ModelIR-linear deformed-view evidence.
+The append-only v12 receipt additionally runs the installed element-recovery view for both linear
+profiles, independently verifies the terminal self-hash, exact schema/locale/window, the Frame3D
+element-local 12-component finite FP64 end-force row, every bound identity, fallback 0 and ANSI
+absence, proves repeated en-US/ko-KR determinism, four-way locale/profile separation, durable-
+session nonmutation and fail-closed invalid-window rejection. The installer continues to verify
+frozen v1 through v11 receipts; only v12 requires installed Frame3D element-recovery evidence.
+Truss3D formatting remains source-tested and outside this installed rootfs authority.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
 frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.
