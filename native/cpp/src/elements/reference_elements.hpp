@@ -46,6 +46,8 @@ struct Frame3dInput {
     double local_axis_rotation_rad;
     std::span<const double> displacement;
     std::span<const double> direction;
+    std::array<double, 3> offset_i_global_m {};
+    std::array<double, 3> offset_j_global_m {};
 };
 
 struct Shell3MembraneInput {

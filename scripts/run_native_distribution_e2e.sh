@@ -400,6 +400,50 @@ modal_result_view_en_us="$e2e_root/model-modal-result-view-en-US-first.txt"
 modal_result_view_ko_kr="$e2e_root/model-modal-result-view-ko-KR-first.txt"
 modal_workbench_directory="$e2e_root/model-modal-workbench-direct"
 modal_workbench_inspect="$e2e_root/model-modal-workbench-inspect-first.json"
+
+offset_linear_model="$e2e_root/frame3d-rigid-offset-model-ir.json"
+sed \
+  -e 's/engine-v2-frame-cantilever/engine-v2-frame-cantilever-rigid-offset/' \
+  -e 's/"i_global_m": \[0.0, 0.0, 0.0\]/"i_global_m": [0.1, 0.0, 0.0]/' \
+  -e 's/"j_global_m": \[0.0, 0.0, 0.0\]/"j_global_m": [-0.1, 0.0, 0.0]/' \
+  "$linear_model" > "$offset_linear_model"
+grep -Fq '"i_global_m": [0.1, 0.0, 0.0]' "$offset_linear_model"
+grep -Fq '"j_global_m": [-0.1, 0.0, 0.0]' "$offset_linear_model"
+offset_linear_request_directory="$e2e_root/frame3d-rigid-offset-request"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  model-create-linear-analysis-request "$offset_linear_model" \
+  --case model-frame-rigid-offset-linear-c5 --load-pattern LC_WEAK \
+  --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+  --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+  --output-dir "$offset_linear_request_directory" \
+  > "$e2e_root/frame3d-rigid-offset-request.stdout.json"
+grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+  "$offset_linear_request_directory/request-receipt.json"
+offset_linear_direct="$e2e_root/frame3d-rigid-offset-direct"
+offset_linear_partial="$e2e_root/frame3d-rigid-offset-partial"
+offset_linear_resumed="$e2e_root/frame3d-rigid-offset-resumed"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$offset_linear_model" "$offset_linear_request_directory/analysis-request.json" \
+  --output-dir "$offset_linear_direct" \
+  > "$e2e_root/frame3d-rigid-offset-direct.stdout.json"
+grep -Fq '"status":"completed"' "$offset_linear_direct/run-receipt.json"
+grep -Fq '"fallback_count":0' "$offset_linear_direct/result-ir.json"
+grep -Fq '"recovery_element_types":[1]' \
+  "$offset_linear_direct/result-recovery-ir.json"
+grep -Fq '"recovery_offsets":[0,12]' \
+  "$offset_linear_direct/result-recovery-ir.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$offset_linear_model" "$offset_linear_request_directory/analysis-request.json" \
+  --output-dir "$offset_linear_partial" --iteration-budget 1 \
+  > "$e2e_root/frame3d-rigid-offset-partial.stdout.json"
+grep -Fq '"status":"active"' "$offset_linear_partial/run-receipt.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-resume \
+  "$offset_linear_model" "$offset_linear_request_directory/analysis-request.json" \
+  "$offset_linear_partial/checkpoint.mlpcp" --output-dir "$offset_linear_resumed" \
+  > "$e2e_root/frame3d-rigid-offset-resumed.stdout.json"
+diff -r "$offset_linear_direct" "$offset_linear_resumed" \
+  > "$e2e_root/frame3d-rigid-offset-restart-diff.txt"
+
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10529,6 +10573,11 @@ model_modal_workbench_session_hash="$(sha256sum "$modal_workbench_directory/work
 model_modal_workbench_validation_receipt_hash="$(sha256sum "$modal_workbench_directory/02-validate/validation-receipt.json" | awk '{print $1}')"
 model_modal_workbench_report_receipt_hash="$(sha256sum "$modal_workbench_directory/06-report/report-receipt.json" | awk '{print $1}')"
 model_modal_workbench_inspect_hash="$(sha256sum "$modal_workbench_inspect" | awk '{print $1}')"
+offset_linear_model_hash="$(sha256sum "$offset_linear_model" | awk '{print $1}')"
+offset_linear_request_hash="$(sha256sum "$offset_linear_request_directory/analysis-request.json" | awk '{print $1}')"
+offset_linear_result_hash="$(sha256sum "$offset_linear_direct/result-ir.json" | awk '{print $1}')"
+offset_linear_recovery_hash="$(sha256sum "$offset_linear_direct/result-recovery-ir.json" | awk '{print $1}')"
+offset_linear_checkpoint_hash="$(sha256sum "$offset_linear_direct/checkpoint.mlpcp" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11402,6 +11451,10 @@ v92_receipt_json="${v91_receipt_json/structural-native-distribution-e2e.v91/stru
 model_modal_workbench_receipt_fields="\"workbench_model_modal_durable_session_surface_passed\":true,\"workbench_model_modal_durable_session_crash_reconciliation_passed\":true,\"workbench_model_modal_durable_session_restart_bitwise_passed\":true,\"workbench_model_modal_durable_session_tamper_rejected\":true,\"workbench_model_modal_durable_session_null_authority_passed\":true,\"workbench_model_modal_durable_session_sha256\":\"sha256:$model_modal_workbench_session_hash\",\"workbench_model_modal_durable_validation_receipt_sha256\":\"sha256:$model_modal_workbench_validation_receipt_hash\",\"workbench_model_modal_durable_report_receipt_sha256\":\"sha256:$model_modal_workbench_report_receipt_hash\",\"workbench_model_modal_durable_inspect_sha256\":\"sha256:$model_modal_workbench_inspect_hash\","
 v92_receipt_json="${v92_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_workbench_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v92_receipt_json" > "$temporary_receipt"
+v93_receipt_json="${v92_receipt_json/structural-native-distribution-e2e.v92/structural-native-distribution-e2e.v93}"
+frame3d_rigid_offset_receipt_fields="\"model_ir_frame3d_rigid_offset_linear_cpu_surface_passed\":true,\"model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed\":true,\"model_ir_frame3d_rigid_offset_linear_cpu_fallback_count\":0,\"model_ir_frame3d_rigid_offset_model_sha256\":\"sha256:$offset_linear_model_hash\",\"model_ir_frame3d_rigid_offset_request_sha256\":\"sha256:$offset_linear_request_hash\",\"model_ir_frame3d_rigid_offset_result_ir_sha256\":\"sha256:$offset_linear_result_hash\",\"model_ir_frame3d_rigid_offset_recovery_sha256\":\"sha256:$offset_linear_recovery_hash\",\"model_ir_frame3d_rigid_offset_checkpoint_sha256\":\"sha256:$offset_linear_checkpoint_hash\","
+v93_receipt_json="${v93_receipt_json/\"workbench_result_view_surface_passed\":true,/${frame3d_rigid_offset_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v93_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

@@ -132,6 +132,8 @@ def _frame_oracle_for(
     roll_rad: float,
     displacement: np.ndarray,
     direction: np.ndarray,
+    offset_i: np.ndarray | None = None,
+    offset_j: np.ndarray | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     e = 200.0
     nu = 0.25
@@ -141,7 +143,11 @@ def _frame_oracle_for(
     iy = 2.0e-5
     iz = 3.0e-5
     torsion_constant = 4.0e-5
-    x_axis = _normalize(node_j - node_i)
+    offset_i = np.zeros(3, dtype=np.float64) if offset_i is None else offset_i
+    offset_j = np.zeros(3, dtype=np.float64) if offset_j is None else offset_j
+    effective_node_i = node_i + offset_i
+    effective_node_j = node_j + offset_j
+    x_axis = _normalize(effective_node_j - effective_node_i)
     reference = np.asarray([0.0, 0.0, 1.0])
     if abs(np.dot(x_axis, reference)) > 0.95:
         reference = np.asarray([0.0, 1.0, 0.0])
@@ -153,7 +159,20 @@ def _frame_oracle_for(
     transform = np.zeros((12, 12), dtype=np.float64)
     for offset in (0, 3, 6, 9):
         transform[offset : offset + 3, offset : offset + 3] = rotation
-    length = np.linalg.norm(node_j - node_i)
+    rigid = np.eye(12, dtype=np.float64)
+    for translation, rotation_offset, arm in (
+        (0, 3, offset_i),
+        (6, 9, offset_j),
+    ):
+        rigid[translation : translation + 3, rotation_offset : rotation_offset + 3] = -np.asarray(
+            [
+                [0.0, -arm[2], arm[1]],
+                [arm[2], 0.0, -arm[0]],
+                [-arm[1], arm[0], 0.0],
+            ]
+        )
+    combined_transform = transform @ rigid
+    length = np.linalg.norm(effective_node_j - effective_node_i)
     stiffness = np.zeros((12, 12), dtype=np.float64)
     for left, right, value in (
         (0, 6, e * area / length),
@@ -218,9 +237,9 @@ def _frame_oracle_for(
     )
     polar_mass = density * (iy + iz) * length
     _scatter(mass, (3, 9), polar_mass / 6.0 * np.asarray([[2.0, 1.0], [1.0, 2.0]]))
-    global_stiffness = transform.T @ stiffness @ transform
-    global_mass = transform.T @ mass @ transform
-    local_displacement = transform @ displacement
+    global_stiffness = combined_transform.T @ stiffness @ combined_transform
+    global_mass = combined_transform.T @ mass @ combined_transform
+    local_displacement = combined_transform @ displacement
     return (
         global_stiffness,
         global_mass,
@@ -318,7 +337,7 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
         "material.plastic_trial",
         "material.committed",
         *(f"{kind}.{field}" for kind in (
-            "truss", "frame", "frame_rotated", "shell", "shell_rotated"
+            "truss", "frame", "frame_rotated", "frame_offset", "shell", "shell_rotated"
         ) for field in (
             "tangent", "consistent_mass", "residual", "jvp", "recovery"
         )),
@@ -385,8 +404,26 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
         ),
         np.asarray([-1.0, 2.0, -3.0, 4.0, -5.0, 6.0, -7.0, 8.0, -9.0]),
     )
+    offset_frame = _frame_oracle_for(
+        np.asarray([1.0, -2.0, 0.5]),
+        np.asarray([3.0, 1.0, 4.5]),
+        0.37,
+        np.asarray(
+            [0.001, -0.002, 0.003, -0.004, 0.005, -0.006,
+             0.007, -0.008, 0.009, -0.010, 0.011, -0.012],
+            dtype=np.float64,
+        ),
+        np.asarray(
+            [-6.0, 5.0, -4.0, 3.0, -2.0, 1.0,
+             0.5, -1.5, 2.5, -3.5, 4.5, -5.5],
+            dtype=np.float64,
+        ),
+        np.asarray([0.2, -0.1, 0.3]),
+        np.asarray([-0.15, 0.25, -0.05]),
+    )
     for prefix, oracle in (
         ("frame_rotated", rotated_frame),
+        ("frame_offset", offset_frame),
         ("shell_rotated", rotated_shell),
     ):
         for field, values in zip(

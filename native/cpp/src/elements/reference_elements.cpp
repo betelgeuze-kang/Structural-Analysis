@@ -33,6 +33,22 @@ void require_vector(
     return {left[0] - right[0], left[1] - right[1], left[2] - right[2]};
 }
 
+[[nodiscard]] Vector3 add(const Vector3& left, const Vector3& right) {
+    return {left[0] + right[0], left[1] + right[1], left[2] + right[2]};
+}
+
+[[nodiscard]] bool finite_vector(const Vector3& value) {
+    return std::all_of(value.begin(), value.end(), [](const double component) {
+        return std::isfinite(component);
+    });
+}
+
+[[nodiscard]] bool zero_vector(const Vector3& value) {
+    return std::all_of(value.begin(), value.end(), [](const double component) {
+        return component == 0.0;
+    });
+}
+
 [[nodiscard]] double dot(const Vector3& left, const Vector3& right) {
     return left[0] * right[0] + left[1] * right[1] + left[2] * right[2];
 }
@@ -174,6 +190,51 @@ void scatter(
         }
     }
     return transform;
+}
+
+[[nodiscard]] std::vector<double> rigid_end_offset_transform_12(
+    const Vector3& offset_i,
+    const Vector3& offset_j) {
+    std::vector<double> transform(12U * 12U, 0.0);
+    for (std::size_t index = 0U; index < 12U; ++index) {
+        transform[index * 12U + index] = 1.0;
+    }
+    const auto add_rigid_arm = [&transform](const std::size_t translation_offset,
+                                   const std::size_t rotation_offset,
+                                   const Vector3& arm) {
+        const std::array<double, 9> negative_skew {
+            0.0, arm[2], -arm[1],
+            -arm[2], 0.0, arm[0],
+            arm[1], -arm[0], 0.0,
+        };
+        for (std::size_t row = 0U; row < 3U; ++row) {
+            for (std::size_t column = 0U; column < 3U; ++column) {
+                transform[(translation_offset + row) * 12U + rotation_offset + column] =
+                    negative_skew[row * 3U + column];
+            }
+        }
+    };
+    add_rigid_arm(0U, 3U, offset_i);
+    add_rigid_arm(6U, 9U, offset_j);
+    return transform;
+}
+
+[[nodiscard]] std::vector<double> multiply_square_12(
+    const std::span<const double> left,
+    const std::span<const double> right) {
+    if (left.size() != 12U * 12U || right.size() != 12U * 12U) {
+        throw std::logic_error("internal 12x12 matrix shape mismatch");
+    }
+    std::vector<double> output(12U * 12U, 0.0);
+    for (std::size_t row = 0U; row < 12U; ++row) {
+        for (std::size_t column = 0U; column < 12U; ++column) {
+            for (std::size_t inner = 0U; inner < 12U; ++inner) {
+                output[row * 12U + column] +=
+                    left[row * 12U + inner] * right[inner * 12U + column];
+            }
+        }
+    }
+    return output;
 }
 
 [[nodiscard]] std::vector<double> frame_local_stiffness(
@@ -329,12 +390,29 @@ ElementOperatorResponse evaluate_frame3d(const Frame3dInput& input) {
     }
     require_vector(input.displacement, 12U, "frame displacement");
     require_vector(input.direction, 12U, "frame direction");
-    const auto length = norm(subtract(input.node_j_m, input.node_i_m));
+    if (!finite_vector(input.offset_i_global_m) || !finite_vector(input.offset_j_global_m)) {
+        throw std::invalid_argument("frame rigid offsets must be finite");
+    }
+    const auto has_rigid_offset =
+        !zero_vector(input.offset_i_global_m) || !zero_vector(input.offset_j_global_m);
+    const auto effective_node_i = has_rigid_offset
+        ? add(input.node_i_m, input.offset_i_global_m)
+        : input.node_i_m;
+    const auto effective_node_j = has_rigid_offset
+        ? add(input.node_j_m, input.offset_j_global_m)
+        : input.node_j_m;
+    const auto length = norm(subtract(effective_node_j, effective_node_i));
     if (!finite_positive(length) || length <= 1.0e-12) {
         throw std::invalid_argument("frame chord is degenerate");
     }
-    const auto transform = block_transform_12(
-        frame_rotation(input.node_i_m, input.node_j_m, input.local_axis_rotation_rad));
+    auto transform = block_transform_12(
+        frame_rotation(effective_node_i, effective_node_j, input.local_axis_rotation_rad));
+    if (has_rigid_offset) {
+        transform = multiply_square_12(
+            transform,
+            rigid_end_offset_transform_12(
+                input.offset_i_global_m, input.offset_j_global_m));
+    }
     const auto local_stiffness = frame_local_stiffness(input, length);
     const auto local_mass = frame_local_mass(input, length);
     const auto local_displacement = multiply(transform, 12U, 12U, input.displacement);

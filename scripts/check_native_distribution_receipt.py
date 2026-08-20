@@ -1081,6 +1081,17 @@ V92_MODEL_IR_MODAL_WORKBENCH_KEYS = {
     "workbench_model_modal_durable_inspect_sha256",
 }
 V92_EXPECTED_KEYS = V91_EXPECTED_KEYS | V92_MODEL_IR_MODAL_WORKBENCH_KEYS
+V93_FRAME3D_RIGID_OFFSET_KEYS = {
+    "model_ir_frame3d_rigid_offset_linear_cpu_surface_passed",
+    "model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed",
+    "model_ir_frame3d_rigid_offset_linear_cpu_fallback_count",
+    "model_ir_frame3d_rigid_offset_model_sha256",
+    "model_ir_frame3d_rigid_offset_request_sha256",
+    "model_ir_frame3d_rigid_offset_result_ir_sha256",
+    "model_ir_frame3d_rigid_offset_recovery_sha256",
+    "model_ir_frame3d_rigid_offset_checkpoint_sha256",
+}
+V93_EXPECTED_KEYS = V92_EXPECTED_KEYS | V93_FRAME3D_RIGID_OFFSET_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1122,6 +1133,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v93_receipt = receipt_schema_version == "structural-native-distribution-e2e.v93"
+    if is_v93_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v92"
     is_v92_receipt = receipt_schema_version == "structural-native-distribution-e2e.v92"
     if is_v92_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v91"
@@ -1464,6 +1478,7 @@ def validate(
         "structural-native-distribution-e2e.v90": V90_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v91": V91_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v92": V92_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v93": V93_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1604,6 +1619,36 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v93_receipt:
+        for name in (
+            "model_ir_frame3d_rigid_offset_linear_cpu_surface_passed",
+            "model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        fallback_count = payload.get(
+            "model_ir_frame3d_rigid_offset_linear_cpu_fallback_count"
+        )
+        if isinstance(fallback_count, bool) or fallback_count != 0:
+            errors.append(
+                "model_ir_frame3d_rigid_offset_linear_cpu_fallback_count must be integer zero"
+            )
+        hash_names = (
+            "model_ir_frame3d_rigid_offset_model_sha256",
+            "model_ir_frame3d_rigid_offset_request_sha256",
+            "model_ir_frame3d_rigid_offset_result_ir_sha256",
+            "model_ir_frame3d_rigid_offset_recovery_sha256",
+            "model_ir_frame3d_rigid_offset_checkpoint_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(hash_names):
+            errors.append("all installed Frame3D rigid-offset identities must differ")
     if is_v92_receipt:
         for name in (
             "workbench_model_modal_durable_session_surface_passed",

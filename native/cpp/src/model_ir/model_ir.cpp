@@ -2640,13 +2640,12 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
     output.global_dof_count = model.nodes.size() * kDofsPerNode;
     output.elements.reserve(model.elements.size());
     for (const auto& element : model.elements) {
-        if (!element.material_id.has_value() || !all_zero(element.offset_i)
-            || !all_zero(element.offset_j) || !element.releases_i.empty()
+        if (!element.material_id.has_value() || !element.releases_i.empty()
             || !element.releases_j.empty() || element.integration_order.has_value()
             || element.uniform_load.has_value()) {
             fail(
                 SA_ERR_ANALYSIS_NOT_READY,
-                "ModelIR linear reference element has unsupported state, offsets, releases, or member loading");
+                "ModelIR linear reference element has unsupported state, releases, or member loading");
         }
         const auto node_i = nodes.find(element.node_ids[0]);
         const auto node_j = nodes.find(element.node_ids[1]);
@@ -2692,10 +2691,17 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
             projected.iz_m4 = frame->iz_m4;
             projected.torsional_constant_m4 = frame->torsional_constant_m4;
             projected.local_axis_rotation_rad = *element.local_axis_rotation_rad;
+            projected.offset_i_global_m = element.offset_i;
+            projected.offset_j_global_m = element.offset_j;
         } else if (element.type == SA_ELEMENT_TRUSS_3D
             && element.formulation == SA_FORMULATION_LINEAR_TRUSS_3D
             && section->second->family == SA_SECTION_TRUSS_3D
             && !element.local_axis_rotation_rad.has_value()) {
+            if (!all_zero(element.offset_i) || !all_zero(element.offset_j)) {
+                fail(
+                    SA_ERR_ANALYSIS_NOT_READY,
+                    "ModelIR linear Truss3D rigid offsets are unsupported");
+            }
             const auto* const truss = std::get_if<sa_truss_section_parameters_v1>(
                 &section->second->parameters);
             if (truss == nullptr) {

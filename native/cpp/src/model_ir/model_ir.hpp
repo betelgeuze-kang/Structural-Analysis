@@ -43,6 +43,8 @@ struct LinearReferenceElement final {
     double iz_m4 {};
     double torsional_constant_m4 {};
     double local_axis_rotation_rad {};
+    std::array<double, 3> offset_i_global_m {};
+    std::array<double, 3> offset_j_global_m {};
 };
 
 struct LinearReferenceNodalLoad final {

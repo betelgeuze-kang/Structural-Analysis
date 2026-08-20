@@ -760,13 +760,21 @@ void copy_finite(
                     input.iz_m4,
                     input.torsional_constant_m4,
                 };
+                const auto zero_offset = [](const auto& offset) {
+                    return std::all_of(offset.begin(), offset.end(), [](const double value) {
+                        return value == 0.0;
+                    });
+                };
                 if (input.displacement.size() != packed.dof_count
                     || input.direction.size() != packed.dof_count
                     || !std::isfinite(input.local_axis_rotation_rad)
+                    || !zero_offset(input.offset_i_global_m)
+                    || !zero_offset(input.offset_j_global_m)
                     || std::any_of(properties.begin(), properties.end(), [](const double value) {
                            return !std::isfinite(value) || value <= 0.0;
                        })) {
-                    throw std::invalid_argument("frame HIP input is outside the bounded domain");
+                    throw std::invalid_argument(
+                        "frame HIP input is outside the bounded zero-offset domain");
                 }
             } else {
                 packed.kind = static_cast<std::uint32_t>(

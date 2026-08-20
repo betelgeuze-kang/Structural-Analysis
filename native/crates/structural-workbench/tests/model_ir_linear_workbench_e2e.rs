@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Value};
 use structural_cli::{execute_model_ir_linear_analysis, execute_native_mgt_import};
-use structural_contracts::model_ir::canonicalize_model_ir_v2;
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::product_ir::sha256_identity;
 use structural_report::{validate_deterministic_localized_pdf_v2, validate_deterministic_pdf_v1};
 
@@ -121,7 +121,7 @@ fn prepare_inputs(root: &Path) -> Inputs {
     let request_bytes = fs::read(&request).expect("linear request fixture");
     let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
         .expect("direct terminal result");
-    assert!(direct.is_complete());
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
     let recovery: Value = serde_json::from_str(
         direct
             .result_recovery_ir_json()
@@ -170,6 +170,101 @@ fn prepare_inputs(root: &Path) -> Inputs {
         .expect("external result JSON"),
     )
     .expect("external result");
+    Inputs {
+        model,
+        request,
+        external,
+        source,
+    }
+}
+
+fn prepare_offset_inputs(root: &Path) -> Inputs {
+    let repository = repository_root();
+    let baseline = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let baseline_request =
+        repository.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let mut model_value: Value =
+        serde_json::from_slice(&fs::read(baseline).expect("baseline ModelIR fixture"))
+            .expect("baseline ModelIR JSON");
+    model_value["model_id"] = json!("engine-v2-frame-cantilever-rigid-offset");
+    model_value["elements"][0]["offsets"]["i_global_m"] = json!([0.1, 0.0, 0.0]);
+    model_value["elements"][0]["offsets"]["j_global_m"] = json!([-0.1, 0.0, 0.0]);
+    let model = root.join("frame-rigid-offset-model-ir.json");
+    fs::write(
+        &model,
+        canonicalize_model_ir_v2(&model_value).expect("canonical offset ModelIR"),
+    )
+    .expect("offset ModelIR fixture");
+
+    let model_bytes = fs::read(&model).expect("offset ModelIR bytes");
+    let parsed_model = parse_model_ir_v2(&model_bytes).expect("strict offset ModelIR");
+    let mut request_value: Value = serde_json::from_slice(
+        &fs::read(&baseline_request).expect("baseline linear request fixture"),
+    )
+    .expect("baseline linear request JSON");
+    request_value["model_identity"] = json!({
+        "content_hash": parsed_model.content_hash(),
+        "semantic_hash": parsed_model.semantic_hash(),
+        "provenance_hash": parsed_model.provenance_hash()
+    });
+    let request = root.join("frame-rigid-offset-request.json");
+    fs::write(
+        &request,
+        canonicalize_model_ir_v2(&request_value).expect("canonical offset request"),
+    )
+    .expect("offset request fixture");
+    let request_bytes = fs::read(&request).expect("linear request fixture");
+    let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct offset terminal result");
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct offset recovery IR"),
+    )
+    .expect("offset recovery JSON");
+    let displacement = recovery["global_displacement"][7]
+        .as_f64()
+        .expect("offset node 2 UY displacement");
+    let source_bytes = b"language-neutral Frame3D rigid-offset Workbench oracle v1\n";
+    let source = root.join("offset-linear-oracle.txt");
+    fs::write(&source, source_bytes).expect("offset source artifact");
+    let external = root.join("offset-linear-external.json");
+    fs::write(
+        &external,
+        serde_json::to_vec(&json!({
+            "schema_version": "structural-model-ir-linear-external-result.v1",
+            "comparison_id": "workbench-model-linear-rigid-offset-c5",
+            "source": {
+                "solver_family": "reference_oracle",
+                "solver_version": "language-neutral-rigid-offset-v1",
+                "run_id": "workbench-model-linear-rigid-offset-run",
+                "evidence_kind": "language_neutral_golden",
+                "source_artifact_hash": sha256_identity(source_bytes),
+                "executable_hash": null
+            },
+            "binding": {
+                "analysis_kind": "model_ir_linear_static",
+                "case_id": recovery["case_id"],
+                "model_identity": recovery["model_identity"],
+                "analysis_request_hash": recovery["analysis_request_hash"],
+                "load_pattern_id": recovery["load_pattern_id"],
+                "coordinate_frame": "model_global"
+            },
+            "observations": [{
+                "observation_id": "offset-cantilever-tip-uy",
+                "external_location_id": "node/N2/UY",
+                "global_dof_index": 7,
+                "dof": "UY",
+                "native_result_path": "/global_displacement/7",
+                "unit": "m",
+                "value": displacement,
+                "tolerance": {"absolute": 0.0, "relative": 0.0}
+            }]
+        }))
+        .expect("offset external result JSON"),
+    )
+    .expect("offset external result");
     Inputs {
         model,
         request,
@@ -1892,5 +1987,90 @@ fn linear_profile_rejects_wrong_external_mapping_before_workspace_publication() 
     assert!(String::from_utf8_lossy(&output.stdout)
         .contains("model_ir_linear_external_dof_mapping_invalid"));
     assert!(!workspace.exists());
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn frame3d_rigid_offsets_survive_workbench_restart_and_result_surfaces() {
+    let root = temporary_root("rigid-offset");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_offset_inputs(&root);
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    assert_success(&run_workbench(&import_arguments(&inputs, &restarted)));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted offset artifact"),
+            fs::read(direct.join(&relative)).expect("direct offset artifact"),
+            "rigid-offset restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let imported_model: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/model-ir.json")).expect("imported offset ModelIR"),
+    )
+    .expect("imported offset ModelIR JSON");
+    assert_eq!(
+        imported_model["elements"][0]["offsets"],
+        json!({"i_global_m": [0.1, 0, 0], "j_global_m": [-0.1, 0, 0]})
+    );
+    let recovery = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("offset recovery ResultIR"),
+        "recovery_hash",
+    );
+    assert_eq!(recovery["recovery_element_types"], json!([1]));
+    assert_eq!(recovery["recovery_offsets"], json!([0, 12]));
+    let result = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-ir.json")).expect("offset sparse ResultIR"),
+        "result_hash",
+    );
+    assert_eq!(result["backend_receipt"]["fallback_count"], 0);
+
+    let element = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_success(&element);
+    let element = String::from_utf8(element.stdout).expect("offset element view UTF-8");
+    assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
+    assert!(element.contains("i_FX_N="));
+
     fs::remove_dir_all(root).expect("cleanup");
 }

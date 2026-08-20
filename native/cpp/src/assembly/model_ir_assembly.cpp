@@ -418,6 +418,8 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                     element.local_axis_rotation_rad,
                     local_displacement,
                     local_direction,
+                    element.offset_i_global_m,
+                    element.offset_j_global_m,
                 });
                 owned.push_back({
                     element.stable_index,

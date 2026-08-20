@@ -23,6 +23,7 @@ EXPECTED_OWNERS = {
     "mgt_import_health": "structural-cli",
     "reference_materials_elements_cpu": "structural_elements",
     "dense_assembly_cpu": "structural_assembly",
+    "modelir_frame3d_rigid_offset_linear_cpu": "structural_assembly",
     "modelir_linear_reaction_results": "structural-contracts",
     "modelir_linear_checkpoint": "structural-runtime",
     "modelir_linear_product_e2e": "structural-cli",
@@ -142,8 +143,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v92",
-        "frozen_installed_receipts": "v1-v91",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v93",
+        "frozen_installed_receipts": "v1-v92",
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",
             "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -212,7 +213,7 @@ EXPECTED_EVIDENCE_CONTRACTS = {
     "native_deployment": {
         "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v14",
         "frozen_rootfs_receipts": "v1-v13",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v92",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v93",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },

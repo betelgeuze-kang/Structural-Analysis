@@ -81,6 +81,23 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "nonzero prescribed constraints" in assembly["claim"]
     assert "shell/nonlinear ModelIR graphs" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_frame3d_rigid_offset_linear_cpu"
+        )
+        is True
+    )
+    rigid_offset = payload["capabilities"]["modelir_frame3d_rigid_offset_linear_cpu"]
+    assert rigid_offset["cutover_gate"] == "C5"
+    assert rigid_offset["owner"] == "structural_assembly"
+    assert "effective element endpoints" in rigid_offset["claim"]
+    assert "rigid-arm translation-rotation kinematics" in rigid_offset["claim"]
+    assert "independent NumPy oracle" in rigid_offset["claim"]
+    assert "byte-identical direct/restart artifacts" in rigid_offset["claim"]
+    assert "strict weak-axis request" in rigid_offset["claim"]
+    assert "Truss3D offsets" in rigid_offset["claim"]
+    assert "installed static/shared distribution v93" in rigid_offset["claim"]
+    assert "rootfs authority" in rigid_offset["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
     assert reaction_results["owner"] == "structural-contracts"
@@ -1676,9 +1693,9 @@ def test_native_distribution_capability_is_bounded_c5():
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v92"
+        == "structural-native-distribution-e2e.v93"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v91"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v92"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1811,7 +1828,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v13"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v92"
+        == "structural-native-distribution-e2e.v93"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

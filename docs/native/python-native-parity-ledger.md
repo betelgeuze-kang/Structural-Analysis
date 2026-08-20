@@ -139,8 +139,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   internal load, external load and reactions with the `internal - external` convention. Its
   three-node mixed graph
   and the direct, exact-two, explicit three-pattern and consolidated nested external-load vectors independently match NumPy for all 43
-  structural entries, including the constrained map/load/reaction vectors. This is not general
-  ModelIR assembly: nonzero constraints, offsets/releases,
+  structural entries, including the constrained map/load/reaction vectors. A separate finite
+  global Frame3D rigid-offset row crosses C++ ModelIR assembly and safe Rust deterministically;
+  a rotated 3D offset element independently matches NumPy tangent, mass, residual, JVP and local
+  recovery. The source-built Workbench evidence is narrower: one axial-offset cantilever completes
+  exact direct/restart, while the tested coupled non-axis weak-load request currently terminates
+  with the product PCG singularity taxonomy and is not promoted. This is not general
+  ModelIR assembly: nonzero constraints, releases, Truss3D offsets,
   self-weight, nested graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the

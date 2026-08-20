@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::thread;
 
+use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_ffi::{Api, ModelIrLinearAssemblyRequest};
 use structural_ffi_sys::{
@@ -30,6 +31,14 @@ fn axial_request() -> ModelIrLinearAssemblyRequest {
         displacement: vec![0.0; 12],
         direction: vec![0.0; 12],
     }
+}
+
+fn offset_fixture() -> ModelIrV2Document {
+    let mut value = fixture().value().clone();
+    value["elements"][0]["offsets"]["i_global_m"] = json!([0.0, 0.2, 0.0]);
+    value["elements"][0]["offsets"]["j_global_m"] = json!([0.0, -0.1, 0.1]);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("offset fixture JSON"))
+        .expect("strict offset fixture")
 }
 
 #[test]
@@ -88,6 +97,44 @@ fn v1_13_safe_wrapper_preserves_identity_and_canonical_csr() {
     assert_eq!(first.recovery_values, [0.0; 12]);
     assert_eq!(first.execution_backend, SA_EXECUTION_BACKEND_CPU);
     assert_eq!(first.fallback_count, 0);
+}
+
+#[test]
+fn safe_wrapper_preserves_frame3d_rigid_offsets_through_native_assembly() {
+    let baseline_source = fixture();
+    let offset_source = offset_fixture();
+    let api = Api::load_model_ir_linear_assembly().expect("v1.13 API");
+    let baseline_model = api
+        .create_model_ir(&baseline_source)
+        .expect("baseline native model");
+    let offset_model = api
+        .create_model_ir(&offset_source)
+        .expect("offset native model");
+    let mut request = axial_request();
+    request.displacement[7] = 0.002;
+    request.displacement[9] = -0.003;
+    request.direction[8] = 1.0;
+    request.direction[10] = -0.5;
+
+    let baseline = baseline_model
+        .assemble_linear_reference(&request)
+        .expect("baseline assembly");
+    let offset = offset_model
+        .assemble_linear_reference(&request)
+        .expect("offset assembly");
+    let repeated = offset_model
+        .assemble_linear_reference(&request)
+        .expect("deterministic offset repeat");
+
+    assert_eq!(offset, repeated);
+    assert_ne!(offset.tangent, baseline.tangent);
+    assert_ne!(offset.consistent_mass, baseline.consistent_mass);
+    assert_ne!(offset.internal_force, baseline.internal_force);
+    assert_ne!(offset.jvp, baseline.jvp);
+    assert_ne!(offset.recovery_values, baseline.recovery_values);
+    assert_eq!(offset.model_content_hash, offset_source.content_hash());
+    assert_eq!(offset.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(offset.fallback_count, 0);
 }
 
 #[test]

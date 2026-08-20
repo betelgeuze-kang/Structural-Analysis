@@ -123,6 +123,22 @@ int main() {
     });
     emit_response("frame_rotated", rotated_frame);
 
+    const auto offset_frame = structural::elements::evaluate_frame3d({
+        {1.0, -2.0, 0.5},
+        {3.0, 1.0, 4.5},
+        material,
+        0.01,
+        2.0E-5,
+        3.0E-5,
+        4.0E-5,
+        0.37,
+        rotated_frame_displacement,
+        rotated_frame_direction,
+        {0.2, -0.1, 0.3},
+        {-0.15, 0.25, -0.05},
+    });
+    emit_response("frame_offset", offset_frame);
+
     const std::array<double, 9> shell_displacement {
         0.0, 0.0, 0.0,
         0.002, 0.0, 0.0,

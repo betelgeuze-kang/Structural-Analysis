@@ -74,8 +74,12 @@ an implemented C3 integration candidate, not a promoted sequential C3 gate.
 
 ## Fail-closed boundary
 
-The projection rejects non-linear material or formulation state, frame2d, shell, rigid offsets,
-end releases, member loads, nonzero prescribed constraints, self-weight, direct combinations
+The projection accepts finite global rigid-end offsets for Euler-Bernoulli Frame3D only and applies
+the same effective-endpoint plus rigid-arm mapping to stiffness, mass, residual, JVP and local
+end-force recovery. General nonzero 3D offsets match an independent NumPy operator oracle, while
+exact zero offsets retain the previous arithmetic path. Truss3D offsets fail closed. The projection
+otherwise rejects non-linear material or formulation state, frame2d, shell, end releases, member
+loads, nonzero prescribed constraints, self-weight, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
 time functions, construction stages, and declared unsupported features. It does not solve the

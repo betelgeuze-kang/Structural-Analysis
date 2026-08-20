@@ -105,6 +105,27 @@ int main() {
     expect_symmetric(frame.consistent_mass, 12U);
     expect(frame.recovery.size() == 12U, "frame local end-force recovery size");
 
+    const auto offset_frame = structural::elements::evaluate_frame3d({
+        {0.0, 0.0, 0.0},
+        {2.0, 0.0, 0.0},
+        material,
+        0.01,
+        2.0E-5,
+        3.0E-5,
+        4.0E-5,
+        0.0,
+        frame_displacement,
+        frame_direction,
+        {0.0, 0.2, 0.0},
+        {0.0, -0.1, 0.1},
+    });
+    expect_symmetric(offset_frame.tangent, 12U);
+    expect_symmetric(offset_frame.consistent_mass, 12U);
+    expect(offset_frame.recovery.size() == 12U, "offset frame local end-force recovery size");
+    expect(
+        offset_frame.tangent != frame.tangent,
+        "nonzero rigid offsets must change the nodal tangent");
+
     const std::array<double, 9> shell_displacement {
         0.0, 0.0, 0.0,
         0.002, 0.0, 0.0,
@@ -159,5 +180,41 @@ int main() {
             }));
         },
         "non-finite element response must fail");
+    expect_throws(
+        [&material, &frame_displacement, &frame_direction] {
+            static_cast<void>(structural::elements::evaluate_frame3d({
+                {0.0, 0.0, 0.0},
+                {2.0, 0.0, 0.0},
+                material,
+                0.01,
+                2.0E-5,
+                3.0E-5,
+                4.0E-5,
+                0.0,
+                frame_displacement,
+                frame_direction,
+                {std::numeric_limits<double>::quiet_NaN(), 0.0, 0.0},
+                {0.0, 0.0, 0.0},
+            }));
+        },
+        "non-finite frame rigid offset must fail");
+    expect_throws(
+        [&material, &frame_displacement, &frame_direction] {
+            static_cast<void>(structural::elements::evaluate_frame3d({
+                {0.0, 0.0, 0.0},
+                {2.0, 0.0, 0.0},
+                material,
+                0.01,
+                2.0E-5,
+                3.0E-5,
+                4.0E-5,
+                0.0,
+                frame_displacement,
+                frame_direction,
+                {1.0, 0.0, 0.0},
+                {-1.0, 0.0, 0.0},
+            }));
+        },
+        "degenerate effective frame chord must fail");
     return EXIT_SUCCESS;
 }

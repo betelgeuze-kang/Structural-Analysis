@@ -695,8 +695,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    remain hosted CPU C5 evidence with Python/Node lookup 0 and fallback 0; this is not rootfs,
    external-comparison, engineering-acceptance, geometric mode-shape, sparse/buckling/shell,
    public/customer, HIP C2 or C6 authority.
+107. authors a linear request for an axial rigid-offset Frame3D cantilever through the installed
+   Workbench, then executes installed direct, one-iteration partial and model-bound resumed CPU
+   products. The append-only v93 receipt requires byte-identical direct/resumed directories,
+   completed status, fallback 0 and one 12-component Frame3D recovery row, and binds five distinct
+   model, request, ResultIR, recovery and checkpoint identities. Static and shared receipts remain
+   hosted CPU C5 evidence; this fixture does not promote the separately verified general rotated
+   three-dimensional offset operator to product PCG authority and is not Truss3D-offset, release,
+   member-load, self-weight, offset-aware visualization, rootfs, HIP C2, engineering-verdict or C6
+   authority.
 
-   The receipt checker continues to accept frozen v1 through v91 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v92 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
@@ -704,7 +713,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    installed ModelIR-linear element-recovery-view authority, and no pre-v90 receipt is
    installed Workbench-authored ModelIR modal product authority, and no pre-v91 receipt is
    installed model-bound modal restart and result-view authority, and no pre-v92 receipt is
-   installed durable modal Workbench-session authority. Its explicit compatibility
+   installed durable modal Workbench-session authority, and no pre-v93 receipt is installed
+   Frame3D rigid-end-offset linear CPU product authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,

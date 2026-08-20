@@ -711,7 +711,7 @@ struct ReactionStorage final {
 [[nodiscard]] bool unsupported_graph_sizes_fail_atomically() {
     const auto api = load_api(SA_ABI_V1_13);
     structural::tests::ModelIrAssemblyFixture fixture;
-    fixture.elements[0].offset_i_global_m[0] = 0.1;
+    fixture.elements[1].offset_i_global_m[0] = 0.1;
     sa_model_ir_handle_v1* handle = nullptr;
     CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
     auto sizes = empty_sizes();

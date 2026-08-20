@@ -421,13 +421,33 @@ int main() {
     structural::tests::ModelIrAssemblyFixture offset_fixture;
     offset_fixture.elements[0].offset_i_global_m[0] = 0.1;
     const structural::model_ir::Model offset_model(offset_fixture.descriptor);
+    const auto offset_result = structural::assembly::assemble_model_ir_linear_reference(
+        offset_model, "lp", displacement, direction);
+    expect(
+        offset_result.operator_result.tangent != result.operator_result.tangent,
+        "Frame3D rigid offset changes the assembled tangent");
+    expect(
+        offset_result.operator_result.consistent_mass != result.operator_result.consistent_mass,
+        "Frame3D rigid offset changes the assembled mass");
+    expect(
+        offset_result.element_recovery[0].values != result.element_recovery[0].values,
+        "Frame3D rigid offset changes local end-force recovery");
+    const auto repeated_offset = structural::assembly::assemble_model_ir_linear_reference(
+        offset_model, "lp", displacement, direction);
+    expect(
+        repeated_offset.operator_result.tangent == offset_result.operator_result.tangent,
+        "Frame3D rigid offset assembly is deterministic");
+
+    structural::tests::ModelIrAssemblyFixture truss_offset_fixture;
+    truss_offset_fixture.elements[1].offset_i_global_m[0] = 0.1;
+    const structural::model_ir::Model truss_offset_model(truss_offset_fixture.descriptor);
     expect_status(
-        [&offset_model, &displacement, &direction] {
+        [&truss_offset_model, &displacement, &direction] {
             static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
-                offset_model, "lp", displacement, direction));
+                truss_offset_model, "lp", displacement, direction));
         },
         SA_ERR_ANALYSIS_NOT_READY,
-        "unsupported rigid offset must fail closed");
+        "unsupported Truss3D rigid offset must fail closed");
 
     structural::tests::ModelIrAssemblyFixture constraint_fixture;
     const std::array<sa_prescribed_value_v1, 1> prescribed {{
