@@ -263,6 +263,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--frame3d-self-weight-direct-root",
             "--frame3d-self-weight-partial-root",
             "--frame3d-self-weight-resumed-root",
+            "--frame3d-member-distributed-load-model",
+            "--frame3d-member-distributed-load-request-root",
+            "--frame3d-member-distributed-load-direct-root",
+            "--frame3d-member-distributed-load-partial-root",
+            "--frame3d-member-distributed-load-resumed-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -519,6 +524,16 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--frame3d-self-weight-partial-root")?;
     let frame3d_self_weight_resumed_root =
         required_path(options, "--frame3d-self-weight-resumed-root")?;
+    let frame3d_member_distributed_load_model =
+        required_path(options, "--frame3d-member-distributed-load-model")?;
+    let frame3d_member_distributed_load_request_root =
+        required_path(options, "--frame3d-member-distributed-load-request-root")?;
+    let frame3d_member_distributed_load_direct_root =
+        required_path(options, "--frame3d-member-distributed-load-direct-root")?;
+    let frame3d_member_distributed_load_partial_root =
+        required_path(options, "--frame3d-member-distributed-load-partial-root")?;
+    let frame3d_member_distributed_load_resumed_root =
+        required_path(options, "--frame3d-member-distributed-load-resumed-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -679,6 +694,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         frame3d_self_weight_direct_root: &frame3d_self_weight_direct_root,
         frame3d_self_weight_partial_root: &frame3d_self_weight_partial_root,
         frame3d_self_weight_resumed_root: &frame3d_self_weight_resumed_root,
+        frame3d_member_distributed_load_model: &frame3d_member_distributed_load_model,
+        frame3d_member_distributed_load_request_root: &frame3d_member_distributed_load_request_root,
+        frame3d_member_distributed_load_direct_root: &frame3d_member_distributed_load_direct_root,
+        frame3d_member_distributed_load_partial_root: &frame3d_member_distributed_load_partial_root,
+        frame3d_member_distributed_load_resumed_root: &frame3d_member_distributed_load_resumed_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,

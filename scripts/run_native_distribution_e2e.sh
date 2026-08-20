@@ -548,6 +548,61 @@ env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-res
 diff -r "$self_weight_linear_direct" "$self_weight_linear_resumed" \
   > "$e2e_root/frame3d-self-weight-restart-diff.txt"
 
+member_load_linear_model="$e2e_root/frame3d-member-load-model-ir.json"
+sed \
+  -e 's/engine-v2-frame-cantilever/engine-v2-frame-cantilever-member-load-installed/' \
+  -e '/"id": "LC_WEAK"/,/"source_id": "generated:LC_WEAK"/ {
+    /"nodal_loads": \[/,/^      \],/c\
+      "nodal_loads": [],
+  }' \
+  -e '/"id": "LC_WEAK"/,/"source_id": "generated:LC_WEAK"/ {
+    /"source_id": "generated:LC_WEAK"/i\
+      "member_distributed_loads": [{"id": "ML_WEAK_E1", "index": 0, "element_id": "E1", "basis": "initial_member_local", "distribution": "uniform_full_span", "components_si": {"qx_n_per_m": 0.0, "qy_n_per_m": -1000.0, "qz_n_per_m": 0.0}, "source_id": "generated:ML_WEAK_E1", "extensions": {}}],
+  }' \
+  "$linear_model" > "$member_load_linear_model"
+grep -Fq '"model_id": "engine-v2-frame-cantilever-member-load-installed"' \
+  "$member_load_linear_model"
+grep -Fq '"member_distributed_loads": [' "$member_load_linear_model"
+grep -Fq '"qy_n_per_m": -1000.0' "$member_load_linear_model"
+member_load_linear_request_directory="$e2e_root/frame3d-member-load-request"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  model-create-linear-analysis-request "$member_load_linear_model" \
+  --case model-frame-member-load-linear-c5 --load-pattern LC_WEAK \
+  --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+  --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+  --output-dir "$member_load_linear_request_directory" \
+  > "$e2e_root/frame3d-member-load-request.stdout.json"
+grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+  "$member_load_linear_request_directory/request-receipt.json"
+member_load_linear_direct="$e2e_root/frame3d-member-load-direct"
+member_load_linear_partial="$e2e_root/frame3d-member-load-partial"
+member_load_linear_resumed="$e2e_root/frame3d-member-load-resumed"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$member_load_linear_model" "$member_load_linear_request_directory/analysis-request.json" \
+  --output-dir "$member_load_linear_direct" \
+  > "$e2e_root/frame3d-member-load-direct.stdout.json"
+grep -Fq '"status":"completed"' "$member_load_linear_direct/run-receipt.json"
+grep -Fq '"fallback_count":0' "$member_load_linear_direct/result-ir.json"
+grep -Fq '"active_external_load":[0,-1000,0,0,0,333.3333333333333]' \
+  "$member_load_linear_direct/result-recovery-ir.json"
+grep -Fq '"global_displacement":[0,0,0,0,0,0,0,-0.00019999999999999998' \
+  "$member_load_linear_direct/result-recovery-ir.json"
+grep -Fq '"recovery_values":[0,2000.0000000000007,0,0,0,2000.0000000000002' \
+  "$member_load_linear_direct/result-recovery-ir.json"
+grep -Fq '"reactions":[0,2000.0000000000007,0,0,0,2000.0000000000002]' \
+  "$member_load_linear_direct/reaction-result-ir.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$member_load_linear_model" "$member_load_linear_request_directory/analysis-request.json" \
+  --output-dir "$member_load_linear_partial" --iteration-budget 1 \
+  > "$e2e_root/frame3d-member-load-partial.stdout.json"
+grep -Fq '"status":"active"' "$member_load_linear_partial/run-receipt.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-resume \
+  "$member_load_linear_model" "$member_load_linear_request_directory/analysis-request.json" \
+  "$member_load_linear_partial/checkpoint.mlpcp" --output-dir "$member_load_linear_resumed" \
+  > "$e2e_root/frame3d-member-load-resumed.stdout.json"
+diff -r "$member_load_linear_direct" "$member_load_linear_resumed" \
+  > "$e2e_root/frame3d-member-load-restart-diff.txt"
+
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10693,6 +10748,12 @@ self_weight_linear_result_hash="$(sha256sum "$self_weight_linear_direct/result-i
 self_weight_linear_recovery_hash="$(sha256sum "$self_weight_linear_direct/result-recovery-ir.json" | awk '{print $1}')"
 self_weight_linear_reaction_hash="$(sha256sum "$self_weight_linear_direct/reaction-result-ir.json" | awk '{print $1}')"
 self_weight_linear_checkpoint_hash="$(sha256sum "$self_weight_linear_direct/checkpoint.mlpcp" | awk '{print $1}')"
+member_load_linear_model_hash="$(sha256sum "$member_load_linear_model" | awk '{print $1}')"
+member_load_linear_request_hash="$(sha256sum "$member_load_linear_request_directory/analysis-request.json" | awk '{print $1}')"
+member_load_linear_result_hash="$(sha256sum "$member_load_linear_direct/result-ir.json" | awk '{print $1}')"
+member_load_linear_recovery_hash="$(sha256sum "$member_load_linear_direct/result-recovery-ir.json" | awk '{print $1}')"
+member_load_linear_reaction_hash="$(sha256sum "$member_load_linear_direct/reaction-result-ir.json" | awk '{print $1}')"
+member_load_linear_checkpoint_hash="$(sha256sum "$member_load_linear_direct/checkpoint.mlpcp" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11578,6 +11639,10 @@ v95_receipt_json="${v94_receipt_json/structural-native-distribution-e2e.v94/stru
 self_weight_receipt_fields="\"model_ir_self_weight_linear_cpu_surface_passed\":true,\"model_ir_self_weight_linear_cpu_restart_bitwise_passed\":true,\"model_ir_self_weight_linear_cpu_fallback_count\":0,\"model_ir_self_weight_standard_gravity_passed\":true,\"model_ir_self_weight_closed_form_tip_displacement_passed\":true,\"model_ir_self_weight_model_sha256\":\"sha256:$self_weight_linear_model_hash\",\"model_ir_self_weight_request_sha256\":\"sha256:$self_weight_linear_request_hash\",\"model_ir_self_weight_result_ir_sha256\":\"sha256:$self_weight_linear_result_hash\",\"model_ir_self_weight_recovery_sha256\":\"sha256:$self_weight_linear_recovery_hash\",\"model_ir_self_weight_reaction_sha256\":\"sha256:$self_weight_linear_reaction_hash\",\"model_ir_self_weight_checkpoint_sha256\":\"sha256:$self_weight_linear_checkpoint_hash\","
 v95_receipt_json="${v95_receipt_json/\"workbench_result_view_surface_passed\":true,/${self_weight_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v95_receipt_json" > "$temporary_receipt"
+v96_receipt_json="${v95_receipt_json/structural-native-distribution-e2e.v95/structural-native-distribution-e2e.v96}"
+member_load_receipt_fields="\"model_ir_frame3d_member_distributed_load_linear_cpu_surface_passed\":true,\"model_ir_frame3d_member_distributed_load_linear_cpu_restart_bitwise_passed\":true,\"model_ir_frame3d_member_distributed_load_linear_cpu_fallback_count\":0,\"model_ir_frame3d_member_distributed_load_fixed_end_force_passed\":true,\"model_ir_frame3d_member_distributed_load_closed_form_tip_displacement_passed\":true,\"model_ir_frame3d_member_distributed_load_model_sha256\":\"sha256:$member_load_linear_model_hash\",\"model_ir_frame3d_member_distributed_load_request_sha256\":\"sha256:$member_load_linear_request_hash\",\"model_ir_frame3d_member_distributed_load_result_ir_sha256\":\"sha256:$member_load_linear_result_hash\",\"model_ir_frame3d_member_distributed_load_recovery_sha256\":\"sha256:$member_load_linear_recovery_hash\",\"model_ir_frame3d_member_distributed_load_reaction_sha256\":\"sha256:$member_load_linear_reaction_hash\",\"model_ir_frame3d_member_distributed_load_checkpoint_sha256\":\"sha256:$member_load_linear_checkpoint_hash\","
+v96_receipt_json="${v96_receipt_json/\"workbench_result_view_surface_passed\":true,/${member_load_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v96_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

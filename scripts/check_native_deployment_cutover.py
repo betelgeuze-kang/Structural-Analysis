@@ -100,9 +100,7 @@ def _require_tokens(
 ) -> None:
     for token in tokens:
         if token not in text:
-            blockers.append(
-                f"deployment_token_missing:{relative.as_posix()}:{token}"
-            )
+            blockers.append(f"deployment_token_missing:{relative.as_posix()}:{token}")
 
 
 def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]:
@@ -114,9 +112,13 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             blockers.append(f"deployment_evidence_missing:{relative.as_posix()}")
 
     active_workflow_dir = root / ".github/workflows"
-    active_workflows = sorted(
-        [*active_workflow_dir.glob("*.yml"), *active_workflow_dir.glob("*.yaml")]
-    ) if active_workflow_dir.is_dir() else []
+    active_workflows = (
+        sorted(
+            [*active_workflow_dir.glob("*.yml"), *active_workflow_dir.glob("*.yaml")]
+        )
+        if active_workflow_dir.is_dir()
+        else []
+    )
     if (active_workflow_dir / "deploy-pages.yml").exists():
         blockers.append("legacy_pages_workflow_still_active")
     forbidden_pages_tokens = (
@@ -379,7 +381,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     )
 
     license_payload = _json_object(root, ACTIVE_LICENSE, blockers)
-    if license_payload.get("schema_version") != "native-offline-license-file.example.v1":
+    if (
+        license_payload.get("schema_version")
+        != "native-offline-license-file.example.v1"
+    ):
         blockers.append("native_offline_license_schema_invalid")
     features = license_payload.get("features")
     required_features = {
@@ -394,16 +399,19 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers.append("native_offline_license_placeholder_invalid")
 
     update_payload = _json_object(root, ACTIVE_UPDATE, blockers)
-    if update_payload.get("schema_version") != "native-signed-update-package.example.v1":
+    if (
+        update_payload.get("schema_version")
+        != "native-signed-update-package.example.v1"
+    ):
         blockers.append("native_signed_update_schema_invalid")
     if update_payload.get("network_policy") != "offline_transfer_only":
         blockers.append("native_signed_update_network_policy_invalid")
     artifacts = update_payload.get("artifacts")
-    labels = {
-        str(row.get("label", ""))
-        for row in artifacts
-        if isinstance(row, dict)
-    } if isinstance(artifacts, list) else set()
+    labels = (
+        {str(row.get("label", "")) for row in artifacts if isinstance(row, dict)}
+        if isinstance(artifacts, list)
+        else set()
+    )
     if labels != {"native_cpu_static_bundle", "native_distribution_e2e_receipt"}:
         blockers.append("native_signed_update_artifacts_invalid")
     rollback = update_payload.get("rollback")
@@ -416,21 +424,33 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     _require_tokens(
         relative=LEGACY_PAGES_WORKFLOW,
         text=archived_pages,
-        tokens=("ARCHIVED - Deploy Workbench", "actions/setup-node@", "actions/deploy-pages@"),
+        tokens=(
+            "ARCHIVED - Deploy Workbench",
+            "actions/setup-node@",
+            "actions/deploy-pages@",
+        ),
         blockers=blockers,
     )
     archived_pages_readme = _text(root, LEGACY_PAGES_README, blockers)
     _require_tokens(
         relative=LEGACY_PAGES_README,
         text=archived_pages_readme,
-        tokens=("rollback and deprecation evidence", "cannot dispatch", "Removal remains disallowed"),
+        tokens=(
+            "rollback and deprecation evidence",
+            "cannot dispatch",
+            "Removal remains disallowed",
+        ),
         blockers=blockers,
     )
     archived_python = _text(root, LEGACY_PYTHON_CONTAINER, blockers)
     _require_tokens(
         relative=LEGACY_PYTHON_CONTAINER,
         text=archived_python,
-        tokens=("rollback-only Python", "FROM python:3.10-slim", "project_ops_api_service.py"),
+        tokens=(
+            "rollback-only Python",
+            "FROM python:3.10-slim",
+            "project_ops_api_service.py",
+        ),
         blockers=blockers,
     )
     archived_python_readme = _text(root, LEGACY_PYTHON_README, blockers)
@@ -443,7 +463,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     legacy_builder = _text(
         root, Path("scripts/build_onprem_deployment_packaging_manifest.py"), blockers
     )
-    if 'DEFAULT_PACKAGING_DIR = Path("deployment/legacy-python-onprem")' not in legacy_builder:
+    if (
+        'DEFAULT_PACKAGING_DIR = Path("deployment/legacy-python-onprem")'
+        not in legacy_builder
+    ):
         blockers.append("legacy_onprem_manifest_builder_not_archived")
 
     build_distribution = _text(
@@ -469,7 +492,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         if token not in build_distribution:
             blockers.append(f"native_distribution_build_token_missing:{token}")
     for token in (
-        "PATH=\"$empty_path\"",
+        'PATH="$empty_path"',
         "workbench_restart_passed",
         "python_lookup_count",
         "node_lookup_count",
@@ -1380,6 +1403,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--frame3d-rigid-offset-model",
         "--frame3d-rigid-offset-partial-root",
         "--frame3d-rigid-offset-resumed-root",
+        "--frame3d-member-distributed-load-model",
+        "--frame3d-member-distributed-load-resumed-root",
         "structural-native-benchmark-catalog-view.v1",
         "structural-native-evidence-bundle-view.v1",
         "--workbench-catalog",
@@ -1397,6 +1422,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "structural-native-rootfs-isolation-e2e.v15",
         "structural-native-rootfs-isolation-e2e.v16",
         "structural-native-rootfs-isolation-e2e.v17",
+        "structural-native-rootfs-isolation-e2e.v18",
         "RootfsIsolationEvidenceV15",
         "model_ir_frame3d_rigid_offset_linear_cpu_surface_passed",
         "model_ir_frame3d_rigid_offset_recovery_sha256",
@@ -1406,6 +1432,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "inspect_rootfs_frame3d_end_release_surface",
         "validate_rootfs_isolation_evidence_v17",
         "inspect_rootfs_frame3d_self_weight_surface",
+        "RootfsIsolationEvidenceV18",
+        "validate_rootfs_isolation_evidence_v18",
+        "inspect_rootfs_frame3d_member_distributed_load_surface",
+        "model_ir_frame3d_member_distributed_load_fixed_end_force_passed",
         "structural-native-rootfs-isolation-e2e.v14",
         "RootfsIsolationEvidenceV14",
         "workbench_model_modal_durable_session_sha256",
@@ -2154,7 +2184,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"),
+        relative=Path(
+            "docs/native/modelir-fixed-constraint-identity-cascade-edit-v2.md"
+        ),
         text=fixed_constraint_identity_cascade_edit_doc,
         tokens=(
             "model-edit-fixed-constraint-identity-cascade",
@@ -2440,7 +2472,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-linear-material-identity-cascade-edit-v2.md"),
+        relative=Path(
+            "docs/native/modelir-linear-material-identity-cascade-edit-v2.md"
+        ),
         text=linear_material_identity_cascade_doc,
         tokens=(
             "model-edit-linear-material-identity-cascade",
@@ -2490,7 +2524,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md"),
+        relative=Path(
+            "docs/native/modelir-linear-load-pattern-identity-cascade-edit-v2.md"
+        ),
         text=load_pattern_identity_cascade_doc,
         tokens=(
             "model-edit-linear-load-pattern-identity-cascade",
@@ -2515,7 +2551,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-linear-load-combination-identity-edit-v1.md"),
+        relative=Path(
+            "docs/native/modelir-linear-load-combination-identity-edit-v1.md"
+        ),
         text=linear_load_combination_identity_edit_doc,
         tokens=(
             "model-edit-linear-load-combination-identity",
@@ -2621,9 +2659,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers=blockers,
     )
 
-    node_add_doc = _text(
-        root, Path("docs/native/modelir-node-add-v1.md"), blockers
-    )
+    node_add_doc = _text(root, Path("docs/native/modelir-node-add-v1.md"), blockers)
     _require_tokens(
         relative=Path("docs/native/modelir-node-add-v1.md"),
         text=node_add_doc,
@@ -2716,7 +2752,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-factor-edit-v1.md"
+        ),
         text=direct_linear_load_combination_factor_edit_doc,
         tokens=(
             "model-edit-linear-load-combination-factor",
@@ -2764,7 +2802,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-deletion-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-deletion-v1.md"
+        ),
         text=direct_linear_load_combination_deletion_doc,
         tokens=(
             "model-delete-linear-load-combination",
@@ -2808,7 +2848,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-nested-linear-load-combination-deletion-v1.md"),
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-deletion-v1.md"
+        ),
         text=nested_linear_load_combination_deletion_doc,
         tokens=(
             "model-delete-linear-load-combination",
@@ -2831,7 +2873,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md"),
+        relative=Path(
+            "docs/native/modelir-nested-linear-load-combination-factor-edit-v1.md"
+        ),
         text=nested_linear_load_combination_factor_edit_doc,
         tokens=(
             "model-edit-nested-linear-load-combination-factor",
@@ -2877,7 +2921,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-term-add-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-term-add-v1.md"
+        ),
         text=direct_linear_load_combination_term_add_doc,
         tokens=(
             "model-add-linear-load-combination-term",
@@ -2899,7 +2945,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-term-delete-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-term-delete-v1.md"
+        ),
         text=direct_linear_load_combination_term_delete_doc,
         tokens=(
             "model-delete-linear-load-combination-term",
@@ -2921,7 +2969,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-term-reorder-v1.md"
+        ),
         text=direct_linear_load_combination_term_reorder_doc,
         tokens=(
             "model-reorder-linear-load-combination-term",
@@ -2943,7 +2993,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         blockers,
     )
     _require_tokens(
-        relative=Path("docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"),
+        relative=Path(
+            "docs/native/modelir-direct-linear-load-combination-term-insert-v1.md"
+        ),
         text=direct_linear_load_combination_term_insert_doc,
         tokens=(
             "model-insert-linear-load-combination-term",
@@ -3080,11 +3132,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     if manifest.get("active_runtime_interpreters") != []:
         blockers.append("deployment_cutover_active_interpreters_not_empty")
     retired = manifest.get("retired_entrypoints")
-    retired_index = {
-        str(row.get("path", "")): row
-        for row in retired
-        if isinstance(row, dict)
-    } if isinstance(retired, list) else {}
+    retired_index = (
+        {str(row.get("path", "")): row for row in retired if isinstance(row, dict)}
+        if isinstance(retired, list)
+        else {}
+    )
     for path in (LEGACY_PAGES_WORKFLOW, LEGACY_PYTHON_CONTAINER):
         row = retired_index.get(path.as_posix())
         if (
@@ -3092,7 +3144,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             or row.get("rollback_only") is not True
             or row.get("removal_allowed") is not False
         ):
-            blockers.append(f"deployment_cutover_retired_entry_invalid:{path.as_posix()}")
+            blockers.append(
+                f"deployment_cutover_retired_entry_invalid:{path.as_posix()}"
+            )
     remaining = manifest.get("remaining_c6_blockers")
     if not isinstance(remaining, list) or len(remaining) < 4:
         blockers.append("deployment_cutover_c6_blockers_not_preserved")
@@ -3135,8 +3189,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in nodal_load_target_edit_claim:
                 blockers.append(
-                    "modelir_nodal_load_target_edit_capability_"
-                    f"claim_missing:{token}"
+                    f"modelir_nodal_load_target_edit_capability_claim_missing:{token}"
                 )
     constraint_target_edit_capability = (
         capabilities.get("modelir_fixed_constraint_target_edit")
@@ -3335,7 +3388,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         else None
     )
     if not isinstance(fixed_constraint_identity_cascade_edit_capability, dict):
-        blockers.append("modelir_fixed_constraint_identity_cascade_edit_capability_missing")
+        blockers.append(
+            "modelir_fixed_constraint_identity_cascade_edit_capability_missing"
+        )
     else:
         for field, expected in (
             ("status", "implemented"),
@@ -3388,8 +3443,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if nodal_load_identity_edit_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_nodal_load_identity_edit_capability_"
-                    f"field_invalid:{field}"
+                    f"modelir_nodal_load_identity_edit_capability_field_invalid:{field}"
                 )
         nodal_load_identity_edit_claim = str(
             nodal_load_identity_edit_capability.get("claim", "")
@@ -3409,8 +3463,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in nodal_load_identity_edit_claim:
                 blockers.append(
-                    "modelir_nodal_load_identity_edit_capability_"
-                    f"claim_missing:{token}"
+                    f"modelir_nodal_load_identity_edit_capability_claim_missing:{token}"
                 )
     linear_load_pattern_identity_edit_capability = (
         capabilities.get("modelir_linear_load_pattern_identity_edit")
@@ -3584,7 +3637,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if node_identity_edit_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_node_identity_edit_capability_" f"field_invalid:{field}"
+                    f"modelir_node_identity_edit_capability_field_invalid:{field}"
                 )
         node_identity_edit_claim = str(node_identity_edit_capability.get("claim", ""))
         for token in (
@@ -3605,7 +3658,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in node_identity_edit_claim:
                 blockers.append(
-                    "modelir_node_identity_edit_capability_" f"claim_missing:{token}"
+                    f"modelir_node_identity_edit_capability_claim_missing:{token}"
                 )
     element_identity_edit_capability = (
         capabilities.get("modelir_element_identity_edit")
@@ -3622,7 +3675,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if element_identity_edit_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_element_identity_edit_capability_" f"field_invalid:{field}"
+                    f"modelir_element_identity_edit_capability_field_invalid:{field}"
                 )
         element_identity_edit_claim = str(
             element_identity_edit_capability.get("claim", "")
@@ -3644,7 +3697,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in element_identity_edit_claim:
                 blockers.append(
-                    "modelir_element_identity_edit_capability_" f"claim_missing:{token}"
+                    f"modelir_element_identity_edit_capability_claim_missing:{token}"
                 )
     element_identity_cascade_edit_capability = (
         capabilities.get("modelir_element_identity_cascade_edit")
@@ -3705,7 +3758,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if model_identity_edit_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_model_identity_edit_capability_" f"field_invalid:{field}"
+                    f"modelir_model_identity_edit_capability_field_invalid:{field}"
                 )
         model_identity_edit_claim = str(model_identity_edit_capability.get("claim", ""))
         for token in (
@@ -3725,7 +3778,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in model_identity_edit_claim:
                 blockers.append(
-                    "modelir_model_identity_edit_capability_" f"claim_missing:{token}"
+                    f"modelir_model_identity_edit_capability_claim_missing:{token}"
                 )
 
     node_identity_cascade_capability = (
@@ -3746,7 +3799,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                     "modelir_node_identity_cascade_edit_capability_"
                     f"field_invalid:{field}"
                 )
-        node_identity_cascade_claim = str(node_identity_cascade_capability.get("claim", ""))
+        node_identity_cascade_claim = str(
+            node_identity_cascade_capability.get("claim", "")
+        )
         for token in (
             "replaces exactly one existing referenced node ID",
             "atomically updates every typed elements[].node_ids",
@@ -3775,7 +3830,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         else None
     )
     if not isinstance(frame_section_identity_cascade_capability, dict):
-        blockers.append("modelir_frame_section_identity_cascade_edit_capability_missing")
+        blockers.append(
+            "modelir_frame_section_identity_cascade_edit_capability_missing"
+        )
     else:
         for field, expected in (
             ("status", "implemented"),
@@ -3818,7 +3875,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         else None
     )
     if not isinstance(linear_material_identity_cascade_capability, dict):
-        blockers.append("modelir_linear_material_identity_cascade_edit_capability_missing")
+        blockers.append(
+            "modelir_linear_material_identity_cascade_edit_capability_missing"
+        )
     else:
         for field, expected in (
             ("status", "implemented"),
@@ -3861,7 +3920,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         else None
     )
     if not isinstance(truss_section_identity_cascade_capability, dict):
-        blockers.append("modelir_truss_section_identity_cascade_edit_capability_missing")
+        blockers.append(
+            "modelir_truss_section_identity_cascade_edit_capability_missing"
+        )
     else:
         for field, expected in (
             ("status", "implemented"),
@@ -3950,7 +4011,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         else None
     )
     if not isinstance(linear_load_combination_identity_edit_capability, dict):
-        blockers.append("modelir_linear_load_combination_identity_edit_capability_missing")
+        blockers.append(
+            "modelir_linear_load_combination_identity_edit_capability_missing"
+        )
     else:
         for field, expected in (
             ("status", "implemented"),
@@ -4003,7 +4066,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if linear_load_combination_identity_cascade_capability.get(field) != expected:
+            if (
+                linear_load_combination_identity_cascade_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_linear_load_combination_identity_cascade_edit_capability_"
                     f"field_invalid:{field}"
@@ -4155,7 +4221,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_factor_edit_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_factor_edit_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_factor_edit_capability_"
                     f"field_invalid:{field}"
@@ -4234,7 +4303,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_term_add_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_term_add_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_add_capability_"
                     f"field_invalid:{field}"
@@ -4273,7 +4345,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_term_delete_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_term_delete_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_delete_capability_"
                     f"field_invalid:{field}"
@@ -4312,7 +4387,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_term_reorder_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_term_reorder_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_reorder_capability_"
                     f"field_invalid:{field}"
@@ -4351,7 +4429,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_term_insert_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_term_insert_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_term_insert_capability_"
                     f"field_invalid:{field}"
@@ -4390,7 +4471,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_term_add_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_term_add_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_add_capability_"
                     f"field_invalid:{field}"
@@ -4431,7 +4515,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_term_insert_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_term_insert_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_insert_capability_"
                     f"field_invalid:{field}"
@@ -4473,7 +4560,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_term_delete_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_term_delete_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_delete_capability_"
                     f"field_invalid:{field}"
@@ -4515,7 +4605,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_term_reorder_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_term_reorder_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_term_reorder_capability_"
                     f"field_invalid:{field}"
@@ -4556,7 +4649,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if direct_linear_load_combination_deletion_capability.get(field) != expected:
+            if (
+                direct_linear_load_combination_deletion_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_direct_linear_load_combination_deletion_capability_"
                     f"field_invalid:{field}"
@@ -4645,7 +4741,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_factor_edit_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_factor_edit_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_factor_edit_capability_"
                     f"field_invalid:{field}"
@@ -4722,7 +4821,10 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             ("cutover_gate", "C5"),
             ("owner", "structural-workbench"),
         ):
-            if nested_linear_load_combination_deletion_capability.get(field) != expected:
+            if (
+                nested_linear_load_combination_deletion_capability.get(field)
+                != expected
+            ):
                 blockers.append(
                     "modelir_nested_linear_load_combination_deletion_capability_"
                     f"field_invalid:{field}"
@@ -4749,9 +4851,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                     "modelir_nested_linear_load_combination_deletion_capability_"
                     f"claim_missing:{token}"
                 )
-    truss_editing_capability = capabilities.get("modelir_truss3d_editing") if isinstance(
-        capabilities, dict
-    ) else None
+    truss_editing_capability = (
+        capabilities.get("modelir_truss3d_editing")
+        if isinstance(capabilities, dict)
+        else None
+    )
     if not isinstance(truss_editing_capability, dict):
         blockers.append("modelir_truss3d_editing_capability_missing")
     else:
@@ -4855,8 +4959,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if linear_material_deletion_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_linear_material_deletion_capability_"
-                    f"field_invalid:{field}"
+                    f"modelir_linear_material_deletion_capability_field_invalid:{field}"
                 )
         linear_material_deletion_claim = str(
             linear_material_deletion_capability.get("claim", "")
@@ -4871,8 +4974,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in linear_material_deletion_claim:
                 blockers.append(
-                    "modelir_linear_material_deletion_capability_"
-                    f"claim_missing:{token}"
+                    f"modelir_linear_material_deletion_capability_claim_missing:{token}"
                 )
     frame_section_deletion_capability = (
         capabilities.get("modelir_frame_section_deletion")
@@ -4889,8 +4991,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if frame_section_deletion_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_frame_section_deletion_capability_"
-                    f"field_invalid:{field}"
+                    f"modelir_frame_section_deletion_capability_field_invalid:{field}"
                 )
         frame_section_deletion_claim = str(
             frame_section_deletion_capability.get("claim", "")
@@ -4904,8 +5005,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in frame_section_deletion_claim:
                 blockers.append(
-                    "modelir_frame_section_deletion_capability_"
-                    f"claim_missing:{token}"
+                    f"modelir_frame_section_deletion_capability_claim_missing:{token}"
                 )
     truss_section_deletion_capability = (
         capabilities.get("modelir_truss_section_deletion")
@@ -4922,8 +5022,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if truss_section_deletion_capability.get(field) != expected:
                 blockers.append(
-                    "modelir_truss_section_deletion_capability_"
-                    f"field_invalid:{field}"
+                    f"modelir_truss_section_deletion_capability_field_invalid:{field}"
                 )
         truss_section_deletion_claim = str(
             truss_section_deletion_capability.get("claim", "")
@@ -4938,8 +5037,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         ):
             if token not in truss_section_deletion_claim:
                 blockers.append(
-                    "modelir_truss_section_deletion_capability_"
-                    f"claim_missing:{token}"
+                    f"modelir_truss_section_deletion_capability_claim_missing:{token}"
                 )
     frame_leaf_deletion_capability = (
         capabilities.get("modelir_frame3d_leaf_deletion")
@@ -4958,9 +5056,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     f"modelir_frame3d_leaf_deletion_capability_field_invalid:{field}"
                 )
-        frame_leaf_deletion_claim = str(
-            frame_leaf_deletion_capability.get("claim", "")
-        )
+        frame_leaf_deletion_claim = str(frame_leaf_deletion_capability.get("claim", ""))
         for token in (
             "last contiguous neutral frame_3d/euler_bernoulli_3d member",
             "last contiguous orphan endpoint node",
@@ -4990,9 +5086,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     f"modelir_truss3d_leaf_deletion_capability_field_invalid:{field}"
                 )
-        truss_leaf_deletion_claim = str(
-            truss_leaf_deletion_capability.get("claim", "")
-        )
+        truss_leaf_deletion_claim = str(truss_leaf_deletion_capability.get("claim", ""))
         for token in (
             "last contiguous neutral truss_3d/linear_truss_3d member",
             "last contiguous orphan endpoint node",
@@ -5004,9 +5098,11 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(
                     f"modelir_truss3d_leaf_deletion_capability_claim_missing:{token}"
                 )
-    capability = capabilities.get("native_deployment") if isinstance(
-        capabilities, dict
-    ) else None
+    capability = (
+        capabilities.get("native_deployment")
+        if isinstance(capabilities, dict)
+        else None
+    )
     if not isinstance(capability, dict):
         blockers.append("native_deployment_capability_missing")
     else:
@@ -5071,13 +5167,28 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
         evidence_contract = capability.get("evidence_contract")
         if evidence_contract != {
-            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v17",
-            "frozen_rootfs_receipts": "v1-v16",
-            "required_installed_receipt_schema": "structural-native-distribution-e2e.v95",
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v18",
+            "frozen_rootfs_receipts": "v1-v17",
+            "required_installed_receipt_schema": "structural-native-distribution-e2e.v96",
             "authority": "local_rootfs_diagnostic_c5",
             "customer_image_authority": False,
         }:
             blockers.append("native_deployment_capability_evidence_contract_invalid")
+        latest_slice_claim = str(capability.get("latest_slice_claim", ""))
+        for token in (
+            "local rootfs diagnostic v18",
+            "installed distribution v96",
+            "UID/GID 65532",
+            "empty PATH",
+            "read-only root and payload",
+            "writable workspace",
+            "loopback-only isolation",
+            "frozen rootfs receipts remain v1-v17",
+            "local_rootfs_diagnostic_c5",
+            "OCI/customer-image authority remains false",
+        ):
+            if token not in latest_slice_claim:
+                blockers.append(f"native_deployment_latest_slice_claim_missing:{token}")
 
     blockers = sorted(set(blockers))
     return {
@@ -5087,7 +5198,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "cutover_gate": manifest.get("cutover_gate"),
         "active_entrypoint": manifest.get("active_entrypoint"),
         "active_workflow_count": len(active_workflows),
-        "active_pages_deployment_authority": False if not blockers else any(
+        "active_pages_deployment_authority": False
+        if not blockers
+        else any(
             blocker.startswith("active_pages_deployment_authority")
             or blocker == "legacy_pages_workflow_still_active"
             for blocker in blockers

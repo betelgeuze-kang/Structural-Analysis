@@ -55,11 +55,20 @@ Reactions retain the established `internal - external` convention.
   and produce byte-identical direct and real-checkpoint-resumed artifacts.
 - The topology view marks both endpoints of a member carrying a distributed load, preventing an
   operator from seeing an apparently unloaded member.
+- Installed static and shared distribution v96 independently author the same request through the
+  installed Workbench under an empty `PATH`, execute direct and one-real-iteration/resumed CPU
+  products, preserve byte-identical terminal directories, and bind six distinct model, request,
+  ResultIR, recovery, reaction and checkpoint identities. The installed fixture retains the exact
+  equivalent active load, fixed-end recovery, support reaction and closed-form tip displacement.
+- Local rootfs diagnostic v18 repeats the installed product as UID/GID 65532 with an empty `PATH`,
+  read-only root and payload, writable operator workspace and loopback-only networking. Its
+  self-hashed receipt retains six distinct product identities and the same numerical assertions.
 
 ## Authority boundary
 
-This is a bounded source-built CPU C5 implementation/verification surface. It is not installed
-distribution or rootfs evidence, independent external solver validation, a design-code load
-generator, engineering acceptance, commercial equivalence, or release authority. HIP parity,
-general member-load shapes/bases, nonzero prescribed constraints, shell/nonlinear consumption,
-and installed-package evidence remain open.
+This is a bounded source-built, installed static/shared and isolated-rootfs CPU C5
+implementation/verification surface. The v96 receipt has `hosted_cpu_c5` authority and v18 has
+`local_rootfs_diagnostic_c5` authority only. Neither is an OCI/customer image, independent external
+solver validation, a design-code load generator, engineering acceptance, commercial equivalence,
+customer publication, or release authority. HIP parity, general member-load shapes/bases, nonzero
+prescribed constraints and shell/nonlinear consumption remain open.

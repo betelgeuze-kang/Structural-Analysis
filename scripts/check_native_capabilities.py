@@ -146,8 +146,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v95",
-        "frozen_installed_receipts": "v1-v94",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v96",
+        "frozen_installed_receipts": "v1-v95",
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",
             "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -214,9 +214,9 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "authority": "hosted_cpu_c5",
     },
     "native_deployment": {
-        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v17",
-        "frozen_rootfs_receipts": "v1-v16",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v95",
+        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v18",
+        "frozen_rootfs_receipts": "v1-v17",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v96",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },
@@ -249,14 +249,19 @@ def validate_capabilities(payload: dict[str, Any]) -> list[str]:
         if row.get("owner") != owner:
             blockers.append(f"native_capability_owner_invalid:{capability}:{owner}")
         expected_evidence = EXPECTED_EVIDENCE_CONTRACTS.get(capability)
-        if expected_evidence is not None and row.get("evidence_contract") != expected_evidence:
+        if (
+            expected_evidence is not None
+            and row.get("evidence_contract") != expected_evidence
+        ):
             blockers.append(f"native_capability_evidence_contract_invalid:{capability}")
         if not str(row.get("claim", "")).strip():
             blockers.append(f"native_capability_claim_missing:{capability}")
         if status == "implemented" and gate not in VALID_CUTOVER_GATES:
             blockers.append(f"native_capability_gate_missing:{capability}")
         if status != "implemented" and gate is not None:
-            blockers.append(f"native_capability_unimplemented_gate_set:{capability}:{gate}")
+            blockers.append(
+                f"native_capability_unimplemented_gate_set:{capability}:{gate}"
+            )
     return sorted(dict.fromkeys(blockers))
 
 

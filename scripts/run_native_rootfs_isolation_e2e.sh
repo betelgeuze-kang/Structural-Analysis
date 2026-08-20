@@ -534,6 +534,42 @@ unshare -Urn bwrap \
       > /mnt/frame3d-self-weight-resumed.stdout.json
     /usr/bin/diff -r /mnt/frame3d-self-weight-direct \
       /mnt/frame3d-self-weight-resumed
+    /usr/bin/sed \
+      -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-member-load-installed/" \
+      -e "/\"id\": \"LC_WEAK\"/,/\"source_id\": \"generated:LC_WEAK\"/ {
+        /\"nodal_loads\": \[/,/^      \],/c\\
+      \"nodal_loads\": [],
+      }" \
+      -e "/\"id\": \"LC_WEAK\"/,/\"source_id\": \"generated:LC_WEAK\"/ {
+        /\"source_id\": \"generated:LC_WEAK\"/i\\
+      \"member_distributed_loads\": [{\"id\": \"ML_WEAK_E1\", \"index\": 0, \"element_id\": \"E1\", \"basis\": \"initial_member_local\", \"distribution\": \"uniform_full_span\", \"components_si\": {\"qx_n_per_m\": 0.0, \"qy_n_per_m\": -1000.0, \"qz_n_per_m\": 0.0}, \"source_id\": \"generated:ML_WEAK_E1\", \"extensions\": {}}],
+      }" \
+      "$8" > /mnt/frame3d-member-load-model-ir.json
+    /opt/payload/bin/structural-workbench model-create-linear-analysis-request \
+      /mnt/frame3d-member-load-model-ir.json \
+      --case model-frame-member-load-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir /mnt/frame3d-member-load-request \
+      > /mnt/frame3d-member-load-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-member-load-model-ir.json \
+      /mnt/frame3d-member-load-request/analysis-request.json \
+      --output-dir /mnt/frame3d-member-load-direct \
+      > /mnt/frame3d-member-load-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-member-load-model-ir.json \
+      /mnt/frame3d-member-load-request/analysis-request.json \
+      --output-dir /mnt/frame3d-member-load-partial --iteration-budget 1 \
+      > /mnt/frame3d-member-load-partial.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-resume \
+      /mnt/frame3d-member-load-model-ir.json \
+      /mnt/frame3d-member-load-request/analysis-request.json \
+      /mnt/frame3d-member-load-partial/checkpoint.mlpcp \
+      --output-dir /mnt/frame3d-member-load-resumed \
+      > /mnt/frame3d-member-load-resumed.stdout.json
+    /usr/bin/diff -r /mnt/frame3d-member-load-direct \
+      /mnt/frame3d-member-load-resumed
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -731,6 +767,16 @@ unshare -Urn bwrap \
       --frame3d-self-weight-direct-root /mnt/frame3d-self-weight-direct \
       --frame3d-self-weight-partial-root /mnt/frame3d-self-weight-partial \
       --frame3d-self-weight-resumed-root /mnt/frame3d-self-weight-resumed \
+      --frame3d-member-distributed-load-model \
+        /mnt/frame3d-member-load-model-ir.json \
+      --frame3d-member-distributed-load-request-root \
+        /mnt/frame3d-member-load-request \
+      --frame3d-member-distributed-load-direct-root \
+        /mnt/frame3d-member-load-direct \
+      --frame3d-member-distributed-load-partial-root \
+        /mnt/frame3d-member-load-partial \
+      --frame3d-member-distributed-load-resumed-root \
+        /mnt/frame3d-member-load-resumed \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

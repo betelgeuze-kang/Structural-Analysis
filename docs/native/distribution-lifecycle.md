@@ -719,8 +719,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    recovery, reaction and checkpoint identities. Static and shared receipts remain hosted CPU C5
    evidence; this is not member distributed load, mass-source validation, design-code load
    generation, HIP, engineering-verdict or C6 authority.
+110. authors a Frame3D request whose selected `LC_WEAK` pattern carries one initial-member-local,
+   uniform full-span `qy=-1000 N/m` load and no nodal load, then executes installed direct,
+   one-iteration partial and model-bound resumed CPU products. The append-only v96 receipt requires
+   byte-identical direct/resumed directories, completed/active status, fallback 0, the exact
+   consistent active FY/MZ vector, fixed-end recovery, support FY/MZ and Euler-Bernoulli tip UY,
+   and six distinct model, request, ResultIR, recovery, reaction and checkpoint identities. Static
+   and shared receipts remain hosted CPU C5 evidence; this is not partial/trapezoidal/global/
+   projected/follower load, design-code generation, rootfs, HIP, engineering-verdict or C6
+   authority.
 
-   The receipt checker continues to accept frozen v1 through v94 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v95 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
@@ -731,7 +740,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    installed durable modal Workbench-session authority, and no pre-v93 receipt is installed
    Frame3D rigid-end-offset linear CPU product authority, and no pre-v94 receipt is installed
    Frame3D end-release linear CPU product authority, and no pre-v95 receipt is installed ModelIR
-   self-weight linear CPU product authority. Its explicit compatibility
+   self-weight linear CPU product authority, and no pre-v96 receipt is installed Frame3D uniform
+   member-distributed-load linear CPU product authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
@@ -973,8 +983,17 @@ inventories, standard-gravity active FZ/MY, support FZ/MY, closed-form tip UZ, f
 byte-identical direct/resumed directories and six distinct
 model/request/ResultIR/recovery/reaction/checkpoint identities. It continues to verify frozen v1
 through v16 rootfs receipts; only v17 requires isolated installed ModelIR self-weight linear CPU
-evidence. Member distributed loads, mass-source validation, design-code load generation, HIP
-parity and engineering acceptance remain open.
+evidence. Mass-source validation, design-code load generation, HIP parity and engineering
+acceptance remain open.
+The append-only v18 receipt additionally authors the selected-pattern initial-member-local,
+uniform full-span `qy=-1000 N/m` Frame3D request with no nodal load and runs installed direct,
+one-iteration partial and resumed CPU products inside the same isolation boundary. The installer
+verifies exact request/execution inventories, consistent active FY/MZ, fixed-end recovery, support
+FY/MZ, closed-form tip UY, fallback 0, byte-identical direct/resumed directories and six distinct
+model/request/ResultIR/recovery/reaction/checkpoint identities. It continues to verify frozen v1
+through v17 rootfs receipts; only v18 requires isolated installed Frame3D uniform member-
+distributed-load linear CPU evidence. Broader member-load shapes/bases, Truss3D, shell/nonlinear
+consumption, design-code generation, HIP parity and engineering acceptance remain open.
 Its authority remains `local_rootfs_diagnostic_c5` with
 `container_image_built` and `customer_image_receipt` false.
 

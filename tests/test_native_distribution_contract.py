@@ -14,7 +14,9 @@ FFI_BUILD = ROOT / "native" / "crates" / "structural-ffi" / "build.rs"
 ROOTFS_RUN = ROOT / "scripts" / "run_native_rootfs_isolation_e2e.sh"
 
 
-def run_checker(tmp_path: Path, receipt: dict, manifest: dict) -> subprocess.CompletedProcess[str]:
+def run_checker(
+    tmp_path: Path, receipt: dict, manifest: dict
+) -> subprocess.CompletedProcess[str]:
     receipt_path = tmp_path / "receipt.json"
     manifest_path = tmp_path / "structural-distribution.json"
     installed_path = tmp_path / "installed-backend.json"
@@ -40,12 +42,12 @@ def run_checker(tmp_path: Path, receipt: dict, manifest: dict) -> subprocess.Com
     receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
     manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
     installed_path.write_text(json.dumps(installed), encoding="utf-8")
-    receipt["bundle_manifest_sha256"] = "sha256:" + hashlib.sha256(
-        manifest_path.read_bytes()
-    ).hexdigest()
-    receipt["installed_backend_receipt_sha256"] = "sha256:" + hashlib.sha256(
-        installed_path.read_bytes()
-    ).hexdigest()
+    receipt["bundle_manifest_sha256"] = (
+        "sha256:" + hashlib.sha256(manifest_path.read_bytes()).hexdigest()
+    )
+    receipt["installed_backend_receipt_sha256"] = (
+        "sha256:" + hashlib.sha256(installed_path.read_bytes()).hexdigest()
+    )
     receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
     return subprocess.run(
         [
@@ -392,8 +394,10 @@ def valid_v20_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v20",
             "workbench_frame_element_orientation_edit_surface_passed": True,
-            "workbench_frame_element_orientation_edit_model_sha256": "sha256:" + "7" * 64,
-            "workbench_frame_element_orientation_edit_receipt_sha256": "sha256:" + "8" * 64,
+            "workbench_frame_element_orientation_edit_model_sha256": "sha256:"
+            + "7" * 64,
+            "workbench_frame_element_orientation_edit_receipt_sha256": "sha256:"
+            + "8" * 64,
         }
     )
     return receipt, manifest
@@ -418,8 +422,10 @@ def valid_v22_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v22",
             "workbench_model_linear_request_create_surface_passed": True,
-            "workbench_model_linear_request_create_request_sha256": "sha256:" + "b" * 64,
-            "workbench_model_linear_request_create_receipt_sha256": "sha256:" + "c" * 64,
+            "workbench_model_linear_request_create_request_sha256": "sha256:"
+            + "b" * 64,
+            "workbench_model_linear_request_create_receipt_sha256": "sha256:"
+            + "c" * 64,
         }
     )
     return receipt, manifest
@@ -528,11 +534,16 @@ def valid_v29_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v29",
             "workbench_frame_element_properties_edit_surface_passed": True,
-            "workbench_frame_element_properties_edit_model_sha256": "sha256:" + "c" * 64,
-            "workbench_frame_element_properties_edit_receipt_sha256": "sha256:" + "d" * 64,
-            "workbench_frame_element_properties_edit_request_sha256": "sha256:" + "e" * 64,
-            "workbench_frame_element_properties_edit_result_ir_sha256": "sha256:" + "f" * 64,
-            "workbench_frame_element_properties_edit_recovery_sha256": "sha256:" + "0" * 64,
+            "workbench_frame_element_properties_edit_model_sha256": "sha256:"
+            + "c" * 64,
+            "workbench_frame_element_properties_edit_receipt_sha256": "sha256:"
+            + "d" * 64,
+            "workbench_frame_element_properties_edit_request_sha256": "sha256:"
+            + "e" * 64,
+            "workbench_frame_element_properties_edit_result_ir_sha256": "sha256:"
+            + "f" * 64,
+            "workbench_frame_element_properties_edit_recovery_sha256": "sha256:"
+            + "0" * 64,
         }
     )
     return receipt, manifest
@@ -649,8 +660,10 @@ def valid_v36_contract() -> tuple[dict, dict]:
             "workbench_linear_load_pattern_delete_model_sha256": "sha256:" + "6" * 64,
             "workbench_linear_load_pattern_delete_receipt_sha256": "sha256:" + "7" * 64,
             "workbench_linear_load_pattern_delete_request_sha256": "sha256:" + "8" * 64,
-            "workbench_linear_load_pattern_delete_result_ir_sha256": "sha256:" + "9" * 64,
-            "workbench_linear_load_pattern_delete_recovery_sha256": "sha256:" + "a" * 64,
+            "workbench_linear_load_pattern_delete_result_ir_sha256": "sha256:"
+            + "9" * 64,
+            "workbench_linear_load_pattern_delete_recovery_sha256": "sha256:"
+            + "a" * 64,
         }
     )
     return receipt, manifest
@@ -744,7 +757,8 @@ def valid_v42_contract() -> tuple[dict, dict]:
             "schema_version": "structural-native-distribution-e2e.v42",
             "workbench_linear_load_combination_add_surface_passed": True,
             "workbench_linear_load_combination_add_model_sha256": "sha256:" + "6" * 64,
-            "workbench_linear_load_combination_add_receipt_sha256": "sha256:" + "7" * 64,
+            "workbench_linear_load_combination_add_receipt_sha256": "sha256:"
+            + "7" * 64,
             "workbench_linear_load_combination_add_validation_sha256": "sha256:"
             + "8" * 64,
             "workbench_linear_load_combination_add_view_sha256": "sha256:" + "9" * 64,
@@ -787,14 +801,10 @@ def valid_v44_contract() -> tuple[dict, dict]:
             "workbench_linear_load_combination_request_sha256": "sha256:" + "1" * 64,
             "workbench_linear_load_combination_assembly_receipt_sha256": "sha256:"
             + "2" * 64,
-            "workbench_linear_load_combination_checkpoint_sha256": "sha256:"
-            + "3" * 64,
-            "workbench_linear_load_combination_result_ir_sha256": "sha256:"
-            + "4" * 64,
-            "workbench_linear_load_combination_recovery_sha256": "sha256:"
-            + "5" * 64,
-            "workbench_linear_load_combination_report_ir_sha256": "sha256:"
-            + "6" * 64,
+            "workbench_linear_load_combination_checkpoint_sha256": "sha256:" + "3" * 64,
+            "workbench_linear_load_combination_result_ir_sha256": "sha256:" + "4" * 64,
+            "workbench_linear_load_combination_recovery_sha256": "sha256:" + "5" * 64,
+            "workbench_linear_load_combination_report_ir_sha256": "sha256:" + "6" * 64,
             "workbench_linear_load_combination_restart_passed": True,
         }
     )
@@ -1292,8 +1302,7 @@ def valid_v61_contract() -> tuple[dict, dict]:
             "workbench_nodal_load_target_edit_request_sha256": "sha256:" + "9" * 64,
             "workbench_nodal_load_target_edit_assembly_receipt_sha256": "sha256:"
             + "a" * 64,
-            "workbench_nodal_load_target_edit_checkpoint_sha256": "sha256:"
-            + "b" * 64,
+            "workbench_nodal_load_target_edit_checkpoint_sha256": "sha256:" + "b" * 64,
             "workbench_nodal_load_target_edit_result_ir_sha256": "sha256:" + "c" * 64,
             "workbench_nodal_load_target_edit_recovery_sha256": "sha256:" + "d" * 64,
             "workbench_nodal_load_target_edit_report_ir_sha256": "sha256:" + "e" * 64,
@@ -1316,8 +1325,7 @@ def valid_v62_contract() -> tuple[dict, dict]:
             "workbench_constraint_target_edit_request_sha256": "sha256:" + "2" * 64,
             "workbench_constraint_target_edit_assembly_receipt_sha256": "sha256:"
             + "3" * 64,
-            "workbench_constraint_target_edit_checkpoint_sha256": "sha256:"
-            + "4" * 64,
+            "workbench_constraint_target_edit_checkpoint_sha256": "sha256:" + "4" * 64,
             "workbench_constraint_target_edit_result_ir_sha256": "sha256:" + "5" * 64,
             "workbench_constraint_target_edit_recovery_sha256": "sha256:" + "6" * 64,
             "workbench_constraint_target_edit_report_ir_sha256": "sha256:" + "7" * 64,
@@ -1333,8 +1341,7 @@ def valid_v63_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v63",
             "workbench_fixed_constraint_dof_delete_surface_passed": True,
-            "workbench_fixed_constraint_dof_delete_model_sha256": "sha256:"
-            + "8" * 64,
+            "workbench_fixed_constraint_dof_delete_model_sha256": "sha256:" + "8" * 64,
             "workbench_fixed_constraint_dof_delete_receipt_sha256": "sha256:"
             + "9" * 64,
             "workbench_fixed_constraint_dof_delete_request_receipt_sha256": "sha256:"
@@ -1372,12 +1379,9 @@ def valid_v64_contract() -> tuple[dict, dict]:
             + "5" * 64,
             "workbench_fixed_constraint_dof_add_checkpoint_sha256": "sha256:"
             + "6" * 64,
-            "workbench_fixed_constraint_dof_add_result_ir_sha256": "sha256:"
-            + "7" * 64,
-            "workbench_fixed_constraint_dof_add_recovery_sha256": "sha256:"
-            + "8" * 64,
-            "workbench_fixed_constraint_dof_add_report_ir_sha256": "sha256:"
-            + "9" * 64,
+            "workbench_fixed_constraint_dof_add_result_ir_sha256": "sha256:" + "7" * 64,
+            "workbench_fixed_constraint_dof_add_recovery_sha256": "sha256:" + "8" * 64,
+            "workbench_fixed_constraint_dof_add_report_ir_sha256": "sha256:" + "9" * 64,
             "workbench_fixed_constraint_dof_add_restart_passed": True,
         }
     )
@@ -1390,8 +1394,7 @@ def valid_v65_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v65",
             "workbench_fixed_constraint_dof_reorder_surface_passed": True,
-            "workbench_fixed_constraint_dof_reorder_model_sha256": "sha256:"
-            + "a" * 64,
+            "workbench_fixed_constraint_dof_reorder_model_sha256": "sha256:" + "a" * 64,
             "workbench_fixed_constraint_dof_reorder_receipt_sha256": "sha256:"
             + "b" * 64,
             "workbench_fixed_constraint_dof_reorder_request_receipt_sha256": "sha256:"
@@ -1450,24 +1453,18 @@ def valid_v67_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v67",
             "workbench_nodal_load_identity_edit_surface_passed": True,
-            "workbench_nodal_load_identity_edit_model_sha256": "sha256:"
-            + "c" * 64,
-            "workbench_nodal_load_identity_edit_receipt_sha256": "sha256:"
-            + "d" * 64,
+            "workbench_nodal_load_identity_edit_model_sha256": "sha256:" + "c" * 64,
+            "workbench_nodal_load_identity_edit_receipt_sha256": "sha256:" + "d" * 64,
             "workbench_nodal_load_identity_edit_request_receipt_sha256": "sha256:"
             + "e" * 64,
-            "workbench_nodal_load_identity_edit_request_sha256": "sha256:"
-            + "f" * 64,
+            "workbench_nodal_load_identity_edit_request_sha256": "sha256:" + "f" * 64,
             "workbench_nodal_load_identity_edit_assembly_receipt_sha256": "sha256:"
             + "0" * 64,
             "workbench_nodal_load_identity_edit_checkpoint_sha256": "sha256:"
             + "1" * 64,
-            "workbench_nodal_load_identity_edit_result_ir_sha256": "sha256:"
-            + "2" * 64,
-            "workbench_nodal_load_identity_edit_recovery_sha256": "sha256:"
-            + "3" * 64,
-            "workbench_nodal_load_identity_edit_report_ir_sha256": "sha256:"
-            + "4" * 64,
+            "workbench_nodal_load_identity_edit_result_ir_sha256": "sha256:" + "2" * 64,
+            "workbench_nodal_load_identity_edit_recovery_sha256": "sha256:" + "3" * 64,
+            "workbench_nodal_load_identity_edit_report_ir_sha256": "sha256:" + "4" * 64,
             "workbench_nodal_load_identity_edit_restart_passed": True,
         }
     )
@@ -1540,8 +1537,7 @@ def valid_v70_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v70",
             "workbench_frame_section_identity_edit_surface_passed": True,
-            "workbench_frame_section_identity_edit_model_sha256": "sha256:"
-            + "7" * 64,
+            "workbench_frame_section_identity_edit_model_sha256": "sha256:" + "7" * 64,
             "workbench_frame_section_identity_edit_receipt_sha256": "sha256:"
             + "8" * 64,
             "workbench_frame_section_identity_edit_request_receipt_sha256": "sha256:"
@@ -1570,8 +1566,7 @@ def valid_v71_contract() -> tuple[dict, dict]:
         {
             "schema_version": "structural-native-distribution-e2e.v71",
             "workbench_truss_section_identity_edit_surface_passed": True,
-            "workbench_truss_section_identity_edit_model_sha256": "sha256:"
-            + "0" * 64,
+            "workbench_truss_section_identity_edit_model_sha256": "sha256:" + "0" * 64,
             "workbench_truss_section_identity_edit_receipt_sha256": "sha256:"
             + "1" * 64,
             "workbench_truss_section_identity_edit_request_receipt_sha256": "sha256:"
@@ -1602,8 +1597,7 @@ def valid_v72_contract() -> tuple[dict, dict]:
             "workbench_node_identity_edit_surface_passed": True,
             "workbench_node_identity_edit_model_sha256": "sha256:" + "9" * 64,
             "workbench_node_identity_edit_receipt_sha256": "sha256:" + "a" * 64,
-            "workbench_node_identity_edit_request_receipt_sha256": "sha256:"
-            + "b" * 64,
+            "workbench_node_identity_edit_request_receipt_sha256": "sha256:" + "b" * 64,
             "workbench_node_identity_edit_request_sha256": "sha256:" + "c" * 64,
             "workbench_node_identity_edit_assembly_receipt_sha256": "sha256:"
             + "d" * 64,
@@ -1683,8 +1677,7 @@ def valid_v75_contract() -> tuple[dict, dict]:
             "workbench_model_identity_edit_request_sha256": "sha256:" + "7" * 64,
             "workbench_model_identity_edit_assembly_receipt_sha256": "sha256:"
             + "8" * 64,
-            "workbench_model_identity_edit_checkpoint_sha256": "sha256:"
-            + "9" * 64,
+            "workbench_model_identity_edit_checkpoint_sha256": "sha256:" + "9" * 64,
             "workbench_model_identity_edit_result_ir_sha256": "sha256:" + "a" * 64,
             "workbench_model_identity_edit_recovery_sha256": "sha256:" + "b" * 64,
             "workbench_model_identity_edit_report_ir_sha256": "sha256:" + "c" * 64,
@@ -1701,12 +1694,10 @@ def valid_v76_contract() -> tuple[dict, dict]:
             "schema_version": "structural-native-distribution-e2e.v76",
             "workbench_node_identity_cascade_edit_surface_passed": True,
             "workbench_node_identity_cascade_edit_model_sha256": "sha256:" + "d" * 64,
-            "workbench_node_identity_cascade_edit_receipt_sha256": "sha256:"
-            + "e" * 64,
+            "workbench_node_identity_cascade_edit_receipt_sha256": "sha256:" + "e" * 64,
             "workbench_node_identity_cascade_edit_request_receipt_sha256": "sha256:"
             + "f" * 64,
-            "workbench_node_identity_cascade_edit_request_sha256": "sha256:"
-            + "0" * 64,
+            "workbench_node_identity_cascade_edit_request_sha256": "sha256:" + "0" * 64,
             "workbench_node_identity_cascade_edit_assembly_receipt_sha256": "sha256:"
             + "1" * 64,
             "workbench_node_identity_cascade_edit_checkpoint_sha256": "sha256:"
@@ -1957,10 +1948,8 @@ def valid_v85_contract() -> tuple[dict, dict]:
             "model_ir_linear_reaction_view_window_sha256": "sha256:" + "9" * 64,
             "mgt_model_ir_linear_reaction_view_surface_passed": True,
             "mgt_model_ir_linear_reaction_view_restart_parity_passed": True,
-            "mgt_model_ir_linear_reaction_view_en_us_sha256": "sha256:"
-            + "a" * 64,
-            "mgt_model_ir_linear_reaction_view_ko_kr_sha256": "sha256:"
-            + "b" * 64,
+            "mgt_model_ir_linear_reaction_view_en_us_sha256": "sha256:" + "a" * 64,
+            "mgt_model_ir_linear_reaction_view_ko_kr_sha256": "sha256:" + "b" * 64,
             "workbench_reaction_view_wrong_profile_rejected": True,
         }
     )
@@ -2023,12 +2012,8 @@ def valid_v88_contract() -> tuple[dict, dict]:
             "schema_version": "structural-native-distribution-e2e.v88",
             "model_ir_linear_deformed_view_surface_passed": True,
             "model_ir_linear_deformed_view_restart_parity_passed": True,
-            "model_ir_linear_deformed_view_en_us_sha256": "sha256:"
-            + "1" * 63
-            + "1",
-            "model_ir_linear_deformed_view_ko_kr_sha256": "sha256:"
-            + "1" * 63
-            + "2",
+            "model_ir_linear_deformed_view_en_us_sha256": "sha256:" + "1" * 63 + "1",
+            "model_ir_linear_deformed_view_ko_kr_sha256": "sha256:" + "1" * 63 + "2",
             "model_ir_linear_deformed_view_projection_sha256": "sha256:"
             + "1" * 63
             + "3",
@@ -2086,9 +2071,7 @@ def valid_v90_contract() -> tuple[dict, dict]:
             "model_ir_modal_active_dof_count": 6,
             "model_ir_modal_fallback_count": 0,
             "model_ir_modal_request_sha256": "sha256:" + "3" * 63 + "1",
-            "workbench_model_modal_request_receipt_sha256": "sha256:"
-            + "3" * 63
-            + "2",
+            "workbench_model_modal_request_receipt_sha256": "sha256:" + "3" * 63 + "2",
             "model_ir_modal_result_ir_sha256": "sha256:" + "3" * 63 + "3",
             "model_ir_modal_report_ir_sha256": "sha256:" + "3" * 63 + "4",
             "model_ir_modal_markdown_sha256": "sha256:" + "3" * 63 + "5",
@@ -2137,9 +2120,7 @@ def valid_v92_contract() -> tuple[dict, dict]:
             "workbench_model_modal_durable_report_receipt_sha256": "sha256:"
             + "5" * 63
             + "3",
-            "workbench_model_modal_durable_inspect_sha256": "sha256:"
-            + "5" * 63
-            + "4",
+            "workbench_model_modal_durable_inspect_sha256": "sha256:" + "5" * 63 + "4",
         }
     )
     return receipt, manifest
@@ -2155,9 +2136,13 @@ def valid_v93_contract() -> tuple[dict, dict]:
             "model_ir_frame3d_rigid_offset_linear_cpu_fallback_count": 0,
             "model_ir_frame3d_rigid_offset_model_sha256": "sha256:" + "6" * 63 + "1",
             "model_ir_frame3d_rigid_offset_request_sha256": "sha256:" + "6" * 63 + "2",
-            "model_ir_frame3d_rigid_offset_result_ir_sha256": "sha256:" + "6" * 63 + "3",
+            "model_ir_frame3d_rigid_offset_result_ir_sha256": "sha256:"
+            + "6" * 63
+            + "3",
             "model_ir_frame3d_rigid_offset_recovery_sha256": "sha256:" + "6" * 63 + "4",
-            "model_ir_frame3d_rigid_offset_checkpoint_sha256": "sha256:" + "6" * 63 + "5",
+            "model_ir_frame3d_rigid_offset_checkpoint_sha256": "sha256:"
+            + "6" * 63
+            + "5",
         }
     )
     return receipt, manifest
@@ -2176,7 +2161,9 @@ def valid_v94_contract() -> tuple[dict, dict]:
             "model_ir_frame3d_end_release_request_sha256": "sha256:" + "7" * 63 + "2",
             "model_ir_frame3d_end_release_result_ir_sha256": "sha256:" + "7" * 63 + "3",
             "model_ir_frame3d_end_release_recovery_sha256": "sha256:" + "7" * 63 + "4",
-            "model_ir_frame3d_end_release_checkpoint_sha256": "sha256:" + "7" * 63 + "5",
+            "model_ir_frame3d_end_release_checkpoint_sha256": "sha256:"
+            + "7" * 63
+            + "5",
         }
     )
     return receipt, manifest
@@ -2198,6 +2185,39 @@ def valid_v95_contract() -> tuple[dict, dict]:
             "model_ir_self_weight_recovery_sha256": "sha256:" + "8" * 63 + "4",
             "model_ir_self_weight_reaction_sha256": "sha256:" + "8" * 63 + "5",
             "model_ir_self_weight_checkpoint_sha256": "sha256:" + "8" * 63 + "6",
+        }
+    )
+    return receipt, manifest
+
+
+def valid_v96_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v95_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v96",
+            "model_ir_frame3d_member_distributed_load_linear_cpu_surface_passed": True,
+            "model_ir_frame3d_member_distributed_load_linear_cpu_restart_bitwise_passed": True,
+            "model_ir_frame3d_member_distributed_load_linear_cpu_fallback_count": 0,
+            "model_ir_frame3d_member_distributed_load_fixed_end_force_passed": True,
+            "model_ir_frame3d_member_distributed_load_closed_form_tip_displacement_passed": True,
+            "model_ir_frame3d_member_distributed_load_model_sha256": "sha256:"
+            + "9" * 63
+            + "1",
+            "model_ir_frame3d_member_distributed_load_request_sha256": "sha256:"
+            + "9" * 63
+            + "2",
+            "model_ir_frame3d_member_distributed_load_result_ir_sha256": "sha256:"
+            + "9" * 63
+            + "3",
+            "model_ir_frame3d_member_distributed_load_recovery_sha256": "sha256:"
+            + "9" * 63
+            + "4",
+            "model_ir_frame3d_member_distributed_load_reaction_sha256": "sha256:"
+            + "9" * 63
+            + "5",
+            "model_ir_frame3d_member_distributed_load_checkpoint_sha256": "sha256:"
+            + "9" * 63
+            + "6",
         }
     )
     return receipt, manifest
@@ -2254,10 +2274,14 @@ def test_distribution_receipt_rejects_missing_v4_catalog_authority(tmp_path: Pat
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("workbench_catalog_surface_passed" in error for error in validation["errors"])
+    assert any(
+        "workbench_catalog_surface_passed" in error for error in validation["errors"]
+    )
 
 
-def test_distribution_receipt_accepts_native_evidence_builder_v5_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_native_evidence_builder_v5_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v5_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -2272,10 +2296,14 @@ def test_distribution_receipt_rejects_missing_v5_builder_authority(tmp_path: Pat
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("evidence_builder_build_passed" in error for error in validation["errors"])
+    assert any(
+        "evidence_builder_build_passed" in error for error in validation["errors"]
+    )
 
 
-def test_distribution_receipt_accepts_native_catalog_builder_v6_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_native_catalog_builder_v6_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v6_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -2290,7 +2318,9 @@ def test_distribution_receipt_rejects_missing_v6_catalog_authority(tmp_path: Pat
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("catalog_builder_check_passed" in error for error in validation["errors"])
+    assert any(
+        "catalog_builder_check_passed" in error for error in validation["errors"]
+    )
 
 
 def test_distribution_receipt_accepts_localized_pdf_v7_contract(tmp_path: Path):
@@ -2302,7 +2332,9 @@ def test_distribution_receipt_accepts_localized_pdf_v7_contract(tmp_path: Path):
     assert validation["authoritative"] is True
 
 
-def test_distribution_receipt_rejects_missing_v7_localized_pdf_authority(tmp_path: Path):
+def test_distribution_receipt_rejects_missing_v7_localized_pdf_authority(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v7_contract()
     receipt["workbench_localized_pdf_surface_passed"] = False
     completed = run_checker(tmp_path, receipt, manifest)
@@ -2341,8 +2373,7 @@ def test_distribution_receipt_rejects_missing_v8_model_view_authority(tmp_path: 
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
     assert any(
-        "workbench_model_view_surface_passed" in error
-        for error in validation["errors"]
+        "workbench_model_view_surface_passed" in error for error in validation["errors"]
     )
 
 
@@ -2376,8 +2407,7 @@ def test_distribution_receipt_rejects_missing_v9_model_edit_authority(tmp_path: 
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
     assert any(
-        "workbench_model_edit_surface_passed" in error
-        for error in validation["errors"]
+        "workbench_model_edit_surface_passed" in error for error in validation["errors"]
     )
 
 
@@ -2388,8 +2418,7 @@ def test_distribution_receipt_rejects_invalid_v9_model_edit_identity(tmp_path: P
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
     assert any(
-        "workbench_model_edit_receipt_sha256" in error
-        for error in validation["errors"]
+        "workbench_model_edit_receipt_sha256" in error for error in validation["errors"]
     )
 
 
@@ -2505,8 +2534,14 @@ def test_distribution_receipt_rejects_duplicate_v12_localized_view_identity(
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("response-view identities must differ" in error for error in validation["errors"])
-    assert any("deformed-view identities must differ" in error for error in validation["errors"])
+    assert any(
+        "response-view identities must differ" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "deformed-view identities must differ" in error
+        for error in validation["errors"]
+    )
 
 
 def test_distribution_receipt_accepts_localized_model_view_v13_contract(
@@ -2544,7 +2579,9 @@ def test_distribution_receipt_rejects_duplicate_v13_localized_model_view_identit
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("model-view identities must differ" in error for error in validation["errors"])
+    assert any(
+        "model-view identities must differ" in error for error in validation["errors"]
+    )
 
 
 def test_distribution_receipt_accepts_model_ir_linear_workbench_v14_contract(
@@ -2586,8 +2623,7 @@ def test_distribution_receipt_rejects_promoting_or_unbound_v14_linear_report(
         for error in validation["errors"]
     )
     assert any(
-        "model_ir_linear_report_pdf_sha256" in error
-        for error in validation["errors"]
+        "model_ir_linear_report_pdf_sha256" in error for error in validation["errors"]
     )
 
 
@@ -2684,7 +2720,9 @@ def test_distribution_receipt_rejects_unbound_v17_nodal_load_edit(tmp_path: Path
     )
 
 
-def test_distribution_receipt_accepts_constraint_value_edit_v18_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_constraint_value_edit_v18_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v18_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -2908,7 +2946,9 @@ def test_distribution_receipt_rejects_unbound_v25_fixed_constraint_add(tmp_path:
     )
 
 
-def test_distribution_receipt_accepts_linear_load_pattern_add_v26_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_linear_load_pattern_add_v26_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v26_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -2917,7 +2957,9 @@ def test_distribution_receipt_accepts_linear_load_pattern_add_v26_contract(tmp_p
     assert validation["authoritative"] is True
 
 
-def test_distribution_receipt_rejects_unbound_v26_linear_load_pattern_add(tmp_path: Path):
+def test_distribution_receipt_rejects_unbound_v26_linear_load_pattern_add(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v26_contract()
     receipt["workbench_linear_load_pattern_add_surface_passed"] = False
     receipt["workbench_linear_load_pattern_add_recovery_sha256"] = "sha256:INVALID"
@@ -2986,7 +3028,9 @@ def test_distribution_receipt_rejects_unbound_v28_frame_section_add(tmp_path: Pa
     )
 
 
-def test_distribution_receipt_accepts_frame_element_properties_v29_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_frame_element_properties_v29_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v29_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -2995,10 +3039,14 @@ def test_distribution_receipt_accepts_frame_element_properties_v29_contract(tmp_
     assert validation["authoritative"] is True
 
 
-def test_distribution_receipt_rejects_unbound_v29_frame_element_properties(tmp_path: Path):
+def test_distribution_receipt_rejects_unbound_v29_frame_element_properties(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v29_contract()
     receipt["workbench_frame_element_properties_edit_surface_passed"] = False
-    receipt["workbench_frame_element_properties_edit_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_frame_element_properties_edit_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3064,7 +3112,9 @@ def test_distribution_receipt_rejects_unbound_v31_truss3d_editing(tmp_path: Path
     )
 
 
-def test_distribution_receipt_accepts_truss3d_leaf_deletion_v32_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_truss3d_leaf_deletion_v32_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v32_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -3092,7 +3142,9 @@ def test_distribution_receipt_rejects_unbound_v32_truss3d_leaf_deletion(
     )
 
 
-def test_distribution_receipt_accepts_frame3d_leaf_deletion_v33_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_frame3d_leaf_deletion_v33_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v33_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -3120,7 +3172,9 @@ def test_distribution_receipt_rejects_unbound_v33_frame3d_leaf_deletion(
     )
 
 
-def test_distribution_receipt_accepts_fixed_constraint_delete_v34_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_fixed_constraint_delete_v34_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v34_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -3427,7 +3481,9 @@ def test_distribution_receipt_rejects_unbound_v44_linear_load_combination_execut
 ):
     receipt, manifest = valid_v44_contract()
     receipt["workbench_linear_load_combination_restart_passed"] = False
-    receipt["workbench_linear_load_combination_assembly_receipt_sha256"] = "sha256:INVALID"
+    receipt["workbench_linear_load_combination_assembly_receipt_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3457,7 +3513,9 @@ def test_distribution_receipt_rejects_unbound_v45_direct_linear_load_combination
 ):
     receipt, manifest = valid_v45_contract()
     receipt["workbench_direct_linear_load_combination_restart_passed"] = False
-    receipt["workbench_direct_linear_load_combination_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_direct_linear_load_combination_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3723,9 +3781,9 @@ def test_distribution_receipt_rejects_unbound_v53_direct_term_add(
 ):
     receipt, manifest = valid_v53_contract()
     receipt["workbench_direct_linear_load_combination_term_add_restart_passed"] = False
-    receipt[
-        "workbench_direct_linear_load_combination_term_add_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_direct_linear_load_combination_term_add_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3754,10 +3812,12 @@ def test_distribution_receipt_rejects_unbound_v54_direct_term_delete(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v54_contract()
-    receipt["workbench_direct_linear_load_combination_term_delete_restart_passed"] = False
-    receipt[
-        "workbench_direct_linear_load_combination_term_delete_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_direct_linear_load_combination_term_delete_restart_passed"] = (
+        False
+    )
+    receipt["workbench_direct_linear_load_combination_term_delete_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3787,9 +3847,9 @@ def test_distribution_receipt_rejects_unbound_v55_nested_term_add(
 ):
     receipt, manifest = valid_v55_contract()
     receipt["workbench_nested_linear_load_combination_term_add_restart_passed"] = False
-    receipt[
-        "workbench_nested_linear_load_combination_term_add_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_nested_linear_load_combination_term_add_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3818,10 +3878,12 @@ def test_distribution_receipt_rejects_unbound_v56_nested_term_delete(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v56_contract()
-    receipt["workbench_nested_linear_load_combination_term_delete_restart_passed"] = False
-    receipt[
-        "workbench_nested_linear_load_combination_term_delete_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_nested_linear_load_combination_term_delete_restart_passed"] = (
+        False
+    )
+    receipt["workbench_nested_linear_load_combination_term_delete_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3850,10 +3912,12 @@ def test_distribution_receipt_rejects_unbound_v57_nested_term_reorder(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v57_contract()
-    receipt["workbench_nested_linear_load_combination_term_reorder_restart_passed"] = False
-    receipt[
-        "workbench_nested_linear_load_combination_term_reorder_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_nested_linear_load_combination_term_reorder_restart_passed"] = (
+        False
+    )
+    receipt["workbench_nested_linear_load_combination_term_reorder_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3882,10 +3946,12 @@ def test_distribution_receipt_rejects_unbound_v58_direct_term_reorder(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v58_contract()
-    receipt["workbench_direct_linear_load_combination_term_reorder_restart_passed"] = False
-    receipt[
-        "workbench_direct_linear_load_combination_term_reorder_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_direct_linear_load_combination_term_reorder_restart_passed"] = (
+        False
+    )
+    receipt["workbench_direct_linear_load_combination_term_reorder_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3914,10 +3980,12 @@ def test_distribution_receipt_rejects_unbound_v59_direct_term_insert(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v59_contract()
-    receipt["workbench_direct_linear_load_combination_term_insert_restart_passed"] = False
-    receipt[
-        "workbench_direct_linear_load_combination_term_insert_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_direct_linear_load_combination_term_insert_restart_passed"] = (
+        False
+    )
+    receipt["workbench_direct_linear_load_combination_term_insert_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -3946,10 +4014,12 @@ def test_distribution_receipt_rejects_unbound_v60_nested_term_insert(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v60_contract()
-    receipt["workbench_nested_linear_load_combination_term_insert_restart_passed"] = False
-    receipt[
-        "workbench_nested_linear_load_combination_term_insert_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_nested_linear_load_combination_term_insert_restart_passed"] = (
+        False
+    )
+    receipt["workbench_nested_linear_load_combination_term_insert_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4039,9 +4109,7 @@ def test_distribution_receipt_rejects_unbound_v63_fixed_constraint_dof_delete(
 ):
     receipt, manifest = valid_v63_contract()
     receipt["workbench_fixed_constraint_dof_delete_restart_passed"] = False
-    receipt[
-        "workbench_fixed_constraint_dof_delete_recovery_sha256"
-    ] = "sha256:INVALID"
+    receipt["workbench_fixed_constraint_dof_delete_recovery_sha256"] = "sha256:INVALID"
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4131,7 +4199,9 @@ def test_distribution_receipt_rejects_unbound_v66_fixed_constraint_identity_edit
 ):
     receipt, manifest = valid_v66_contract()
     receipt["workbench_fixed_constraint_identity_edit_restart_passed"] = False
-    receipt["workbench_fixed_constraint_identity_edit_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_fixed_constraint_identity_edit_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4191,7 +4261,9 @@ def test_distribution_receipt_rejects_unbound_v68_linear_load_pattern_identity_e
 ):
     receipt, manifest = valid_v68_contract()
     receipt["workbench_linear_load_pattern_identity_edit_restart_passed"] = False
-    receipt["workbench_linear_load_pattern_identity_edit_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_linear_load_pattern_identity_edit_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4221,7 +4293,9 @@ def test_distribution_receipt_rejects_unbound_v69_linear_material_identity_edit(
 ):
     receipt, manifest = valid_v69_contract()
     receipt["workbench_linear_material_identity_edit_restart_passed"] = False
-    receipt["workbench_linear_material_identity_edit_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_linear_material_identity_edit_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4413,7 +4487,9 @@ def test_distribution_receipt_rejects_unbound_v75_model_identity_edit(tmp_path: 
     )
 
 
-def test_distribution_receipt_accepts_node_identity_cascade_v76_contract(tmp_path: Path):
+def test_distribution_receipt_accepts_node_identity_cascade_v76_contract(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v76_contract()
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 0, completed.stderr
@@ -4552,7 +4628,9 @@ def test_distribution_receipt_rejects_unbound_v80_load_pattern_identity_cascade(
     tmp_path: Path,
 ):
     receipt, manifest = valid_v80_contract()
-    receipt["workbench_linear_load_pattern_identity_cascade_edit_restart_passed"] = False
+    receipt["workbench_linear_load_pattern_identity_cascade_edit_restart_passed"] = (
+        False
+    )
     receipt["workbench_linear_load_pattern_identity_cascade_edit_recovery_sha256"] = (
         "sha256:INVALID"
     )
@@ -4621,7 +4699,9 @@ def test_distribution_receipt_rejects_unbound_v82_element_identity_cascade(
 ):
     receipt, manifest = valid_v82_contract()
     receipt["workbench_element_identity_cascade_edit_restart_passed"] = False
-    receipt["workbench_element_identity_cascade_edit_recovery_sha256"] = "sha256:INVALID"
+    receipt["workbench_element_identity_cascade_edit_recovery_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -4735,7 +4815,9 @@ def test_distribution_receipt_rejects_colliding_v85_reaction_view_identities(
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("locale identities must differ" in error for error in validation["errors"])
+    assert any(
+        "locale identities must differ" in error for error in validation["errors"]
+    )
     assert any("window identity must differ" in error for error in validation["errors"])
 
 
@@ -4804,7 +4886,9 @@ def test_distribution_receipt_rejects_unbound_v87_nodal_displacement_view(
 ):
     receipt, manifest = valid_v87_contract()
     receipt["model_ir_linear_nodal_displacement_view_restart_parity_passed"] = False
-    receipt["mgt_model_ir_linear_nodal_displacement_view_en_us_sha256"] = "sha256:INVALID"
+    receipt["mgt_model_ir_linear_nodal_displacement_view_en_us_sha256"] = (
+        "sha256:INVALID"
+    )
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
@@ -5027,6 +5111,51 @@ def test_distribution_receipt_rejects_colliding_model_ir_self_weight_v95_identit
     )
 
 
+def test_distribution_receipt_accepts_frame3d_member_distributed_load_v96_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v96_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_frame3d_member_distributed_load_v96(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v96_contract()
+    receipt["model_ir_frame3d_member_distributed_load_fixed_end_force_passed"] = False
+    receipt["model_ir_frame3d_member_distributed_load_linear_cpu_fallback_count"] = True
+    receipt["model_ir_frame3d_member_distributed_load_checkpoint_sha256"] = (
+        "sha256:INVALID"
+    )
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("fixed_end_force_passed" in error for error in validation["errors"])
+    assert any("fallback_count" in error for error in validation["errors"])
+    assert any("checkpoint_sha256" in error for error in validation["errors"])
+
+
+def test_distribution_receipt_rejects_colliding_frame3d_member_distributed_load_v96_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v96_contract()
+    receipt["model_ir_frame3d_member_distributed_load_reaction_sha256"] = receipt[
+        "model_ir_frame3d_member_distributed_load_result_ir_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR Frame3D member distributed load identities must differ"
+        in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -5132,15 +5261,22 @@ def test_distribution_receipt_rejects_unbound_v91_modal_restart_view(tmp_path: P
     completed = run_checker(tmp_path, receipt, manifest)
     assert completed.returncode == 1
     validation = json.loads(completed.stdout)
-    assert any("model_ir_modal_restart_bitwise_passed" in error for error in validation["errors"])
+    assert any(
+        "model_ir_modal_restart_bitwise_passed" in error
+        for error in validation["errors"]
+    )
     assert any(
         "workbench_model_modal_result_view_read_only_passed" in error
         for error in validation["errors"]
     )
-    assert any("model_ir_modal_checkpoint_sha256" in error for error in validation["errors"])
+    assert any(
+        "model_ir_modal_checkpoint_sha256" in error for error in validation["errors"]
+    )
 
 
-def test_distribution_receipt_rejects_colliding_v91_modal_view_identities(tmp_path: Path):
+def test_distribution_receipt_rejects_colliding_v91_modal_view_identities(
+    tmp_path: Path,
+):
     receipt, manifest = valid_v91_contract()
     receipt["workbench_model_modal_result_view_ko_kr_sha256"] = receipt[
         "workbench_model_modal_result_view_en_us_sha256"
@@ -5322,10 +5458,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-catalog -- check --root" in catalog_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in catalog_wrapper
     assert "structural-catalog -- build" in catalog_wrapper
-    assert "PATH=\"$empty_path\"" in e2e
-    assert "diff -r \"$restarted\" \"$direct\"" in e2e
+    assert 'PATH="$empty_path"' in e2e
+    assert 'diff -r "$restarted" "$direct"' in e2e
     assert "workflow-mgt" in e2e
-    assert "diff -r \"$mgt_restarted\" \"$mgt_direct\"" in e2e
+    assert 'diff -r "$mgt_restarted" "$mgt_direct"' in e2e
     assert "mgt_workbench_direct_parity_passed" in e2e
     assert "exercise_operator_surface" in e2e
     assert "workbench_operator_surface_passed" in e2e
@@ -5543,20 +5679,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v74" in e2e
     assert "exercise_linear_load_combination_identity_edit_surface" in e2e
     assert "model-edit-linear-load-combination-identity" in e2e
-    assert (
-        "structural-native:model-edit-linear-load-combination-identity.v1" in e2e
-    )
+    assert "structural-native:model-edit-linear-load-combination-identity.v1" in e2e
     assert "workbench_linear_load_combination_identity_edit_surface_passed" in e2e
     assert "workbench_linear_load_combination_identity_edit_model_sha256" in e2e
     assert "workbench_linear_load_combination_identity_edit_receipt_sha256" in e2e
     assert (
-        "workbench_linear_load_combination_identity_edit_request_receipt_sha256"
-        in e2e
+        "workbench_linear_load_combination_identity_edit_request_receipt_sha256" in e2e
     )
     assert "workbench_linear_load_combination_identity_edit_request_sha256" in e2e
     assert (
-        "workbench_linear_load_combination_identity_edit_assembly_receipt_sha256"
-        in e2e
+        "workbench_linear_load_combination_identity_edit_assembly_receipt_sha256" in e2e
     )
     assert "workbench_linear_load_combination_identity_edit_checkpoint_sha256" in e2e
     assert "workbench_linear_load_combination_identity_edit_result_ir_sha256" in e2e
@@ -5600,9 +5732,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_frame_section_identity_cascade_edit_surface_passed" in e2e
     assert "workbench_frame_section_identity_cascade_edit_model_sha256" in e2e
     assert "workbench_frame_section_identity_cascade_edit_receipt_sha256" in e2e
-    assert (
-        "workbench_frame_section_identity_cascade_edit_request_receipt_sha256" in e2e
-    )
+    assert "workbench_frame_section_identity_cascade_edit_request_receipt_sha256" in e2e
     assert "workbench_frame_section_identity_cascade_edit_request_sha256" in e2e
     assert (
         "workbench_frame_section_identity_cascade_edit_assembly_receipt_sha256" in e2e
@@ -5638,9 +5768,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_truss_section_identity_cascade_edit_surface_passed" in e2e
     assert "workbench_truss_section_identity_cascade_edit_model_sha256" in e2e
     assert "workbench_truss_section_identity_cascade_edit_receipt_sha256" in e2e
-    assert (
-        "workbench_truss_section_identity_cascade_edit_request_receipt_sha256" in e2e
-    )
+    assert "workbench_truss_section_identity_cascade_edit_request_receipt_sha256" in e2e
     assert "workbench_truss_section_identity_cascade_edit_request_sha256" in e2e
     assert (
         "workbench_truss_section_identity_cascade_edit_assembly_receipt_sha256" in e2e
@@ -5653,9 +5781,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v80" in e2e
     assert "exercise_linear_load_pattern_identity_cascade_edit_surface" in e2e
     assert "model-edit-linear-load-pattern-identity-cascade" in e2e
-    assert (
-        "structural-native:model-edit-linear-load-pattern-identity-cascade.v2" in e2e
-    )
+    assert "structural-native:model-edit-linear-load-pattern-identity-cascade.v2" in e2e
     assert "workbench_linear_load_pattern_identity_cascade_edit_surface_passed" in e2e
     assert "workbench_linear_load_pattern_identity_cascade_edit_model_sha256" in e2e
     assert "workbench_linear_load_pattern_identity_cascade_edit_receipt_sha256" in e2e
@@ -5668,7 +5794,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_linear_load_pattern_identity_cascade_edit_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_linear_load_pattern_identity_cascade_edit_checkpoint_sha256" in e2e
+    assert (
+        "workbench_linear_load_pattern_identity_cascade_edit_checkpoint_sha256" in e2e
+    )
     assert "workbench_linear_load_pattern_identity_cascade_edit_result_ir_sha256" in e2e
     assert "workbench_linear_load_pattern_identity_cascade_edit_recovery_sha256" in e2e
     assert "workbench_linear_load_pattern_identity_cascade_edit_report_ir_sha256" in e2e
@@ -5677,25 +5805,45 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "exercise_linear_load_combination_identity_cascade_edit_surface" in e2e
     assert "model-edit-linear-load-combination-identity-cascade" in e2e
     assert (
-        "structural-native:model-edit-linear-load-combination-identity-cascade.v2" in e2e
+        "structural-native:model-edit-linear-load-combination-identity-cascade.v2"
+        in e2e
     )
-    assert "workbench_linear_load_combination_identity_cascade_edit_surface_passed" in e2e
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_surface_passed" in e2e
+    )
     assert "workbench_linear_load_combination_identity_cascade_edit_model_sha256" in e2e
-    assert "workbench_linear_load_combination_identity_cascade_edit_receipt_sha256" in e2e
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_receipt_sha256" in e2e
+    )
     assert (
         "workbench_linear_load_combination_identity_cascade_edit_request_receipt_sha256"
         in e2e
     )
-    assert "workbench_linear_load_combination_identity_cascade_edit_request_sha256" in e2e
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_request_sha256" in e2e
+    )
     assert (
         "workbench_linear_load_combination_identity_cascade_edit_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_linear_load_combination_identity_cascade_edit_checkpoint_sha256" in e2e
-    assert "workbench_linear_load_combination_identity_cascade_edit_result_ir_sha256" in e2e
-    assert "workbench_linear_load_combination_identity_cascade_edit_recovery_sha256" in e2e
-    assert "workbench_linear_load_combination_identity_cascade_edit_report_ir_sha256" in e2e
-    assert "workbench_linear_load_combination_identity_cascade_edit_restart_passed" in e2e
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_checkpoint_sha256"
+        in e2e
+    )
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_result_ir_sha256"
+        in e2e
+    )
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_recovery_sha256" in e2e
+    )
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_report_ir_sha256"
+        in e2e
+    )
+    assert (
+        "workbench_linear_load_combination_identity_cascade_edit_restart_passed" in e2e
+    )
     assert "structural-native-distribution-e2e.v82" in e2e
     assert "exercise_element_identity_cascade_edit_surface" in e2e
     assert "model-edit-element-identity-cascade" in e2e
@@ -5725,7 +5873,8 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     )
     assert "workbench_fixed_constraint_identity_cascade_edit_request_sha256" in e2e
     assert (
-        "workbench_fixed_constraint_identity_cascade_edit_assembly_receipt_sha256" in e2e
+        "workbench_fixed_constraint_identity_cascade_edit_assembly_receipt_sha256"
+        in e2e
     )
     assert "workbench_fixed_constraint_identity_cascade_edit_checkpoint_sha256" in e2e
     assert "workbench_fixed_constraint_identity_cascade_edit_result_ir_sha256" in e2e
@@ -5734,7 +5883,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v84" in e2e
     assert "model_ir_linear_reaction_result_ir_sha256" in e2e
     assert "mgt_model_ir_linear_reaction_result_ir_sha256" in e2e
-    assert '04-resume/reaction-result-ir.json' in e2e
+    assert "04-resume/reaction-result-ir.json" in e2e
     assert "structural-native-distribution-e2e.v85" in e2e
     assert "exercise_model_ir_linear_reaction_view_surface" in e2e
     assert "reaction-view" in e2e
@@ -5801,6 +5950,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v95" in e2e
     assert "model_ir_self_weight_standard_gravity_passed" in e2e
     assert "model_ir_self_weight_reaction_sha256" in e2e
+    assert "structural-native-distribution-e2e.v96" in e2e
+    assert "model_ir_frame3d_member_distributed_load_fixed_end_force_passed" in e2e
+    assert "model_ir_frame3d_member_distributed_load_reaction_sha256" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e
@@ -5829,7 +5981,8 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "exercise_model_ir_linear_localized_pdf_surface" in e2e
     assert "model_ir_linear_localized_pdf_surface_passed" in e2e
     assert (
-        "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3" in e2e
+        "structural-native-model-ir-linear-engineering-localized-pdf-report-receipt.v3"
+        in e2e
     )
     assert "structural-native-sparse-linear-pdf-report-receipt.v1" in e2e
     assert "frame_cantilever_language_neutral_oracle_v1.txt" in e2e
@@ -5874,7 +6027,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--model-ir-linear-element-recovery-view-ko-kr-second" in rootfs_e2e
     assert "--mgt-model-ir-linear-element-recovery-view-en-us-first" in rootfs_e2e
     assert "--mgt-model-ir-linear-element-recovery-view-ko-kr-second" in rootfs_e2e
-    assert "--workbench-linear-element-recovery-view-invalid-window-failure" in rootfs_e2e
+    assert (
+        "--workbench-linear-element-recovery-view-invalid-window-failure" in rootfs_e2e
+    )
     assert "model-create-modal-analysis-request" in rootfs_e2e
     assert "model-modal-run" in rootfs_e2e
     assert "model-modal-resume" in rootfs_e2e
@@ -6102,7 +6257,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_linear_load_combination_report_ir_sha256" in e2e
     assert "workbench_linear_load_combination_restart_passed" in e2e
     assert "exercise_direct_linear_load_combination_surface" in e2e
-    assert "structural-native-model-linear-direct-combination-request-create-receipt.v2" in e2e
+    assert (
+        "structural-native-model-linear-direct-combination-request-create-receipt.v2"
+        in e2e
+    )
     assert "workbench_direct_linear_load_combination_surface_passed" in e2e
     assert "workbench_direct_linear_load_combination_model_sha256" in e2e
     assert "workbench_direct_linear_load_combination_edit_receipt_sha256" in e2e
@@ -6137,7 +6295,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_direct_linear_load_combination_delete_model_sha256" in e2e
     assert "workbench_direct_linear_load_combination_delete_receipt_sha256" in e2e
     assert "workbench_direct_linear_load_combination_delete_request_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_delete_assembly_receipt_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_delete_assembly_receipt_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_delete_checkpoint_sha256" in e2e
     assert "workbench_direct_linear_load_combination_delete_result_ir_sha256" in e2e
     assert "workbench_direct_linear_load_combination_delete_recovery_sha256" in e2e
@@ -6165,9 +6325,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert (
         "structural-native:model-edit-direct-linear-load-combination-factor.v1" in e2e
     )
-    assert (
-        "workbench_direct_linear_load_combination_factor_edit_surface_passed" in e2e
-    )
+    assert "workbench_direct_linear_load_combination_factor_edit_surface_passed" in e2e
     assert "workbench_direct_linear_load_combination_factor_edit_model_sha256" in e2e
     assert "workbench_direct_linear_load_combination_factor_edit_receipt_sha256" in e2e
     assert (
@@ -6179,19 +6337,23 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_direct_linear_load_combination_factor_edit_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_direct_linear_load_combination_factor_edit_checkpoint_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_factor_edit_result_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_factor_edit_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_factor_edit_result_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_factor_edit_recovery_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_factor_edit_report_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_factor_edit_report_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_factor_edit_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_factor_edit_surface" in e2e
     assert "model-edit-nested-linear-load-combination-factor" in e2e
     assert (
         "structural-native:model-edit-nested-linear-load-combination-factor.v1" in e2e
     )
-    assert (
-        "workbench_nested_linear_load_combination_factor_edit_surface_passed" in e2e
-    )
+    assert "workbench_nested_linear_load_combination_factor_edit_surface_passed" in e2e
     assert "workbench_nested_linear_load_combination_factor_edit_model_sha256" in e2e
     assert "workbench_nested_linear_load_combination_factor_edit_receipt_sha256" in e2e
     assert (
@@ -6203,10 +6365,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_nested_linear_load_combination_factor_edit_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_nested_linear_load_combination_factor_edit_checkpoint_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_factor_edit_result_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_factor_edit_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_factor_edit_result_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_factor_edit_recovery_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_factor_edit_report_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_factor_edit_report_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_factor_edit_restart_passed" in e2e
     assert "exercise_direct_linear_load_combination_reference_edit_surface" in e2e
     assert "model-edit-linear-load-combination-reference" in e2e
@@ -6215,23 +6383,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         in e2e
     )
     assert (
-        "workbench_direct_linear_load_combination_reference_edit_surface_passed"
-        in e2e
+        "workbench_direct_linear_load_combination_reference_edit_surface_passed" in e2e
     )
+    assert "workbench_direct_linear_load_combination_reference_edit_model_sha256" in e2e
     assert (
-        "workbench_direct_linear_load_combination_reference_edit_model_sha256" in e2e
-    )
-    assert (
-        "workbench_direct_linear_load_combination_reference_edit_receipt_sha256"
-        in e2e
+        "workbench_direct_linear_load_combination_reference_edit_receipt_sha256" in e2e
     )
     assert (
         "workbench_direct_linear_load_combination_reference_edit_request_receipt_sha256"
         in e2e
     )
     assert (
-        "workbench_direct_linear_load_combination_reference_edit_request_sha256"
-        in e2e
+        "workbench_direct_linear_load_combination_reference_edit_request_sha256" in e2e
     )
     assert (
         "workbench_direct_linear_load_combination_reference_edit_assembly_receipt_sha256"
@@ -6246,8 +6409,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         in e2e
     )
     assert (
-        "workbench_direct_linear_load_combination_reference_edit_recovery_sha256"
-        in e2e
+        "workbench_direct_linear_load_combination_reference_edit_recovery_sha256" in e2e
     )
     assert (
         "workbench_direct_linear_load_combination_reference_edit_report_ir_sha256"
@@ -6263,23 +6425,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         in e2e
     )
     assert (
-        "workbench_nested_linear_load_combination_reference_edit_surface_passed"
-        in e2e
+        "workbench_nested_linear_load_combination_reference_edit_surface_passed" in e2e
     )
+    assert "workbench_nested_linear_load_combination_reference_edit_model_sha256" in e2e
     assert (
-        "workbench_nested_linear_load_combination_reference_edit_model_sha256" in e2e
-    )
-    assert (
-        "workbench_nested_linear_load_combination_reference_edit_receipt_sha256"
-        in e2e
+        "workbench_nested_linear_load_combination_reference_edit_receipt_sha256" in e2e
     )
     assert (
         "workbench_nested_linear_load_combination_reference_edit_request_receipt_sha256"
         in e2e
     )
     assert (
-        "workbench_nested_linear_load_combination_reference_edit_request_sha256"
-        in e2e
+        "workbench_nested_linear_load_combination_reference_edit_request_sha256" in e2e
     )
     assert (
         "workbench_nested_linear_load_combination_reference_edit_assembly_receipt_sha256"
@@ -6294,8 +6451,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         in e2e
     )
     assert (
-        "workbench_nested_linear_load_combination_reference_edit_recovery_sha256"
-        in e2e
+        "workbench_nested_linear_load_combination_reference_edit_recovery_sha256" in e2e
     )
     assert (
         "workbench_nested_linear_load_combination_reference_edit_report_ir_sha256"
@@ -6306,9 +6462,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     )
     assert "exercise_direct_linear_load_combination_term_add_surface" in e2e
     assert "model-add-linear-load-combination-term" in e2e
-    assert (
-        "structural-native:model-add-direct-linear-load-combination-term.v1" in e2e
-    )
+    assert "structural-native:model-add-direct-linear-load-combination-term.v1" in e2e
     assert "workbench_direct_linear_load_combination_term_add_surface_passed" in e2e
     assert "workbench_direct_linear_load_combination_term_add_model_sha256" in e2e
     assert "workbench_direct_linear_load_combination_term_add_receipt_sha256" in e2e
@@ -6343,10 +6497,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_direct_linear_load_combination_term_delete_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_direct_linear_load_combination_term_delete_checkpoint_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_delete_result_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_delete_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_term_delete_result_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_term_delete_recovery_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_delete_report_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_delete_report_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_term_delete_restart_passed" in e2e
     assert "exercise_direct_linear_load_combination_term_reorder_surface" in e2e
     assert "model-reorder-linear-load-combination-term" in e2e
@@ -6365,10 +6525,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_direct_linear_load_combination_term_reorder_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_direct_linear_load_combination_term_reorder_checkpoint_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_reorder_result_ir_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_reorder_recovery_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_reorder_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_term_reorder_result_ir_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_term_reorder_recovery_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_term_reorder_report_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_term_reorder_restart_passed" in e2e
     assert "exercise_direct_linear_load_combination_term_insert_surface" in e2e
     assert "model-insert-linear-load-combination-term" in e2e
@@ -6387,10 +6555,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_direct_linear_load_combination_term_insert_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_insert_result_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_insert_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_direct_linear_load_combination_term_insert_result_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_term_insert_recovery_sha256" in e2e
-    assert "workbench_direct_linear_load_combination_term_insert_report_ir_sha256" in e2e
+    assert (
+        "workbench_direct_linear_load_combination_term_insert_report_ir_sha256" in e2e
+    )
     assert "workbench_direct_linear_load_combination_term_insert_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_term_insert_surface" in e2e
     assert "model-insert-nested-linear-load-combination-term" in e2e
@@ -6409,10 +6583,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_nested_linear_load_combination_term_insert_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_nested_linear_load_combination_term_insert_checkpoint_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_insert_result_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_insert_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_term_insert_result_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_insert_recovery_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_insert_report_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_insert_report_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_insert_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_term_add_surface" in e2e
     assert "model-add-nested-linear-load-combination-term" in e2e
@@ -6436,7 +6616,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_nested_linear_load_combination_term_add_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_term_delete_surface" in e2e
     assert "model-delete-nested-linear-load-combination-term" in e2e
-    assert "structural-native:model-delete-nested-linear-load-combination-term.v1" in e2e
+    assert (
+        "structural-native:model-delete-nested-linear-load-combination-term.v1" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_delete_surface_passed" in e2e
     assert "workbench_nested_linear_load_combination_term_delete_model_sha256" in e2e
     assert "workbench_nested_linear_load_combination_term_delete_receipt_sha256" in e2e
@@ -6449,14 +6631,22 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_nested_linear_load_combination_term_delete_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_nested_linear_load_combination_term_delete_checkpoint_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_delete_result_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_delete_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_term_delete_result_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_delete_recovery_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_delete_report_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_delete_report_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_delete_restart_passed" in e2e
     assert "exercise_nested_linear_load_combination_term_reorder_surface" in e2e
     assert "model-reorder-nested-linear-load-combination-term" in e2e
-    assert "structural-native:model-reorder-nested-linear-load-combination-term.v1" in e2e
+    assert (
+        "structural-native:model-reorder-nested-linear-load-combination-term.v1" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_reorder_surface_passed" in e2e
     assert "workbench_nested_linear_load_combination_term_reorder_model_sha256" in e2e
     assert "workbench_nested_linear_load_combination_term_reorder_receipt_sha256" in e2e
@@ -6469,10 +6659,18 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         "workbench_nested_linear_load_combination_term_reorder_assembly_receipt_sha256"
         in e2e
     )
-    assert "workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_reorder_result_ir_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_reorder_recovery_sha256" in e2e
-    assert "workbench_nested_linear_load_combination_term_reorder_report_ir_sha256" in e2e
+    assert (
+        "workbench_nested_linear_load_combination_term_reorder_checkpoint_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_term_reorder_result_ir_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_term_reorder_recovery_sha256" in e2e
+    )
+    assert (
+        "workbench_nested_linear_load_combination_term_reorder_report_ir_sha256" in e2e
+    )
     assert "workbench_nested_linear_load_combination_term_reorder_restart_passed" in e2e
     assert "exercise_linear_load_combination_delete_surface" in e2e
     assert "model-delete-linear-load-combination" in e2e
@@ -6510,7 +6708,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "rustc-link-lib=dylib=structural_c_abi_v1" in ffi
     assert "native-hip-approved" in rocm_e2e
     assert "ROCm product library has an unresolved runtime dependency" in rocm_e2e
-    assert "structural_native_backend_package_consumer\" hip" in rocm_e2e
+    assert 'structural_native_backend_package_consumer" hip' in rocm_e2e
     assert "workflow-mgt" in rocm_e2e
     assert "mgt_workbench_direct_parity_passed" in rocm_e2e
     assert "exercise_operator_surface" in rocm_e2e
@@ -6548,7 +6746,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "evidence_builder_build_passed" in rocm_e2e
     assert "workbench_catalog_surface_passed" in rocm_e2e
     assert "workbench_evidence_surface_passed" in rocm_e2e
-    assert '"approved_device_runner\\\":true' in rocm_e2e
+    assert '"approved_device_runner\\":true' in rocm_e2e
     assert "inspect --workspace /mnt/modelir-workbench" in rootfs_e2e
     assert "review-show --workspace /mnt/modelir-workbench" in rootfs_e2e
     assert "export --workspace /mnt/modelir-workbench" in rootfs_e2e
