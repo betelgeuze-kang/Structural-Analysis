@@ -4,9 +4,9 @@ Status: bounded local CPU implementation evidence
 
 This slice connects the existing typed Frame3D/Truss3D `ModelIR` assembly to the existing ABI
 v1.9 dense modal solver. It is a bounded C5 product path for at most 128 active DOFs, with installed
-static/shared run evidence at distribution v90 and a newer source-level model-bound restart. It
+static/shared run, model-bound restart and read-only result-view evidence at distribution v91. It
 does not promote the generalized-eigen numerical family beyond C1 and does not claim sparse
-whole-model, linear-buckling, installed restart, public/customer publication, or engineering
+whole-model, linear-buckling, public/customer publication, or engineering
 authority.
 
 ## Strict request and assembly boundary
@@ -108,14 +108,14 @@ lookup. Contract tests cover strict wire rejection, identity drift, excessive mo
 malformed CSR, exact symmetry, artifact self-hashes, checkpoint corruption, and outer
 model/request/assembly/generated-request bindings. A second load selector that produces the same
 dense K/M request is still rejected, proving the outer checkpoint is not merely matrix-bound.
-The append-only installed static/shared distribution v90 repeats Workbench request authoring and
-the unchanged three-mode CLI execution in an empty `PATH`, binds six request/result/report
-artifact identities, active DOF 6, fallback 0 and unsupported-planar rejection, and requires
-Python/Node lookup 0.
+The append-only installed static/shared distribution v91 retains the v90 Workbench request
+authoring and unchanged three-mode CLI execution, then resumes from the exact model-bound
+checkpoint and requires byte-identical eleven-artifact direct/resumed output. It repeatedly runs
+the self-hashed en-US/ko-KR mode-table view in an empty `PATH`, proves source nonmutation and
+invalid-window rejection, and requires Python/Node lookup 0 and fallback 0.
 
 Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
-buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, installed-distribution
-exercise of the model-bound restart and `modal-result-view`, a durable modal Workbench session,
+buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, a durable modal Workbench session,
 geometric mode-shape animation/participation-mass or response-spectrum visualization, local rootfs
 or public/customer publication, protected-runner HIP C2, independent broad-corpus engineering
 validation, and C6 decommission.

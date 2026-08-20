@@ -1058,6 +1058,17 @@ V90_MODEL_IR_MODAL_KEYS = {
     "model_ir_modal_run_receipt_sha256",
 }
 V90_EXPECTED_KEYS = V89_EXPECTED_KEYS | V90_MODEL_IR_MODAL_KEYS
+V91_MODEL_IR_MODAL_RESTART_VIEW_KEYS = {
+    "model_ir_modal_restart_surface_passed",
+    "model_ir_modal_restart_bitwise_passed",
+    "workbench_model_modal_result_view_surface_passed",
+    "workbench_model_modal_result_view_read_only_passed",
+    "workbench_model_modal_result_view_invalid_window_rejected",
+    "model_ir_modal_checkpoint_sha256",
+    "workbench_model_modal_result_view_en_us_sha256",
+    "workbench_model_modal_result_view_ko_kr_sha256",
+}
+V91_EXPECTED_KEYS = V90_EXPECTED_KEYS | V91_MODEL_IR_MODAL_RESTART_VIEW_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1099,6 +1110,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v91_receipt = receipt_schema_version == "structural-native-distribution-e2e.v91"
+    if is_v91_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v90"
     is_v90_receipt = receipt_schema_version == "structural-native-distribution-e2e.v90"
     if is_v90_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v89"
@@ -1433,6 +1447,7 @@ def validate(
         "structural-native-distribution-e2e.v88": V88_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v89": V89_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v90": V90_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v91": V91_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1573,6 +1588,30 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v91_receipt:
+        for name in (
+            "model_ir_modal_restart_surface_passed",
+            "model_ir_modal_restart_bitwise_passed",
+            "workbench_model_modal_result_view_surface_passed",
+            "workbench_model_modal_result_view_read_only_passed",
+            "workbench_model_modal_result_view_invalid_window_rejected",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "model_ir_modal_checkpoint_sha256",
+            "workbench_model_modal_result_view_en_us_sha256",
+            "workbench_model_modal_result_view_ko_kr_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(hash_names):
+            errors.append("all installed ModelIR modal restart/view identities must differ")
     if is_v90_receipt:
         for name in (
             "workbench_model_modal_request_create_surface_passed",

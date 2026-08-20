@@ -2098,6 +2098,28 @@ def valid_v90_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v91_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v90_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v91",
+            "model_ir_modal_restart_surface_passed": True,
+            "model_ir_modal_restart_bitwise_passed": True,
+            "workbench_model_modal_result_view_surface_passed": True,
+            "workbench_model_modal_result_view_read_only_passed": True,
+            "workbench_model_modal_result_view_invalid_window_rejected": True,
+            "model_ir_modal_checkpoint_sha256": "sha256:" + "4" * 63 + "1",
+            "workbench_model_modal_result_view_en_us_sha256": "sha256:"
+            + "4" * 63
+            + "2",
+            "workbench_model_modal_result_view_ko_kr_sha256": "sha256:"
+            + "4" * 63
+            + "3",
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4836,6 +4858,47 @@ def test_distribution_receipt_accepts_model_ir_modal_v90_contract(tmp_path: Path
     assert validation["authoritative"] is True
 
 
+def test_distribution_receipt_accepts_model_ir_modal_restart_view_v91_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v91_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v91_modal_restart_view(tmp_path: Path):
+    receipt, manifest = valid_v91_contract()
+    receipt["model_ir_modal_restart_bitwise_passed"] = False
+    receipt["workbench_model_modal_result_view_read_only_passed"] = False
+    receipt["model_ir_modal_checkpoint_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("model_ir_modal_restart_bitwise_passed" in error for error in validation["errors"])
+    assert any(
+        "workbench_model_modal_result_view_read_only_passed" in error
+        for error in validation["errors"]
+    )
+    assert any("model_ir_modal_checkpoint_sha256" in error for error in validation["errors"])
+
+
+def test_distribution_receipt_rejects_colliding_v91_modal_view_identities(tmp_path: Path):
+    receipt, manifest = valid_v91_contract()
+    receipt["workbench_model_modal_result_view_ko_kr_sha256"] = receipt[
+        "workbench_model_modal_result_view_en_us_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR modal restart/view identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_unbound_v90_model_ir_modal_product(
     tmp_path: Path,
 ):
@@ -5454,6 +5517,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256" in e2e
     assert "workbench_linear_element_recovery_view_invalid_window_rejected" in e2e
     assert "structural-native-distribution-e2e.v90" in e2e
+    assert "structural-native-distribution-e2e.v91" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e
@@ -5463,6 +5527,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_model_modal_unsupported_planar_rejected" in e2e
     assert "model_ir_modal_result_ir_sha256" in e2e
     assert "model_ir_modal_run_receipt_sha256" in e2e
+    assert "model-modal-resume" in e2e
+    assert "modal-result-view" in e2e
+    assert "model_ir_modal_restart_bitwise_passed" in e2e
+    assert "workbench_model_modal_result_view_read_only_passed" in e2e
     assert "workbench_fixed_constraint_identity_cascade_edit_restart_passed" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e

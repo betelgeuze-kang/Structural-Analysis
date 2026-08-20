@@ -223,7 +223,7 @@ exercise_model_ir_modal_installed_surface() {
       > "$e2e_root/model-modal-run-$label.stdout.json"
     for artifact in \
       assembly-receipt.json checkpoint.eigcp dense-run-receipt.json \
-      generated-dense-request.json model-ir.json model-modal-request.json \
+      checkpoint.mmcp generated-dense-request.json model-ir.json model-modal-request.json \
       report-ir.json report.md result-ir.json run-receipt.json; do
       test -f "$execution_directory/$artifact"
     done
@@ -245,6 +245,57 @@ exercise_model_ir_modal_installed_surface() {
     > "$e2e_root/model-modal-run-diff.txt"
   cmp "$e2e_root/model-modal-run-first.stdout.json" \
     "$e2e_root/model-modal-run-second.stdout.json"
+
+  local resumed_directory="$e2e_root/model-modal-resume"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-modal-resume \
+    "$linear_model" \
+    "$e2e_root/model-modal-request-create-first/analysis-request.json" \
+    "$e2e_root/model-modal-run-first/checkpoint.mmcp" \
+    --output-dir "$resumed_directory" \
+    > "$e2e_root/model-modal-resume.stdout.json"
+  diff -r "$e2e_root/model-modal-run-first" "$resumed_directory" \
+    > "$e2e_root/model-modal-resume-diff.txt"
+  cmp "$e2e_root/model-modal-run-first.stdout.json" \
+    "$e2e_root/model-modal-resume.stdout.json"
+
+  local view_source_before="$e2e_root/model-modal-view-source-before"
+  cp -a -- "$e2e_root/model-modal-run-first" "$view_source_before"
+  local locale first_view second_view declared actual unsigned
+  for locale in en-US ko-KR; do
+    first_view="$e2e_root/model-modal-result-view-$locale-first.txt"
+    second_view="$e2e_root/model-modal-result-view-$locale-second.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-result-view \
+      "$e2e_root/model-modal-run-first" --locale "$locale" --count 16 > "$first_view"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-result-view \
+      "$e2e_root/model-modal-run-first" --locale "$locale" --count 16 > "$second_view"
+    cmp "$first_view" "$second_view"
+    if [[ "$locale" == "ko-KR" ]]; then
+      declared="$(sed -n 's/^보기 해시: sha256://p' "$first_view")"
+    else
+      declared="$(sed -n 's/^View hash: sha256://p' "$first_view")"
+    fi
+    if [[ ! "$declared" =~ ^[0-9a-f]{64}$ ]]; then
+      echo "installed modal result view has no valid self-hash" >&2
+      exit 1
+    fi
+    unsigned="$first_view.unsigned"
+    sed '$d' "$first_view" > "$unsigned"
+    actual="$(sha256sum "$unsigned" | awk '{print $1}')"
+    if [[ "$actual" != "$declared" ]]; then
+      echo "installed modal result view self-hash mismatch" >&2
+      exit 1
+    fi
+  done
+  diff -r "$view_source_before" "$e2e_root/model-modal-run-first" \
+    > "$e2e_root/model-modal-result-view-source-diff.txt"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-result-view \
+    "$e2e_root/model-modal-run-first" --start-mode 4 --count 1 \
+    > "$e2e_root/model-modal-result-view-invalid-window.json"; then
+    echo "installed modal result view accepted an invalid window" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_modal_result_view_window_invalid' \
+    "$e2e_root/model-modal-result-view-invalid-window.json"
   if [[ "$(sha256sum "$linear_model" | awk '{print $1}')" != "$linear_model_before_hash" ]]; then
     echo "installed ModelIR modal authoring or execution mutated its source ModelIR" >&2
     exit 1
@@ -272,6 +323,8 @@ exercise_model_ir_modal_installed_surface() {
 exercise_model_ir_modal_installed_surface
 modal_request_directory="$e2e_root/model-modal-request-create-first"
 modal_execution_directory="$e2e_root/model-modal-run-first"
+modal_result_view_en_us="$e2e_root/model-modal-result-view-en-US-first.txt"
+modal_result_view_ko_kr="$e2e_root/model-modal-result-view-ko-KR-first.txt"
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10394,6 +10447,9 @@ model_modal_result_hash="$(sha256sum "$modal_execution_directory/result-ir.json"
 model_modal_report_ir_hash="$(sha256sum "$modal_execution_directory/report-ir.json" | awk '{print $1}')"
 model_modal_markdown_hash="$(sha256sum "$modal_execution_directory/report.md" | awk '{print $1}')"
 model_modal_run_receipt_hash="$(sha256sum "$modal_execution_directory/run-receipt.json" | awk '{print $1}')"
+model_modal_checkpoint_hash="$(sha256sum "$modal_execution_directory/checkpoint.mmcp" | awk '{print $1}')"
+model_modal_result_view_en_us_hash="$(sha256sum "$modal_result_view_en_us" | awk '{print $1}')"
+model_modal_result_view_ko_kr_hash="$(sha256sum "$modal_result_view_ko_kr" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11259,6 +11315,10 @@ v90_receipt_json="${v89_receipt_json/structural-native-distribution-e2e.v89/stru
 model_modal_receipt_fields="\"workbench_model_modal_request_create_surface_passed\":true,\"model_ir_modal_product_surface_passed\":true,\"model_ir_modal_repeat_bitwise_passed\":true,\"workbench_model_modal_unsupported_planar_rejected\":true,\"model_ir_modal_mode_count\":3,\"model_ir_modal_active_dof_count\":6,\"model_ir_modal_fallback_count\":0,\"model_ir_modal_request_sha256\":\"sha256:$model_modal_request_hash\",\"workbench_model_modal_request_receipt_sha256\":\"sha256:$model_modal_request_receipt_hash\",\"model_ir_modal_result_ir_sha256\":\"sha256:$model_modal_result_hash\",\"model_ir_modal_report_ir_sha256\":\"sha256:$model_modal_report_ir_hash\",\"model_ir_modal_markdown_sha256\":\"sha256:$model_modal_markdown_hash\",\"model_ir_modal_run_receipt_sha256\":\"sha256:$model_modal_run_receipt_hash\","
 v90_receipt_json="${v90_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v90_receipt_json" > "$temporary_receipt"
+v91_receipt_json="${v90_receipt_json/structural-native-distribution-e2e.v90/structural-native-distribution-e2e.v91}"
+model_modal_restart_view_receipt_fields="\"model_ir_modal_restart_surface_passed\":true,\"model_ir_modal_restart_bitwise_passed\":true,\"workbench_model_modal_result_view_surface_passed\":true,\"workbench_model_modal_result_view_read_only_passed\":true,\"workbench_model_modal_result_view_invalid_window_rejected\":true,\"model_ir_modal_checkpoint_sha256\":\"sha256:$model_modal_checkpoint_hash\",\"workbench_model_modal_result_view_en_us_sha256\":\"sha256:$model_modal_result_view_en_us_hash\",\"workbench_model_modal_result_view_ko_kr_sha256\":\"sha256:$model_modal_result_view_ko_kr_hash\","
+v91_receipt_json="${v91_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_restart_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v91_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

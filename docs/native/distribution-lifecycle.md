@@ -673,14 +673,25 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    ResultIR, ReportIR, Markdown and run-receipt identities. Static and shared receipts remain
    hosted CPU C5 evidence with Python/Node lookup 0; this is not sparse/buckling authority, local
    rootfs or public/customer publication, HIP C2, an engineering verdict or C6.
+105. resumes the exact v90 modal result through installed `structural-cli analysis
+   model-modal-resume`, verifies byte-identical eleven-artifact direct/resumed directories and
+   stdout, then runs installed `structural-workbench modal-result-view` repeatedly for en-US and
+   ko-KR in an empty `PATH`. It independently verifies each ANSI-free view self-hash, source
+   directory nonmutation and fail-closed invalid-window rejection, then emits append-only v91
+   binding the outer `checkpoint.mmcp` plus both localized view identities and five positive
+   restart/view gates. Static and shared receipts remain hosted CPU C5 evidence with Python/Node
+   lookup 0 and fallback 0; this is not a durable modal session, geometric mode-shape,
+   participation-mass, response-spectrum, sparse/buckling, local rootfs, public/customer package,
+   HIP C2, engineering-verdict or C6 receipt.
 
-   The receipt checker continues to accept frozen v1 through v89 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v90 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
    pre-v88 receipt is installed ModelIR-linear deformed-view authority, no pre-v89 receipt is
    installed ModelIR-linear element-recovery-view authority, and no pre-v90 receipt is
-   installed Workbench-authored ModelIR modal product authority. Its explicit compatibility
+   installed Workbench-authored ModelIR modal product authority, and no pre-v91 receipt is
+   installed model-bound modal restart and result-view authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
