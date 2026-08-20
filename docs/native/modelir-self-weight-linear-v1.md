@@ -1,7 +1,8 @@
 # Bounded ModelIR Linear Self-Weight v1
 
-Status: source-built CPU C5 implementation evidence. This is not installed-distribution,
-protected-runner HIP, external engineering-validation, design-code, or release authority.
+Status: source-built plus installed static/shared CPU C5 and local rootfs diagnostic evidence.
+This is not protected-runner HIP, external engineering-validation, design-code, customer-image,
+or release authority.
 
 ## Numerical contract
 
@@ -31,8 +32,15 @@ accumulation overflow fails before partial publication.
 - The source-built Workbench completes Import -> Validate -> one-real-iteration Run -> Resume ->
   Compare -> Report. Its external comparison uses the Euler-Bernoulli uniform-load result
   `wL^4/(8EI)` and direct/restarted workspace files are byte-identical.
+- Installed static/shared distribution v95 authors the bounded request through the installed
+  Workbench and executes the installed CLI in an empty PATH. It binds exact active FZ/MY, support
+  FZ/MY, tip UZ, fallback 0, six distinct model/request/ResultIR/recovery/reaction/checkpoint
+  identities, and byte-identical direct/resumed fifteen-artifact directories after one real
+  iteration.
+- Local rootfs diagnostic v17 independently repeats that installed flow as UID/GID 65532 with a
+  read-only root and payload, writable operator workspace, empty PATH and loopback-only network.
+  Its authority remains `local_rootfs_diagnostic_c5`; no OCI or customer image is produced.
 
-Still open: member distributed-load schema and fixed-end-force semantics, installed static/shared
-distribution and read-only rootfs evidence, HIP parity, nonzero prescribed constraints,
-shell/nonlinear gravity, independent mass-source engineering validation, design-code load
-generation, engineering acceptance, and C6.
+Still open: member distributed-load schema and fixed-end-force semantics, HIP parity, nonzero
+prescribed constraints, shell/nonlinear gravity, independent mass-source engineering validation,
+design-code load generation, engineering acceptance, customer publication, and C6.

@@ -128,7 +128,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "independent NumPy" in self_weight["claim"]
     assert "closed-form Euler-Bernoulli wL^4/(8EI)" in self_weight["claim"]
     assert "byte-identical checkpoint resume" in self_weight["claim"]
-    assert "installed distribution" in self_weight["claim"]
+    assert "installed static/shared distribution v95" in self_weight["claim"]
+    assert "local rootfs diagnostic v17" in self_weight["claim"]
+    assert "exact active FZ/MY" in self_weight["claim"]
     assert "HIP parity" in self_weight["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
@@ -1718,16 +1720,17 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "unchanged installed CLI execution to three modes" in distribution["claim"]
     assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v93 receipts" in distribution["claim"]
+    assert "frozen v1 through v94 receipts" in distribution["claim"]
+    assert "append-only v95 binds" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v94"
+        == "structural-native-distribution-e2e.v95"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v93"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v94"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1839,7 +1842,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v16 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "v17 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
     assert "algebraic reaction audits" in deployment["claim"]
     assert "bounded nodal-displacement views" in deployment["claim"]
@@ -1852,19 +1855,20 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "copied-checkpoint tamper rejection" in deployment["claim"]
     assert "v15 additionally binds one axial rigid-offset Frame3D model" in deployment["claim"]
     assert "v16 additionally binds the constrained i-RY end-release Frame3D model" in deployment["claim"]
+    assert "v17 additionally binds the selected-pattern nodal-load-plus-negative-Z-self-weight Frame3D product" in deployment["claim"]
     assert "positive exact-zero released i-MY" in deployment["claim"]
     assert "byte-identical fifteen-artifact direct/resumed product" in deployment["claim"]
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v15 rootfs receipts" in deployment["claim"]
+    assert "frozen v1 through v16 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v16"
+        == "structural-native-rootfs-isolation-e2e.v17"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v15"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v16"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v94"
+        == "structural-native-distribution-e2e.v95"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

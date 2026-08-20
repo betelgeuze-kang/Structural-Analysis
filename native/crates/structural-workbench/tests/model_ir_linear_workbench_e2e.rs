@@ -2394,6 +2394,7 @@ fn frame3d_end_releases_survive_workbench_restart_and_result_surfaces() {
 }
 
 #[test]
+#[allow(clippy::too_many_lines)]
 fn frame3d_self_weight_survives_workbench_restart_and_result_surfaces() {
     let root = temporary_root("self-weight");
     fs::create_dir(&root).expect("temporary root");

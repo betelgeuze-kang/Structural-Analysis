@@ -258,6 +258,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--frame3d-end-release-direct-root",
             "--frame3d-end-release-partial-root",
             "--frame3d-end-release-resumed-root",
+            "--frame3d-self-weight-model",
+            "--frame3d-self-weight-request-root",
+            "--frame3d-self-weight-direct-root",
+            "--frame3d-self-weight-partial-root",
+            "--frame3d-self-weight-resumed-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -505,6 +510,15 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--frame3d-end-release-partial-root")?;
     let frame3d_end_release_resumed_root =
         required_path(options, "--frame3d-end-release-resumed-root")?;
+    let frame3d_self_weight_model = required_path(options, "--frame3d-self-weight-model")?;
+    let frame3d_self_weight_request_root =
+        required_path(options, "--frame3d-self-weight-request-root")?;
+    let frame3d_self_weight_direct_root =
+        required_path(options, "--frame3d-self-weight-direct-root")?;
+    let frame3d_self_weight_partial_root =
+        required_path(options, "--frame3d-self-weight-partial-root")?;
+    let frame3d_self_weight_resumed_root =
+        required_path(options, "--frame3d-self-weight-resumed-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -660,6 +674,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         frame3d_end_release_direct_root: &frame3d_end_release_direct_root,
         frame3d_end_release_partial_root: &frame3d_end_release_partial_root,
         frame3d_end_release_resumed_root: &frame3d_end_release_resumed_root,
+        frame3d_self_weight_model: &frame3d_self_weight_model,
+        frame3d_self_weight_request_root: &frame3d_self_weight_request_root,
+        frame3d_self_weight_direct_root: &frame3d_self_weight_direct_root,
+        frame3d_self_weight_partial_root: &frame3d_self_weight_partial_root,
+        frame3d_self_weight_resumed_root: &frame3d_self_weight_resumed_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,

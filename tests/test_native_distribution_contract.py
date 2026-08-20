@@ -2182,6 +2182,27 @@ def valid_v94_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v95_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v94_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v95",
+            "model_ir_self_weight_linear_cpu_surface_passed": True,
+            "model_ir_self_weight_linear_cpu_restart_bitwise_passed": True,
+            "model_ir_self_weight_linear_cpu_fallback_count": 0,
+            "model_ir_self_weight_standard_gravity_passed": True,
+            "model_ir_self_weight_closed_form_tip_displacement_passed": True,
+            "model_ir_self_weight_model_sha256": "sha256:" + "8" * 63 + "1",
+            "model_ir_self_weight_request_sha256": "sha256:" + "8" * 63 + "2",
+            "model_ir_self_weight_result_ir_sha256": "sha256:" + "8" * 63 + "3",
+            "model_ir_self_weight_recovery_sha256": "sha256:" + "8" * 63 + "4",
+            "model_ir_self_weight_reaction_sha256": "sha256:" + "8" * 63 + "5",
+            "model_ir_self_weight_checkpoint_sha256": "sha256:" + "8" * 63 + "6",
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4964,6 +4985,48 @@ def test_distribution_receipt_accepts_frame3d_end_release_v94_contract(
     assert validation["authoritative"] is True
 
 
+def test_distribution_receipt_accepts_model_ir_self_weight_v95_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v95_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_model_ir_self_weight_v95(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v95_contract()
+    receipt["model_ir_self_weight_standard_gravity_passed"] = False
+    receipt["model_ir_self_weight_linear_cpu_fallback_count"] = True
+    receipt["model_ir_self_weight_checkpoint_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("standard_gravity_passed" in error for error in validation["errors"])
+    assert any("fallback_count" in error for error in validation["errors"])
+    assert any("checkpoint_sha256" in error for error in validation["errors"])
+
+
+def test_distribution_receipt_rejects_colliding_model_ir_self_weight_v95_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v95_contract()
+    receipt["model_ir_self_weight_reaction_sha256"] = receipt[
+        "model_ir_self_weight_result_ir_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR self-weight identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -5157,6 +5220,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v14",
         "structural-native-rootfs-isolation-e2e.v15",
         "structural-native-rootfs-isolation-e2e.v16",
+        "structural-native-rootfs-isolation-e2e.v17",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -5207,6 +5271,10 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "model_ir_frame3d_end_release_released_force_exact_zero_passed",
         "inspect_rootfs_frame3d_end_release_surface",
         "validate_rootfs_isolation_evidence_v16",
+        "model_ir_self_weight_linear_cpu_surface_passed",
+        "model_ir_self_weight_standard_gravity_passed",
+        "inspect_rootfs_frame3d_self_weight_surface",
+        "validate_rootfs_isolation_evidence_v17",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -5730,6 +5798,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "workbench_linear_element_recovery_view_invalid_window_rejected" in e2e
     assert "structural-native-distribution-e2e.v90" in e2e
     assert "structural-native-distribution-e2e.v91" in e2e
+    assert "structural-native-distribution-e2e.v95" in e2e
+    assert "model_ir_self_weight_standard_gravity_passed" in e2e
+    assert "model_ir_self_weight_reaction_sha256" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e
@@ -5812,6 +5883,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--model-modal-resumed-root" in rootfs_e2e
     assert "--model-modal-result-view-en-us-first" in rootfs_e2e
     assert "--model-modal-result-view-invalid-window-failure" in rootfs_e2e
+    assert "frame3d-self-weight-model-ir.json" in rootfs_e2e
+    assert "--frame3d-self-weight-model" in rootfs_e2e
+    assert "--frame3d-self-weight-resumed-root" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

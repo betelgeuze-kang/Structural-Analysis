@@ -505,6 +505,35 @@ unshare -Urn bwrap \
       > /mnt/frame3d-end-release-resumed.stdout.json
     /usr/bin/diff -r /mnt/frame3d-end-release-direct \
       /mnt/frame3d-end-release-resumed
+    /usr/bin/sed \
+      -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-self-weight-installed/" \
+      -e "/\"id\": \"LC_WEAK\"/,/^    }/ s/\"self_weight\": \[0.0, 0.0, 0.0\]/\"self_weight\": [0.0, 0.0, -1.0]/" \
+      "$8" > /mnt/frame3d-self-weight-model-ir.json
+    /opt/payload/bin/structural-workbench model-create-linear-analysis-request \
+      /mnt/frame3d-self-weight-model-ir.json \
+      --case model-frame-self-weight-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir /mnt/frame3d-self-weight-request \
+      > /mnt/frame3d-self-weight-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-self-weight-model-ir.json \
+      /mnt/frame3d-self-weight-request/analysis-request.json \
+      --output-dir /mnt/frame3d-self-weight-direct \
+      > /mnt/frame3d-self-weight-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-self-weight-model-ir.json \
+      /mnt/frame3d-self-weight-request/analysis-request.json \
+      --output-dir /mnt/frame3d-self-weight-partial --iteration-budget 1 \
+      > /mnt/frame3d-self-weight-partial.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-resume \
+      /mnt/frame3d-self-weight-model-ir.json \
+      /mnt/frame3d-self-weight-request/analysis-request.json \
+      /mnt/frame3d-self-weight-partial/checkpoint.mlpcp \
+      --output-dir /mnt/frame3d-self-weight-resumed \
+      > /mnt/frame3d-self-weight-resumed.stdout.json
+    /usr/bin/diff -r /mnt/frame3d-self-weight-direct \
+      /mnt/frame3d-self-weight-resumed
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -697,6 +726,11 @@ unshare -Urn bwrap \
       --frame3d-end-release-direct-root /mnt/frame3d-end-release-direct \
       --frame3d-end-release-partial-root /mnt/frame3d-end-release-partial \
       --frame3d-end-release-resumed-root /mnt/frame3d-end-release-resumed \
+      --frame3d-self-weight-model /mnt/frame3d-self-weight-model-ir.json \
+      --frame3d-self-weight-request-root /mnt/frame3d-self-weight-request \
+      --frame3d-self-weight-direct-root /mnt/frame3d-self-weight-direct \
+      --frame3d-self-weight-partial-root /mnt/frame3d-self-weight-partial \
+      --frame3d-self-weight-resumed-root /mnt/frame3d-self-weight-resumed \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

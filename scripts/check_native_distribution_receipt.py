@@ -1104,6 +1104,20 @@ V94_FRAME3D_END_RELEASE_KEYS = {
     "model_ir_frame3d_end_release_checkpoint_sha256",
 }
 V94_EXPECTED_KEYS = V93_EXPECTED_KEYS | V94_FRAME3D_END_RELEASE_KEYS
+V95_MODEL_IR_SELF_WEIGHT_KEYS = {
+    "model_ir_self_weight_linear_cpu_surface_passed",
+    "model_ir_self_weight_linear_cpu_restart_bitwise_passed",
+    "model_ir_self_weight_linear_cpu_fallback_count",
+    "model_ir_self_weight_standard_gravity_passed",
+    "model_ir_self_weight_closed_form_tip_displacement_passed",
+    "model_ir_self_weight_model_sha256",
+    "model_ir_self_weight_request_sha256",
+    "model_ir_self_weight_result_ir_sha256",
+    "model_ir_self_weight_recovery_sha256",
+    "model_ir_self_weight_reaction_sha256",
+    "model_ir_self_weight_checkpoint_sha256",
+}
+V95_EXPECTED_KEYS = V94_EXPECTED_KEYS | V95_MODEL_IR_SELF_WEIGHT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1145,6 +1159,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v95_receipt = receipt_schema_version == "structural-native-distribution-e2e.v95"
+    if is_v95_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v94"
     is_v94_receipt = receipt_schema_version == "structural-native-distribution-e2e.v94"
     if is_v94_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v93"
@@ -1495,6 +1512,7 @@ def validate(
         "structural-native-distribution-e2e.v92": V92_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v93": V93_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v94": V94_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v95": V95_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1635,6 +1653,37 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v95_receipt:
+        for name in (
+            "model_ir_self_weight_linear_cpu_surface_passed",
+            "model_ir_self_weight_linear_cpu_restart_bitwise_passed",
+            "model_ir_self_weight_standard_gravity_passed",
+            "model_ir_self_weight_closed_form_tip_displacement_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        fallback_count = payload.get("model_ir_self_weight_linear_cpu_fallback_count")
+        if isinstance(fallback_count, bool) or fallback_count != 0:
+            errors.append(
+                "model_ir_self_weight_linear_cpu_fallback_count must be integer zero"
+            )
+        hash_names = (
+            "model_ir_self_weight_model_sha256",
+            "model_ir_self_weight_request_sha256",
+            "model_ir_self_weight_result_ir_sha256",
+            "model_ir_self_weight_recovery_sha256",
+            "model_ir_self_weight_reaction_sha256",
+            "model_ir_self_weight_checkpoint_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(hash_names):
+            errors.append("all installed ModelIR self-weight identities must differ")
     if is_v94_receipt:
         for name in (
             "model_ir_frame3d_end_release_linear_cpu_surface_passed",
