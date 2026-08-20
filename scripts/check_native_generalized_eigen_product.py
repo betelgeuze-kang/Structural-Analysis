@@ -335,7 +335,7 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
             "all direct/resumed artifact bytes match",
             "external comparison and engineering verdict explicitly null",
             "installed static/shared distribution v92 binds the durable session surface",
-            "rootfs durable-session authority",
+            "local rootfs diagnostic v14 independently binds",
             "HIP C2",
             "C6",
         ),

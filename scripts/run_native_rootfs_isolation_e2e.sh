@@ -379,6 +379,58 @@ unshare -Urn bwrap \
     fi
     test ! -s /mnt/model-modal-result-view-invalid-window-stderr.txt
     /usr/bin/diff -r /mnt/model-modal-view-source-before /mnt/model-modal-direct
+    /opt/payload/bin/structural-workbench import-model-modal "$8" \
+      /mnt/model-modal-request/analysis-request.json \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-import.stdout.json
+    /opt/payload/bin/structural-workbench modal-validate \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-validate.stdout.json
+    /bin/cp /mnt/model-modal-workbench-restarted/workbench-session.json \
+      /mnt/model-modal-workbench-validated-session.json
+    /opt/payload/bin/structural-workbench modal-run \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-run.stdout.json
+    /bin/cp /mnt/model-modal-workbench-validated-session.json \
+      /mnt/model-modal-workbench-restarted/workbench-session.json
+    /opt/payload/bin/structural-workbench modal-status \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-reconciled.stdout.json
+    /opt/payload/bin/structural-workbench modal-resume \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-resume.stdout.json
+    /opt/payload/bin/structural-workbench modal-report \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-report.stdout.json
+    /opt/payload/bin/structural-workbench modal-inspect \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-inspect-first.json
+    /opt/payload/bin/structural-workbench modal-inspect \
+      --workspace /mnt/model-modal-workbench-restarted \
+      > /mnt/model-modal-workbench-inspect-second.json
+    /usr/bin/cmp /mnt/model-modal-workbench-inspect-first.json \
+      /mnt/model-modal-workbench-inspect-second.json
+    /opt/payload/bin/structural-workbench workflow-model-modal "$8" \
+      /mnt/model-modal-request/analysis-request.json \
+      --workspace /mnt/model-modal-workbench-direct \
+      > /mnt/model-modal-workbench-direct.stdout.json
+    /usr/bin/diff -r /mnt/model-modal-workbench-restarted \
+      /mnt/model-modal-workbench-direct
+    /usr/bin/diff -r /mnt/model-modal-workbench-direct/03-run \
+      /mnt/model-modal-workbench-direct/04-resume
+    /usr/bin/diff -r /mnt/model-modal-direct \
+      /mnt/model-modal-workbench-direct/04-resume
+    test ! -e /mnt/model-modal-workbench-direct/05-compare
+    /bin/cp -a /mnt/model-modal-workbench-direct /mnt/model-modal-workbench-tampered
+    printf X | /bin/dd of=/mnt/model-modal-workbench-tampered/03-run/checkpoint.mmcp \
+      bs=1 seek=0 count=1 conv=notrunc status=none
+    if /opt/payload/bin/structural-workbench modal-status \
+      --workspace /mnt/model-modal-workbench-tampered \
+      > /mnt/model-modal-workbench-tamper-failure.json \
+      2> /mnt/model-modal-workbench-tamper-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-modal-workbench-tamper-stderr.txt
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -550,6 +602,17 @@ unshare -Urn bwrap \
         /mnt/model-modal-result-view-ko-KR-second.txt \
       --model-modal-result-view-invalid-window-failure \
         /mnt/model-modal-result-view-invalid-window-failure.json \
+      --model-modal-workbench-restarted-root \
+        /mnt/model-modal-workbench-restarted \
+      --model-modal-workbench-direct-root /mnt/model-modal-workbench-direct \
+      --model-modal-workbench-reconciled-stdout \
+        /mnt/model-modal-workbench-reconciled.stdout.json \
+      --model-modal-workbench-inspect-first \
+        /mnt/model-modal-workbench-inspect-first.json \
+      --model-modal-workbench-inspect-second \
+        /mnt/model-modal-workbench-inspect-second.json \
+      --model-modal-workbench-tamper-failure \
+        /mnt/model-modal-workbench-tamper-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

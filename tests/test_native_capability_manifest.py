@@ -232,7 +232,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "all direct/resumed artifact bytes match" in modal_workbench["claim"]
     assert "external comparison and engineering verdict explicitly null" in modal_workbench["claim"]
     assert "installed static/shared distribution v92 binds the durable session surface" in modal_workbench["claim"]
-    assert "rootfs durable-session authority" in modal_workbench["claim"]
+    assert "local rootfs diagnostic v14 independently binds" in modal_workbench["claim"]
     assert "HIP C2" in modal_workbench["claim"]
     assert "C6" in modal_workbench["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
@@ -1790,7 +1790,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v13 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "v14 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
     assert "algebraic reaction audits" in deployment["claim"]
     assert "bounded nodal-displacement views" in deployment["claim"]
@@ -1799,14 +1799,16 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "Truss3D installed execution explicitly open" in deployment["claim"]
     assert "byte-identical eleven-artifact modal direct/resumed output" in deployment["claim"]
     assert "self-hashed en-US/ko-KR modal result views" in deployment["claim"]
+    assert "durable modal Workbench staged/one-shot tree identity" in deployment["claim"]
+    assert "copied-checkpoint tamper rejection" in deployment["claim"]
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v12 rootfs receipts" in deployment["claim"]
+    assert "frozen v1 through v13 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v13"
+        == "structural-native-rootfs-isolation-e2e.v14"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v12"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v13"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
         == "structural-native-distribution-e2e.v92"

@@ -242,6 +242,12 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-modal-result-view-ko-kr-first",
             "--model-modal-result-view-ko-kr-second",
             "--model-modal-result-view-invalid-window-failure",
+            "--model-modal-workbench-restarted-root",
+            "--model-modal-workbench-direct-root",
+            "--model-modal-workbench-reconciled-stdout",
+            "--model-modal-workbench-inspect-first",
+            "--model-modal-workbench-inspect-second",
+            "--model-modal-workbench-tamper-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -459,6 +465,18 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-modal-result-view-ko-kr-second")?;
     let model_modal_result_view_invalid_window_failure =
         required_path(options, "--model-modal-result-view-invalid-window-failure")?;
+    let model_modal_workbench_restarted_root =
+        required_path(options, "--model-modal-workbench-restarted-root")?;
+    let model_modal_workbench_direct_root =
+        required_path(options, "--model-modal-workbench-direct-root")?;
+    let model_modal_workbench_reconciled_stdout =
+        required_path(options, "--model-modal-workbench-reconciled-stdout")?;
+    let model_modal_workbench_inspect_first =
+        required_path(options, "--model-modal-workbench-inspect-first")?;
+    let model_modal_workbench_inspect_second =
+        required_path(options, "--model-modal-workbench-inspect-second")?;
+    let model_modal_workbench_tamper_failure =
+        required_path(options, "--model-modal-workbench-tamper-failure")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -598,6 +616,12 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_modal_result_view_ko_kr_second: &model_modal_result_view_ko_kr_second,
         model_modal_result_view_invalid_window_failure:
             &model_modal_result_view_invalid_window_failure,
+        model_modal_workbench_restarted_root: &model_modal_workbench_restarted_root,
+        model_modal_workbench_direct_root: &model_modal_workbench_direct_root,
+        model_modal_workbench_reconciled_stdout: &model_modal_workbench_reconciled_stdout,
+        model_modal_workbench_inspect_first: &model_modal_workbench_inspect_first,
+        model_modal_workbench_inspect_second: &model_modal_workbench_inspect_second,
+        model_modal_workbench_tamper_failure: &model_modal_workbench_tamper_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,

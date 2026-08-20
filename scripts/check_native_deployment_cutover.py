@@ -1371,6 +1371,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--model-modal-resumed-root",
         "--model-modal-result-view-en-us-first",
         "--model-modal-result-view-invalid-window-failure",
+        "workflow-model-modal",
+        "modal-status",
+        "modal-inspect",
+        "--model-modal-workbench-restarted-root",
+        "--model-modal-workbench-reconciled-stdout",
+        "--model-modal-workbench-tamper-failure",
         "structural-native-benchmark-catalog-view.v1",
         "structural-native-evidence-bundle-view.v1",
         "--workbench-catalog",
@@ -1385,6 +1391,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         root, Path("native/crates/structural-distribution/src/lib.rs"), blockers
     )
     for token in (
+        "structural-native-rootfs-isolation-e2e.v14",
+        "RootfsIsolationEvidenceV14",
+        "workbench_model_modal_durable_session_sha256",
+        "workbench_model_modal_durable_session_crash_reconciliation_passed",
+        "inspect_rootfs_model_modal_workbench_surface",
+        "validate_rootfs_isolation_evidence_v14",
         "structural-native-rootfs-isolation-e2e.v13",
         "RootfsIsolationEvidenceV13",
         "structural_cli_sha256",
@@ -1818,6 +1830,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "frozen v1 through v11 rootfs receipts",
             "append-only v13 receipt",
             "frozen v1 through v12 rootfs receipts",
+            "append-only v14 receipt",
+            "frozen v1 through v13 rootfs receipts",
+            "isolated durable modal Workbench-session evidence",
             "algebraic reaction audit",
             "no pre-v86 receipt",
             "no pre-v87 receipt",
@@ -5016,7 +5031,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",
-            "v13 self-hashed local_rootfs_diagnostic_c5 receipt",
+            "v14 self-hashed local_rootfs_diagnostic_c5 receipt",
             "strict-ModelIR and normalized-MGT constrained-reaction views",
             "algebraic reaction audits",
             "bounded nodal-displacement views",
@@ -5025,6 +5040,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "Truss3D installed execution explicitly open",
             "byte-identical eleven-artifact modal direct/resumed output",
             "self-hashed en-US/ko-KR modal result views",
+            "durable modal Workbench",
+            "copied-checkpoint tamper rejection",
             "visible nonzero normalized-MGT FP64 roundoff",
             "final C6 remain open",
         ):
@@ -5032,8 +5049,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
         evidence_contract = capability.get("evidence_contract")
         if evidence_contract != {
-            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v13",
-            "frozen_rootfs_receipts": "v1-v12",
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v14",
+            "frozen_rootfs_receipts": "v1-v13",
             "required_installed_receipt_schema": "structural-native-distribution-e2e.v92",
             "authority": "local_rootfs_diagnostic_c5",
             "customer_image_authority": False,

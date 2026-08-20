@@ -915,6 +915,16 @@ strict three-mode CPU ResultIR, completed run receipt, byte-identical direct/res
 and stdout, localized view self-hashes and rows, result-directory nonmutation and fail-closed
 invalid-window rejection. It continues to verify frozen v1 through v12 rootfs receipts; only v13
 requires isolated installed ModelIR modal restart and result-view evidence.
+The append-only v14 receipt additionally executes the installed durable modal Workbench as the
+explicit import, validate, direct-run, reconciled-status, resume and report stages and through
+`workflow-model-modal`. The installer independently requires byte-identical staged and one-shot
+workspace trees, exact direct/resume and installed-CLI eleven-artifact parity, a direct stage
+reconciled from an intentionally restored validated session, deterministic repeated terminal
+inspect output, self-hashed session/validation/report/inspect artifacts, explicit null external
+comparison and engineering verdict fields, and fail-closed copied-checkpoint mutation. It
+continues to verify frozen v1 through v13 rootfs receipts; only v14 requires isolated durable modal Workbench-session evidence.
+Its authority remains `local_rootfs_diagnostic_c5` with
+`container_image_built` and `customer_image_receipt` false.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
 frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.
