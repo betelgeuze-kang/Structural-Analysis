@@ -134,6 +134,8 @@ def _frame_oracle_for(
     direction: np.ndarray,
     offset_i: np.ndarray | None = None,
     offset_j: np.ndarray | None = None,
+    releases_i: tuple[int, ...] = (),
+    releases_j: tuple[int, ...] = (),
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     e = 200.0
     nu = 0.25
@@ -237,15 +239,30 @@ def _frame_oracle_for(
     )
     polar_mass = density * (iy + iz) * length
     _scatter(mass, (3, 9), polar_mass / 6.0 * np.asarray([[2.0, 1.0], [1.0, 2.0]]))
-    global_stiffness = combined_transform.T @ stiffness @ combined_transform
-    global_mass = combined_transform.T @ mass @ combined_transform
-    local_displacement = combined_transform @ displacement
+    released = tuple(sorted((*releases_i, *(6 + dof for dof in releases_j))))
+    effective_transform = combined_transform
+    if released:
+        retained = tuple(index for index in range(12) if index not in released)
+        recovery_operator = np.linalg.solve(
+            stiffness[np.ix_(released, released)],
+            -stiffness[np.ix_(released, retained)],
+        )
+        release_transform = np.zeros((12, 12), dtype=np.float64)
+        release_transform[retained, retained] = 1.0
+        release_transform[np.ix_(released, retained)] = recovery_operator
+        effective_transform = release_transform @ combined_transform
+    global_stiffness = effective_transform.T @ stiffness @ effective_transform
+    global_mass = effective_transform.T @ mass @ effective_transform
+    local_displacement = effective_transform @ displacement
+    local_end_force = stiffness @ local_displacement
+    if released:
+        local_end_force[np.asarray(released, dtype=int)] = 0.0
     return (
         global_stiffness,
         global_mass,
         global_stiffness @ displacement,
         global_stiffness @ direction,
-        stiffness @ local_displacement,
+        local_end_force,
     )
 
 
@@ -337,7 +354,8 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
         "material.plastic_trial",
         "material.committed",
         *(f"{kind}.{field}" for kind in (
-            "truss", "frame", "frame_rotated", "frame_offset", "shell", "shell_rotated"
+            "truss", "frame", "frame_rotated", "frame_offset", "frame_released",
+            "shell", "shell_rotated"
         ) for field in (
             "tangent", "consistent_mass", "residual", "jvp", "recovery"
         )),
@@ -421,9 +439,29 @@ def test_reference_material_element_and_assembly_cpp_match_independent_numpy_ora
         np.asarray([0.2, -0.1, 0.3]),
         np.asarray([-0.15, 0.25, -0.05]),
     )
+    released_frame = _frame_oracle_for(
+        np.asarray([1.0, -2.0, 0.5]),
+        np.asarray([3.0, 1.0, 4.5]),
+        0.37,
+        np.asarray(
+            [0.001, -0.002, 0.003, -0.004, 0.005, -0.006,
+             0.007, -0.008, 0.009, -0.010, 0.011, -0.012],
+            dtype=np.float64,
+        ),
+        np.asarray(
+            [-6.0, 5.0, -4.0, 3.0, -2.0, 1.0,
+             0.5, -1.5, 2.5, -3.5, 4.5, -5.5],
+            dtype=np.float64,
+        ),
+        np.asarray([0.2, -0.1, 0.3]),
+        np.asarray([-0.15, 0.25, -0.05]),
+        (4,),
+        (5,),
+    )
     for prefix, oracle in (
         ("frame_rotated", rotated_frame),
         ("frame_offset", offset_frame),
+        ("frame_released", released_frame),
         ("shell_rotated", rotated_shell),
     ):
         for field, values in zip(

@@ -5,6 +5,7 @@
 
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <span>
 #include <vector>
 
@@ -48,6 +49,9 @@ struct Frame3dInput {
     std::span<const double> direction;
     std::array<double, 3> offset_i_global_m {};
     std::array<double, 3> offset_j_global_m {};
+    // Zero-based local UX..RZ components released at each element end.
+    std::span<const std::uint32_t> releases_i {};
+    std::span<const std::uint32_t> releases_j {};
 };
 
 struct Shell3MembraneInput {

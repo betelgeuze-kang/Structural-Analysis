@@ -144,8 +144,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   a rotated 3D offset element independently matches NumPy tangent, mass, residual, JVP and local
   recovery. The source-built Workbench evidence is narrower: one axial-offset cantilever completes
   exact direct/restart, while the tested coupled non-axis weak-load request currently terminates
-  with the product PCG singularity taxonomy and is not promoted. This is not general
-  ModelIR assembly: nonzero constraints, releases, Truss3D offsets,
+  with the product PCG singularity taxonomy and is not promoted. A separate rotated 3D offset plus
+  i-RY/j-RZ local-release row independently matches NumPy for tangent, Guyan-compatible mass,
+  residual, JVP and exact-zero released end forces. The same release crosses safe Rust and a stable
+  constrained source-built Workbench direct/restart flow with byte-identical artifacts and fallback
+  zero; singular `Kqq` release sets fail closed without regularization. This is not general ModelIR
+  assembly: nonzero prescribed constraints, Truss3D offsets or releases,
   self-weight, nested graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the

@@ -3,6 +3,7 @@
 #include "model_ir_assembly_fixture.hpp"
 
 #include <array>
+#include <cmath>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -437,6 +438,48 @@ int main() {
     expect(
         repeated_offset.operator_result.tangent == offset_result.operator_result.tangent,
         "Frame3D rigid offset assembly is deterministic");
+
+    structural::tests::ModelIrAssemblyFixture release_fixture;
+    const std::array<sa_dof_v1, 1> release_i {{SA_DOF_RY}};
+    const std::array<sa_dof_v1, 1> release_j {{SA_DOF_RZ}};
+    release_fixture.elements[0].releases_i = release_i.data();
+    release_fixture.elements[0].releases_i_count = release_i.size();
+    release_fixture.elements[0].releases_j = release_j.data();
+    release_fixture.elements[0].releases_j_count = release_j.size();
+    const structural::model_ir::Model release_model(release_fixture.descriptor);
+    const auto release_result = structural::assembly::assemble_model_ir_linear_reference(
+        release_model, "lp", displacement, direction);
+    expect(
+        release_result.operator_result.tangent != result.operator_result.tangent,
+        "Frame3D end releases change the assembled tangent");
+    expect(
+        release_result.operator_result.consistent_mass != result.operator_result.consistent_mass,
+        "Frame3D end releases change the assembled mass");
+    expect(
+        std::abs(release_result.element_recovery[0].values[4]) <= 1.0e-15
+            && std::abs(release_result.element_recovery[0].values[11]) <= 1.0e-15,
+        "Frame3D released local end forces recover as zero");
+    const auto repeated_release = structural::assembly::assemble_model_ir_linear_reference(
+        release_model, "lp", displacement, direction);
+    expect(
+        repeated_release.operator_result.tangent == release_result.operator_result.tangent,
+        "Frame3D release assembly is deterministic");
+
+    structural::tests::ModelIrAssemblyFixture singular_release_fixture;
+    const std::array<sa_dof_v1, 1> axial_release {{SA_DOF_UX}};
+    singular_release_fixture.elements[0].releases_i = axial_release.data();
+    singular_release_fixture.elements[0].releases_i_count = axial_release.size();
+    singular_release_fixture.elements[0].releases_j = axial_release.data();
+    singular_release_fixture.elements[0].releases_j_count = axial_release.size();
+    const structural::model_ir::Model singular_release_model(
+        singular_release_fixture.descriptor);
+    expect_status(
+        [&singular_release_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                singular_release_model, "lp", displacement, direction));
+        },
+        SA_ERR_RESIDUAL_LIMIT,
+        "singular Frame3D release set must fail closed without fallback");
 
     structural::tests::ModelIrAssemblyFixture truss_offset_fixture;
     truss_offset_fixture.elements[1].offset_i_global_m[0] = 0.1;

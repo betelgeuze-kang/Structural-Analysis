@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -237,6 +238,153 @@ void scatter(
     return output;
 }
 
+[[nodiscard]] std::vector<double> frame_release_transform_12(
+    const std::span<const double> local_stiffness,
+    const std::span<const std::uint32_t> releases_i,
+    const std::span<const std::uint32_t> releases_j) {
+    if (local_stiffness.size() != 12U * 12U) {
+        throw std::logic_error("internal frame stiffness shape mismatch");
+    }
+    std::array<bool, 12> is_released {};
+    std::vector<std::size_t> released;
+    released.reserve(releases_i.size() + releases_j.size());
+    const auto append = [&is_released, &released](
+                            const std::span<const std::uint32_t> components,
+                            const std::size_t end_offset) {
+        for (const auto component : components) {
+            if (component >= 6U) {
+                throw std::invalid_argument(
+                    "frame release component must be a zero-based local UX..RZ index");
+            }
+            const auto index = end_offset + static_cast<std::size_t>(component);
+            if (is_released[index]) {
+                throw std::invalid_argument("frame release component is duplicated");
+            }
+            is_released[index] = true;
+            released.push_back(index);
+        }
+    };
+    append(releases_i, 0U);
+    append(releases_j, 6U);
+    if (released.empty()) {
+        throw std::logic_error("internal release transform requires a release");
+    }
+    std::sort(released.begin(), released.end());
+    std::vector<std::size_t> retained;
+    retained.reserve(12U - released.size());
+    for (std::size_t index = 0U; index < 12U; ++index) {
+        if (!is_released[index]) {
+            retained.push_back(index);
+        }
+    }
+    if (retained.empty()) {
+        throw std::invalid_argument("frame release set must retain at least one local DOF");
+    }
+
+    const auto released_count = released.size();
+    const auto retained_count = retained.size();
+    std::vector<double> coefficients(released_count * released_count, 0.0);
+    std::vector<double> right_hand_side(released_count * retained_count, 0.0);
+    std::vector<double> row_scales(released_count, 0.0);
+    for (std::size_t row = 0U; row < released_count; ++row) {
+        for (std::size_t column = 0U; column < released_count; ++column) {
+            const auto value = local_stiffness[released[row] * 12U + released[column]];
+            coefficients[row * released_count + column] = value;
+            row_scales[row] = std::max(row_scales[row], std::abs(value));
+        }
+        for (std::size_t column = 0U; column < retained_count; ++column) {
+            right_hand_side[row * retained_count + column] =
+                -local_stiffness[released[row] * 12U + retained[column]];
+        }
+        if (!(row_scales[row] > 0.0) || !std::isfinite(row_scales[row])) {
+            throw std::invalid_argument("frame released local tangent is singular");
+        }
+    }
+
+    constexpr auto kPivotTolerance = 64.0 * std::numeric_limits<double>::epsilon();
+    for (std::size_t pivot = 0U; pivot < released_count; ++pivot) {
+        auto selected = pivot;
+        auto selected_ratio = 0.0;
+        for (std::size_t row = pivot; row < released_count; ++row) {
+            const auto ratio =
+                std::abs(coefficients[row * released_count + pivot]) / row_scales[row];
+            if (ratio > selected_ratio) {
+                selected = row;
+                selected_ratio = ratio;
+            }
+        }
+        if (!(selected_ratio > kPivotTolerance) || !std::isfinite(selected_ratio)) {
+            throw std::invalid_argument("frame released local tangent is singular");
+        }
+        if (selected != pivot) {
+            for (std::size_t column = 0U; column < released_count; ++column) {
+                std::swap(
+                    coefficients[pivot * released_count + column],
+                    coefficients[selected * released_count + column]);
+            }
+            for (std::size_t column = 0U; column < retained_count; ++column) {
+                std::swap(
+                    right_hand_side[pivot * retained_count + column],
+                    right_hand_side[selected * retained_count + column]);
+            }
+            std::swap(row_scales[pivot], row_scales[selected]);
+        }
+        const auto diagonal = coefficients[pivot * released_count + pivot];
+        for (std::size_t row = pivot + 1U; row < released_count; ++row) {
+            const auto factor = coefficients[row * released_count + pivot] / diagonal;
+            coefficients[row * released_count + pivot] = 0.0;
+            for (std::size_t column = pivot + 1U; column < released_count; ++column) {
+                coefficients[row * released_count + column] -=
+                    factor * coefficients[pivot * released_count + column];
+            }
+            for (std::size_t column = 0U; column < retained_count; ++column) {
+                right_hand_side[row * retained_count + column] -=
+                    factor * right_hand_side[pivot * retained_count + column];
+            }
+        }
+    }
+    for (std::size_t reverse = released_count; reverse > 0U; --reverse) {
+        const auto row = reverse - 1U;
+        const auto diagonal = coefficients[row * released_count + row];
+        for (std::size_t column = 0U; column < retained_count; ++column) {
+            auto value = right_hand_side[row * retained_count + column];
+            for (std::size_t inner = row + 1U; inner < released_count; ++inner) {
+                value -= coefficients[row * released_count + inner]
+                    * right_hand_side[inner * retained_count + column];
+            }
+            right_hand_side[row * retained_count + column] = value / diagonal;
+        }
+    }
+
+    for (std::size_t row = 0U; row < released_count; ++row) {
+        for (std::size_t column = 0U; column < retained_count; ++column) {
+            auto residual = local_stiffness[released[row] * 12U + retained[column]];
+            auto reference = std::max(1.0, std::abs(residual));
+            for (std::size_t inner = 0U; inner < released_count; ++inner) {
+                const auto term = local_stiffness[released[row] * 12U + released[inner]]
+                    * right_hand_side[inner * retained_count + column];
+                residual += term;
+                reference = std::max(reference, std::abs(term));
+            }
+            if (!std::isfinite(residual) || std::abs(residual) > 1.0e-10 * reference) {
+                throw std::invalid_argument("frame release local solve residual gate failed");
+            }
+        }
+    }
+
+    std::vector<double> transform(12U * 12U, 0.0);
+    for (const auto index : retained) {
+        transform[index * 12U + index] = 1.0;
+    }
+    for (std::size_t row = 0U; row < released_count; ++row) {
+        for (std::size_t column = 0U; column < retained_count; ++column) {
+            transform[released[row] * 12U + retained[column]] =
+                right_hand_side[row * retained_count + column];
+        }
+    }
+    return transform;
+}
+
 [[nodiscard]] std::vector<double> frame_local_stiffness(
     const Frame3dInput& input,
     const double length) {
@@ -415,8 +563,23 @@ ElementOperatorResponse evaluate_frame3d(const Frame3dInput& input) {
     }
     const auto local_stiffness = frame_local_stiffness(input, length);
     const auto local_mass = frame_local_mass(input, length);
+    const auto has_releases = !input.releases_i.empty() || !input.releases_j.empty();
+    if (has_releases) {
+        transform = multiply_square_12(
+            frame_release_transform_12(
+                local_stiffness, input.releases_i, input.releases_j),
+            transform);
+    }
     const auto local_displacement = multiply(transform, 12U, 12U, input.displacement);
     auto recovery = multiply(local_stiffness, 12U, 12U, local_displacement);
+    if (has_releases) {
+        for (const auto component : input.releases_i) {
+            recovery[component] = 0.0;
+        }
+        for (const auto component : input.releases_j) {
+            recovery[6U + component] = 0.0;
+        }
+    }
     return finish_response(
         ReferenceElementKind::frame3d,
         12U,

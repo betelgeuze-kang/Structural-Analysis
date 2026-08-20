@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <map>
 #include <optional>
@@ -2640,12 +2641,11 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
     output.global_dof_count = model.nodes.size() * kDofsPerNode;
     output.elements.reserve(model.elements.size());
     for (const auto& element : model.elements) {
-        if (!element.material_id.has_value() || !element.releases_i.empty()
-            || !element.releases_j.empty() || element.integration_order.has_value()
+        if (!element.material_id.has_value() || element.integration_order.has_value()
             || element.uniform_load.has_value()) {
             fail(
                 SA_ERR_ANALYSIS_NOT_READY,
-                "ModelIR linear reference element has unsupported state, releases, or member loading");
+                "ModelIR linear reference element has unsupported state or member loading");
         }
         const auto node_i = nodes.find(element.node_ids[0]);
         const auto node_j = nodes.find(element.node_ids[1]);
@@ -2693,6 +2693,18 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
             projected.local_axis_rotation_rad = *element.local_axis_rotation_rad;
             projected.offset_i_global_m = element.offset_i;
             projected.offset_j_global_m = element.offset_j;
+            projected.releases_i.reserve(element.releases_i.size());
+            projected.releases_j.reserve(element.releases_j.size());
+            std::transform(
+                element.releases_i.begin(),
+                element.releases_i.end(),
+                std::back_inserter(projected.releases_i),
+                [](const auto dof) { return dof - SA_DOF_UX; });
+            std::transform(
+                element.releases_j.begin(),
+                element.releases_j.end(),
+                std::back_inserter(projected.releases_j),
+                [](const auto dof) { return dof - SA_DOF_UX; });
         } else if (element.type == SA_ELEMENT_TRUSS_3D
             && element.formulation == SA_FORMULATION_LINEAR_TRUSS_3D
             && section->second->family == SA_SECTION_TRUSS_3D

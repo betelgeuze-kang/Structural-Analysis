@@ -139,6 +139,26 @@ int main() {
     });
     emit_response("frame_offset", offset_frame);
 
+    const std::array<std::uint32_t, 1> release_i {4U};
+    const std::array<std::uint32_t, 1> release_j {5U};
+    const auto released_frame = structural::elements::evaluate_frame3d({
+        {1.0, -2.0, 0.5},
+        {3.0, 1.0, 4.5},
+        material,
+        0.01,
+        2.0E-5,
+        3.0E-5,
+        4.0E-5,
+        0.37,
+        rotated_frame_displacement,
+        rotated_frame_direction,
+        {0.2, -0.1, 0.3},
+        {-0.15, 0.25, -0.05},
+        release_i,
+        release_j,
+    });
+    emit_response("frame_released", released_frame);
+
     const std::array<double, 9> shell_displacement {
         0.0, 0.0, 0.0,
         0.002, 0.0, 0.0,

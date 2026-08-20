@@ -92,10 +92,13 @@ This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous con
 nodal loads, one signed direct linear combination of two through 64 unique patterns, or one
 depth-eight/64-leaf acyclic nested linear combination, active-DOF
 solution and residual, and element recovery. The exact-two receipt path remains frozen while the
-three-through-64 Workbench path uses the additive v2 provenance/request contract. Append-only ABI
+three-through-64 Workbench path uses the additive v2 provenance/request contract. Finite global
+Frame3D rigid offsets and nonsingular local end-release sets use the same bounded ModelIR assembly;
+the release mapping is source-verified separately in `modelir-frame3d-end-release-linear-v1.md`.
+Append-only ABI
 v1.14 now exposes constrained reactions for this bounded CPU graph without changing the frozen
 v1.13 active-system prefix or the C4 checkpoint bytes. It still excludes nonzero prescribed
-constraints, releases/offsets, self-weight, member loads, nested graphs outside
+constraints, Truss3D offsets/releases, singular Frame3D release sets, self-weight, member loads, nested graphs outside
 the bounded depth/expansion/resolved-pattern contract, more-than-64-term combinations or stages,
 shells, nonlinear constitutive epochs, reordering/preconditioning authority, broader Workbench
 solver profiles, PDF specialization beyond the separately bounded Workbench path, HIP execution,

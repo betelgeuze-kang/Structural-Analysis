@@ -57,14 +57,18 @@ capability's last promotable sequential cutover gate remains C1.
 
 The shell profile is membrane-only. It has no bending, drilling, transverse
 shear, nonlinear material, offset, opening or general shell claim. The frame
-profile supports finite global rigid-end offsets on the CPU by composing effective-endpoint
-geometry and rigid-arm kinematics; one general rotated 3D case matches every operator and recovery
-value from an independent NumPy oracle, and exact zero offsets preserve the previous path. It has
-no releases, geometric stiffness or nonlinear constitutive state, and the frozen ABI v1.7 direct
-reference-element descriptor remains zero-offset. The CSR result is a bounded serial reference projection of caller-supplied
+profile supports finite global rigid-end offsets and bounded local UX/UY/UZ/RX/RY/RZ end releases
+on the CPU. Release condensation solves `Kqq * Rq = -Kqr` with scaled partial pivoting and a
+residual gate, then composes the same kinematic recovery into stiffness, Guyan-compatible mass,
+residual, JVP, and local end-force recovery. It uses no regularization, pseudoinverse, or fallback;
+singular release sets fail closed and released end-force components are normalized to exact zero.
+One general rotated 3D offset plus i-RY/j-RZ release case matches every operator and recovery value
+from an independent NumPy oracle. Exact zero offsets and an empty release set preserve the previous
+path. It has no geometric stiffness or nonlinear constitutive state, and the frozen ABI v1.7 direct
+reference-element descriptor remains zero-offset and zero-release. The CSR result is a bounded serial reference projection of caller-supplied
 local contributions and homogeneous constrained-DOF indices. The separate typed ModelIR
-composition accepts arbitrary topology only within its linear frame3d/truss3d, Frame3D-offset,
-zero-release, direct-nodal-load subset; Truss3D offsets remain rejected. Neither path applies nonzero prescribed-displacement load
+composition accepts arbitrary topology only within its linear frame3d/truss3d, bounded Frame3D
+offset/release, direct-nodal-load subset; Truss3D offsets and releases remain rejected. Neither path applies nonzero prescribed-displacement load
 corrections, reorders DOFs, propagates constitutive epochs, or claims a sparse performance backend.
 The typed path now crosses ABI v1.13 through safe Rust and a separately bounded C4/C5 CPU
 composition; the caller-supplied dense/CSR reference path itself remains outside product execution.

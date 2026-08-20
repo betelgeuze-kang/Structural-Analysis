@@ -45,6 +45,8 @@ struct LinearReferenceElement final {
     double local_axis_rotation_rad {};
     std::array<double, 3> offset_i_global_m {};
     std::array<double, 3> offset_j_global_m {};
+    std::vector<std::uint32_t> releases_i {};
+    std::vector<std::uint32_t> releases_j {};
 };
 
 struct LinearReferenceNodalLoad final {

@@ -112,6 +112,52 @@ struct MgtInputs {
     source: PathBuf,
 }
 
+fn write_release_oracle(root: &Path, recovery: &Value) -> (PathBuf, PathBuf) {
+    let displacement = recovery["global_displacement"][7]
+        .as_f64()
+        .expect("released model node 2 UY displacement");
+    let source_bytes = b"language-neutral Frame3D end-release Workbench oracle v1\n";
+    let source = root.join("release-linear-oracle.txt");
+    fs::write(&source, source_bytes).expect("release source artifact");
+    let external = root.join("release-linear-external.json");
+    fs::write(
+        &external,
+        serde_json::to_vec(&json!({
+            "schema_version": "structural-model-ir-linear-external-result.v1",
+            "comparison_id": "workbench-model-linear-end-release-c5",
+            "source": {
+                "solver_family": "reference_oracle",
+                "solver_version": "language-neutral-end-release-v1",
+                "run_id": "workbench-model-linear-end-release-run",
+                "evidence_kind": "language_neutral_golden",
+                "source_artifact_hash": sha256_identity(source_bytes),
+                "executable_hash": null
+            },
+            "binding": {
+                "analysis_kind": "model_ir_linear_static",
+                "case_id": recovery["case_id"],
+                "model_identity": recovery["model_identity"],
+                "analysis_request_hash": recovery["analysis_request_hash"],
+                "load_pattern_id": recovery["load_pattern_id"],
+                "coordinate_frame": "model_global"
+            },
+            "observations": [{
+                "observation_id": "released-cantilever-tip-uy",
+                "external_location_id": "node/N2/UY",
+                "global_dof_index": 7,
+                "dof": "UY",
+                "native_result_path": "/global_displacement/7",
+                "unit": "m",
+                "value": displacement,
+                "tolerance": {"absolute": 0.0, "relative": 0.0}
+            }]
+        }))
+        .expect("release external result JSON"),
+    )
+    .expect("release external result");
+    (source, external)
+}
+
 fn prepare_inputs(root: &Path) -> Inputs {
     let repository = repository_root();
     let model = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
@@ -265,6 +311,81 @@ fn prepare_offset_inputs(root: &Path) -> Inputs {
         .expect("offset external result JSON"),
     )
     .expect("offset external result");
+    Inputs {
+        model,
+        request,
+        external,
+        source,
+    }
+}
+
+fn prepare_release_inputs(root: &Path) -> Inputs {
+    let repository = repository_root();
+    let baseline = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let baseline_request =
+        repository.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let mut model_value: Value =
+        serde_json::from_slice(&fs::read(baseline).expect("baseline ModelIR fixture"))
+            .expect("baseline ModelIR JSON");
+    model_value["model_id"] = json!("engine-v2-frame-cantilever-end-release");
+    model_value["elements"][0]["offsets"]["i_global_m"] = json!([0.1, 0.0, 0.0]);
+    model_value["elements"][0]["offsets"]["j_global_m"] = json!([-0.1, 0.0, 0.0]);
+    model_value["elements"][0]["releases"]["i"] = json!(["RY"]);
+    model_value["constraints"]
+        .as_array_mut()
+        .expect("constraint array")
+        .push(json!({
+            "id": "BC2",
+            "index": 1,
+            "type": "fixed_dofs",
+            "node_id": "N2",
+            "dofs": ["UZ"],
+            "prescribed_values_si": {"UZ": 0.0},
+            "source_id": "generated:BC2",
+            "extensions": {}
+        }));
+    let model = root.join("frame-end-release-model-ir.json");
+    fs::write(
+        &model,
+        canonicalize_model_ir_v2(&model_value).expect("canonical release ModelIR"),
+    )
+    .expect("release ModelIR fixture");
+
+    let model_bytes = fs::read(&model).expect("release ModelIR bytes");
+    let parsed_model = parse_model_ir_v2(&model_bytes).expect("strict release ModelIR");
+    let mut request_value: Value = serde_json::from_slice(
+        &fs::read(&baseline_request).expect("baseline linear request fixture"),
+    )
+    .expect("baseline linear request JSON");
+    request_value["model_identity"] = json!({
+        "content_hash": parsed_model.content_hash(),
+        "semantic_hash": parsed_model.semantic_hash(),
+        "provenance_hash": parsed_model.provenance_hash()
+    });
+    let request = root.join("frame-end-release-request.json");
+    fs::write(
+        &request,
+        canonicalize_model_ir_v2(&request_value).expect("canonical release request"),
+    )
+    .expect("release request fixture");
+    let request_bytes = fs::read(&request).expect("release request fixture");
+    let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct release terminal result");
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct release recovery IR"),
+    )
+    .expect("release recovery JSON");
+    assert_eq!(
+        recovery["recovery_values"][4]
+            .as_f64()
+            .expect("released i-MY recovery")
+            .to_bits(),
+        0.0_f64.to_bits()
+    );
+    let (source, external) = write_release_oracle(root, &recovery);
     Inputs {
         model,
         request,
@@ -2071,6 +2192,101 @@ fn frame3d_rigid_offsets_survive_workbench_restart_and_result_surfaces() {
     let element = String::from_utf8(element.stdout).expect("offset element view UTF-8");
     assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
     assert!(element.contains("i_FX_N="));
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn frame3d_end_releases_survive_workbench_restart_and_result_surfaces() {
+    let root = temporary_root("end-release");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_release_inputs(&root);
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    assert_success(&run_workbench(&import_arguments(&inputs, &restarted)));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted release artifact"),
+            fs::read(direct.join(&relative)).expect("direct release artifact"),
+            "end-release restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let imported_model: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/model-ir.json")).expect("imported release ModelIR"),
+    )
+    .expect("imported release ModelIR JSON");
+    assert_eq!(
+        imported_model["elements"][0]["releases"],
+        json!({"i": ["RY"], "j": []})
+    );
+    let recovery = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("release recovery ResultIR"),
+        "recovery_hash",
+    );
+    assert_eq!(recovery["recovery_element_types"], json!([1]));
+    assert_eq!(recovery["recovery_offsets"], json!([0, 12]));
+    assert_eq!(
+        recovery["recovery_values"][4]
+            .as_f64()
+            .expect("released i-MY recovery")
+            .to_bits(),
+        0.0_f64.to_bits()
+    );
+    let result = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-ir.json")).expect("release sparse ResultIR"),
+        "result_hash",
+    );
+    assert_eq!(result["backend_receipt"]["fallback_count"], 0);
+
+    let element = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_success(&element);
+    let element = String::from_utf8(element.stdout).expect("release element view UTF-8");
+    assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
+    assert!(
+        element.contains("i_MY_N_m=+0.00000000000000000e0"),
+        "{element}"
+    );
 
     fs::remove_dir_all(root).expect("cleanup");
 }

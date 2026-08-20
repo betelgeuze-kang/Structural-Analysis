@@ -98,6 +98,22 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "Truss3D offsets" in rigid_offset["claim"]
     assert "installed static/shared distribution v93" in rigid_offset["claim"]
     assert "local rootfs diagnostic v15" in rigid_offset["claim"]
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_frame3d_end_release_linear_cpu"
+        )
+        is True
+    )
+    end_release = payload["capabilities"]["modelir_frame3d_end_release_linear_cpu"]
+    assert end_release["cutover_gate"] == "C5"
+    assert end_release["owner"] == "structural_assembly"
+    assert "Kqq*Rq=-Kqr" in end_release["claim"]
+    assert "no regularization, no pseudoinverse and no fallback" in end_release["claim"]
+    assert "Guyan-compatible consistent mass" in end_release["claim"]
+    assert "independent NumPy oracle" in end_release["claim"]
+    assert "byte-identical direct/restart artifacts" in end_release["claim"]
+    assert "singular two-end axial release fails closed" in end_release["claim"]
+    assert "installed distribution, rootfs isolation, HIP parity" in end_release["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
     assert reaction_results["owner"] == "structural-contracts"

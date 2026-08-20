@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <functional>
 #include <iostream>
@@ -126,6 +127,59 @@ int main() {
         offset_frame.tangent != frame.tangent,
         "nonzero rigid offsets must change the nodal tangent");
 
+    const std::array<std::uint32_t, 1> release_i {4U};
+    const std::array<std::uint32_t, 1> release_j {5U};
+    const auto released_frame = structural::elements::evaluate_frame3d({
+        {0.0, 0.0, 0.0},
+        {2.0, 0.0, 0.0},
+        material,
+        0.01,
+        2.0E-5,
+        3.0E-5,
+        4.0E-5,
+        0.0,
+        frame_displacement,
+        frame_direction,
+        {0.0, 0.2, 0.0},
+        {0.0, -0.1, 0.1},
+        release_i,
+        release_j,
+    });
+    expect_symmetric(released_frame.tangent, 12U);
+    expect_symmetric(released_frame.consistent_mass, 12U);
+    expect_near(released_frame.recovery[4], 0.0, 1.0E-15, "released i-RY force");
+    expect_near(released_frame.recovery[11], 0.0, 1.0E-15, "released j-RZ force");
+    expect(
+        released_frame.tangent != offset_frame.tangent,
+        "end releases must change the offset-frame tangent");
+    for (auto component = std::uint32_t {0U}; component < 6U; ++component) {
+        const std::array<std::uint32_t, 1> single_release {component};
+        const auto single_released_frame = structural::elements::evaluate_frame3d({
+            {0.0, 0.0, 0.0},
+            {2.0, 0.0, 0.0},
+            material,
+            0.01,
+            2.0E-5,
+            3.0E-5,
+            4.0E-5,
+            0.0,
+            frame_displacement,
+            frame_direction,
+            {},
+            {},
+            single_release,
+            {},
+        });
+        expect_symmetric(single_released_frame.tangent, 12U);
+        expect_symmetric(single_released_frame.consistent_mass, 12U);
+        expect(
+            single_released_frame.recovery[component] == 0.0,
+            "each single i-end local release must recover exact zero force");
+        expect(
+            single_released_frame.tangent != frame.tangent,
+            "each single i-end local release must change the tangent");
+    }
+
     const std::array<double, 9> shell_displacement {
         0.0, 0.0, 0.0,
         0.002, 0.0, 0.0,
@@ -216,5 +270,47 @@ int main() {
             }));
         },
         "degenerate effective frame chord must fail");
+    expect_throws(
+        [&material, &frame_displacement, &frame_direction] {
+            const std::array<std::uint32_t, 1> axial_release {0U};
+            static_cast<void>(structural::elements::evaluate_frame3d({
+                {0.0, 0.0, 0.0},
+                {2.0, 0.0, 0.0},
+                material,
+                0.01,
+                2.0E-5,
+                3.0E-5,
+                4.0E-5,
+                0.0,
+                frame_displacement,
+                frame_direction,
+                {},
+                {},
+                axial_release,
+                axial_release,
+            }));
+        },
+        "singular two-end axial release must fail closed");
+    expect_throws(
+        [&material, &frame_displacement, &frame_direction] {
+            const std::array<std::uint32_t, 1> invalid_release {6U};
+            static_cast<void>(structural::elements::evaluate_frame3d({
+                {0.0, 0.0, 0.0},
+                {2.0, 0.0, 0.0},
+                material,
+                0.01,
+                2.0E-5,
+                3.0E-5,
+                4.0E-5,
+                0.0,
+                frame_displacement,
+                frame_direction,
+                {},
+                {},
+                invalid_release,
+                {},
+            }));
+        },
+        "out-of-range frame release component must fail closed");
     return EXIT_SUCCESS;
 }

@@ -420,6 +420,8 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                     local_direction,
                     element.offset_i_global_m,
                     element.offset_j_global_m,
+                    element.releases_i,
+                    element.releases_j,
                 });
                 owned.push_back({
                     element.stable_index,

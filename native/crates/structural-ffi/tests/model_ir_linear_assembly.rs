@@ -7,7 +7,7 @@ use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_ffi::{Api, ModelIrLinearAssemblyRequest};
 use structural_ffi_sys::{
     SA_ABI_V1_13, SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU, SA_ELEMENT_FRAME_3D,
-    SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_EXECUTION_BACKEND_CPU,
+    SA_ERR_INVALID_ARGUMENT, SA_ERR_RESIDUAL_LIMIT, SA_ERR_UNSUPPORTED, SA_EXECUTION_BACKEND_CPU,
 };
 
 fn repository_root() -> PathBuf {
@@ -39,6 +39,22 @@ fn offset_fixture() -> ModelIrV2Document {
     value["elements"][0]["offsets"]["j_global_m"] = json!([0.0, -0.1, 0.1]);
     parse_model_ir_v2(&serde_json::to_vec(&value).expect("offset fixture JSON"))
         .expect("strict offset fixture")
+}
+
+fn released_offset_fixture() -> ModelIrV2Document {
+    let mut value = offset_fixture().value().clone();
+    value["elements"][0]["releases"]["i"] = json!(["RY"]);
+    value["elements"][0]["releases"]["j"] = json!(["RZ"]);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("release fixture JSON"))
+        .expect("strict release fixture")
+}
+
+fn singular_release_fixture() -> ModelIrV2Document {
+    let mut value = fixture().value().clone();
+    value["elements"][0]["releases"]["i"] = json!(["UX"]);
+    value["elements"][0]["releases"]["j"] = json!(["UX"]);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("singular release fixture JSON"))
+        .expect("strict singular release fixture")
 }
 
 #[test]
@@ -135,6 +151,58 @@ fn safe_wrapper_preserves_frame3d_rigid_offsets_through_native_assembly() {
     assert_eq!(offset.model_content_hash, offset_source.content_hash());
     assert_eq!(offset.execution_backend, SA_EXECUTION_BACKEND_CPU);
     assert_eq!(offset.fallback_count, 0);
+}
+
+#[test]
+fn safe_wrapper_preserves_frame3d_end_releases_through_native_assembly() {
+    let offset_source = offset_fixture();
+    let released_source = released_offset_fixture();
+    let api = Api::load_model_ir_linear_assembly().expect("v1.13 API");
+    let offset_model = api
+        .create_model_ir(&offset_source)
+        .expect("offset native model");
+    let released_model = api
+        .create_model_ir(&released_source)
+        .expect("released native model");
+    let mut request = axial_request();
+    request.displacement[7] = 0.002;
+    request.displacement[9] = -0.003;
+    request.direction[8] = 1.0;
+    request.direction[10] = -0.5;
+
+    let offset = offset_model
+        .assemble_linear_reference(&request)
+        .expect("offset assembly");
+    let released = released_model
+        .assemble_linear_reference(&request)
+        .expect("released assembly");
+    let repeated = released_model
+        .assemble_linear_reference(&request)
+        .expect("deterministic release repeat");
+
+    assert_eq!(released, repeated);
+    assert_ne!(released.tangent, offset.tangent);
+    assert_ne!(released.consistent_mass, offset.consistent_mass);
+    assert_ne!(released.internal_force, offset.internal_force);
+    assert_ne!(released.jvp, offset.jvp);
+    assert_eq!(released.recovery_values[4].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(released.recovery_values[11].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(released.model_content_hash, released_source.content_hash());
+    assert_eq!(released.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(released.fallback_count, 0);
+}
+
+#[test]
+fn safe_wrapper_rejects_singular_frame3d_release_without_partial_results() {
+    let source = singular_release_fixture();
+    let api = Api::load_model_ir_linear_assembly().expect("v1.13 API");
+    let model = api
+        .create_model_ir(&source)
+        .expect("singular release model remains schema-valid");
+    let error = model
+        .assemble_linear_reference(&axial_request())
+        .expect_err("singular release assembly fails closed");
+    assert_eq!(error.code, SA_ERR_RESIDUAL_LIMIT);
 }
 
 #[test]

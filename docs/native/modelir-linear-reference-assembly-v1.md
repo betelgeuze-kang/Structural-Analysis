@@ -77,8 +77,12 @@ an implemented C3 integration candidate, not a promoted sequential C3 gate.
 The projection accepts finite global rigid-end offsets for Euler-Bernoulli Frame3D only and applies
 the same effective-endpoint plus rigid-arm mapping to stiffness, mass, residual, JVP and local
 end-force recovery. General nonzero 3D offsets match an independent NumPy operator oracle, while
-exact zero offsets retain the previous arithmetic path. Truss3D offsets fail closed. The projection
-otherwise rejects non-linear material or formulation state, frame2d, shell, end releases, member
+exact zero offsets retain the previous arithmetic path. For Frame3D, unique local end-release DOFs
+are admitted only when the released `Kqq` block passes a no-fallback pivot and residual gate. The
+same recovery mapping condenses stiffness and mass, released local end forces publish as exact zero,
+and a rotated offset plus i-RY/j-RZ release matches the independent NumPy oracle. Singular release
+sets fail closed. Truss3D offsets and releases fail closed. The projection otherwise rejects
+non-linear material or formulation state, frame2d, shell, member
 loads, nonzero prescribed constraints, self-weight, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
