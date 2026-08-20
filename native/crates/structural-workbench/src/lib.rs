@@ -60,8 +60,9 @@ mod result_view;
 
 pub use analysis_request::{
     create_model_linear_analysis_request, create_model_linear_combination_analysis_request,
-    publish_model_linear_analysis_request, publish_model_linear_combination_analysis_request,
-    ModelLinearAnalysisRequestCreateOutcomeV1,
+    create_model_modal_analysis_request, publish_model_linear_analysis_request,
+    publish_model_linear_combination_analysis_request, publish_model_modal_analysis_request,
+    ModelLinearAnalysisRequestCreateOutcomeV1, ModelModalAnalysisRequestCreateOutcomeV1,
 };
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,

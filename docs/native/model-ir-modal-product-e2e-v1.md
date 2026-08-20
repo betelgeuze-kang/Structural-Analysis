@@ -30,9 +30,30 @@ load-dependent geometric stiffness matrix.
 
 ## Public local flow
 
+Workbench can create the exact model-bound request after running the same semantic and active
+`K/M` preflight used by execution:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  model-create-modal-analysis-request model.json \
+  --case frame-modal --assembly-load-pattern LC_WEAK \
+  --mode-count 3 --maximum-sweeps 4096 \
+  --symmetry-relative-tolerance 1e-12 \
+  --positive-semidefinite-relative-tolerance 1e-12 \
+  --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+  --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+  --eigensolver-relative-tolerance 1e-12 --output-dir request
+~~~
+
+The create-new directory contains canonical `analysis-request.json` and a self-hashed
+`request-receipt.json`. The receipt records `execution_started=false`, the active DOF count,
+source/model/request/assembly/generated-dense identities, and that the assembly selector's load
+vector is not consumed by modal execution. Repeated clean-environment authoring is byte-identical;
+the authored request then executes unchanged through the command below.
+
 ~~~bash
 cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
-  analysis model-modal-run model.json modal-request.json --output-dir result
+  analysis model-modal-run model.json request/analysis-request.json --output-dir result
 ~~~
 
 Publication is create-new and atomic. A successful directory contains:

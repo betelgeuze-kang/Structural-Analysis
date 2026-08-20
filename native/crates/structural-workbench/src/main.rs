@@ -5,6 +5,7 @@ use std::process::ExitCode;
 
 use serde_json::json;
 use structural_contracts::sparse_product::SparseLinearConfigV1;
+use structural_contracts::spectral_product::SpectralGeneralizedEigenConfigV1;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
@@ -565,6 +566,15 @@ struct ModelCreateLinearAnalysisRequestCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelCreateModalAnalysisRequestCommand {
+    model: PathBuf,
+    case_id: String,
+    assembly_load_pattern_id: String,
+    config: SpectralGeneralizedEigenConfigV1,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ResultViewCommand {
     workspace: PathBuf,
@@ -861,6 +871,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("model-create-linear-analysis-request") => {
             parse_model_create_linear_analysis_request(arguments)
                 .and_then(|command| run_model_create_linear_analysis_request(&command))
+        }
+        Some("model-create-modal-analysis-request") => {
+            parse_model_create_modal_analysis_request(arguments)
+                .and_then(|command| run_model_create_modal_analysis_request(&command))
         }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
@@ -2078,6 +2092,20 @@ fn run_model_create_linear_analysis_request(
             &command.output_directory,
         )?
     };
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
+fn run_model_create_modal_analysis_request(
+    command: &ModelCreateModalAnalysisRequestCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_modal_analysis_request(
+        &command.model,
+        &command.case_id,
+        &command.assembly_load_pattern_id,
+        command.config,
+        &command.output_directory,
+    )?;
     println!("{}", outcome.receipt_json);
     Ok(())
 }
@@ -4541,6 +4569,78 @@ fn parse_model_create_linear_analysis_request(
     })
 }
 
+fn parse_model_create_modal_analysis_request(
+    arguments: &[OsString],
+) -> Result<ModelCreateModalAnalysisRequestCommand, WorkbenchError> {
+    if arguments.len() != 26
+        || arguments[2] != "--case"
+        || arguments[4] != "--assembly-load-pattern"
+        || arguments[6] != "--mode-count"
+        || arguments[8] != "--maximum-sweeps"
+        || arguments[10] != "--symmetry-relative-tolerance"
+        || arguments[12] != "--positive-semidefinite-relative-tolerance"
+        || arguments[14] != "--mode-relative-tolerance"
+        || arguments[16] != "--cluster-relative-tolerance"
+        || arguments[18] != "--residual-relative-tolerance"
+        || arguments[20] != "--orthogonality-tolerance"
+        || arguments[22] != "--eigensolver-relative-tolerance"
+        || arguments[24] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-create-modal-analysis-request requires MODEL.json --case ID --assembly-load-pattern ID --mode-count N --maximum-sweeps N --symmetry-relative-tolerance VALUE --positive-semidefinite-relative-tolerance VALUE --mode-relative-tolerance VALUE --cluster-relative-tolerance VALUE --residual-relative-tolerance VALUE --orthogonality-tolerance VALUE --eigensolver-relative-tolerance VALUE --output-dir DIR",
+        ));
+    }
+    let mode_count = arguments[7]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=128).contains(value))
+        .ok_or_else(|| usage_error("modal mode count must be an integer from 1 through 128"))?;
+    let maximum_sweeps = arguments[9]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=4_096).contains(value))
+        .ok_or_else(|| {
+            usage_error("modal maximum sweeps must be an integer from 1 through 4096")
+        })?;
+    let parse_tolerance = |index: usize, name: &str| -> Result<f64, WorkbenchError> {
+        let value = parse_finite_edit_number(&arguments[index], name)?;
+        if value > 0.0 {
+            Ok(value)
+        } else {
+            Err(usage_error(&format!("{name} must be positive")))
+        }
+    };
+    Ok(ModelCreateModalAnalysisRequestCommand {
+        model: PathBuf::from(&arguments[1]),
+        case_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-create-modal-analysis-request case ID",
+        )?,
+        assembly_load_pattern_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-create-modal-analysis-request assembly load-pattern ID",
+        )?,
+        config: SpectralGeneralizedEigenConfigV1 {
+            mode_count,
+            maximum_sweeps,
+            symmetry_relative_tolerance: parse_tolerance(11, "modal symmetry relative tolerance")?,
+            positive_semidefinite_relative_tolerance: parse_tolerance(
+                13,
+                "modal positive-semidefinite relative tolerance",
+            )?,
+            mode_relative_tolerance: parse_tolerance(15, "modal mode relative tolerance")?,
+            cluster_relative_tolerance: parse_tolerance(17, "modal cluster relative tolerance")?,
+            residual_relative_tolerance: parse_tolerance(19, "modal residual relative tolerance")?,
+            orthogonality_tolerance: parse_tolerance(21, "modal orthogonality tolerance")?,
+            eigensolver_relative_tolerance: parse_tolerance(
+                23,
+                "modal eigensolver relative tolerance",
+            )?,
+        },
+        output_directory: PathBuf::from(&arguments[25]),
+    })
+}
+
 fn parse_bounded_edit_id(argument: &OsString, name: &str) -> Result<String, WorkbenchError> {
     argument
         .to_str()
@@ -5236,6 +5336,7 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-delete-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --output-dir <DIR>",
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
+        "\n  structural-workbench model-create-modal-analysis-request <MODEL.json> --case <ID> --assembly-load-pattern <ID> --mode-count <1..128> --maximum-sweeps <1..4096> --symmetry-relative-tolerance <VALUE> --positive-semidefinite-relative-tolerance <VALUE> --mode-relative-tolerance <VALUE> --cluster-relative-tolerance <VALUE> --residual-relative-tolerance <VALUE> --orthogonality-tolerance <VALUE> --eigensolver-relative-tolerance <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity-cascade <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
     )
 }
@@ -5254,7 +5355,7 @@ mod tests {
         parse_model_add_linear_material, parse_model_add_nested_linear_load_combination,
         parse_model_add_nested_linear_load_combination_term, parse_model_add_nodal_load,
         parse_model_add_node, parse_model_add_truss3d_member, parse_model_add_truss_section,
-        parse_model_create_linear_analysis_request,
+        parse_model_create_linear_analysis_request, parse_model_create_modal_analysis_request,
         parse_model_delete_direct_linear_load_combination_term,
         parse_model_delete_fixed_constraint, parse_model_delete_fixed_constraint_dof,
         parse_model_delete_frame3d_leaf_member, parse_model_delete_frame_section,
@@ -8078,5 +8179,51 @@ mod tests {
             Some("product_readiness")
         );
         assert!(parse_evidence(&show[..3], true).is_err());
+    }
+
+    #[test]
+    fn model_modal_request_parser_requires_every_bounded_control() {
+        let arguments = [
+            OsString::from("model-create-modal-analysis-request"),
+            OsString::from("model.json"),
+            OsString::from("--case"),
+            OsString::from("frame-modal"),
+            OsString::from("--assembly-load-pattern"),
+            OsString::from("LC_WEAK"),
+            OsString::from("--mode-count"),
+            OsString::from("3"),
+            OsString::from("--maximum-sweeps"),
+            OsString::from("4096"),
+            OsString::from("--symmetry-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--positive-semidefinite-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--mode-relative-tolerance"),
+            OsString::from("1e-10"),
+            OsString::from("--cluster-relative-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--residual-relative-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--orthogonality-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--eigensolver-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--output-dir"),
+            OsString::from("created"),
+        ];
+        let parsed = parse_model_create_modal_analysis_request(&arguments)
+            .expect("valid modal request creation command");
+        assert_eq!(parsed.model, PathBuf::from("model.json"));
+        assert_eq!(parsed.case_id, "frame-modal");
+        assert_eq!(parsed.assembly_load_pattern_id, "LC_WEAK");
+        assert_eq!(parsed.config.mode_count, 3);
+        assert_eq!(parsed.config.maximum_sweeps, 4_096);
+        assert_eq!(parsed.output_directory, PathBuf::from("created"));
+
+        for (index, value) in [(7, "0"), (9, "4097"), (11, "0"), (19, "NaN")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_model_create_modal_analysis_request(&invalid).is_err());
+        }
     }
 }

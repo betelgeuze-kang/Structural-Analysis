@@ -91,6 +91,7 @@ REQUIRED_TOKENS = {
     "native/crates/structural-cli/src/model_modal_product.rs": (
         "execute_model_ir_modal_analysis",
         "publish_model_ir_modal_analysis",
+        "validate_model_ir_modal_analysis_compatibility",
         "structural-model-ir-modal-run-receipt.v1",
         "generated-dense-request.json",
     ),
@@ -99,6 +100,25 @@ REQUIRED_TOKENS = {
         "env_clear()",
         "expected_files",
         "verify_self_hash",
+    ),
+    "native/crates/structural-workbench/src/analysis_request.rs": (
+        "publish_model_modal_analysis_request",
+        "create_model_modal_analysis_request",
+        "structural-native-model-modal-request-create-receipt.v1",
+        "cpp_active_k_m_assembly_preflight_verified",
+        "execution_started",
+    ),
+    "native/crates/structural-workbench/src/main.rs": (
+        'Some("model-create-modal-analysis-request")',
+        "--assembly-load-pattern",
+        "--positive-semidefinite-relative-tolerance",
+        "--eigensolver-relative-tolerance",
+    ),
+    "native/crates/structural-workbench/tests/model_ir_modal_request_create.rs": (
+        "workbench_authors_preflighted_request_that_executes_without_rebinding",
+        "clean_environment_cli_publishes_byte_identical_request_and_receipt",
+        "load_vector_consumed_by_modal",
+        "env_clear()",
     ),
     "docs/native/generalized-eigen-product-e2e-v1.md": (
         "C4",
@@ -118,6 +138,8 @@ REQUIRED_TOKENS = {
         "linear-buckling",
         "protected-runner HIP C2",
         "C6",
+        "model-create-modal-analysis-request",
+        "execution_started=false",
     ),
 }
 
@@ -211,6 +233,24 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers,
     )
+    modelir_modal_authoring = _check_capability(
+        payload,
+        "modelir_modal_request_authoring",
+        "C5",
+        "structural-workbench",
+        (
+            "model-create-modal-analysis-request",
+            "ABI v1.14",
+            "128-DOF",
+            "execution_started false",
+            "ABI v1.9",
+            "Python/Node-free",
+            "installed distribution",
+            "HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
 
     for relative, tokens in REQUIRED_TOKENS.items():
         try:
@@ -233,6 +273,7 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         "checkpoint_gate": checkpoint.get("cutover_gate"),
         "product_gate": product.get("cutover_gate"),
         "modelir_modal_product_gate": modelir_modal_product.get("cutover_gate"),
+        "modelir_modal_authoring_gate": modelir_modal_authoring.get("cutover_gate"),
         "sequential_numerical_gate": "C1",
         "blockers": blockers,
         "claim_boundary": (

@@ -42,7 +42,8 @@ pub use model_linear_product::{
 };
 pub use model_modal_product::{
     execute_model_ir_modal_analysis, publish_model_ir_modal_analysis,
-    ModelIrModalAnalysisOutcomeV1, ModelIrModalProductError,
+    validate_model_ir_modal_analysis_compatibility, ModelIrModalAnalysisOutcomeV1,
+    ModelIrModalCompatibilityV1, ModelIrModalProductError,
 };
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,

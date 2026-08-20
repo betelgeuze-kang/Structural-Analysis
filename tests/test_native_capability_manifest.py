@@ -193,6 +193,19 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "linear buckling" in modelir_modal["claim"]
     assert "HIP C2" in modelir_modal["claim"]
     assert "C6" in modelir_modal["claim"]
+    assert capabilities.capability_is_enabled(
+        payload, "modelir_modal_request_authoring"
+    ) is True
+    modal_authoring = payload["capabilities"]["modelir_modal_request_authoring"]
+    assert modal_authoring["cutover_gate"] == "C5"
+    assert modal_authoring["owner"] == "structural-workbench"
+    assert "model-create-modal-analysis-request" in modal_authoring["claim"]
+    assert "ABI v1.14" in modal_authoring["claim"]
+    assert "ABI v1.9" in modal_authoring["claim"]
+    assert "execution_started false" in modal_authoring["claim"]
+    assert "installed distribution" in modal_authoring["claim"]
+    assert "HIP C2" in modal_authoring["claim"]
+    assert "C6" in modal_authoring["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

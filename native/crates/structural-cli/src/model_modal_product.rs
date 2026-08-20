@@ -89,6 +89,14 @@ pub struct ModelIrModalAnalysisOutcomeV1 {
     run_receipt_json: String,
 }
 
+/// Identity receipt for an assembled, execution-compatible typed-`ModelIR` modal request.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelIrModalCompatibilityV1 {
+    pub assembly_hash: String,
+    pub generated_dense_request_hash: String,
+    pub active_dof_count: u32,
+}
+
 impl ModelIrModalAnalysisOutcomeV1 {
     #[must_use]
     pub fn result_ir_json(&self) -> &str {
@@ -109,6 +117,28 @@ impl ModelIrModalAnalysisOutcomeV1 {
     pub fn run_receipt_json(&self) -> &str {
         &self.run_receipt_json
     }
+}
+
+/// Verify exact model/request identities and construct the modal operator without solving it.
+///
+/// # Errors
+///
+/// Returns a strict contract error before FFI or a native/runtime error when the selected model,
+/// load-pattern assembly surface, active graph, or generated dense request is outside the bounded
+/// CPU modal domain.
+pub fn validate_model_ir_modal_analysis_compatibility(
+    model_ir_bytes: &[u8],
+    analysis_request_bytes: &[u8],
+) -> Result<ModelIrModalCompatibilityV1, ModelIrModalProductError> {
+    let document =
+        parse_model_ir_v2(model_ir_bytes).map_err(|error| model_contract_error(&error))?;
+    let request = parse_model_ir_modal_analysis_request_v1(analysis_request_bytes)?;
+    let prepared = Runtime::new()?.prepare_model_ir_modal_product(&document, &request)?;
+    Ok(ModelIrModalCompatibilityV1 {
+        assembly_hash: prepared.assembly_hash,
+        generated_dense_request_hash: prepared.generated_request.request_hash().to_owned(),
+        active_dof_count: prepared.generated_request.request().order,
+    })
 }
 
 /// Strictly parse, assemble and execute one bounded typed-`ModelIR` modal request.

@@ -31,6 +31,7 @@ def test_repository_generalized_eigen_c4_c5_contract_is_evidence_backed() -> Non
     assert report["checkpoint_gate"] == "C4"
     assert report["product_gate"] == "C5"
     assert report["modelir_modal_product_gate"] == "C5"
+    assert report["modelir_modal_authoring_gate"] == "C5"
     assert report["sequential_numerical_gate"] == "C1"
     assert "cannot promote C2 or C6" in report["claim_boundary"]
 

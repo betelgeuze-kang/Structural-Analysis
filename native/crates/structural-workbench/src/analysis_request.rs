@@ -1,13 +1,21 @@
 use std::path::Path;
 
 use serde_json::json;
-use structural_cli::{validate_model_bytes, validate_model_ir_linear_analysis_compatibility};
+use structural_cli::{
+    validate_model_bytes, validate_model_ir_linear_analysis_compatibility,
+    validate_model_ir_modal_analysis_compatibility,
+};
 use structural_contracts::model_linear_product::{
     build_model_ir_linear_analysis_request_v1, ModelIrLinearAnalysisRequestV1,
     ModelIrLinearBackendV1, MODEL_IR_LINEAR_ANALYSIS_REQUEST_V1,
 };
+use structural_contracts::model_modal_product::{
+    build_model_ir_modal_analysis_request_v1, ModelIrModalAnalysisRequestV1, ModelIrModalBackendV1,
+    MODEL_IR_MODAL_ANALYSIS_REQUEST_V1,
+};
 use structural_contracts::product_ir::{sha256_identity, ModelIrIdentityV1};
 use structural_contracts::sparse_product::SparseLinearConfigV1;
+use structural_contracts::spectral_product::SpectralGeneralizedEigenConfigV1;
 
 use super::linear_combination::{
     require_bounded_linear_load_combination, ExpandedLinearLoadCombinationV1,
@@ -24,10 +32,13 @@ const DIRECT_COMBINATION_REQUEST_RECEIPT_SCHEMA_V2: &str =
     "structural-native-model-linear-direct-combination-request-create-receipt.v2";
 const NESTED_COMBINATION_REQUEST_RECEIPT_SCHEMA_V3: &str =
     "structural-native-model-linear-nested-combination-request-create-receipt.v3";
+const MODAL_REQUEST_RECEIPT_SCHEMA_V1: &str =
+    "structural-native-model-modal-request-create-receipt.v1";
 const CLAIM_BOUNDARY: &str = "bounded_cpp_assembly_preflighted_modelir_linear_cpu_request_creation_not_arbitrary_solver_backend_model_editing_execution_convergence_engineering_acceptance_or_c6";
 const COMBINATION_CLAIM_BOUNDARY: &str = "bounded_exact_two_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
 const DIRECT_COMBINATION_CLAIM_BOUNDARY: &str = "bounded_two_to_64_unique_direct_pattern_linear_combination_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_nested_combination_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
 const NESTED_COMBINATION_CLAIM_BOUNDARY: &str = "bounded_acyclic_nested_linear_static_combination_depth_eight_expanded_64_terms_cpp_assembly_preflighted_cpu_request_using_frozen_v1_load_pattern_id_wire_alias_not_self_weight_arbitrary_solver_backend_hip_engineering_acceptance_or_c6";
+const MODAL_CLAIM_BOUNDARY: &str = "bounded_cpp_semantic_and_active_k_m_assembly_preflighted_modelir_frame3d_truss3d_dense_cpu_modal_request_creation_max_128_active_dofs_not_execution_sparse_buckling_shell_nonlinear_durable_service_distribution_hip_engineering_acceptance_or_c6";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum LoadSelectorKindV1 {
@@ -40,6 +51,128 @@ enum LoadSelectorKindV1 {
 pub struct ModelLinearAnalysisRequestCreateOutcomeV1 {
     pub analysis_request_json: String,
     pub receipt_json: String,
+}
+
+/// Complete deterministic artifact pair for one CPU `ModelIR` modal analysis request.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ModelModalAnalysisRequestCreateOutcomeV1 {
+    pub analysis_request_json: String,
+    pub receipt_json: String,
+}
+
+/// Construct and atomically publish one model-bound bounded CPU modal request.
+///
+/// # Errors
+///
+/// Rejects unsafe paths, invalid or blocked `ModelIR`, an incompatible linear assembly selector,
+/// invalid modal controls, more than 128 active DOFs, or create-new publication failures.
+pub fn publish_model_modal_analysis_request(
+    source_path: &Path,
+    case_id: &str,
+    assembly_load_pattern_id: &str,
+    config: SpectralGeneralizedEigenConfigV1,
+    output_directory: &Path,
+) -> Result<ModelModalAnalysisRequestCreateOutcomeV1, WorkbenchError> {
+    let source = read_bounded_regular_file(source_path, MAX_MODEL_BYTES)?;
+    let outcome =
+        create_model_modal_analysis_request(&source, case_id, assembly_load_pattern_id, config)?;
+    publish_new_directory(
+        output_directory,
+        &[
+            (
+                "analysis-request.json",
+                outcome.analysis_request_json.as_bytes(),
+            ),
+            ("request-receipt.json", outcome.receipt_json.as_bytes()),
+        ],
+    )?;
+    Ok(outcome)
+}
+
+/// Construct one canonical CPU modal request after C++ snapshot and active `K/M` preflight.
+///
+/// # Errors
+///
+/// Returns a stable Workbench error for invalid source semantics/readiness, a missing or
+/// non-linear assembly load pattern, invalid request fields, or bounded modal incompatibility.
+pub fn create_model_modal_analysis_request(
+    source_bytes: &[u8],
+    case_id: &str,
+    assembly_load_pattern_id: &str,
+    config: SpectralGeneralizedEigenConfigV1,
+) -> Result<ModelModalAnalysisRequestCreateOutcomeV1, WorkbenchError> {
+    let source_validation = validate_model_bytes(source_bytes).map_err(|error| {
+        input_error(
+            "workbench_model_modal_request_source_validation_failed",
+            &error,
+        )
+    })?;
+    if !source_validation.report.contract_valid || !source_validation.report.semantics_valid {
+        return Err(WorkbenchError::new(
+            "workbench_model_modal_request_source_semantics_invalid",
+            "native C++ validation rejected the source ModelIR semantics",
+        ));
+    }
+    if !source_validation.report.analysis_ready {
+        return Err(WorkbenchError::new(
+            "workbench_model_modal_request_source_not_ready",
+            "source ModelIR retains explicit analysis blockers",
+        ));
+    }
+    require_linear_load_pattern(source_validation.snapshot.value(), assembly_load_pattern_id)?;
+
+    let request = build_model_ir_modal_analysis_request_v1(ModelIrModalAnalysisRequestV1 {
+        schema_version: MODEL_IR_MODAL_ANALYSIS_REQUEST_V1.to_owned(),
+        operation: "solve_model_ir_modal".to_owned(),
+        case_id: case_id.to_owned(),
+        backend: ModelIrModalBackendV1::Cpu,
+        model_identity: ModelIrIdentityV1 {
+            content_hash: source_validation.report.content_hash.clone(),
+            semantic_hash: source_validation.report.semantic_hash.clone(),
+            provenance_hash: source_validation.report.provenance_hash.clone(),
+        },
+        assembly_load_pattern_id: assembly_load_pattern_id.to_owned(),
+        config,
+    })
+    .map_err(|error| input_error("workbench_model_modal_request_contract_invalid", &error))?;
+    let compatibility =
+        validate_model_ir_modal_analysis_compatibility(source_bytes, request.canonical_bytes())
+            .map_err(|error| {
+                input_error("workbench_model_modal_request_preflight_failed", &error)
+            })?;
+
+    let analysis_request_json = request.canonical_json().to_owned();
+    let request_artifact = artifact_entry(
+        "model_modal_analysis_request",
+        "analysis-request.json",
+        "application/json",
+        analysis_request_json.as_bytes(),
+    )?;
+    let receipt_json = canonical_self_hashed(json!({
+        "schema_version": MODAL_REQUEST_RECEIPT_SCHEMA_V1,
+        "operation": "create_model_ir_modal_analysis_request",
+        "model_id": source_validation.report.model_id,
+        "model_identity": request.request().model_identity,
+        "source_input_sha256": sha256_identity(source_bytes),
+        "case_id": request.request().case_id,
+        "backend": "cpu",
+        "assembly_load_pattern_id": request.request().assembly_load_pattern_id,
+        "load_vector_consumed_by_modal": false,
+        "config": request.request().config,
+        "analysis_request_hash": request.request_hash(),
+        "cpp_semantic_snapshot_verified": true,
+        "cpp_active_k_m_assembly_preflight_verified": true,
+        "active_dof_count": compatibility.active_dof_count,
+        "assembly_hash": compatibility.assembly_hash,
+        "generated_dense_request_hash": compatibility.generated_dense_request_hash,
+        "execution_started": false,
+        "artifacts": [request_artifact],
+        "claim_boundary": MODAL_CLAIM_BOUNDARY,
+    }))?;
+    Ok(ModelModalAnalysisRequestCreateOutcomeV1 {
+        analysis_request_json,
+        receipt_json,
+    })
 }
 
 /// Construct and atomically publish one model-bound CPU linear analysis request.
