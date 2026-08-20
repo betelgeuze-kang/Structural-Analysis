@@ -144,8 +144,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v93",
-        "frozen_installed_receipts": "v1-v92",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v94",
+        "frozen_installed_receipts": "v1-v93",
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",
             "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -212,9 +212,9 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "authority": "hosted_cpu_c5",
     },
     "native_deployment": {
-        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v15",
-        "frozen_rootfs_receipts": "v1-v14",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v93",
+        "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v16",
+        "frozen_rootfs_receipts": "v1-v15",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v94",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },

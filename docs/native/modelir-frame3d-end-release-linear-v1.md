@@ -1,6 +1,6 @@
 # ModelIR Frame3D Linear End Release v1
 
-Status: bounded source-built CPU C5 implementation; installed and release authority remain open.
+Status: bounded installed CPU C5 integration evidence; engineering and customer release authority remain open.
 
 ## Contract
 
@@ -47,12 +47,17 @@ projection and safe Rust v1.13/v1.14 assembly require no ABI extension.
 - A stable constrained cantilever with an i-RY release crosses source-built Workbench
   `Import -> Validate -> Run(1) -> Resume -> Compare -> Report`. Direct and resumed artifact trees
   are byte-identical, and the element-recovery view displays the released i-MY value as exact zero.
+- Installed static/shared distribution receipt v94 independently binds the constrained model,
+  Workbench-authored request, fallback-free ResultIR, twelve-component recovery, positive
+  exact-zero released i-MY, real-iteration checkpoint and direct/resume parity.
+- Local rootfs diagnostic v16 repeats that surface as UID/GID 65532 with an empty PATH, read-only
+  root and payload, writable operator workspace and loopback-only networking.
 
 ## Honest boundary
 
 This is implementation and focused verification evidence, not independent external validation or
-customer release authority. No installed static/shared distribution or rootfs isolation receipt is
-attached. HIP remains fail-closed for releases. Truss3D releases, singular release mechanisms,
+customer release authority. The installed v94 and rootfs v16 receipts are local C5 integration
+evidence and do not promote engineering acceptance. HIP remains fail-closed for releases. Truss3D releases, singular release mechanisms,
 member distributed loads, self-weight, geometric/material nonlinearity, release-aware deformed
 shape visualization, design checks, external engineering acceptance, and C6 decommission remain
 open.

@@ -704,8 +704,15 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    three-dimensional offset operator to product PCG authority and is not Truss3D-offset, release,
    member-load, self-weight, offset-aware visualization, rootfs, HIP C2, engineering-verdict or C6
    authority.
+108. authors a stable constrained Frame3D request with axial rigid offsets and an i-end RY release
+   through the installed Workbench, then executes installed direct, one-iteration partial and
+   model-bound resumed CPU products. The append-only v94 receipt requires byte-identical
+   direct/resumed directories, completed status, fallback 0, one 12-component Frame3D recovery
+   row, positive exact-zero released i-MY and five distinct model, request, ResultIR, recovery and
+   checkpoint identities. Static and shared receipts remain hosted CPU C5 evidence; this bounded
+   fixture is not general release-combination, mechanism, HIP, engineering-verdict or C6 authority.
 
-   The receipt checker continues to accept frozen v1 through v92 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v93 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
@@ -714,7 +721,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    installed Workbench-authored ModelIR modal product authority, and no pre-v91 receipt is
    installed model-bound modal restart and result-view authority, and no pre-v92 receipt is
    installed durable modal Workbench-session authority, and no pre-v93 receipt is installed
-   Frame3D rigid-end-offset linear CPU product authority. Its explicit compatibility
+   Frame3D rigid-end-offset linear CPU product authority, and no pre-v94 receipt is installed
+   Frame3D end-release linear CPU product authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
@@ -942,6 +950,13 @@ model/request/ResultIR/recovery/checkpoint identities. It continues to verify fr
 v14 rootfs receipts; only v15 requires isolated installed Frame3D rigid-offset linear CPU evidence.
 The general rotated three-dimensional offset operator remains source-verified below the product
 solver and is not promoted by the axial product fixture.
+The append-only v16 receipt additionally authors the stable constrained Frame3D i-RY end-release
+request and runs installed direct, one-iteration partial and resumed CPU products inside the same
+isolation boundary. The installer verifies the exact request and execution inventories,
+byte-identical direct/resumed directories, fallback 0, positive exact-zero released i-MY and five
+distinct model/request/ResultIR/recovery/checkpoint identities. It continues to verify frozen v1
+through v15 rootfs receipts; only v16 requires isolated installed Frame3D end-release linear CPU
+evidence. General release combinations, mechanisms and HIP parity remain open.
 Its authority remains `local_rootfs_diagnostic_c5` with
 `container_image_built` and `customer_image_receipt` false.
 

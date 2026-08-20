@@ -1395,11 +1395,14 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
     )
     for token in (
         "structural-native-rootfs-isolation-e2e.v15",
+        "structural-native-rootfs-isolation-e2e.v16",
         "RootfsIsolationEvidenceV15",
         "model_ir_frame3d_rigid_offset_linear_cpu_surface_passed",
         "model_ir_frame3d_rigid_offset_recovery_sha256",
         "inspect_rootfs_frame3d_rigid_offset_surface",
         "validate_rootfs_isolation_evidence_v15",
+        "validate_rootfs_isolation_evidence_v16",
+        "inspect_rootfs_frame3d_end_release_surface",
         "structural-native-rootfs-isolation-e2e.v14",
         "RootfsIsolationEvidenceV14",
         "workbench_model_modal_durable_session_sha256",
@@ -5040,7 +5043,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",
-            "v15 self-hashed local_rootfs_diagnostic_c5 receipt",
+            "v16 self-hashed local_rootfs_diagnostic_c5 receipt",
             "strict-ModelIR and normalized-MGT constrained-reaction views",
             "algebraic reaction audits",
             "bounded nodal-displacement views",
@@ -5052,6 +5055,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "durable modal Workbench",
             "copied-checkpoint tamper rejection",
             "v15 additionally binds one axial rigid-offset Frame3D model",
+            "v16 additionally binds the constrained i-RY end-release Frame3D model",
+            "positive exact-zero released i-MY",
             "byte-identical fifteen-artifact direct/resumed product",
             "visible nonzero normalized-MGT FP64 roundoff",
             "final C6 remain open",
@@ -5060,9 +5065,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
         evidence_contract = capability.get("evidence_contract")
         if evidence_contract != {
-            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v15",
-            "frozen_rootfs_receipts": "v1-v14",
-            "required_installed_receipt_schema": "structural-native-distribution-e2e.v93",
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v16",
+            "frozen_rootfs_receipts": "v1-v15",
+            "required_installed_receipt_schema": "structural-native-distribution-e2e.v94",
             "authority": "local_rootfs_diagnostic_c5",
             "customer_image_authority": False,
         }:

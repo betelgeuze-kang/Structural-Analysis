@@ -253,6 +253,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--frame3d-rigid-offset-direct-root",
             "--frame3d-rigid-offset-partial-root",
             "--frame3d-rigid-offset-resumed-root",
+            "--frame3d-end-release-model",
+            "--frame3d-end-release-request-root",
+            "--frame3d-end-release-direct-root",
+            "--frame3d-end-release-partial-root",
+            "--frame3d-end-release-resumed-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -491,6 +496,15 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--frame3d-rigid-offset-partial-root")?;
     let frame3d_rigid_offset_resumed_root =
         required_path(options, "--frame3d-rigid-offset-resumed-root")?;
+    let frame3d_end_release_model = required_path(options, "--frame3d-end-release-model")?;
+    let frame3d_end_release_request_root =
+        required_path(options, "--frame3d-end-release-request-root")?;
+    let frame3d_end_release_direct_root =
+        required_path(options, "--frame3d-end-release-direct-root")?;
+    let frame3d_end_release_partial_root =
+        required_path(options, "--frame3d-end-release-partial-root")?;
+    let frame3d_end_release_resumed_root =
+        required_path(options, "--frame3d-end-release-resumed-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -641,6 +655,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         frame3d_rigid_offset_direct_root: &frame3d_rigid_offset_direct_root,
         frame3d_rigid_offset_partial_root: &frame3d_rigid_offset_partial_root,
         frame3d_rigid_offset_resumed_root: &frame3d_rigid_offset_resumed_root,
+        frame3d_end_release_model: &frame3d_end_release_model,
+        frame3d_end_release_request_root: &frame3d_end_release_request_root,
+        frame3d_end_release_direct_root: &frame3d_end_release_direct_root,
+        frame3d_end_release_partial_root: &frame3d_end_release_partial_root,
+        frame3d_end_release_resumed_root: &frame3d_end_release_resumed_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -736,7 +755,7 @@ fn usage_error(detail: &str) -> CliError {
 fn usage() -> String {
     frozen_usage_v11().replace(
         " --workbench-catalog",
-        " --model-ir-linear-element-recovery-view-en-us-first FILE --model-ir-linear-element-recovery-view-en-us-second FILE --model-ir-linear-element-recovery-view-ko-kr-first FILE --model-ir-linear-element-recovery-view-ko-kr-second FILE --mgt-model-ir-linear-element-recovery-view-en-us-first FILE --mgt-model-ir-linear-element-recovery-view-en-us-second FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-first FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-second FILE --workbench-linear-element-recovery-view-invalid-window-failure FILE --frame3d-rigid-offset-model FILE --frame3d-rigid-offset-request-root DIR --frame3d-rigid-offset-direct-root DIR --frame3d-rigid-offset-partial-root DIR --frame3d-rigid-offset-resumed-root DIR --workbench-catalog",
+        " --model-ir-linear-element-recovery-view-en-us-first FILE --model-ir-linear-element-recovery-view-en-us-second FILE --model-ir-linear-element-recovery-view-ko-kr-first FILE --model-ir-linear-element-recovery-view-ko-kr-second FILE --mgt-model-ir-linear-element-recovery-view-en-us-first FILE --mgt-model-ir-linear-element-recovery-view-en-us-second FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-first FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-second FILE --workbench-linear-element-recovery-view-invalid-window-failure FILE --frame3d-rigid-offset-model FILE --frame3d-rigid-offset-request-root DIR --frame3d-rigid-offset-direct-root DIR --frame3d-rigid-offset-partial-root DIR --frame3d-rigid-offset-resumed-root DIR --frame3d-end-release-model FILE --frame3d-end-release-request-root DIR --frame3d-end-release-direct-root DIR --frame3d-end-release-partial-root DIR --frame3d-end-release-resumed-root DIR --workbench-catalog",
     )
 }
 

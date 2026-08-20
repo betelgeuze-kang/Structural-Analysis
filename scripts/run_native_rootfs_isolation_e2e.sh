@@ -461,6 +461,50 @@ unshare -Urn bwrap \
       > /mnt/frame3d-rigid-offset-resumed.stdout.json
     /usr/bin/diff -r /mnt/frame3d-rigid-offset-direct \
       /mnt/frame3d-rigid-offset-resumed
+    /usr/bin/sed \
+      -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-end-release/" \
+      -e "s/\"i_global_m\": \[0.0, 0.0, 0.0\]/\"i_global_m\": [0.1, 0.0, 0.0]/" \
+      -e "s/\"j_global_m\": \[0.0, 0.0, 0.0\]/\"j_global_m\": [-0.1, 0.0, 0.0]/" \
+      -e "s/\"i\": \[\]/\"i\": [\"RY\"]/" \
+      -e "/\"source_id\": \"generated:BC1\"/,/^    }$/ { /^    }$/c\\
+    },\\
+    {\\
+      \"id\": \"BC2\",\\
+      \"index\": 1,\\
+      \"type\": \"fixed_dofs\",\\
+      \"node_id\": \"N2\",\\
+      \"dofs\": [\"UZ\"],\\
+      \"prescribed_values_si\": {\"UZ\": 0.0},\\
+      \"source_id\": \"generated:BC2\",\\
+      \"extensions\": {}\\
+    }
+  }" \
+      "$8" > /mnt/frame3d-end-release-model-ir.json
+    /opt/payload/bin/structural-workbench model-create-linear-analysis-request \
+      /mnt/frame3d-end-release-model-ir.json \
+      --case model-frame-end-release-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir /mnt/frame3d-end-release-request \
+      > /mnt/frame3d-end-release-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-end-release-model-ir.json \
+      /mnt/frame3d-end-release-request/analysis-request.json \
+      --output-dir /mnt/frame3d-end-release-direct \
+      > /mnt/frame3d-end-release-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-end-release-model-ir.json \
+      /mnt/frame3d-end-release-request/analysis-request.json \
+      --output-dir /mnt/frame3d-end-release-partial --iteration-budget 1 \
+      > /mnt/frame3d-end-release-partial.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-resume \
+      /mnt/frame3d-end-release-model-ir.json \
+      /mnt/frame3d-end-release-request/analysis-request.json \
+      /mnt/frame3d-end-release-partial/checkpoint.mlpcp \
+      --output-dir /mnt/frame3d-end-release-resumed \
+      > /mnt/frame3d-end-release-resumed.stdout.json
+    /usr/bin/diff -r /mnt/frame3d-end-release-direct \
+      /mnt/frame3d-end-release-resumed
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -648,6 +692,11 @@ unshare -Urn bwrap \
       --frame3d-rigid-offset-direct-root /mnt/frame3d-rigid-offset-direct \
       --frame3d-rigid-offset-partial-root /mnt/frame3d-rigid-offset-partial \
       --frame3d-rigid-offset-resumed-root /mnt/frame3d-rigid-offset-resumed \
+      --frame3d-end-release-model /mnt/frame3d-end-release-model-ir.json \
+      --frame3d-end-release-request-root /mnt/frame3d-end-release-request \
+      --frame3d-end-release-direct-root /mnt/frame3d-end-release-direct \
+      --frame3d-end-release-partial-root /mnt/frame3d-end-release-partial \
+      --frame3d-end-release-resumed-root /mnt/frame3d-end-release-resumed \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \
