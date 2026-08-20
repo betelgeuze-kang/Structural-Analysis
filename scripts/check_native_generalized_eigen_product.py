@@ -81,6 +81,20 @@ REQUIRED_TOKENS = {
         "operator is not exactly symmetric",
         "load_vector_consumed_by_modal",
     ),
+    "native/crates/structural-runtime/src/model_modal_checkpoint.rs": (
+        'b"SAMMCP01"',
+        "structural-model-ir-modal-checkpoint.v1",
+        "ModelIrModalCheckpointBindingsV1",
+        "verify_bindings",
+        "inner_checkpoint_hash",
+    ),
+    "native/crates/structural-runtime/tests/model_ir_modal_checkpoint.rs": (
+        "modal_checkpoint_round_trip_preserves_every_outer_and_inner_binding",
+        "every_modal_checkpoint_byte_and_each_outer_binding_fail_closed",
+        "wrong taxonomy at byte",
+        "truncation must fail",
+        "trailing bytes must fail",
+    ),
     "native/crates/structural-runtime/tests/model_ir_modal_product.rs": (
         "typed_model_ir_assembly_drives_existing_native_modal_product",
         "identity_drift_and_excess_mode_request_fail_closed",
@@ -90,13 +104,16 @@ REQUIRED_TOKENS = {
     ),
     "native/crates/structural-cli/src/model_modal_product.rs": (
         "execute_model_ir_modal_analysis",
+        "execute_model_ir_modal_analysis_with_checkpoint",
         "publish_model_ir_modal_analysis",
         "validate_model_ir_modal_analysis_compatibility",
         "structural-model-ir-modal-run-receipt.v1",
         "generated-dense-request.json",
+        "checkpoint.mmcp",
     ),
     "native/crates/structural-cli/tests/model_ir_modal_product_cli.rs": (
-        "python_node_free_modelir_modal_cli_is_deterministic_and_bound",
+        "python_node_free_modelir_modal_direct_resume_are_byte_identical_and_bound",
+        "modelir_modal_resume_rejects_tamper_and_outer_binding_drift_without_publication",
         "env_clear()",
         "expected_files",
         "verify_self_hash",
@@ -140,6 +157,8 @@ REQUIRED_TOKENS = {
         "C6",
         "model-create-modal-analysis-request",
         "execution_started=false",
+        "model-modal-resume",
+        "SAMMCP01",
     ),
 }
 
@@ -224,7 +243,8 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
             "128 DOFs",
             "ABI v1.14",
             "ABI v1.9",
-            "byte-identical 10-artifact",
+            "byte-identical 11-artifact",
+            "model-bound checkpoint",
             "independent 2x2 closed-form",
             "fallback 0",
             "linear buckling",

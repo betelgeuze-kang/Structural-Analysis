@@ -71,6 +71,11 @@ pub struct DenseSpectralRunOutcomeV1 {
 
 impl DenseSpectralRunOutcomeV1 {
     #[must_use]
+    pub const fn checkpoint(&self) -> &DenseSpectralCheckpointV1 {
+        &self.checkpoint
+    }
+
+    #[must_use]
     pub fn checkpoint_bytes(&self) -> &[u8] {
         self.checkpoint.as_bytes()
     }

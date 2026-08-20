@@ -5,7 +5,10 @@ use serde_json::{json, Value};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError};
 use structural_contracts::model_modal_product::parse_model_ir_modal_analysis_request_v1;
 use structural_contracts::product_ir::{sha256_identity, ProductIrContractError};
-use structural_runtime::{PreparedModelIrModalProductV1, Runtime, RuntimeError};
+use structural_runtime::{
+    ModelIrModalCheckpointBindingsV1, ModelIrModalCheckpointReceiptV1, ModelIrModalCheckpointV1,
+    PreparedModelIrModalProductV1, Runtime, RuntimeError,
+};
 
 use crate::product::{artifact_entry, canonicalize_value, publish_artifact_directory};
 use crate::spectral_product::{
@@ -85,6 +88,8 @@ pub struct ModelIrModalAnalysisOutcomeV1 {
     analysis_request_json: String,
     assembly_receipt_json: String,
     generated_request_json: String,
+    checkpoint: ModelIrModalCheckpointV1,
+    checkpoint_receipt: ModelIrModalCheckpointReceiptV1,
     spectral_outcome: DenseSpectralRunOutcomeV1,
     run_receipt_json: String,
 }
@@ -116,6 +121,16 @@ impl ModelIrModalAnalysisOutcomeV1 {
     #[must_use]
     pub fn run_receipt_json(&self) -> &str {
         &self.run_receipt_json
+    }
+
+    #[must_use]
+    pub fn checkpoint_bytes(&self) -> &[u8] {
+        self.checkpoint.as_bytes()
+    }
+
+    #[must_use]
+    pub const fn checkpoint_receipt(&self) -> &ModelIrModalCheckpointReceiptV1 {
+        &self.checkpoint_receipt
     }
 }
 
@@ -151,19 +166,64 @@ pub fn execute_model_ir_modal_analysis(
     model_ir_bytes: &[u8],
     analysis_request_bytes: &[u8],
 ) -> Result<ModelIrModalAnalysisOutcomeV1, ModelIrModalProductError> {
+    execute_model_ir_modal_analysis_with_checkpoint(model_ir_bytes, analysis_request_bytes, None)
+}
+
+/// Reconstruct exact `ModelIR` assembly and execute or resume its model-bound modal phase.
+///
+/// A resumed call accepts the embedded dense phase boundary only after the model content,
+/// semantics, provenance, outer request, assembly and generated dense request all match.
+///
+/// # Errors
+///
+/// Returns a strict contract/runtime error before publication for any model, request,
+/// derivation, checkpoint, solve, projection or immutable binding drift.
+pub fn execute_model_ir_modal_analysis_with_checkpoint(
+    model_ir_bytes: &[u8],
+    analysis_request_bytes: &[u8],
+    checkpoint_bytes: Option<&[u8]>,
+) -> Result<ModelIrModalAnalysisOutcomeV1, ModelIrModalProductError> {
     let document =
         parse_model_ir_v2(model_ir_bytes).map_err(|error| model_contract_error(&error))?;
     let request = parse_model_ir_modal_analysis_request_v1(analysis_request_bytes)?;
     let runtime = Runtime::new()?;
     let prepared = runtime.prepare_model_ir_modal_product(&document, &request)?;
-    let spectral_outcome =
-        execute_dense_spectral_analysis(prepared.generated_request.canonical_bytes(), None)?;
-    let run_receipt_json = build_run_receipt(&document, &request, &prepared, &spectral_outcome)?;
+    let bindings = ModelIrModalCheckpointBindingsV1 {
+        model_content_hash: document.content_hash().to_owned(),
+        model_semantic_hash: document.semantic_hash().to_owned(),
+        model_provenance_hash: document.provenance_hash().to_owned(),
+        analysis_request_hash: request.request_hash().to_owned(),
+        assembly_hash: prepared.assembly_hash.clone(),
+        generated_request_hash: prepared.generated_request.request_hash().to_owned(),
+    };
+    let restored = checkpoint_bytes
+        .map(ModelIrModalCheckpointV1::from_bytes)
+        .transpose()?;
+    if let Some(checkpoint) = &restored {
+        checkpoint.verify_bindings(&bindings)?;
+    }
+    let spectral_outcome = execute_dense_spectral_analysis(
+        prepared.generated_request.canonical_bytes(),
+        restored.as_ref().map(|value| value.inner().as_bytes()),
+    )?;
+    let checkpoint =
+        ModelIrModalCheckpointV1::create(spectral_outcome.checkpoint().clone(), &bindings)?;
+    let checkpoint_receipt = checkpoint.receipt();
+    let run_receipt_json = build_run_receipt(
+        &document,
+        &request,
+        &prepared,
+        &checkpoint,
+        &checkpoint_receipt,
+        &spectral_outcome,
+    )?;
     Ok(ModelIrModalAnalysisOutcomeV1 {
         model_ir_json: document.canonical_json().to_owned(),
         analysis_request_json: request.canonical_json().to_owned(),
         assembly_receipt_json: prepared.assembly_receipt_json,
         generated_request_json: prepared.generated_request.canonical_json().to_owned(),
+        checkpoint,
+        checkpoint_receipt,
         spectral_outcome,
         run_receipt_json,
     })
@@ -197,6 +257,7 @@ pub fn publish_model_ir_modal_analysis(
             "checkpoint.eigcp",
             outcome.spectral_outcome.checkpoint_bytes(),
         ),
+        ("checkpoint.mmcp", outcome.checkpoint_bytes()),
         ("result-ir.json", outcome.result_ir_json().as_bytes()),
         ("report-ir.json", outcome.report_ir_json().as_bytes()),
         ("report.md", outcome.report_document().as_bytes()),
@@ -213,6 +274,8 @@ fn build_run_receipt(
     document: &structural_contracts::model_ir::ModelIrV2Document,
     request: &structural_contracts::model_modal_product::ModelIrModalAnalysisRequestDocumentV1,
     prepared: &PreparedModelIrModalProductV1,
+    checkpoint: &ModelIrModalCheckpointV1,
+    checkpoint_receipt: &ModelIrModalCheckpointReceiptV1,
     spectral: &DenseSpectralRunOutcomeV1,
 ) -> Result<String, ModelIrModalProductError> {
     let artifacts = vec![
@@ -245,6 +308,12 @@ fn build_run_receipt(
             "checkpoint.eigcp",
             "application/vnd.structural.dense-spectral-checkpoint",
             spectral.checkpoint_bytes(),
+        )?,
+        artifact_entry(
+            "model_ir_modal_checkpoint",
+            "checkpoint.mmcp",
+            "application/vnd.structural.model-ir-modal-checkpoint",
+            checkpoint.as_bytes(),
         )?,
         artifact_entry(
             "result_ir",
@@ -280,10 +349,11 @@ fn build_run_receipt(
         "analysis_request_hash": request.request_hash(),
         "assembly_hash": prepared.assembly_hash,
         "generated_dense_request_hash": prepared.generated_request.request_hash(),
+        "model_ir_modal_checkpoint": checkpoint_receipt,
         "dense_checkpoint": spectral.checkpoint_receipt(),
         "artifacts": artifacts,
         "fallback_count": 0,
-        "claim_boundary": "bounded_local_frame3d_truss3d_modelir_cpu_modal_product_max_128_active_dofs_not_sparse_buckling_shell_nonlinear_durable_service_public_customer_distribution_publication_hip_or_engineering_acceptance",
+        "claim_boundary": "bounded_local_frame3d_truss3d_modelir_cpu_modal_product_and_model_bound_atomic_phase_restart_max_128_active_dofs_not_sparse_buckling_shell_nonlinear_durable_service_public_customer_distribution_publication_hip_or_engineering_acceptance",
         "receipt_hash": ""
     });
     value_self_hash(&mut receipt)?;

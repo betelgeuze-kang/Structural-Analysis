@@ -32,7 +32,7 @@ fn temporary_root(name: &str) -> PathBuf {
     ))
 }
 
-fn request(model_bytes: &[u8]) -> Vec<u8> {
+fn request(model_bytes: &[u8], load_pattern: &str) -> Vec<u8> {
     let model = parse_model_ir_v2(model_bytes).expect("strict ModelIR");
     build_model_ir_modal_analysis_request_v1(ModelIrModalAnalysisRequestV1 {
         schema_version: MODEL_IR_MODAL_ANALYSIS_REQUEST_V1.to_owned(),
@@ -44,7 +44,7 @@ fn request(model_bytes: &[u8]) -> Vec<u8> {
             semantic_hash: model.semantic_hash().to_owned(),
             provenance_hash: model.provenance_hash().to_owned(),
         },
-        assembly_load_pattern_id: "LC_WEAK".to_owned(),
+        assembly_load_pattern_id: load_pattern.to_owned(),
         config: SpectralGeneralizedEigenConfigV1 {
             mode_count: 3,
             maximum_sweeps: 4_096,
@@ -75,16 +75,17 @@ fn verify_self_hash(value: &Value, field: &str) {
 }
 
 #[test]
-fn python_node_free_modelir_modal_cli_is_deterministic_and_bound() {
+fn python_node_free_modelir_modal_direct_resume_are_byte_identical_and_bound() {
     let root = temporary_root("e2e");
     fs::create_dir_all(&root).expect("temporary root");
     let model_path =
         repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
     let model_bytes = fs::read(&model_path).expect("ModelIR fixture");
     let request_path = root.join("request.json");
-    fs::write(&request_path, request(&model_bytes)).expect("request fixture");
+    fs::write(&request_path, request(&model_bytes, "LC_WEAK")).expect("request fixture");
     let first = root.join("first");
     let second = root.join("second");
+    let resumed = root.join("resumed");
 
     for output in [&first, &second] {
         let execution = Command::new(env!("CARGO_BIN_EXE_structural-cli"))
@@ -107,10 +108,34 @@ fn python_node_free_modelir_modal_cli_is_deterministic_and_bound() {
             String::from_utf8_lossy(&execution.stderr)
         );
     }
+    let resume = Command::new(env!("CARGO_BIN_EXE_structural-cli"))
+        .env_clear()
+        .env("PATH", "/nonexistent")
+        .args([
+            "analysis",
+            "model-modal-resume",
+            model_path.to_str().expect("model path"),
+            request_path.to_str().expect("request path"),
+            first
+                .join("checkpoint.mmcp")
+                .to_str()
+                .expect("checkpoint path"),
+            "--output-dir",
+            resumed.to_str().expect("output path"),
+        ])
+        .output()
+        .expect("resume structural-cli");
+    assert!(
+        resume.status.success(),
+        "stdout={} stderr={}",
+        String::from_utf8_lossy(&resume.stdout),
+        String::from_utf8_lossy(&resume.stderr)
+    );
 
     let expected_files = [
         "assembly-receipt.json",
         "checkpoint.eigcp",
+        "checkpoint.mmcp",
         "dense-run-receipt.json",
         "generated-dense-request.json",
         "model-ir.json",
@@ -125,6 +150,11 @@ fn python_node_free_modelir_modal_cli_is_deterministic_and_bound() {
             fs::read(first.join(file)).expect("first artifact"),
             fs::read(second.join(file)).expect("second artifact"),
             "artifact drifted: {file}"
+        );
+        assert_eq!(
+            fs::read(first.join(file)).expect("direct artifact"),
+            fs::read(resumed.join(file)).expect("resumed artifact"),
+            "resume artifact drifted: {file}"
         );
     }
 
@@ -148,6 +178,70 @@ fn python_node_free_modelir_modal_cli_is_deterministic_and_bound() {
             artifact["byte_length"],
             u64::try_from(bytes.len()).expect("bounded artifact length")
         );
+    }
+
+    let _ = fs::remove_dir_all(root);
+}
+
+#[test]
+fn modelir_modal_resume_rejects_tamper_and_outer_binding_drift_without_publication() {
+    let root = temporary_root("restart-rejection");
+    fs::create_dir_all(&root).expect("temporary root");
+    let model_path =
+        repository_root().join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let model_bytes = fs::read(&model_path).expect("ModelIR fixture");
+    let first_request = root.join("first-request.json");
+    fs::write(&first_request, request(&model_bytes, "LC_WEAK")).expect("first request");
+    let direct = root.join("direct");
+    let execution = Command::new(env!("CARGO_BIN_EXE_structural-cli"))
+        .env_clear()
+        .env("PATH", "/nonexistent")
+        .args([
+            "analysis",
+            "model-modal-run",
+            model_path.to_str().expect("model path"),
+            first_request.to_str().expect("request path"),
+            "--output-dir",
+            direct.to_str().expect("output path"),
+        ])
+        .output()
+        .expect("direct structural-cli");
+    assert!(execution.status.success());
+
+    let checkpoint = fs::read(direct.join("checkpoint.mmcp")).expect("model checkpoint");
+    let mut tampered = checkpoint.clone();
+    let last = tampered.last_mut().expect("nonempty checkpoint");
+    *last ^= 1;
+    let tampered_path = root.join("tampered.mmcp");
+    fs::write(&tampered_path, tampered).expect("tampered checkpoint");
+    let alternate_request = root.join("alternate-request.json");
+    fs::write(&alternate_request, request(&model_bytes, "LC_STRONG")).expect("alternate request");
+
+    for (name, request_path, checkpoint_path) in [
+        ("tampered-output", &first_request, &tampered_path),
+        (
+            "binding-drift-output",
+            &alternate_request,
+            &direct.join("checkpoint.mmcp"),
+        ),
+    ] {
+        let output = root.join(name);
+        let rejected = Command::new(env!("CARGO_BIN_EXE_structural-cli"))
+            .env_clear()
+            .env("PATH", "/nonexistent")
+            .args([
+                "analysis",
+                "model-modal-resume",
+                model_path.to_str().expect("model path"),
+                request_path.to_str().expect("request path"),
+                checkpoint_path.to_str().expect("checkpoint path"),
+                "--output-dir",
+                output.to_str().expect("output path"),
+            ])
+            .output()
+            .expect("reject structural-cli resume");
+        assert!(!rejected.status.success(), "{name} unexpectedly succeeded");
+        assert!(!output.exists(), "{name} published a partial directory");
     }
 
     let _ = fs::remove_dir_all(root);

@@ -41,9 +41,9 @@ pub use model_linear_product::{
     ModelIrLinearCompatibilityV1, ModelIrLinearProductError,
 };
 pub use model_modal_product::{
-    execute_model_ir_modal_analysis, publish_model_ir_modal_analysis,
-    validate_model_ir_modal_analysis_compatibility, ModelIrModalAnalysisOutcomeV1,
-    ModelIrModalCompatibilityV1, ModelIrModalProductError,
+    execute_model_ir_modal_analysis, execute_model_ir_modal_analysis_with_checkpoint,
+    publish_model_ir_modal_analysis, validate_model_ir_modal_analysis_compatibility,
+    ModelIrModalAnalysisOutcomeV1, ModelIrModalCompatibilityV1, ModelIrModalProductError,
 };
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,

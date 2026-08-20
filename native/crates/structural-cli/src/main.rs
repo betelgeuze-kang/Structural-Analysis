@@ -8,9 +8,9 @@ use serde_json::json;
 use structural_cli::{
     contract_error_report, execute_dense_spectral_analysis, execute_external_comparison,
     execute_localized_pdf_report, execute_model_ir_linear_analysis,
-    execute_model_ir_modal_analysis, execute_model_ir_native_analysis, execute_native_analysis,
-    execute_native_mgt_import, execute_nonlinear_static_analysis, execute_pdf_report,
-    execute_sparse_linear_analysis, execute_sparse_linear_localized_pdf_report,
+    execute_model_ir_modal_analysis_with_checkpoint, execute_model_ir_native_analysis,
+    execute_native_analysis, execute_native_mgt_import, execute_nonlinear_static_analysis,
+    execute_pdf_report, execute_sparse_linear_analysis, execute_sparse_linear_localized_pdf_report,
     execute_sparse_linear_pdf_report, publish_dense_spectral_analysis, publish_external_comparison,
     publish_localized_pdf_report, publish_model_ir_linear_analysis,
     publish_model_ir_modal_analysis, publish_model_ir_native_analysis, publish_native_analysis,
@@ -28,6 +28,7 @@ const MAX_MODEL_IR_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_MODEL_LINEAR_CHECKPOINT_BYTES: u64 = 128 * 1024 * 1024;
+const MAX_MODEL_MODAL_CHECKPOINT_BYTES: u64 = 6 * 1024 * 1024;
 const MAX_SPECTRAL_CHECKPOINT_BYTES: u64 = 5 * 1024 * 1024;
 const MAX_SPARSE_REQUEST_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_SPARSE_CHECKPOINT_BYTES: u64 = 68 * 1024 * 1024;
@@ -94,7 +95,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-linear-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-linear-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.mlpcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-modal-run <MODEL.json> <MODAL-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis static-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis static-resume <REQUEST.json> <CHECKPOINT.stacp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli report render-sparse-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job submit-model-linear <MODEL.json> <MODEL-REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-linear-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-linear-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.mlpcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-modal-run <MODEL.json> <MODAL-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-modal-resume <MODEL.json> <MODAL-REQUEST.json> <CHECKPOINT.mmcp> --output-dir <DIR>\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis static-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis static-resume <REQUEST.json> <CHECKPOINT.stacp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli report render-sparse-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job submit-model-linear <MODEL.json> <MODEL-REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     eprintln!("localized PDF option: --locale en-US|ko-KR");
     ExitCode::from(EXIT_USAGE_OR_INVALID)
@@ -250,6 +251,7 @@ struct ModelLinearAnalysisCommand {
 struct ModelModalAnalysisCommand {
     model_path: PathBuf,
     request_path: PathBuf,
+    checkpoint_path: Option<PathBuf>,
     output_directory: PathBuf,
 }
 
@@ -636,7 +638,19 @@ fn run_model_modal_analysis(command: &ModelModalAnalysisCommand) -> ExitCode {
     else {
         return model_modal_analysis_input_failure("request_read_error", "/request");
     };
-    let outcome = match execute_model_ir_modal_analysis(&model_bytes, &request_bytes) {
+    let checkpoint_bytes = if let Some(path) = command.checkpoint_path.as_ref() {
+        let Ok(bytes) = read_bounded_regular_file(path, MAX_MODEL_MODAL_CHECKPOINT_BYTES) else {
+            return model_modal_analysis_input_failure("checkpoint_read_error", "/checkpoint");
+        };
+        Some(bytes)
+    } else {
+        None
+    };
+    let outcome = match execute_model_ir_modal_analysis_with_checkpoint(
+        &model_bytes,
+        &request_bytes,
+        checkpoint_bytes.as_deref(),
+    ) {
         Ok(outcome) => outcome,
         Err(error) => {
             let exit = if error.is_contract_error() {
@@ -1466,21 +1480,32 @@ fn parse_model_linear_analysis_arguments(
 fn parse_model_modal_analysis_arguments(
     arguments: &[OsString],
 ) -> Option<ModelModalAnalysisCommand> {
-    if arguments.len() != 6
-        || arguments[0] != "analysis"
-        || arguments[1] != "model-modal-run"
-        || arguments[2..4]
+    if arguments.first()? != "analysis" {
+        return None;
+    }
+    let (positional_count, checkpoint_index) = if arguments.get(1)? == "model-modal-run" {
+        (4, None)
+    } else if arguments.get(1)? == "model-modal-resume" {
+        (5, Some(4))
+    } else {
+        return None;
+    };
+    if arguments.len() != positional_count + 2
+        || arguments[2..positional_count]
             .iter()
             .any(|value| value.to_string_lossy().starts_with('-'))
-        || arguments[4] != "--output-dir"
-        || arguments[5].to_string_lossy().starts_with('-')
+        || arguments[positional_count] != "--output-dir"
+        || arguments[positional_count + 1]
+            .to_string_lossy()
+            .starts_with('-')
     {
         return None;
     }
     Some(ModelModalAnalysisCommand {
         model_path: PathBuf::from(&arguments[2]),
         request_path: PathBuf::from(&arguments[3]),
-        output_directory: PathBuf::from(&arguments[5]),
+        checkpoint_path: checkpoint_index.map(|index| PathBuf::from(&arguments[index])),
+        output_directory: PathBuf::from(&arguments[positional_count + 1]),
     })
 }
 
@@ -1669,7 +1694,25 @@ mod tests {
             Some(ModelModalAnalysisCommand {
                 model_path: "model.json".into(),
                 request_path: "modal.json".into(),
+                checkpoint_path: None,
                 output_directory: "out".into(),
+            })
+        );
+        assert_eq!(
+            parse_model_modal_analysis_arguments(&args(&[
+                "analysis",
+                "model-modal-resume",
+                "model.json",
+                "modal.json",
+                "checkpoint.mmcp",
+                "--output-dir",
+                "resumed"
+            ])),
+            Some(ModelModalAnalysisCommand {
+                model_path: "model.json".into(),
+                request_path: "modal.json".into(),
+                checkpoint_path: Some("checkpoint.mmcp".into()),
+                output_directory: "resumed".into(),
             })
         );
         assert!(parse_model_modal_analysis_arguments(&args(&[

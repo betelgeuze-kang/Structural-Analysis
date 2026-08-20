@@ -3,9 +3,11 @@
 Status: bounded local CPU implementation evidence
 
 This slice connects the existing typed Frame3D/Truss3D `ModelIR` assembly to the existing ABI
-v1.9 dense modal solver. It is a local C5 product path for at most 128 active DOFs. It does not
-promote the generalized-eigen numerical family beyond C1 and does not claim sparse whole-model,
-linear-buckling, installed-distribution, or engineering authority.
+v1.9 dense modal solver. It is a bounded C5 product path for at most 128 active DOFs, with installed
+static/shared run evidence at distribution v90 and a newer source-level model-bound restart. It
+does not promote the generalized-eigen numerical family beyond C1 and does not claim sparse
+whole-model, linear-buckling, installed restart, public/customer publication, or engineering
+authority.
 
 ## Strict request and assembly boundary
 
@@ -56,17 +58,30 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   analysis model-modal-run model.json request/analysis-request.json --output-dir result
 ~~~
 
+The public model-bound restart reconstructs and verifies the exact model, outer request, ABI
+v1.14 assembly and generated dense request before accepting the embedded ABI v1.9 phase boundary:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  analysis model-modal-resume model.json request/analysis-request.json \
+  result/checkpoint.mmcp --output-dir resumed
+~~~
+
 Publication is create-new and atomic. A successful directory contains:
 
 - the canonical `model-ir.json` and `model-modal-request.json`;
 - `assembly-receipt.json` and `generated-dense-request.json`;
-- the dense phase boundary `checkpoint.eigcp`;
+- the dense phase boundary `checkpoint.eigcp` and outer model-bound `checkpoint.mmcp` envelope;
 - self-hashed `result-ir.json`, `report-ir.json`, and deterministic `report.md`;
 - the nested `dense-run-receipt.json`; and
 - the outer self-hashed `run-receipt.json` binding all prior artifacts.
 
-The checkpoint is matrix-bound but is not yet an outer ModelIR-bound restart contract. This first
-public command therefore exposes run only; `model-modal-resume` is intentionally absent.
+`checkpoint.mmcp` is a pointer-free `SAMMCP01`, aggregate-hashed envelope over the exact content,
+semantic, provenance, analysis-request, assembly, generated-request and embedded dense-checkpoint identities.
+Corruption, truncation, trailing bytes, or drift in any binding fails before native execution or
+publication. Because the dense solve is atomic, this is an honest pre-dispatch phase restart, not
+an invented mid-Jacobi state. Direct and resumed executions publish byte-identical eleven-artifact
+directories.
 
 ## Verification and remaining authority
 
@@ -74,18 +89,20 @@ The focused product case is the repository's two-node Frame3D cantilever: C++ AB
 six active DOFs, Rust adapts the exact `K/M` pair, and ABI v1.9 returns three positive modes whose
 relative residuals satisfy the request tolerance. The first two bending eigenvalues match an
 independent 2x2 closed-form Euler-Bernoulli consistent-mass oracle within `5e-15` relative error.
-Repeated execution with an empty environment
-and unusable `PATH` publishes byte-identical ten-artifact directories with fallback count zero and
-no Python/Node lookup.
-Contract tests cover strict wire rejection, identity drift, excessive mode requests, malformed
-CSR, exact symmetry, artifact self-hashes, and outer model/assembly/generated-request bindings.
+Repeated direct and model-bound resumed execution with an empty environment and unusable `PATH`
+publishes byte-identical eleven-artifact directories with fallback count zero and no Python/Node
+lookup. Contract tests cover strict wire rejection, identity drift, excessive mode requests,
+malformed CSR, exact symmetry, artifact self-hashes, checkpoint corruption, and outer
+model/request/assembly/generated-request bindings. A second load selector that produces the same
+dense K/M request is still rejected, proving the outer checkpoint is not merely matrix-bound.
 The append-only installed static/shared distribution v90 repeats Workbench request authoring and
 the unchanged three-mode CLI execution in an empty `PATH`, binds six request/result/report
 artifact identities, active DOF 6, fallback 0 and unsupported-planar rejection, and requires
 Python/Node lookup 0.
 
 Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
-buckling, shell/nonlinear ModelIR graphs, a ModelIR-bound restart envelope, durable jobs and
-service API, Workbench modal session/result visualization, local rootfs or public/customer
-publication, protected-runner HIP C2, independent broad-corpus engineering validation, and C6
+buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, installed-distribution
+exercise of the model-bound restart, Workbench modal session/result visualization, local rootfs or
+public/customer publication, protected-runner HIP C2, independent broad-corpus engineering
+validation, and C6
 decommission.
