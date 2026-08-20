@@ -476,6 +476,15 @@ separation, session nonmutation and invalid-window rejection, preserves frozen v
 verification, and requires installed distribution v89 authority. Static, shared and isolated paths
 bind the same four Frame3D identities. Truss3D formatting remains source-tested and is not promoted
 to installed or rootfs execution authority.
+Append-only v13 additionally authors the exact six-active-DOF Frame3D modal request, runs and
+resumes the installed CPU CLI to byte-identical eleven-artifact directories, and repeatedly
+renders self-hashed en-US/ko-KR `modal-result-view` output inside the same isolated boundary. The
+installer independently verifies the structural-cli bundle identity, exact request/result
+inventories, strict three-mode ResultIR, completed run receipt, direct/resumed directory and stdout
+parity, view hashes and rows, pre/post-view source equality and fail-closed invalid-window result.
+It preserves frozen v1 through v12 verification and requires installed distribution v91
+authority. This remains a local rootfs diagnostic, not a durable modal session, geometric
+mode-shape, response-spectrum, sparse/buckling, customer-image, HIP C2 or C6 authority.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.

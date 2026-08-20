@@ -4961,6 +4961,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v10",
         "structural-native-rootfs-isolation-e2e.v11",
         "structural-native-rootfs-isolation-e2e.v12",
+        "structural-native-rootfs-isolation-e2e.v13",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -4995,6 +4996,10 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "workbench_linear_element_recovery_view_invalid_window_rejected",
         "inspect_rootfs_linear_element_recovery_view_surface",
         "validate_rootfs_isolation_evidence_v12",
+        "model_ir_modal_checkpoint_sha256",
+        "workbench_model_modal_result_view_en_us_sha256",
+        "inspect_rootfs_model_modal_surface",
+        "validate_rootfs_isolation_evidence_v13",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -5592,6 +5597,14 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--mgt-model-ir-linear-element-recovery-view-en-us-first" in rootfs_e2e
     assert "--mgt-model-ir-linear-element-recovery-view-ko-kr-second" in rootfs_e2e
     assert "--workbench-linear-element-recovery-view-invalid-window-failure" in rootfs_e2e
+    assert "model-create-modal-analysis-request" in rootfs_e2e
+    assert "model-modal-run" in rootfs_e2e
+    assert "model-modal-resume" in rootfs_e2e
+    assert "modal-result-view" in rootfs_e2e
+    assert "--model-modal-direct-root" in rootfs_e2e
+    assert "--model-modal-resumed-root" in rootfs_e2e
+    assert "--model-modal-result-view-en-us-first" in rootfs_e2e
+    assert "--model-modal-result-view-invalid-window-failure" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

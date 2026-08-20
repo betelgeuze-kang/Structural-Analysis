@@ -231,6 +231,17 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--mgt-model-ir-linear-element-recovery-view-ko-kr-first",
             "--mgt-model-ir-linear-element-recovery-view-ko-kr-second",
             "--workbench-linear-element-recovery-view-invalid-window-failure",
+            "--model-modal-request-root",
+            "--model-modal-direct-root",
+            "--model-modal-resumed-root",
+            "--model-modal-view-source-before",
+            "--model-modal-direct-stdout",
+            "--model-modal-resumed-stdout",
+            "--model-modal-result-view-en-us-first",
+            "--model-modal-result-view-en-us-second",
+            "--model-modal-result-view-ko-kr-first",
+            "--model-modal-result-view-ko-kr-second",
+            "--model-modal-result-view-invalid-window-failure",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -431,6 +442,23 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         options,
         "--workbench-linear-element-recovery-view-invalid-window-failure",
     )?;
+    let model_modal_request_root = required_path(options, "--model-modal-request-root")?;
+    let model_modal_direct_root = required_path(options, "--model-modal-direct-root")?;
+    let model_modal_resumed_root = required_path(options, "--model-modal-resumed-root")?;
+    let model_modal_view_source_before =
+        required_path(options, "--model-modal-view-source-before")?;
+    let model_modal_direct_stdout = required_path(options, "--model-modal-direct-stdout")?;
+    let model_modal_resumed_stdout = required_path(options, "--model-modal-resumed-stdout")?;
+    let model_modal_result_view_en_us_first =
+        required_path(options, "--model-modal-result-view-en-us-first")?;
+    let model_modal_result_view_en_us_second =
+        required_path(options, "--model-modal-result-view-en-us-second")?;
+    let model_modal_result_view_ko_kr_first =
+        required_path(options, "--model-modal-result-view-ko-kr-first")?;
+    let model_modal_result_view_ko_kr_second =
+        required_path(options, "--model-modal-result-view-ko-kr-second")?;
+    let model_modal_result_view_invalid_window_failure =
+        required_path(options, "--model-modal-result-view-invalid-window-failure")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -558,6 +586,18 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             &mgt_model_ir_linear_element_recovery_view_ko_kr_second,
         workbench_linear_element_recovery_view_invalid_window_failure:
             &workbench_linear_element_recovery_view_invalid_window_failure,
+        model_modal_request_root: &model_modal_request_root,
+        model_modal_direct_root: &model_modal_direct_root,
+        model_modal_resumed_root: &model_modal_resumed_root,
+        model_modal_view_source_before: &model_modal_view_source_before,
+        model_modal_direct_stdout: &model_modal_direct_stdout,
+        model_modal_resumed_stdout: &model_modal_resumed_stdout,
+        model_modal_result_view_en_us_first: &model_modal_result_view_en_us_first,
+        model_modal_result_view_en_us_second: &model_modal_result_view_en_us_second,
+        model_modal_result_view_ko_kr_first: &model_modal_result_view_ko_kr_first,
+        model_modal_result_view_ko_kr_second: &model_modal_result_view_ko_kr_second,
+        model_modal_result_view_invalid_window_failure:
+            &model_modal_result_view_invalid_window_failure,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,

@@ -192,6 +192,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "ABI v1.9" in modelir_modal["claim"]
     assert "installed static/shared distribution v91" in modelir_modal["claim"]
     assert "direct/resumed eleven-artifact outputs" in modelir_modal["claim"]
+    assert "local rootfs diagnostic v13 independently binds" in modelir_modal["claim"]
     assert "linear buckling" in modelir_modal["claim"]
     assert "HIP C2" in modelir_modal["claim"]
     assert "C6" in modelir_modal["claim"]
@@ -207,6 +208,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "execution_started false" in modal_authoring["claim"]
     assert "installed static/shared distribution v91" in modal_authoring["claim"]
     assert "direct/resumed execution and read-only modal result views" in modal_authoring["claim"]
+    assert "local rootfs diagnostic v13 repeats" in modal_authoring["claim"]
     assert "HIP C2" in modal_authoring["claim"]
     assert "C6" in modal_authoring["claim"]
     assert capabilities.capability_is_enabled(payload, "modelir_modal_result_view") is True
@@ -217,6 +219,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "exact eleven-artifact" in modal_result_view["claim"]
     assert "installed static/shared distribution v91" in modal_result_view["claim"]
     assert "source nonmutation and invalid-window rejection" in modal_result_view["claim"]
+    assert "local rootfs diagnostic v13 independently re-verifies" in modal_result_view["claim"]
     assert "HIP C2" in modal_result_view["claim"]
     assert "C6" in modal_result_view["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
@@ -1760,24 +1763,26 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v12 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "v13 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
     assert "algebraic reaction audits" in deployment["claim"]
     assert "bounded nodal-displacement views" in deployment["claim"]
     assert "bounded linear deformed views" in deployment["claim"]
     assert "Frame3D element-local end-force views" in deployment["claim"]
     assert "Truss3D installed execution explicitly open" in deployment["claim"]
+    assert "byte-identical eleven-artifact modal direct/resumed output" in deployment["claim"]
+    assert "self-hashed en-US/ko-KR modal result views" in deployment["claim"]
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v11 rootfs receipts" in deployment["claim"]
+    assert "frozen v1 through v12 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v12"
+        == "structural-native-rootfs-isolation-e2e.v13"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v11"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v12"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v89"
+        == "structural-native-distribution-e2e.v91"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

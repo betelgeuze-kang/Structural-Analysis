@@ -336,6 +336,49 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/linear-element-recovery-view-invalid-window-stderr.txt
+    /opt/payload/bin/structural-workbench model-create-modal-analysis-request "$8" \
+      --case rootfs-frame-modal-c5 --assembly-load-pattern LC_WEAK \
+      --mode-count 3 --maximum-sweeps 4096 \
+      --symmetry-relative-tolerance 1e-12 \
+      --positive-semidefinite-relative-tolerance 1e-12 \
+      --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+      --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+      --eigensolver-relative-tolerance 1e-12 \
+      --output-dir /mnt/model-modal-request \
+      > /mnt/model-modal-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-modal-run "$8" \
+      /mnt/model-modal-request/analysis-request.json \
+      --output-dir /mnt/model-modal-direct \
+      > /mnt/model-modal-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-modal-resume "$8" \
+      /mnt/model-modal-request/analysis-request.json \
+      /mnt/model-modal-direct/checkpoint.mmcp \
+      --output-dir /mnt/model-modal-resumed \
+      > /mnt/model-modal-resumed.stdout.json
+    /usr/bin/diff -r /mnt/model-modal-direct /mnt/model-modal-resumed
+    /usr/bin/cmp /mnt/model-modal-direct.stdout.json /mnt/model-modal-resumed.stdout.json
+    /bin/cp -a /mnt/model-modal-direct /mnt/model-modal-view-source-before
+    for locale in en-US ko-KR; do
+      for repeat in first second; do
+        /opt/payload/bin/structural-workbench modal-result-view \
+          /mnt/model-modal-direct --locale "$locale" --count 16 \
+          > "/mnt/model-modal-result-view-$locale-$repeat.txt"
+      done
+      /usr/bin/cmp "/mnt/model-modal-result-view-$locale-first.txt" \
+        "/mnt/model-modal-result-view-$locale-second.txt"
+    done
+    if /usr/bin/cmp -s /mnt/model-modal-result-view-en-US-first.txt \
+      /mnt/model-modal-result-view-ko-KR-first.txt; then
+      exit 1
+    fi
+    if /opt/payload/bin/structural-workbench modal-result-view \
+      /mnt/model-modal-direct --start-mode 4 --count 1 \
+      > /mnt/model-modal-result-view-invalid-window-failure.json \
+      2> /mnt/model-modal-result-view-invalid-window-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-modal-result-view-invalid-window-stderr.txt
+    /usr/bin/diff -r /mnt/model-modal-view-source-before /mnt/model-modal-direct
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -491,6 +534,22 @@ unshare -Urn bwrap \
         /mnt/mgt-model-ir-linear-element-recovery-view-ko-KR-second.txt \
       --workbench-linear-element-recovery-view-invalid-window-failure \
         /mnt/linear-element-recovery-view-invalid-window-failure.json \
+      --model-modal-request-root /mnt/model-modal-request \
+      --model-modal-direct-root /mnt/model-modal-direct \
+      --model-modal-resumed-root /mnt/model-modal-resumed \
+      --model-modal-view-source-before /mnt/model-modal-view-source-before \
+      --model-modal-direct-stdout /mnt/model-modal-direct.stdout.json \
+      --model-modal-resumed-stdout /mnt/model-modal-resumed.stdout.json \
+      --model-modal-result-view-en-us-first \
+        /mnt/model-modal-result-view-en-US-first.txt \
+      --model-modal-result-view-en-us-second \
+        /mnt/model-modal-result-view-en-US-second.txt \
+      --model-modal-result-view-ko-kr-first \
+        /mnt/model-modal-result-view-ko-KR-first.txt \
+      --model-modal-result-view-ko-kr-second \
+        /mnt/model-modal-result-view-ko-KR-second.txt \
+      --model-modal-result-view-invalid-window-failure \
+        /mnt/model-modal-result-view-invalid-window-failure.json \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

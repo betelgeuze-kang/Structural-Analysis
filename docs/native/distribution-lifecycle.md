@@ -894,6 +894,14 @@ absence, proves repeated en-US/ko-KR determinism, four-way locale/profile separa
 session nonmutation and fail-closed invalid-window rejection. The installer continues to verify
 frozen v1 through v11 receipts; only v12 requires installed Frame3D element-recovery evidence.
 Truss3D formatting remains source-tested and outside this installed rootfs authority.
+The append-only v13 receipt additionally runs installed Workbench modal request authoring,
+installed CLI direct execution and exact model-bound checkpoint resume, then repeated installed
+en-US/ko-KR modal result views inside the UID/GID 65532 rootfs boundary. The installer verifies the
+structural-cli bundle identity, exact two-artifact request and eleven-artifact result inventories,
+strict three-mode CPU ResultIR, completed run receipt, byte-identical direct/resumed directories
+and stdout, localized view self-hashes and rows, result-directory nonmutation and fail-closed
+invalid-window rejection. It continues to verify frozen v1 through v12 rootfs receipts; only v13
+requires isolated installed ModelIR modal restart and result-view evidence.
 
 The installed flows remain the exact bounded ModelIR/NDTHA, normalized-MGT-to-NDTHA,
 frame3d/truss3d ModelIR-linear and normalized cantilever-MGT-to-ModelIR-linear Workbench profiles.
