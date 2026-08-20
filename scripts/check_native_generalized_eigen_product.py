@@ -245,7 +245,7 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
             "execution_started false",
             "ABI v1.9",
             "Python/Node-free",
-            "installed distribution",
+            "installed static/shared distribution v90",
             "HIP C2",
             "C6",
         ),

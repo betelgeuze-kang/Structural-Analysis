@@ -79,8 +79,13 @@ and unusable `PATH` publishes byte-identical ten-artifact directories with fallb
 no Python/Node lookup.
 Contract tests cover strict wire rejection, identity drift, excessive mode requests, malformed
 CSR, exact symmetry, artifact self-hashes, and outer model/assembly/generated-request bindings.
+The append-only installed static/shared distribution v90 repeats Workbench request authoring and
+the unchanged three-mode CLI execution in an empty `PATH`, binds six request/result/report
+artifact identities, active DOF 6, fallback 0 and unsupported-planar rejection, and requires
+Python/Node lookup 0.
 
 Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
 buckling, shell/nonlinear ModelIR graphs, a ModelIR-bound restart envelope, durable jobs and
-service API, Workbench and installed distribution integration, protected-runner HIP C2,
-independent broad-corpus engineering validation, and C6 decommission.
+service API, Workbench modal session/result visualization, local rootfs or public/customer
+publication, protected-runner HIP C2, independent broad-corpus engineering validation, and C6
+decommission.

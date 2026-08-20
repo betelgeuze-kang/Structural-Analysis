@@ -190,6 +190,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "typed-ModelIR frame3d/truss3d CPU modal" in modelir_modal["claim"]
     assert "ABI v1.14" in modelir_modal["claim"]
     assert "ABI v1.9" in modelir_modal["claim"]
+    assert "installed static/shared distribution v90" in modelir_modal["claim"]
     assert "linear buckling" in modelir_modal["claim"]
     assert "HIP C2" in modelir_modal["claim"]
     assert "C6" in modelir_modal["claim"]
@@ -203,7 +204,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "ABI v1.14" in modal_authoring["claim"]
     assert "ABI v1.9" in modal_authoring["claim"]
     assert "execution_started false" in modal_authoring["claim"]
-    assert "installed distribution" in modal_authoring["claim"]
+    assert "installed static/shared distribution v90" in modal_authoring["claim"]
     assert "HIP C2" in modal_authoring["claim"]
     assert "C6" in modal_authoring["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
@@ -1633,18 +1634,21 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v87 binds deterministic installed strict-ModelIR" in distribution["claim"]
     assert "append-only v88 binds deterministic installed strict-ModelIR" in distribution["claim"]
     assert "append-only v89 binds deterministic installed strict-ModelIR" in distribution["claim"]
+    assert "append-only v90 binds deterministic installed Workbench ModelIR modal" in distribution["claim"]
     assert "Frame3D element-local end-force views" in distribution["claim"]
+    assert "unchanged installed CLI execution to three modes" in distribution["claim"]
+    assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v88 receipts" in distribution["claim"]
+    assert "frozen v1 through v89 receipts" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v89"
+        == "structural-native-distribution-e2e.v90"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v88"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v89"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1681,6 +1685,14 @@ def test_native_distribution_capability_is_bounded_c5():
         "model_ir_linear_element_recovery_view_ko_kr_sha256",
         "mgt_model_ir_linear_element_recovery_view_en_us_sha256",
         "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256",
+    ]
+    assert distribution_evidence["model_ir_modal_hash_fields"] == [
+        "model_ir_modal_request_sha256",
+        "workbench_model_modal_request_receipt_sha256",
+        "model_ir_modal_result_ir_sha256",
+        "model_ir_modal_report_ir_sha256",
+        "model_ir_modal_markdown_sha256",
+        "model_ir_modal_run_receipt_sha256",
     ]
     assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False

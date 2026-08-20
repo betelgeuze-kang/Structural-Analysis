@@ -283,7 +283,7 @@ fn build_run_receipt(
         "dense_checkpoint": spectral.checkpoint_receipt(),
         "artifacts": artifacts,
         "fallback_count": 0,
-        "claim_boundary": "bounded_local_frame3d_truss3d_modelir_cpu_modal_product_max_128_active_dofs_not_sparse_buckling_shell_nonlinear_durable_service_distribution_hip_or_engineering_acceptance",
+        "claim_boundary": "bounded_local_frame3d_truss3d_modelir_cpu_modal_product_max_128_active_dofs_not_sparse_buckling_shell_nonlinear_durable_service_public_customer_distribution_publication_hip_or_engineering_acceptance",
         "receipt_hash": ""
     });
     value_self_hash(&mut receipt)?;

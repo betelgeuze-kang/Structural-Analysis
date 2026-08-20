@@ -1042,6 +1042,22 @@ V89_LINEAR_ELEMENT_RECOVERY_VIEW_KEYS = {
     "workbench_linear_element_recovery_view_invalid_window_rejected",
 }
 V89_EXPECTED_KEYS = V88_EXPECTED_KEYS | V89_LINEAR_ELEMENT_RECOVERY_VIEW_KEYS
+V90_MODEL_IR_MODAL_KEYS = {
+    "workbench_model_modal_request_create_surface_passed",
+    "model_ir_modal_product_surface_passed",
+    "model_ir_modal_repeat_bitwise_passed",
+    "workbench_model_modal_unsupported_planar_rejected",
+    "model_ir_modal_mode_count",
+    "model_ir_modal_active_dof_count",
+    "model_ir_modal_fallback_count",
+    "model_ir_modal_request_sha256",
+    "workbench_model_modal_request_receipt_sha256",
+    "model_ir_modal_result_ir_sha256",
+    "model_ir_modal_report_ir_sha256",
+    "model_ir_modal_markdown_sha256",
+    "model_ir_modal_run_receipt_sha256",
+}
+V90_EXPECTED_KEYS = V89_EXPECTED_KEYS | V90_MODEL_IR_MODAL_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1083,6 +1099,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v90_receipt = receipt_schema_version == "structural-native-distribution-e2e.v90"
+    if is_v90_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v89"
     is_v89_receipt = receipt_schema_version == "structural-native-distribution-e2e.v89"
     if is_v89_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v88"
@@ -1413,6 +1432,7 @@ def validate(
         "structural-native-distribution-e2e.v87": V87_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v88": V88_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v89": V89_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v90": V90_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1553,6 +1573,41 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v90_receipt:
+        for name in (
+            "workbench_model_modal_request_create_surface_passed",
+            "model_ir_modal_product_surface_passed",
+            "model_ir_modal_repeat_bitwise_passed",
+            "workbench_model_modal_unsupported_planar_rejected",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name, expected in (
+            ("model_ir_modal_mode_count", 3),
+            ("model_ir_modal_active_dof_count", 6),
+            ("model_ir_modal_fallback_count", 0),
+        ):
+            if payload.get(name) != expected:
+                errors.append(f"{name} must be {expected}")
+        hash_names = (
+            "model_ir_modal_request_sha256",
+            "workbench_model_modal_request_receipt_sha256",
+            "model_ir_modal_result_ir_sha256",
+            "model_ir_modal_report_ir_sha256",
+            "model_ir_modal_markdown_sha256",
+            "model_ir_modal_run_receipt_sha256",
+        )
+        modal_identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                modal_identities.append(identity)
+        if len(modal_identities) == len(hash_names) and len(set(modal_identities)) != len(
+            hash_names
+        ):
+            errors.append("all installed ModelIR modal artifact identities must differ")
     if is_v89_receipt:
         for name in (
             "model_ir_linear_element_recovery_view_surface_passed",

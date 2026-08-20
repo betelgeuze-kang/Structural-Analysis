@@ -189,6 +189,89 @@ exercise_model_linear_request_create_surface() {
 }
 
 exercise_model_linear_request_create_surface
+
+exercise_model_ir_modal_installed_surface() {
+  local linear_model_before_hash label request_directory execution_directory artifact
+  linear_model_before_hash="$(sha256sum "$linear_model" | awk '{print $1}')"
+  for label in first second; do
+    request_directory="$e2e_root/model-modal-request-create-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-modal-analysis-request "$linear_model" \
+      --case model-frame-modal-c5 --assembly-load-pattern LC_WEAK \
+      --mode-count 3 --maximum-sweeps 4096 \
+      --symmetry-relative-tolerance 1e-12 \
+      --positive-semidefinite-relative-tolerance 1e-12 \
+      --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+      --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+      --eigensolver-relative-tolerance 1e-12 --output-dir "$request_directory" \
+      > "$e2e_root/model-modal-request-create-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-modal-request-create-receipt.v1"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"cpp_active_k_m_assembly_preflight_verified":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"active_dof_count":6' "$request_directory/request-receipt.json"
+    grep -Fq '"load_vector_consumed_by_modal":false' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"execution_started":false' "$request_directory/request-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$request_directory/request-receipt.json"
+
+    execution_directory="$e2e_root/model-modal-run-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-modal-run \
+      "$linear_model" "$request_directory/analysis-request.json" \
+      --output-dir "$execution_directory" \
+      > "$e2e_root/model-modal-run-$label.stdout.json"
+    for artifact in \
+      assembly-receipt.json checkpoint.eigcp dense-run-receipt.json \
+      generated-dense-request.json model-ir.json model-modal-request.json \
+      report-ir.json report.md result-ir.json run-receipt.json; do
+      test -f "$execution_directory/$artifact"
+    done
+    grep -Fq '"schema_version":"structural-dense-spectral-result-ir.v1"' \
+      "$execution_directory/result-ir.json"
+    grep -Fq '"mode_count":3' "$execution_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$execution_directory/result-ir.json"
+    grep -Fq '"schema_version":"structural-model-ir-modal-run-receipt.v1"' \
+      "$execution_directory/run-receipt.json"
+    grep -Fq '"status":"completed"' "$execution_directory/run-receipt.json"
+    grep -Fq '"fallback_count":0' "$execution_directory/run-receipt.json"
+  done
+  diff -r "$e2e_root/model-modal-request-create-first" \
+    "$e2e_root/model-modal-request-create-second" \
+    > "$e2e_root/model-modal-request-create-diff.txt"
+  cmp "$e2e_root/model-modal-request-create-first.stdout.json" \
+    "$e2e_root/model-modal-request-create-second.stdout.json"
+  diff -r "$e2e_root/model-modal-run-first" "$e2e_root/model-modal-run-second" \
+    > "$e2e_root/model-modal-run-diff.txt"
+  cmp "$e2e_root/model-modal-run-first.stdout.json" \
+    "$e2e_root/model-modal-run-second.stdout.json"
+  if [[ "$(sha256sum "$linear_model" | awk '{print $1}')" != "$linear_model_before_hash" ]]; then
+    echo "installed ModelIR modal authoring or execution mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+    model-create-modal-analysis-request \
+    "$repository_root/examples/bounded_planar_frame_alpha.model-ir.v2.json" \
+    --case unsupported-planar-modal --assembly-load-pattern LP1 \
+    --mode-count 1 --maximum-sweeps 64 \
+    --symmetry-relative-tolerance 1e-12 \
+    --positive-semidefinite-relative-tolerance 1e-12 \
+    --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+    --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+    --eigensolver-relative-tolerance 1e-12 \
+    --output-dir "$e2e_root/model-modal-unsupported-planar" \
+    > "$e2e_root/model-modal-unsupported-planar-rejected.json"; then
+    echo "installed ModelIR modal request creation accepted unsupported planar/profile input" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_model_linear_request_load_pattern_unsupported' \
+    "$e2e_root/model-modal-unsupported-planar-rejected.json"
+}
+
+exercise_model_ir_modal_installed_surface
+modal_request_directory="$e2e_root/model-modal-request-create-first"
+modal_execution_directory="$e2e_root/model-modal-run-first"
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10305,6 +10388,12 @@ linear_deformed_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-deformed
 linear_deformed_view_projection_hash="$(sha256sum "$e2e_root/model-ir-linear-deformed-view-projection.txt" | awk '{print $1}')"
 linear_element_recovery_view_en_us_hash="$(sha256sum "$e2e_root/model-ir-linear-element-recovery-view-en-US-first.txt" | awk '{print $1}')"
 linear_element_recovery_view_ko_kr_hash="$(sha256sum "$e2e_root/model-ir-linear-element-recovery-view-ko-KR-first.txt" | awk '{print $1}')"
+model_modal_request_hash="$(sha256sum "$modal_request_directory/analysis-request.json" | awk '{print $1}')"
+model_modal_request_receipt_hash="$(sha256sum "$modal_request_directory/request-receipt.json" | awk '{print $1}')"
+model_modal_result_hash="$(sha256sum "$modal_execution_directory/result-ir.json" | awk '{print $1}')"
+model_modal_report_ir_hash="$(sha256sum "$modal_execution_directory/report-ir.json" | awk '{print $1}')"
+model_modal_markdown_hash="$(sha256sum "$modal_execution_directory/report.md" | awk '{print $1}')"
+model_modal_run_receipt_hash="$(sha256sum "$modal_execution_directory/run-receipt.json" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11166,6 +11255,10 @@ v89_receipt_json="${v88_receipt_json/structural-native-distribution-e2e.v88/stru
 linear_element_recovery_view_receipt_fields="\"model_ir_linear_element_recovery_view_surface_passed\":true,\"model_ir_linear_element_recovery_view_restart_parity_passed\":true,\"model_ir_linear_element_recovery_view_en_us_sha256\":\"sha256:$linear_element_recovery_view_en_us_hash\",\"model_ir_linear_element_recovery_view_ko_kr_sha256\":\"sha256:$linear_element_recovery_view_ko_kr_hash\",\"mgt_model_ir_linear_element_recovery_view_surface_passed\":true,\"mgt_model_ir_linear_element_recovery_view_restart_parity_passed\":true,\"mgt_model_ir_linear_element_recovery_view_en_us_sha256\":\"sha256:$mgt_linear_element_recovery_view_en_us_hash\",\"mgt_model_ir_linear_element_recovery_view_ko_kr_sha256\":\"sha256:$mgt_linear_element_recovery_view_ko_kr_hash\",\"workbench_linear_element_recovery_view_invalid_window_rejected\":true,"
 v89_receipt_json="${v89_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_element_recovery_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v89_receipt_json" > "$temporary_receipt"
+v90_receipt_json="${v89_receipt_json/structural-native-distribution-e2e.v89/structural-native-distribution-e2e.v90}"
+model_modal_receipt_fields="\"workbench_model_modal_request_create_surface_passed\":true,\"model_ir_modal_product_surface_passed\":true,\"model_ir_modal_repeat_bitwise_passed\":true,\"workbench_model_modal_unsupported_planar_rejected\":true,\"model_ir_modal_mode_count\":3,\"model_ir_modal_active_dof_count\":6,\"model_ir_modal_fallback_count\":0,\"model_ir_modal_request_sha256\":\"sha256:$model_modal_request_hash\",\"workbench_model_modal_request_receipt_sha256\":\"sha256:$model_modal_request_receipt_hash\",\"model_ir_modal_result_ir_sha256\":\"sha256:$model_modal_result_hash\",\"model_ir_modal_report_ir_sha256\":\"sha256:$model_modal_report_ir_hash\",\"model_ir_modal_markdown_sha256\":\"sha256:$model_modal_markdown_hash\",\"model_ir_modal_run_receipt_sha256\":\"sha256:$model_modal_run_receipt_hash\","
+v90_receipt_json="${v90_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v90_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

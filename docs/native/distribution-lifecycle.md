@@ -665,13 +665,22 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    distinct locale/profile identities. Static and shared receipts are hosted CPU C5 evidence with
    Python/Node lookup 0 and fallback 0. Truss3D formatting remains source-tested and is not
    independently exercised by v89.
+104. runs installed `structural-workbench model-create-modal-analysis-request` twice for the exact
+   six-active-DOF Frame3D cantilever and executes each unchanged request through installed
+   `structural-cli analysis model-modal-run`, verifies byte-identical request and ten-artifact
+   result directories, three modes, active DOF 6, fallback 0, source nonmutation and fail-closed
+   unsupported-planar assembly, then emits append-only v90 binding the request, request receipt,
+   ResultIR, ReportIR, Markdown and run-receipt identities. Static and shared receipts remain
+   hosted CPU C5 evidence with Python/Node lookup 0; this is not sparse/buckling authority, local
+   rootfs or public/customer publication, HIP C2, an engineering verdict or C6.
 
-   The receipt checker continues to accept frozen v1 through v88 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v89 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
-   pre-v88 receipt is installed ModelIR-linear deformed-view authority, and no pre-v89 receipt is
-   installed ModelIR-linear element-recovery-view authority. Its explicit compatibility
+   pre-v88 receipt is installed ModelIR-linear deformed-view authority, no pre-v89 receipt is
+   installed ModelIR-linear element-recovery-view authority, and no pre-v90 receipt is
+   installed Workbench-authored ModelIR modal product authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,

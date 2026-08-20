@@ -2073,6 +2073,31 @@ def valid_v89_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v90_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v89_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v90",
+            "workbench_model_modal_request_create_surface_passed": True,
+            "model_ir_modal_product_surface_passed": True,
+            "model_ir_modal_repeat_bitwise_passed": True,
+            "workbench_model_modal_unsupported_planar_rejected": True,
+            "model_ir_modal_mode_count": 3,
+            "model_ir_modal_active_dof_count": 6,
+            "model_ir_modal_fallback_count": 0,
+            "model_ir_modal_request_sha256": "sha256:" + "3" * 63 + "1",
+            "workbench_model_modal_request_receipt_sha256": "sha256:"
+            + "3" * 63
+            + "2",
+            "model_ir_modal_result_ir_sha256": "sha256:" + "3" * 63 + "3",
+            "model_ir_modal_report_ir_sha256": "sha256:" + "3" * 63 + "4",
+            "model_ir_modal_markdown_sha256": "sha256:" + "3" * 63 + "5",
+            "model_ir_modal_run_receipt_sha256": "sha256:" + "3" * 63 + "6",
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4802,6 +4827,51 @@ def test_distribution_receipt_rejects_colliding_v89_element_recovery_identities(
     )
 
 
+def test_distribution_receipt_accepts_model_ir_modal_v90_contract(tmp_path: Path):
+    receipt, manifest = valid_v90_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v90_model_ir_modal_product(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v90_contract()
+    receipt["model_ir_modal_repeat_bitwise_passed"] = False
+    receipt["model_ir_modal_mode_count"] = 2
+    receipt["model_ir_modal_result_ir_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "model_ir_modal_repeat_bitwise_passed" in error
+        for error in validation["errors"]
+    )
+    assert any("model_ir_modal_mode_count" in error for error in validation["errors"])
+    assert any(
+        "model_ir_modal_result_ir_sha256" in error for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_colliding_v90_model_ir_modal_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v90_contract()
+    receipt["model_ir_modal_report_ir_sha256"] = receipt[
+        "model_ir_modal_result_ir_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR modal artifact identities must differ" in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_runtime_and_manifest_drift(tmp_path: Path):
     receipt, manifest = valid_contract()
     receipt["node_lookup_count"] = 1
@@ -5383,6 +5453,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "mgt_model_ir_linear_element_recovery_view_en_us_sha256" in e2e
     assert "mgt_model_ir_linear_element_recovery_view_ko_kr_sha256" in e2e
     assert "workbench_linear_element_recovery_view_invalid_window_rejected" in e2e
+    assert "structural-native-distribution-e2e.v90" in e2e
+    assert "exercise_model_ir_modal_installed_surface" in e2e
+    assert "model-create-modal-analysis-request" in e2e
+    assert "model-modal-run" in e2e
+    assert "workbench_model_modal_request_create_surface_passed" in e2e
+    assert "model_ir_modal_product_surface_passed" in e2e
+    assert "model_ir_modal_repeat_bitwise_passed" in e2e
+    assert "workbench_model_modal_unsupported_planar_rejected" in e2e
+    assert "model_ir_modal_result_ir_sha256" in e2e
+    assert "model_ir_modal_run_receipt_sha256" in e2e
     assert "workbench_fixed_constraint_identity_cascade_edit_restart_passed" in e2e
     assert "exercise_model_linear_request_create_surface" in e2e
     assert "model-create-linear-analysis-request" in e2e
