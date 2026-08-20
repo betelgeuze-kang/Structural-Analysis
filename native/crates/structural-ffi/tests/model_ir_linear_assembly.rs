@@ -4,7 +4,7 @@ use std::thread;
 
 use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
-use structural_ffi::{Api, ModelIrLinearAssemblyRequest};
+use structural_ffi::{Api, ModelIrLinearAssemblyRequest, ModelIrLinearReactionRequest};
 use structural_ffi_sys::{
     SA_ABI_V1_13, SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU, SA_ELEMENT_FRAME_3D,
     SA_ERR_INVALID_ARGUMENT, SA_ERR_RESIDUAL_LIMIT, SA_ERR_UNSUPPORTED, SA_EXECUTION_BACKEND_CPU,
@@ -55,6 +55,14 @@ fn singular_release_fixture() -> ModelIrV2Document {
     value["elements"][0]["releases"]["j"] = json!(["UX"]);
     parse_model_ir_v2(&serde_json::to_vec(&value).expect("singular release fixture JSON"))
         .expect("strict singular release fixture")
+}
+
+fn self_weight_fixture() -> ModelIrV2Document {
+    let mut value = fixture().value().clone();
+    value["load_patterns"][1]["self_weight"] = json!([0.0, 0.0, -1.0]);
+    value["load_patterns"][1]["nodal_loads"] = json!([]);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("self-weight fixture JSON"))
+        .expect("strict self-weight fixture")
 }
 
 #[test]
@@ -190,6 +198,46 @@ fn safe_wrapper_preserves_frame3d_end_releases_through_native_assembly() {
     assert_eq!(released.model_content_hash, released_source.content_hash());
     assert_eq!(released.execution_backend, SA_EXECUTION_BACKEND_CPU);
     assert_eq!(released.fallback_count, 0);
+}
+
+#[test]
+fn safe_wrapper_assembles_frame3d_self_weight_and_reactions_deterministically() {
+    let source = self_weight_fixture();
+    let api = Api::load_model_ir_linear_reactions().expect("v1.14 API");
+    let model = api
+        .create_model_ir(&source)
+        .expect("self-weight native model");
+    let request = ModelIrLinearAssemblyRequest {
+        load_pattern_id: "LC_WEAK".to_owned(),
+        displacement: vec![0.0; 12],
+        direction: vec![0.0; 12],
+    };
+    let assembly = model
+        .assemble_linear_reference(&request)
+        .expect("self-weight assembly");
+    let repeated = model
+        .assemble_linear_reference(&request)
+        .expect("deterministic self-weight repeat");
+    assert_eq!(assembly, repeated);
+    assert_eq!(assembly.external_load[0].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(assembly.external_load[1].to_bits(), 0.0_f64.to_bits());
+    assert!((assembly.external_load[2] - -1_539.644_05).abs() <= 1.0e-10);
+    assert_eq!(assembly.external_load[3].to_bits(), 0.0_f64.to_bits());
+    assert!((assembly.external_load[4] - -513.214_683_333_333_3).abs() <= 1.0e-10);
+    assert_eq!(assembly.external_load[5].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(assembly.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(assembly.fallback_count, 0);
+
+    let reactions = model
+        .recover_linear_reactions(&ModelIrLinearReactionRequest {
+            load_pattern_id: "LC_WEAK".to_owned(),
+            displacement: vec![0.0; 12],
+        })
+        .expect("self-weight constrained reactions");
+    assert!((reactions.reactions[2] - 1_539.644_05).abs() <= 1.0e-10);
+    assert!((reactions.reactions[4] - -513.214_683_333_333_3).abs() <= 1.0e-10);
+    assert_eq!(reactions.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(reactions.fallback_count, 0);
 }
 
 #[test]

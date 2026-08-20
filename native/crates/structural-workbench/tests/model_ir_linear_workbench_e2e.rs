@@ -394,6 +394,108 @@ fn prepare_release_inputs(root: &Path) -> Inputs {
     }
 }
 
+fn prepare_self_weight_inputs(root: &Path) -> Inputs {
+    let repository = repository_root();
+    let baseline = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let baseline_request =
+        repository.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let mut model_value: Value =
+        serde_json::from_slice(&fs::read(baseline).expect("baseline ModelIR fixture"))
+            .expect("baseline ModelIR JSON");
+    model_value["model_id"] = json!("engine-v2-frame-cantilever-self-weight-workbench");
+    model_value["load_patterns"][1]["self_weight"] = json!([0.0, 0.0, -1.0]);
+    model_value["load_patterns"][1]["nodal_loads"] = json!([]);
+    let model = root.join("frame-self-weight-model-ir.json");
+    fs::write(
+        &model,
+        canonicalize_model_ir_v2(&model_value).expect("canonical self-weight ModelIR"),
+    )
+    .expect("self-weight ModelIR fixture");
+
+    let model_bytes = fs::read(&model).expect("self-weight ModelIR bytes");
+    let parsed_model = parse_model_ir_v2(&model_bytes).expect("strict self-weight ModelIR");
+    let mut request_value: Value = serde_json::from_slice(
+        &fs::read(&baseline_request).expect("baseline linear request fixture"),
+    )
+    .expect("baseline linear request JSON");
+    request_value["model_identity"] = json!({
+        "content_hash": parsed_model.content_hash(),
+        "semantic_hash": parsed_model.semantic_hash(),
+        "provenance_hash": parsed_model.provenance_hash()
+    });
+    let request = root.join("frame-self-weight-request.json");
+    fs::write(
+        &request,
+        canonicalize_model_ir_v2(&request_value).expect("canonical self-weight request"),
+    )
+    .expect("self-weight request fixture");
+    let request_bytes = fs::read(&request).expect("self-weight request fixture");
+    let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct self-weight terminal result");
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct self-weight recovery IR"),
+    )
+    .expect("self-weight recovery JSON");
+    let expected_tip_uz = -0.000_192_455_506_25_f64;
+    assert!(
+        (recovery["global_displacement"][8]
+            .as_f64()
+            .expect("self-weight node 2 UZ displacement")
+            - expected_tip_uz)
+            .abs()
+            <= 1.0e-15
+    );
+    let source_bytes =
+        b"Euler-Bernoulli cantilever self-weight oracle: wL^4/(8EI), g=9.80665 m/s^2\n";
+    let source = root.join("self-weight-linear-oracle.txt");
+    fs::write(&source, source_bytes).expect("self-weight source artifact");
+    let external = root.join("self-weight-linear-external.json");
+    fs::write(
+        &external,
+        serde_json::to_vec(&json!({
+            "schema_version": "structural-model-ir-linear-external-result.v1",
+            "comparison_id": "workbench-model-linear-self-weight-c5",
+            "source": {
+                "solver_family": "reference_oracle",
+                "solver_version": "euler-bernoulli-self-weight-v1",
+                "run_id": "workbench-model-linear-self-weight-run",
+                "evidence_kind": "language_neutral_golden",
+                "source_artifact_hash": sha256_identity(source_bytes),
+                "executable_hash": null
+            },
+            "binding": {
+                "analysis_kind": "model_ir_linear_static",
+                "case_id": recovery["case_id"],
+                "model_identity": recovery["model_identity"],
+                "analysis_request_hash": recovery["analysis_request_hash"],
+                "load_pattern_id": recovery["load_pattern_id"],
+                "coordinate_frame": "model_global"
+            },
+            "observations": [{
+                "observation_id": "self-weight-cantilever-tip-uz",
+                "external_location_id": "node/N2/UZ",
+                "global_dof_index": 8,
+                "dof": "UZ",
+                "native_result_path": "/global_displacement/8",
+                "unit": "m",
+                "value": expected_tip_uz,
+                "tolerance": {"absolute": 1.0e-15, "relative": 1.0e-12}
+            }]
+        }))
+        .expect("self-weight external result JSON"),
+    )
+    .expect("self-weight external result");
+    Inputs {
+        model,
+        request,
+        external,
+        source,
+    }
+}
+
 fn prepare_mgt_inputs() -> MgtInputs {
     let repository = repository_root();
     let source_mgt =
@@ -2287,6 +2389,126 @@ fn frame3d_end_releases_survive_workbench_restart_and_result_surfaces() {
         element.contains("i_MY_N_m=+0.00000000000000000e0"),
         "{element}"
     );
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn frame3d_self_weight_survives_workbench_restart_and_result_surfaces() {
+    let root = temporary_root("self-weight");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_self_weight_inputs(&root);
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    assert_success(&run_workbench(&import_arguments(&inputs, &restarted)));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted self-weight artifact"),
+            fs::read(direct.join(&relative)).expect("direct self-weight artifact"),
+            "self-weight restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let imported_model: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/model-ir.json")).expect("imported self-weight ModelIR"),
+    )
+    .expect("imported self-weight ModelIR JSON");
+    assert_eq!(
+        imported_model["load_patterns"][1]["self_weight"],
+        json!([0, 0, -1])
+    );
+    assert_eq!(imported_model["load_patterns"][1]["nodal_loads"], json!([]));
+    let recovery = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("self-weight recovery ResultIR"),
+        "recovery_hash",
+    );
+    let external = recovery["active_external_load"]
+        .as_array()
+        .expect("self-weight active external load");
+    assert!((external[2].as_f64().expect("self-weight FZ") - -1_539.644_05).abs() <= 1.0e-10);
+    assert!(
+        (external[4].as_f64().expect("self-weight MY") - -513.214_683_333_333_3).abs() <= 1.0e-10
+    );
+    assert!(
+        (recovery["global_displacement"][8]
+            .as_f64()
+            .expect("self-weight tip UZ")
+            - -0.000_192_455_506_25)
+            .abs()
+            <= 1.0e-15
+    );
+    let reaction = verify_self_hash(
+        &fs::read(restarted.join("04-resume/reaction-result-ir.json"))
+            .expect("self-weight reaction ResultIR"),
+        "result_hash",
+    );
+    assert!(
+        (reaction["reactions"][2]
+            .as_f64()
+            .expect("self-weight support FZ")
+            - 3_079.288_1)
+            .abs()
+            <= 1.0e-8
+    );
+    assert!(
+        (reaction["reactions"][4]
+            .as_f64()
+            .expect("self-weight support MY")
+            - -3_079.288_1)
+            .abs()
+            <= 1.0e-8
+    );
+    let result = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-ir.json")).expect("self-weight sparse ResultIR"),
+        "result_hash",
+    );
+    assert_eq!(result["backend_receipt"]["fallback_count"], 0);
+
+    let element = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_success(&element);
+    let element = String::from_utf8(element.stdout).expect("self-weight element view UTF-8");
+    assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
+    assert!(element.contains("i_MY_N_m="));
 
     fs::remove_dir_all(root).expect("cleanup");
 }

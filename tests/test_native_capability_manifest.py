@@ -116,6 +116,20 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "installed static/shared distribution v94" in end_release["claim"]
     assert "local rootfs diagnostic v16" in end_release["claim"]
     assert "HIP parity" in end_release["claim"]
+    assert (
+        capabilities.capability_is_enabled(payload, "modelir_self_weight_linear_cpu")
+        is True
+    )
+    self_weight = payload["capabilities"]["modelir_self_weight_linear_cpu"]
+    assert self_weight["cutover_gate"] == "C5"
+    assert self_weight["owner"] == "structural_assembly"
+    assert "standard gravity 9.80665 m/s^2" in self_weight["claim"]
+    assert "consistent mass" in self_weight["claim"]
+    assert "independent NumPy" in self_weight["claim"]
+    assert "closed-form Euler-Bernoulli wL^4/(8EI)" in self_weight["claim"]
+    assert "byte-identical checkpoint resume" in self_weight["claim"]
+    assert "installed distribution" in self_weight["claim"]
+    assert "HIP parity" in self_weight["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
     assert reaction_results["owner"] == "structural-contracts"

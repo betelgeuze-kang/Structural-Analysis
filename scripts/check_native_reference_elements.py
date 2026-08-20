@@ -52,7 +52,7 @@ REQUIRED_TOKENS = {
         "Model::project_linear_reference_graph",
         "linear frame3d/truss3d reference slice",
         "supports homogeneous constraints only",
-        "zero-self-weight linear-static patterns",
+        "requires linear-static patterns",
     ),
     "native/cpp/src/assembly/model_ir_assembly.hpp": (
         "ModelIrLinearAssemblyResult",
@@ -69,6 +69,7 @@ REQUIRED_TOKENS = {
         "assemble_reduced_csr_deterministic",
         "homogeneous constrained DOFs require zero state and direction",
         "nodal-load accumulation exceeds the finite numerical domain",
+        "self-weight equivalent-load assembly exceeds the finite numerical domain",
     ),
     "native/cpp/include/structural/abi_v1.h": (
         "SA_ABI_V1_7",

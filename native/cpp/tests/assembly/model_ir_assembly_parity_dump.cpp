@@ -61,6 +61,29 @@ int main() {
         "model_assembly.combination_equilibrium_residual",
         combination.equilibrium_residual);
     emit("model_assembly.combination_reactions", combination.reactions);
+    structural::tests::ModelIrAssemblyFixture self_weight_fixture;
+    self_weight_fixture.load_patterns[0].self_weight[2] = -1.0;
+    self_weight_fixture.enable_linear_combination();
+    const structural::model_ir::Model self_weight_model(self_weight_fixture.descriptor);
+    const auto self_weight = structural::assembly::assemble_model_ir_linear_reference(
+        self_weight_model, "lp", displacement, direction);
+    emit("model_assembly.self_weight_external_load", self_weight.external_load);
+    emit(
+        "model_assembly.self_weight_equilibrium_residual",
+        self_weight.equilibrium_residual);
+    emit("model_assembly.self_weight_reactions", self_weight.reactions);
+    const auto self_weight_combination =
+        structural::assembly::assemble_model_ir_linear_reference(
+            self_weight_model, "combo", displacement, direction);
+    emit(
+        "model_assembly.self_weight_combination_external_load",
+        self_weight_combination.external_load);
+    emit(
+        "model_assembly.self_weight_combination_equilibrium_residual",
+        self_weight_combination.equilibrium_residual);
+    emit(
+        "model_assembly.self_weight_combination_reactions",
+        self_weight_combination.reactions);
     structural::tests::ModelIrAssemblyFixture direct_terms_fixture;
     direct_terms_fixture.enable_three_pattern_linear_combination();
     const structural::model_ir::Model direct_terms_model(direct_terms_fixture.descriptor);

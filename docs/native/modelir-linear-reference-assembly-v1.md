@@ -24,6 +24,10 @@ pattern it:
   at most 64 expanded leaf contributions and two through 64 resolved nonzero unique patterns, into the
   same active order and emits both external load and
   `equilibrium_residual = internal_force - external_load`;
+- converts each selected pattern's dimensionless global `self_weight` vector to translational
+  acceleration with standard gravity `9.80665 m/s²`, multiplies the exact offset/release-aware
+  element consistent mass by that acceleration, and applies the resolved direct or nested
+  combination factor before deterministic stable-element accumulation;
 - preserves constrained DOFs in sorted global order and emits constrained internal force,
   constrained external load, and `reaction = internal_force - external_load` from the same
   stable-order element accumulation;
@@ -39,12 +43,14 @@ not link Python or Rust.
 - C0: `structural_model_ir_assembly_cpu_tests` covers the mixed frame/truss graph, exact active and
   CSR structure, repeated byte-value determinism, load/residual convention, element recovery, bad
   selector and state lengths, nonzero constrained state, rigid offset, nonzero prescribed value,
-  and self-weight fail-closed paths.
+  self-weight total-force conservation, deterministic repeat, and numerical fail-closed paths.
 - C1: `tests/test_native_model_ir_assembly_python_parity.py` compiles a test-only C++ consumer. An
   independent NumPy implementation evaluates a rolled frame and orthogonal truss, scatters their
   18-DOF graph, reduces it to seven active DOFs and 43 structural entries, and compares the exact
   active map, CSR rows/columns, tangent, mass, internal force, direct and combined external load,
-  equilibrium residual, JVP, constrained map/load/reaction vectors, and both recovery records.
+  self-weight and self-weight-combination loads from an independent mass-times-acceleration
+  calculation, equilibrium residual, JVP, constrained map/load/reaction vectors, and both recovery
+  records.
 - C3 integration candidate: ABI v1.13 preserves the complete 184-byte v1.12 prefix and appends an
   immutable exact-sizes query plus a failure-atomic execute slot. Execute requires 16 disjoint
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
@@ -83,7 +89,7 @@ same recovery mapping condenses stiffness and mass, released local end forces pu
 and a rotated offset plus i-RY/j-RZ release matches the independent NumPy oracle. Singular release
 sets fail closed. Truss3D offsets and releases fail closed. The projection otherwise rejects
 non-linear material or formulation state, frame2d, shell, member
-loads, nonzero prescribed constraints, self-weight, direct combinations
+loads, nonzero prescribed constraints, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
 time functions, construction stages, and declared unsupported features. It does not solve the

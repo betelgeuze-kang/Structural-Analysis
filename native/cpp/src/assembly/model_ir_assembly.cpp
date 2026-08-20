@@ -34,6 +34,8 @@ struct SelectedLoadCase final {
     std::vector<SelectedLoadPattern> patterns;
 };
 
+constexpr double kStandardGravityMPerS2 = 9.80665;
+
 [[nodiscard]] const model_ir::LinearReferenceLoadPattern* find_load_pattern(
     const model_ir::LinearReferenceGraph& graph,
     const std::string_view id) {
@@ -513,6 +515,55 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                         "ModelIR load-case accumulation exceeds the finite numerical domain");
                 }
                 full_external_load[index] = accumulated;
+            }
+        }
+        std::array<double, 3> gravity_acceleration {};
+        for (std::size_t axis = 0U; axis < gravity_acceleration.size(); ++axis) {
+            gravity_acceleration[axis] = selected.factor
+                * selected.pattern->self_weight[axis] * kStandardGravityMPerS2;
+            if (!std::isfinite(gravity_acceleration[axis])) {
+                throw model_ir::Error(
+                    SA_ERR_RESIDUAL_LIMIT,
+                    "ModelIR self-weight factor propagation exceeds the finite numerical domain");
+            }
+        }
+        if (std::any_of(
+                gravity_acceleration.begin(),
+                gravity_acceleration.end(),
+                [](const double value) { return value != 0.0; })) {
+            for (const auto& element : owned) {
+                const auto dimension = element.dof_indices.size();
+                if (element.response.consistent_mass.size() != dimension * dimension) {
+                    throw model_ir::Error(
+                        SA_ERR_INTERNAL,
+                        "ModelIR element mass shape became invalid during self-weight assembly");
+                }
+                for (std::size_t row = 0U; row < dimension; ++row) {
+                    double equivalent_load = 0.0;
+                    for (std::size_t column = 0U; column < dimension; ++column) {
+                        const auto component = element.dof_indices[column] % 6U;
+                        const auto acceleration = component < 3U
+                            ? gravity_acceleration[component]
+                            : 0.0;
+                        const auto contribution =
+                            element.response.consistent_mass[row * dimension + column]
+                            * acceleration;
+                        equivalent_load += contribution;
+                        if (!std::isfinite(contribution) || !std::isfinite(equivalent_load)) {
+                            throw model_ir::Error(
+                                SA_ERR_RESIDUAL_LIMIT,
+                                "ModelIR self-weight equivalent-load assembly exceeds the finite numerical domain");
+                        }
+                    }
+                    const auto global_index = element.dof_indices[row];
+                    const auto accumulated = full_external_load[global_index] + equivalent_load;
+                    if (!std::isfinite(accumulated)) {
+                        throw model_ir::Error(
+                            SA_ERR_RESIDUAL_LIMIT,
+                            "ModelIR self-weight accumulation exceeds the finite numerical domain");
+                    }
+                    full_external_load[global_index] = accumulated == 0.0 ? 0.0 : accumulated;
+                }
             }
         }
     }

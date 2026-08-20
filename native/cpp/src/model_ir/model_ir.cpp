@@ -2757,10 +2757,10 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
 
     output.load_patterns.reserve(model.load_patterns.size());
     for (const auto& pattern : model.load_patterns) {
-        if (pattern.analysis_type != SA_ANALYSIS_LINEAR_STATIC || !all_zero(pattern.self_weight)) {
+        if (pattern.analysis_type != SA_ANALYSIS_LINEAR_STATIC) {
             fail(
                 SA_ERR_ANALYSIS_NOT_READY,
-                "ModelIR linear reference assembly requires zero-self-weight linear-static patterns");
+                "ModelIR linear reference assembly requires linear-static patterns");
         }
         LinearReferenceLoadPattern projected {
             pattern.identity.id,

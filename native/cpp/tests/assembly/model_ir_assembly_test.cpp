@@ -508,15 +508,32 @@ int main() {
         "nonzero prescribed constraint must fail closed");
 
     structural::tests::ModelIrAssemblyFixture self_weight_fixture;
-    self_weight_fixture.load_patterns[0].self_weight[2] = -9.81;
+    self_weight_fixture.load_patterns[0].self_weight[2] = -1.0;
     const structural::model_ir::Model self_weight_model(self_weight_fixture.descriptor);
-    expect_status(
-        [&self_weight_model, &displacement, &direction] {
-            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
-                self_weight_model, "lp", displacement, direction));
-        },
-        SA_ERR_ANALYSIS_NOT_READY,
-        "unimplemented self weight must fail closed");
+    const auto self_weight = structural::assembly::assemble_model_ir_linear_reference(
+        self_weight_model, "lp", displacement, direction);
+    double global_z_self_weight = 0.0;
+    for (std::size_t index = 0U; index < self_weight.operator_result.active_dof_indices.size();
+         ++index) {
+        if (self_weight.operator_result.active_dof_indices[index] % 6U == 2U) {
+            global_z_self_weight += self_weight.external_load[index];
+        }
+    }
+    for (std::size_t index = 0U; index < self_weight.constrained_dof_indices.size(); ++index) {
+        if (self_weight.constrained_dof_indices[index] % 6U == 2U) {
+            global_z_self_weight += self_weight.constrained_external_load[index];
+        }
+    }
+    expect(
+        std::abs(global_z_self_weight - (-40.0 * 9.80665)) <= 1.0e-12,
+        "self weight uses total consistent element mass and standard gravity");
+    const auto repeated_self_weight = structural::assembly::assemble_model_ir_linear_reference(
+        self_weight_model, "lp", displacement, direction);
+    expect(
+        repeated_self_weight.external_load == self_weight.external_load
+            && repeated_self_weight.constrained_external_load
+                == self_weight.constrained_external_load,
+        "self-weight assembly is deterministic");
 
     structural::tests::ModelIrAssemblyFixture load_overflow_fixture;
     load_overflow_fixture.nodal_loads[0].components_si[0] =

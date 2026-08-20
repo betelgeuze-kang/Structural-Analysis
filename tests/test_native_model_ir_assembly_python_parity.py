@@ -252,12 +252,22 @@ def _oracle() -> dict[str, np.ndarray]:
     )
     full_external = np.zeros(18, dtype=np.float64)
     full_external[active] = external
+    full_secondary = np.zeros(18, dtype=np.float64)
+    full_secondary[active] = secondary
     full_combination_external = np.zeros(18, dtype=np.float64)
     full_combination_external[active] = combination_external
     full_direct_terms_external = np.zeros(18, dtype=np.float64)
     full_direct_terms_external[active] = direct_terms_external
     full_nested_combination_external = np.zeros(18, dtype=np.float64)
     full_nested_combination_external[active] = nested_combination_external
+    gravity_acceleration = np.zeros(18, dtype=np.float64)
+    gravity_acceleration[2::6] = -9.80665
+    self_weight_full_external = full_external + mass @ gravity_acceleration
+    self_weight_external = self_weight_full_external[active]
+    self_weight_combination_full_external = (
+        1.2 * self_weight_full_external - 0.5 * full_secondary
+    )
+    self_weight_combination_external = self_weight_combination_full_external[active]
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -279,6 +289,16 @@ def _oracle() -> dict[str, np.ndarray]:
         - combination_external,
         "model_assembly.combination_reactions": internal[constrained]
         - full_combination_external[constrained],
+        "model_assembly.self_weight_external_load": self_weight_external,
+        "model_assembly.self_weight_equilibrium_residual": internal[active]
+        - self_weight_external,
+        "model_assembly.self_weight_reactions": internal[constrained]
+        - self_weight_full_external[constrained],
+        "model_assembly.self_weight_combination_external_load": self_weight_combination_external,
+        "model_assembly.self_weight_combination_equilibrium_residual": internal[active]
+        - self_weight_combination_external,
+        "model_assembly.self_weight_combination_reactions": internal[constrained]
+        - self_weight_combination_full_external[constrained],
         "model_assembly.direct_terms_external_load": direct_terms_external,
         "model_assembly.direct_terms_equilibrium_residual": internal[active]
         - direct_terms_external,
