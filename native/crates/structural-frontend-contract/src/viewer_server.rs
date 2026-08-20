@@ -247,7 +247,17 @@ where
                 format!("set Viewer response timeout failed: {error}"),
             )
         })?;
-    let response = match read_request(&mut stream).and_then(|request| route(&request)) {
+    let request = match read_request(&mut stream) {
+        Ok(request) => request,
+        Err(error) if error.code == "viewer_server_idle_connection_closed" => return Ok(()),
+        Err(error) => {
+            return write_response(
+                &mut stream,
+                &error_response(400, "Bad Request", &error.detail),
+            )
+        }
+    };
+    let response = match route(&request) {
         Ok(response) => response,
         Err(error) => error_response(400, "Bad Request", &error.detail),
     };
@@ -390,7 +400,13 @@ fn read_request(stream: &mut TcpStream) -> Result<Vec<u8>, FrontendContractError
             break;
         }
     }
-    if request.is_empty() || !request.windows(4).any(|window| window == b"\r\n\r\n") {
+    if request.is_empty() {
+        return Err(FrontendContractError::new(
+            "viewer_server_idle_connection_closed",
+            "Viewer connection closed before sending a request",
+        ));
+    }
+    if !request.windows(4).any(|window| window == b"\r\n\r\n") {
         return Err(FrontendContractError::new(
             "viewer_server_request_invalid",
             "Viewer request headers are incomplete",
@@ -631,21 +647,37 @@ fn write_response(
             format!("encode Viewer response headers failed: {error}"),
         )
     })?;
-    stream.write_all(head.as_bytes()).map_err(|error| {
-        FrontendContractError::new(
-            "viewer_server_response_write_failed",
-            format!("write Viewer response headers failed: {error}"),
-        )
-    })?;
-    if !response.head_only {
-        stream.write_all(&response.body).map_err(|error| {
-            FrontendContractError::new(
-                "viewer_server_response_write_failed",
-                format!("write Viewer response body failed: {error}"),
-            )
-        })?;
+    if !write_all_or_client_closed(stream, head.as_bytes(), "headers")? {
+        return Ok(());
+    }
+    if !response.head_only && !write_all_or_client_closed(stream, &response.body, "body")? {
+        return Ok(());
     }
     Ok(())
+}
+
+fn write_all_or_client_closed<W: Write>(
+    writer: &mut W,
+    bytes: &[u8],
+    response_part: &str,
+) -> Result<bool, FrontendContractError> {
+    match writer.write_all(bytes) {
+        Ok(()) => Ok(true),
+        Err(error)
+            if matches!(
+                error.kind(),
+                std::io::ErrorKind::BrokenPipe
+                    | std::io::ErrorKind::ConnectionAborted
+                    | std::io::ErrorKind::ConnectionReset
+            ) =>
+        {
+            Ok(false)
+        }
+        Err(error) => Err(FrontendContractError::new(
+            "viewer_server_response_write_failed",
+            format!("write Viewer response {response_part} failed: {error}"),
+        )),
+    }
 }
 
 fn content_type(path: &str) -> &'static str {
@@ -706,12 +738,15 @@ fn hash_without_receipt_hash(
 
 #[cfg(test)]
 mod tests {
+    use std::io::{self, Write};
+    use std::net::{Ipv4Addr, SocketAddrV4, TcpListener, TcpStream};
+    use std::path::Path;
     use std::sync::atomic::{AtomicU64, Ordering};
 
     use super::{
-        allowed_relative_path, content_type, percent_decode_path, route_request,
+        allowed_relative_path, content_type, handle_spa_stream, percent_decode_path, route_request,
         route_request_with_policy, route_spa_request, validate_scoped_policy, validate_spa_policy,
-        validate_viewer_server_source, ViewerServerSourceV1,
+        validate_viewer_server_source, write_all_or_client_closed, ViewerServerSourceV1,
     };
 
     static TEST_SEQUENCE: AtomicU64 = AtomicU64::new(0);
@@ -929,5 +964,51 @@ mod tests {
         assert_eq!(method.status, 405);
 
         std::fs::remove_dir_all(root).expect("remove SPA router fixture");
+    }
+
+    #[test]
+    fn spa_server_ignores_a_closed_idle_browser_preconnection() {
+        let listener = TcpListener::bind(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0))
+            .expect("bind idle preconnection fixture");
+        let address = listener.local_addr().expect("inspect fixture address");
+        let client = TcpStream::connect(address).expect("open idle preconnection");
+        drop(client);
+        let (server, _) = listener.accept().expect("accept idle preconnection");
+
+        handle_spa_stream(Path::new("."), "index.html", server)
+            .expect("an idle preconnection is not an HTTP request failure");
+    }
+
+    struct FailingWriter(io::ErrorKind);
+
+    impl Write for FailingWriter {
+        fn write(&mut self, _buffer: &[u8]) -> io::Result<usize> {
+            Err(io::Error::from(self.0))
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    #[test]
+    fn response_writer_distinguishes_client_cancellation_from_server_failure() {
+        for kind in [
+            io::ErrorKind::BrokenPipe,
+            io::ErrorKind::ConnectionAborted,
+            io::ErrorKind::ConnectionReset,
+        ] {
+            assert!(
+                !write_all_or_client_closed(&mut FailingWriter(kind), b"response", "body",)
+                    .expect("client cancellation is not a server failure")
+            );
+        }
+        let error = write_all_or_client_closed(
+            &mut FailingWriter(io::ErrorKind::PermissionDenied),
+            b"response",
+            "body",
+        )
+        .expect_err("unrelated response failures remain fail-closed");
+        assert_eq!(error.code, "viewer_server_response_write_failed");
     }
 }
