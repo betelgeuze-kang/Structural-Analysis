@@ -181,6 +181,18 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "no Python or Node" in generalized_product["claim"]
     assert "HIP C2" in generalized_product["claim"]
     assert "C6" in generalized_product["claim"]
+    assert capabilities.capability_is_enabled(
+        payload, "modelir_modal_product_e2e"
+    ) is True
+    modelir_modal = payload["capabilities"]["modelir_modal_product_e2e"]
+    assert modelir_modal["cutover_gate"] == "C5"
+    assert modelir_modal["owner"] == "structural-cli"
+    assert "typed-ModelIR frame3d/truss3d CPU modal" in modelir_modal["claim"]
+    assert "ABI v1.14" in modelir_modal["claim"]
+    assert "ABI v1.9" in modelir_modal["claim"]
+    assert "linear buckling" in modelir_modal["claim"]
+    assert "HIP C2" in modelir_modal["claim"]
+    assert "C6" in modelir_modal["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

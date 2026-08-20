@@ -68,6 +68,38 @@ REQUIRED_TOKENS = {
         "assert_same_artifacts",
         "tamper_request_drift_and_existing_destination_publish_nothing",
     ),
+    "native/crates/structural-contracts/src/model_modal_product.rs": (
+        "structural-model-ir-modal-analysis-request.v1",
+        "assembly_load_pattern_id",
+        "MODEL_IR_MODAL_MAXIMUM_REQUEST_BYTES",
+        "deny_unknown_fields",
+    ),
+    "native/crates/structural-runtime/src/model_modal_product.rs": (
+        "prepare_model_ir_modal_product",
+        "MAXIMUM_MODAL_ORDER",
+        "csr_to_dense",
+        "operator is not exactly symmetric",
+        "load_vector_consumed_by_modal",
+    ),
+    "native/crates/structural-runtime/tests/model_ir_modal_product.rs": (
+        "typed_model_ir_assembly_drives_existing_native_modal_product",
+        "identity_drift_and_excess_mode_request_fail_closed",
+        "execute_dense_spectral_product",
+        "one_element_cantilever_bending_eigenvalue",
+        "5.0e-15",
+    ),
+    "native/crates/structural-cli/src/model_modal_product.rs": (
+        "execute_model_ir_modal_analysis",
+        "publish_model_ir_modal_analysis",
+        "structural-model-ir-modal-run-receipt.v1",
+        "generated-dense-request.json",
+    ),
+    "native/crates/structural-cli/tests/model_ir_modal_product_cli.rs": (
+        "python_node_free_modelir_modal_cli_is_deterministic_and_bound",
+        "env_clear()",
+        "expected_files",
+        "verify_self_hash",
+    ),
     "docs/native/generalized-eigen-product-e2e-v1.md": (
         "C4",
         "C5",
@@ -75,6 +107,16 @@ REQUIRED_TOKENS = {
         "phase boundary",
         "Python/Node",
         "protected-runner C2",
+        "C6",
+    ),
+    "docs/native/model-ir-modal-product-e2e-v1.md": (
+        "C5",
+        "ABI v1.14",
+        "ABI v1.9",
+        "128 active DOFs",
+        "Python/Node",
+        "linear-buckling",
+        "protected-runner HIP C2",
         "C6",
     ),
 }
@@ -150,6 +192,25 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers,
     )
+    modelir_modal_product = _check_capability(
+        payload,
+        "modelir_modal_product_e2e",
+        "C5",
+        "structural-cli",
+        (
+            "typed-ModelIR frame3d/truss3d CPU modal",
+            "128 DOFs",
+            "ABI v1.14",
+            "ABI v1.9",
+            "byte-identical 10-artifact",
+            "independent 2x2 closed-form",
+            "fallback 0",
+            "linear buckling",
+            "HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
 
     for relative, tokens in REQUIRED_TOKENS.items():
         try:
@@ -171,12 +232,14 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         "contract_pass": not blockers,
         "checkpoint_gate": checkpoint.get("cutover_gate"),
         "product_gate": product.get("cutover_gate"),
+        "modelir_modal_product_gate": modelir_modal_product.get("cutover_gate"),
         "sequential_numerical_gate": "C1",
         "blockers": blockers,
         "claim_boundary": (
             "C4/C5 are bounded dense CPU implementation capabilities. The generalized-"
             "eigen numerical family remains sequentially at C1 until an approved protected-"
-            "runner HIP C2 receipt exists; this check cannot promote C2 or C6."
+            "runner HIP C2 receipt exists; the bounded ModelIR modal C5 path cannot promote "
+            "general sparse or buckling authority and cannot promote C2 or C6."
         ),
     }
 

@@ -16,6 +16,7 @@ pub mod model_linear_job;
 pub mod model_linear_product;
 pub mod model_linear_reactions;
 pub mod model_linear_recovery;
+pub mod model_modal_product;
 pub mod product_ir;
 pub mod solver_cpu;
 pub mod sparse_product;

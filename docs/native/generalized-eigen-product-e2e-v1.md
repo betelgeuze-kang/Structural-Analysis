@@ -75,7 +75,9 @@ and fallback count zero.
 - scripts/check_native_generalized_eigen_product.py makes the source, test, documentation and
   capability evidence fail closed in hosted CI.
 
-Still open are the protected-runner C2 approval, sparse/subspace extraction, ModelIR-to-operator
-adaptation, durable queued jobs for this analysis family, whole-model engineering authority,
-spectral PDF rendering and C6 decommission. Python remains the broader oracle and rollback owner
-until those sequential gates close.
+The separate bounded path in `docs/native/model-ir-modal-product-e2e-v1.md` now adapts typed
+Frame3D/Truss3D `ModelIR` active `K/M` operators to this dense modal product. Still open are the
+protected-runner C2 approval, general sparse/subspace extraction, ModelIR linear-buckling
+geometric-stiffness assembly, durable queued jobs for this analysis family, whole-model
+engineering authority, spectral PDF rendering and C6 decommission. Python remains the broader
+oracle and rollback owner until those sequential gates close.

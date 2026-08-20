@@ -7,6 +7,7 @@ mod job;
 mod mgt_product;
 mod model_linear_comparison;
 mod model_linear_product;
+mod model_modal_product;
 mod model_product;
 mod product;
 mod report;
@@ -38,6 +39,10 @@ pub use model_linear_product::{
     execute_model_ir_linear_analysis, publish_model_ir_linear_analysis,
     validate_model_ir_linear_analysis_compatibility, ModelIrLinearAnalysisOutcomeV1,
     ModelIrLinearCompatibilityV1, ModelIrLinearProductError,
+};
+pub use model_modal_product::{
+    execute_model_ir_modal_analysis, publish_model_ir_modal_analysis,
+    ModelIrModalAnalysisOutcomeV1, ModelIrModalProductError,
 };
 pub use model_product::{
     execute_model_ir_native_analysis, publish_model_ir_native_analysis,

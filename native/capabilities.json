@@ -125,7 +125,13 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded dense CPU modal/linear-buckling product E2E C5 implementation only: strict Rust request parsing crosses ABI v1.9 C++ execution and the exact C4 phase checkpoint, then emits self-hashed ResultIR, ReportIR, deterministic Markdown and an atomic run receipt through public eigen-run/eigen-resume commands; modal and buckling direct/resume artifact directories are byte-identical in a clean environment with no Python or Node lookup and fallback 0; protected-runner HIP C2, ModelIR/sparse assembly adaptation, durable service jobs, engineering acceptance, PDF rendering for this profile and C6 remain open"
+      "claim": "bounded dense CPU modal/linear-buckling product E2E C5 implementation only: strict Rust request parsing crosses ABI v1.9 C++ execution and the exact C4 phase checkpoint, then emits self-hashed ResultIR, ReportIR, deterministic Markdown and an atomic run receipt through public eigen-run/eigen-resume commands; modal and buckling direct/resume artifact directories are byte-identical in a clean environment with no Python or Node lookup and fallback 0; one separate bounded ModelIR modal adapter is tracked independently, while protected-runner HIP C2, general sparse assembly/extraction, durable service jobs, engineering acceptance, PDF rendering for this profile and C6 remain open"
+    },
+    "modelir_modal_product_e2e": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded local typed-ModelIR frame3d/truss3d CPU modal product C5 implementation only: a strict model-modal-run request binds content/semantic/provenance identities and one existing linear load selector used only to enter ABI v1.14 zero-state assembly; Rust independently limits the active graph to 128 DOFs, validates canonical CSR and exact K/M symmetry, deterministically densifies the active operators, then crosses the existing ABI v1.9 modal solver and publishes the exact model, request, assembly receipt, generated dense request, phase checkpoint, self-hashed ResultIR/ReportIR/Markdown and nested receipts; the six-active-DOF cantilever produces three positive residual-gated modes, its two bending eigenvalues match an independent 2x2 closed-form consistent-mass oracle within 5e-15 relative error, and two Python/Node-free executions publish byte-identical 10-artifact directories with fallback 0; the selected load vector is explicitly not consumed, and sparse/subspace extraction, linear buckling geometric-stiffness assembly, shell/nonlinear graphs, model-bound restart, durable service jobs, Workbench/installed distribution, protected-runner HIP C2, engineering acceptance and C6 remain open"
     },
     "track_point_load_cpu": {
       "status": "implemented",
